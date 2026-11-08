@@ -7,6 +7,13 @@ import SwiftUI
 /// Gestures: pan in both axes with momentum, pinch to zoom time, drag the price axis to scale price,
 /// tap for the crosshair (drag moves it, tap again hides it), double-tap to reset and follow.
 /// Display only — never an execution price or risk input.
+///
+/// Smoothness (owner 2026-11-09 “拖动起来还是有卡顿的感觉，如何做到和tradingview一样的流畅”, tier 1):
+/// a fling keeps gliding with UIScrollView-like exponential decay, driven frame by frame by a
+/// TimelineView (a Canvas cannot interpolate `withAnimation`, so the old release animation jumped to its
+/// end in one frame); candles and volume are filled as one pixel-snapped path per colour instead of
+/// one stroke + fill per bar; axis/label strings, previous-week touch markers and indicator series are
+/// cached instead of rebuilt every frame.
 struct ChartLine: Equatable, Identifiable {
     let price: Double
     let title: String
@@ -79,8 +86,11 @@ struct CandleChart: View {
     var onNeedOlder: () -> Void = {}
 
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.displayScale) private var displayScale
     @State private var spacing: CGFloat = 7
+    /// Committed horizontal offset in bars (0 = live edge). While `glide` runs, the drawn offset comes from it.
     @State private var offset: CGFloat = 0
+    @State private var glide: Glide?
     @State private var yShift: Double = 0
     @State private var yZoom: Double = 1
     @State private var panStart: (offset: CGFloat, shift: Double)?
@@ -97,18 +107,28 @@ struct CandleChart: View {
     private let rightPad: CGFloat = 5
 
     var body: some View {
+        // Paused unless a fling is gliding; then it redraws once per display frame.
+        TimelineView(.animation(minimumInterval: nil, paused: glide == nil)) { timeline in
         GeometryReader { proxy in
             let size = proxy.size
             let plot = CGRect(x: 0, y: topInset, width: max(1, size.width - axisWidth),
                               height: max(1, size.height - topInset - (wallpaper ? 0 : timeHeight)))
             // The time axis sits just above the floating bottom UI in wallpaper mode.
             let axisY = wallpaper ? plot.maxY - bottomOverlay - 12 : plot.maxY + timeHeight / 2 + 1
-            let layout = Layout(bars: bars, spacing: spacing, offset: offset, plot: plot, rightPad: rightPad, period: period, range: range,
-                                lines: lines, wallpaper: wallpaper, bottomReserve: wallpaper ? Double((bottomOverlay + 34) / max(plot.height, 1)) : 0,
-                                yShift: yShift, yZoom: yZoom)
+            let layout = Layout(bars: bars, spacing: spacing, offset: glide?.offset(at: timeline.date) ?? offset, plot: plot, rightPad: rightPad,
+                                period: period, range: range, lines: lines, wallpaper: wallpaper,
+                                bottomReserve: wallpaper ? Double((bottomOverlay + 34) / max(plot.height, 1)) : 0, yShift: yShift, yZoom: yZoom)
             ZStack(alignment: .topLeading) {
                 if wallpaper { (scheme == .dark ? ChartPalette.hex(0x0B0E14) : Color.white) }
-                Canvas(rendersAsynchronously: false) { context, _ in draw(&context, layout: layout, axisY: axisY) }
+                Canvas(rendersAsynchronously: false) { context, _ in
+                    #if DEBUG
+                    let started = CACurrentMediaTime()
+                    #endif
+                    draw(&context, layout: layout, axisY: axisY)
+                    #if DEBUG
+                    ChartFrameProbe.shared.drawn(CACurrentMediaTime() - started)
+                    #endif
+                }
                 if let picked, let hit = markerPoints(layout).first(where: { $0.marker.id == picked }) {
                     MarkerCallout(marker: hit.marker, price: groupedPrice(hit.marker.price))
                         .position(x: min(max(hit.point.x, plot.minX + 112), plot.maxX - 112),
@@ -132,10 +152,29 @@ struct CandleChart: View {
                 if first < 12 && bars.count >= 55 { onNeedOlder() }
             }
         }
-        .onChange(of: generation) { _, _ in offset = 0; spacing = 7; yShift = 0; yZoom = 1; cross = nil; picked = nil }
+        }
+        // Commit the glide's resting offset when it has decayed (or hit the edge); a new touch cancels it first.
+        .task(id: glide?.id) {
+            guard let current = glide else { return }
+            try? await Task.sleep(for: .seconds(current.duration))
+            guard !Task.isCancelled, let finished = glide, finished.id == current.id else { return }
+            offset = finished.final
+            glide = nil
+            #if DEBUG
+            ChartFrameProbe.shared.end()
+            #endif
+        }
+        .onChange(of: generation) { _, _ in glide = nil; offset = 0; spacing = 7; yShift = 0; yZoom = 1; cross = nil; picked = nil }
         .onChange(of: followToken) { _, _ in reset() }
         .onChange(of: bars.last?.time) { old, new in
-            if let old, let new, new > old, offset > 0.5 { offset += CGFloat((new - old) / period.seconds) }
+            guard let old, let new, new > old else { return }
+            let added = CGFloat((new - old) / period.seconds)
+            // Away from the live edge, keep the same bars in view when a new bar opens (also mid-glide).
+            if var moving = glide {
+                if moving.offset(at: .now) > 0.5 { moving.origin += added; moving.upper += added; glide = moving }
+            } else if offset > 0.5 {
+                offset += added
+            }
         }
         .accessibilityElement()
         .accessibilityLabel("\(watermark ?? "") \(period.label) K线")
@@ -143,13 +182,27 @@ struct CandleChart: View {
 
     private func reset() {
         Haptics.tap()
+        glide = nil
         withAnimation(.snappy(duration: 0.35)) { offset = 0; yShift = 0; yZoom = 1; cross = nil }
+    }
+
+    /// A touch stops a gliding chart where it is (UIScrollView behaviour). Returns true if it was gliding.
+    @discardableResult private func stopGlide() -> Bool {
+        guard let current = glide else { return false }
+        offset = current.offset(at: .now)
+        glide = nil
+        #if DEBUG
+        ChartFrameProbe.shared.end()
+        #endif
+        return true
     }
 
     // MARK: gestures
 
     private func tap(_ point: CGPoint, layout: Layout) {
         guard point.x <= layout.plot.maxX else { return }
+        // A tap on a gliding chart only stops it (no crosshair), like a scroll view.
+        if stopGlide() { return }
         if picked != nil { withAnimation(.easeOut(duration: 0.15)) { picked = nil }; return }
         if cross != nil { withAnimation(.easeOut(duration: 0.15)) { cross = nil }; return }
         if let hit = markerPoints(layout).first(where: { hypot($0.point.x - point.x, $0.point.y - point.y) < 22 }) {
@@ -183,32 +236,92 @@ struct CandleChart: View {
                     yZoom = min(20, max(0.05, (axisStart ?? 1) * exp(Double(value.translation.height) / 180)))
                     return
                 }
-                if panStart == nil { panStart = (offset, yShift) }
+                if panStart == nil {
+                    stopGlide()
+                    panStart = (offset, yShift)
+                    #if DEBUG
+                    ChartFrameProbe.shared.begin("drag")
+                    #endif
+                }
                 let start = panStart ?? (offset, yShift)
                 offset = clampOffset(start.offset + value.translation.width / spacing, layout: layout)
                 yShift = start.shift + Double(value.translation.height / layout.plot.height) * yZoom
             }
             .onEnded { value in
                 if axisStart != nil { axisStart = nil; return }
-                guard let start = panStart else { return }
+                guard panStart != nil else { return }
                 panStart = nil
-                let target = clampOffset(start.offset + value.predictedEndTranslation.width / spacing, layout: layout)
-                withAnimation(.smooth(duration: 0.55)) { offset = target }
+                #if DEBUG
+                ChartFrameProbe.shared.end()
+                #endif
+                let bounds = offsetBounds(layout: layout)
+                glide = Glide(origin: offset, speed: value.velocity.width, spacing: spacing, lower: bounds.lower, upper: bounds.upper)
+                #if DEBUG
+                if glide != nil { ChartFrameProbe.shared.begin("glide") }
+                #endif
             }
     }
 
     private var zoom: some Gesture {
         MagnifyGesture()
             .onChanged { value in
-                if zoomStart == nil { zoomStart = spacing }
+                if zoomStart == nil {
+                    stopGlide()
+                    zoomStart = spacing
+                    #if DEBUG
+                    ChartFrameProbe.shared.begin("pinch")
+                    #endif
+                }
                 spacing = min(32, max(1.6, (zoomStart ?? spacing) * value.magnification))
             }
-            .onEnded { _ in zoomStart = nil; Haptics.select() }
+            .onEnded { _ in
+                zoomStart = nil; Haptics.select()
+                #if DEBUG
+                ChartFrameProbe.shared.end()
+                #endif
+            }
+    }
+
+    private func offsetBounds(layout: Layout) -> (lower: CGFloat, upper: CGFloat) {
+        let visible = layout.plot.width / spacing
+        return (-visible * 0.6, max(0, CGFloat(bars.count) - visible * 0.3))
     }
 
     private func clampOffset(_ value: CGFloat, layout: Layout) -> CGFloat {
-        let visible = layout.plot.width / spacing
-        return min(max(value, -visible * 0.6), max(0, CGFloat(bars.count) - visible * 0.3))
+        let bounds = offsetBounds(layout: layout)
+        return min(max(value, bounds.lower), bounds.upper)
+    }
+
+    /// Fling momentum in bars: exponential decay at UIScrollView's normal rate (0.998 per ms ≈ 2 per s),
+    /// stopping at 8 pt/s or at the pan limit. Analytic, so every frame shows the exact position for its time.
+    private struct Glide {
+        static let decay = 2.0
+        let id = UUID()
+        let start = Date.now
+        var origin: CGFloat
+        let velocity: Double          // bars per second
+        var lower: CGFloat
+        var upper: CGFloat
+        let duration: Double
+
+        init?(origin: CGFloat, speed: CGFloat, spacing: CGFloat, lower: CGFloat, upper: CGFloat) {
+            guard abs(speed) > 120, spacing > 0, speed.isFinite else { return nil }
+            let velocity = Double(speed / spacing)
+            let edge = Double((velocity > 0 ? upper : lower) - origin)
+            guard edge * velocity > 0 else { return nil }   // already at the limit it is flung toward
+            let toRest = log(Double(abs(speed)) / 8) / Self.decay
+            let reach = edge * Self.decay / velocity           // fraction of the full coast needed to hit the edge
+            let toEdge = reach < 1 ? -log(1 - reach) / Self.decay : .infinity
+            self.origin = origin; self.velocity = velocity; self.lower = lower; self.upper = upper
+            duration = max(0.05, min(toRest, toEdge))
+        }
+
+        func offset(at date: Date) -> CGFloat {
+            let t = min(max(0, date.timeIntervalSince(start)), duration)
+            return min(max(origin + CGFloat(velocity / Self.decay * (1 - exp(-Self.decay * t))), lower), upper)
+        }
+
+        var final: CGFloat { offset(at: start.addingTimeInterval(duration)) }
     }
 
     // MARK: layout
@@ -267,8 +380,13 @@ struct CandleChart: View {
         }
     }
 
-    private func format(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(decimals)).grouping(.never)) }
-    private func groupedPrice(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(0...max(2, decimals)))) }
+    // Number styles are slow to apply; axis ticks and level prices repeat every frame, so cache the strings.
+    private func format(_ value: Double) -> String {
+        memo.text(.init(kind: 0, value: value, other: 0, digits: decimals)) { value.formatted(.number.precision(.fractionLength(decimals)).grouping(.never)) }
+    }
+    private func groupedPrice(_ value: Double) -> String {
+        memo.text(.init(kind: 1, value: value, other: 0, digits: decimals)) { value.formatted(.number.precision(.fractionLength(0...max(2, decimals)))) }
+    }
 
     // MARK: drawing
 
@@ -297,17 +415,31 @@ struct CandleChart: View {
         var clipped = context
         clipped.clip(to: Path(plot))
         let visible = layout.bars[layout.firstVisible...layout.lastVisible]
-        let body = max(1, layout.spacing * 0.72)
 
-        // Volume rests on the time axis, its own scale.
+        // One path per colour (up / down / NY Monday) for candles and for volume: a handful of fills per
+        // frame instead of a stroke and two fills per bar. Edges snap to device pixels so candles stay
+        // crisp while panning instead of shimmering across fractional positions.
+        let scale = max(displayScale, 1), pixel = 1 / scale
+        func snap(_ v: CGFloat) -> CGFloat { (v * scale).rounded() / scale }
+        let bodyWidth = max(pixel, snap(max(1, layout.spacing * 0.72))), wickWidth = max(pixel, snap(1))
+        let wickInset = snap((bodyWidth - wickWidth) / 2)
+        var candlePaths = [Path(), Path(), Path()], volumePaths = [Path(), Path(), Path()]
         let maxVolume = visible.map(\.volume).max() ?? 0
-        let volumeFloor = wallpaper ? axisY - 12 : plot.maxY
-        if maxVolume > 0 {
-            for (offset, bar) in visible.enumerated() {
-                let x = layout.x(CGFloat(layout.firstVisible + offset)), h = CGFloat(bar.volume / maxVolume) * plot.height * (wallpaper ? 0.08 : 0.14)
-                clipped.fill(Path(CGRect(x: x - body / 2, y: volumeFloor - h, width: body, height: h)), with: .color(candleColor(bar).opacity(0.22)))
+        let volumeFloor = snap(wallpaper ? axisY - 12 : plot.maxY), volumeHeight = plot.height * (wallpaper ? 0.08 : 0.14)
+        for (index, bar) in zip(layout.firstVisible..., visible) {
+            let tone = candleTone(bar), left = snap(layout.x(CGFloat(index)) - bodyWidth / 2)
+            let top = snap(layout.y(max(bar.open, bar.close))), bottom = snap(layout.y(min(bar.open, bar.close)))
+            let high = snap(layout.y(bar.high)), low = snap(layout.y(bar.low))
+            candlePaths[tone].addRect(CGRect(x: left + wickInset, y: high, width: wickWidth, height: max(pixel, low - high)))
+            candlePaths[tone].addRect(CGRect(x: left, y: top, width: bodyWidth, height: max(snap(1), bottom - top)))
+            if maxVolume > 0, bar.volume > 0 {
+                let h = snap(CGFloat(bar.volume / maxVolume) * volumeHeight)
+                if h > 0 { volumePaths[tone].addRect(CGRect(x: left, y: volumeFloor - h, width: bodyWidth, height: h)) }
             }
         }
+
+        // Volume rests on the time axis, its own scale.
+        for tone in 0..<3 where !volumePaths[tone].isEmpty { clipped.fill(volumePaths[tone], with: .color(toneColor(tone).opacity(0.22))) }
 
         if cloud { drawCloud(&clipped, layout: layout, dark: dark) }
 
@@ -319,13 +451,7 @@ struct CandleChart: View {
         }
         if let range { drawRange(&clipped, range, layout: layout, dark: dark, inner: innerLines, faded: false) }
 
-        for (offset, bar) in visible.enumerated() {
-            let x = layout.x(CGFloat(layout.firstVisible + offset))
-            let color = candleColor(bar)
-            let top = layout.y(max(bar.open, bar.close)), bottom = layout.y(min(bar.open, bar.close))
-            clipped.stroke(Path { $0.move(to: CGPoint(x: x, y: layout.y(bar.high))); $0.addLine(to: CGPoint(x: x, y: layout.y(bar.low))) }, with: .color(color), lineWidth: 1)
-            clipped.fill(Path(CGRect(x: x - body / 2, y: top, width: body, height: max(1, bottom - top))), with: .color(color))
-        }
+        for tone in 0..<3 where !candlePaths[tone].isEmpty { clipped.fill(candlePaths[tone], with: .color(toneColor(tone))) }
 
         if averages {
             let step = period.seconds
@@ -440,10 +566,15 @@ struct CandleChart: View {
         return lo
     }
 
-    /// Given markers plus each previous week's first touch after Monday (from the bars).
+    /// Given markers plus each previous week's first touch after Monday (from the bars). The scan runs
+    /// once per change of bars/history, not once per frame.
     private var allMarkers: [ChartMarker] {
         guard markHistory, !bars.isEmpty else { return markers }
-        var out = markers
+        return markers + memo.historyMarkers(bars: bars, history: history) { historyTouches() }
+    }
+
+    private func historyTouches() -> [ChartMarker] {
+        var out: [ChartMarker] = []
         guard let firstTime = bars.first?.time, let lastTime = bars.last?.time else { return out }
         for past in history where past.end > firstTime && past.start <= lastTime {
             let mondayEnd = past.start   // a FibRange starts when its Monday closes (Tuesday 00:00 NY)
@@ -493,10 +624,13 @@ struct CandleChart: View {
         }
     }
 
-    private func candleColor(_ bar: Candle) -> Color {
-        if let monday = colors.monday, memo.isNYMonday(bar.time) { return monday }
-        return bar.close >= bar.open ? colors.up : colors.down
+    /// 0 up, 1 down, 2 NY Monday (custom colours only).
+    private func candleTone(_ bar: Candle) -> Int {
+        if colors.monday != nil, memo.isNYMonday(bar.time) { return 2 }
+        return bar.close >= bar.open ? 0 : 1
     }
+
+    private func toneColor(_ tone: Int) -> Color { tone == 2 ? colors.monday ?? colors.up : tone == 0 ? colors.up : colors.down }
 
     private func drawCloud(_ context: inout GraphicsContext, layout: Layout, dark: Bool) {
         let points = memo.cloud(layout.bars, step: period.seconds)
@@ -554,6 +688,10 @@ struct CandleChart: View {
     static func fullTime(_ t: Double) -> String { fullFormatter.string(from: Date(timeIntervalSince1970: t)) }
 
     private func timeLabel(_ t: Double, previous: Double?) -> String {
+        memo.text(.init(kind: 2, value: t, other: previous ?? -1, digits: period == .d1 || period == .h12 ? 1 : 0)) { makeTimeLabel(t, previous: previous) }
+    }
+
+    private func makeTimeLabel(_ t: Double, previous: Double?) -> String {
         let date = Date(timeIntervalSince1970: t)
         if period == .d1 || period == .h12 { return Self.dayFormatter.string(from: date) }
         if let previous, Self.dayFormatter.string(from: Date(timeIntervalSince1970: previous)) != Self.dayFormatter.string(from: date) {
@@ -576,12 +714,13 @@ struct CandleChart: View {
 /// Causal close-only averages (chart-style.js).
 enum Indicators {
     static func sma(_ bars: [Candle], _ period: Int, step: Double? = nil) -> [Double?] {
-        var out = [Double?](repeating: nil, count: bars.count), window: [Double] = [], sum = 0.0
+        // Running sum over the current gap-free run; O(n) (Array.removeFirst made it O(n·period)).
+        var out = [Double?](repeating: nil, count: bars.count), sum = 0.0, start = 0
         for (i, bar) in bars.enumerated() {
-            if i > 0, let step, bar.time - bars[i - 1].time != step { window.removeAll(); sum = 0 }
-            window.append(bar.close); sum += bar.close
-            if window.count > period { sum -= window.removeFirst() }
-            if window.count >= period { out[i] = sum / Double(period) }
+            if i > 0, let step, bar.time - bars[i - 1].time != step { start = i; sum = 0 }
+            sum += bar.close
+            if i - start + 1 > period { sum -= bars[i - period].close }
+            if i - start + 1 >= period { out[i] = sum / Double(period) }
         }
         return out
     }
@@ -609,17 +748,47 @@ enum Indicators {
     }
 }
 
-/// Per-frame caches: indicator series while the bars are unchanged, and NY-Monday flags per bar time.
+/// Per-frame caches: indicator series while the bars are unchanged, NY-Monday flags per bar time,
+/// previous-week touch markers, and formatted label strings.
 final class IndicatorMemo {
-    private var key = ""
+    private struct BarsKey: Equatable {
+        let count: Int, first: Double, last: Double, close: Double, high: Double, low: Double, step: Double
+        init(_ bars: [Candle], step: Double) {
+            count = bars.count; first = bars.first?.time ?? 0; last = bars.last?.time ?? 0
+            close = bars.last?.close ?? 0; high = bars.last?.high ?? 0; low = bars.last?.low ?? 0; self.step = step
+        }
+    }
+    private struct HistoryKey: Equatable {
+        let bars: BarsKey, weeks: Int, firstStart: Double, lastStart: Double
+    }
+    struct TextKey: Hashable { let kind: UInt8; let value: Double; let other: Double; let digits: Int }
+
+    private var key: BarsKey?
     private var averages: [String: [Double?]] = [:]
     private var cloudPoints: [(a: Double, b: Double)?] = []
     private var mondays: [Double: Bool] = [:]
+    private var historyKey: HistoryKey?
+    private var historyValue: [ChartMarker] = []
+    private var texts: [TextKey: String] = [:]
     private static let ny: Calendar = { var c = Calendar(identifier: .gregorian); c.timeZone = TimeZone(identifier: "America/New_York")!; return c }()
 
     private func check(_ bars: [Candle], _ step: Double) {
-        let next = "\(bars.count)|\(bars.first?.time ?? 0)|\(bars.last?.time ?? 0)|\(bars.last?.close ?? 0)|\(step)"
+        let next = BarsKey(bars, step: step)
         if next != key { key = next; averages = [:]; cloudPoints = [] }
+    }
+
+    func text(_ key: TextKey, _ make: () -> String) -> String {
+        if let hit = texts[key] { return hit }
+        if texts.count > 2048 { texts.removeAll(keepingCapacity: true) }
+        let value = make()
+        texts[key] = value
+        return value
+    }
+
+    func historyMarkers(bars: [Candle], history: [FibRange], scan: () -> [ChartMarker]) -> [ChartMarker] {
+        let next = HistoryKey(bars: BarsKey(bars, step: 0), weeks: history.count, firstStart: history.first?.start ?? 0, lastStart: history.last?.start ?? 0)
+        if next != historyKey { historyKey = next; historyValue = scan() }
+        return historyValue
     }
     func average(_ kind: String, _ period: Int, _ bars: [Candle], step: Double) -> [Double?] {
         check(bars, step)
@@ -682,3 +851,47 @@ private struct MarkerCallout: View {
         .accessibilityElement(children: .combine)
     }
 }
+
+#if DEBUG
+/// QA-only frame probe (DEBUG build + launch argument `-SpikeQAFrames YES`): while the chart is dragged,
+/// pinched or gliding it records display-link frame intervals and the CPU time of each canvas draw, then
+/// prints one line per gesture. Used to compare drag smoothness before/after a change on the simulator.
+/// Release builds never contain it.
+final class ChartFrameProbe: NSObject {
+    nonisolated(unsafe) static let shared = ChartFrameProbe()
+    private var link: CADisplayLink?
+    private var last: CFTimeInterval = 0
+    private var intervals: [Double] = []
+    private var draws: [Double] = []
+    private var label = ""
+    private lazy var enabled = UserDefaults.standard.bool(forKey: "SpikeQAFrames")
+
+    func begin(_ name: String) {
+        guard enabled else { return }
+        if link != nil { if name != label { end() } else { return } }
+        label = name; intervals = []; draws = []; last = 0
+        let link = CADisplayLink(target: self, selector: #selector(tick(_:)))
+        link.preferredFrameRateRange = CAFrameRateRange(minimum: 60, maximum: 120, preferred: 120)
+        link.add(to: .main, forMode: .common)
+        self.link = link
+    }
+
+    func drawn(_ seconds: Double) { if link != nil { draws.append(seconds) } }
+
+    @objc private func tick(_ link: CADisplayLink) {
+        if last > 0 { intervals.append(link.timestamp - last) }
+        last = link.timestamp
+    }
+
+    func end() {
+        guard let link else { return }
+        link.invalidate(); self.link = nil
+        guard intervals.count > 5 else { return }
+        let sorted = intervals.sorted(), frame = sorted[sorted.count / 2]
+        let dropped = intervals.reduce(0) { $0 + max(0, Int(($1 / frame).rounded()) - 1) }
+        let d = draws.sorted()
+        let ms = { (v: Double) in String(format: "%.2f", v * 1000) }
+        print("[frames] \(label) frames=\(intervals.count) frame=\(ms(frame))ms p95=\(ms(sorted[(sorted.count - 1) * 95 / 100]))ms max=\(ms(sorted.last!))ms dropped=\(dropped) draws=\(d.count) draw_mean=\(ms(d.reduce(0, +) / Double(max(d.count, 1))))ms draw_p95=\(ms(d.isEmpty ? 0 : d[(d.count - 1) * 95 / 100]))ms")
+    }
+}
+#endif
