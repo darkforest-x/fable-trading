@@ -497,6 +497,47 @@ def _priority(events: pd.DataFrame, signal_atr: pd.Series) -> pd.DataFrame:
     return result
 
 
+def _prepare_event_inputs(config: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
+                                                pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Run the exact pre-loop input path used by generate, including path legs."""
+    signals, catalog, joined = _read_parent(config)
+    actual_catalog = catalog[~catalog.is_control].copy()
+    signals["source_row_number"] = signals.source_row_number.astype("int64")
+    events = wallet.read_paths()
+    events = events[events.tp_r.isin([0.0, 2.0])].copy()
+    if not events.groupby("event_id").tp_r.apply(
+            lambda x: set(x.astype(float)) == {0.0, 2.0}).all():
+        raise ValueError("Frozen OKX path runner must retain matching no-TP and 2R exits")
+
+    signal_meta = signals[["source_row_number", "symbol", "week", "side", "prior_atr_pct",
+                           "reference_entry", "reference_stop", "opposite_target",
+                           "key_open_ms", "confirmation_ms"]].rename(
+                               columns={"symbol": "parent_symbol", "week": "parent_week",
+                                        "side": "parent_side", "key_open_ms": "parent_key_open_ms",
+                                        "confirmation_ms": "parent_confirmation_ms"})
+    events = events.merge(signal_meta, on="source_row_number", validate="many_to_one")
+    if (not events.symbol.eq(events.parent_symbol).all()
+            or not events.side.eq(events.parent_side).all()):
+        raise ValueError("Parent symbol/direction mismatch between path ledger and frozen signal CSV")
+    events["week"] = events.parent_week
+
+    event_catalog = catalog.copy()
+    event_catalog["source_row_number"] = pd.to_numeric(
+        event_catalog.source_row_number, errors="coerce").astype("int64")
+    event_catalog = event_catalog.merge(signal_meta, on="source_row_number",
+                                        validate="many_to_one")
+    if (not event_catalog.week.eq(event_catalog.parent_week).all()
+            or not event_catalog.symbol.eq(event_catalog.parent_symbol).all()
+            or not event_catalog.side.eq(event_catalog.parent_side).all()):
+        raise ValueError("Actual/control identity differs from its frozen parent")
+    score = leadership.leadership()
+    event_catalog = _score_90d(event_catalog, score)
+    atr = signals.set_index("source_row_number").prior_atr_pct
+    event_catalog = _priority(event_catalog, atr)
+    events = _priority(events, atr)
+    return signals, catalog, joined, actual_catalog, events, event_catalog
+
+
 def _custom_periods(trades: pd.DataFrame, equity: pd.DataFrame) -> dict:
     return {
         "2026_to_2026-09-23": wallet.summarize(
@@ -551,13 +592,13 @@ def generate(config_path: Path) -> dict:
         raise ValueError("OKX fees differ from the owner-confirmed frozen V1.7 costs")
     output_paths = {k: ROOT / v for k, v in config["outputs"].items()}
     dynamic_outputs = [output_paths["funded"].with_name(f"funded_{name}.csv.gz")
-                      for name in ("baseline_90d_actual", "baseline_90d_control",
+                      for name in ("baseline_90d_actual",
                                    "baseline_90d_paired_actual", "baseline_90d_paired_control",
                                    "agreement_4h_actual", "agreement_4h_paired_actual",
                                    "agreement_4h_paired_control", "baseline_90d_actual_slip5bp",
                                    "agreement_4h_actual_slip5bp")]
     dynamic_outputs += [output_paths["equity"].with_name(f"hourly_{name}.csv.gz")
-                        for name in ("baseline_90d_actual", "baseline_90d_control",
+                        for name in ("baseline_90d_actual",
                                      "baseline_90d_paired_actual", "baseline_90d_paired_control",
                                      "agreement_4h_actual", "agreement_4h_paired_actual",
                                      "agreement_4h_paired_control", "baseline_90d_actual_slip5bp",
@@ -565,38 +606,7 @@ def generate(config_path: Path) -> dict:
     if any(p.exists() for p in [*output_paths.values(), *dynamic_outputs]):
         raise FileExistsError("Refusing to overwrite existing OKX agreement outputs")
 
-    signals, catalog, joined = _read_parent(config)
-    actual_catalog = catalog[~catalog.is_control].copy()
-    signals["source_row_number"] = signals.source_row_number.astype("int64")
-    events = wallet.read_paths()
-    events = events[events.tp_r.isin([0.0, 2.0])].copy()
-    if not events.groupby("event_id").tp_r.apply(
-            lambda x: set(x.astype(float)) == {0.0, 2.0}).all():
-        raise ValueError("Frozen OKX path runner must retain matching no-TP and 2R exits")
-    signal_meta = signals[["source_row_number", "symbol", "week", "side", "prior_atr_pct",
-                           "reference_entry", "reference_stop", "opposite_target",
-                           "key_open_ms", "confirmation_ms"]].rename(
-                               columns={"symbol": "parent_symbol", "week": "parent_week",
-                                        "side": "parent_side", "key_open_ms": "parent_key_open_ms",
-                                        "confirmation_ms": "parent_confirmation_ms"})
-    events = events.merge(signal_meta, on="source_row_number", validate="many_to_one")
-    if (not events.week.eq(events.parent_week).all()
-            or not events.symbol.eq(events.parent_symbol).all()
-            or not events.side.eq(events.parent_side).all()):
-        raise ValueError("Parent week mismatch between path ledger and frozen signal CSV")
-    event_catalog = catalog.copy()
-    event_catalog["source_row_number"] = pd.to_numeric(
-        event_catalog.source_row_number, errors="coerce").astype("int64")
-    event_catalog = event_catalog.merge(signal_meta, on="source_row_number",
-                                        validate="many_to_one")
-    if (not event_catalog.week.eq(event_catalog.parent_week).all()
-            or not event_catalog.symbol.eq(event_catalog.parent_symbol).all()
-            or not event_catalog.side.eq(event_catalog.parent_side).all()):
-        raise ValueError("Actual/control identity differs from its frozen parent")
-    score = leadership.leadership()
-    event_catalog = _score_90d(event_catalog, score)
-    event_catalog = _priority(event_catalog, signals.set_index("source_row_number").prior_atr_pct)
-    events = _priority(events, signals.set_index("source_row_number").prior_atr_pct)
+    signals, catalog, joined, actual_catalog, events, event_catalog = _prepare_event_inputs(config)
 
     by_symbol_paths = actual_catalog.drop_duplicates("symbol").set_index("symbol")
     parents_by_symbol = {str(sym): frame.sort_values("source_row_number")
@@ -685,7 +695,6 @@ def generate(config_path: Path) -> dict:
 
     cohorts = {
         "baseline_90d_actual": (ARM_BASE, "actual", real_90, 0.0),
-        "baseline_90d_control": (ARM_BASE, "control", control_90, 0.0),
         "baseline_90d_paired_actual": (ARM_BASE, "paired_actual", actual_90_paired, 0.0),
         "baseline_90d_paired_control": (ARM_BASE, "paired_control", control_90_paired, 0.0),
         "agreement_4h_actual": (ARM_4H, "actual", real_4h, 0.0),
@@ -757,6 +766,7 @@ def generate(config_path: Path) -> dict:
             "90d_actual_opportunities": int(real_90.event_id.nunique()),
             "90d_paired_control_opportunities": int(control_90.event_id.nunique()),
             "90d_strict_parent_pairs": len(pair90),
+        "90d_control_is_paired_control_cohort": bool(set(control_90.event_id) == set(control_90_paired.event_id)),
             "4h_actual_opportunities": int(real_4h.event_id.nunique()),
             "4h_paired_control_opportunities": int(control_4h.event_id.nunique()),
             "4h_strict_parent_pairs": len(pair4),
