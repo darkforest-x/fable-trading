@@ -1,0 +1,8 @@
+{
+  "id":"exp-cloud-close-btc-regime-20261109-v1",
+  "parent":"exp-cloud-close-priority-20261109-v1",
+  "hypothesis":"Avoid opening a V1.7 position against the medium/long BTC trend; measure whether this concentrates realized profits and reduces shared account drawdowns.",
+  "factor":"One gate, sign of completed BTC price return over [14,30,60,90,180] days must match the trade direction. Use BTC 12H closes only up to the opening of the key 12H candle (12 hours before the signal), with contiguous coverage of the complete lookback. Missing regime before warmup skips, reported. 0-day parent bypasses the gate. All other settings from the priority study's development pick, independently of the stop-distance study.",
+  "evaluation":"Development ending 2024-12-31 only, same return/win/payoff/dd gates and 100-trade floor. Matched controls must be eligible at their own subsequent confirmation, and their parent must qualify at the original confirmation. Show matched-only funded comparator and adverse 5bp/market fill for the selected and highest-development-growth policies. Repeated historical exploration disclosed.",
+  "command":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_btc_regime"
+}
