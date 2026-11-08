@@ -199,7 +199,7 @@ def symbol_orders(symbol, bars, frozen, step, decimals):
         next_week = (pd.Timestamp(r.week) + pd.Timedelta(days=7)).tz_localize("America/New_York")
         next_week_ms = next_week.value//1_000_000
         last = min(end, int(np.searchsorted(ms, next_week_ms))-1)
-        side, limit = r.side, r.entry
+        side, limit = r.side, round(float(r.entry), decimals)
         col = LOW if side == 1 else HIGH
         raw_ok = side*(bars[first,col]-limit) <= 0
         for tf,width in WIDTHS.items():
