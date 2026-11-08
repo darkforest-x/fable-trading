@@ -1,0 +1,9 @@
+{
+  "id": "exp-cloud-close-lock-profit-20261109-v1",
+  "parent": "Use a full-position V1.7 runner within the frozen 90-day-eligible nine-slot universe and low prior ATR priority. It retains every original causal 12H close entry.",
+  "factor": "Only activation threshold of a fixed +0.5R protective stop. Off, +1R, +1.5R, +2R or +3R. A threshold on an hourly high (long) or low (short) can arm the order only AFTER that H1 closes. From next observed H1 open the protective stop stays at entry plus direction times 0.5 original R while the original native stop and EMA exit stay live. No early realization, no reset or later ratchet. Opening gap takes executable open.",
+  "threshold_r": [1, 1.5, 2, 3],
+  "locked_r": 0.5,
+  "decision": "Select on full calendar history ending 2024, maximize terminal wealth with >=100 closed trades, >=30% net winners, >=2.5 equal-notional payoff and <=35% hourly conservative DD. If none qualify retain off as comparator only. 2025 and 2026 are later previously used periods. Extra market slippage 5bp and paired null for development leader and pick. No fee-free breakeven wins.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_lock_profit"
+}

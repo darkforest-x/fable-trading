@@ -19,7 +19,7 @@ WIDTHS = (1,2,3,4)
 
 @njit(cache=True)
 def trail_order(c, bars, times, start, end, sides, risk, widths, exit_px, phase,
-                peaks, why, exit_stage):
+                peaks, why, exit_stage, fixed_profit):
     col = c.from_col
     s = sides[col]
     pos = start[col]+c.i
@@ -41,8 +41,12 @@ def trail_order(c, bars, times, start, end, sides, risk, widths, exit_px, phase,
         if c.i:
             prev = bars[pos-1]
             peaks[col]=max(peaks[col],prev[1]) if s>0 else min(peaks[col],prev[2])
-        armed = c.i>0 and (peaks[col]-entry)*s>=2*risk[col] and risk[col]>0
-        level = peaks[col]-s*widths[col]*risk[col]
+        arm_at = widths[col] if fixed_profit >= 0. else 2.
+        armed = c.i>0 and (peaks[col]-entry)*s>=arm_at*risk[col] and risk[col]>0
+        if fixed_profit >= 0.:
+            level = entry+s*fixed_profit*risk[col]
+        else:
+            level = peaks[col]-s*widths[col]*risk[col]
         adverse = lo if s>0 else hi
         if armed and (op-level)*s<=0:
             px=op
@@ -61,7 +65,7 @@ def trail_order(c, bars, times, start, end, sides, risk, widths, exit_px, phase,
     return col,nb.order_nb(size=-c.last_position[col],price=px,fees=w.TAKER,raise_reject=True)
 
 
-def symbol_paths(group):
+def symbol_paths(group,levels=WIDTHS,fixed_profit=-1.):
     clock,bars = w.quotes(group.symbol.iloc[0])
     bars=np.ascontiguousarray(bars)
     starts=clock.searchsorted(group.entry_ms)
@@ -73,7 +77,7 @@ def symbol_paths(group):
     results=[]
     for offset in range(0,len(group),12):
         batch=group.iloc[offset:offset+12]
-        events=batch.loc[batch.index.repeat(len(WIDTHS))].reset_index(drop=True)
+        events=batch.loc[batch.index.repeat(len(levels))].reset_index(drop=True)
         start=events['first'].to_numpy()
         end=events['last'].to_numpy()
         n=len(events)
@@ -83,10 +87,10 @@ def symbol_paths(group):
         phase=events.exit_phase.map({'open':1,'intrabar':2,'close':3}).to_numpy(dtype=np.int8)
         why=np.zeros(n,dtype=np.int8)
         stage=why.copy()
-        widths=np.tile(WIDTHS,len(batch))
+        widths=np.tile(levels,len(batch))
         pf=vbt.Portfolio.from_order_func(marked,trail_order,bars,clock,start,end,
             events.side.to_numpy(),risk,widths,events.exit_price.to_numpy(),phase,
-            np.empty(n),why,stage,flexible=True,cash_sharing=False,
+            np.empty(n),why,stage,fixed_profit,flexible=True,cash_sharing=False,
             init_cash=np.maximum(10.,10*events.entry_price.to_numpy()),max_orders=n*2,fill_pos_record=False)
         orders=pf.orders.records.sort_values(['col','id'])
         opened=orders.iloc[::2]
@@ -95,11 +99,11 @@ def symbol_paths(group):
             raise ValueError('Incomplete VectorBT pair')
         if not np.allclose(opened.price,events.entry_price,rtol=2e-10,atol=1e-15):
             raise ValueError('Runner entry mismatch')
-        events['giveback_r']=widths
+        events['arm_at_r' if fixed_profit>=0. else 'giveback_r']=widths
         events['exit_price']=closed.price.to_numpy()
         events['exit_phase']=pd.Series(stage).map({1:'open',2:'intrabar',3:'close'}).to_numpy()
         events['exit_bar_ms']=clock[start+closed.idx.to_numpy()]
-        events.loc[why==1,'exit_reason']='trailing_stop'
+        events.loc[why==1,'exit_reason']='profit_lock' if fixed_profit>=0. else 'trailing_stop'
         events.loc[why==1,'gap_flag']=False
         events['exit_fee_rate']=w.TAKER
         results.append(events.drop(columns=['first','last','span']))
