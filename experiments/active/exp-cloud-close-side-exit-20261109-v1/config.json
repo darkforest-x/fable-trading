@@ -1,0 +1,8 @@
+{
+  "id": "exp-cloud-close-side-exit-20261109-v1",
+  "factor": "Which trade direction uses the 75% partial at 2R: both, longs only, shorts only, or neither. A long perpetual position can earn more than its initial notional, and a fully funded short position's maximum gross gain is one initial notional. The two sides may merit different profit-taking rules. Same entry, stop, intrabar cloud exit and account.",
+  "policies": ["both","longs_only","shorts_only","neither"],
+  "parent": "90-day eligible 9-slot funded portfolio, low prior ATR first. Reuse the previously priced V1.7 legs for each side. In the applicable direction 75% exits at 2R; otherwise both monetary slices exit at their original runner's exact fill and fees. Two numerically represented market orders on the same exit pay the same linear cost as one full exit; no lot minimum, no cost rebates.",
+  "selection": "Choose on pre-2025 development NAV subject to >=100 closed positions, >=30% winners, both money and equal-notional payoff >=2.5, <=35% hourly DD upper bound. Fallback none if no valid rule. Stress extra 5bp adverse market slip and later matched controls for qualifying new winner and unconstrained dev leader when new. Existing endpoints reused.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_side_exit"
+}
