@@ -55,12 +55,13 @@ def load_events() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict]:
         raise FileNotFoundError(f"Wait for the frozen ordinary stream: {ADMISSION}")
 
     ordinary = _utc(pd.read_parquet(ADMISSION), ("decision", "known", "exit_time"))
-    required = {"decision", "epoch", "entry_open", "exit_open", "net_pct", "raw_index"}
+    required = {"decision", "epoch", "entry_open", "exit_vwap", "net_pct", "raw_index"}
     missing = required.difference(ordinary.columns)
     if missing:
         raise ValueError(f"Ordinary frozen stream lacks required columns: {sorted(missing)}")
     if len(ordinary) != 177 or ordinary.decision.duplicated().any():
         raise ValueError(f"Expected 177 unique frozen ordinary admissions, got {len(ordinary)}")
+    ordinary["exit_open"] = ordinary.exit_vwap
     if "exit_time" not in ordinary:
         ordinary["exit_time"] = ordinary.decision + HOLD
     if not ordinary.exit_time.eq(ordinary.decision + HOLD).all():
