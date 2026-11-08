@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from yoyo.evaluation.cloud_peak10_inputs import CONFIG, CUTOFF, EXP, HOUR, OHLC, RANKING, dump
+from yoyo.evaluation.pepe_range_exits import signals as stoch_crosses
 from yoyo.monitor.cloud_signal_plans import atr_points
 from yoyo.monitor.cloud_signals import STEP, ema_points, signal
 from yoyo.monitor.monday_fib import week_window
@@ -97,6 +98,9 @@ def census(spec):
     bars = pd.read_csv(folder/'bars12h.csv.gz', index_col='time', float_precision='round_trip')
     hour = pd.read_csv(folder/'bars1h.csv.gz', index_col='time', float_precision='round_trip')
     calendar = anchors(hour, bars, symbol)
+    # On an eligible key the proper directional wick already clears its 1.618.
+    # V1.7's optional chart-timeframe Stoch marks hide NY weekend opens by default.
+    crosses = stoch_crosses(bars)
     records = bars[OHLC].reset_index().to_dict(orient='records')
     ema, atr = ema_points(records), atr_points(records)
     selected = []
@@ -127,6 +131,9 @@ def census(spec):
             order = finer_order(hour, s, p)
         else:
             status = 'miss' if ended else 'censored'
+        feat = features(s, records[idx], atr[idx-1])
+        distance = feat['close_distance_r']
+        ny_weekday = pd.Timestamp(s['signal_open_ms'],unit='ms',tz='UTC').tz_convert('America/New_York').weekday()
         rows.append(dict(rank=spec['rank'], symbol=spec['symbol'], week=s['week'], side=s['side'],
             key_open_bjt=bjt(s['signal_open_ms']), confirmed_bjt=bjt(s['confirmed_ms']),
             reference_entry=s['entry'], confirmation_close=s['confirmation_close'],
@@ -136,8 +143,11 @@ def census(spec):
             path_end_bar_bjt=bjt(p.get('exit_bar_ms')), exit_reason=p.get('exit_state') or p['state'],
             exit_reference_r=p.get('exit_r'), first_12h_exit=p.get('exit_bar_ms') == s['confirmed_ms'],
             hour_order_if_possible=order, pre_current_listing=s['signal_open_ms'] < int(spec['list_time']),
+            same_side_stoch=bool(ny_weekday < 5 and crosses.iloc[idx] == s['side']),
+            confirmation_basis_lower_r=max(0., (lo-distance)/(1+distance)),
+            confirmation_basis_upper_r=max(0., (hi-distance)/(1+distance)),
             bar_source=bars.source.iloc[idx], evaluation_cutoff_bjt=bjt(CUTOFF),
-            **features(s, records[idx], atr[idx-1])))
+            **feat))
     coverage = dict(symbol=spec['symbol'], first_12h=bjt(int(bars.index[0])), through=bjt(int(bars.index[-1])+STEP),
         n12h=len(bars), observed_weeks=len(calendar),
         ready_mondays=sum(w['state']=='ready' for w in calendar.values()), signals=len(rows))
@@ -151,6 +161,7 @@ def delivery(frame, filename):
         'peak_lower_r':'峰值R下界','peak_upper_r':'峰值R上界','first_gt10_bjt':'首次明确过10R所在12H开盘_北京时间',
         'peak_time_bjt':'峰值下界所在12H开盘_北京时间','path_end_bar_bjt':'退出所在12H开盘_北京时间',
         'exit_reason':'结束原因','hour_order_if_possible':'小时线先后核对','pre_current_listing':'早于当前合约上市',
+        'same_side_stoch':'关键K同向勾叉_默认设置','confirmation_basis_lower_r':'按确认收盘到原止损重算的峰值R下界',
         'close_distance_r':'确认时已离触线多少R','prior_atr_pct':'确认前12H_ATR14百分比'}
     out = frame.loc[:, list(names)].copy()
     out['side'] = out.side.map({1:'多',-1:'空'})
