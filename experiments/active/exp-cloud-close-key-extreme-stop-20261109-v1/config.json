@@ -1,0 +1,8 @@
+{
+  "id": "exp-cloud-close-key-extreme-stop-20261109-v1",
+  "single_variable": "Place the initial protective market stop at the actual completed V1.7 key's low (long) or high (short), with zero extra padding. Keep the original 2R partial target PRICE fixed, so changes arise solely from where the protective stop executes. Same exact post-12H H1 market open, 9 fully funded slots, low prior ATR, 2/3 partial and 1/3 original EMA runner.",
+  "sample": "All 11780 90-day eligible OKX first-key opportunities including gaps already through the stop; those execute under the frozen native callback. The real key extremum is known at its confirmed close. Controls inherit the observed real stop's signed entry-relative distance at their own later open; no random-draw selection based on profitability. Baseline stored in the corrected thirds study.",
+  "decision": "Development through 2024. Require >=100 closed trades, win >=30%, cash and return payoff >=2.5, conservative hourly drawdown <=35%; evaluate later periods along with full history. Only development-qualified policy receives paired controls and extra 5bp market-fill slippage; if also full-qualified evaluate unchanged Binance rule. All later years previously seen.",
+  "cost": "Taker 5bp each market, protective stop and EMA exit; maker 2bp for executed resting target. No funding or capacity model.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_key_extreme_stop"
+}
