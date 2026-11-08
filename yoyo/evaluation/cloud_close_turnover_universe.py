@@ -75,7 +75,7 @@ def okx_values(folder, top, supplement=None):
     candles = candles[['time',*cols]].apply(pd.to_numeric)
     if supplement is not None:
         candles = pd.concat([candles,supplement[['time',*cols]]],ignore_index=True)
-    candles = candles.drop_duplicates()
+    candles = candles.astype({'time':'int64', **dict.fromkeys(cols,'float64')}).drop_duplicates()
     if candles.empty:
         return eligibility,pd.Series(dtype=float)
     candles = candles.loc[~candles.time.duplicated(keep=False)].set_index('time').reindex(bars.time)
