@@ -142,8 +142,9 @@ def _entry_metrics(rows: pd.DataFrame, start: pd.Timestamp, end: pd.Timestamp) -
     growth, dd = compound_and_settlement_dd(rows)
     if len(decisions):
         bounded = pd.DatetimeIndex([start, *decisions.tolist(), end])
-        max_gap_days = float(np.diff(bounded.asi8).max() / pd.Timedelta(days=1).value)
-        gaps = np.diff(decisions.asi8) / pd.Timedelta(hours=1).value
+        boundary_gaps = (bounded[1:] - bounded[:-1]) / pd.Timedelta(days=1)
+        max_gap_days = float(boundary_gaps.max())
+        gaps = (decisions[1:] - decisions[:-1]) / pd.Timedelta(hours=1)
         max_interentry = float(gaps.max()) if len(gaps) else np.nan
         exit_times = decisions + pd.Timedelta(hours=HOLD_HOURS)
         idle = np.r_[
