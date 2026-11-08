@@ -1,0 +1,9 @@
+{
+  "id": "exp-cloud-close-pyramid-20261109-v1",
+  "parent": "exp-cloud-close-leadership-20261109-v1 coverage-only arm",
+  "factor": "Maximum concurrent positions on the same contract: 1, 2, 3 or 9, with 9 total account slots in every case. Additional positions require a fresh original 12H V1.7 confirmation and all existing positions on that contract must be same-direction and profitable at the current observable open after taker costs on both ends. No addition based on intrabar highs/lows, no future observation, no add to a losing position.",
+  "amount": "Each addition has its own stop and 75% at its own 2R, remaining 25% on V1.7 EMA exit. Open from available cash only and at most NAV/9. Open-slot count, priority, global collateral, 90-day eligibility and closes all frozen. Runs use actual entry and exit slippage to judge the mark for addition eligibility.",
+  "cap": [1, 2, 3, 9],
+  "decision": "Maximum dev value through 2024 meeting >=100 trades, >=30% winners, payoff by return >=2.5 and conservative hourly DD <=35%. Later periods previously studied; checks on selected and unconstrained development leader if new. No recalibration from full-history outcome.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_pyramid"
+}
