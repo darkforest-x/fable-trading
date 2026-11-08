@@ -16,7 +16,6 @@ from __future__ import annotations
 import argparse
 import gc
 import json
-from collections import Counter
 from pathlib import Path
 
 import numpy as np
@@ -388,20 +387,29 @@ def _construct_symbol_events(symbol: str, runner: pd.DataFrame,
 
 def generate_target_paths(config: dict, reward_config: dict,
                           runner: pd.DataFrame, fixed_2r: pd.DataFrame,
-                          signals: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
+                          signals: pd.DataFrame, checkpoint_path: Path) -> pd.DataFrame:
     batch_size = int(config["execution"]["event_batch_size"])
     result_rows: list[dict] = []
-    total = Counter()
     for i, symbol in enumerate(sorted(runner.symbol.astype(str).unique()), start=1):
         rows, counts = _construct_symbol_events(
             symbol, runner, signals, reward_config, batch_size)
         result_rows.extend(rows)
-        total.update(counts)
         if i % 25 == 0 or i == runner.symbol.nunique():
             print(f"Completed target paths for {i}/{runner.symbol.nunique()} symbols", flush=True)
         del rows
+        del counts
         gc.collect()
     paths = pd.DataFrame(result_rows)
+    checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+    checkpoint_tmp = checkpoint_path.with_name(checkpoint_path.name + ".tmp")
+    paths.to_csv(checkpoint_tmp, index=False, compression="gzip", float_format="%.12g")
+    checkpoint_tmp.replace(checkpoint_path)
+    print(f"Wrote resumable target-path checkpoint: {checkpoint_path}", flush=True)
+    return paths
+
+
+def audit_target_paths(paths: pd.DataFrame, config: dict,
+                       runner: pd.DataFrame, fixed_2r: pd.DataFrame) -> dict:
     expected_rows = len(runner) * len(FRACTIONS)
     if len(paths) != expected_rows:
         raise AssertionError(f"Expected {expected_rows} target path rows, found {len(paths)}")
@@ -422,12 +430,13 @@ def generate_target_paths(config: dict, reward_config: dict,
     for fraction in FRACTIONS:
         variant = paths[paths.target_fraction.eq(fraction)]
         no_orders = variant[variant.target_no_resting_order]
-        fallback = variant[variant.target_fallback_2r]
+        fallback_mask = variant.target_fallback_2r.astype(bool)
+        no_order_mask = variant.target_no_resting_order.astype(bool)
         fallback_counts[candidate_name(fraction)] = {
             "already_passed_extension_2r_fallback": int(variant.target_level_already_passed.sum()),
             "already_passed_signal": int((variant.target_level_already_passed & ~variant.is_control).sum()),
             "already_passed_control": int((variant.target_level_already_passed & variant.is_control).sum()),
-            "orderable_2r_fallback": int((fallback & ~variant.target_no_resting_order).sum()),
+            "orderable_2r_fallback": int((fallback_mask & ~no_order_mask).sum()),
             "unplaceable_no_order": int(variant.target_no_resting_order.sum()),
             "unplaceable_extension_target": int(variant.target_geometry.eq("no_resting_order_nonpositive_extension_target").sum()),
             "unplaceable_extension_signal": int((variant.target_geometry.eq("no_resting_order_nonpositive_extension_target") & ~variant.is_control).sum()),
@@ -453,10 +462,13 @@ def generate_target_paths(config: dict, reward_config: dict,
         "input_matched_control_events": int(runner.is_control.sum()),
         "target_path_rows": int(len(paths)),
         "target_fallback_counts": fallback_counts,
-        "vectorbt_execution_totals": dict(total),
+        "vectorbt_execution_totals": {
+            "columns": int(len(paths)), "orders": int(len(paths) * 2),
+            "trades": int(len(paths)),
+        },
         "fallback_path_parity": "Orderable passed-level events reproduce frozen fixed-2R paths; nonpositive projected prices produce no finite target and reproduce frozen 0R runner paths. Both parity checks include fills, fees, time, PnL, and ambiguity flags.",
     }
-    return paths, audit
+    return audit
 
 
 def _rank_low_prior_atr(frame: pd.DataFrame, signals: pd.DataFrame) -> pd.DataFrame:
@@ -563,18 +575,32 @@ def main(argv=None):
     if tuple(float(x) for x in config["target_fractions_of_remaining_extension"]) != FRACTIONS:
         raise ValueError("Registered one-factor target fractions differ from the builder")
     outputs = {key: ROOT / value for key, value in config["outputs"].items()}
-    existing = [str(p) for p in outputs.values() if p.exists()]
+    result_outputs = [outputs["account_metrics_csv"], outputs["summary_json"]]
+    existing = [str(p) for p in result_outputs if p.exists()]
     if existing:
         raise FileExistsError(f"Refusing to overwrite frozen outputs: {existing}")
 
     reward_config, baseline, parent_summaries = _parent_contract(config)
     runner, fixed_2r, signals = _read_frozen_events(config)
-    print(f"Frozen runner events: {len(runner)}; generating four target geometries", flush=True)
-    target_paths, path_audit = generate_target_paths(
-        config, reward_config, runner, fixed_2r, signals)
-    outputs["target_paths_csv_gz"].parent.mkdir(parents=True, exist_ok=True)
-    target_paths.to_csv(outputs["target_paths_csv_gz"], index=False,
-                        compression="gzip", float_format="%.12g")
+    target_output = outputs["target_paths_csv_gz"]
+    checkpoint = EXP / "work" / "target_paths.checkpoint.csv.gz"
+    if target_output.is_file():
+        print(f"Resuming from completed target paths: {target_output}", flush=True)
+        target_paths = pd.read_csv(target_output, low_memory=False)
+    elif checkpoint.is_file():
+        print(f"Resuming from target-path checkpoint: {checkpoint}", flush=True)
+        target_paths = pd.read_csv(checkpoint, low_memory=False)
+    else:
+        print(f"Frozen runner events: {len(runner)}; generating four target geometries", flush=True)
+        target_paths = generate_target_paths(
+            config, reward_config, runner, fixed_2r, signals, checkpoint)
+    path_audit = audit_target_paths(target_paths, config, runner, fixed_2r)
+    if not target_output.is_file():
+        target_output.parent.mkdir(parents=True, exist_ok=True)
+        target_paths.to_csv(target_output, index=False,
+                            compression="gzip", float_format="%.12g")
+    if checkpoint.is_file():
+        checkpoint.unlink()
 
     rows = _baseline_metrics(baseline, config).to_dict("records")
     curves: dict[str, tuple[pd.DataFrame, pd.DataFrame]] = {}
@@ -600,8 +626,6 @@ def main(argv=None):
     eligible = dev[dev.apply(wallet.qualifies, axis=1) & dev.trades.ge(100)]
     pick = str(eligible.candidate.iloc[0]) if len(eligible) else BASELINE_CANDIDATE
     best = str(dev.candidate.iloc[0])
-    frame.to_csv(outputs["account_metrics_csv"], index=False)
-
     checks = {}
     for name in sorted({pick, best}):
         if name == BASELINE_CANDIDATE:
@@ -623,6 +647,7 @@ def main(argv=None):
             trades.to_csv(EXP / f"funded_{name}.csv.gz", index=False, compression="gzip")
             equity.to_csv(EXP / f"hourly_{name}.csv.gz", index_label="hour_end_utc")
 
+    frame.to_csv(outputs["account_metrics_csv"], index=False)
     baseline_rows = frame[(frame.candidate.eq(BASELINE_CANDIDATE)) & frame.period.eq("all")]
     summary = {
         "experiment_id": config["experiment_id"],
