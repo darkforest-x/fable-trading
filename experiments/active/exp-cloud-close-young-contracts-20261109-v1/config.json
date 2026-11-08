@@ -1,0 +1,57 @@
+{
+  "id": "exp-cloud-close-young-contracts-20261109-v1",
+  "question": "Among the frozen V1.7 native 12H close opportunities, does selecting contracts with a verifiable exchange listing age from 0 through <90 days change the funded account?",
+  "factor": "At each event's actual entry timestamp, require 0 <= entry_ms - archived_listing_time_ms < 90 days. The age check applies independently to each actual signal and each matched control at its own entry time.",
+  "fixed_strategy": {
+    "entry": "Original V1.7 12H close confirmation, filled at the coincident next H1 open already stored in native paths.",
+    "risk_and_exit": "Original fixed stop and EMA/cloud runner; close 2/3 at the resting 2R target and retain 1/3 in the original runner.",
+    "account": "One shared, fully collateralized 1000 USDT account with 9 equal slots; one position per symbol; original low-prior-ATR entry priority and event-time ordering.",
+    "costs": "Use the frozen paths' maker/taker exit fee class and 2 bp maker / 5 bp taker assumptions; market entry is charged 5 bp. A separate stress adds 5 bp adverse slippage to market fills under the existing wallet implementation.",
+    "capacity": "No leverage, funding, exchange depth, tick-size or lot-size rounding."
+  },
+  "population": {
+    "OKX": {
+      "native_paths": "experiments/active/exp-cloud-close-reward-20261109-v1/paths.csv.gz; 12,707 actual source signal rows and their available matched controls, retaining only existing executed 0R runner and 2R target paths.",
+      "priority": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/signals.csv prior_atr_pct keyed by source_row_number, matching the existing 9-slot V1.7 account priority.",
+      "listing_archive": "experiments/active/exp-ma-morphology-top20-20260922-v1/inputs/raw/instruments.json; exact SWAP instrumentId base ticker, settleCcy=USDT, official listTime milliseconds."
+    },
+    "Binance": {
+      "native_paths": "All 632 original per-contract files under experiments/active/exp-cloud-close-binance-transfer-20261109-v1/work/*/fills.csv.gz, replacing the 43 February-2022-gap contracts with data/research/cloud_close_binance_feb2022_replay/<ticker>/fills.csv.gz.",
+      "listing_archive": "data/kline_preholdout_binance_um15m/exchange_info.json; exact contractType=PERPETUAL, quoteAsset=USDT, marginAsset=USDT symbol and official onboardDate milliseconds.",
+      "screening": "Do not use eligible_at_own_time, the >=10 rankable-contract threshold, or repaired.assembled() to create the age cohorts. Those fields are used only for a smoke reconciliation to the old screened path keys."
+    },
+    "common": "Use only events with an archived listing time and nonnegative age in both the metadata-covered all-age account and the young account. Never infer listing time from the first candle. Exclude rows before the archived listTime/onboardDate as listing/relisting ambiguity."
+  },
+  "comparison": {
+    "arms": [
+      "metadata-covered all-age actual signals (young and >=90d)",
+      "young actual signals (0 to <90d)",
+      "same-age matched-control accounts, each control filtered by its own listing age",
+      "paired actual signals retained only when an independently age-qualified control exists",
+      "separate +5 bp market-fill slippage stress for all-age and young actual signals"
+    ],
+    "periods": {
+      "development": "Through 2024-12-31; report as dev.",
+      "2025": "2025-01-01 through 2025-12-31; trades crossing the boundary are excluded from period trade metrics by wallet.summarize.",
+      "2026": "2026 YTD through each venue's frozen data cutoff.",
+      "full": "Continuous available account history."
+    },
+    "accounting": "Use existing cloud_close_slots / cloud_close_scaleout and cloud_close_reward_account VectorBT cash-sharing adapters; no independent return compounding or per-event re-simulation. Reconcile funded cash PnL with terminal marked NAV."
+  },
+  "archival_limits": [
+    "The OKX instruments file is an archived current-instrument snapshot dated by its 2026-09-22 experiment archive, not a complete delisting history. Four source tickers (CT, ICX, KII, LRC) lack a mapped USDT-swap listTime; five pre-listTime ZEC signal paths and four corresponding control paths are excluded from both arms. These are not reassigned using candle starts.",
+    "The Binance exchangeInfo snapshot serverTime is 2026-08-28T09:36:55.468Z. It does not guarantee inclusion of contracts already delisted before capture; all 632 source-path tickers do map to a USDT perpetual onboardDate in this archive, including settling-status contracts.",
+    "Results are conditional on the archived signal/path universe and archived exchange instrument snapshots. They do not model subsequent delisting, funding, exchange capacity, tick/lot rounding, or live execution."
+  ],
+  "preregistered_outputs": [
+    "account_metrics.csv",
+    "summary.json",
+    "listing_audit.csv.gz",
+    "funded_{venue}_{all_age|young_lt_90d}.csv.gz",
+    "hourly_{venue}_{all_age|young_lt_90d}.csv.gz"
+  ],
+  "commands": [
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_young_contracts --smoke",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_young_contracts"
+  ]
+}
