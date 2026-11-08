@@ -1,0 +1,11 @@
+{
+  "id": "exp-cloud-close-turnover-complete-20261109-v1",
+  "motivation": "After seeing that excluding the retrospective fixed twelve pilot names raised Binance coverage-only wealth, replace those names with an observable liquidity rule and start on a different venue (OKX). The number twelve is taken directly from the pilot, not a searched threshold.",
+  "single_variable": "At least twelve other eligible same-venue contracts must have greater native 30-day USDT traded value before the 12H key opens. Last 60 complete UTC 12H candles, excluding the key. No name exclusion, no threshold or window search.",
+  "missing": "Compare only contracts with valid native quote turnover (OKX history-candles volCcyQuote). For each event, at least 13 historical price-eligible contracts must exist. Admit only if twelve strictly larger known sums prove the rank. If even assigning every missing peer above the candidate cannot reach twelve, prove it belongs to the liquid set. Exclude ambiguous ranks from both the candidate and the matched-coverage baseline. All ties treated as not strictly larger. The original retrospective venue census has survivorship limitations.",
+  "portfolio": "1000U, two thirds at native resting 2R and one third through original cloud, nine funded slots, prior low ATR first. Own clock for signal and control, taker 5bp and resting maker 2bp; 5bp extra per market fill under stress. Funding and capacity omitted.",
+  "validation": "Development through 2024; 2025 and 2026 previously seen. Record baseline, cutoff, controls, stress and annual intervals. Transfer this exact rule to corrected Binance only if OKX dev and full pass the gates and wealth beats the same-coverage parent. No claims of independent future validation.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_turnover_universe --shared",
+  "parent": "exp-cloud-close-turnover-universe-20261109-v1",
+  "input_revision": "Read the shared public OKX price cache identified in each symbol receipt for missing quote volume, in addition to the original REST archive pages. Freeze native public quote turnovers. Accept only OHLC matching the historical decision tape; retain all original rank, eligibility and account rules."
+}

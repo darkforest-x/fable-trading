@@ -1,11 +1,15 @@
 """Select V1.7 12H keys outside the twelve most-traded eligible contracts at that time."""
+import argparse
 import gc
 import gzip
 import json
+import sqlite3
+from contextlib import closing
 
 import numpy as np
 import pandas as pd
 
+from yoyo.evaluation import cloud_allmarket_inputs as raw_inputs
 from yoyo.evaluation import cloud_close_eligibility_repair as repair
 from yoyo.evaluation import cloud_close_leadership as leader
 from yoyo.evaluation import cloud_close_second_reclaim as second
@@ -14,6 +18,7 @@ from yoyo.evaluation import cloud_close_volatility_expansion as market
 
 wallet = thirds.wallet
 EXP = wallet.ROOT/'experiments/active/exp-cloud-close-turnover-universe-20261109-v1'
+COMPLETE = EXP.parent/'exp-cloud-close-turnover-complete-20261109-v1'
 LIMIT = 12
 
 
@@ -27,7 +32,37 @@ def known_at_entry(bars, turnover):
     return total
 
 
-def okx_values(folder, top):
+def shared_quotes(coverage, output):
+    """Snapshot only public candles that supplied the archived 12H quote timeline."""
+    saved = output/'shared_quote_turnover.csv.gz'
+    if saved.is_file():
+        return pd.read_csv(saved,dtype={'symbol':str},float_precision='round_trip')
+    records = []
+    with closing(sqlite3.connect(raw_inputs.CANDLE_CACHE.as_uri()+'?mode=ro',uri=True,timeout=25)) as db:
+        for row in coverage.itertuples():
+            if row.cohort=='top20_reused':
+                continue
+            file = wallet.SOURCE/'inputs'/row.symbol/'bars12h.csv.gz'
+            timeline = pd.read_csv(file,usecols=['time','source'])
+            wanted = set(timeline.loc[timeline.source.eq('shared_OKX_cache_12Hutc'),'time'])
+            if not wanted:
+                continue
+            args = (f'https://www.okx.com|{row.instId}|12Hutc',min(wanted),max(wanted))
+            query = 'SELECT t, raw FROM candles WHERE key=? AND t>=? AND t<=? ORDER BY t'
+            for t,raw in db.execute(query,args):
+                if t not in wanted:
+                    continue
+                bar = json.loads(raw)
+                if len(bar)>=9 and str(bar[8])=='1' and int(bar[0])==t:
+                    records.append((row.symbol,t,*map(float,bar[1:5]),float(bar[7])))
+    frame = pd.DataFrame(records,columns=['symbol','time','open','high','low','close','quote'])
+    if frame.empty or frame.duplicated(['symbol','time']).any():
+        raise ValueError('Unexpected shared 12H candle coverage or duplicate rows')
+    frame.to_csv(saved,index=False)
+    return frame
+
+
+def okx_values(folder, top, supplement=None):
     bars = pd.read_csv(folder/'bars12h.csv.gz',float_precision='round_trip')
     eligibility = leader.trailing_return(bars).notna()
     source = sorted(folder.glob('12Hutc-*.json.gz') if top else (folder/'raw/12Hutc').glob('*.json.gz'))
@@ -35,11 +70,14 @@ def okx_values(folder, top):
     for file in source:
         with gzip.open(file,'rt') as stream:
             rows.extend(row[:9] for row in json.load(stream) if len(row)>=9 and str(row[8])=='1')
-    if not rows:
-        return eligibility,pd.Series(dtype=float)
     candles = pd.DataFrame(rows,columns=['time','open','high','low','close','contracts','base','quote','confirm'])
     cols = ['open','high','low','close','quote']
-    candles = candles[['time',*cols]].apply(pd.to_numeric).drop_duplicates()
+    candles = candles[['time',*cols]].apply(pd.to_numeric)
+    if supplement is not None:
+        candles = pd.concat([candles,supplement[['time',*cols]]],ignore_index=True)
+    candles = candles.drop_duplicates()
+    if candles.empty:
+        return eligibility,pd.Series(dtype=float)
     candles = candles.loc[~candles.time.duplicated(keep=False)].set_index('time').reindex(bars.time)
     same = np.isclose(candles[cols[:4]],bars[cols[:4]],rtol=1e-9,atol=1e-15).all(axis=1)
     valid = same & np.isfinite(candles.quote) & candles.quote.ge(0)
@@ -63,13 +101,15 @@ def rank_table(eligible, traded):
     return state, higher, missing
 
 
-def features(paths):
+def features(paths,output):
     coverage = pd.read_csv(wallet.SOURCE/'input_coverage.csv',dtype={'symbol':str},keep_default_na=False)
+    shared = shared_quotes(coverage,output) if output==COMPLETE else None
+    by_symbol = {} if shared is None else dict(tuple(shared.groupby('symbol')))
     eligible, volume = {}, {}
     for row in coverage.itertuples():
         top = row.cohort=='top20_reused'
         folder = (wallet.TOP if top else wallet.SOURCE)/'inputs'/row.symbol
-        eligible[row.symbol],volume[row.symbol] = okx_values(folder,top)
+        eligible[row.symbol],volume[row.symbol] = okx_values(folder,top,by_symbol.get(row.symbol))
     if len(eligible)!=291:
         raise ValueError('Frozen OKX census mismatch')
     state,higher,missing = rank_table(pd.DataFrame(eligible),pd.DataFrame(volume))
@@ -85,12 +125,15 @@ def features(paths):
 
 
 def main():
-    if (EXP/'summary.json').exists():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--shared',action='store_true',help='Use archived native pages and the shared OKX candle input')
+    output = COMPLETE if parser.parse_args().shared else EXP
+    if (output/'summary.json').exists():
         raise FileExistsError('Frozen turnover study already evaluated')
     paths = thirds.okx_paths()
     repair.check_parent_sets(paths)
-    events = features(paths)
-    events.to_csv(EXP/'event_ranks.csv.gz',index=False)
+    events = features(paths,output)
+    events.to_csv(output/'event_ranks.csv.gz',index=False)
     classified = events[events.state.isin(['inside_top12','outside_top12'])]
     selected = classified[classified.state.eq('outside_top12')]
     real = selected[~selected.is_control]
@@ -107,16 +150,16 @@ def main():
         rows.extend(dict(cohort=name,period=p,**m) for p,m in metrics.items())
         outcomes[name] = metrics
         if name=='outside_top12':
-            trades.to_csv(EXP/'funded.csv.gz')
-            equity.to_csv(EXP/'hourly.csv.gz',index_label='hour_end_utc')
+            trades.to_csv(output/'funded.csv.gz')
+            equity.to_csv(output/'hourly.csv.gz',index_label='hour_end_utc')
         del trades,equity
         gc.collect()
     choice = outcomes['outside_top12']
     summary.update(dev_pass=second.meets(choice['dev']),full_pass=second.meets(choice['all']),
                    wealth_improved=choice['all']['final_usdt']>outcomes['rank_available']['all']['final_usdt'])
     table = pd.DataFrame(rows)
-    table.to_csv(EXP/'account_metrics.csv',index=False)
-    (EXP/'summary.json').write_text(json.dumps(summary,indent=2,allow_nan=False)+'\n')
+    table.to_csv(output/'account_metrics.csv',index=False)
+    (output/'summary.json').write_text(json.dumps(summary,indent=2,allow_nan=False)+'\n')
     print(table[table.period.eq('all')][['cohort','final_usdt','trades','win_pct','payoff_usdt','dd_bound_pct']].to_string(index=False))
 
 
