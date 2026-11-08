@@ -442,11 +442,13 @@ def run() -> None:
         raise ValueError("The original ALT 24h spacing stream must stay at 239 / 25 events")
 
     # Produce fee-only all-history 5m marks and validate against the frozen account row.
-    btc_all_quotes, all_price_receipt = prices.load_full_ohlc(
-        "BTCUSDT", min(baseline.decision.min(), new_events.decision.min(), alt_all.decision.min()),
-        max(baseline.exit_time.max(), new_events.exit_time.max(), alt_all.exit_time.max()),
-        repair_missing=False,
-    )
+    required_quote_start = min(baseline.decision.min(), new_events.decision.min(), alt_all.decision.min())
+    required_quote_end = max(baseline.exit_time.max(), new_events.exit_time.max(), alt_all.exit_time.max())
+    if quotes_all.index.min() > required_quote_start or quotes_all.index.max() < required_quote_end:
+        raise ValueError("The already-loaded BTC quote frame does not cover every historical admitted interval")
+    # Reuse the frame used for causal EMA features instead of rescanning the same
+    # registered multi-year source files a second time.
+    btc_all_quotes, all_price_receipt = quotes_all, price_receipt
     partials = case_cache.set_index("entry_time")
     baseline_fee_paths = risk.btc_marks(baseline, btc_all_quotes, partials)
     new_fee_paths = risk.btc_marks(new_events, btc_all_quotes, partials)
@@ -633,7 +635,8 @@ def run() -> None:
         baseline_first_exit_time=baseline_target.first_exit_time,
         baseline_first_exit_price=target_fill.first_exit_price,
         baseline_runner_exit_price=2 * target_fill.exit_vwap - target_fill.first_exit_price,
-        baseline_exit_vwap=baseline_target.exit_vwap,
+        baseline_exit_vwap=target_fill.exit_vwap,
+        baseline_fee_points=target_fill.exit_vwap - baseline_target.entry_open - baseline_target.net_points,
         baseline_exit_time=baseline_target.exit_time,
         baseline_net_points=baseline_target.net_points,
         baseline_funding_points=baseline_target.funding_points,
