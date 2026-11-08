@@ -24,6 +24,10 @@ def main():
              'cadence','stop_price','exit_reason','gap_flag']
     frame=pd.read_csv(PARENT/'paths.csv.gz',usecols=columns,dtype={'symbol':str},keep_default_na=False)
     paths=frame[frame.cadence.eq(rule)&frame.entry_status.eq('executed')].copy()
+    for name in ['entry_ms','exit_bar_ms','source_row_number']:
+        paths[name]=pd.to_numeric(paths[name],errors='raise').astype('int64')
+    for name in ['entry_price','exit_price','stop_price','exit_fee_rate','tp_r']:
+        paths[name]=pd.to_numeric(paths[name],errors='raise')
     if not paths.groupby('event_id').size().eq(2).all() or set(paths.tp_r)!={0.,2.}:
         raise ValueError('Target and runner coverage differs')
     src=pd.read_csv(wallet.SOURCE/'signals.csv',usecols=['prior_atr_pct'])
