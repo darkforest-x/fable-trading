@@ -67,8 +67,8 @@ def admit(events, slots):
     return events.loc[selected.index].assign(slot=selected.slot), rejected
 
 
-def prepare(events, slots, start=START, end=END):
-    selected, skips = admit(events, slots)
+def prepare(events, slots, start=START, end=END, *, assigned=None):
+    selected, skips = admit(events, slots) if assigned is None else assigned
     count = (end - start) // HOUR
     # Stages in every hour: openings, exits observed at open, remaining exits at end.
     shape = (count, 3, slots)
@@ -138,7 +138,7 @@ def pre_segment(c):
 
 
 @njit(cache=True)
-def account_order(c, nav, actions, prices, fees, market_slip, exposure):
+def account_order(c, nav, actions, prices, fees, market_slip, exposure, weights, reservation):
     action = actions[c.i, c.col]
     if action == 0:
         return NoOrder
@@ -152,7 +152,12 @@ def account_order(c, nav, actions, prices, fees, market_slip, exposure):
                            slippage=slip, lock_cash=True, allow_partial=False, raise_reject=True)
     if c.position_now != 0:
         raise ValueError('Position collision')
-    budget = min(nav * exposure / c.group_len, c.free_cash_now)
+    # Simultaneous child orders share a single collateral reservation.
+    leg = c.col % len(weights)
+    if leg == 0:
+        capacity = c.group_len // len(weights)
+        reservation[0] = min(nav * exposure / capacity, c.free_cash_now)
+    budget = reservation[0] * weights[leg]
     if budget < 1.e-8:
         return NoOrder
     # Leave a rounding margin on the short and long collateral requirements.
@@ -161,10 +166,13 @@ def account_order(c, nav, actions, prices, fees, market_slip, exposure):
                        lock_cash=True, allow_partial=False, raise_reject=True)
 
 
-def account(data, slip=0., exposure=1.):
+def account(data, slip=0., exposure=1., weights=(1.,)):
     actions = data['actions']
+    weights = np.asarray(weights, dtype=float)
+    if np.any(weights<=0) or not np.isclose(weights.sum(), 1) or actions.shape[1]%len(weights):
+        raise ValueError('Invalid leg weights')
     pf = vbt.Portfolio.from_order_func(data['marks'], account_order, actions, data['prices'],
-        data['fees'], slip, exposure, pre_segment_func_nb=pre_segment, cash_sharing=True,
+        data['fees'], slip, exposure, weights, np.zeros(1), pre_segment_func_nb=pre_segment, cash_sharing=True,
         group_by=True, init_cash=1000., max_orders=int(np.count_nonzero(actions))+1,
         fill_pos_record=False)
     orders = pf.orders.records

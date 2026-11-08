@@ -1,0 +1,8 @@
+{
+  "id":"exp-cloud-close-scaleout-20261109-v1",
+  "hypothesis":"Bank part of each position at 2R while keeping a runner for outsize winners. One independent change relative to the original V1.7 untargeted runner. Both legs open at the next hourly open after 12H confirmation, with the same initial stop and cloud-cross rule. Taking profit on the first leg never moves the second leg's stop.",
+  "single_variable":"Fraction closed at a 2R limit: 0, 0.25, 0.50, 0.75, 1.0. Endpoints reused from the full-target study. No admission filters, same shared-cash twelve-position portfolio; each pair reserves its weighted collateral simultaneously; keep a symbol/slot busy until the whole position closes.",
+  "selection":"Development data ending 2024-12-31, same conservative 35% DD, >=30% fee-net wins, >=2.5 actual equal-notional net payoff and >=100 closed development trades. Select highest development growth among qualifying configurations; otherwise show unmodified runner plus descriptively highest development growth. No later-year choice.",
+  "costs":"OKX maker 2bp at resting target; taker 5bp at entries, protective/time exits. Fee-net, no funding or order-book capacity; stress 5bp per market fill.",
+  "command":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_scaleout"
+}
