@@ -493,6 +493,9 @@ def frequency_review() -> dict[str, Any]:
         (period, hours) for period in periods for hours in (6, 12, 24)
     } or not joined.alt_legs.equals(joined.selected):
         raise ValueError("Incomplete or inconsistent ALT spacing comparison")
+    events = pd.read_csv(SPACING / "events.csv", parse_dates=["decision"])
+    extra = events.loc[events.year.eq(2026) & ~events.selected_24h & (events.selected_6h | events.selected_12h)].copy()
+    extra["entry_bjt"] = extra.decision.dt.tz_convert("Asia/Shanghai").dt.strftime("%m-%d %H:%M")
     marks = pd.read_csv(SPACING / "marks_2026.csv")
     checked = joined[joined.period.eq("2026_to_2026-10-27")].merge(marks, on="minimum_gap_hours", validate="one_to_one")
     if len(checked) != 3 or not checked.alt_legs.equals(checked.events):
@@ -508,6 +511,7 @@ def frequency_review() -> dict[str, Any]:
     return {
         "spacing": clean(joined.drop(columns="selected").sort_values("minimum_gap_hours", ascending=False).to_dict("records")),
         "higher_frequency_2026": clean(high_frequency.to_dict("records")),
+        "extra_baskets_2026": clean(extra[["entry_bjt", "member_count", "net_pct", "selected_6h", "selected_12h"]].to_dict("records")),
         "marks_2026": clean(marks[["minimum_gap_hours", "events", "fee_marked_dd_pct", "funded_events",
                                    "funded_growth_pct", "funded_marked_dd_pct"]].to_dict("records")),
     }
