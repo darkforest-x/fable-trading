@@ -1,0 +1,23 @@
+{
+  "id": "exp-monday-1618-cvd-divergence-20261108-v1",
+  "native": "experiments/active/exp-monday-limit-reclaim-20261024-v1/symbols",
+  "days": "data/crypto/market/kline_binance_um1m_touchdays_20261027",
+  "major_months": "data/research/ma6_knot_1m_20261011/downloads",
+  "ticks": "data/crypto/market/aggtrades_binance_um_touchbars_20261029",
+  "population": "All Binance UM symbol/NY-week/side first-touch signal fills in the existing unscreened near_monday_edge/m60 ledger. Omit known invalid source events (BAD_EVENTS); log them. No score, capacity or hindsight selection. Win = original closed net_bp > 0, OHLC path, maker 2bp on entry/TP, taker 5bp on other exits, zero slippage/funding. These fills span the original ledger only.",
+  "reference": "15m and 1h UTC native clock, most recent strict same-side price pivot in prior 20 completed bars, confirmed by two fully closed bars on either side before the current timeframe bar. Compare first traded touch to first traded minute of the reference pivot price extreme. Require contiguous 22 completed timeframe bars and continuous minutes through touch.",
+  "flow": "Base contract quantity delta = 2*taker_buy_volume - volume. Difference of two CVD values uses only intervening flow, without a session reset. For both endpoint minutes the unobserved partial flow lies in [-sell_volume, buy_volume]; exact ordered aggTrade prefix at current hit when the whole touch minute reconciles. Use the full hit minute only to bound possibilities retrospectively; all feasible categories retained. Do not condition trade execution on observability.",
+  "price": "Use the actual first touch tick/open if available or logically bounded first-cross price (between outward limit and minute extreme). Long regular = lower price and higher CVD vs prior low; short mirrors. Absorption candidate = price holds/retests prior level within 0.25 times the 14 closed bars' mean true range while CVD passes its prior value in the adverse direction. This opposite divergence is not proof of passive absorption; no footprint queue claim. Neither is the clean comparator. Equal CVD belongs to neither. This is a study convention, not a reproduction of Tia's own entry rules.",
+  "pre": "Fully observable sensitivity uses the resting limit versus prior same-side pivot, CVD at the close of its first extreme minute versus CVD ending immediately before the touch minute. Timeframe remains 15m/1h.",
+  "split": "NY week years 2020-2024 / 2025 / 2026. Full cohort, both sides and 5000 NY-week cluster resamples. No fitted parameter or strategy replay.",
+  "source_docs": [
+    "https://github.com/binance/binance-public-data#futures",
+    "https://developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Aggregate-Trades-List"
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "bad_events": [
+    "BABYUSDT:2026-06-01:-1",
+    "DASHUSDT:2020-04-13:+1"
+  ]
+}
