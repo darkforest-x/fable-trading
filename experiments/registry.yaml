@@ -121,6 +121,21 @@ experiments:
     canonical_report: experiments/active/exp-monday-breadth-extension-20261108-v1/results.csv
     notes: Frozen parent births, chronological development selection, actual funding on 2026 events, monthly matched controls, sensitivity and complete alternatives. Known historical evaluation, no live eligibility.
 
+  - experiment_id: exp-monday-breadth-btc-admission-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6d74ad262b8c062ed4752da5947ac363193f546d
+    status: complete
+    question: 'Does moving the ordinary BTC completed-4h-close <= EMA20 veto before its original six-day reservation recover otherwise blocked entries without worsening the unchanged ALT 24h-spacing sleeve?'
+    single_variable: 'Only move the ordinary BTC EMA20 veto from after the original six-day frequency reservation to immediately before it. Preserve the exact causal breadth rule, original per-epoch frequency admissions, case-first six-day BTC reservation and half-target/half-six-day case exit, ordinary BTC 144h VectorBT exit, ALT 6h exit and 24h spacing, 50/50 non-rebalanced sleeves, and fee assumptions.'
+    result: 'Case-first BTC entries increase 159 to 192 (+60 new, 27 removed); 2026 BTC 23 to 29 (+12, 6 removed), ALT remains 239 full-history / 25 in 2026. Independent 50/50 fee-only full-history growth falls +466.60% to +234.73% (close-only settlement DD 24.07% to 21.88%; 5m price-mark DD 26.75% to 25.57%). With 2026 realized funding, growth falls +42.03% to +17.33% (settlement DD 3.54% to 10.66%; 5m marked DD 6.59% to 13.10%). Only 24/54 candidate 2026 entries have an exact asset+clock reused control (edge +1.396pp, monthly p=.156); added entries are unmatched. The new 2026-09-12 ordinary booking reserves through 09-18 and blocks the baseline 09-15 19:20 case whose net funded result was +10,005.75 points.'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-breadth-btc-admission-20261108-v1/summary.csv
+    notes: 'Reuses the native VectorBT outcomes for all 177 standalone ordinary admissions and native policy4 case fills for all 37 candidate case entries. 2026 BTC realized funding and five-minute price coverage are complete. Retrospective; no new random controls for added clocks, and no paper or live account was changed.'
+
   - experiment_id: exp-monday-breadth-frequency-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 161a4e494081149a771cf7a0cfcf30e43c953a40
