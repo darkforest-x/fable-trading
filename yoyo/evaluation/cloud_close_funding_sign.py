@@ -1,4 +1,8 @@
-"""Use the previous settled funding rate to screen a frozen 12-contract Binance V1.7 panel."""
+"""Retrospective funding settlement diagnostic on a fixed Binance panel.
+
+Monthly archives date settlements, but do not record when an observer first
+saw the rate. The timestamp-based comparison cannot establish a causal input.
+"""
 import json
 
 import numpy as np
@@ -13,6 +17,7 @@ EXP = wallet.ROOT/'experiments/active/exp-cloud-close-funding-sign-20261109-v1'
 ARCHIVE = EXP.parent/'exp-monday-1618-flow-20261023-v1'
 BEGIN = pd.Timestamp('2022-09-01',tz='UTC').value//1_000_000
 END = repaired.venue.END
+SOURCE_TIMING = 'Settlement timestamps only. First-seen publication is unavailable; the one-minute separation does not establish historical feature availability. Retrospective diagnostic only.'
 
 
 def asof(ticker, clocks):
@@ -51,7 +56,8 @@ def main():
     filtered = pools[pools.event_id.isin(events.loc[events.admitted,'event_id'])]
     signal = filtered[~filtered.is_control]
     controls = filtered[filtered.is_control & filtered.parent_id.isin(signal.parent_id)]
-    summary = dict(month_archives=months,actual_missing=int(events[~events.is_control].known_rate.isna().sum()),
+    summary = dict(source_timing=SOURCE_TIMING,causal_feature_verified=False,
+                   month_archives=months,actual_missing=int(events[~events.is_control].known_rate.isna().sum()),
                    eligible=len(real)//2,filtered=len(signal)//2,eligible_pairs=len(controls)//2,
                    real_by_side=real[real.tp_r.eq(0)].side.value_counts().to_dict(),
                    filtered_by_side=signal[signal.tp_r.eq(0)].side.value_counts().to_dict())
