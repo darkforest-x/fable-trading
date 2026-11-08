@@ -1,0 +1,16 @@
+{
+  "source_events": "experiments/active/exp-monday-pa-followthrough-20261108-v1/events.csv.gz",
+  "archive": "exp-monday-12h-partial-recovery-20261026-v1",
+  "factor": "On the last complete UTC 4h bar at/before the first touch 5m OPEN, compare close with 6 four-hour bars earlier. Aligned = up on lower first touch, down on upper first touch; flat separate. Record magnitude / simple mean of 14 closed 4H true ranges; normalization never affects the sign.",
+  "cohort": "All archived OKX BTC/ETH first touches in 147 NY weeks from 2024-01-01 to 2026-10-19. Do not require a particular wick or any later confirmation. Exclude unknown or flat trend, four-hour labels crossing the NY weekly reset or UTC 2026-01-01 period boundary.",
+  "primary": "Lower first touches: fraction of 4h closes strictly above the touch-bar close. Report by coin, early 2024-25, 2026 and all. Upper-side mirror and pooled are supporting. Both groups measured from touch 5m close, never count the touch bar move as future.",
+  "uncertainty": "Within-period NY week cluster percentile bootstrap, 10000 draws, seed 20261108, require at least two contributing weeks per arm. Judge consistent positive effect in the two periods/coins and the later lower-side positive 95% interval; no threshold search.",
+  "case_mix": "Secondary overlap-weighted within-stratum group difference, strata asset/side/touch close inside or outside/previous 4h ATR14 above or below 2% of price/period. Weight each common cell n0*n1/(n0+n1). No exact original paper score in the frozen two-asset OKX cohort. Do not impute missing market context.",
+  "existing_fills": "Secondary only: link original OKX 12h partial-recovery native positions and same-event matched random means by asset/week/side plus original entry bar. Report closed count and original boundary-marked net R per group. R=1% of entry notional. Exclude time-mismatched fills; no new positions or account simulation.",
+  "split": "2026-01-01T00:00:00Z",
+  "atr_pct_split": 2,
+  "seed": 20261108,
+  "draws": 10000,
+  "training_eligible": false,
+  "production_eligible": false
+}
