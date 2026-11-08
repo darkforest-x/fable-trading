@@ -392,9 +392,17 @@ def _weekly_key_audit(symbol: str, anchor: dict, bars4: pd.DataFrame,
         status = "no_closed_4h_candidate"
     else:
         status = "complete_no_key"
-    return {"symbol": symbol, "week": anchor["week"], "first_key": first,
-            "week_status": status, "scan_through_ms": decision,
-            "candidate_4h_slots_scanned": (max(0, (decision - int(anchor["end_ms"])) // STEP_4H))}
+    first = first or {}
+    return {"symbol": symbol, "week": anchor["week"],
+            "first_key_id": first.get("id"), "first_key_open_ms": first.get("signal_open_ms"),
+            "first_key_confirm_ms": first.get("confirmed_ms"), "first_key_side": first.get("side"),
+            "first_key_entry": first.get("entry"), "first_key_stop": first.get("stop"),
+            "first_key_target": first.get("target"), "week_status": status,
+            "scan_through_ms": decision,
+            "candidate_4h_slots_scanned": len(range(
+                ((int(anchor["end_ms"]) + STEP_4H - 1) // STEP_4H) * STEP_4H,
+                ((min(decision, int(anchor["expires_ms"])) - STEP_4H) // STEP_4H) * STEP_4H + 1,
+                STEP_4H))}
 
 
 def _build_anchor_and_4h(symbol: str, parent_weeks: pd.DataFrame, bars1: pd.DataFrame,
@@ -513,7 +521,19 @@ def generate(config_path: Path) -> dict:
             or float(config["fees"]["resting_maker_per_fill"]) != MAKER):
         raise ValueError("OKX fees differ from the owner-confirmed frozen V1.7 costs")
     output_paths = {k: ROOT / v for k, v in config["outputs"].items()}
-    if any(p.exists() for p in output_paths.values()):
+    dynamic_outputs = [output_paths["funded"].with_name(f"funded_{name}.csv.gz")
+                      for name in ("baseline_90d_actual", "baseline_90d_control",
+                                   "baseline_90d_paired_actual", "baseline_90d_paired_control",
+                                   "agreement_4h_actual", "agreement_4h_paired_actual",
+                                   "agreement_4h_paired_control", "baseline_90d_actual_slip5bp",
+                                   "agreement_4h_actual_slip5bp")]
+    dynamic_outputs += [output_paths["equity"].with_name(f"hourly_{name}.csv.gz")
+                        for name in ("baseline_90d_actual", "baseline_90d_control",
+                                     "baseline_90d_paired_actual", "baseline_90d_paired_control",
+                                     "agreement_4h_actual", "agreement_4h_paired_actual",
+                                     "agreement_4h_paired_control", "baseline_90d_actual_slip5bp",
+                                     "agreement_4h_actual_slip5bp")]
+    if any(p.exists() for p in [*output_paths.values(), *dynamic_outputs]):
         raise FileExistsError("Refusing to overwrite existing OKX agreement outputs")
 
     signals, catalog, joined = _read_parent(config)
@@ -524,85 +544,89 @@ def generate(config_path: Path) -> dict:
     if not events.groupby("event_id").tp_r.apply(
             lambda x: set(x.astype(float)) == {0.0, 2.0}).all():
         raise ValueError("Frozen OKX path runner must retain matching no-TP and 2R exits")
-    events = events.merge(signals[["source_row_number", "week", "prior_atr_pct"]],
-                          on="source_row_number", suffixes=("", "_signal"),
-                          validate="many_to_one")
-    if not events.week.eq(events.week_signal).all():
+    signal_meta = signals[["source_row_number", "symbol", "week", "side", "prior_atr_pct",
+                           "reference_entry", "reference_stop", "opposite_target",
+                           "key_open_ms", "confirmation_ms"]].rename(
+                               columns={"symbol": "parent_symbol", "week": "parent_week",
+                                        "side": "parent_side", "key_open_ms": "parent_key_open_ms",
+                                        "confirmation_ms": "parent_confirmation_ms"})
+    events = events.merge(signal_meta, on="source_row_number", validate="many_to_one")
+    if (not events.week.eq(events.parent_week).all()
+            or not events.symbol.eq(events.parent_symbol).all()
+            or not events.side.eq(events.parent_side).all()):
         raise ValueError("Parent week mismatch between path ledger and frozen signal CSV")
-    events = events.drop(columns="week_signal")
+    event_catalog = catalog.copy()
+    event_catalog["source_row_number"] = pd.to_numeric(
+        event_catalog.source_row_number, errors="coerce").astype("int64")
+    event_catalog = event_catalog.merge(signal_meta, on="source_row_number",
+                                        validate="many_to_one")
+    if (not event_catalog.week.eq(event_catalog.parent_week).all()
+            or not event_catalog.symbol.eq(event_catalog.parent_symbol).all()
+            or not event_catalog.side.eq(event_catalog.parent_side).all()):
+        raise ValueError("Actual/control identity differs from its frozen parent")
     score = leadership.leadership()
-    events = _score_90d(events, score)
+    event_catalog = _score_90d(event_catalog, score)
+    event_catalog = _priority(event_catalog, signals.set_index("source_row_number").prior_atr_pct)
     events = _priority(events, signals.set_index("source_row_number").prior_atr_pct)
 
     by_symbol_paths = actual_catalog.drop_duplicates("symbol").set_index("symbol")
-    bars12_by_symbol: dict[str, pd.DataFrame] = {}
-    inputs_by_symbol = {}
-    for symbol, row in by_symbol_paths.iterrows():
-        p12 = ROOT / str(row.source_path_12h)
-        p1 = ROOT / str(row.source_path_1h)
-        bars12 = engine._load_bars(p12, "12h")
-        bars1 = engine._load_bars(p1, "1h")
-        bars12_by_symbol[str(symbol)] = bars12
-        inputs_by_symbol[str(symbol)] = {"bars12": bars12, "bars1": bars1,
-                                         "path12": str(p12.relative_to(ROOT)),
-                                         "path1": str(p1.relative_to(ROOT))}
-    parent_validation = _verify_12h_parent(joined, actual_catalog, bars12_by_symbol)
-
     parents_by_symbol = {str(sym): frame.sort_values("source_row_number")
                          for sym, frame in signals.groupby("symbol", sort=False)}
-    anchors_by_symbol: dict[str, dict[str, dict]] = {}
-    weekly_first: list[dict] = []
-    weekly_audit = {}
-    for symbol in sorted(parents_by_symbol):
-        info = inputs_by_symbol[symbol]
-        anchors, weekly, prepared = _build_anchor_and_4h(
-            symbol, parents_by_symbol[symbol], info["bars1"], config)
-        anchors_by_symbol[symbol] = anchors
-        weekly_first.extend(weekly.to_dict("records"))
-        weekly_audit[symbol] = prepared["audit"]
-        prepared["bars4"] = None
-        prepared["points4"] = None
-
-    # Rebuild each symbol's small 4H matrices once for event-clock checks. Keep
-    # the event screen as the audit source; no 4H-conditioned price is invented.
-    screened_rows = []
-    event_catalog = catalog.copy()
-    event_catalog["source_row_number"] = pd.to_numeric(event_catalog.source_row_number,
-                                                        errors="coerce").astype("Int64")
-    event_catalog = event_catalog.merge(
-        signals[["source_row_number", "week", "prior_atr_pct", "reference_entry",
-                 "reference_stop", "opposite_target", "key_open_ms", "confirmation_ms"]],
-        on="source_row_number", suffixes=("", "_signal"), validate="many_to_one")
-    event_catalog = event_catalog.drop(columns=["week_signal", "key_open_ms_signal",
-                                                "confirmation_ms_signal"], errors="ignore")
+    screened_rows, weekly_first = [], []
+    symbol_audits = {}
+    validation_counts = Counter()
+    validation_max_error = Counter()
     eligibility_counts = Counter()
-    for symbol, group in event_catalog.groupby("symbol", sort=False):
-        anchor_map = anchors_by_symbol[str(symbol)]
-        bars4, _ = _aggregate_complete_4h(inputs_by_symbol[str(symbol)]["bars1"])
-        points4 = _ema_points(bars4, STEP_4H)
+    for symbol in sorted(parents_by_symbol):
+        path_row = by_symbol_paths.loc[symbol]
+        p12 = ROOT / str(path_row.source_path_12h)
+        p1 = ROOT / str(path_row.source_path_1h)
+        bars12 = engine._load_bars(p12, "12h")
+        bars1 = engine._load_bars(p1, "1h")
+        symbol_joined = joined[joined.symbol_signal.eq(symbol)]
+        checked = _verify_12h_parent(symbol_joined, actual_catalog[actual_catalog.symbol.eq(symbol)],
+                                     {symbol: bars12})
+        validation_counts.update(checked["ohlc_ema_fields_compared"])
+        for name, error in checked["maximum_absolute_error"].items():
+            validation_max_error[name] = max(validation_max_error[name], error)
+        anchors, weekly, prepared = _build_anchor_and_4h(
+            symbol, parents_by_symbol[symbol], bars1, config)
+        symbol_audits[symbol] = prepared["audit"]
+        weekly_first.extend(weekly.to_dict("records"))
+        group = event_catalog[event_catalog.symbol.eq(symbol)]
         for event in group.to_dict("records"):
             base = {k: event.get(k) for k in (
                 "event_id", "parent_id", "source_row_number", "symbol", "week", "side",
                 "is_control", "entry_status", "entry_ms", "key_open_ms", "confirmation_ms",
                 "entry_price", "stop_price", "risk_distance", "control_confirmation_ms",
-                "control_12h_open_ms", "prior_atr_pct")}
-            coverage = bool(event.get("eligible_90d", False))
-            if not coverage:
+                "control_12h_open_ms", "prior_atr_pct", "coverage_rank_90d")}
+            coverage = bool(event["eligible_90d"])
+            if event.get("entry_status") != "executed" or pd.isna(event.get("entry_ms")):
+                result = {"screen_reason": "unmatched_or_unexecutable_control",
+                          "four_h_signal_ms": None, "four_h_confirm_ms": None,
+                          "four_h_side": None}
+            elif not coverage:
                 result = {"screen_reason": "outside_90d_coverage", "four_h_signal_ms": None,
                           "four_h_confirm_ms": None, "four_h_side": None}
-            elif str(event["week"]) not in anchor_map:
+            elif str(event["week"]) not in anchors:
                 result = {"screen_reason": "missing_parent_week_anchor", "four_h_signal_ms": None,
                           "four_h_confirm_ms": None, "four_h_side": None}
             else:
-                result = _first_4h_by_event(event, weekly_audit.get(str(symbol), {}).get(
-                    "_unused", {}), bars4, points4, anchor_map[str(event["week"])])
-            # Fill summary will replace the placeholder call path below.
+                result = _first_4h_by_event(event, prepared["bars4"], prepared["points4"],
+                                            anchors[str(event["week"])])
             base.update(result)
             base["eligible_90d"] = coverage
             base["eligible_4h_agreement"] = (
                 coverage and result.get("screen_reason") == "passes_4h_agreement")
             screened_rows.append(base)
             eligibility_counts[str(result["screen_reason"])] += 1
+        del bars12, bars1, prepared, anchors
+        gc.collect()
+
+    parent_validation = {"event_count": int(len(joined)),
+                         "ohlc_ema_fields_compared": dict(validation_counts),
+                         "maximum_absolute_error": dict(validation_max_error),
+                         "strict_side_wick_close_rule": "all frozen 12H events passed"}
 
     # Account cohorts require executed parent paths. The event screen retains
     # explicit unmatched controls above; they never enter a funded account.
@@ -611,6 +635,9 @@ def generate(config_path: Path) -> dict:
         raise AssertionError("The event screen must emit one row per parent/control event")
     executed = events[events.entry_status.eq("executed")].copy()
     flags = screen.set_index("event_id")[["eligible_90d", "eligible_4h_agreement"]]
+    if not executed.event_id.isin(flags.index).all():
+        raise ValueError("Executed parent paths missing from event screen")
+    executed["eligible_90d"] = executed.event_id.map(flags.eligible_90d).fillna(False).astype(bool)
     executed["eligible_4h_agreement"] = executed.event_id.map(
         flags.eligible_4h_agreement).fillna(False).astype(bool)
     real_90 = executed[(~executed.is_control) & executed.eligible_90d]
