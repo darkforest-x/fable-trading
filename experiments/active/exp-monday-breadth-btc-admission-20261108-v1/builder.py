@@ -9,10 +9,16 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+# Running this experiment by file path puts only its own directory on sys.path.
+ROOT = Path(__file__).resolve().parents[3]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from yoyo.evaluation import monday_breadth_extension_btc as trend
 from yoyo.evaluation import monday_breadth_extension_partial_marks as partial_marks
@@ -24,7 +30,6 @@ from yoyo.evaluation import monday_breadth_opt_selection as selection
 from yoyo.evaluation.monday_breadth_opt_match_exits import paired_month_p
 
 
-ROOT = Path(__file__).resolve().parents[3]
 OUT = Path(__file__).resolve().parent
 FREQ = ROOT / "experiments/active/exp-monday-breadth-frequency-20261108-v1"
 OPT = ROOT / "experiments/active/exp-monday-breadth-optimization-20261108-v1"
