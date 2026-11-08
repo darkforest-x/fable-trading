@@ -22,6 +22,30 @@ def month_archive(symbol,month):
     return h.sort_index()
 
 
+def interval_charge(r):
+    start,end=r.decision,r.selected_exit_time
+    month=start.strftime('%Y-%m')
+    official=month_archive(r.symbol,month)
+    lo,hi=official.index.searchsorted(start,side='left')-1,official.index.searchsorted(end,side='right')
+    if start.strftime('%Y-%m')!=end.strftime('%Y-%m') or lo<0 or hi>=len(official):
+        return None
+    bracket=official.iloc[lo:hi+1]
+    gaps=bracket.index.to_series().diff().dt.total_seconds().div(3600).iloc[1:]
+    if not np.allclose(gaps,bracket.funding_interval_hours.iloc[1:],rtol=0,atol=1e-6):
+        return None
+    observed=f.rates(r.symbol,months=(month,),local_only=True).loc[start:end]
+    settled=official.loc[start:end]
+    if not observed.index.equals(settled.index):raise ValueError('Archived clocks disagree')
+    np.testing.assert_allclose(observed.realized_rate,settled.last_funding_rate)
+    cost=observed.realized_rate*observed.mark_price
+    if cost.isna().any():raise ValueError('Unobserved funding mark')
+    boundary=cost.index.isin([start,end])
+    cost.loc[boundary]=cost.loc[boundary].clip(lower=0)
+    charged=100*cost.sum()/r.entry_open_6h
+    return dict(symbol=r.symbol,decision=start,exit_time=end,official_settlements=len(settled),
+                current_interval_hours=bracket.funding_interval_hours.iloc[-1],funding_cost_pct=charged)
+
+
 def run():
     d=pd.read_parquet(EXP/'alt/member_strategy_returns.parquet').query('epoch==3 and strategy=="baseline_6h"').copy()
     # Preserve the exact thirteen event/member pairs flagged by the original
@@ -33,27 +57,10 @@ def run():
         candidates |= pd.MultiIndex.from_frame(d[['symbol','decision']]).isin(pd.MultiIndex.from_frame(flagged))
     repaired=[]
     for i,r in d[candidates].iterrows():
-        start,end=r.decision,r.selected_exit_time
-        month=start.strftime('%Y-%m')
-        official=month_archive(r.symbol,month)
-        lo,hi=official.index.searchsorted(start,side='left')-1,official.index.searchsorted(end,side='right')
-        if start.strftime('%Y-%m')!=end.strftime('%Y-%m') or lo<0 or hi>=len(official):
-            raise ValueError(f'Review incomplete month at {r.symbol} {start}')
-        bracket=official.iloc[lo:hi+1]
-        gaps=bracket.index.to_series().diff().dt.total_seconds().div(3600).iloc[1:]
-        np.testing.assert_allclose(gaps,bracket.funding_interval_hours.iloc[1:],rtol=0,atol=1e-6)
-        observed=f.rates(r.symbol,months=(month,),local_only=True).loc[start:end]
-        settled=official.loc[start:end]
-        if not observed.index.equals(settled.index):raise ValueError('Archived clocks disagree')
-        np.testing.assert_allclose(observed.realized_rate,settled.last_funding_rate)
-        cost=observed.realized_rate*observed.mark_price
-        if cost.isna().any():raise ValueError('Unobserved funding mark')
-        boundary=cost.index.isin([start,end])
-        cost.loc[boundary]=cost.loc[boundary].clip(lower=0)
-        charged=100*cost.sum()/r.entry_open_6h
-        d.at[i,'selected_funded_net_pct']=r.selected_net_pct-charged
-        repaired.append(dict(symbol=r.symbol,decision=start,exit_time=end,official_settlements=len(settled),
-                             current_interval_hours=bracket.funding_interval_hours.iloc[-1],funding_cost_pct=charged))
+        proof=interval_charge(r)
+        if proof is None:raise ValueError(f'Unresolved baseline funding for {r.symbol}')
+        d.at[i,'selected_funded_net_pct']=r.selected_net_pct-proof['funding_cost_pct']
+        repaired.append(proof)
     if d.selected_funded_net_pct.isna().any():raise ValueError('Missing member outcome')
     check=d.groupby('decision',as_index=False).agg(verified_funded_pct=('selected_funded_net_pct','mean'),members=('symbol','size'))
     ref=pd.read_parquet(PARENT/'audit/fixed/all_rule_and_account_events.parquet').query('epoch==3 and candidate_id=="freq36_ALT"')
@@ -62,6 +69,17 @@ def run():
     np.testing.assert_allclose(check.verified_funded_pct,check.funded_pct,atol=1e-6)
     check.to_csv(EXP/'risk/alt_6h_funding_reconciliation.csv',index=False)
     if repaired:pd.DataFrame(repaired).to_csv(audit_path,index=False)
+    members=pd.read_parquet(EXP/'alt/member_strategy_returns.parquet').query('epoch==3').copy()
+    for _,group in members[members.selected_funded_net_pct.isna()].groupby(['symbol','decision','selected_exit_time']):
+        try:
+            proof=interval_charge(group.iloc[0])
+        except FileNotFoundError:
+            proof=None
+        if proof is not None:
+            members.loc[group.index,'selected_funded_net_pct']=group.selected_net_pct-proof['funding_cost_pct']
+    scores=members.groupby(['strategy','decision']).selected_funded_net_pct.agg(['count','size','mean'])
+    scores['funded_net_pct']=scores['mean'].where(scores['count'].eq(scores['size']))
+    scores.drop(columns='mean').to_csv(EXP/'risk/alt_policy_verified_events_2026.csv')
 
 
 if __name__=='__main__':

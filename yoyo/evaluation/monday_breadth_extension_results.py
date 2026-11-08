@@ -82,15 +82,15 @@ def run():
     equity.loc[ii,'monthly_p']=ctrl.p_month
     equity.loc[ii,'sept_btc_points']=read('partial/periods.csv').query('period=="3" and exit_policy=="half_then_6d"').partial_sept_net_points.item()
     # A matched-event effect is per position notional, independent of the capital fraction used.
-    ev=read('alt/event_results.csv.gz')
+    ev=read('risk/alt_policy_verified_events_2026.csv')
     controls=read('alt/control_paired_events.csv')
     chosen=read('alt/selection.csv').set_index('strategy')
-    for rule,g in ev[ev.epoch.eq(3)].groupby('strategy'):
-        qualified=g[g.funding_member_coverage_pct.ge(99.999)&g.funded_net_pct.notna()].sort_values('decision')
+    for rule,g in ev.groupby('strategy'):
+        qualified=g[g.funded_net_pct.notna()].sort_values('decision')
         full=len(qualified)==len(g)
         paired=controls[(controls.strategy==rule)&controls.basis.eq('funded_net')&controls.eligible_80pct].copy()
         q=qualified.funded_net_pct
-        rows.append(pd.DataFrame([dict(family='ALT_exit',rule=rule,source='alt/event_results.csv.gz',events=len(g),
+        rows.append(pd.DataFrame([dict(family='ALT_exit',rule=rule,source='risk/alt_policy_verified_events_2026.csv',events=len(g),
             funded_n=len(q),funded_win_pct=100*q.gt(0).mean(),funded_mean_pct=q.mean(),
             funded_growth_pct=100*((1+q/100).prod()-1) if full else np.nan,
             stressed_growth_pct=100*((1+(q-.2)/100).prod()-1) if full else np.nan,matched_events=len(paired),
