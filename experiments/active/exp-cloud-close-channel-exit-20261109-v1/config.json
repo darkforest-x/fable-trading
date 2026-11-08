@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-cloud-close-channel-exit-20261109-v1",
+  "question": "Within the frozen 11,780-event OKX 12H first-entry universe, does a strict prior-channel close breakout (10 or 20 completed 12H bars) as the only trend-exit change improve the nine-slot 2R scale-out account when 2/3 is closed at 2R and the remaining position follows the same trend exit?",
+  "single_variable": "Trend exit only: frozen V1.7 EMA intrabar reversal versus the first adverse channel close on the preceding 10 or 20 complete native UTC12H bars. Stop, target, entry time, priority, account capacity and fees are fixed.",
+  "population": {
+    "signals_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/signals.csv",
+    "parent_paths": "experiments/active/exp-cloud-close-reward-20261109-v1/paths.csv.gz",
+    "parent_path_config": "experiments/active/exp-cloud-close-reward-20261109-v1/paths_config.json",
+    "leadership_source": "yoyo.evaluation.cloud_close_leadership.leadership(), computed from measured 90-day native-12H ranks with non-null rank and at least 10 cross-sectional members",
+    "rank_filter": "Keep a path only when its exact (entry_ms,symbol) reindexes to a non-null measured rank. Apply the same entry-time rule to real signals and controls, then keep controls only when their real parent remains eligible.",
+    "expected_real_events": 11780,
+    "expected_matched_control_events": 10816,
+    "identity": "parent_id=signal-row-{source_row_number:05d}; source_row_number is the 1-based signals.csv data-row ordinal. Validate path symbol/side and signal/control suffix against that source row.",
+    "rank_window": "Previous 180 contiguous native UTC12H returns, with the key candle excluded as in cloud_close_leadership.trailing_return.",
+    "control": "Reuse the frozen same-symbol, same-New-York-week, same-side, EMA-aligned, prior-ATR-matched controls; preserve parent_id. Apply the non-null measured-rank filter at each control's own entry timestamp.",
+    "lookahead_filter": false
+  },
+  "frozen_account": {
+    "first_entry_only": true,
+    "initial_cash_usdt": 1000.0,
+    "slots": 9,
+    "fraction_at_2r": 0.6666666666666666,
+    "priority": "entry_ms ascending, low prior_atr_pct ascending, then frozen CRC32(symbol), symbol and event_id ties",
+    "priority_source": "signals.csv prior_atr_pct indexed by source_row_number; controls inherit their parent row value",
+    "entry": "Frozen exact H1 open at the completed UTC12H confirmation timestamp.",
+    "scale_out": "Original resting 2R limit closes 2/3 at maker fee. The remaining 1/3 stays open until the same strategy's protected stop or trend exit.",
+    "account_engine": "Reuse cloud_close_slots.run -> cloud_close_scaleout -> cloud_close_reward_account; one shared-cash VectorBT account. Reuse the repaired frozen OKX first-entry baseline from exp-cloud-close-eligibility-repair-20261109-v1/thirds/account_metrics.csv; it uses the same non-null rank-filtered parent roster, low-prior-ATR ordering, 9 slots and 2/3 allocation.",
+    "fees_per_fill": {"taker": 0.0005, "resting_maker": 0.0002},
+    "market_slippage_stress_per_market_fill": 0.0005
+  },
+  "channel_exit": {
+    "candidate_lookbacks_completed_utc12h": [10, 20],
+    "long": "At a completed native 12H close, exit when close is strictly below the minimum low of the preceding N complete native 12H bars; the current bar is excluded.",
+    "short": "At a completed native 12H close, exit when close is strictly above the maximum high of the preceding N complete native 12H bars; the current bar is excluded.",
+    "execution": "At the first observed H1 open whose open timestamp is at or after that 12H close. A channel close at the same timestamp as entry is not a post-entry exit; the existing callback's entry-row guard keeps it from closing on the entry fill.",
+    "implementation": "For each symbol and direction, build a causal q[:,5] adverse sentinel with q[:,4]=NaN, then call cloud_close_reward_paths._simulate_symbol and its unchanged VectorBT _order_func. Do not implement a second fill callback or price path.",
+    "fixed_stop": "Keep the frozen absolute touched-extension stop on both scale-out legs.",
+    "native_2r_limit": "Keep the original VectorBT resting 2R target and maker fill on the target leg.",
+    "gap_and_stale": "Keep q[:,6] unchanged. The original callback's unexpected H1-gap and stale-12H exits retain precedence over channel, stop and 2R processing.",
+    "safe_path": "Cap each channel simulation at the earliest existing gap/stale boundary or encoded channel close using _safe_path_end. Any series_tail_close must occur at the physical final H1 bar only. Preserve actual native tail settlement.",
+    "post_entry_rule": "A channel close timestamp equal to the event entry_ms is not eligible to exit a newly opened position; only later completed 12H closes can exit it.",
+    "fees": {"market_exit_taker": 0.0005, "resting_2r_maker": 0.0002}
+  },
+  "selection": {
+    "periods": ["dev", "2025", "2026", "all"],
+    "development_cutoff_utc_exclusive": "2025-01-01T00:00:00Z",
+    "dev_gates": {"minimum_closed_trades": 100, "minimum_win_pct": 30.0, "minimum_equal_notional_payoff": 2.5, "minimum_cash_payoff": 2.5, "maximum_conservative_dd_bound_pct": 35.0},
+    "all_period_gates": {"minimum_win_pct": 30.0, "minimum_equal_notional_payoff": 2.5, "minimum_cash_payoff": 2.5, "maximum_conservative_dd_bound_pct": 35.0},
+    "pick": "Among channel variants that pass the development gates and all-period guardrails, select the highest development funded-account multiple. If none qualify, keep the original EMA-exit account. Report each period's gates separately.",
+    "checks": "For every candidate passing development gates, run the parent-paired real subset, its matched-control account, and adverse 5bp market-fill slippage using the same 2/3 account runner."
+  },
+  "execution": {
+    "framework": "Local VectorBT 1.2.0 Portfolio.from_order_func via the frozen reward-path callback",
+    "runtime": "/Users/zhangzc/.local/bin/vectorbt-python",
+    "event_batch_size": 24,
+    "mini_symbols": 12,
+    "no_formal_run_in_builder_turn": true,
+    "mini_sample_command": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_channel_exit --mini-sample",
+    "generation_command": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_channel_exit",
+    "submit_builder_before_generation": true
+  },
+  "outputs": {
+    "paths_csv_gz": "experiments/active/exp-cloud-close-channel-exit-20261109-v1/paths.csv.gz",
+    "paths_audit_json": "experiments/active/exp-cloud-close-channel-exit-20261109-v1/paths_audit.json",
+    "account_metrics_csv": "experiments/active/exp-cloud-close-channel-exit-20261109-v1/account_metrics.csv",
+    "summary_json": "experiments/active/exp-cloud-close-channel-exit-20261109-v1/summary.json",
+    "funded_template": "experiments/active/exp-cloud-close-channel-exit-20261109-v1/funded_<lookback>.csv.gz",
+    "equity_template": "experiments/active/exp-cloud-close-channel-exit-20261109-v1/hourly_<lookback>.csv.gz",
+    "funded": "experiments/active/exp-cloud-close-channel-exit-20261109-v1/funded_<mode>.csv.gz",
+    "equity": "experiments/active/exp-cloud-close-channel-exit-20261109-v1/hourly_<mode>.csv.gz"
+  }
+}
