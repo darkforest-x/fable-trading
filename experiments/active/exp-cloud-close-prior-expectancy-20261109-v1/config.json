@@ -1,0 +1,10 @@
+{
+  "id": "exp-cloud-close-prior-expectancy-20261109-v1",
+  "question": "Does the realized payoff history of this particular asset and side identify V1.7 entry opportunities that retain a recurring advantage?",
+  "single_variable": "Admission based on the rolling mean net equal-notional return on the most recent 12 fully observed original signals on the same venue, contract and side (minimum eight). Include coverage-only, or require rolling historical net mean >=0, >=0.25%, or >=0.50%. Compare against original regardless of history.",
+  "thresholds": {"coverage": null, "nonnegative": 0.0, "quarter_pct": 0.0025, "half_pct": 0.005},
+  "clock": "Track every shadow signal that satisfied the parent 90-day eligibility, even when the account was full. Only the completion of the slower leg reports a result, at the end of its exit hour. Accept only outcomes whose reporting time is strictly before this entry. Order simultaneous reports by deterministic parent ID. Pending outcomes never enter the average. Matched controls require the parent and their own side/contract/time to pass, using the same earlier real signals; never learn from control results.",
+  "parent": "OKX, shared 1000U, nine slots, low prior ATR priority, 75% at 2 original R / 25% on the original cloud. Existing VectorBT native fee-net executions. Compare a frozen development choice on independent Binance native 12H data using the same trading rule and its own past results.",
+  "selection": "Maximize pre-2025 OKX ending NAV among >=100 positions, >=30% net wins, both realized payoff ratios >=2.5, conservative hourly drawdown bound <=35%. Transfer a selected new arm without tuning. 5bp per market fill, 2bp per resting fill, adverse +5bp stress on selected new arm with same shadow signal stream. Later years and both transferable datasets previously inspected. Funding, depth and contract rounding unavailable.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_prior_expectancy"
+}
