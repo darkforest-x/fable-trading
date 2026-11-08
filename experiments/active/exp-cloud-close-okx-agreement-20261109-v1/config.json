@@ -38,7 +38,7 @@
     "periods": ["all", "dev", "2025", "2026", "all_through_2026-09-23", "2026_through_2026-09-23", "post_2026-09-23"],
     "metrics": ["final_usdt", "win_pct", "payoff", "payoff_usdt", "dd_mark_pct", "dd_bound_pct", "trades"],
     "checks": ["same-scope paired controls", "actual-only 5bp market-fill slippage stress"],
-    "binance_reference": "exp-cloud-close-agreement-split-20261109-v1/account_metrics.csv, fraction=0.50, through 2026-09-23"
+    "binance_reference": "exp-cloud-close-binance-gap-repair-20261109-v1/account_metrics.csv, policy=agree4h_0.5; earlier local Binance files remain historical references"
   },
   "outputs": {
     "event_screen": "experiments/active/exp-cloud-close-okx-agreement-20261109-v1/event_screen.csv.gz",

@@ -35,6 +35,7 @@ ROOT = wallet.ROOT
 EXP = ROOT / "experiments/active/exp-cloud-close-okx-agreement-20261109-v1"
 BINANCE_SPLIT = ROOT / "experiments/active/exp-cloud-close-agreement-split-20261109-v1"
 BINANCE_LOWER = ROOT / "experiments/active/exp-cloud-close-lower-agreement-20261109-v1"
+BINANCE_REPAIR = ROOT / "experiments/active/exp-cloud-close-binance-gap-repair-20261109-v1"
 SIGNALS_PATH = wallet.SOURCE / "signals.csv"
 PARENT_PATHS_PATH = wallet.EXP / "paths.csv.gz"
 HOUR_MS = wallet.HOUR
@@ -511,6 +512,22 @@ def _period_rows(arm: str, cohort: str, metrics: dict) -> list[dict]:
             for period, row in metrics.items()]
 
 
+def _binance_reference() -> dict:
+    table = pd.read_csv(BINANCE_REPAIR / "account_metrics.csv")
+    selected = table[(table.policy == "agree4h_0.5") & table.period.isin(["all", "dev"])]
+    if set(selected.period) != {"all", "dev"} or selected.duplicated("period").any():
+        raise ValueError("Corrected Binance 4H agreement reference rows are missing or ambiguous")
+    fields = ("final_usdt", "win_pct", "payoff", "payoff_usdt", "dd_mark_pct",
+              "dd_bound_pct", "trades")
+    return {"source": str(BINANCE_REPAIR.relative_to(ROOT)),
+            "policy": "agree4h_0.5", "partial_2r_fraction": 0.5,
+            "all": selected[selected.period.eq("all")].iloc[0][list(fields)].to_dict(),
+            "dev": selected[selected.period.eq("dev")].iloc[0][list(fields)].to_dict(),
+            "historical_local_sources": [str(BINANCE_SPLIT.relative_to(ROOT)),
+                                         str(BINANCE_LOWER.relative_to(ROOT))],
+            "comparison_note": "Corrected Binance full account is the cross-market reference. Earlier local Binance CSVs are retained as historical methods/results; OKX baseline and filter are independently funded on the same 90d OKX universe. Compare the common through-2026-09-23 interval and report OKX post-cutoff separately."}
+
+
 def generate(config_path: Path) -> dict:
     config = json.loads(config_path.read_text(encoding="utf-8"))
     if (float(config["account"]["partial_2r_fraction"]) != FRACTION_2R
@@ -692,6 +709,10 @@ def generate(config_path: Path) -> dict:
     baseline_actual = account_results["baseline_90d_actual"]["metrics"]
     agreement_actual = account_results["agreement_4h_actual"]["metrics"]
     screen_counts = screen.screen_reason.value_counts(dropna=False).to_dict()
+    anchor_source_counts = Counter()
+    for info in symbol_audits.values():
+        anchor_source_counts.update(info["monday_anchor_source_counts"])
+    binance_reference = _binance_reference()
     audit = {
         "experiment_id": config["id"],
         "generator": str(Path(__file__).relative_to(ROOT)),
@@ -731,19 +752,14 @@ def generate(config_path: Path) -> dict:
             "4h_control_reasons": screen[screen.is_control & screen.eligible_90d].screen_reason.value_counts().to_dict(),
             "event_screen_reasons_all": screen_counts,
             "weekly_first_key_status": dict(Counter(r["week_status"] for r in weekly_first)),
-            "anchor_sources": dict(Counter(r["source"] for rows in anchors_by_symbol.values() for r in rows.values())),
+            "anchor_sources": dict(anchor_source_counts),
             "account_opportunities_and_funded_positions": {
                 k: {"opportunities": v["opportunities"],
                     "funded_positions": int(v["metrics"].get("all", {}).get("trades", 0))}
                 for k, v in account_results.items()},
         },
         "binance_reference": {
-            "split_source": str(BINANCE_SPLIT.relative_to(ROOT)),
-            "lower_agreement_source": str(BINANCE_LOWER.relative_to(ROOT)),
-            "fraction": 0.5,
-            "reported_source_metrics": {"ending_usdt": 11907.201120814,"win_pct":37.44075829383886,
-                                         "payoff_usdt":2.339428,"dd_bound_pct":34.058352},
-            "comparison_note": "Cross-market reference only; OKX baseline/filter are both independently funded on the same 90d OKX universe and same 50% account. Binance full period ends 2026-09-23; OKX additionally reports an aligned through-2026-09-23 period and post-cutoff extension.",
+            **binance_reference,
         },
         "account_metrics": {"baseline_90d_actual": baseline_actual,
                             "agreement_4h_actual": agreement_actual},
