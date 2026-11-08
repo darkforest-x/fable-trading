@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-archive-cohort-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "f86452cf3f"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Add all 29 names absent from the original 632-name Binance universe and present in the registered 503-name historical archive. Independently fund the unchanged partial and trend-efficiency rule from 1000U with native contract prices and the same shared nine slots."
+    result: "661 archived contracts, 723 new contract-months across the 29 additions (679 reused), 637 additional eligible keys; 83 funded from additions. 2020 ADA 17 keys and 8056 native 1H quotes match across source resolutions. Partial shrinks from 6508.24 to 4685.01; efficient trend from 8772.84 to 6281.41, 1635 funded, 32.17% win, cash payoff 2.565, observed 35.283% drawdown vs upper 35.920% and hence fails the risk gate. The original 632-only risk qualification does not generalize to the enlarged sample. 11 total internal hours missing in AERGO after official daily recovery; archive incomplete for the wider all-time universe."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-archive-cohort-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41288564-79af-8117-ac38-ec880e598b54."
+
   - experiment_id: exp-cloud-close-young-contracts-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "808d483567"
