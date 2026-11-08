@@ -1,0 +1,8 @@
+{
+  "id":"exp-cloud-close-stop-distance-20261109-v1",
+  "question":"If the stop is too close to a wick or unnecessarily wide, changing its distance from the touched extension could improve actual account payoff. Can it close the terminal-wealth gap on the development-selected 9-slot low-prior-ATR scale-out?",
+  "single_variable":"Multiply only the original fixed extension-to-stop percentage by [0,0.25,0.5,1,2,3,5]. Original touched 1.618, 12H confirmation, exact entry-open time, EMA reversal and original absolute 2R limit held fixed even if stop changes. 0 means stop at the touched extension. Both legs use the new protective stop. If the opening quote is already outside, enter and exit at that open and pay both market fees. Research only.",
+  "control":"Same already-matched timestamps; transfer each parent's new entry-to-stop percentage to the subsequent control. Preserve the original control's TP price, same fee classes and pooled account. New paths via VectorBT only.",
+  "selection":"After freezing the parent dev-selected ranking, compare each stop change independently. Highest development growth under unchanged risk/win/payoff and >=100 completed trades, fallback parent. Report later years, market slip, matched controls. This is sequential exploration using previously seen historical years.",
+  "command":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_stop_distance"
+}
