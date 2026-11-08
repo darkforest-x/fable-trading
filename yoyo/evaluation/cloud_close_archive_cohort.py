@@ -135,7 +135,11 @@ def pool(extra):
             ranks.update(map(int,f['rank_times']))
         if ticker in repaired or ticker in extra:
             parts.append(pd.read_csv(work/'fills.csv.gz',dtype={'symbol':str},keep_default_na=False,float_precision='round_trip'))
-    all_paths=pd.concat(parts,ignore_index=True)
+    all_paths=pd.concat([part for part in parts if not part.empty],ignore_index=True)
+    for field in ('is_control','eligible_at_own_time'):
+        if not all_paths[field].isin([True,False]).all():
+            raise ValueError(f'Unexpected indicator in native paths: {field}')
+        all_paths[field] = all_paths[field].astype(bool)
     if all_paths.duplicated(['event_id','tp_r']).any() or not all_paths.groupby('event_id').size().eq(2).all():
         raise ValueError('Native runner/limit pairs incomplete in enlarged eligible universe')
     valid=all_paths.eligible_at_own_time & all_paths.entry_ms.map(ranks).fillna(0).ge(10)
