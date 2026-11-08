@@ -9,10 +9,13 @@ No scanner subscriptions, execution context or signal/notification writes.
 Sources: https://www.okx.com/docs-v5/en/#order-book-trading-market-data
 """
 from collections import OrderedDict
+from concurrent.futures import Future, TimeoutError
 from copy import deepcopy
 from threading import BoundedSemaphore, Lock
+from time import monotonic
 
 from fastapi import HTTPException, Query
+from fastapi.responses import JSONResponse
 
 from yoyo.data.candle_hub import STEPS, validate
 from .monday_fib import week_window
@@ -25,6 +28,10 @@ HISTORY_PAGE_SIZE = 300
 # still enforces the OKX request budget.
 HISTORY_SLOTS = 3
 SLOT_WAIT_SECONDS = 10
+# Replaying views can request the same closed page together; only successful
+# exact-key pages are reused for this brief overlap window.
+HISTORY_PAGE_CACHE_SECONDS = 2
+HISTORY_PAGE_CACHE_SIZE = 12
 
 
 class ChartHistory:
@@ -34,6 +41,8 @@ class ChartHistory:
         self.slot_wait = SLOT_WAIT_SECONDS
         self.lock = Lock()
         self.windows = OrderedDict()
+        self.pages = OrderedDict()
+        self.page_inflight = {}
 
     def trade_window(self, symbol, period, entry_ms, exit_ms):
         """Read a bounded public OHLC window around a saved paper fill.
@@ -94,14 +103,8 @@ class ChartHistory:
         finally:
             self.slots.release()
 
-    def read(self, symbol, period, before_ms):
-        client = self.candles.client
-        bar = native_bar(period)
-        now, step = client.clock(), step_ms(period)
-        before_ms = min(open_time(before_ms, period), open_time(now, period))
-        value = dict(symbol=symbol, bar=period, native_bar=bar, source='OKX',
-                     before_ms=before_ms, candles=[], next_before_ms=before_ms,
-                     has_more=True, state='ready', error=None)
+    def _read_page(self, client, symbol, period, before_ms, bar, now, value):
+        """Fetch one page while holding a history slot; failures stay retryable."""
         if not self.slots.acquire(timeout=self.slot_wait):
             return dict(value, state='retry', error='历史 K 线正在读取，请稍后重试')
         try:
@@ -117,13 +120,66 @@ class ChartHistory:
             bars = display_candles(rows, period)
             if not bars:
                 return dict(value, state='retry', error='历史 K 线不完整，可重试')
-            cursor = bars[0]['time']
-            return dict(value, candles=bars, next_before_ms=cursor,
+            return dict(value, candles=bars, next_before_ms=bars[0]['time'],
                         has_more=True, state='ready')
         except Exception:
             return dict(value, state='retry', error='历史 K 线读取失败，可重试')
         finally:
             self.slots.release()
+
+    def read(self, symbol, period, before_ms):
+        client = self.candles.client
+        bar = native_bar(period)
+        now = client.clock()
+        before_ms = min(open_time(before_ms, period), open_time(now, period))
+        value = dict(symbol=symbol, bar=period, native_bar=bar, source='OKX',
+                     before_ms=before_ms, candles=[], next_before_ms=before_ms,
+                     has_more=True, state='ready', error=None)
+        key = (symbol, period, before_ms)
+        cached = None
+        leader = False
+        with self.lock:
+            page = self.pages.get(key)
+            if page is not None:
+                expires, cached = page
+                if expires <= monotonic():
+                    del self.pages[key]
+                    cached = None
+                else:
+                    self.pages.move_to_end(key)
+            if cached is None:
+                future = self.page_inflight.get(key)
+                if future is None:
+                    future = Future()
+                    self.page_inflight[key] = future
+                    leader = True
+        if cached is not None:
+            return deepcopy(cached)
+        if not leader:
+            try:
+                return deepcopy(future.result(timeout=self.slot_wait))
+            except TimeoutError:
+                return dict(value, state='retry', error='历史 K 线正在读取，请稍后重试')
+
+        result = None
+        shared_result = None
+        try:
+            result = self._read_page(client, symbol, period, before_ms, bar, now, value)
+            shared_result = deepcopy(result)
+            if result['state'] == 'ready':
+                with self.lock:
+                    self.pages[key] = (monotonic()+HISTORY_PAGE_CACHE_SECONDS, shared_result)
+                    self.pages.move_to_end(key)
+                    while len(self.pages) > HISTORY_PAGE_CACHE_SIZE:
+                        self.pages.popitem(last=False)
+            return result
+        finally:
+            with self.lock:
+                active = self.page_inflight.pop(key, None)
+                if active is future and not future.done():
+                    if shared_result is None:
+                        shared_result = deepcopy(dict(value, state='retry', error='历史 K 线读取失败，可重试'))
+                    future.set_result(shared_result)
 
     def weeks(self, symbol, from_ms, to_ms):
         """At most three weeks per request; cursor continues without a total cap."""
@@ -163,7 +219,7 @@ def install(app, candles, levels):
     def history(symbol: str = Query(..., pattern=symbol_pattern),
                 period: str = Query('15m', pattern='^('+'|'.join(PERIODS)+')$'),
                 before_ms: int = Query(..., gt=0)):
-        return service.read(symbol, period, before_ms)
+        return JSONResponse(service.read(symbol, period, before_ms))
 
     @app.get('/api/monday-fib/weekly-levels')
     def weekly_levels(symbol: str = Query(..., pattern=symbol_pattern),

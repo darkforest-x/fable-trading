@@ -370,8 +370,22 @@
     // Follow its anchor instead of dismissing the just-opened calendar.
     el('.rs-reading').addEventListener('scroll',()=>positionCalendar(),{passive:true});
     function positionPicker(){const r=trigger.getBoundingClientRect();picker.style.left=Math.max(8,Math.min(r.left,innerWidth-picker.offsetWidth-8))+'px';picker.style.top=Math.max(8,Math.min(r.bottom+6,innerHeight-picker.offsetHeight-8))+'px';}
-    function sync(){trigger.querySelector('b').textContent=label(getTrack());picker.querySelector('[data-more-current]').textContent=layout.more.includes(getTrack())?'当前：'+label(getTrack()):'';picker.querySelectorAll('[data-strategy-select]').forEach(b=>{const selected=b.dataset.strategySelect===getTrack();b.setAttribute('aria-pressed',String(selected));b.closest('[data-account-row]').dataset.selected=String(selected);});picker.querySelectorAll('[data-account-pnl]').forEach(n=>{const v=pnlView(getPnl?.(n.dataset.accountPnl));n.textContent=v.text;n.className=v.tone;n.title=v.title;});}
-    trigger.addEventListener('click',()=>{if(picker.matches(':popover-open'))picker.hidePopover();else{setMore(false);orderStatus.textContent='拖动把手排序或移入常用';sync();picker.showPopover();accountList.scrollTop=0;positionPicker();(layout.main.includes(getTrack())?picker.querySelector(`[data-strategy-select="${getTrack()}"]`):moreToggle).focus({preventScroll:true});}});
+    function sync(opening=false){
+      const track=getTrack(),name=label(track),labelNode=trigger.querySelector('b');
+      if(labelNode.textContent!==name)labelNode.textContent=name;
+      if(!opening&&!picker.matches(':popover-open'))return;
+      picker.querySelector('[data-more-current]').textContent=layout.more.includes(track)?'当前：'+name:'';
+      for(const button of picker.querySelectorAll('[data-strategy-select]')){
+        const selected=String(button.dataset.strategySelect===track);
+        button.setAttribute('aria-pressed',selected);
+        button.closest('[data-account-row]').dataset.selected=selected;
+      }
+      for(const node of picker.querySelectorAll('[data-account-pnl]')){
+        const value=pnlView(getPnl?.(node.dataset.accountPnl));
+        node.textContent=value.text;node.className=value.tone;node.title=value.title;
+      }
+    }
+    trigger.addEventListener('click',()=>{if(picker.matches(':popover-open'))picker.hidePopover();else{setMore(false);orderStatus.textContent='拖动把手排序或移入常用';sync(true);picker.showPopover();accountList.scrollTop=0;positionPicker();(layout.main.includes(getTrack())?picker.querySelector(`[data-strategy-select="${getTrack()}"]`):moreToggle).focus({preventScroll:true});}});
     picker.addEventListener('toggle',()=>{const shown=picker.matches(':popover-open');trigger.setAttribute('aria-expanded',String(shown));root.classList.toggle('rs-picker-webkit',shown&&/AppleWebKit\//.test(navigator.userAgent)&&!/(Chrome|Chromium|Edg)\//.test(navigator.userAgent));if(!shown)finishDrag(true);});
     picker.addEventListener('keydown',event=>{
       if(event.key==='Escape'){event.stopPropagation();if(drag){event.preventDefault();finishDrag(true);}return;}

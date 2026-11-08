@@ -39,3 +39,15 @@ test('cached averages equal full causal recalculation after every display histor
  const first=check(data);data.at(-1).close+=1;check(data);
  assert.notEqual(first.at(-1).close,data.at(-1).close,'later updates cannot mutate previous outputs');
 });
+test('certified tail patches equal full recalculation for revisions, appends, gaps and invalid closes',()=>{
+ const sync=require('../../yoyo/monitor/static/chart-style.js').createAverages(),data=rows.slice(0,125).map(r=>({...r})),step=300000;
+ const assertFull=()=>assert.deepEqual(data.map((row,i)=>({...row,...sync.valueAt(i)})),averages(data,step));
+ sync(data,step);assertFull();
+ data.at(-1).close+=12.5;sync.patchTail(data,step,data.length-1);assertFull();
+ data.push({time:data.at(-1).time+step,close:200});sync.patchTail(data,step,data.length-1);assertFull();
+ data.at(-2).time+=step;data.at(-1).time+=step;assert.equal(sync.patchTail(data,step,data.length-2),null,'a gap repair before the tip requires a full recalculation');sync(data,step);assertFull();
+ data.at(-1).close=null;sync.patchTail(data,step,data.length-1);assertFull();
+ const history=data.map(r=>({...r}));history[20].close+=1;
+ assert.equal(sync.patchTail(history,step,20),null,'a historical correction requires the deterministic full path');
+ assert.deepEqual(sync(history,step),averages(history,step));
+});

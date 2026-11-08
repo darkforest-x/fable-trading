@@ -25,8 +25,38 @@
   function lower(rows,time){let a=0,b=rows.length;while(a<b){const m=(a+b)>>>1;if(rows[m].time<time)a=m+1;else b=m;}return a;}
   class DataIndex {
     constructor(rows,step){
-      this.rows=rows;this.step=step;this.vol=[0];this.missing=[0];this.gaps=[0];
-      rows.forEach((r,i)=>{const valid=finite(r.volume)&&r.volume>=0;this.vol.push(this.vol[i]+(valid?r.volume:0));this.missing.push(this.missing[i]+Number(!valid));this.gaps.push(this.gaps[i]+Number(i>0&&r.time-rows[i-1].time!==step));});
+      this.step=step;this.rebuild(rows);
+    }
+    rebuild(rows){
+      this.rows=rows;this.vol=[0];this.missing=[0];this.gaps=[0];this.times=[];this.volumes=[];this.states=[];
+      rows.forEach((r,i)=>this.append(r,i));
+    }
+    append(r,i){
+      const valid=finite(r.volume)&&r.volume>=0;this.times.push(r.time);this.volumes.push(r.volume);this.states.push([r.confirmed,r.live]);
+      this.vol.push(this.vol[i]+(valid?r.volume:0));this.missing.push(this.missing[i]+Number(!valid));this.gaps.push(this.gaps[i]+Number(i>0&&r.time-this.rows[i-1].time!==this.step));
+    }
+    rebuildFrom(rows,start){
+      this.rows=rows;this.vol.length=start+1;this.missing.length=start+1;this.gaps.length=start+1;
+      this.times.length=start;this.volumes.length=start;this.states.length=start;
+      for(let i=start;i<rows.length;i++)this.append(rows[i],i);
+    }
+    update(rows,changedRows){
+      const oldLength=this.rows.length,nextLength=rows.length;
+      if(nextLength<oldLength){this.rebuild(rows);return true;}
+      const certified=Array.isArray(changedRows),indices=certified?changedRows:Array.from({length:Math.min(oldLength,nextLength)},(_,i)=>i);
+      let start=Infinity,paintChanged=nextLength!==oldLength;
+      for(const i of indices){
+        if(i<0||i>=nextLength)continue;
+        if(i>=oldLength){start=Math.min(start,oldLength);paintChanged=true;continue;}
+        const row=rows[i],timeVolumeChanged=!Object.is(this.times[i],row.time)||!Object.is(this.volumes[i],row.volume),state=[row.confirmed,row.live];
+        if(timeVolumeChanged){start=Math.min(start,i);paintChanged=true;}
+        else if(!Object.is(this.states[i][0],state[0])||!Object.is(this.states[i][1],state[1]))paintChanged=true;
+        this.states[i]=state;
+      }
+      if(nextLength>oldLength)start=Math.min(start,oldLength);
+      this.rows=rows;
+      if(Number.isFinite(start))this.rebuildFrom(rows,start);
+      return paintChanged;
     }
     timeAt(i){const rows=this.rows,n=rows.length;if(!n||!finite(i))return null;
       if(i<=0)return rows[0].time+i*this.step;if(i>=n-1)return rows[n-1].time+(i-n+1)*this.step;
@@ -69,13 +99,13 @@
     strip.innerHTML='<div><b data-cd-title></b><span data-cd-hint role="status"></span></div><button type="button" data-cd-action="cancel">退出绘图</button>';
     const announcement=document.createElement('span');announcement.className='cd-sr';announcement.setAttribute('aria-live','polite');strip.append(announcement);root.append(strip);
     const state=()=>({mode,selected,items:copy(items),draft:copy(draft),symbol,warning});
-    const publish=()=>{
+    const publish=(invalidate=true)=>{
       const active=mode!=='select',choice=items.find(d=>d.id===selected);
       const text=choice?.type==='measure'?measurementText(index.measure(...choice.points),volumeUnit).join('；'):'';
       const key=JSON.stringify([mode,!!gesture,selected,draft?.points.length,!!index.rows.length,items.length,undo.length,warning,text]);
       // Candle ticks still invalidate the canvas primitive, but unchanged tool
       // chrome must not rebuild text nodes or invalidate the page's layout.
-      primitive?.requestUpdate?.();
+      if(invalidate)primitive?.requestUpdate?.();
       if(key===published)return;published=key;
       root.classList.toggle('is-drawing',active||!!gesture);strip.hidden=!active&&!choice&&!warning;
       root.querySelectorAll('[data-cd-tool]').forEach(b=>{b.disabled=!index.rows.length;b.setAttribute('aria-pressed',String(b.dataset.cdTool===mode));});
@@ -209,8 +239,10 @@
         if(memory.has(symbol)){const cached=memory.get(symbol);items=copy(cached.items);blocked=cached.blocked;warning=cached.warning;}else try{items=decode(window.localStorage.getItem(PREFIX+symbol));}catch{items=[];warning='本地绘图暂不可读取；新增绘图仅本页保留，原内容未改';blocked=true;}
       }
       const step=({'1m':60,'2m':120,'3m':180,'5m':300,'15m':900,'30m':1800,'1H':3600,'4H':14400,'12H':43200,'1D':86400})[data.bar]||900;
-      if(index.step!==step){cancel();}
-      index=new DataIndex(next.rows,step);publish();
+      let changed=true;
+      if(index.step!==step){cancel();index=new DataIndex(next.rows,step);}
+      else changed=next.rowDelta?.changedRows?index.update(next.rows,next.rowDelta.changedRows):index.update(next.rows);
+      publish(changed);
     }
     function detach(){if(!instance)return;cancel();instance.series.detachPrimitive?.(primitive);instance.drawingLayer=null;instance=null;primitive=null;index=new DataIndex([],900);publish();}
     function paint({context:ctx,mediaSize:s}){

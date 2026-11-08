@@ -64,7 +64,15 @@
     root.addEventListener('keydown',e=>{if(hidden&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();setHidden(false);}},true);
     return {get hidden(){return hidden;},reset(){gesture.reset();suppressUntil=0;setHidden(false,false);}};
   }
-  const api={createGesture,bind};
+  // Reveal the active timeframe without moving the chart or its ancestor page.
+  function revealControl(button){
+    const group=button?.parentElement;
+    if(!group||!group.clientWidth||group.scrollWidth<=group.clientWidth)return;
+    const item=button.getBoundingClientRect(),bounds=group.getBoundingClientRect();
+    if(item.left<bounds.left)group.scrollLeft+=item.left-bounds.left;
+    else if(item.right>bounds.right)group.scrollLeft+=item.right-bounds.right;
+  }
+  const api={createGesture,bind,revealControl};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   else window.SpikeChartFocus=api;
 })();

@@ -150,6 +150,81 @@ def test_half_day_history_uses_utc_native_pages_and_aligned_cursor():
     assert client.calls[-1][1]['bar'] == '12Hutc'
 
 
+def test_history_page_cache_is_short_lived_and_returns_isolated_payload(monkeypatch):
+    from yoyo.monitor import monday_chart_history
+    from yoyo.monitor.monday_chart_history import HISTORY_PAGE_CACHE_SECONDS
+    clock = [10.0]
+    monkeypatch.setattr(monday_chart_history, 'monotonic', lambda: clock[0])
+    history, client = service()
+    first = history.read('BTC-USDT-SWAP', '15m', NOW)
+    assert first['state'] == 'ready' and len(first['candles']) == 300
+    calls = len(client.calls)
+    first['candles'][0]['close'] = -1
+    first['candles'].clear()
+
+    cached = history.read('BTC-USDT-SWAP', '15m', NOW)
+    assert len(client.calls) == calls
+    assert len(cached['candles']) == 300 and cached['candles'][0]['close'] == 11.0
+    clock[0] += HISTORY_PAGE_CACHE_SECONDS + .001
+    assert history.read('BTC-USDT-SWAP', '15m', NOW)['state'] == 'ready'
+    assert len(client.calls) == calls + 1
+
+
+def test_chart_read_routes_return_jsonresponses_without_changing_payload(tmp_path):
+    from fastapi import FastAPI
+    from fastapi.responses import JSONResponse
+    from yoyo.monitor.monday_candles import install
+
+    app = FastAPI()
+    install(app, tmp_path)
+    candles = app.state.monday_candles
+    candle_value = dict(symbol='BTC-USDT-SWAP', bar='15m', candles=[dict(
+        time=NOW-900000, open=10.0, high=12.0, low=9.0, close=11.0, volume=4.0)],
+        loading=False, now_ms=NOW, next_close_ms=NOW+1000, native_bar='15m', source='OKX')
+    history_value = dict(symbol='BTC-USDT-SWAP', bar='15m', native_bar='15m', source='OKX',
+        before_ms=NOW, candles=[], next_before_ms=NOW, has_more=True, state='retry', error='可重试')
+    candles.snapshot = lambda symbol, period, wait_ms: candle_value
+    app.state.monday_chart_history.read = lambda symbol, period, before_ms: history_value
+    routes = {route.path: route.endpoint for route in app.routes if hasattr(route, 'path')}
+    try:
+        candle_response = routes['/api/monday-fib/candles']('BTC-USDT-SWAP', '15m', 0)
+        history_response = routes['/api/monday-fib/history']('BTC-USDT-SWAP', '15m', NOW)
+        assert isinstance(candle_response, JSONResponse) and candle_response.status_code == 200
+        assert isinstance(history_response, JSONResponse) and history_response.status_code == 200
+        assert candle_response.body == JSONResponse(candle_value).body
+        assert history_response.body == JSONResponse(history_value).body
+    finally:
+        candles.close()
+
+
+def test_concurrent_duplicate_history_pages_share_one_upstream_read():
+    import threading
+    import time
+    from concurrent.futures import ThreadPoolExecutor
+    history, client = service()
+    original_get = client.get
+    calls = []
+    calls_lock = threading.Lock()
+
+    def slow_get(path, params):
+        with calls_lock:
+            calls.append((path, params))
+        time.sleep(.05)
+        return original_get(path, params)
+
+    client.get = slow_get
+    barrier = threading.Barrier(8)
+
+    def read():
+        barrier.wait()
+        return history.read('ETH-USDT-SWAP', '15m', NOW)
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        pages = list(pool.map(lambda _: read(), range(8)))
+    assert len(calls) == 1
+    assert all(page['state'] == 'ready' and len(page['candles']) == 300 for page in pages)
+
+
 def test_valid_empty_response_marks_api_boundary_but_request_failure_retries():
     history, client = service()
     client.empty = True
@@ -186,6 +261,8 @@ def test_concurrent_history_reads_queue_instead_of_failing():
         assert history.read('ETH-USDT-SWAP', '15m', NOW)['state'] == 'ready'
     finally:
         history.slots.release()
+    # Exercise the queue path independently of the short duplicate-page cache.
+    history.pages.clear()
     from yoyo.monitor.monday_chart_history import HISTORY_SLOTS
     for _ in range(HISTORY_SLOTS):
         history.slots.acquire()

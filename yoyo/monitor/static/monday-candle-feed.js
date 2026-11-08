@@ -27,9 +27,23 @@
     if(!live)return context;
     // Historical confirmed OHLC always wins. The live map is private to this
     // chart and cannot widen last_close_ms or enter the order-context API.
-    const rows=new Map((context.candles||[]).map(b=>[b.time,b]));
-    for(const b of live.bars||[])if(valid(b,period,live.now_ms)&&b.time>=context.last_close_ms)rows.set(b.time,b);
-    return {...context,candles:[...rows.values()].sort((a,b)=>a.time-b.time),display_live:true};
+    const history=context.candles||[];
+    const updates=(live.bars||[]).filter(b=>valid(b,period,live.now_ms)&&b.time>=context.last_close_ms);
+    // Legacy or unordered input still gets the original sort/dedup treatment.
+    // For a normal chart only the overlapping tail can change.
+    let split=0;
+    if(history.every((bar,i)=>!i||history[i-1].time<bar.time)){
+      split=history.length;
+      if(!updates.length)return {...context,candles:history,display_live:true};
+      const first=updates.reduce((t,bar)=>Math.min(t,bar.time),Infinity);
+      while(split&&history[split-1].time>=first)split--;
+    }
+    const tail=new Map();
+    for(let i=split;i<history.length;i++)tail.set(history[i].time,history[i]);
+    for(const bar of updates)tail.set(bar.time,bar);
+    const candles=history.slice(0,split);
+    for(const bar of [...tail.values()].sort((a,b)=>a.time-b.time))candles.push(bar);
+    return {...context,candles,display_live:true};
   }
   function create({symbol,period,onChange,onReconnect=()=>{},socket=()=>new WebSocket('wss://ws.okx.com/ws/v5/business'),request=(...args)=>fetch(...args),now=Date.now,
     later=setTimeout,cancel=clearTimeout,repeat=setInterval,clearRepeat=clearInterval}){

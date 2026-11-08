@@ -337,7 +337,18 @@
     doc.body.append(dock,dialog,replay);
     const $=selector=>dialog.querySelector(selector),panel=dock.querySelector('.sa-settings'),trigger=dock.querySelector('.sa-trigger');
     const reduced=env.matchMedia('(prefers-reduced-motion: reduce)');let state,shown=null,closing=null,focusBefore=null,queueKey='',audioState='off';
-    const motion=sirenMotion({root:dialog,animate:env.Motion?.animate,reduced,hidden:()=>doc.hidden});
+    const makeMotion=()=>sirenMotion({root:dialog,animate:env.Motion?.animate,reduced,hidden:()=>doc.hidden});
+    let motion=makeMotion(),motionLoad=null;
+    function loadAlarmMotion(){
+      if(env.Motion?.animate||motionLoad||!env.SpikeModules||!dialog.open||closing||doc.hidden||reduced.matches)return;
+      motionLoad=env.SpikeModules.ensure('alarm-motion').then(()=>{
+        motion=makeMotion();
+        // The dialog is already visible. Start its loops without replaying a
+        // delayed fade from zero opacity over controls the user can already use.
+        motion.sync(dialog.open&&!closing&&state.running);
+      }).catch(()=>{/* The visible alarm and its actions are independent of decorative motion. */})
+        .finally(()=>{motionLoad=null;});
+    }
     const audio=sound({AudioContext:env.AudioContext||env.webkitAudioContext,change:value=>{audioState=value;syncSound();}});
     const labels={on:'声音已启用',off:'声音未启用',blocked:'声音被暂停，请点击启用',unsupported:'浏览器不支持声音',enabling:'正在启用声音…'};
     const soundNotes={off:'需在本页点击一次才能发声',blocked:'浏览器暂停了声音，请再点一次',unsupported:'此浏览器不支持声音',enabling:'正在启用…'};
@@ -625,7 +636,7 @@ ${coins.length?`<button type="button" class="sa-h-open" data-sa-chart="${a.id}">
       renderDesk(alert,changed);
       if(changed&&dialog.open)motion.change();
       $('.sa-error').textContent=next.ackError;$('.sa-ack').disabled=next.ackPending;$('.sa-ack').textContent=next.ackPending?'确认中…':next.ackError?'重试确认':'知道了';
-      if(!dialog.open){env.SpikeWorkspaceDisplay?.setMobileNavigation(false,false);focusBefore=doc.activeElement;dialog.inert=false;dialog.showModal();$('.sa-ack').focus({preventScroll:true});motion.enter();startDeskTimer();}
+      if(!dialog.open){env.SpikeWorkspaceDisplay?.setMobileNavigation(false,false);focusBefore=doc.activeElement;dialog.inert=false;dialog.showModal();$('.sa-ack').focus({preventScroll:true});motion.enter();loadAlarmMotion();startDeskTimer();}
       motion.sync(next.running);
     }
     const controller=create({source:url=>new env.EventSource(url),request:(url,opts)=>env.fetch(url,opts),clock:()=>env.performance.now(),later:env.setTimeout.bind(env),cancel:env.clearTimeout.bind(env),change:render});
@@ -658,8 +669,8 @@ ${coins.length?`<button type="button" class="sa-h-open" data-sa-chart="${a.id}">
     const hide=()=>{controller.stop();audio.stop();motion.stop();historyStore.abort();stopDesk();if(replay.open)replay.close();};env.addEventListener('pagehide',hide);env.addEventListener('pageshow',()=>controller.start());
     // The shared chart skips its fetch while the page is hidden and does not retry by itself. Alarms often fire in
     // a background tab, so refresh the wallpaper and replay charts once the page is visible again.
-    doc.addEventListener('visibilitychange',()=>{if(!doc.hidden){controller.refreshTime();if(dialog.open)deskChart?.retry();if(replay.open)replayChart?.retry();}motion.sync(dialog.open&&state.running);fieldSync();});
-    reduced.addEventListener('change',()=>{motion.sync(dialog.open&&state.running);fieldSync();});
+    doc.addEventListener('visibilitychange',()=>{if(!doc.hidden){controller.refreshTime();loadAlarmMotion();if(dialog.open)deskChart?.retry();if(replay.open)replayChart?.retry();}motion.sync(dialog.open&&state.running);fieldSync();});
+    reduced.addEventListener('change',()=>{loadAlarmMotion();motion.sync(dialog.open&&state.running);fieldSync();});
     env.addEventListener('resize',()=>particles?.resize());
     controller.start();return {state:controller.state};
   }

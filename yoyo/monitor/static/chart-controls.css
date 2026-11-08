@@ -1,0 +1,82 @@
+/* Stitch 8f7d93f497a64762ab959a41e76b66d7. The chart moves underneath
+   these controls, so their material can be drawn without sampling each frame. */
+:is(#monday-reclaim-paper, #cloud-signal-dialog, #cloud-signal-wallpaper) {
+  --chart-control-surface: var(--glass-opaque-dock);
+  --chart-control-selected: color-mix(in srgb, var(--brand-primary) 13%, var(--chart-control-surface));
+  --chart-control-selected-text: color-mix(in srgb, var(--brand-primary) 80%, var(--text));
+  --chart-control-duration: 140ms;
+}
+#monday-reclaim-paper .rp-dock::before,
+:is(#cloud-signal-dialog, #cloud-signal-wallpaper) .cs-dock,
+#monday-reclaim-paper :is(.rp-context, .rp-recent, .rp-account, .rp-analysis-trigger) {
+  background: var(--chart-control-surface);
+  border-color: var(--control-border);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+#monday-reclaim-paper .rp-wallpaper .cv-readout {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+:is(#monday-reclaim-paper, #cloud-signal-dialog, #cloud-signal-wallpaper) :is(.rp-periods, .cs-periods) {
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  background: var(--control-bg);
+  border-radius: 11px;
+}
+:is(#monday-reclaim-paper, #cloud-signal-dialog, #cloud-signal-wallpaper) :is(.rp-periods, .cs-periods, .rp-layout-switch, .cs-layout-switch) button[aria-pressed=true] {
+  color: var(--chart-control-selected-text);
+  background: var(--chart-control-selected);
+  box-shadow: none;
+  font-weight: 650;
+}
+:is(#monday-reclaim-paper, #cloud-signal-dialog, #cloud-signal-wallpaper) :is(.rp-periods, .cs-periods, .rp-layout-switch, .cs-layout-switch) button:focus-visible {
+  outline: 2px solid var(--focus-border);
+  outline-offset: -2px;
+}
+#monday-reclaim-paper .rp-more-periods {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  width: auto;
+  border-radius: 9px;
+  font-variant-numeric: tabular-nums;
+}
+#monday-reclaim-paper .rp-more-periods:has([data-rp=extra-period]:not([hidden])) {
+  padding-inline: 6px;
+  background: var(--chart-control-selected);
+  color: var(--chart-control-selected-text);
+}
+@media (prefers-reduced-motion: no-preference) {
+  :is(#monday-reclaim-paper, #cloud-signal-dialog, #cloud-signal-wallpaper) :is(.rp-dock, .cs-dock) button:not([data-cs-grip]) {
+    transition: transform var(--chart-control-duration) var(--motion-ease);
+  }
+  :is(#monday-reclaim-paper, #cloud-signal-dialog, #cloud-signal-wallpaper) :is(.rp-dock, .cs-dock) button:not(:disabled, [data-cs-grip]):active {
+    translate: none;
+    transform: scale(.96);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(#monday-reclaim-paper, #cloud-signal-dialog, #cloud-signal-wallpaper) :is(.rp-dock, .cs-dock) button:active {
+    transform: none;
+    translate: none;
+  }
+}
+@media (max-width: 600px) {
+  /* Leave the chart attribution and time axis reachable below the dock. */
+  :is(#monday-reclaim-paper, #cloud-signal-wallpaper) {
+    --chart-dock-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+  #monday-reclaim-paper .rp-dock,
+  #cloud-signal-wallpaper .cs-dock {
+    bottom: var(--chart-dock-bottom);
+  }
+  #monday-reclaim-paper .rp-wallpaper .cv-readout,
+  #cloud-signal-wallpaper .cs-chart .cv-readout {
+    bottom: calc(var(--chart-dock-bottom) + 64px);
+  }
+  #monday-reclaim-paper .rp-more-periods {min-width: 32px}
+}

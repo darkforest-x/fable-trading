@@ -2,6 +2,7 @@
 (() => {
   'use strict';
   const groups = {
+    'alarm-motion': ['vendor/motion-14.6.0.js'],
     signals: ['signal-history.css','signal-components.css','okx-execution.css','signal-workspace.css','monday-reclaim-paper.css','monday-chart-settings.css','okx-execution.js','public-chart-cache.js','chart-history.js','range-chart.js','monday-candle-feed.js','monday-chart-appearance.js','monday-fib-chart.js','yolo-preview-sheet.js','chart-drawings.css','chart-drawings.js','reclaim-chart.js','chart-focus.js','monday-list-model.js','symbol-list-model.js','reclaim-watchlist.js','reclaim-analytics.js','reclaim-close.js','monday-quick.js','home-ticket.css','home-ticket.js','reclaim-strategy-book.css','reclaim-strategy-book.js','strategy-backtest.css','strategy-backtest.js','cloud-candle-colors.js','monday-chart-settings.js','monday-reclaim-paper.js','cloud-signals.css','cloud-stop-settings.js','cloud-history-stats.js','cloud-history-loader.js','cloud-history-panel.css','cloud-history-panel.js','cloud-signal-chart.js','cloud-chart-settings.js','cloud-signals.js','signal-workspace.js'],
     'breadth-booklet': ['breadth-booklet.css', 'breadth-book-history.js', 'breadth-booklet.js', 'breadth-replay-data.js'],
     'signal-charts': ['echarts-6.1.0.min.js'],

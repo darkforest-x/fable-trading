@@ -32,6 +32,22 @@ test('incremental refresh skips unchanged data, updates only the tail, replaces 
  sync(s,[{time:1,value:9},{time:2,value:21},{time:3,value:30}]);assert.equal(calls.at(-1)[0],'set');
  sync(s,first);assert.equal(calls.at(-1)[0],'set');
 });
+test('certified dirty ranges avoid equality scans while retaining historical replacement semantics',()=>{
+ const calls=[],s={setData:r=>calls.push(['set',r.length]),update:r=>calls.push(['update',r.time])},sync=T.syncer();
+ const rows=[{time:1,value:10},{time:2,value:20}];sync(s,rows,0);assert.deepEqual(calls,[['set',2]]);
+ rows[1]={time:2,value:21};sync(s,rows,1);assert.deepEqual(calls.at(-1),['update',2]);
+ rows.push({time:3,value:30});sync(s,rows,2);assert.deepEqual(calls.at(-1),['update',3]);
+ rows[0]={time:1,value:11};sync(s,rows,0);assert.deepEqual(calls.at(-1),['set',3]);
+ rows.pop();sync(s,rows,2);assert.deepEqual(calls.at(-1),['set',2]);
+ const before=calls.length;sync(s,rows,rows.length);assert.equal(calls.length,before,'an unchanged certified range is a no-op');
+});
+test('certified tip timestamp corrections use full replacement before later monotonic appends',()=>{
+ const calls=[],s={setData:r=>calls.push(['set',r.map(x=>x.time)]),update:r=>calls.push(['update',r.time])},sync=T.syncer();
+ const rows=[{time:10,value:1},{time:20,value:2}];sync(s,rows,0);
+ rows[1]={time:20,value:3};sync(s,rows,1);assert.deepEqual(calls.at(-1),['update',20]);
+ rows[1]={time:19,value:3};sync(s,rows,1);assert.deepEqual(calls.at(-1),['set',[10,19]],'a revised tip time cannot be sent through Lightweight Charts update');
+ rows.push({time:30,value:4});sync(s,rows,2);assert.deepEqual(calls.at(-1),['update',30]);
+});
 test('readout identifies cursor versus latest and labels opening timestamp accurately',()=>{
  const row={o:.0000012,h:.0000014,l:.000001,c:.0000013};
  assert.match(T.readout(row,0,true),/最新 K 线.*01\/01 08:00 北京开盘/);
@@ -104,6 +120,26 @@ test('compact axes bound long calculated prices while full readouts preserve pri
  assert.equal(T.axisPrice(81741.96125),'81,741.96125');
  assert.match(T.readout({open:81741.96125},0),/81,741\.96125/);
  assert.equal(T.compactAxisPrice(null),'—');
+});
+test('price formatters preserve their former output and reuse a finite formatter set',()=>{
+ const fs=require('node:fs'),vm=require('node:vm');let numbers=0,dates=0;
+ const intl={
+  NumberFormat:class extends Intl.NumberFormat{constructor(...args){numbers++;super(...args);}},
+  DateTimeFormat:class extends Intl.DateTimeFormat{constructor(...args){dates++;super(...args);}},
+ };
+ const sandbox={Intl:intl,window:{},module:{exports:{}}};
+ vm.runInNewContext(fs.readFileSync('yoyo/vision_research/static/chart-tools.js','utf8'),sandbox);
+ const tools=sandbox.module.exports,initialNumbers=numbers,initialDates=dates;
+ for(const value of [81741.96125,.006771234,1.23456789,1200000,-81741.96125,0,1.23e-10,1.23e12,-.00051]){
+  const fraction=Math.abs(value)>=100?2:Math.abs(value)>=1?4:10;
+  assert.equal(tools.price(value),value.toLocaleString('en-US',{maximumFractionDigits:fraction}));
+  assert.equal(tools.axisPrice(value),value.toLocaleString('en-US',{maximumFractionDigits:10}));
+  const abs=Math.abs(value),expected=abs!==0&&(abs<.001||abs>=1e7)?value.toExponential(2).replace('e+','e'):
+    value.toLocaleString('en-US',{useGrouping:false,maximumSignificantDigits:abs>0&&abs<1?Math.max(3,7+Math.floor(Math.log10(abs))):6});
+  assert.equal(tools.compactAxisPrice(value),expected);
+ }
+ assert.equal(numbers,initialNumbers,'format calls allocate no new NumberFormat instances');
+ assert.equal(dates,initialDates,'loading chart tools creates only its shared clock formatter');
 });
 test('compact axis changes at resize breakpoints without changing candle viewport',()=>{
  const old={raf:global.requestAnimationFrame,caf:global.cancelAnimationFrame,ro:global.ResizeObserver};

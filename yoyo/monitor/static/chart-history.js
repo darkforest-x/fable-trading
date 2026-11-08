@@ -28,8 +28,13 @@
       const detail=historyError||weekError,error=detail&&!detail.includes('重试')?detail+' · 点击重试':detail;
       status({text:error|| (active.has('history')?'正在加载更早 K 线…':active.has('weeks')?'正在补齐历史周线…':full(symbol)?more?'← 回看历史，自动加载':'已到此合约最早 K 线':'最近 720 根 · 逐周区间'),retry:!!error,count:context?.candles?.length||0,history_end_reason:historyEndReason});
     }
-    function merge(value){
+    function merge(value,liveBase){
       if(value.symbol!==symbol||value.bar!==period)throw Error('历史 K 线身份不匹配');
+      // A feed overlay derived from this exact snapshot already contains every
+      // paged candle and validated week. A late overlay takes the full merge.
+      if(liveBase&&liveBase===context&&value.display_live&&full(symbol)){
+        context=value;publish();return context;
+      }
       for(const w of value.weekly_ranges||[])if(validWeek(w,symbol))weeks.set(w.week,w);
       if(value.history_has_more===false){more=false;historyEndReason=value.history_end_reason||null;}
       const candles=full(symbol)?mergeRows(context?.candles||[],value.candles||[]):(value.candles||[]).slice(-720);

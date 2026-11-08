@@ -1,6 +1,16 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
 const D=require('../../yoyo/monitor/static/chart-drawings.js');
+test('drawing volume index patches only the live suffix and deterministically rebuilds old corrections',()=>{
+ const rows=Array.from({length:720},(_,i)=>({time:i*60,volume:i+1})),index=new D.DataIndex(rows,60),prefix=index.vol[719];
+ const revised=rows.slice();revised[719]={...rows[719],volume:900};
+ const guarded=revised.map((row,i)=>i<718?new Proxy(row,{get(){throw Error('prefix should not be read on a certified tail update');}}):row);
+ assert.equal(index.update(guarded,[719]),true);assert.equal(index.vol[719],prefix);assert.equal(index.vol[720],index.vol[719]+900);
+ const appended=[...guarded,{time:720*60,volume:10}];assert.equal(index.update(appended,[720]),true);assert.equal(index.vol[720],prefix+900);assert.equal(index.vol[721],prefix+910);
+ const sameOHLC=[...revised,{time:720*60,volume:10}].map(r=>({...r,close:123}));assert.equal(index.update(sameOHLC,[719,720]),false,'price-only revisions leave time and volume prefixes untouched');assert.equal(index.rows,sameOHLC);
+ const history=sameOHLC.map(r=>({...r}));history[100].volume+=50;assert.equal(index.update(history),true);assert.equal(index.vol[101],sameOHLC[100].volume+50+index.vol[100]);
+ assert.equal(index.gaps.at(-1),0);assert.equal(index.measure({time:100*60,price:1},{time:102*60,price:2}).complete,true);
+});
 const rows=Array.from({length:8},(_,i)=>({time:1000+i*60,volume:i*10,confirmed:true}));
 test('measure preserves direction, exact time and inclusive contract volume in either time direction',()=>{
  const index=new D.DataIndex(rows,60),a={time:1060,price:100},b={time:1240,price:120};

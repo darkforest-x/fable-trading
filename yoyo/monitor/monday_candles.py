@@ -14,6 +14,7 @@ import re
 import threading
 
 from fastapi import HTTPException, Query
+from fastapi.responses import JSONResponse
 from yoyo.data.candle_hub import STEPS, validate
 from yoyo.monitor.monday_fib import week_window
 from yoyo.monitor.okx import OKX
@@ -201,7 +202,7 @@ def install(app, runtime):
     def candles(symbol: str = Query(..., pattern=SYMBOL),
                 period: str = Query('15m', pattern='^('+'|'.join(PERIODS)+')$'),
                 wait_ms: int = Query(0, ge=0, le=8000)):
-        return service.snapshot(symbol, period, wait_ms)
+        return JSONResponse(service.snapshot(symbol, period, wait_ms))
 
     @app.get('/api/monday-fib/live-candles')
     def live_candles(symbol: str = Query(..., pattern=SYMBOL),

@@ -53,12 +53,19 @@
     // Same account default as monday-reclaim-paper.js route(); the snapshot
     // then carries closed/today records for this account only.
     const track=['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3','live-wick6x3','live-wick3x3','live-wick6x3hi','live-wick3x3far','live-breadth'].includes(params.get('track'))?params.get('track'):'spike';
-    start('paper-snapshot','/api/monday-reclaim-paper?list_period=today&track='+encodeURIComponent(track))?.then(packet=>{
-      const symbol=paperSymbol(packet?.value,params);if(!symbol)return;
-      const candidate=params.get('period'),period=['5m','15m','1H','4H','12H','1D'].includes(candidate)?candidate:'15m';
+    const snapshot=start('paper-snapshot:'+track,'/api/monday-reclaim-paper?list_period=today&track='+encodeURIComponent(track));
+    function warmChart(symbol){
+      if(!symbol)return;
+      const candidate=params.get('period'),period=['1m','2m','3m','5m','15m','1H','4H','12H','1D'].includes(candidate)?candidate:'15m';
       start('levels:'+symbol,'/api/monday-fib/levels?symbol='+encodeURIComponent(symbol));
       start(symbol+'|'+period,'/api/monday-fib/candles?symbol='+encodeURIComponent(symbol)+'&period='+period+'&wait_ms=8000');
-    });
+    }
+    // Pinned markets are already identified before the account is available.
+    // A trade bookmark may instead open its historical fill window.
+    if(!params.get('trade')){
+      if(params.has('symbol')&&params.get('symbol'))warmChart(paperSymbol(null,params));
+      else snapshot?.then(packet=>{if(packet)warmChart(paperSymbol(packet.value,params));});
+    }
   }else{
     start('monday-snapshot','/api/monday-fib/display')?.then(packet=>{
       const symbol=initialSymbol(packet?.value?.items,params.get('symbol')||'');

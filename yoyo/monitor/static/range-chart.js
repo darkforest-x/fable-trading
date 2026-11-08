@@ -6,8 +6,76 @@
           handleScale:{mouseWheel:true,pinch:true,axisPressedMouseMove:{time:true,price:true},axisDoubleClickReset:{time:true,price:true}},
           crosshair:{mode:0},timeScale:{rightOffset:10},kineticScroll:{mouse:false,touch:true}};
   const fin=x=>typeof x==='number'&&Number.isFinite(x);
-  const price=x=>fin(x)?x.toLocaleString('zh-CN',{useGrouping:false,maximumFractionDigits:Math.abs(x)>=100?2:Math.abs(x)>=1?4:8}):'—';
-  const clock=(ms,year=false)=>ms==null?'—':new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',...(year?{year:'numeric'}:{}),month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(ms));
+  function rowSnapshot(row){
+    const values={},keys=Object.keys(row);
+    for(const key of keys)values[key]=row[key];
+    return {values,count:keys.length};
+  }
+  function sameSnapshot(snapshot,row){
+    let count=0;
+    for(const key in row){
+      if(!Object.hasOwn(row,key))continue;
+      count++;
+      if(!Object.hasOwn(snapshot.values,key)||!Object.is(snapshot.values[key],row[key]))return false;
+    }
+    return count===snapshot.count;
+  }
+  function inspectRows(previous,rows){
+    if(!previous){
+      return {snapshots:rows.map(rowSnapshot),previousLength:0,from:0,maFrom:0,
+        changed:rows.map((_,i)=>i),structureChanged:true,timeChanged:true};
+    }
+    const snapshots=previous,previousLength=snapshots.length,common=Math.min(previousLength,rows.length),changed=[];
+    let from=rows.length===previousLength?rows.length:common;
+    let maFrom=from,timeChanged=rows.length!==previousLength;
+    for(let i=0;i<common;i++){
+      const old=snapshots[i],row=rows[i];
+      if(sameSnapshot(old,row))continue;
+      const priorTime=old.values.time??old.values.t,priorClose=old.values.close;
+      const nextTime=row.time??row.t;
+      const timeChangedHere=!Object.is(priorTime,nextTime);
+      if(timeChangedHere)timeChanged=true;
+      if(timeChangedHere||!Object.is(priorClose,row.close))maFrom=Math.min(maFrom,i);
+      from=Math.min(from,i);
+      changed.push(i);
+      snapshots[i]=rowSnapshot(row);
+    }
+    if(rows.length>previousLength){
+      for(let i=previousLength;i<rows.length;i++){
+        snapshots.push(rowSnapshot(rows[i]));changed.push(i);
+      }
+    }else if(rows.length<previousLength)snapshots.length=rows.length;
+    const structureChanged=rows.length!==previousLength;
+    if(structureChanged){from=Math.min(from,common);maFrom=Math.min(maFrom,common);}
+    return {snapshots,previousLength,from,maFrom,changed,structureChanged,timeChanged};
+  }
+  function samePoint(a,b){
+    if(a===b)return true;
+    if(!a||!b)return false;
+    const keys=Object.keys(a);
+    if(keys.length!==Object.keys(b).length)return false;
+    return keys.every(key=>Object.is(a[key],b[key]));
+  }
+  function firstPointDifference(a,b){
+    if(!a)return 0;
+    const common=Math.min(a.length,b.length);
+    for(let i=0;i<common;i++)if(!samePoint(a[i],b[i]))return i;
+    return common;
+  }
+  const candlePoint=(r,color,custom)=>({time:r.time,open:r.open,high:r.high,low:r.low,close:r.close,...(custom?{color,wickColor:color,borderColor:color}:{})});
+  const volumePoint=(r,color,custom,T)=>({time:r.time,value:r.volume||0,color:custom?color+'38':r.close>=r.open?T.colors.volumeUp:T.colors.volumeDown});
+  function rowMin(row){
+    let min=Infinity;
+    for(const value of [row.low??row.l,row.high??row.h,row.close??row.c])if(fin(value)&&value>0)min=Math.min(min,value);
+    return min;
+  }
+  const priceFormats=new Map([2,4,8].map(digits=>[digits,new Intl.NumberFormat('zh-CN',{useGrouping:false,maximumFractionDigits:digits})]));
+  const price=x=>fin(x)?priceFormats.get(Math.abs(x)>=100?2:Math.abs(x)>=1?4:8).format(x):'—';
+  const clocks={
+    short:new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}),
+    year:new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}),
+  };
+  const clock=(ms,year=false)=>ms==null?'—':clocks[year?'year':'short'].format(new Date(ms));
   // LWC 4.2 ignores vertical pan while autoScale is on. Unlock before its native
   // mouse/touch handler starts; do not capture or cancel the library's gestures.
   function bindFreePan(chart,canvas,env=window){
@@ -187,29 +255,133 @@
         }
       }
     }
+    processRows(data,view,key,step,oldTimes){
+      const raw=data?.candles||[];
+      const displayWindow=view.displayWindow;
+      const processKey=JSON.stringify([key,!!view.ma,displayWindow?.from??null,displayWindow?.to??null]);
+      const configChanged=this.processKey!==processKey;
+      if(configChanged){
+        this.inputSnapshots=null;
+        this.computedRows=null;
+        this.averages=null;
+      }
+      if(view.ma)this.averages ||= window.SpikeChartStyle.createAverages();
+      else this.averages=null;
+
+      const previousLength=this.processedRawLength||0;
+      const previousStart=this.renderStart??0;
+      const changes=inspectRows(this.inputSnapshots,raw);
+      this.inputSnapshots=changes.snapshots;
+      const dataChanged=changes.from<raw.length||changes.structureChanged||!this.computedRows;
+      const visibleBars=Number.isFinite(view.bars)&&view.bars>0?view.bars:Infinity;
+      const nextStart=displayWindow?null:Number.isFinite(visibleBars)?Math.max(0,raw.length-visibleBars):0;
+      const tailSafe=!configChanged&&!displayWindow&&this.computedRows
+        &&changes.from>=Math.max(0,previousLength-1,previousStart)
+        &&raw.length>=previousLength&&nextStart===previousStart;
+      let rebuild=configChanged||!this.computedRows||(dataChanged&&!tailSafe);
+      if(dataChanged&&displayWindow)rebuild=true;
+      if(!rebuild&&dataChanged&&view.ma&&changes.maFrom<raw.length){
+        rebuild=this.averages.patchTail(raw,step,changes.maFrom)===null;
+      }
+      this.processKey=processKey;
+
+      if(rebuild)this.rebuildRows(raw,view,step,displayWindow,oldTimes);
+      else if(dataChanged)this.patchRows(raw,view,changes,previousStart);
+      else{
+        this.rowsDirtyFrom=this.rows.length;
+        this.maDirtyFrom=this.rows.length;
+        this.rowsFull=false;
+        this.rowTimesChanged=false;
+      }
+      this.processedRawLength=raw.length;
+      return {
+        full:this.rowsFull,
+        rowsFrom:this.rowsDirtyFrom,
+        maFrom:this.maDirtyFrom,
+        changed:changes.changed,
+        timeChanged:this.rowTimesChanged,
+      };
+    }
+    rebuildRows(raw,view,step,displayWindow,oldTimes){
+      const computed=view.ma?this.averages(raw,step):raw.slice();
+      this.computedRows=computed;
+      const selected=displayWindow
+        ?computed.filter(row=>row.time>=displayWindow.from&&row.time<displayWindow.to)
+        :computed;
+      this.rows=selected.slice(-view.bars).map(row=>({...row,time:row.time/1000}));
+      this.rowByTime=new Map(this.rows.map(row=>[row.time,row]));
+      this.renderStart=displayWindow?null:Math.max(0,computed.length-this.rows.length);
+      this.rowTimes=this.rows.map(row=>row.time);
+      this.rowsDirtyFrom=0;
+      this.maDirtyFrom=0;
+      this.rowsFull=true;
+      this.rowTimesChanged=oldTimes.length!==this.rowTimes.length
+        ||oldTimes.some((time,i)=>time!==this.rowTimes[i]);
+    }
+    patchRows(raw,view,changes,previousStart){
+      for(let i=changes.from;i<raw.length;i++){
+        const values=view.ma?this.averages.valueAt(i):null;
+        this.computedRows[i]=view.ma?{...raw[i],...values}:{...raw[i]};
+      }
+      this.computedRows.length=raw.length;
+
+      let firstChanged=Infinity;
+      const start=Math.max(changes.from,previousStart);
+      for(let i=start;i<raw.length;i++){
+        const chartIndex=i-previousStart;
+        const source=this.computedRows[i];
+        const next={...source,time:source.time/1000};
+        const old=this.rows[chartIndex];
+        if(old){
+          if(old.time!==next.time)this.rowByTime.delete(old.time);
+          this.rows[chartIndex]=next;
+          this.rowByTime.set(next.time,next);
+          this.rowTimes[chartIndex]=next.time;
+        }else if(chartIndex===this.rows.length){
+          this.rows.push(next);
+          this.rowByTime.set(next.time,next);
+          this.rowTimes.push(next.time);
+        }
+        firstChanged=Math.min(firstChanged,chartIndex);
+      }
+      this.rowsDirtyFrom=Number.isFinite(firstChanged)?firstChanged:this.rows.length;
+      this.maDirtyFrom=view.ma&&changes.maFrom<raw.length
+        ?Math.max(0,changes.maFrom-previousStart)
+        :this.rows.length;
+      this.rowsFull=false;
+      this.rowTimesChanged=changes.timeChanged;
+    }
+    updatePriceFormat(T,full,from){
+      const scan=()=>{let minimum=Infinity,at=-1;this.rows.forEach((row,i)=>{const value=rowMin(row);if(value<minimum){minimum=value;at=i;}});this.minimumPrice=minimum;this.minimumPriceIndex=at;};
+      if(full||this.minimumPrice===undefined)scan();
+      else if(from<this.rows.length){
+        if(this.minimumPriceIndex>=from)scan();
+        else for(let i=from;i<this.rows.length;i++){const value=rowMin(this.rows[i]);if(value<this.minimumPrice){this.minimumPrice=value;this.minimumPriceIndex=i;}}
+      }
+      return T.priceFormatMinimum(this.minimumPrice);
+    }
     draw(data,view,error){
       const T=window.SpikeChartTools,key=`${data?.symbol||''}|${data?.timezone||''}|${data?.bar||'15m'}|${view.bars}`;
-      const oldTimes=T.times(this.rows),oldRange=this.chart.timeScale().getVisibleLogicalRange();
+      const oldTimes=this.rowTimes||T.times(this.rows),oldRange=this.chart.timeScale().getVisibleLogicalRange();
       this.views.save(this.key,oldRange,oldTimes);
       if(key!==this.key)this.chart.priceScale('right').applyOptions({autoScale:true});
       const saved=key===this.key?T.anchor(oldRange,oldTimes):null;
       // API time is milliseconds. Display-only live tips are explicitly merged
       // by their owning chart; analytical consumers keep their closed series.
-      const raw=data?.candles||[],step={'1m':60000,'2m':120000,'3m':180000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000}[data?.bar]||900000;
-      if(view.ma)this.averages ||= window.SpikeChartStyle.createAverages();else this.averages=null;
-      // Compute averages with warmup history before trimming the visible trade window.
-      const computed=this.averages?this.averages(raw,step):raw;
-      this.rows=(view.displayWindow?computed.filter(r=>r.time>=view.displayWindow.from&&r.time<view.displayWindow.to):computed).slice(-view.bars).map(r=>({...r,time:r.time/1000}));
-      this.syncAverages(!!view.ma);
-      this.rowByTime=new Map(this.rows.map(r=>[r.time,r]));
-      const newTimes=T.times(this.rows),timeChanged=oldTimes.length!==newTimes.length||oldTimes.some((t,i)=>t!==newTimes[i]);
-      // Optional per-bar display palette. Keep colors in sync snapshots so a
-      // palette edit repaints unchanged OHLC, and polling preserves the style.
-      const candleColors=view.candleColor?this.rows.map(view.candleColor):null;
-      this.sync(this.series,this.rows.map(({time,open,high,low,close},i)=>({time,open,high,low,close,...(candleColors?{color:candleColors[i],wickColor:candleColors[i],borderColor:candleColors[i]}:{})})));
-      this.sync(this.volume,this.rows.map((r,i)=>({time:r.time,value:r.volume||0,color:candleColors?candleColors[i]+'38':r.close>=r.open?T.colors.volumeUp:T.colors.volumeDown})));
+      const step={'1m':60000,'2m':120000,'3m':180000,'5m':300000,'15m':900000,'30m':1800000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000}[data?.bar]||900000;
+      const rowChanges=this.processRows(data,view,key,step,oldTimes),newTimes=this.rowTimes,timeChanged=rowChanges.timeChanged;
+      this.rowDelta=rowChanges.full?null:{changedRows:rowChanges.changed.map(i=>i-(this.renderStart||0)).filter(i=>i>=0&&i<this.rows.length)};
+      this.syncAverages(!!view.ma,rowChanges.maFrom,rowChanges.full);
+      const custom=typeof view.candleColor==='function',candleColors=custom?this.rows.map(view.candleColor):null;
+      let paletteFrom=this.rows.length;
+      if(custom){
+        if(!this.candleColorCustom||!this.candleColorValues||this.candleColorValues.length!==candleColors.length)paletteFrom=0;
+        else for(let i=0;i<candleColors.length;i++)if(!Object.is(candleColors[i],this.candleColorValues[i])){paletteFrom=Math.min(paletteFrom,i);}
+      }else if(this.candleColorCustom)paletteFrom=0;
+      this.candleColorCustom=custom;this.candleColorValues=candleColors;
+      this.syncCandleData(T,candleColors,custom,rowChanges.full,Math.min(rowChanges.rowsFrom,paletteFrom));
       this.compactReplay=!!view.compactReplay;
-      const options={priceFormat:T.priceFormat(this.rows),lastValueVisible:!this.compactReplay,priceLineVisible:!this.compactReplay,...(view.candleColors?{upColor:view.candleColors.up,wickUpColor:view.candleColors.up,downColor:view.candleColors.down,wickDownColor:view.candleColors.down}:{})},optionKey=JSON.stringify(options);
+      const options={priceFormat:this.updatePriceFormat(T,rowChanges.full,rowChanges.rowsFrom),lastValueVisible:!this.compactReplay,priceLineVisible:!this.compactReplay,...(view.candleColors?{upColor:view.candleColors.up,wickUpColor:view.candleColors.up,downColor:view.candleColors.down,wickDownColor:view.candleColors.down}:{})},optionKey=JSON.stringify(options);
       if(optionKey!==this.optionKey){this.series.applyOptions(options);this.optionKey=optionKey;}
       const colors={range:'#3984b3',fib:'#9774c1',profile:'#cc8d35',npoc:'#b9689e',prior:'#8a969e'};
       const levels=(data?.levels||[]).filter(l=>view[l.kind]&&fin(l.price));this.activeLevels=levels;
@@ -238,15 +410,53 @@
       view.decorate?.(this,data);
       if(view.showLevels)this.panel.querySelector('.cv-level-details').open=true;
       this.mondayWindow=view.mondayBand?data?.monday:null;
-      this.bandIndices=this.mondayWindow?this.rows.map((r,i)=>r.time*1000>=this.mondayWindow.start_ms&&r.time*1000<this.mondayWindow.end_ms?i:-1).filter(i=>i>=0):[];this.paintMondayBand();
+      if(timeChanged||this.mondayBandKey!==JSON.stringify([this.mondayWindow?.start_ms,this.mondayWindow?.end_ms])){
+        this.bandIndices=this.mondayWindow?this.rows.map((r,i)=>r.time*1000>=this.mondayWindow.start_ms&&r.time*1000<this.mondayWindow.end_ms?i:-1).filter(i=>i>=0):[];
+        this.mondayBandKey=JSON.stringify([this.mondayWindow?.start_ms,this.mondayWindow?.end_ms]);
+      }
+      this.paintMondayBand();
       this.visibleRange=view.onVisibleRange;this.bandPaint?.();
     }
-    syncAverages(visible){
+    syncCandleData(T,colors,custom,full,from){
+      if(full||!this.candleData||!this.volumeData||this.candleData.length>this.rows.length||this.volumeData.length>this.rows.length){
+        const oldCandles=this.candleData,oldVolumes=this.volumeData;
+        this.candleData=this.rows.map((r,i)=>candlePoint(r,colors?.[i],custom));
+        this.volumeData=this.rows.map((r,i)=>volumePoint(r,colors?.[i],custom,T));
+        if(!oldCandles)this.sync(this.series,this.candleData);else{const first=firstPointDifference(oldCandles,this.candleData);if(first<this.candleData.length||oldCandles.length!==this.candleData.length)this.sync(this.series,this.candleData,first);}
+        if(!oldVolumes)this.sync(this.volume,this.volumeData);else{const first=firstPointDifference(oldVolumes,this.volumeData);if(first<this.volumeData.length||oldVolumes.length!==this.volumeData.length)this.sync(this.volume,this.volumeData,first);}
+        return;
+      }
+      if(from>=this.rows.length)return;
+      while(this.candleData.length<this.rows.length){this.candleData.push(null);this.volumeData.push(null);}
+      let candleFrom=this.rows.length,volumeFrom=this.rows.length;
+      for(let i=from;i<this.rows.length;i++){
+        const r=this.rows[i],candle=candlePoint(r,colors?.[i],custom),volume=volumePoint(r,colors?.[i],custom,T);
+        if(!samePoint(this.candleData[i],candle)){this.candleData[i]=candle;candleFrom=Math.min(candleFrom,i);}
+        if(!samePoint(this.volumeData[i],volume)){this.volumeData[i]=volume;volumeFrom=Math.min(volumeFrom,i);}
+      }
+      if(candleFrom<this.rows.length)this.sync(this.series,this.candleData,candleFrom);
+      if(volumeFrom<this.rows.length)this.sync(this.volume,this.volumeData,volumeFrom);
+    }
+    syncAverages(visible,dirtyFrom=this.rows.length,full=false){
       const legend=this.panel.querySelector('.cv-ma-legend');if(legend)legend.hidden=!visible;
-      if(!visible){for(const line of this.maSeries||[])this.chart.removeSeries(line);this.maSeries=[];return;}
+      if(!visible){for(const line of this.maSeries||[])this.chart.removeSeries(line);this.maSeries=[];this.maData=[];return;}
       const style=window.SpikeChartStyle;
-      if(!this.maSeries?.length)this.maSeries=style.lines.map(m=>this.chart.addLineSeries({color:m.color,lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false}));
-      style.lines.forEach((m,i)=>this.sync(this.maSeries[i],this.rows.map(r=>fin(r[m.key])?{time:r.time,value:r[m.key]}:{time:r.time})));
+      let created=false;if(!this.maSeries?.length){this.maSeries=style.lines.map(m=>this.chart.addLineSeries({color:m.color,lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false}));this.maData=style.lines.map(()=>[]);created=true;}
+      if(full||created||this.maData.some(rows=>rows.length>this.rows.length)){
+        const previous=this.maData;
+        this.maData=style.lines.map(m=>this.rows.map(r=>fin(r[m.key])?{time:r.time,value:r[m.key]}:{time:r.time}));
+        style.lines.forEach((m,i)=>{
+          if(!previous?.[i])this.sync(this.maSeries[i],this.maData[i]);
+          else{const first=firstPointDifference(previous[i],this.maData[i]);if(first<this.maData[i].length||previous[i].length!==this.maData[i].length)this.sync(this.maSeries[i],this.maData[i],first);}
+        });return;
+      }
+      if(dirtyFrom>=this.rows.length)return;
+      style.lines.forEach((m,i)=>{
+        const rows=this.maData[i];let first=this.rows.length;
+        while(rows.length<this.rows.length)rows.push(null);
+        for(let j=dirtyFrom;j<this.rows.length;j++){const row=this.rows[j],next=fin(row[m.key])?{time:row.time,value:row[m.key]}:{time:row.time};if(!samePoint(rows[j],next)){rows[j]=next;first=Math.min(first,j);}}
+        if(first<this.rows.length)this.sync(this.maSeries[i],rows,first);
+      });
     }
     paintMondayBand(){
       if(!this.band)return;const scale=this.chart?.timeScale();

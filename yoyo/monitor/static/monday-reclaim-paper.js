@@ -20,10 +20,16 @@
   const icons=typeof module!=='undefined'&&module.exports?require('./coin-icons.js'):window.SpikeCoinIcons;
   const finite = value => typeof value === 'number' && Number.isFinite(value);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const num = (value, digits=2) => finite(value) ? value.toLocaleString('en-US', {minimumFractionDigits:digits,maximumFractionDigits:digits}) : '—';
+  const numberFormats=new Map();
+  function num(value,digits=2){
+    if(!finite(value))return '—';
+    if(!numberFormats.has(digits))numberFormats.set(digits,new Intl.NumberFormat('en-US',{minimumFractionDigits:digits,maximumFractionDigits:digits}));
+    return numberFormats.get(digits).format(value);
+  }
   const signed = (value, digits=2) => finite(value) ? `${value > 0 ? '+' : ''}${num(value,digits)}` : '—';
   const bp = value => finite(value) ? `${signed(value/100)}%` : '—';
-  const price = value => finite(value) ? value.toLocaleString('en-US', {maximumSignificantDigits:9}) : '—';
+  const priceFormat=new Intl.NumberFormat('en-US',{maximumSignificantDigits:9});
+  const price=value=>finite(value)?priceFormat.format(value):'—';
   const tone = value => !finite(value) || value === 0 ? '' : value > 0 ? 'rp-positive' : 'rp-negative';
   const dateFormat = new Intl.DateTimeFormat('zh-CN', {timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});
   const date = value => finite(value) && value > 0 && !Number.isNaN(new Date(value).getTime()) ? dateFormat.format(new Date(value)) : '—';
@@ -178,7 +184,7 @@
   // One visible page owns the GET, timer and cancellation generation. Failed
   // reads retain the last successful snapshot; late responses cannot revive it.
   function createFeed({read,cancel=()=>{},change=()=>{},schedule=setTimeout,unschedule=clearTimeout,interval=10000,validateData=validate}) {
-    let active=false, epoch=0, pending=null, timer=null;
+    let active=false, epoch=0, pending=null, timer=null, selection=null;
     let state={data:null,error:null,busy:false};
     const emit=next=>{state={...state,...next};change(state);};
     function refresh() {
@@ -186,14 +192,23 @@
       if (pending) return pending;
       unschedule(timer);timer=null;
       const revision=epoch;
-      emit({busy:true});
       const task=Promise.resolve().then(()=>active && revision===epoch ? read() : null)
         .then(data=>{if(active && revision===epoch)emit({data:validateData(data),error:null,busy:false});})
         .catch(error=>{if(active && revision===epoch)emit({error:error instanceof TypeError ? '网络暂时不可用' : error?.message || '读取失败，请稍后重试',busy:false});})
         .finally(()=>{if(pending!==task)return;pending=null;if(active)timer=schedule(refresh,interval);});
-      pending=task;return task;
+      pending=task;emit({busy:true});return task;
     }
-    return {refresh,getState:()=>state,setActive(value){
+    // An explicit account switch supersedes its in-flight detail read. Other
+    // refreshes of the same account continue sharing the existing promise.
+    function select(value){
+      if(selection===value)return;
+      selection=value;
+      if(!active)return;
+      epoch++;
+      if(pending){pending=null;cancel();}
+      return refresh();
+    }
+    return {refresh,select,getState:()=>state,setActive(value){
       if(active===value)return;active=value;epoch++;unschedule(timer);timer=null;
       if(!active){pending=null;cancel();emit({busy:false});}else refresh();
     }};
@@ -324,7 +339,7 @@
   let startupRead=null,cloudLayout=false,cloudSymbol='';
   const feed=createFeed({read:async()=>{
     const c=new AbortController();startupRead=c;
-    try{const pending=window.SpikeStartup?.take('paper-snapshot',c.signal),warm=pending?await pending:null;if(c.signal.aborted)throw Error('cancelled');return warm?.value||await requests.json('/api/monday-reclaim-paper?list_period=today&track='+encodeURIComponent(state.track));}finally{if(startupRead===c)startupRead=null}
+    try{const pending=window.SpikeStartup?.take('paper-snapshot:'+state.track,c.signal),warm=pending?await pending:null;if(c.signal.aborted)throw Error('cancelled');return warm?.value||await requests.json('/api/monday-reclaim-paper?list_period=today&track='+encodeURIComponent(state.track));}finally{if(startupRead===c)startupRead=null}
   },cancel:()=>{startupRead?.abort();startupRead=null;requests.cancel();},change:render});
   const el=id=>root.querySelector(`[data-rp="${id}"]`);
   function mount(){
@@ -339,7 +354,7 @@
       <details class="rp-account rp-glass"><summary><span><small data-rp="account-label">spike 模拟</small> · 已实现净值 <b data-rp="equity">—</b><small> USDT</small></span><span data-rp="pnl"></span><span aria-hidden="true">⌄</span><span class="rp-capital-status" data-rp="capital" hidden title="净值 ÷ 累计本金，不是交易收益率"></span></summary><div class="rp-account-body"><section data-rp="metrics" class="rp-metrics"></section><p data-rp="status" role="status"></p><div data-rp="refills"></div><details class="rp-rules"><summary>规则与统计口径</summary><div data-rp="rules"></div></details></div></details><button class="rp-analysis-trigger rp-glass" data-rp-action="analytics" aria-controls="rp-analysis-panel" aria-expanded="false">统计分析 ↗</button>
       <div class="rp-alert rp-glass" data-rp="error" role="alert" hidden></div>
       <section id="rp-record-panel" class="rp-records rp-glass" aria-label="模拟交易簿" aria-hidden="true" inert><header class="rp-record-heading rp-ledger-heading" data-yd-sheet-drag><strong data-rp="ledger-label">60m</strong><label class="rp-search" hidden><input type="search" placeholder="搜索币种" aria-label="搜索模拟盘币种" maxlength="80" autocomplete="off" data-rp="search"></label><button type="button" data-rp-action="search" aria-label="搜索币种" aria-expanded="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></button><label class="rp-record-sort" title="排序 · 评分优先"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M7 20V4m-4 4 4-4 4 4M17 4v16m-4-4 4 4 4-4"/></svg><select aria-label="记录排序" data-rp="sort">${Object.entries(SORTS).map(([value,label])=>`<option value="${value}">${label}</option>`).join('')}</select></label><button type="button" data-rp-action="history" aria-label="历史记录" title="历史记录" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 10a9 9 0 1 1 1.5 7M3 4v6h6M12 7v5l3 2"/></svg></button><button type="button" data-rp-action="close-records" aria-label="收起交易簿">×</button><div class="rp-ledger-period"><span data-rp="list-period">今日 · 北京时间</span><button type="button" data-rp-action="today" hidden>← 返回今日</button></div><div class="rp-ledger-filter"><div class="rp-ledger-tabs" role="group" aria-label="记录类型">${[['open','持仓'],['closed','已结束'],['events','触价']].map(([tab,label])=>`<button type="button" data-rp-tab="${tab}" aria-pressed="false">${label}<span data-rp="count-${tab}"></span></button>`).join('')}</div><label class="rp-scope" data-rp="scope-label" title="记录资金范围"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg><select aria-label="记录资金范围" data-rp="scope"><option value="funded">计入资金</option><option value="shadow">影子记录</option><option value="all">全部记录</option></select></label></div></header><div class="rp-record-scroll"><p data-rp="history-error" class="rp-history-error" role="status" hidden></p><button type="button" data-rp-action="retry-history" class="rp-more" hidden>重试读取历史</button><div data-rp="rows" class="rp-rows"></div><button type="button" data-rp-action="more" class="rp-more" hidden>再显示 50 条</button><div data-rp="pending"></div><p class="rp-record-caption" data-rp="caption"></p><p class="rp-footnote" data-rp="record-note"></p></div></section>
-      <nav class="rp-dock" aria-label="模拟盘图表工具"><div class="rp-layout-switch" role="group" aria-label="图表布局"><button type="button" aria-pressed="true">区间</button><button type="button" data-rp-action="cloud-layout" aria-pressed="false">信号</button></div><div class="rp-periods" role="group" aria-label="图表周期">${['5m','15m','1H','4H','12H','1D'].map(p=>`<button type="button" data-rp-period="${p}" aria-pressed="false">${p}</button>`).join('')}</div><label class="rp-more-periods" title="更多周期"><span aria-hidden="true">⌄</span><select data-rp="period" aria-label="K 线周期">${['1m','2m','3m','5m','15m','1H','4H','12H','1D'].map(v=>`<option value="${v}">${v}</option>`).join('')}</select></label><div class="rp-indicators"><button type="button" data-rp-action="indicators" aria-label="图表设置" aria-controls="rp-indicator-panel" aria-expanded="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="var(--rp-canvas)"/><circle cx="15" cy="17" r="3" fill="var(--rp-canvas)"/></svg><span data-rp="indicator-count" hidden></span></button><section id="rp-indicator-panel" class="rp-indicator-panel rp-glass mcs-panel" aria-label="图表设置" aria-hidden="true" inert>${chartSettingsHTML}</section></div><button type="button" data-rp-action="fit" title="显示全部已加载 K 线" aria-label="显示全部 K 线">${chartIcon('M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5')}</button><button type="button" data-rp-action="latest" title="回到最新 K 线" aria-label="回到最新 K 线">${chartIcon('m5 5 8 7-8 7m14-14v14')}</button><button type="button" data-rp-action="follow" aria-pressed="true" aria-label="跟随最新单" title="跟随最新单">${chartIcon('M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 6M4 12l2 6a7 7 0 0 0 12-1')}</button></nav><span class="rp-chart-foot">逐周 1.618 区间 · 开平仓按实际成交标记</span>`;
+      <nav class="rp-dock" aria-label="模拟盘图表工具"><div class="rp-layout-switch" role="group" aria-label="图表布局"><button type="button" aria-pressed="true">区间</button><button type="button" data-rp-action="cloud-layout" aria-pressed="false">信号</button></div><div class="rp-periods" role="group" aria-label="图表周期">${['5m','15m','1H','4H','12H','1D'].map(p=>`<button type="button" data-rp-period="${p}" aria-pressed="false">${p}</button>`).join('')}</div><label class="rp-more-periods" title="更多周期"><span data-rp="extra-period" hidden></span><span aria-hidden="true">⌄</span><select data-rp="period" aria-label="K 线周期">${['1m','2m','3m','5m','15m','1H','4H','12H','1D'].map(v=>`<option value="${v}">${v}</option>`).join('')}</select></label><div class="rp-indicators"><button type="button" data-rp-action="indicators" aria-label="图表设置" aria-controls="rp-indicator-panel" aria-expanded="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="var(--rp-canvas)"/><circle cx="15" cy="17" r="3" fill="var(--rp-canvas)"/></svg><span data-rp="indicator-count" hidden></span></button><section id="rp-indicator-panel" class="rp-indicator-panel rp-glass mcs-panel" aria-label="图表设置" aria-hidden="true" inert>${chartSettingsHTML}</section></div><button type="button" data-rp-action="fit" title="显示全部已加载 K 线" aria-label="显示全部 K 线">${chartIcon('M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5')}</button><button type="button" data-rp-action="latest" title="回到最新 K 线" aria-label="回到最新 K 线">${chartIcon('m5 5 8 7-8 7m14-14v14')}</button><button type="button" data-rp-action="follow" aria-pressed="true" aria-label="跟随最新单" title="跟随最新单">${chartIcon('M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 6M4 12l2 6a7 7 0 0 0 12-1')}</button></nav><span class="rp-chart-foot">逐周 1.618 区间 · 开平仓按实际成交标记</span>`;
     const account=root.querySelector('.rp-account');
     window.SpikeYoloPreviewSheet.bindOutside({panel:account,dismiss:restore=>{account.open=false;if(restore)account.querySelector('summary').focus({preventScroll:true});}});
     const heightProperties=new Map([[root.querySelector('.rp-context'),'--rp-context-height'],[root.querySelector('.rp-account>summary'),'--rp-account-summary-height'],[el('backtest-summary'),'--bt-summary-height']]);
@@ -448,6 +463,7 @@
   function replace(id,html){const node=el(id);if(node.innerHTML!==html)node.innerHTML=html;}
   function render(current){
     if(!pageActive)return;mount();
+    if(feed.select(state.track))return;
     const {data,error,busy}=current, track=data?.tracks?.[state.track], stats=summary(track,state.track);
     const pendingDetail=detailPending(data,state.track);
     if(pendingDetail&&!busy&&!error)feed.refresh();
@@ -493,7 +509,17 @@
     root.querySelector('[data-rp-action="follow"]').setAttribute('aria-pressed',String(!replay&&!state.trade&&!state.symbol));
     root.querySelector('[data-rp-action="follow"]').setAttribute('aria-label',historical?'返回实时':'跟随最新单');
     root.querySelector('[data-rp-action="follow"]').title=historical?'返回实时':'跟随最新单';
-    root.querySelectorAll('[data-rp-period]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.rpPeriod===state.period)));
+    const periodButtons=root.querySelectorAll('[data-rp-period]');
+    const extraPeriod=el('extra-period');
+    extraPeriod.hidden=Array.from(periodButtons).some(b=>b.dataset.rpPeriod===state.period);
+    if(!extraPeriod.hidden)extraPeriod.textContent=state.period;
+    periodButtons.forEach(b=>{
+      const pressed=String(b.dataset.rpPeriod===state.period);
+      if(b.getAttribute('aria-pressed')!==pressed){
+        b.setAttribute('aria-pressed',pressed);
+        if(pressed==='true')window.SpikeChartFocus.revealControl(b);
+      }
+    });
     el('signal-link').hidden=!chartSymbol;el('signal-link').href=signalChartLink(chartSymbol);el('signal-link').setAttribute('aria-label','打开 '+base(chartSymbol||'')+' 的 12H 信号图表');
     replace('symbol-label',chartSymbol?`${esc(base(chartSymbol))}<small> / USDT</small>`:'选择币种');
     replace('selection-status',replay?`<span class="${tone(replay.row.pnl)}">历史回测 · ${sideLabel(replay.row)} · ${signed(replay.row.pnl)} USDT</span>`:selected?`<span class="${selected.side===1?'rp-positive':'rp-negative'}">${sideLabel(selected)} · ${esc(stage(selected,data.now_ms))}</span>`:'');

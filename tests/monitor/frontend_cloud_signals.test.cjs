@@ -570,12 +570,13 @@ test('a dedicated 12H forming candle updates the exit while the visible chart is
  const forming={time:boundary,open:90,high:95,low:80,close:90,volume:1,confirmed:false};
  const older={...current,id:'other-visible-plan',week:'2026-10-26',range:{...current.range,week:'2026-10-26'},confirmed_ms:boundary-twelve,signal_open_ms:boundary-2*twelve};
  let pathFeedOptions=null;
+ const summaries=[];
  const h=cloudChartHarness(url=>{
   if(url.includes('/trade-candles')){const period=new URL(url,'https://local').searchParams.get('period');return Promise.resolve(response(chartValue(current.symbol,period,current)));}
   return Promise.resolve(response({symbol:current.symbol,items:[older],latest_id:current.id,reconstruction_supported:false}));
  },()=>{},{start:(options,count)=>{
   if(options.period==='12H'&&count===2){pathFeedOptions=options;options.onChange({bars:[forming],now_ms:Date.now(),error:''});}
- }});
+ }},{stats:value=>summaries.push(value)});
  await h.chart.show(current);await h.chart.period('5m');
  await tick();await tick();await tick();
  const path=h.excursions.filter(Boolean).at(-1),firstUpper=path?.upperR;
@@ -586,9 +587,13 @@ test('a dedicated 12H forming candle updates the exit while the visible chart is
  assert.ok(path);assert.equal(path.exit_state,'cloud_flip');assert.equal(path.exit_bar_ms,boundary);
  assert.equal(path.exit_bar_confirmed,false);assert.equal(path.exit_at_open,false);assert.equal(path.exit_time_ms,null);
  assert.ok(firstUpper>0);
+ const beforeLayers=summaries.length;
+ h.chart.layer('cloud',false);
+ assert.equal(summaries.length,beforeLayers);
  const unlatched=planExcursion({...current,stop:current.entry*.985,stop_pct:.015},[{...forming,high:110}],boundary);
  assert.ok(unlatched.upperR>firstUpper);
  pathFeedOptions.onChange({bars:[{...forming,high:110}],now_ms:Date.now(),error:''});
+ assert.ok(summaries.length>beforeLayers);
  const improved=h.excursions.filter(Boolean).at(-1);
  assert.equal(improved.upperR,firstUpper);assert.equal(improved.exit_state,'cloud_flip');
  pathFeedOptions.onChange({bars:[{...forming,high:130,confirmed:true}],now_ms:boundary+twelve+1000,error:''});
@@ -620,6 +625,10 @@ test('the actual zero-width reference exit keeps its peak label without a profit
  const makeTarget=()=>{const calls={texts:[],rects:[]};const context={save(){},beginPath(){},rect(){},clip(){},restore(){},fillRect(...args){calls.rects.push(args);},setLineDash(){},moveTo(){},lineTo(){},stroke(){},closePath(){},fill(){},measureText(value){return {width:value.length*5};},fillText(value){calls.texts.push(value);}};return {calls,useMediaCoordinateSpace(fn){fn({context,mediaSize:{width:500,height:300}});}};};
  const labels=makeTarget();drawing.paint(labels,true);assert.ok(labels.calls.texts.includes('0.53R'));
  const fills=makeTarget();drawing.paint(fills,false);assert.ok(fills.calls.rects.length>=2);assert.ok(fills.calls.rects.every(r=>r[2]===0));
+ drawing.layers.range=false;drawing.layers.fib=false;
+ drawing.owner.chart.timeScale=()=>({getVisibleLogicalRange:()=>({from:10000,to:10100}),logicalToCoordinate(){throw Error('offscreen plan requested a pixel coordinate');}});
+ const offscreen=makeTarget();drawing.paint(offscreen,false);
+ assert.equal(offscreen.calls.rects.length,0);assert.equal(drawing.autoscaleInfo(10000,10100),null);
 });
 test('incomplete coverage and later candle gaps cannot inflate maximum R',()=>{
  assert.equal(planExcursion(plan,[bar(2,100,999,99,500)],3*twelve),null);

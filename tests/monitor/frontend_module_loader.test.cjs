@@ -61,3 +61,12 @@ test('patrol loads reference overlay before charts can mount',async()=>{
  assert.ok(c.calls.indexOf('/static/yolo-preview-sheet.js')>=0);
  assert.ok(c.calls.indexOf('/static/yolo-preview-sheet.js')<c.calls.indexOf('/static/yolo-detect.js'));
 });
+
+test('alarm animation library loads once on demand outside the startup bundle',async()=>{
+ const c=harness();await c.api.ensure('signals');
+ assert.ok(!c.calls.some(url=>url.includes('motion-14.6.0')));
+ await Promise.all([c.api.ensure('alarm-motion'),c.api.ensure('alarm-motion')]);
+ assert.equal(c.calls.filter(url=>url.includes('motion-14.6.0')).length,1);
+ const shell=fs.readFileSync(require('node:path').join(__dirname,'../../yoyo/monitor/static/index.html'),'utf8');
+ assert.ok(!shell.includes('vendor/motion-14.6.0.js'));
+});

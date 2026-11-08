@@ -82,3 +82,13 @@ test('2m polls validated aggregated REST bars without requesting an unsupported 
  for(const t of f.intervals.values())t.fn();assert.equal(f.requests.length,2);
  f.feed.stop();assert.equal(f.requests[1].options.signal.aborted,true);
 });
+
+test('live tail keeps closed history authoritative and normalizes legacy out-of-order duplicates',()=>{
+ const step=300000,t=Math.floor(NOW/step)*step;
+ const old=obj(t-step,true),duplicate={...old,close:12},forming=obj(t),newer={...forming,close:13};
+ const live={bars:[obj(t-step,true,9),newer],now_ms:NOW};
+ for(const candles of [[old,forming],[forming,old,duplicate]]){
+  const result=mergeDisplay({last_close_ms:t,candles},live,'5m');
+  assert.deepEqual(result.candles,[candles.length===2?old:duplicate,newer]);
+ }
+});

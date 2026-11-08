@@ -41,6 +41,26 @@ test('shared range renderer uses the selected contract identity and small coin p
  const html=render(c,view);assert.match(html,/OKX WUSDT.P/);assert.match(html,/周一高 0.0023/);assert.doesNotMatch(html,/BTC/);
  assert.equal(price(.00001234),'0.00001234');assert.equal(price(null),'—');
 });
+test('range fallback prices and Beijing clocks preserve output without per-call Intl allocation',()=>{
+ let numbers=0,dates=0;
+ const intl={
+  NumberFormat:class extends Intl.NumberFormat{constructor(...args){numbers++;super(...args);}},
+  DateTimeFormat:class extends Intl.DateTimeFormat{constructor(...args){dates++;super(...args);}},
+ };
+ const context={window:{SpikeChartTools:require('../../yoyo/vision_research/static/chart-tools.js')},module:{exports:{}},Intl:intl,Date};
+ vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/range-chart.js','utf8'),context);
+ const api=context.module.exports,chart=context.window.SpikeRangeChart,initialNumbers=numbers,initialDates=dates;
+ for(const value of [81741.96125,.006771234,1.23456789,1200000,-81741.96125,0,1.23e-10]){
+  const digits=Math.abs(value)>=100?2:Math.abs(value)>=1?4:8;
+  assert.equal(api.price(value),value.toLocaleString('zh-CN',{useGrouping:false,maximumFractionDigits:digits}));
+ }
+ const stamp=Date.parse('2026-11-09T04:05:00Z');
+ for(const year of [false,true]){
+  const expected=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',...(year?{year:'numeric'}:{}),month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(stamp));
+  assert.equal(chart.clock(stamp,year),expected);
+ }
+ assert.equal(chart.clock(null),'—');assert.equal(numbers,initialNumbers);assert.equal(dates,initialDates);
+});
 test('readout caching preserves DOM and updates corrected OHLC and MA independently',()=>{
  const style=sandbox.window.SpikeChartStyle=require('../../yoyo/monitor/static/chart-style.js');
  let writes=0;
@@ -153,6 +173,54 @@ test('wallpaper starts with readable recent candles and refresh retains a manual
  assert.equal(instance.rows.length,27);assert.equal(instance.rows[0].time,from/1000);assert.equal(instance.rows.at(-1).time,to/1000-900);
  assert.equal(instance.rows[0].sma120,101,'the hidden 240-bar prefix must still warm up the first displayed SMA');
  instance.draw(data,config,'');assert.equal(instance.rows.length,400,'leaving the trade window restores the full live history');
+ sandbox.window.SpikeRangeChart.unmount(host);
+});
+
+test('720-bar live revisions update only the tip and still replace historical corrections',()=>{
+ const T=require('../../yoyo/vision_research/static/chart-tools.js'),style=require('../../yoyo/monitor/static/chart-style.js');
+ sandbox.window.SpikeChartTools={...T};sandbox.window.SpikeChartStyle=style;
+ const host={replaceChildren(){}},instance=sandbox.window.SpikeRangeChart.mount(host,{},view),nodes=new Map();
+ const node=key=>{if(!nodes.has(key))nodes.set(key,{innerHTML:'',textContent:'',hidden:false,open:false,classList:{toggle(){}},querySelectorAll:()=>[]});return nodes.get(key);};
+ let visible={from:500.25,to:650.25},setCalls=0,updates=0,points=0;
+ const makeSeries=()=>({rows:[],setData(rows){setCalls++;points+=rows.length;this.rows=rows.slice();},update(row){updates++;points++;if(this.rows.at(-1)?.time===row.time)this.rows[this.rows.length-1]=row;else this.rows.push(row);},applyOptions(){},createPriceLine(){return {};},removePriceLine(){}});
+ const scale={getVisibleLogicalRange:()=>visible,setVisibleLogicalRange:r=>{visible=r;},fitContent(){}};
+ instance.chart={priceScale:()=>({applyOptions(){}}),timeScale:()=>scale,applyOptions(){},removeSeries(){},remove(){}};
+ instance.series=makeSeries();instance.volume=makeSeries();instance.chart.addLineSeries=()=>makeSeries();
+ instance.canvas={clientWidth:1200};instance.panel={querySelector:node};instance.controls={update(){},destroy(){}};
+ instance.paintMondayBand=()=>{};
+ const start=Date.parse('2026-11-01T00:00Z'),candles=Array.from({length:720},(_,i)=>({time:start+i*900000,open:100,high:102,low:99,close:101,volume:20}));
+ const config={...view,bars:900,wallpaper:true,initialBars:150,ma:true,mondayBand:true};
+ const data={symbol:'BTC',timezone:'America/New_York',bar:'15m',levels:[],monday:{start_ms:start,end_ms:start+800*900000}};
+ instance.draw({...data,candles},config,'');assert.equal(instance.rowDelta,null,'full initial data does not claim a certified tail');
+ assert.equal(setCalls,8);assert.equal(points,720*8,'initial load sets the eight candle, volume and MA series');
+ visible={from:500.25,to:650.25}; // Simulate a user pan after initial centering.
+ const prefix=instance.rows.slice(0,-1),initialWrites=points;
+ let current=candles,mapVisits=0;const originalMap=Array.prototype.map;
+ Array.prototype.map=function(...args){if(this.length===720)mapVisits+=this.length;return originalMap.apply(this,args);};
+ try{
+  for(let tick=0;tick<60;tick++){
+   current=current.slice();const old=current.at(-1),close=old.close+(tick%2?-.01:.02);
+   current[719]={...old,high:Math.max(old.high,close),close,volume:old.volume+1};
+   instance.draw({...data,candles:current},config,'');
+   if(tick===0)assert.deepEqual(Array.from(instance.rowDelta.changedRows),[719],'drawing overlays receive the precise revised tail index');
+  }
+ }finally{Array.prototype.map=originalMap;}
+ assert.equal(mapVisits,0,'same-K ticks allocate no full 720-row mapped series snapshots');
+ assert.equal(updates,60*8,'each same-bar OHLC/volume revision updates one point in each active series');
+ assert.equal(setCalls,8,'live revisions never send a 720-row setData snapshot');
+ assert.equal(points-initialWrites,60*8);assert.ok(prefix.every((row,i)=>instance.rows[i]===row),'unchanged candles retain their chart row objects');
+ assert.deepEqual(visible,{from:500.25,to:650.25},'same-K revisions preserve the historical viewport');
+ current=[...current,{time:start+720*900000,open:current.at(-1).close,high:103,low:current.at(-1).close,close:102,volume:5}];
+ instance.draw({...data,candles:current},config,'');
+ assert.equal(instance.rows.length,721);assert.equal(setCalls,8,'an in-window append extends all active series incrementally');
+ assert.deepEqual(Array.from(instance.rowDelta.changedRows),[720]);assert.equal(instance.bandIndices.length,721,'Monday overlay includes the appended bar');
+ assert.equal(updates,61*8,'the new bar advances candle, volume and all six MA series once');
+ assert.equal(instance.rows.at(-1).sma120,style.averages(current,900000).at(-1).sma120,'appended MA values match a full causal calculation');
+ const corrected=current.slice();corrected[100]={...corrected[100],close:corrected[100].close+.5,high:corrected[100].high+.5};
+ instance.draw({...data,candles:corrected},config,'');assert.equal(instance.rowDelta,null,'history corrections invalidate the tail certificate');
+ assert.equal(setCalls,15,'a historical close correction replaces affected series from the first changed candle');
+ assert.equal(instance.rows[100].close,corrected[100].close);assert.equal(instance.rowByTime.get(corrected[100].time/1000).close,corrected[100].close);
+ assert.deepEqual(visible,{from:500.25,to:650.25},'historical OHLC corrections do not move the time viewport');
  sandbox.window.SpikeRangeChart.unmount(host);
 });
 

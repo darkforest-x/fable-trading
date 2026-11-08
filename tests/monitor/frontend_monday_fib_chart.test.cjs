@@ -85,6 +85,19 @@ test('closed candle scheduling follows server boundaries and retries incomplete 
   assert.equal(refreshDelay({...ready,error:'offline'},period),10000);
  }
 });
+test('loading marks the retry control busy while empty-data and failure states keep retry available',async()=>{
+ const pending=[],attrs=new Map(),state={textContent:''},caption={hidden:false,setAttribute:(k,v)=>attrs.set(k,v)},mount={},retry={hidden:false,addEventListener(){}};
+ const host={innerHTML:'',querySelector:s=>s==='[role=status]'?state:s==='.mf-chart-caption'?caption:s==='.mf-chart-mount'?mount:retry};
+ const sandbox={document:{hidden:false},window:{SpikeRangeChart:{mount(){return {};},unmount(){}}},Intl,Date,AbortController,fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve})),setTimeout:()=>1,clearTimeout(){}};
+ vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
+ const api=sandbox.window.SpikeMondayFibChart,anchors=anchorReply('/?symbol='+row.symbol),settle=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
+ api.show(host,row,'2026-10-19',{anchors});assert.equal(retry.hidden,true);assert.equal(attrs.get('aria-busy'),'true');
+ pending[0].resolve({ok:true,json:async()=>({...context(),candles:[]})});await settle();
+ assert.equal(retry.hidden,false);assert.equal(attrs.get('aria-busy'),'false');assert.match(state.textContent,/暂无此周期 K 线/);
+ api.retry();assert.equal(retry.hidden,true);assert.equal(attrs.get('aria-busy'),'true');
+ pending[1].resolve({ok:false,json:async()=>({detail:'offline'})});await settle();
+ assert.equal(retry.hidden,false);assert.equal(attrs.get('aria-busy'),'false');assert.match(state.textContent,/可重新加载/);api.hide();
+});
 
 test('late anchor replies cannot paint a retired symbol and pending anchors draw no rays',async()=>{
  const pending=[],rendered=[];const state={textContent:''},mount={},button={addEventListener(){}};

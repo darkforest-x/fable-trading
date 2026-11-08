@@ -36,8 +36,8 @@
   // the state BEFORE the old tip: a forming candle may be replaced many times.
   // Corrections, prepends, rolling windows and period changes rebuild the state.
   function createAverages(){
-    let inputs=[],values=[],beforeTip=initial(),previousStep;
-    return (rows,step)=>{
+    let inputs=[],values=[],beforeTip=initial(),afterTip=initial(),previousStep;
+    const calculate=(rows,step)=>{
       const n=inputs.length;
       const reusable=step===previousStep&&n>0&&rows.length>=n&&
         inputs.slice(0,-1).every((p,i)=>Object.is(p.time,rows[i].time??rows[i].t)&&Object.is(p.close,rows[i].close))&&
@@ -50,10 +50,34 @@
         values.push(advance(state,rows[i],step,previous));previous=rows[i].time??rows[i].t;
       }
       inputs=rows.map(row=>({time:row.time??row.t,close:row.close}));previousStep=step;
+      afterTip=checkpoint(state);
       // Only indicator values are cached; fresh OHLC, volume and confirmation
       // metadata always come from the current input, including old corrections.
       return rows.map((row,i)=>({...row,...values[i]}));
     };
+    // The range renderer performs an exact all-row comparison before using
+    // this fast path. It only accepts a tip revision, an append, or a revised
+    // tip followed by appends; any older correction uses the normal full call.
+    calculate.patchTail=(rows,step,from)=>{
+      const n=inputs.length;
+      if(step!==previousStep||!n||rows.length<n||from<n-1||from>rows.length)return null;
+      if(from===rows.length&&rows.length===n)return values.at(-1)||{};
+      if(from<n&&from!==n-1)return null;
+      if(from===n&&rows.length===n)return values.at(-1)||{};
+      const state=from<n?checkpoint(beforeTip):checkpoint(afterTip);
+      if(from<n)values.length=from;
+      let previous=from?(rows[from-1].time??rows[from-1].t):undefined;
+      for(let i=from;i<rows.length;i++){
+        if(i===rows.length-1)beforeTip=checkpoint(state);
+        values[i]=advance(state,rows[i],step,previous);
+        inputs[i]={time:rows[i].time??rows[i].t,close:rows[i].close};
+        previous=rows[i].time??rows[i].t;
+      }
+      values.length=rows.length;inputs.length=rows.length;previousStep=step;afterTip=checkpoint(state);
+      return values.at(-1)||{};
+    };
+    calculate.valueAt=index=>values[index]||{};
+    return calculate;
   }
   const api={lines,price,legend,legendPrice,averages,createAverages};
   if(typeof window!=='undefined')window.SpikeChartStyle=api;

@@ -97,10 +97,15 @@
       if(compactReplay)value.levels=value.levels.map(l=>({...l,lineWidth:1,color:l.kind==='fib'?'#8196ac70':'#8196ac55',inlinePriceVisible:false}));
       const candleColor=appearance&&appearanceModel?.candleColorizer?appearanceModel.candleColorizer(appearance,window.SpikeCloudCandleColors):null;
       target.instance=window.SpikeRangeChart.mount(target.mount,value,{...view,...(candleColor?{candleColor}:{}),compactReplay,displayWindow,scaleReferenceLevels:!compactReplay,bars:target.replay||window.SpikeChartHistory?.full(target.row.symbol)?Infinity:720,ma:target.ma,mondayBand:target.period!=='1D',onVisibleRange:instance=>target?.history?.observe(instance)},error);
-      message(error||target.levelError||(context.error?'K 线更新失败：'+context.error:context.loading?'正在同步此合约 K 线…':!value.candles?.length?'暂无此周期 K 线，请稍后重试':target.live?.error||''));
+      const status=error||target.levelError||(context.error?'K 线更新失败：'+context.error:context.loading?'正在同步此合约 K 线…':!value.candles?.length?'暂无此周期 K 线，请稍后重试':target.live?.error||'');
+      message(status,{busy:!error&&!target.levelError&&!context.error&&!!context.loading});
     }catch(e){message(e.message);window.SpikeRangeChart.unmount(target.mount);}
   }
-  function message(value){if(!target)return;target.state.textContent=value;target.caption.hidden=!value;}
+  function message(value,{busy=false}={}){
+    if(!target)return;target.state.textContent=value;target.caption.hidden=!value;
+    target.caption.setAttribute?.('aria-busy',String(!!busy));
+    const retry=target.host.querySelector('[data-mf-chart-retry]');if(retry)retry.hidden=!!busy;
+  }
   function startFeed(){
     if(!target||target.replay||target.feed||document.hidden||paused||!window.SpikeMondayCandleFeed)return;
     const current=target;current.live=null;
@@ -116,6 +121,7 @@
     if(!target||controller||document.hidden)return;
     clearTimeout(timer);const current=target,token=version,c=new AbortController();controller=c;
     const timeout=setTimeout(()=>c.abort(),15000);let delay=15000;
+    if(!current.context?.candles?.length&&!current.context?.error)message('正在加载区间 K 线…',{busy:true});
     const anchorRequest=current.levels&&!current.levels.display_previous?null:fetch('/api/monday-fib/levels?symbol='+encodeURIComponent(current.row.symbol),{signal:c.signal,cache:'no-store'}).then(async r=>{
       if(!r.ok)throw Error('周一锚点读取失败');const a=await r.json();
       if(a.symbol!==current.row.symbol||(a.current_week||a.week)!==current.week)throw Error('周一锚点待同步');
@@ -149,14 +155,14 @@
   async function refreshReplay(){
     if(!target?.replay||controller||paused)return;
     const current=target,token=version,c=new AbortController();controller=c;
-    const timeout=setTimeout(()=>c.abort(),30000);message('正在读取原始回测 K 线…');
+    const timeout=setTimeout(()=>c.abort(),30000);message('正在读取原始回测 K 线…',{busy:true});
     const paper=current.paper,trade=current.replay,breadth=current.replaySource==='breadth-ema20';
     const eventId=current.replayOptions?.event_id||trade.event_id;
     const url=breadth?'/api/breadth-replay/candles?'+new URLSearchParams({event_id:eventId,symbol:trade.symbol,period:current.period})
       :paper?'/api/monday-fib/trade-candles?'+new URLSearchParams({symbol:trade.symbol,entry_ms:trade.fill_ms,exit_ms:trade.exit_ms,period:current.period})
       :'/api/strategy-backtest/candles?'+new URLSearchParams({track:current.track,trade:trade.id,period:current.period});
-    if(paper)message('正在读取开仓时段 K 线…');
-    else if(breadth)message('正在读取全市场下轨原始 Binance K 线…');
+    if(paper)message('正在读取开仓时段 K 线…',{busy:true});
+    else if(breadth)message('正在读取全市场下轨原始 Binance K 线…',{busy:true});
     try{
       if(breadth&&(!eventId||typeof eventId!=='string'||typeof trade.symbol!=='string'||!trade.symbol))throw Error('回放事件或成分币标识缺失');
       const r=await fetch(url,{signal:c.signal,cache:'no-store'});
@@ -219,7 +225,7 @@
       // Clear the previous identity synchronously while keeping its canvas and
       // per-symbol viewport cache. Never label the old candles as a new symbol.
       target.instance=window.SpikeRangeChart.mount(target.mount,{symbol:row.symbol,bar:period,candles:[],levels:[]},view);
-      message('正在加载区间 K 线…');
+      message('正在加载区间 K 线…',{busy:true});
     }
     const current=target;
     if(!current.levels)shared?.restoreLevels?.(row.symbol+'|'+week).then(anchors=>{

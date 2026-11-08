@@ -96,3 +96,15 @@ test('a busy server retry continues paging automatically without a manual retry 
  assert.equal(calls,2);assert.equal(value.candles.length,1020);assert.equal(status.retry,false);
  h.pause();
 });
+
+test('the live tail reuses its history, and a page prepended after its base survives a late overlay',async()=>{
+ const base=snapshot(),prior=candle(start-step);
+ const h=H.create({symbol:base.symbol,period:base.bar,request:async()=>reply({
+  symbol:base.symbol,bar:base.bar,native_bar:'5m',state:'ready',has_more:false,candles:[prior]})});
+ const first=h.merge(base),tip=candle(start+base.candles.length*step);
+ const live={...first,display_live:true,candles:[...first.candles,tip]};
+ assert.equal(h.merge(live,first).candles,live.candles);
+ await h.older();
+ const merged=h.merge({...live,candles:[...live.candles.slice(0,-1),{...tip,close:12}]},live);
+ assert.equal(merged.candles[0].time,prior.time);assert.equal(merged.candles.at(-1).close,12);h.pause();
+});

@@ -26,8 +26,8 @@ test('startup chooses the same event and pinned symbol as the monitor',()=>{
 test('other pages and hidden documents make no speculative market request',()=>{
  for(const options of [{hash:'#signals'},{hidden:true}]){const h=harness(options);assert.equal(h.calls.length,0);assert.equal(h.links.length,0);}
 });
-test('home and retired market bookmarks warm only the paper snapshot before choosing its actual coin',()=>{
- for(const hash of ['','#market']){const h=harness({hash});assert.equal(h.calls.length,1);assert.equal(h.calls[0].url,'/api/monday-reclaim-paper?list_period=today&track=spike');}
+test('home and retired market bookmarks warm the pinned BTC chart alongside the account',()=>{
+ for(const hash of ['','#market']){const h=harness({hash});assert.deepEqual(h.calls.map(call=>call.url),['/api/monday-reclaim-paper?list_period=today&track=spike','/api/monday-fib/levels?symbol=BTC-USDT-SWAP','/api/monday-fib/candles?symbol=BTC-USDT-SWAP&period=15m&wait_ms=8000']);}
 });
 test('startup overlaps code and data, preserves receipt time, and consumes each response once',async()=>{
  const h=harness(),signal=new AbortController().signal;
@@ -75,7 +75,8 @@ test('paper warmup chooses exact funded latest fill, preserves pins and overlaps
  assert.equal(paperSymbol(data,new URLSearchParams('symbol=DOGE-USDT-SWAP')),'DOGE-USDT-SWAP');
  const h=harness({hash:'#signals?pane=reclaim&track=60&period=1H'});h.calls[0].resolve({ok:true,json:async()=>data});await flush();
  assert.deepEqual(h.calls.map(c=>c.url),['/api/monday-reclaim-paper?list_period=today&track=60','/api/monday-fib/levels?symbol=SOL-USDT-SWAP','/api/monday-fib/candles?symbol=SOL-USDT-SWAP&period=1H&wait_ms=8000']);
- const warm=await h.window.SpikeStartup.take('paper-snapshot',new AbortController().signal);assert.equal(warm.value,data);
+ assert.equal(h.window.SpikeStartup.take('paper-snapshot:spike',new AbortController().signal),null);
+ const warm=await h.window.SpikeStartup.take('paper-snapshot:60',new AbortController().signal);assert.equal(warm.value,data);
  h.window.location.hash='#signals?pane=records';h.events.hashchange();assert.ok(h.calls.slice(1).every(c=>c.options.signal.aborted));
 });
 
@@ -100,7 +101,12 @@ for(const key of ['spike','v3lock','allin3','v3add20'])test(`${key} cold links w
  delete d.tracks[key];assert.equal(paperSymbol(d,new URLSearchParams('track='+key)),'BTC-USDT-SWAP');
 });
 
-for(const period of ['12H','1D'])test(`paper cold ${period} link warms the selected native period`,async()=>{
+test('an explicit trade waits for its own chart and never warms the latest market',async()=>{
+ const h=harness({hash:'#signals?pane=reclaim&trade=12&symbol=BTC-USDT-SWAP'});
+ h.calls[0].resolve({ok:true,json:async()=>({tracks:{}})});await flush();
+ assert.equal(h.calls.length,1);
+});
+for(const period of ['1m','2m','3m','12H','1D'])test(`paper cold ${period} link warms the selected native period`,async()=>{
  const h=harness({hash:'#signals?pane=reclaim&track=spike&symbol=BTC-USDT-SWAP&period='+period});
  h.calls[0].resolve({ok:true,json:async()=>({tracks:{spike:{open:[]}}})});await flush();
  assert.equal(h.calls.length,3);assert.match(h.calls[2].url,new RegExp('period='+period+'&wait_ms=8000$'));

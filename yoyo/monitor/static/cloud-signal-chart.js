@@ -114,8 +114,15 @@
     const crossPrice=()=>(((1-a50)*ema50-(1-a20)*ema20)/spreadSlope);
     const stopAt=price=>s.side===1?price<=s.stop:price>=s.stop;
     const favorableR=price=>Math.max(0,(price-s.entry)*s.side/risk);
-    for(const r of rows){
-      if(r.time<next)continue;
+    // All evidence windows are merged by timestamp. Jump to the confirmation
+    // candle before walking the path, including the gap check on the first bar.
+    let low=0,high=rows.length;
+    while(low<high){
+      const mid=Math.floor((low+high)/2);
+      if(rows[mid].time<next)low=mid+1;else high=mid;
+    }
+    for(let i=low;i<rows.length;i++){
+      const r=rows[i];
       if(r.time!==next){state=state==='unavailable'?'unavailable':'gap';break;}
       if(![r.open,r.high,r.low,r.close].every(Number.isFinite)||r.low<=0||r.high<Math.max(r.open,r.close,r.low)||r.low>Math.min(r.open,r.close)){state='gap';break;}
       const live=r.confirmed===false,closed=r.confirmed===true||(!live&&r.time+step<=closedMs);
@@ -238,16 +245,35 @@
     attached({requestUpdate}){this.requestUpdate=requestUpdate;}
     detached(){this.requestUpdate=null;}
     paneViews(){return this.views;}
-    update(signal,period,layers,history,latestId,pathRows,pathClosed,pathFor=planExcursion){this.signal=signal;this.step=STEPS[period];this.layers=layers;this.plans=planWindows(signal,history,latestId).map(s=>{const path=pathFor(s,pathRows,pathClosed);return {...s,path,end_ms:path?.exit_state?Math.min(s.end_ms,path.through_ms):s.end_ms};});this.points=averages(this.owner.rows,this.step,signal,period,history);this.requestUpdate?.();}
-    updatePath(signal,history,latestId,pathRows,pathClosed,pathFor=planExcursion){this.plans=planWindows(signal,history,latestId).map(s=>{const path=pathFor(s,pathRows,pathClosed);return {...s,path,end_ms:path?.exit_state?Math.min(s.end_ms,path.through_ms):s.end_ms};});this.requestUpdate?.();}
+    update(signal,period,layers,history,latestId,pathRows,pathClosed,pathFor=planExcursion){
+      this.signal=signal;this.step=STEPS[period];this.layers=layers;
+      this.points=averages(this.owner.rows,this.step,signal,period,history);
+      this.updatePath(signal,history,latestId,pathRows,pathClosed,pathFor);
+    }
+    updatePath(signal,history,latestId,pathRows,pathClosed,pathFor=planExcursion){
+      this.plans=planWindows(signal,history,latestId).map(plan=>{
+        const path=pathFor(plan,pathRows,pathClosed);
+        const end=path?.exit_state?Math.min(plan.end_ms,path.through_ms):plan.end_ms;
+        return {...plan,path,end_ms:end,startIndex:indexAt(this.owner.rows,plan.start_ms,this.step),
+          endIndex:indexAt(this.owner.rows,end,this.step)};
+      });
+      this.requestUpdate?.();
+    }
     autoscaleInfo(from,to){
-      if(!this.signal)return null;const values=[],o=this.owner,s=this.signal;
-      if(this.layers.cloud)for(const p of this.points.slice(Math.max(0,Math.floor(from)),Math.ceil(to)+1))values.push(p.a,p.b);
-      if(this.layers.plan)for(const plan of this.plans){
-        const start=indexAt(o.rows,plan.start_ms,this.step),end=indexAt(o.rows,plan.end_ms,this.step);
-        if(to>=start&&from<=end)values.push(plan.entry,plan.stop,plan.target,plan.path?.peak??plan.entry);
+      if(!this.signal)return null;
+      let min=Infinity,max=-Infinity;
+      if(this.layers.cloud){
+        const first=Math.max(0,Math.floor(from)),last=Math.min(this.points.length-1,Math.ceil(to));
+        for(let i=first;i<=last;i++){
+          const p=this.points[i];min=Math.min(min,p.a,p.b);max=Math.max(max,p.a,p.b);
+        }
       }
-      return values.length?{priceRange:{minValue:Math.min(...values),maxValue:Math.max(...values)}}:null;
+      if(this.layers.plan)for(const p of this.plans){
+        if(p.startIndex>to||p.endIndex<from)continue;
+        const peak=p.path?.peak??p.entry;
+        min=Math.min(min,p.entry,p.stop,p.target,peak);max=Math.max(max,p.entry,p.stop,p.target,peak);
+      }
+      return min<=max?{priceRange:{minValue:min,maxValue:max}}:null;
     }
     paint(target,labelsOnly=false){
       if(!this.signal||!this.owner.rows.length)return;
@@ -255,8 +281,8 @@
       target.useMediaCoordinateSpace(({context:c,mediaSize:{width:w,height:h}})=>{
         c.save();c.beginPath();c.rect(0,0,w,h);c.clip();
         const dark=document.documentElement.dataset.theme==='dark';
-        const visible=visibleCloudPoints(this.points,scale.getVisibleLogicalRange?.());
-        if(!labelsOnly&&this.layers.cloud)for(const group of cloudSegments(visible,this.step)){
+        const range=scale.getVisibleLogicalRange?.();
+        if(!labelsOnly&&this.layers.cloud)for(const group of cloudSegments(visibleCloudPoints(this.points,range),this.step)){
           const points=group.map(p=>({x:xAt(scale,indexAt(o.rows,p.time*1000,this.step)),a:y(p.a),b:y(p.b)})).filter(p=>p.x!=null&&p.a!=null&&p.b!=null);
           if(points.length<2||points.at(-1).x<0||points[0].x>w)continue;
           const bullish=group.some(p=>p.a>p.b);
@@ -266,7 +292,10 @@
         }
         const labels=[];
         if(this.layers.plan)for(const plan of this.plans){
-          const left=xAt(scale,indexAt(o.rows,plan.start_ms,this.step)),right=xAt(scale,indexAt(o.rows,plan.end_ms,this.step));
+          // Panning changes pixel coordinates, but a plan's logical range is
+          // stable until its evidence or the underlying candle window changes.
+          if(range&&(plan.endIndex<range.from-1||plan.startIndex>range.to+1))continue;
+          const left=xAt(scale,plan.startIndex),right=xAt(scale,plan.endIndex);
           const extent=plan.side===1?Math.max(plan.target,plan.path?.peak??plan.entry):Math.min(plan.target,plan.path?.peak??plan.entry);
           const e=y(plan.entry),stop=y(plan.stop),tp=y(extent),palette=planPalette(plan.latest,dark);
           if([left,right,e,stop,tp].every(v=>v!=null)&&right>0&&left<w){
@@ -335,7 +364,13 @@
       const sameWeek=plans.find(s=>s.week===signal.week);
       return (signal.context_only?plans.at(-1):sameWeek)||{...signal,context_only:true,range:null};
     }
+    let lastStatsInputs=[];
     function refreshStats(){
+      // Lower-timeframe quote ticks redraw candles but do not change the
+      // canonical 12H evidence or the reference plans used by the statistics.
+      const inputs=[plans,pathRows,pathClosed,stopSettings,bulkStatus,rangeMode,signal];
+      if(inputs.every((value,i)=>value===lastStatsInputs[i]))return;
+      lastStatsInputs=inputs;
       const rows=plans.map(s=>stops.project(s,stopSettings));
       const coverage={...bulkStatus,range_mode:rangeMode,from_ms:bulkStatus.from_ms??pathRows[0]?.time,to_ms:bulkStatus.to_ms??pathClosed};
       hooks.stats?.(window.SpikeCloudHistoryStats.summarize(rows,{pathFor:s=>pathFor(s,pathRows,pathClosed),coverage}),coverage);
@@ -374,7 +409,6 @@
     }
     function draw(){
       if(!data||!signal)return;
-      if(data.bar==='12H')mergePathCandles(data);
       const ref=currentReference(),viewSignal=stops.project(ref,stopSettings),viewPlans=plans.map(s=>stops.project(s,stopSettings));
       onExcursion(viewSignal.plan_state==='ready'?pathFor(viewSignal,pathRows,pathClosed):null);
       const anchor=ref.range;
@@ -477,9 +511,9 @@
         let previous=-Infinity;for(const r of value.candles){if(![r.time,r.open,r.high,r.low,r.close].every(Number.isFinite)||r.time<=previous||r.time+STEPS[tf]>value.last_close_ms)throw Error('K 线数据不完整');previous=r.time;}
         if(mode==='signal'&&isFreshSignalChart(current,tf,value))rememberSignalChart(current.id+'|'+tf,value);
         history=window.SpikeChartHistory?.create({symbol:current.symbol,period:tf,
-          changed:v=>{if(epoch===version){data=v;draw();replay?.observe(v.weekly_ranges);}},
+          changed:v=>{if(epoch===version){data=v;mergePathCandles(v);draw();replay?.observe(v.weekly_ranges);}},
           status:v=>{if(epoch===version){const el=host.parentElement.querySelector('[data-cs-history-status]');if(el){el.textContent=v.retry?v.text:'';el.hidden=!v.retry;}}}});
-        data=history?history.merge(value):value;draw();candleError='';message(planError||'');resumePlanHistory();
+        data=history?history.merge(value):value;mergePathCandles(data);draw();candleError='';message(planError||'');resumePlanHistory();
         if(tf!=='12H')void loadPathWindow(current,epoch);
         // Only merge live tips onto a contiguous recent window. Historical
         // lower-timeframe views must never jump across an unobserved gap.
@@ -487,7 +521,7 @@
           feed=window.SpikeMondayCandleFeed?.create({symbol:current.symbol,period:tf,onChange:live=>{
             if(epoch!==version||!data)return;const merged=window.SpikeMondayCandleFeed.mergeDisplay(data,live,tf);
             if(tf==='12H')mergePathCandles(merged,live.now_ms);
-            data=history?history.merge(merged):merged;draw();message(live.error||'');}});feed?.start();
+            data=history?history.merge(merged,data):merged;draw();message(live.error||'');}});feed?.start();
         }
       }catch(e){if(epoch===version&&(e.name!=='AbortError'||timedOut)){candleError=e.name==='AbortError'?'K 线读取超时，请重试':e.message;message(candleError||'K 线读取失败，请重试');}}
       finally{clearTimeout(timeout);if(controller===c)controller=null;}
@@ -504,7 +538,7 @@
       stops(value){const next=stops.normalize(value);if(next.btcEth!==stopSettings.btcEth||next.other!==stopSettings.other)exitLatches.clear();stopSettings=next;draw();instance?.chart?.priceScale('right').applyOptions({autoScale:true});},
       palette(value){palette=window.SpikeCloudCandleColors.normalize(value);candleColor=window.SpikeCloudCandleColors.colorizer(palette);draw();},
       focus(){if(signal?.context_only)return focus('latest');mode==='signal'?focus():load('signal');},latest(){mode==='latest'?focus('latest'):load('latest');},
-      pause(){stopRequests();},resume(){if(signal)load();},close(){stopRequests();window.SpikeRangeChart.unmount(host);instance=null;data=null;signal=null;}};
+      pause(){stopRequests();},resume(){if(signal)load();},close(){stopRequests();window.SpikeRangeChart.unmount(host);instance=null;data=null;signal=null;lastStatsInputs=[];}};
   }
   window.SpikeCloudChart={create};
 })();

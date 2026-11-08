@@ -13,15 +13,17 @@
   ]);
   // Shared display palette, matched to the approved Monday 1.618 chart.
   const colors=Object.freeze({up:'#169873',down:'#d7355d',volumeUp:'#16987338',volumeDown:'#d7355d38'});
-  const price=v=>finite(v)?v.toLocaleString('en-US',{maximumFractionDigits:Math.abs(v)>=100?2:Math.abs(v)>=1?4:10}):'—';
-  const axisPrice=v=>finite(v)?v.toLocaleString('en-US',{maximumFractionDigits:10}):'—';
+  const priceFormats=new Map([2,4,10].map(digits=>[digits,new Intl.NumberFormat('en-US',{maximumFractionDigits:digits})]));
+  const significantPriceFormats=new Map([3,4,5,6].map(digits=>[digits,new Intl.NumberFormat('en-US',{useGrouping:false,maximumSignificantDigits:digits})]));
+  const price=v=>finite(v)?priceFormats.get(Math.abs(v)>=100?2:Math.abs(v)>=1?4:10).format(v):'—';
+  const axisPrice=v=>finite(v)?priceFormats.get(10).format(v):'—';
   // Compact axis labels are display-only. Full OHLC readouts use axisPrice.
   const compactAxisPrice=v=>{
     if(!finite(v))return '—';
     const abs=Math.abs(v);
     if(abs!==0&&(abs<.001||abs>=1e7))return v.toExponential(2).replace('e+','e');
     const digits=abs>0&&abs<1?Math.max(3,7+Math.floor(Math.log10(abs))):6;
-    return v.toLocaleString('en-US',{useGrouping:false,maximumSignificantDigits:digits});
+    return significantPriceFormats.get(digits).format(v);
   };
   const date=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});
   const clock=t=>finite(t)?date.format(new Date(t*1000)):'—';
@@ -36,10 +38,11 @@
     save(key,range,ts){const value=anchor(range,ts);if(!key||!value)return;this.values.delete(key);this.values.set(key,value);while(this.values.size>this.limit)this.values.delete(this.values.keys().next().value);}
     get(key,ts){return restore(this.values.get(key),ts);}
   }
+  function priceFormatMinimum(min){if(!finite(min))min=1;const precision=Math.min(10,Math.max(2,4-Math.floor(Math.log10(min))));return {type:'price',precision,minMove:10**-precision};}
   function priceFormat(rows,extra=[]){
     let min=Infinity;const take=v=>{if(finite(v)&&v>0&&v<min)min=v;};
     for(const r of rows){take(r.low??r.l);take(r.high??r.h);take(r.close??r.c);}for(const v of extra)take(v);
-    if(!finite(min))min=1;const precision=Math.min(10,Math.max(2,4-Math.floor(Math.log10(min))));return {type:'price',precision,minMove:10**-precision};
+    return priceFormatMinimum(min);
   }
   function frame(fn){let id=null,args;const run=(...values)=>{args=values;if(id===null)id=requestAnimationFrame(()=>{id=null;fn(...args);});};run.cancel=()=>{if(id!==null)cancelAnimationFrame(id);id=null;};return run;}
   function resize(chart,host,{compactAxis=false}={}){
@@ -58,7 +61,34 @@
     observer.observe(host);paint();
     return {disconnect(){observer.disconnect();paint.cancel();}};
   }
-  function syncer(){const snapshots=new WeakMap(),same=(a,b)=>a===b||!!a&&!!b&&Object.keys(a).length===Object.keys(b).length&&Object.keys(a).every(k=>Object.is(a[k],b[k]));return (series,rows)=>{const old=snapshots.get(series);if(old?.length===rows.length&&rows.every((r,i)=>same(r,old[i])))return;const append=old?.length&&rows.length>=old.length&&old.slice(0,-1).every((r,i)=>same(r,rows[i]))&&rows[old.length-1]?.time===old.at(-1).time;if(append&&series.update){for(let i=old.length-1;i<rows.length;i++)if(!same(rows[i],old[i]))series.update(rows[i]);}else series.setData(rows);snapshots.set(series,rows);};}
+  function syncer(){
+    const states=new WeakMap();
+    const same=(a,b)=>a===b||!!a&&!!b&&Object.keys(a).length===Object.keys(b).length&&Object.keys(a).every(k=>Object.is(a[k],b[k]));
+    const remember=(series,rows)=>states.set(series,{rows,length:rows.length,tailTime:rows.at(-1)?.time});
+    function updateDirty(series,rows,dirtyFrom,oldState){
+      const old=oldState?.rows,oldLength=oldState?.length,oldTailTime=oldState?.tailTime;
+      // The caller has compared the source rows and gives the earliest changed output index.
+      if(old&&dirtyFrom>=rows.length&&oldLength===rows.length)return;
+      const revisesTailTime=!!old&&oldLength>0&&dirtyFrom<oldLength&&!Object.is(rows[oldLength-1]?.time,oldTailTime);
+      if(old&&!revisesTailTime&&series.update&&rows.length>=oldLength&&dirtyFrom>=oldLength-1){
+        for(let i=Math.max(0,dirtyFrom);i<rows.length;i++)series.update(rows[i]);
+      }else series.setData(rows);
+      remember(series,rows);
+    }
+    function updateDefensively(series,rows,old){
+      if(old?.length===rows.length&&rows.every((r,i)=>same(r,old[i])))return;
+      const append=old?.length&&rows.length>=old.length&&old.slice(0,-1).every((r,i)=>same(r,rows[i]))&&rows[old.length-1]?.time===old.at(-1).time;
+      if(append&&series.update){
+        for(let i=old.length-1;i<rows.length;i++)if(!same(rows[i],old[i]))series.update(rows[i]);
+      }else series.setData(rows);
+      remember(series,rows);
+    }
+    return (series,rows,dirtyFrom)=>{
+      const oldState=states.get(series);
+      if(Number.isInteger(dirtyFrom))updateDirty(series,rows,dirtyFrom,oldState);
+      else updateDefensively(series,rows,oldState?.rows);
+    };
+  }
   const interaction={handleScroll:{vertTouchDrag:false,horzTouchDrag:true,mouseWheel:true,pressedMouseMove:true},handleScale:{axisPressedMouseMove:true,mouseWheel:true,pinch:true},kineticScroll:{mouse:false,touch:true}};
   function readout(row,t,latest=false){return `<span class="cv-time">${latest?'最新 K 线':'光标'} · ${clock(t)} 北京开盘</span>${[['开','open','o'],['高','high','h'],['低','low','l'],['收','close','c']].map(([label,key,short])=>`<span>${label} <b>${axisPrice(row?.[key]??row?.[short])}</b></span>`).join('')}`;}
   function toolbar({reset=false,expand=false,log=true}={}){return `<div class="cv-tools" role="group" aria-label="看图工具"><button type="button" data-cv="latest" title="定位最后一根已载入 K 线，保留缩放宽度">定位最新</button><button type="button" data-cv="fit">适应全部</button>${reset?'<button type="button" data-cv="reset">还原视图</button>':''}${log?'<button type="button" data-cv="log" aria-pressed="false" title="切换价格轴；不改变行情数据">对数</button>':''}${expand?'<button type="button" data-cv="expand" aria-pressed="false">放大</button>':''}</div>`;}
@@ -107,7 +137,7 @@
   let libraryVersion='';
   try{libraryVersion=JSON.parse(document.getElementById('asset-versions')?.textContent||'{}')['/vision-assets/vendor/lightweight-charts.standalone.production.js']||'';}catch{}
   function library(){if(window.LightweightCharts)return Promise.resolve();if(!pending)pending=new Promise((resolve,reject)=>{const el=document.createElement('script');el.src=libraryVersion?'/vision-assets/vendor/lightweight-charts.standalone.production.js?v='+libraryVersion:scriptBase?new URL('vendor/lightweight-charts.standalone.production.js',scriptBase).href:'/vision-assets/vendor/lightweight-charts.standalone.production.js';el.onload=()=>window.LightweightCharts?resolve():reject(Error('图表组件不可用'));el.onerror=()=>{pending=null;el.remove();reject(Error('图表组件加载失败，请重试'));};document.head.append(el);});return pending;}
-  const api={lines,colors,price,axisPrice,compactAxisPrice,priceFormat,clock,times,anchor,restore,Views,validRange,resize,frame,syncer,interaction,readout,toolbar,bind,inspector,fullscreen,library};
+  const api={lines,colors,price,axisPrice,compactAxisPrice,priceFormat,priceFormatMinimum,clock,times,anchor,restore,Views,validRange,resize,frame,syncer,interaction,readout,toolbar,bind,inspector,fullscreen,library};
   if(typeof window!=='undefined')window.SpikeChartTools=api;
   if(typeof module!=='undefined')module.exports=api;
 })();
