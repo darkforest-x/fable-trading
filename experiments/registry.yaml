@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-mainwave-confirmation-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "7330342dd6"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Permit a 12H long only following a prior observable, plan-qualified 5m BitLanglang main-wave setup, within its original 10-day window and before the first 5m close below the original box bottom."
+    result: "Only the 2023-01 to 2026-09 teacher overlap is available. 160 eligible real entries, 151 funded; 1000U to 1109.62U, 31.79% wins, cash payoff 2.530, drawdown bound 20.92%. Unscreened 12H longs 1207.15U; matched signal account 949.38U and later non-signals 982.61U, extra slippage 1093.37U. Reuses the corrected Binance history. Teacher profits not imported."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-mainwave-confirmation-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af811a903bc61c2b8a0db4."
+
   - experiment_id: exp-cloud-close-binance-gap-repair-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "cb84ddd611"
