@@ -1,0 +1,8 @@
+{
+  "id": "exp-cloud-close-slots-20261109-v1",
+  "parent": "exp-cloud-close-scaleout-20261109-v1",
+  "question": "Does changing only the number of equal-notional slots raise terminal wealth while preserving the development-selected scale-out exit's win rate, payoff and drawdown?",
+  "single_variable": "Shared account capacity [1,3,6,9,12,18,24] unlevered equal positions. Original CRC same-boundary priority, actual collateral for every accepted trade, only one position per symbol, original scale-out legs. Fewer slots concentrate positions and more slots admit a larger share of simultaneous signals.",
+  "selection": "Before inspecting new slot-count outcomes: use only the scale-out development pick. Among capacities with >=100 development completions, >=30% net wins, >=2.5 equal-notional net payoff and conservative hourly DD<=35%, select highest development account growth. If none qualify, retain 12 and show the highest-growth capacity descriptively. No selection on 2025/26. This follow-up was motivated by the parent result; its later period has been seen.",
+  "command": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_slots"
+}
