@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-equity-stop-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "5a91fb2e68"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "When H1 closing equity drops 15%, 25%, or 35% from its current risk-cycle close peak, flatten open positions next available open, then re-admit only fresh 12H signals; lifetime DD never resets. Native VectorBT nine-slot shared wallet."
+    result: "Frozen no-trigger 1922-position ledger and all period metrics reproduced. With 15%, 25%, 35% triggers final NAV 21007.37U, 34164.64U, 20288.58U. Wins 33.69%, 33.10%, 33.22%; realized money payoffs 2.761, 2.964, 2.838. Actual open/close-marked drawdowns already 37.33%, 43.84%, 48.56%; upper bounds 38.05%, 44.76%, 49.74%. No development selection. No missing held-quote hours or delayed actual forced fills."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-equity-stop-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af8139b8ece891e711f10b."
+
   - experiment_id: exp-cloud-close-drawdown-bounds-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "96e0f44d88"

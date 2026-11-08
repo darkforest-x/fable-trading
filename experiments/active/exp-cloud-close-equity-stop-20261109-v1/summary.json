@@ -1,0 +1,346 @@
+{
+  "experiment": "exp-cloud-close-equity-stop-20261109-v1",
+  "engine": "VectorBT 1.2.0 Portfolio.from_order_func",
+  "pick_threshold": null,
+  "development_eligible": [],
+  "development_gates": {
+    "min_trades": 100,
+    "min_win_pct": 30.0,
+    "min_equal_notional_payoff": 2.5,
+    "min_cash_payoff": 2.5,
+    "max_conservative_dd_pct": 35.0
+  },
+  "zero_threshold_exact_parity": {
+    "all": {
+      "final_usdt": {
+        "actual": 27432.017158220166,
+        "artifact": 27432.017158220166,
+        "passed": true,
+        "atol": 0.005
+      },
+      "multiple": {
+        "actual": 27.432017158220166,
+        "artifact": 27.432017158220166,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "dd_mark_pct": {
+        "actual": 48.04193343660219,
+        "artifact": 48.04193343660219,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "dd_bound_pct": {
+        "actual": 53.30569300139284,
+        "artifact": 53.30569300139284,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "trades": {
+        "actual": 1922.0,
+        "artifact": 1922.0,
+        "passed": true,
+        "atol": 1e-06
+      },
+      "win_pct": {
+        "actual": 33.1945889698231,
+        "artifact": 33.1945889698231,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "payoff": {
+        "actual": 4.081679745830103,
+        "artifact": 4.081679745830103,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "payoff_usdt": {
+        "actual": 2.8220677374480836,
+        "artifact": 2.8220677374480836,
+        "passed": true,
+        "atol": 2e-06
+      }
+    },
+    "dev": {
+      "final_usdt": {
+        "actual": 20464.12757724768,
+        "artifact": 20464.12757724768,
+        "passed": true,
+        "atol": 0.005
+      },
+      "multiple": {
+        "actual": 20.46412757724768,
+        "artifact": 20.46412757724768,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "dd_mark_pct": {
+        "actual": 48.04193343660219,
+        "artifact": 48.04193343660219,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "dd_bound_pct": {
+        "actual": 51.620861498795904,
+        "artifact": 51.620861498795904,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "trades": {
+        "actual": 1347.0,
+        "artifact": 1347.0,
+        "passed": true,
+        "atol": 1e-06
+      },
+      "win_pct": {
+        "actual": 34.44691907943579,
+        "artifact": 34.44691907943579,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "payoff": {
+        "actual": 4.427736485447638,
+        "artifact": 4.427736485447638,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "payoff_usdt": {
+        "actual": 3.0297806087379406,
+        "artifact": 3.0297806087379406,
+        "passed": true,
+        "atol": 2e-06
+      }
+    },
+    "2025": {
+      "final_usdt": {
+        "actual": 24588.527497700616,
+        "artifact": 24588.527497700616,
+        "passed": true,
+        "atol": 0.005
+      },
+      "multiple": {
+        "actual": 1.2015429147851142,
+        "artifact": 1.2015429147851142,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "dd_mark_pct": {
+        "actual": 45.69777228224745,
+        "artifact": 45.69777228224745,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "dd_bound_pct": {
+        "actual": 53.30569300139284,
+        "artifact": 53.30569300139284,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "trades": {
+        "actual": 302.0,
+        "artifact": 302.0,
+        "passed": true,
+        "atol": 1e-06
+      },
+      "win_pct": {
+        "actual": 24.17218543046358,
+        "artifact": 24.17218543046358,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "payoff": {
+        "actual": 3.1968670115495383,
+        "artifact": 3.1968670115495383,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "payoff_usdt": {
+        "actual": 2.873264431094082,
+        "artifact": 2.873264431094082,
+        "passed": true,
+        "atol": 2e-06
+      }
+    },
+    "2026": {
+      "final_usdt": {
+        "actual": 27432.017158220166,
+        "artifact": 27432.017158220166,
+        "passed": true,
+        "atol": 0.005
+      },
+      "multiple": {
+        "actual": 1.1156429420503304,
+        "artifact": 1.1156429420503304,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "dd_mark_pct": {
+        "actual": 23.21421916568823,
+        "artifact": 23.21421916568823,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "dd_bound_pct": {
+        "actual": 26.803395132797093,
+        "artifact": 26.803395132797093,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "trades": {
+        "actual": 258.0,
+        "artifact": 258.0,
+        "passed": true,
+        "atol": 1e-06
+      },
+      "win_pct": {
+        "actual": 34.10852713178294,
+        "artifact": 34.10852713178294,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "payoff": {
+        "actual": 2.593711368513796,
+        "artifact": 2.593711368513796,
+        "passed": true,
+        "atol": 2e-06
+      },
+      "payoff_usdt": {
+        "actual": 2.5619219816274295,
+        "artifact": 2.5619219816274295,
+        "passed": true,
+        "atol": 2e-06
+      }
+    }
+  },
+  "static_zero_roster": {
+    "count": 1922,
+    "rejections": {
+      "same_contract": 598,
+      "all_slots_busy": 9260
+    }
+  },
+  "checks": {},
+  "audits": {
+    "0": {
+      "drawdown_threshold": 0.0,
+      "candidates": 11780,
+      "admitted": 1922,
+      "same_contract_rejected": 598,
+      "all_slots_rejected": 9260,
+      "equity_stop_blocked": 0,
+      "unfundable": 0,
+      "triggers": 0,
+      "completed_liquidation_cycles": 0,
+      "forced_exits": 0,
+      "delayed_forced_exits": 0,
+      "maximum_forced_exit_delay_hours": 0,
+      "native_exit_suppressed_same_hour": 0,
+      "unquoted_position_hours": 0,
+      "static_admit_count": 1922,
+      "static_admit_rejections": {
+        "same_contract": 598,
+        "all_slots_busy": 9260
+      },
+      "static_roster_match": true,
+      "static_slot_assignment_match": true,
+      "new_dynamic_admissions": 0,
+      "static_admissions_missing_dynamically": 0,
+      "vectorbt_version": "1.2.0",
+      "orders": 3844,
+      "cash_from_orders": 27432.0171772319,
+      "final_cash_pnl": 27432.017177231897,
+      "input_quote_rows": 6666181
+    },
+    "15": {
+      "drawdown_threshold": 0.15,
+      "candidates": 11780,
+      "admitted": 2152,
+      "same_contract_rejected": 536,
+      "all_slots_rejected": 9090,
+      "equity_stop_blocked": 2,
+      "unfundable": 0,
+      "triggers": 37,
+      "completed_liquidation_cycles": 37,
+      "forced_exits": 217,
+      "delayed_forced_exits": 0,
+      "maximum_forced_exit_delay_hours": 0,
+      "native_exit_suppressed_same_hour": 11,
+      "unquoted_position_hours": 0,
+      "static_admit_count": 1922,
+      "static_admit_rejections": {
+        "same_contract": 598,
+        "all_slots_busy": 9260
+      },
+      "static_roster_match": false,
+      "static_slot_assignment_match": false,
+      "new_dynamic_admissions": 380,
+      "static_admissions_missing_dynamically": 150,
+      "vectorbt_version": "1.2.0",
+      "orders": 4304,
+      "cash_from_orders": 21007.372107874642,
+      "final_cash_pnl": 21007.372107874617,
+      "input_quote_rows": 6666181
+    },
+    "25": {
+      "drawdown_threshold": 0.25,
+      "candidates": 11780,
+      "admitted": 2030,
+      "same_contract_rejected": 572,
+      "all_slots_rejected": 9178,
+      "equity_stop_blocked": 0,
+      "unfundable": 0,
+      "triggers": 13,
+      "completed_liquidation_cycles": 13,
+      "forced_exits": 88,
+      "delayed_forced_exits": 0,
+      "maximum_forced_exit_delay_hours": 0,
+      "native_exit_suppressed_same_hour": 1,
+      "unquoted_position_hours": 0,
+      "static_admit_count": 1922,
+      "static_admit_rejections": {
+        "same_contract": 598,
+        "all_slots_busy": 9260
+      },
+      "static_roster_match": false,
+      "static_slot_assignment_match": false,
+      "new_dynamic_admissions": 177,
+      "static_admissions_missing_dynamically": 69,
+      "vectorbt_version": "1.2.0",
+      "orders": 4060,
+      "cash_from_orders": 34164.64282618546,
+      "final_cash_pnl": 34164.642826185445,
+      "input_quote_rows": 6666181
+    },
+    "35": {
+      "drawdown_threshold": 0.35,
+      "candidates": 11780,
+      "admitted": 1999,
+      "same_contract_rejected": 582,
+      "all_slots_rejected": 9199,
+      "equity_stop_blocked": 0,
+      "unfundable": 0,
+      "triggers": 7,
+      "completed_liquidation_cycles": 7,
+      "forced_exits": 51,
+      "delayed_forced_exits": 0,
+      "maximum_forced_exit_delay_hours": 0,
+      "native_exit_suppressed_same_hour": 1,
+      "unquoted_position_hours": 0,
+      "static_admit_count": 1922,
+      "static_admit_rejections": {
+        "same_contract": 598,
+        "all_slots_busy": 9260
+      },
+      "static_roster_match": false,
+      "static_slot_assignment_match": false,
+      "new_dynamic_admissions": 126,
+      "static_admissions_missing_dynamically": 49,
+      "vectorbt_version": "1.2.0",
+      "orders": 3998,
+      "cash_from_orders": 20288.57703483885,
+      "final_cash_pnl": 20288.577034838825,
+      "input_quote_rows": 6666181
+    }
+  },
+  "note": "Paired controls and additional 5bp market-slippage account run only if a nonzero threshold passes all preregistered development gates."
+}
