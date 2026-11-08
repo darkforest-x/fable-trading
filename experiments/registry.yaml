@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-highwin-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2eb85c8053
+    status: rejected
+    question: Can the seven-alt 12H reclaim-to-near-Monday-edge rule meet 60 percent fee-net wins and positive net R in each year?
+    single_variable: Label the common first executable weekly reclaim as aligned or counter to EMA20/50. Static target, extension-based 3 percent stop, 48h time exit, same following hour open and costs.
+    result: 420 signals, 272 wins (64.76 percent), +0.0205R/trade. 2025 +0.0752R at 65.84 percent; 2026 -0.0302R at 63.76 percent. 10bp per market fill turns combined mean to -0.0129R. Against 419 pairs in the same coin/week/direction/session, +0.1793R on average; 2026 difference interval includes zero. Neither EMA subset meets both yearly gates.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-cloud-highwin-20261109-v1/results.json
+    notes: Native Nautilus 1.231.0, 1H OHLC, two ambiguous signal exits, actual-fill 2bp maker and 5bp taker, no funding. 7b8306d191 froze design. Data and controls in sibling entries.csv and trades.csv. Notion 4128856479af812caad5e7bf4bf071f6.
+
   - experiment_id: exp-cloud-fvg-pilot-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 24e11f5c18
