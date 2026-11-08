@@ -1,0 +1,87 @@
+{
+  "experiment_id": "exp-monday-breadth-extension-20261108-v1/alt",
+  "candidate_id": "freq36_ALT",
+  "status": "completed_from_saved_price_funding_and_native_control_outputs",
+  "builder": "yoyo/evaluation/monday_breadth_extension_alt.py",
+  "builder_commits": {
+    "funding_audit": "67416e9dbd",
+    "oos_trajectory": "0281d5ee72"
+  },
+  "source_lock": "experiments/active/exp-monday-breadth-frequency-20261108-v1/fixed/locked_events.parquet",
+  "locked_entries": 239,
+  "locked_constituents": 6865,
+  "entry_clock": "locked decision open; known + 0 minutes",
+  "minimum_entry_gap_hours": 24,
+  "maximum_holding_hours": 24,
+  "fees": {
+    "entry_taker_rate": 0.0005,
+    "exit_taker_rate": 0.0005,
+    "funding": "charged at actual symbol-month settlement times when verified"
+  },
+  "strategies": [
+    "baseline_6h",
+    "fixed_12h",
+    "fixed_24h",
+    "close6_green_to_12h",
+    "close6_green_to_24h"
+  ],
+  "conditional_rule": "At 6h, a constituent with close_6h / entry_open - 1 > 0 exits at the selected 12h or 24h next-bar open; otherwise it exits at the 6h next-bar open.",
+  "selection": {
+    "development_periods": ["pre2023", "2023_2024", "2025"],
+    "uses_2026_for_selection": false,
+    "selected_diagnostic": "close6_green_to_24h",
+    "selection_gate": "All three development-period paired mean deltas are positive; rank by minimum clipped paired-delta LCB.",
+    "inferential_status": "The minimum development-period clipped paired-delta LCB is negative; this is a selected diagnostic, not a passed statistical gate."
+  },
+  "control": {
+    "method": "Existing same-symbol, same-random-time matched controls; same selected exit, native VectorBT fills, paired by event/member.",
+    "minimum_member_support_pct": 80,
+    "eligible_oos_events": 13,
+    "total_oos_events": 25,
+    "monthly_permutation_and_holm_outputs": "selection.csv"
+  },
+  "funding_evidence": {
+    "source_policy": "Local symbol-month history first; targeted public archive only for required missing months.",
+    "clock_validation": "Use official per-settlement funding_interval_hours where present; missing settlements are not zero-filled.",
+    "coverage_and_unresolved_rows": "funding_coverage.csv and funding_fill_ledger_2026.parquet",
+    "note": "The saved ALT audit contains remaining incomplete long-horizon funding rows; baseline reconciliation is separately documented by the parent task."
+  },
+  "risk_trajectory": {
+    "file": "oos_trajectory.csv.gz",
+    "drawdown_file": "oos_drawdown.csv",
+    "method": "2026 constituent marks, event-time member average, fixed-notional additive returns; no compounding."
+  },
+  "outputs": [
+    "actual_member_price_inputs.parquet",
+    "actual_oos_path_marks.parquet",
+    "actual_price_source_receipts.json.gz",
+    "baseline_parity.csv",
+    "constituent_exit_distribution_price_only.csv",
+    "constituent_post6_returns.parquet",
+    "control_member_draws.parquet",
+    "control_native_vectorbt_fills.parquet",
+    "control_paired_events.csv",
+    "control_quote_rows_before_merge.parquet",
+    "event_results.csv.gz",
+    "event_results_price_only.csv.gz",
+    "fold_summary.csv",
+    "fold_summary_price_only.csv",
+    "funding_baseline_parity.csv",
+    "funding_coverage.csv",
+    "funding_fill_ledger_2026.parquet",
+    "funding_history_used_2026.parquet",
+    "member_strategy_returns.parquet",
+    "oos_drawdown.csv",
+    "oos_trajectory.csv.gz",
+    "price_quote_rows_before_merge.parquet",
+    "price_quote_rows_before_merge_receipts.json.gz",
+    "price_stage.json",
+    "price_stage_period_summary.csv",
+    "price_stage_summary.csv",
+    "random_funding_fill_ledger.parquet",
+    "selection.csv",
+    "selection.json",
+    "selection_price_only.csv",
+    "six_hour_winner_followthrough.csv"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "candidate_id": "freq36_ALT",
+  "frozen_entries": 239,
+  "development_periods_only": [
+    "pre2023",
+    "2023_2024",
+    "2025"
+  ],
+  "selection_rule": "Prefer candidates with candidate-minus-baseline event-mean net deltas >0 in all three folds; rank those by minimum fold clipped paired-difference LCB. If none pass, report best diagnostic by positive-fold count then the same minimum LCB.",
+  "paired_difference_lcb": "Clip event-level candidate-minus-same-event/same-members baseline deltas to +/-20 percentage points; LCB = mean - 1.28*SE.",
+  "2026_used_for_selection": false,
+  "selected_candidate": "close6_green_to_24h",
+  "selection_status": "selected_by_all_three_positive_then_min_clipped_paired_delta_lcb",
+  "entry_spacing_min_hours": 24,
+  "maximum_member_hold_hours": 24,
+  "max_hold_compatible_with_original_entry_interval": true,
+  "fold_boundary_purge": "For each fold, candidate positions must finish strictly before the next fold boundary using the candidate's maximum possible hold (6/12/24h). All 239 entries remain in the raw ledger; boundary-censored event returns are excluded only from that fold metric."
+}
