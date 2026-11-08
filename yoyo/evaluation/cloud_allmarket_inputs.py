@@ -55,10 +55,12 @@ TOP20_SYMBOLS = set(json.loads(TOP20_RANKING.read_text())["top20"][i]["symbol"]
 DELISTED_CRYPTO = {
     "ICX": {
         "notice": "https://www.okx.com/help/okx-to-delist-perpetual-futures-for-icxusdt",
+        "delist_time_ms": int(pd.Timestamp("2026-09-17T08:00:00Z").timestamp() * 1000),
         "basis": "OKX official delisting notice + archived OKX USDT-swap OHLC",
     },
     "LRC": {
         "notice": "https://www.okx.com/help/okx-to-delist-perpetual-futures-for-lrcusdt",
+        "delist_time_ms": int(pd.Timestamp("2026-07-20T08:00:00Z").timestamp() * 1000),
         "basis": "OKX official delisting notice + archived OKX USDT-swap OHLC",
     },
 }
@@ -183,7 +185,7 @@ def build_universe(rows: list[dict], fetched_at: str) -> tuple[pd.DataFrame, dic
             is_current=False, cohort="archived_crypto_delisted_notice", top20=False,
             asset_class="crypto", category_evidence="OKX perpetual delisting notice; historical category snapshot unavailable",
             archive_basis=meta["basis"] + f"; notice={meta['notice']}; list_time is earliest observed archive bar, not official listing time",
-            current_inst_category="", rest_allowed=False, archive_end_ms=CUTOFF))
+            current_inst_category="", rest_allowed=False, archive_end_ms=meta["delist_time_ms"]))
 
     df = pd.DataFrame(records).drop_duplicates("instId", keep="first")
     df["top20"] = df["top20"].astype(bool)
@@ -549,12 +551,19 @@ def write_top20_receipt(spec: dict) -> dict:
 
 def run() -> None:
     EXP.mkdir(parents=True, exist_ok=True)
-    all_rows, fetched_at = raw_instruments()
-    # Keep raw official market snapshot used to define category and instrument IDs.
     snapshot = EXP / "instruments_snapshot.json.gz"
-    with gzip.open(snapshot, "wt") as handle:
-        json.dump({"fetched_at_utc": fetched_at, "endpoint": API + "/public/instruments?instType=SWAP",
-                   "data": all_rows}, handle, separators=(",", ":"))
+    # Reruns must use the original instrument universe, even after delistings or
+    # same-symbol category changes. Query live instruments only for a fresh run.
+    if snapshot.exists():
+        with gzip.open(snapshot, "rt") as handle:
+            frozen = json.load(handle)
+        all_rows, fetched_at = frozen["data"], frozen["fetched_at_utc"]
+    else:
+        all_rows, fetched_at = raw_instruments()
+        with gzip.open(snapshot, "wt") as handle:
+            json.dump({"fetched_at_utc": fetched_at,
+                       "endpoint": API + "/public/instruments?instType=SWAP",
+                       "data": all_rows}, handle, separators=(",", ":"))
     universe, meta = build_universe(all_rows, fetched_at)
     universe.to_csv(EXP / "universe.csv", index=False)
     dump_json(EXP / "market_meta.json", meta)
@@ -590,6 +599,11 @@ def run() -> None:
                      "last1h_open_ms": r.get("bars1h", {}).get("last_open_ms"),
                      "ready_ny_mondays": r.get("bars1h", {}).get("complete_ny_mondays"),
                      "closed_ny_mondays": r.get("bars1h", {}).get("closed_ny_mondays"),
+                     "missing_ny_mondays": json.dumps(r.get("bars1h", {}).get("missing_ny_mondays", []), separators=(",", ":")),
+                     "data_cutoff_ms": r.get("data_cutoff_ms", CUTOFF),
+                     "usable": r.get("usable", False),
+                     "transport_error": r.get("transport_error", False),
+                     "audit_state": r.get("audit_state", ""),
                      "archive_basis": r.get("archive_basis", ""),
                      "error": r.get("error", ""), "receipt_path": f"inputs/{r.get('symbol')}/receipt.json"}
                     for r in receipts)
