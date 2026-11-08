@@ -1,0 +1,8 @@
+{
+  "id": "exp-cloud-close-reclaim-failure-20261109-v1",
+  "factor": "Exit when price closes back through the original touched Monday 1.618 reference against the trade. Vary only the complete, UTC-aligned confirmation bar duration (1H, 4H, 12H, or original without such exit). No touch-only exit or same-bar retrospective fill. Use the first following observed hourly open. Native gap/stale, pre-existing protective opening exits and resting target opening fills retain priority. Original unconditional stop, cloud flip and 75% at 2R remain active within each hour.",
+  "hours": [1, 4, 12],
+  "parent": "Original 90-day coverage OKX account, 1000U, nine slots, low prior ATR priority. Both legs use the same active barrier. For the later matched non-signal the parent's touched level divided by parent's actual entry is transferred to its own entry, preserving signed relative geometry. No execution before original 12H confirmation.",
+  "selection": "Maximize pre-2025 ending NAV with >=100 closed positions, >=30% wins, >=2.5 percentage and cash payoff and conservative hourly DD bound <=35%. For qualifying new choice save hourly equity and trades, paired controls, and +5bp market slippage stress. Post-2024 dates previously explored. Market fee 5bp, resting target 2bp, no funding/depth modeling.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_reclaim_failure"
+}

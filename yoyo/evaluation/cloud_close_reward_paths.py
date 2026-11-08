@@ -53,13 +53,15 @@ REASON_NAMES = {
     7: "data_gap_markout",
     8: "series_tail_close",
     9: "stale_12h_markout",
+    10: "reclaim_failed_at_close",
 }
 PHASE_NAMES = {1: "intrabar", 2: "open", 3: "close"}
 
 
 @njit(cache=True)
 def _order_func(c, q, bar_ms, starts, ends, sides, stops, targets,
-                tp_rs, n_tp, reasons, phases, ambiguous, gap_flags, gap_hours):
+                tp_rs, n_tp, reasons, phases, ambiguous, gap_flags, gap_hours,
+                reclaim_levels=None, reclaim_hours=0):
     """Emit VectorBT orders at the open or the first active intrabar barrier."""
     col = c.from_col
     start = starts[col]
@@ -97,6 +99,11 @@ def _order_func(c, q, bar_ms, starts, ends, sides, stops, targets,
         reason = 4
     elif target_open:
         reason, price, fee = 6, target, MAKER
+    elif (reclaim_hours > 0 and reclaim_levels is not None and c.i >= reclaim_hours
+          and bar_ms[pos] % (HOUR_MS * reclaim_hours) == 0
+          and bar_ms[pos]-bar_ms[pos-reclaim_hours] == HOUR_MS * reclaim_hours
+          and (q[pos-1,3]-reclaim_levels[col])*side < 0.):
+        reason = 10
     elif hit_stop or hit_flip:
         # The two protective barriers lie on the same side. Approaching from
         # the open, price reaches the nearer one first, including triple hits.
@@ -488,7 +495,7 @@ def _safe_path_end(start_i: int, side: int, q: np.ndarray, bar_ms: np.ndarray) -
 
 
 def _simulate_symbol(events: list[dict], q: np.ndarray, bar_ms: np.ndarray,
-                     tp_rs: tuple[float, ...], batch_size: int) -> tuple[list[dict], dict]:
+                     tp_rs: tuple[float, ...], batch_size: int, *, reclaim_hours: int = 0) -> tuple[list[dict], dict]:
     executable = [e for e in events if e.get("entry_i") is not None
                   and e.get("entry_price") is not None and e.get("stop_price") is not None]
     pre_rows = []
@@ -535,9 +542,10 @@ def _simulate_symbol(events: list[dict], q: np.ndarray, bar_ms: np.ndarray,
         gap_flags = np.zeros(n_cols, dtype=np.bool_)
         gap_hours = np.zeros(n_cols, dtype=np.int16)
         capital = np.maximum(np.repeat(np.asarray([e["entry_price"] for e in batch]), n_tp), 1.0)*10.0
+        reclaim_levels = np.repeat([e["reclaim_level"] for e in batch], n_tp) if reclaim_hours else None
         portfolio = vbt.Portfolio.from_order_func(
             marked, _order_func, q, bar_ms, starts, ends, sides, stops, targets,
-            tp_col, n_tp, reason_codes, phase_codes, ambiguous, gap_flags, gap_hours,
+            tp_col, n_tp, reason_codes, phase_codes, ambiguous, gap_flags, gap_hours, reclaim_levels, reclaim_hours,
             flexible=True, init_cash=capital, cash_sharing=False, group_by=False,
             max_orders=2*n_cols, freq="1h")
         order_records = pd.DataFrame(portfolio.orders.records).sort_values(["col", "id"])
