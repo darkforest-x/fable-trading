@@ -984,6 +984,7 @@ def run(*, prices_only: bool = False) -> dict:
         cached = actual
         empty_members = members.iloc[:0][["symbol", "decision"]]
         quotes, _, random_receipts = load_quotes_for_entries(empty_members, matches)
+        quotes.to_parquet(OUT / "control_quote_rows_before_merge.parquet", index=False)
         mark_rows = pd.read_parquet(OUT / "actual_oos_path_marks.parquet")
         oos_paths = {
             (str(symbol), pd.Timestamp(entry).tz_convert("UTC")): group.sort_values("step_5m").mark_price.to_numpy(dtype=float)
@@ -995,6 +996,11 @@ def run(*, prices_only: bool = False) -> dict:
     else:
         cached = load_member_payoff_cache(members)
         quotes, oos_paths, price_receipts = load_quotes_for_entries(members, matches)
+        quote_name = "price_quote_rows_before_merge.parquet" if prices_only else "all_quote_rows_before_merge.parquet"
+        quotes.to_parquet(OUT / quote_name, index=False)
+        with gzip.open(OUT / quote_name.replace(".parquet", "_receipts.json.gz"), "wt", encoding="utf-8") as f:
+            json.dump({"symbols_loaded": len(price_receipts), "source_receipts": price_receipts},
+                      f, indent=2, ensure_ascii=False, default=str)
         actual = add_actual_close_decisions(cached, quotes)
         actual.to_parquet(actual_input, index=False)
         if oos_paths:
