@@ -1,0 +1,9 @@
+{
+  "universe": "exp-top20-1618-short-marks-20261031-v1/ranking.json",
+  "cutoff_utc": "2026-11-08T12:00:00Z",
+  "threshold_r_strictly_greater_than": 10,
+  "indicator": "spike_signal_cloud_v1_7.pine; all completed native UTC12H candles, default stops",
+  "bounds": "historical 12H lower bound >10 = hit; only upper >10 = possible; incomplete path below threshold = censored; resolved upper <=10 = miss",
+  "features": "Confirmation-time descriptors. Development through 2024; compare 2025 and 2026. Inclusive current and archived listing labels are identifiable per row.",
+  "commands": [".venv/bin/python -m yoyo.evaluation.cloud_peak10_inputs", ".venv/bin/python -m yoyo.evaluation.cloud_peak10_census", ".venv/bin/python -m yoyo.evaluation.cloud_peak10_patterns"]
+}
