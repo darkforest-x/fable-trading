@@ -234,6 +234,25 @@ def build(workers):
     return frame
 
 
+def export_picks(events):
+    """Write the two disjoint-label selections separately for each timeframe."""
+    for tf in TFS:
+        labels = events[f"label_{tf}"]
+        keep = labels.isin(["regular", "absorption"]) & events.net_bp.notna()
+        picked = events.loc[keep, ["event", "symbol", "side", "touch_minute_ms",
+                                   "entry_limit", f"label_{tf}", f"pivot_minute_ms_{tf}",
+                                   f"pivot_price_{tf}", f"cvd_diff_min_{tf}",
+                                   f"cvd_diff_max_{tf}", "tick_exact", "net_bp"]].copy()
+        picked.columns = ["事件", "合约", "方向", "触价分钟_UTC", "挂单价", "订单流类型",
+                          "参照极值分钟_UTC", "参照价格", "CVD差下界_基础币量",
+                          "CVD差上界_基础币量", "触价逐笔已核对", "扣费净收益_bp"]
+        for col in ["触价分钟_UTC", "参照极值分钟_UTC"]:
+            picked[col] = pd.to_datetime(picked[col], unit="ms", utc=True).dt.strftime("%Y-%m-%d %H:%M")
+        picked["方向"] = picked["方向"].map({1: "多", -1: "空"})
+        picked["订单流类型"] = picked["订单流类型"].map({"regular": "常规背离", "absorption": "吸收候选"})
+        picked.to_csv(EXP / f"divergent_{tf}.csv", index=False, encoding="utf-8-sig")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--workers", type=int, default=6)
@@ -247,6 +266,7 @@ def main():
         tmp.replace(events_file)
     else:
         events = pd.read_csv(events_file)
+    export_picks(events)
     from yoyo.evaluation.monday_flow_divergence_stats import summarize, plot
     summary = summarize(events)
     summary["builder_commit"] = subprocess.check_output(["git", "log", "-1", "--format=%H", "--", __file__], cwd=ROOT, text=True).strip()
