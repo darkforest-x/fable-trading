@@ -1,4 +1,5 @@
 """Small audit and counts to accompany the all-market V1.7 per-signal ledger."""
+import json
 import pandas as pd
 from yoyo.evaluation.cloud_allmarket_census import EXP,TOP,OLD
 from yoyo.evaluation.cloud_peak10_inputs import dump
@@ -35,6 +36,13 @@ def main():
         yearly_primary={str(k):totals(g) for k,g in new.groupby(new.confirmed_bjt.str[:4])},
         first_detected_10r_bar_after_confirmation_days={str(k):float(v) for k,v in days.quantile([.25,.5,.75]).items()},
         checksum_original_top20='all 1292 weekly keys, outcomes and two lower-bound R series compared row by row')
+    gaps=[]
+    for receipt in sorted((EXP/'inputs').glob('*/receipt.json')):
+        v=json.loads(receipt.read_text())
+        for week in v.get('bars1h',{}).get('missing_ny_mondays',[]):
+            gaps.append({'币种':v['symbol'],'缺少完整行情的纽约周一':week,'范围':'新增合约，自起始日至研究截止或归档边界'})
+    pd.DataFrame(gaps,columns=['币种','缺少完整行情的纽约周一','范围']).to_csv(EXP/'新增合约缺失周一.csv',index=False,encoding='utf-8-sig')
+    out['new_contract_missing_monday_count']=len(gaps)
     dump(EXP/'coverage_and_totals.json',out)
 if __name__=='__main__':
     main()

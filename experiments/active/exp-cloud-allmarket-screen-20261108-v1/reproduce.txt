@@ -6,6 +6,7 @@ Dates are exchange/frozen timestamps, not the runtime clock. No orders or P&L.
 4. .venv/bin/python -m yoyo.evaluation.cloud_allmarket_screen
 5. .venv/bin/python -m yoyo.evaluation.cloud_allmarket_cross_section
 6. .venv/bin/python -m yoyo.evaluation.cloud_allmarket_cooldown
+7. .venv/bin/python -m yoyo.evaluation.cloud_allmarket_landmark
 The input receipts freeze completed official 12Hutc / NY Monday hourly OHLC and
 use existing OKX archives. Frozen Top20 histories are linked by symbol in code.
 Preserve ./inputs, ./work, market_meta.json, universe.csv and instruments_snapshot.json.gz.
