@@ -68,7 +68,9 @@ def admit(events, slots):
     return events.loc[selected.index].assign(slot=selected.slot), rejected
 
 
-def prepare(events, slots, start=START, end=END, *, assigned=None):
+def prepare(events, slots, start=START, end=END, *, assigned=None, quote_loader=None):
+    if quote_loader is None:
+        quote_loader = quotes
     selected, skips = admit(events, slots) if assigned is None else assigned
     count = (end - start) // HOUR
     # Stages in every hour: openings, exits observed at open, remaining exits at end.
@@ -81,7 +83,7 @@ def prepare(events, slots, start=START, end=END, *, assigned=None):
     fees = np.zeros(shape)
     gap_marks = 0
     for r in selected.itertuples():
-        clock, hourly = quotes(r.symbol)
+        clock, hourly = quote_loader(r.symbol)
         first = (int(r.entry_ms) - start) // HOUR
         last = (int(r.exit_bar_ms) - start) // HOUR
         if not 0 <= first <= last < count:

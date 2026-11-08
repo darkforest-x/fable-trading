@@ -1,0 +1,13 @@
+{
+  "id": "exp-cloud-close-binance-transfer-20261109-v1",
+  "question": "Does the development-selected OKX partial-profit account transfer to Binance UM history, and does the positive realized payoff survive?",
+  "factor": "Compare only the already fixed weights of the 2R closing leg, 0% (full V1.7 runner) versus 75%. Both portfolios have the same eligibility, low-prior-ATR priority, 9 slots and 1000 USDT initial equity. No local tuning.",
+  "frozen_source": "exp-signal-center-score-20261106-v1/results/symbols; only raw 12H signal id, week, direction, confirmed timestamp and absolute fixed stop. Never use its labels, prior result ranking or prices as fills. Original 632 historical Binance UM source jobs (626 native 5m, six native 1m aggregated to complete 5m); shared listed-to-2026 survivorship bias, differing historical coverage per asset.",
+  "period_start_utc": "2020-01-01T00:00:00Z",
+  "period_end_exclusive_utc": "2026-09-24T00:00:00Z",
+  "execution": "Use exactly complete UTC 1H and 12H OHLC from the same per-symbol native price series. Enter at first H1 open coincident with confirmed 12H close. Same native protective stop and intrabar EMA as OKX, optional 75% partial at a resting 2R from actual entry. Same adverse ambiguity convention. Missing 1H open or nonpositive initial risk is ineligible. Use actual 1H OHLC to mark the fully funded shared wallet.",
+  "eligibility": "The selected OKX coverage-only arm. Before signal key open, require 181 consecutive 12H closes and >=10 rankable contracts at this timestamp. Low previous Wilder ATR14/close priority, deterministic ties by base ticker CRC32. Pair a later non-signal control by week, side, EMA direction and causal prior ATR tolerance 25%, without outcome matching; retain only pairs whose two times pass the common eligibility.",
+  "economics": "Normalize to the owner's 5bp market/stop and 2bp resting-target single-side fees. Also stress each market fill by an extra 5bp. Without funding, order book capacity, or quantity/tick rounding. No Binance account fee claim.",
+  "validation": "Development through 2024, 2025 and incomplete 2026 reported separately; known source has also been explored on Binance. No independent live sample. Evaluate signal versus matched controls for frozen 75% portfolio plus 5bp extra impact. No outcome-selected symbols or parameters.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_binance_transfer"
+}

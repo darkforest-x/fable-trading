@@ -7,7 +7,7 @@ from yoyo.evaluation import cloud_close_reward_account as w
 EXP = w.ROOT / 'experiments/active/exp-cloud-close-scaleout-20261109-v1'
 
 
-def pair_data(runner, target, slots=12):
+def pair_data(runner, target, slots=12, *, start=w.START, end=w.END, quote_loader=None):
     if not np.array_equal(np.sort(runner.event_id),np.sort(target.event_id)):
         raise ValueError('Split legs have different event sets')
     first, skips = w.admit(runner,slots)
@@ -17,7 +17,7 @@ def pair_data(runner, target, slots=12):
     second['slot'] = first.slot.to_numpy()*2
     first['slot'] = first.slot*2+1
     merged = pd.concat([second,first],ignore_index=True)
-    return w.prepare(None,slots*2,assigned=(merged,skips))
+    return w.prepare(None,slots*2,start,end,assigned=(merged,skips),quote_loader=quote_loader)
 
 
 def simulate(data, fraction, slip=0., full_slots=0, slot_weights=None):
