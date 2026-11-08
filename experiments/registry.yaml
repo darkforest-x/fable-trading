@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-shadow-trend-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "a8fc6f6b0c"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Open original 12H signal only when lagged independent original two-thirds shadow portfolio gained over prior 90 days."
+    result: "OKX 8268 qualified keys, 1524.41U, wins 30.64%, cash payoff 2.480, DD upper 58.18%; Binance 13939 keys, 1945.97U, 31.07%, 2.508, 45.87%. Development and full fail on both."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-shadow-trend-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af815e97f7f13d884d557e."
+
+  - experiment_id: exp-cloud-close-shadow-recovery-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "1fbc84eb1e"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Post-hoc complement; execute keys only while lagged 90-day reference shadow portfolio return was nonpositive. No threshold change."
+    result: "OKX 3512 keys, 7121.79U, 38.83% wins, 2.786 cash payoff, DD upper 32.90%; Binance 8684 keys, 4682.27U, 35.32%, 2.745 and hourly DD upper 35.54%. Both below the original strategy in terminal wealth."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-shadow-recovery-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af8182acc8dec52ee34595."
+
   - experiment_id: exp-cloud-close-exit-rotation-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "b7bfa13e58"
