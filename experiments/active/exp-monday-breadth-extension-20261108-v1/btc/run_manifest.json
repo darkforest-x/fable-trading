@@ -1,0 +1,65 @@
+{
+  "experiment_id": "exp-monday-breadth-extension-20261108-v1",
+  "builder": "yoyo/evaluation/monday_breadth_extension_btc.py",
+  "git_revision": "28175307026b2568e3032dcca388b4b5d5441966",
+  "opportunity_input": "experiments/active/exp-monday-breadth-frequency-20261108-v1/fixed/locked_events.parquet",
+  "original_fill_source": "experiments/active/exp-monday-breadth-frequency-20261108-v1/fixed/locked_events.parquet (cached VectorBT 144h fixed-time outcomes; no baseline replay)",
+  "source_candidate_id": "freq36_BTC",
+  "expected_and_observed_original_alerts": 246,
+  "baseline_period_counts": {
+    "2020_2022": 81,
+    "2023_2024": 80,
+    "2025": 45,
+    "2026_to_ledger_end": 40
+  },
+  "trigger_clock": "The 246 locked alert times remain fixed. No cooldown reset, replacement entry, or additional fill is created after filtering.",
+  "entry_exit": "Entry at the locked 5m decision open; fixed 144h exit at the corresponding 5m open from the original locked VectorBT result.",
+  "trend_asof": "For each 5m entry time, use the most recent complete UTC 4h or 1d candle whose close time is <= entry time. Higher-timeframe candles require all 5m OHLC bars; EMAs require 20/50 consecutive complete candles and use only those closed candles.",
+  "rules": {
+    "4h_ema20": "last completed 4h close > EMA20",
+    "4h_ema50": "last completed 4h close > EMA50",
+    "1d_ema20": "last completed 1d close > EMA20",
+    "1d_ema50": "last completed 1d close > EMA50",
+    "4h_reclaim_ema20": "last completed 4h close > EMA20 and immediately prior completed 4h close <= its EMA20"
+  },
+  "frequency_gate": {
+    "2020_2022": 41,
+    "2023_2024": 40,
+    "2025": 24
+  },
+  "ranking": "Among frequency-eligible gates, sort by the smallest accepted-mean lift versus the same-period original opportunities across 2020-2022, 2023-2024, and 2025. 2026 does not select the gates.",
+  "costs": {
+    "entry_fee": 0.0005,
+    "exit_fee": 0.0005,
+    "fee_type": "taker / market on each fill",
+    "slippage": 0,
+    "fee_validation": "Reconstructed from local entry and 144h exit opens, then compared with the immutable locked VectorBT net_pct; maximum difference must be <= 1e-6 percentage points."
+  },
+  "2026_funding": "Realized BTC USD-M 2026 funding history and mark prices from the existing normalized local cache; funding cost is applied to the same fixed 144h entry/exit interval for actuals and random controls.",
+  "controls": {
+    "local_ohlc": "source receipt written separately",
+    "random_control_engine": "monday_breadth_reversal_window.trade_returns (VectorBT from_orders), 144h fixed market exit",
+    "draws_per_signal_max": 12,
+    "match_pool_rule": "same BTC, UTC decision month, UTC 6h block, prior 1h volatility bucket, prior 1h trend sign, NY weekdays, monitor fraction; past-only shock and lower-touch rules; no overlap with actual holding interval; then same HTF gate",
+    "control_pool_filter_applied_before_draw": true
+  },
+  "selection_inference": "Two-sided UTC-month block sign-flip p-values with Holm correction across the five pre-specified rules, separately for 2020-2025 development-period price-only incremental return, all-history price-only incremental return, 2026 funded incremental return, and 2026 funded matched-control edge.",
+  "primary_output_fields": [
+    "accept_<rule>",
+    "net_pct",
+    "gross_price_pct",
+    "total_fee_pct",
+    "period",
+    "per_original_opportunity_<rule>_net_pct",
+    "funded_net_pct",
+    "funding_points_cost",
+    "trend_filtered_match_pool_n",
+    "random_net_pct",
+    "random_funded_net_pct",
+    "worst_three_period_accepted_mean_lift_pp",
+    "frequency_gate_pass",
+    "price_month_p_holm_five_rules",
+    "2026_funded_month_p_holm_five_rules"
+  ],
+  "production_eligible": false
+}

@@ -1,0 +1,113 @@
+{
+  "symbol": "BTCUSDT",
+  "venue": "Binance USD-M",
+  "interval": "5m",
+  "columns": [
+    "open",
+    "high",
+    "low",
+    "close"
+  ],
+  "index": "UTC candle open time",
+  "requested_range_utc": {
+    "start": "2019-11-25T12:10:00+00:00",
+    "end": "2026-10-29T12:10:00+00:00",
+    "inclusive": true
+  },
+  "needed_intervals_utc": [],
+  "local_sources": [
+    {
+      "kind": "preholdout_base",
+      "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv",
+      "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv",
+      "aliases": [
+        "/Users/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv"
+      ],
+      "priority": 10,
+      "has_low": true,
+      "rows": 665856,
+      "invalid_timestamp_alignment": 0,
+      "bytes": 54081964,
+      "mtime_ns": 1788064735000000000
+    },
+    {
+      "kind": "forward",
+      "path": "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/BTCUSDT.csv",
+      "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/BTCUSDT.csv",
+      "aliases": [
+        "/Users/zhangzc/fable-trading/data/crypto/market/kline_binance_um5m_forward_20260922/series/BTCUSDT.csv"
+      ],
+      "priority": 20,
+      "has_low": true,
+      "rows": 41640,
+      "invalid_timestamp_alignment": 0,
+      "bytes": 3326725,
+      "mtime_ns": 1790091692000000000
+    },
+    {
+      "kind": "recent",
+      "path": "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/BTCUSDT.csv.gz",
+      "resolved_path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/BTCUSDT.csv.gz",
+      "aliases": [
+        "/Users/zhangzc/fable-trading/data/crypto/market/research-spike_v128_recent_20260923/series/BTCUSDT.csv.gz"
+      ],
+      "priority": 30,
+      "has_low": true,
+      "rows": 89904,
+      "invalid_timestamp_alignment": 0,
+      "bytes": 1657368,
+      "mtime_ns": 1790138569000000000
+    },
+    {
+      "kind": "full_ohlc_rest",
+      "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790136000000_1790364000000.csv.gz",
+      "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790136000000_1790364000000.csv.gz",
+      "aliases": [
+        "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790136000000_1790364000000.csv.gz"
+      ],
+      "priority": 60,
+      "has_low": true,
+      "rows": 761,
+      "invalid_timestamp_alignment": 0,
+      "bytes": 11032,
+      "mtime_ns": 1794073557261980692
+    },
+    {
+      "kind": "full_ohlc_rest",
+      "path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790364300000_1793662200000.csv.gz",
+      "resolved_path": "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790364300000_1793662200000.csv.gz",
+      "aliases": [
+        "/Users/zhangzc/fable-trading/data/research/monday_breadth_optimization_20261108_v1/payoffs/ohlc_rest/BTCUSDT/1790364300000_1793662200000.csv.gz"
+      ],
+      "priority": 60,
+      "has_low": true,
+      "rows": 9706,
+      "invalid_timestamp_alignment": 0,
+      "bytes": 151508,
+      "mtime_ns": 1794073920864959631
+    },
+    {
+      "low_recovered_from_matching_source": 0
+    }
+  ],
+  "excluded_source_lineage": [
+    {
+      "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/ma6_knot_1m_20261011/series/binance_um_BTCUSDT_1m_2059200.csv",
+      "reason": "source_not_in_5m_whitelist"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/research/ma6_knot_1m_20261011/series/binance_um_BTCUSDT_1m_2059200.csv",
+      "reason": "source_not_in_5m_whitelist"
+    }
+  ],
+  "rows": 718131,
+  "earliest_registered_source_ms": 1577836800000,
+  "observed_range_utc": {
+    "start": "2020-01-01T00:00:00+00:00",
+    "end": "2026-10-29T12:10:00+00:00"
+  },
+  "low_missing_rows_in_returned_frame": 0,
+  "rest_repairs": [],
+  "remaining_missing_full_ohlc_ranges": [],
+  "rest_endpoint": null
+}
