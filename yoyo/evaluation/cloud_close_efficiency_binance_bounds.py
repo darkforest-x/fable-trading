@@ -278,7 +278,7 @@ def _bar_rows_for_hours(config: dict, legs: pd.DataFrame,
                 ].copy(), audit
 
     CACHE.mkdir(parents=True, exist_ok=True)
-    if step_ms == FIVE_MIN:
+    if step_ms == FIVE_MIN and not config["resolution"].get("official_daily_primary", False):
         jobs_by_symbol = {job["symbol"].removesuffix("USDT"): job
                           for job in source_jobs() if job["group"] == "crypto_5m"}
         source_manifest = json.loads(INPUT_ARCHIVE_AUDIT.read_text(encoding="utf-8"))
@@ -331,8 +331,8 @@ def _bar_rows_for_hours(config: dict, legs: pd.DataFrame,
                  "resolution": "5m", "source": source_name,
                  "official_archive_provider": source_manifest["provider"],
                  "contracts": source_records, "rows": int(len(output))}
-    elif step_ms == ONE_MIN:
-        output, audit = _official_1m_rows(needed, cache_path)
+    elif step_ms in (ONE_MIN, FIVE_MIN):
+        output, audit = _official_rows(needed, cache_path, step_ms)
     else:
         raise ValueError(f"Unsupported subhour bar size: {step_ms}")
 
@@ -381,7 +381,10 @@ def _official_daily_bars(symbol: str, hour_ms: int, interval: str,
         with archive.open(members[0]) as handle:
             frame = pd.read_csv(handle, header=None, usecols=[0, 1, 2, 3, 4],
                                 names=["time", *OHLC])
+    if str(frame.time.iloc[0]).lower() in {"open_time", "open time"}:
+        frame = frame.iloc[1:].copy()
     frame["time"] = pd.to_numeric(frame.time, errors="raise").astype("int64")
+    frame[OHLC] = frame[OHLC].astype(float)
     frame = frame.loc[(frame.time >= hour_ms) & (frame.time < hour_ms + HOUR)].copy()
     expected = _expected_bar_times(hour_ms, step_ms)
     if not np.array_equal(frame.time.to_numpy(dtype=np.int64), expected):
@@ -393,16 +396,17 @@ def _official_daily_bars(symbol: str, hour_ms: int, interval: str,
     }
 
 
-def _official_1m_rows(needed: dict[str, list[int]], cache_path: Path) -> tuple[pd.DataFrame, dict]:
-    """Use checksum-verified Binance USD-M daily 1m archives for just the needed hours."""
+def _official_rows(needed: dict[str, list[int]], cache_path: Path, step_ms: int) -> tuple[pd.DataFrame, dict]:
+    """Use Binance USD-M daily archives for the selected contracts and hours."""
+    interval = "1m" if step_ms == ONE_MIN else "5m"
     records, archive_records = [], []
     for symbol, hour_stamps in sorted(needed.items()):
         for hour_ms in sorted(set(hour_stamps)):
-            frame, audit = _official_daily_bars(symbol, hour_ms, "1m", ONE_MIN)
+            frame, audit = _official_daily_bars(symbol, hour_ms, interval, step_ms)
             records.extend(frame.assign(symbol=symbol).to_dict("records"))
             archive_records.append(audit)
     return pd.DataFrame(records, columns=["time", *OHLC, "symbol"])[["symbol", "time", *OHLC]], {
-        "resolution": "1m", "source": "Binance official USD-M daily klines",
+        "resolution": interval, "source": "Binance official USD-M daily klines",
         "contracts_and_archives": archive_records, "rows": int(len(records)),
         "cache": str(cache_path.relative_to(ROOT)), "reused": False,
     }

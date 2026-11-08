@@ -68,12 +68,13 @@
   },
   "resolution": {
     "first_pass": "For each derived critical peak/trough hour, read the exact active Binance contracts' complete 12 native 5m bars, aggregate them to native Binance H1 OHLC, and apply the existing dd.hour_envelope calculation to the unchanged VectorBT hourly ledger.",
-    "five_minute_source": "Existing frozen 5m sources via monday_limit_reclaim_inputs.jobs() and signal_center_score.five_minute(); the source audit identifies Binance official data.binance.vision USD-M monthly klines.",
+    "five_minute_source": "Targeted Binance USD-M official daily 5m archives for only the active contracts in the two hours, cached and aggregated to their frozen native H1. Same venue and fields as the monthly archives; avoids probing the entire 633-symbol migrated source manifest.",
     "cache_root": "data/research/cloud_close_efficiency_binance_dd/",
     "fallback": "Only if the complete 5m upper bound still straddles 35%, use checksum-verified official Binance USD-M daily 1m klines for the same active contracts and exact candidate hours. Do not fetch a broad history.",
     "h1_integrity": "Each refined hour must aggregate exactly to the corrected Binance-native H1 OHLC; the envelope helper also checks the refined end NAV against the frozen H1 NAV.",
     "fee_bound_integrity": "The complete coarse fee-adjusted H1 candidate scan precedes source extraction. Fee deductions are applied only to coarse lower marks after refinement; candidate-window entry-fee upper marks remain in the refined envelope.",
-    "result_rule": "Report strict lower/upper drawdown bounds for full and development. If observed_lower_pct <= 35 <= refined_upper_pct after 1m, return unresolved."
+    "result_rule": "Report strict lower/upper drawdown bounds for full and development. If observed_lower_pct <= 35 <= refined_upper_pct after 1m, return unresolved.",
+    "official_daily_primary": true
   },
   "outputs": {
     "primary": "experiments/active/exp-cloud-close-efficient-trend-20261109-v1/binance_refinement.json",
