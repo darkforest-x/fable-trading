@@ -15,6 +15,7 @@ import gzip
 import json
 import subprocess
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -198,11 +199,10 @@ def load_quotes_for_entries(members: pd.DataFrame, controls: pd.DataFrame) -> tu
     random_requests = controls[["symbol", "random_entry"]].rename(columns={"random_entry": "entry_time"})
     requests = pd.concat([actual_requests, random_requests], ignore_index=True).drop_duplicates()
     requests["entry_time"] = pd.to_datetime(requests.entry_time, utc=True)
-    quote_rows: list[dict] = []
-    oos_paths: dict[tuple[str, pd.Timestamp], np.ndarray] = {}
-    receipts: list[dict] = []
     symbols = list(requests.groupby("symbol", sort=True))
-    for n, (symbol, task) in enumerate(symbols, 1):
+
+    def load_one(item):
+        symbol, task = item
         times = pd.DatetimeIndex(task.entry_time.unique()).sort_values()
         intervals = [(stamp, stamp + pd.Timedelta(hours=24)) for stamp in times]
         frame, proof = payoffs.load_full_ohlc(
@@ -211,7 +211,8 @@ def load_quotes_for_entries(members: pd.DataFrame, controls: pd.DataFrame) -> tu
         )
         if not frame.index.is_unique or not frame.index.is_monotonic_increasing:
             raise ValueError(f"Invalid local quote clock for {symbol}")
-        receipts.append({"symbol": str(symbol), **proof})
+        rows = []
+        paths = {}
         for entry_time in times:
             grid = pd.date_range(entry_time, periods=24 * 12 + 1, freq="5min")
             path = frame.reindex(grid)
@@ -242,7 +243,7 @@ def load_quotes_for_entries(members: pd.DataFrame, controls: pd.DataFrame) -> tu
                     100 * (x / row["close_6h"] - 1)
                     if row["close_6h"] > 0 and np.isfinite(x) else np.nan
                 )
-            quote_rows.append(row)
+            rows.append(row)
             if entry_time.year == 2026:
                 # Offset 0 is the entry open; later snapshots use the last
                 # completed close; offset 288 is the 24h liquidation open.
@@ -250,9 +251,19 @@ def load_quotes_for_entries(members: pd.DataFrame, controls: pd.DataFrame) -> tu
                 marks[0] = op[0]
                 marks[1:288] = cl[:287]
                 marks[288] = op[288]
-                oos_paths[(str(symbol), entry_time)] = marks
-        if n % 50 == 0 or n == len(symbols):
-            print(f"loaded local OHLC {n}/{len(symbols)} symbols", flush=True)
+                paths[(str(symbol), entry_time)] = marks
+        return str(symbol), rows, paths, {"symbol": str(symbol), **proof}
+
+    quote_rows: list[dict] = []
+    oos_paths: dict[tuple[str, pd.Timestamp], np.ndarray] = {}
+    receipts: list[dict] = []
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        for n, (symbol, rows, paths, proof) in enumerate(pool.map(load_one, symbols), 1):
+            quote_rows.extend(rows)
+            oos_paths.update(paths)
+            receipts.append(proof)
+            if n % 50 == 0 or n == len(symbols):
+                print(f"loaded local OHLC {n}/{len(symbols)} symbols", flush=True)
     quotes = pd.DataFrame(quote_rows)
     if quotes.duplicated(["symbol", "entry_time"]).any():
         raise ValueError("Duplicate quote row")
