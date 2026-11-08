@@ -151,11 +151,12 @@ def summarize(exp, cfg, out, checks):
             balance_control={f: float(g[g.role == 'control'][f].mean()) for f in feats},
             per_event=[dict(event=str(t), event_net=float(e.net_pct[t]), control_mean=float(cm.get(t, np.nan)),
                             controls=int(c.size().get(t, 0))) for t in e.index])
+    from yoyo.evaluation.monday_limit_be_scalein_compare import clean
     p = res['primary']['main']
     decision = {a: bool(p[a]['excess_ci95_pp'][0] > 0 and p[a]['excess_mean_pp'] > 0) for a in p}
-    dump(exp/'summary.json', dict(config=cfg, checks=checks, results=res, decision=decision,
+    dump(exp/'summary.json', clean(dict(config=cfg, checks=checks, results=res, decision=decision,
                                  source_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
-                                 training_eligible=False, production_eligible=False))
+                                 training_eligible=False, production_eligible=False)))
     print(json.dumps(checks))
     for pop in res:
         for arm in res[pop]:
@@ -166,6 +167,22 @@ def summarize(exp, cfg, out, checks):
     print('decision', decision)
 
 
+def summary_only(config):
+    """Re-summarize saved matches without re-running VectorBT; parity re-checked from the saved event rows."""
+    exp = config.resolve().parent
+    cfg = json.loads(config.read_text())
+    committed(CODE, str(config.resolve().relative_to(ROOT)))
+    out = pd.read_csv(exp/'matches.csv.gz', parse_dates=['event', 't'])
+    ev = pd.read_csv(ROOT/cfg['source_events'], usecols=['decision', 'asset', 'net_pct'], parse_dates=['decision'])
+    checks = {}
+    for asset, g in out[(out.population == 'primary') & (out.role == 'event')].groupby('asset'):
+        src = ev[ev.asset == asset].drop_duplicates('decision').set_index('decision').net_pct
+        got = g.drop_duplicates('event').set_index('event').net_pct
+        checks[asset] = dict(events=int(len(got)), max_abs_diff_pct=float((got-src.reindex(got.index)).abs().max()))
+    summarize(exp, cfg, out, checks)
+
+
 if __name__ == '__main__':
-    ap = argparse.ArgumentParser(); ap.add_argument('--config', type=Path, required=True)
-    run(ap.parse_args().config)
+    ap = argparse.ArgumentParser(); ap.add_argument('--config', type=Path, required=True); ap.add_argument('--summary', action='store_true')
+    a = ap.parse_args()
+    summary_only(a.config) if a.summary else run(a.config)
