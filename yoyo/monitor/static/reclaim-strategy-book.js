@@ -9,7 +9,8 @@
 (() => {
   'use strict';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const label=t=>({60:'60m',5:'5m'}[t]||t);
+  const BREADTH='breadth-ema20';
+  const label=t=>({60:'60m',5:'5m',[BREADTH]:'全市场下轨反弹'}[t]||t);
   // Stitch 1e1df06e25b64257b3f0de741e8f8c81: independent pre-touch account.
   const TITLES={'live-wick6x3':'插针收盘 · 6份3倍','live-wick3x3':'插针收盘 · 3份3倍','live-wick6x3hi':'插针收盘 · 6份3倍 · 高分加仓','live-wick3x3far':'插针收盘 · 3份3倍 · 离1.618≥1.5%','live-allin3':'触价前评分 · 模拟运行',60:'等待回收',5:'快速确认',v3:'分数决定目标',v3add:'逆向分步加仓',spike:'排列过滤插针',v3lock:'回收后锁住利润',allin3:'单仓 · 梭哈3倍',v3add20:'20份动态保证金 · 3倍加仓'};
   const BOOK='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5C8 2 4 3 2 4v15c3-1 6-1 10 2 4-3 7-3 10-2V4c-2-1-6-2-10 1Zm0 0v16"/></svg>';
@@ -39,7 +40,7 @@
   function accountLayout(saved,tracks,legacy=null){
     const valid=saved&&Array.isArray(saved.main)&&Array.isArray(saved.more),defaults=accountOrder(legacy,tracks),seen=new Set(),layout={main:[],more:[]};
     if(valid)for(const group of ['main','more'])for(const id of saved[group])if(tracks.includes(id)&&!seen.has(id)){layout[group].push(id);seen.add(id);}
-    for(const id of defaults)if(!seen.has(id)){layout[id.startsWith('live-')?'main':'more'].push(id);seen.add(id);}
+    for(const id of defaults)if(!seen.has(id)){layout[id.startsWith('live-')||id===BREADTH?'main':'more'].push(id);seen.add(id);}
     return layout;
   }
   function moveAccountGroup(layout,id,group,index){
@@ -52,7 +53,7 @@
     const sign=value>0?'+':value<0?'−':'',amount=Math.abs(value);
     return {text:sign+(amount>0&&amount<.005?'<0.01':amount.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})),tone:value>0?'rp-positive':value<0?'rp-negative':'',title:'已实现净盈亏 · USDT · 不含浮盈亏和补充本金'};
   }
-  function pickerHTML(tracks){return tracks.map(t=>`<div class="rs-account-row" data-account-row="${esc(t)}"><button type="button" data-account-drag="${esc(t)}" aria-label="拖动调整 ${esc(label(t))} 顺序" aria-description="拖动排序或移入移出常用；Alt 加上下键排序，Alt 加左键移入常用、右键收入更多" title="拖动排序或移入移出常用 · Alt + ↑/↓ 排序 · Alt + ←/→ 分组"><svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" aria-hidden="true"><circle cx="4" cy="5" r="1.2"/><circle cx="10" cy="5" r="1.2"/><circle cx="4" cy="10" r="1.2"/><circle cx="10" cy="10" r="1.2"/><circle cx="4" cy="15" r="1.2"/><circle cx="10" cy="15" r="1.2"/></svg></button><button type="button" data-strategy-select="${esc(t)}" aria-pressed="false"><span>${esc(label(t))}</span><strong data-account-pnl="${esc(t)}">—</strong><i aria-hidden="true">✓</i></button><button type="button" data-strategy-book="${esc(t)}" aria-label="查看 ${esc(label(t))} 策略小册" title="策略小册">${BOOK}</button><button type="button" data-strategy-backtest="${esc(t)}" aria-label="查看 ${esc(label(t))} 回测交易" title="回测交易">${BACKTEST}</button></div>`).join('');}
+  function pickerHTML(tracks){return tracks.map(t=>`<div class="rs-account-row" data-account-row="${esc(t)}"><button type="button" data-account-drag="${esc(t)}" aria-label="拖动调整 ${esc(label(t))} 顺序" aria-description="拖动排序或移入移出常用；Alt 加上下键排序，Alt 加左键移入常用、右键收入更多" title="拖动排序或移入移出常用 · Alt + ↑/↓ 排序 · Alt + ←/→ 分组"><svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" aria-hidden="true"><circle cx="4" cy="5" r="1.2"/><circle cx="10" cy="5" r="1.2"/><circle cx="4" cy="10" r="1.2"/><circle cx="10" cy="10" r="1.2"/><circle cx="4" cy="15" r="1.2"/><circle cx="10" cy="15" r="1.2"/></svg></button><button type="button" data-strategy-select="${esc(t)}" aria-pressed="false"><span>${esc(label(t))}</span>${t===BREADTH?'<small title="尚无前向模拟账户">研究</small>':`<strong data-account-pnl="${esc(t)}">—</strong>`}<i aria-hidden="true">✓</i></button><button type="button" data-strategy-book="${esc(t)}" aria-label="查看 ${esc(label(t))} 策略小册" title="策略小册">${BOOK}</button><button type="button" data-strategy-backtest="${esc(t)}" aria-label="查看 ${esc(label(t))} 回测交易" title="回测交易">${BACKTEST}</button></div>`).join('');}
   function tableHTML(headers,rows){return `<div class="rs-table-wrap"><table><thead><tr>${headers.map(h=>`<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map((v,i)=>i?`<td>${typeof v==='number'?num(v):esc(v??'—')}</td>`:`<th scope="row">${esc(v)}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;}
   const historyDate=ms=>new Date(ms).toISOString().slice(0,10);
   function validateHistory(h,track){
@@ -132,7 +133,7 @@
   const utcTime=ms=>new Date(ms).toISOString().slice(0,16).replace('T',' ');
   function dayTradeHTML(r){
     const score=r.entry_rules?.score,view=pnlView(r.pnl),side=r.side===1?'做多':'做空';
-    return `<button type="button" class="rs-day-trade" data-day-trade="${r.id}" aria-label="查看 ${esc(r.symbol.replace(/USDT$/,''))} ${side} ${utcTime(r.entry_ms)} 历史K线"><span class="rs-day-trade-head"><span><b>${esc(r.symbol.replace(/USDT$/,''))}</b><em class="${r.side===1?'rp-positive':'rp-negative'}">${side}</em></span><strong class="${view.tone}">${view.text}<small> USDT</small></strong></span><span class="rs-day-trade-times"><span>开 ${utcTime(r.entry_ms)}</span><span>平 ${utcTime(r.exit_ms)}</span></span><span class="rs-day-trade-foot"><span>${Number.isFinite(score)?'评分 '+score.toFixed(4):'评分未留存'} · 单笔 ${signed(r.return_pct)}%</span><span>查看K线 ↗</span></span></button>`;
+    return `<button type="button" class="rs-day-trade" data-day-trade="${r.id}" aria-label="查看 ${esc(r.symbol.replace(/USDT$/,''))} ${side} ${utcTime(r.entry_ms)} 历史K线"><span class="rs-day-trade-head"><span><b>${esc(r.symbol.replace(/USDT$/,''))}</b><em class="${r.side===1?'rp-positive':'rp-negative'}">${side}</em></span><strong class="${view.tone}">${view.text}<small> USDT</small></strong></span><span class="rs-day-trade-times"><span>开 ${utcTime(r.entry_ms)}</span><span>平 ${utcTime(r.exit_ms)}</span></span><span class="rs-day-trade-foot"><span>${r.eventId?'下轨反弹':Number.isFinite(score)?'评分 '+score.toFixed(4):'评分未留存'} · 单笔 ${signed(r.return_pct)}%</span><span>查看K线 ↗</span></span></button>`;
   }
   function dayTradesHTML(s){
     const [y,m,d]=s.date.split('-').map(Number);
@@ -185,8 +186,8 @@
   }
   function historyHTML(h){
     const s=h.summary,pf=s.profit_factor_state==='no_losses'?'∞':num(s.profit_factor),unit=h.refilled?'USDT':'%';
-    const metrics=[[h.refilled?'交易净盈亏':'累计净收益',num(h.refilled?s.pnl:s.return_pct)+(h.refilled?' USDT':'%')],['最大已实现回撤',num(s.max_drawdown_pct)+'%'],['资金成交胜率',num(s.win_pct,1)+'%'],['已平仓笔数',num(s.trades,0)],['盈利因子',pf],['期末资金',num(s.end)+' USDT']];
-    return `<div class="rs-history-meta"><span>${historyDate(h.points[0][0])} — ${historyDate(h.points.at(-1)[0])} · UTC</span><span>1000 USDT 起步 · 已实现净值</span></div><p class="rs-research-note">${esc(h.meta.note)}</p><div class="rs-backtest-metrics">${metrics.map(([k,v])=>`<div><small>${k}</small><strong>${v}</strong></div>`).join('')}</div><figure class="rs-primary-figure"><figcaption><b>资金路径与回撤</b><div class="rs-chart-modes" role="group" aria-label="历史曲线显示"><button type="button" data-history-mode="equity" aria-pressed="true">资金 USDT</button><button type="button" data-history-mode="returns" aria-pressed="false">${h.refilled?'交易净盈亏':'累计收益 %'}</button></div></figcaption>${historyToolbar()}<div class="rs-history-chart" tabindex="0" role="region" aria-label="历史资金与回撤曲线，左右方向键平移，Home 查看全部"></div><p class="rs-muted">${h.refilled?'灰线为累计净投入；补充本金不计入交易收益。回撤按每轮本金计算，补充本金重置高水位。':'蓝线为已实现资金／累计净收益，红色为相对历史高点的回撤。'} 曲线保留每笔结算，不含持仓浮盈亏；同一时刻的先亏损后补款也保留。</p></figure><div class="rs-period-grid"><figure><figcaption>${h.refilled?'月度交易净盈亏':'月度收益热力图'} <small>/ ${unit}</small></figcaption>${heatmapHTML(h)}</figure><figure><figcaption>${h.refilled?'年度交易净盈亏':'年度收益'} <small>/ ${unit}</small></figcaption><div class="rs-bar-chart" data-history-chart="yearly" role="img" aria-label="年度收益柱状图"></div></figure></div><div class="rs-chart-grid"><figure><figcaption>单笔净收益分布 <small>/ 名义本金收益 % · 纵轴笔数</small></figcaption><div class="rs-bar-chart" data-history-chart="distribution" role="img" aria-label="单笔净收益分布"></div></figure><figure><figcaption>持仓时长分布 <small>/ 笔</small></figcaption><div class="rs-bar-chart" data-history-chart="holding" role="img" aria-label="持仓时长分布"></div></figure></div><div class="rs-sides"><h3>多空表现</h3>${tableHTML(['方向','成交笔数','胜率 %','净盈亏 USDT'],h.sides)}</div><details class="rs-detail-table"><summary>逐笔成交 · 最近 ${h.recent.length} 笔 / 共 ${s.trades} 笔</summary>${tableHTML(['币种','开仓 UTC','平仓 UTC','方向','净盈亏 USDT','净收益 %'],h.recent.map(r=>[r[0],new Date(r[1]).toISOString().slice(0,16).replace('T',' '),new Date(r[2]).toISOString().slice(0,16).replace('T',' '),...r.slice(3)]))}</details>`;
+    const metrics=[[h.refilled?'交易净盈亏':'累计净收益',num(h.refilled?s.pnl:s.return_pct)+(h.refilled?' USDT':'%')],[h.meta.track===BREADTH?'最大盯市回撤':'最大已实现回撤',num(s.max_drawdown_pct)+'%'],['资金成交胜率',num(s.win_pct,1)+'%'],['已平仓笔数',num(s.trades,0)],['盈利因子',pf],['期末资金',num(s.end)+' USDT']];
+    return `<div class="rs-history-meta"><span>${historyDate(h.points[0][0])} — ${historyDate(h.points.at(-1)[0])} · UTC</span><span>1000 USDT 起步 · 已实现净值</span></div><p class="rs-research-note">${esc(h.meta.note)}</p><div class="rs-backtest-metrics">${metrics.map(([k,v])=>`<div><small>${k}</small><strong>${v}</strong></div>`).join('')}</div><figure class="rs-primary-figure"><figcaption><b>资金路径与回撤</b><div class="rs-chart-modes" role="group" aria-label="历史曲线显示"><button type="button" data-history-mode="equity" aria-pressed="true">资金 USDT</button><button type="button" data-history-mode="returns" aria-pressed="false">${h.refilled?'交易净盈亏':'累计收益 %'}</button></div></figcaption>${historyToolbar()}<div class="rs-history-chart" tabindex="0" role="region" aria-label="历史资金与回撤曲线，左右方向键平移，Home 查看全部"></div><p class="rs-muted">${h.refilled?'灰线为累计净投入；补充本金不计入交易收益。回撤按每轮本金计算，补充本金重置高水位。':'蓝线为已实现资金／累计净收益，红色为相对历史高点的回撤。'} ${h.meta.track===BREADTH?'曲线按平仓结算，不含持仓浮盈亏；上方最大盯市回撤按每 5 分钟估值。':'曲线保留每笔结算，不含持仓浮盈亏；同一时刻的先亏损后补款也保留。'}</p></figure><div class="rs-period-grid"><figure><figcaption>${h.refilled?'月度交易净盈亏':'月度收益热力图'} <small>/ ${unit}</small></figcaption>${heatmapHTML(h)}</figure><figure><figcaption>${h.refilled?'年度交易净盈亏':'年度收益'} <small>/ ${unit}</small></figcaption><div class="rs-bar-chart" data-history-chart="yearly" role="img" aria-label="年度收益柱状图"></div></figure></div><div class="rs-chart-grid"><figure><figcaption>单笔净收益分布 <small>/ 名义本金收益 % · 纵轴笔数</small></figcaption><div class="rs-bar-chart" data-history-chart="distribution" role="img" aria-label="单笔净收益分布"></div></figure><figure><figcaption>持仓时长分布 <small>/ 笔</small></figcaption><div class="rs-bar-chart" data-history-chart="holding" role="img" aria-label="持仓时长分布"></div></figure></div><div class="rs-sides"><h3>多空表现</h3>${tableHTML(['方向','成交笔数','胜率 %','净盈亏 USDT'],h.sides)}</div><details class="rs-detail-table"><summary>逐笔成交 · 最近 ${h.recent.length} 笔 / 共 ${s.trades} 笔</summary>${tableHTML(['币种','开仓 UTC','平仓 UTC','方向','净盈亏 USDT','净收益 %'],h.recent.map(r=>[r[0],new Date(r[1]).toISOString().slice(0,16).replace('T',' '),new Date(r[2]).toISOString().slice(0,16).replace('T',' '),...r.slice(3)]))}</details>`;
   }
   function equityOptions(h,mode='equity',dark=false,view=historyWindow(h)){
     const c=dark?'#abb8c5':'#607382',gridColor=dark?'#ffffff12':'#7184941c',returns=mode==='returns';
@@ -212,9 +213,10 @@
     const trigger=root.querySelector('[data-rp="track"]');
     let storage;try{storage=window.localStorage;}catch{}
     const stored=key=>{try{return JSON.parse(storage?.getItem(key)||'null');}catch{return null;}};
-    let layout=accountLayout(stored(LAYOUT_KEY),tracks,stored(ORDER_KEY)),drag=null,dragFrame=0,blockedUntil=0;
+    const catalog=[...tracks,BREADTH];
+    let layout=accountLayout(stored(LAYOUT_KEY),catalog,stored(ORDER_KEY)),drag=null,dragFrame=0,blockedUntil=0;
     const picker=document.createElement('div');picker.id='rs-account-picker';picker.className='rs-account-picker';picker.setAttribute('popover','auto');picker.setAttribute('role','dialog');picker.setAttribute('aria-label','策略');
-    picker.innerHTML='<header><b>策略</b><small>已实现盈亏 · USDT</small></header><div class="rs-account-list"><div class="rs-group-title">常用策略 <span data-main-count></span></div><div class="rs-account-group" data-account-group="main" aria-label="常用策略">'+pickerHTML(layout.main)+'</div><button type="button" class="rs-more-toggle" data-account-more aria-expanded="false" aria-controls="rs-more-accounts"><span>更多策略</span><span class="rs-group-count" data-more-count></span><small data-more-current></small><span class="rs-more-chevron" aria-hidden="true">⌄</span></button><div id="rs-more-accounts" class="rs-account-group rs-more-accounts" data-account-group="more" aria-label="更多策略" hidden>'+pickerHTML(layout.more)+'</div></div><a class="rs-breadth-link" data-breadth-book href="/static/strategy-booklet/breadth-ema20.html">全市场下轨反弹 · 研究小册 ↗</a><p class="rs-order-status" role="status">拖动把手排序或移入常用</p>';root.append(picker);
+    picker.innerHTML='<header><b>策略</b><small>已实现盈亏 · USDT</small></header><div class="rs-account-list"><div class="rs-group-title">常用策略 <span data-main-count></span></div><div class="rs-account-group" data-account-group="main" aria-label="常用策略">'+pickerHTML(layout.main)+'</div><button type="button" class="rs-more-toggle" data-account-more aria-expanded="false" aria-controls="rs-more-accounts"><span>更多策略</span><span class="rs-group-count" data-more-count></span><small data-more-current></small><span class="rs-more-chevron" aria-hidden="true">⌄</span></button><div id="rs-more-accounts" class="rs-account-group rs-more-accounts" data-account-group="more" aria-label="更多策略" hidden>'+pickerHTML(layout.more)+'</div></div><p class="rs-order-status" role="status">拖动把手排序或移入常用</p>';root.append(picker);
     const accountList=picker.querySelector('.rs-account-list'),orderStatus=picker.querySelector('.rs-order-status'),moreToggle=picker.querySelector('[data-account-more]');
     const groups={main:picker.querySelector('[data-account-group="main"]'),more:picker.querySelector('[data-account-group="more"]')};
     const accountNodes=new Map([...picker.querySelectorAll('[data-account-row]')].map(n=>[n.dataset.accountRow,n]));
@@ -262,13 +264,15 @@
     picker.addEventListener('lostpointercapture',()=>finishDrag(true));
     picker.addEventListener('dragstart',e=>e.preventDefault());
     window.addEventListener('blur',()=>finishDrag(true));
-    window.addEventListener('storage',e=>{if([LAYOUT_KEY,ORDER_KEY,null].includes(e.key)&&!drag){layout=accountLayout(stored(LAYOUT_KEY),tracks,stored(ORDER_KEY));applyOrder();if(picker.matches(':popover-open'))positionPicker();}});
+    window.addEventListener('storage',e=>{if([LAYOUT_KEY,ORDER_KEY,null].includes(e.key)&&!drag){layout=accountLayout(stored(LAYOUT_KEY),catalog,stored(ORDER_KEY));applyOrder();if(picker.matches(':popover-open'))positionPicker();}});
     applyOrder();
     const dialog=document.createElement('dialog');dialog.className='rs-book';dialog.setAttribute('aria-label','策略小册');
     dialog.innerHTML=`<article class="rs-sheet"><header class="rs-header"><span>${BOOK} 策略小册</span><b data-book-label tabindex="-1"></b><button type="button" data-book-close aria-label="关闭策略小册">×</button></header><div class="rs-layout"><nav class="rs-toc" aria-label="小册章节">${[['overview','概览'],['research','历史回测'],['rules','执行规则'],['forward','前向资金'],['sources','来源']].map(([id,title],i)=>`<button type="button" data-book-chapter="${id}"><small>0${i+1}</small>${title}</button>`).join('')}</nav><div class="rs-reading"><section id="rs-overview"></section><section id="rs-research" aria-live="polite"></section><section id="rs-rules"></section><section id="rs-forward"><div class="rs-section-title"><h2>前向模拟资金曲线</h2></div><p>当前策略完整账本 · USDT · 已实现净值</p><div class="rs-forward-status" role="status"></div><div class="rs-forward-metrics"></div><div class="rs-forward-chart" role="img" aria-label="前向模拟资金曲线"></div><p class="rs-forward-note"></p><button type="button" class="rs-text-button" data-book-refresh>刷新曲线</button></section><section id="rs-sources"></section></div></div></article>`;
     document.body.append(dialog);
     const el=s=>dialog.querySelector(s);let requests=window.SpikeRuntime.createRequests();
     let open=false,track='',epoch=0,closing=null,analytics=null,research=null,bars=[],line=null,chartData=null,active=true,history=null,historyChart=null,historyMode='equity',historyPaintKey='';
+    let breadthData=null,breadthReplay=null,breadthScope=null,breadthPending=null;
+    const forwardTemplate=el('#rs-forward').innerHTML;
     let historyView=null,chartFrame=null,resizeFrame=null,zoomFrame=null,barPaintKeys=[],forwardPaintData=null,forwardPaintTheme='';
     const visibleCharts=new Set(),reading=el('.rs-reading');
     const chartObserver=new IntersectionObserver(entries=>{
@@ -319,7 +323,12 @@
     }
     function showDay(number){
       const d=calendarMonth?.days[number-1];if(!d?.covered)return;
-      calendarDay=number;dayView=true;dayModel.select(track,d.date,d.pnl);calendar.querySelector('#rs-calendar-title').focus({preventScroll:true});
+      calendarDay=number;dayView=true;
+      if(track===BREADTH){
+        const rows=(history.dayRows[d.date]||[]).map((r,i)=>({...r,side:1,id:i+1}));
+        renderDay({date:d.date,expectedPnl:d.pnl,data:{total:rows.length},rows});
+      }else dayModel.select(track,d.date,d.pnl);
+      calendar.querySelector('#rs-calendar-title').focus({preventScroll:true});
     }
     function backToCalendar(){showCalendar(calendarMonth.key,null,'day');}
     function resetMonthButtons(){dialog.querySelectorAll('[data-history-month][aria-expanded="true"]').forEach(b=>b.setAttribute('aria-expanded','false'));}
@@ -349,7 +358,8 @@
       if(day)showDay(Number(day.dataset.calendarDay));
       if(e.target.closest('[data-calendar-back]'))backToCalendar();
       if(e.target.closest('[data-day-more],[data-day-retry]'))dayModel.load();
-      const trade=e.target.closest('[data-day-trade]');if(trade){const s=dayModel.getState(),row=s.rows.find(r=>r.id===Number(trade.dataset.dayTrade));if(row){const selectedTrack=s.track;close(true);onBacktest?.(selectedTrack,row);}}
+      const trade=e.target.closest('[data-day-trade]');if(trade&&track===BREADTH){const rows=history.dayRows[calendarMonth.days[calendarDay-1].date]||[];const row=rows[Number(trade.dataset.dayTrade)-1];if(row){closeCalendar();jumpBreadth('replay',row.eventId);}return;}
+      if(trade){const s=dayModel.getState(),row=s.rows.find(r=>r.id===Number(trade.dataset.dayTrade));if(row){const selectedTrack=s.track;close(true);onBacktest?.(selectedTrack,row);}}
     });
     calendar.addEventListener('focusin',e=>{const day=e.target.closest('[data-calendar-day]');if(day)calendar.querySelector('.rs-calendar-detail').textContent=calendarDayLabel(calendarMonth.days[Number(day.dataset.calendarDay)-1]);});
     dialog.addEventListener('keydown',e=>{if(e.key==='Escape'&&calendar.matches(':popover-open')){e.preventDefault();e.stopPropagation();if(dayView)backToCalendar();else closeCalendar(true);}});
@@ -376,11 +386,13 @@
         (target===moreToggle?target:target.querySelectorAll('button')[Math.max(0,column)]).focus();
       }
     });
-    picker.addEventListener('click',event=>{if(event.detail!==0&&Date.now()<blockedUntil){event.preventDefault();event.stopPropagation();return;}const b=event.target.closest('button');if(!b)return;if(b.hasAttribute('data-account-more')){setMore(groups.more.hidden);return;}if(b.dataset.strategySelect){onSelect(b.dataset.strategySelect);sync();picker.hidePopover();trigger.focus({preventScroll:true});}if(b.dataset.strategyBook){picker.hidePopover();show(b.dataset.strategyBook);}if(b.dataset.strategyBacktest){picker.hidePopover();onBacktest?.(b.dataset.strategyBacktest);}});
+    picker.addEventListener('click',event=>{if(event.detail!==0&&Date.now()<blockedUntil){event.preventDefault();event.stopPropagation();return;}const b=event.target.closest('button');if(!b)return;if(b.hasAttribute('data-account-more')){setMore(groups.more.hidden);return;}if(b.dataset.strategySelect===BREADTH){picker.hidePopover();show(BREADTH);return;}if(b.dataset.strategySelect){onSelect(b.dataset.strategySelect);sync();picker.hidePopover();trigger.focus({preventScroll:true});}if(b.dataset.strategyBook){picker.hidePopover();show(b.dataset.strategyBook);}if(b.dataset.strategyBacktest){picker.hidePopover();if(b.dataset.strategyBacktest===BREADTH)show(BREADTH,{chapter:'replay'});else onBacktest?.(b.dataset.strategyBacktest);}});
     function stopCharts(){chartObserver.disconnect();visibleCharts.clear();for(const frame of [chartFrame,resizeFrame,zoomFrame])cancelAnimationFrame(frame);chartFrame=resizeFrame=zoomFrame=null;bars.forEach(c=>c?.dispose());bars=[];barPaintKeys=[];line?.dispose();line=null;forwardPaintData=null;historyChart?.dispose();historyChart=null;historyPaintKey='';}
     function close(immediate=false){
       closeCalendar();
       if(!open&&!dialog.open)return;open=false;epoch++;requests.cancel();analytics?.setActive(false);stopCharts();dialog.classList.remove('is-open');clearTimeout(closing);
+      if(track===BREADTH)clearBookLocation();
+      breadthReplay?.destroy();breadthReplay=null;breadthData=null;breadthPending=null;
       const finish=()=>{dialog.close();document.body.classList.remove('rs-book-open','rs-book-webkit');trigger.focus({preventScroll:true});};
       if(immediate||matchReduced())finish();else closing=setTimeout(finish,280);
     }
@@ -399,14 +411,14 @@
           el('.rs-chart-status').textContent='';
         }
         if(chartData&&visibleCharts.has(el('.rs-forward-chart'))&&(chartData!==forwardPaintData||dark!==forwardPaintTheme)){line??=window.echarts.init(el('.rs-forward-chart'));line.setOption(window.SpikeReclaimAnalytics.chartOptions(chartData,dark),true);forwardPaintData=chartData;forwardPaintTheme=dark;}
-      }catch{if(open&&token===epoch){const n=el('.rs-chart-status');if(n)n.textContent='图表加载失败，表格数值仍可阅读。';el('.rs-forward-note').textContent+=' 曲线绘制失败，请刷新重试。';}}
+      }catch{if(open&&token===epoch){const n=el('.rs-chart-status');if(n)n.textContent='图表加载失败，表格数值仍可阅读。';const note=el('.rs-forward-note');if(note)note.textContent+=' 曲线绘制失败，请刷新重试。';}}
     }
     function renderForward(){
-      if(!open)return;const {data,error,busy}=analytics.getState();
+      if(!open||track===BREADTH||!analytics)return;const {data,error,busy}=analytics.getState();
       el('.rs-forward-status').textContent=error?`读取失败：${error}${data?' · 保留上次统计':''}`:data?`更新于 ${new Date(data.now_ms).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai'})} 北京时间`:'正在读取完整账本…';
       el('[data-book-refresh]').disabled=busy;
       if(!data)return;chartData=data;const s=data.summary;
-      el('.rs-forward-metrics').innerHTML=[['已实现净盈亏',num(s.realized_pnl)+' USDT'],['已完全平仓',num(s.closed_count,0)+' 笔'],['最大已实现回撤',num(s.max_drawdown_pct)+'%']].map(([k,v])=>`<div><small>${k}</small><strong>${v}</strong></div>`).join('');
+      el('.rs-forward-metrics').innerHTML=[['已实现净盈亏',num(s.realized_pnl)+' USDT'],['已完全平仓',num(s.closed_count,0)+' 笔'],[h.meta.track===BREADTH?'最大盯市回撤':'最大已实现回撤',num(s.max_drawdown_pct)+'%']].map(([k,v])=>`<div><small>${k}</small><strong>${v}</strong></div>`).join('');
       el('.rs-forward-note').textContent=window.SpikeReclaimAnalytics.curveNote(data)+' 不含浮动盈亏。'+window.SpikeReclaimAnalytics.coverageNote(data.coverage);queueCharts();
     }
     function rules(){
@@ -414,13 +426,55 @@
       el('#rs-overview').innerHTML=overviewHTML(d,track);
       el('#rs-rules').innerHTML=`<div class="rs-section-title"><h2>从触价到退出</h2></div>${flowHTML(track)}<h3>本策略当前规则</h3><div class="rs-current-rules">${current?renderRules(d,track):'<p>正在读取策略数据。</p>'}</div><p class="rs-muted">规则取自当前只读模拟盘接口；历史回测版本差异见回测章节。</p>`;
     }
-    async function show(next){
+    function clearBookLocation(){window.SpikeBreadthBookRoute?.write(null);}
+    function jumpBreadth(chapter,eventId=null){
+      const targets={replay:'rs-breadth-replay',stats:'rs-breadth-stats',overview:'rs-overview',research:'rs-research',rules:'rs-rules',forward:'rs-forward',sources:'rs-sources'};
+      const id=targets[chapter];if(!id)return;
+      if(eventId)breadthReplay?.selectEvent(eventId);
+      window.SpikeBreadthBookRoute?.write({chapter,eventId,scope:breadthScope});
+      el('#'+id)?.scrollIntoView({block:'start',behavior:'instant'});
+    }
+    function renderBreadthScope(scope){
+      const h=validateHistory(window.SpikeBreadthHistory.createBreadthBookHistory(breadthData,{track:BREADTH,scope}),BREADTH);
+      closeCalendar();stopCharts();history=h;historyView=null;historyMode='equity';breadthScope=scope;
+      el('[data-breadth-path]').innerHTML=historyHTML(history);
+      el('#rs-breadth-stats').innerHTML='<h3>统计分析</h3>'+window.SpikeBreadthBook.statsHTML(breadthData,{scope});
+      dialog.querySelectorAll('[data-breadth-scope]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.breadthScope===scope)));
+      observeCharts();queueCharts();
+    }
+    async function showBreadth(token,options){
+      window.SpikeBreadthBookRoute?.write(options);
+      try{
+        const [,data]=await Promise.all([window.SpikeModules.ensure('breadth-booklet'),requests.json('/static/strategy-booklet/breadth-ema20-data.json')]);
+        if(!open||epoch!==token)return;
+        breadthData=data;
+        el('#rs-research').innerHTML='<div class="rs-section-title"><h2>历史回测</h2><span class="rs-badge">组合回测</span></div><div class="rs-breadth-tools"><div class="rs-chart-modes" role="group" aria-label="回测区间"><button type="button" data-breadth-scope="all_history_fee_only">全历史 · 仅手续费</button><button type="button" data-breadth-scope="2026_actual_funded">2026 · 含资金费</button></div><button class="rs-text-button" type="button" data-breadth-jump="replay">查看逐笔开仓图</button><button class="rs-text-button" type="button" data-breadth-jump="stats">统计分析</button></div><div data-breadth-path></div><p class="rs-chart-status" role="status"></p><div id="rs-breadth-stats"></div><div id="rs-breadth-replay"></div>';
+        renderBreadthScope(options.scope==='2026_actual_funded'?options.scope:'all_history_fee_only');
+        el('#rs-rules').innerHTML='<div class="rs-section-title"><h2>执行规则</h2></div>'+window.SpikeBreadthBook.rulesHTML(data);
+        const p=data.provenance;
+        el('#rs-sources').innerHTML='<div class="rs-section-title"><h2>口径与来源</h2></div><p>原实验：'+esc(p.experiment_id)+'</p><p>信号覆盖至 '+esc(historyDate(Date.parse(data.signal_cutoff_exclusive_utc)-1))+'（UTC）。普通 BTC 的 EMA20 条件是在看过这段历史后选出的，2026 年并非盲测。</p>'+[['BTC 逐笔账本',p.event_sources.BTC],['山寨篮子与成员退出',p.event_sources.ALT],['山寨资金费核对',p.ALT_2026_funding]].map(([name,path])=>'<details class="rs-source-note"><summary>'+esc(name)+'</summary><p>'+esc(path)+'</p></details>').join('');
+        breadthReplay=window.SpikeBreadthBook.mountReplay(el('#rs-breadth-replay'),data,options.eventId,{scope:breadthScope,onEvent:eventId=>window.SpikeBreadthBookRoute?.write({chapter:'replay',eventId,scope:breadthScope})});
+        if(options.chapter&&options.chapter!=='overview'){const dest=options.chapter==='replay'?el('#rs-breadth-replay'):options.chapter==='stats'?el('#rs-breadth-stats'):el('#rs-'+options.chapter);dest?.scrollIntoView({block:'start',behavior:'instant'});}
+      }catch(error){if(open&&epoch===token)el('#rs-research').innerHTML='<p class="rs-warning">回测资料暂时不可用：'+esc(error.message)+'</p><button type="button" data-book-retry>重试读取</button>';}
+    }
+    async function show(next,options={}){
       closeCalendar();
-      if(!tracks.includes(next))return;clearTimeout(closing);epoch++;const token=epoch;track=next;open=true;chartData=null;research=null;history=null;historyView=null;historyMode='equity';analytics?.setActive(false);requests.cancel();requests=window.SpikeRuntime.createRequests();stopCharts();
-      el('[data-book-label]').textContent=label(track);rules();el('.rs-reading').scrollTop=0;
-      el('#rs-research').innerHTML='<p class="rs-muted">正在读取回测资料…</p>';el('#rs-sources').innerHTML='';el('.rs-forward-metrics').innerHTML='';el('.rs-forward-note').textContent='';
+      if(!catalog.includes(next))return;
+      if(track===BREADTH&&next!==track)clearBookLocation();
+      breadthReplay?.destroy();breadthReplay=null;breadthData=null;breadthPending=next===BREADTH?options:null;
+      clearTimeout(closing);epoch++;const token=epoch;track=next;open=true;chartData=null;research=null;history=null;historyView=null;historyMode='equity';analytics?.setActive(false);requests.cancel();requests=window.SpikeRuntime.createRequests();stopCharts();
+      analytics=null;
+      el('[data-book-label]').textContent=label(track);
+      el('#rs-forward').innerHTML=track===BREADTH?'<div class="rs-section-title"><h2>前向模拟资金曲线</h2></div><p>这条策略尚未运行模拟账户，暂无前向资金记录。</p>':forwardTemplate;
+      if(track===BREADTH){
+        el('#rs-overview').innerHTML='<div class="rs-section-title"><h1>全市场下轨反弹<em>普通 BTC · 4H EMA20 过滤</em></h1></div><div class="rs-facts"><div><small>方向</small><b>做多</b></div><div><small>交易标的</small><b>BTC / 山寨篮子</b></div><div><small>信号</small><b>周一下轨首触</b></div></div>';
+        el('#rs-rules').innerHTML='';
+      }else rules();
+      reading.scrollTo({top:0,behavior:'instant'});
+      el('#rs-research').innerHTML='<p class="rs-muted">正在读取回测资料…</p>';el('#rs-sources').innerHTML='';
       document.body.classList.add('rs-book-open');document.body.classList.toggle('rs-book-webkit',/AppleWebKit\//.test(navigator.userAgent)&&!/(Chrome|Chromium|Edg)\//.test(navigator.userAgent));if(!dialog.open)dialog.showModal();el('.rs-sheet').getBoundingClientRect();requestAnimationFrame(()=>{if(open&&token===epoch)dialog.classList.add('is-open');});el('[data-book-label]').focus({preventScroll:true});
       const selected=track;
+      if(selected===BREADTH){await showBreadth(token,options);return;}
       analytics=createFeed({read:()=>requests.json(`/api/monday-reclaim-paper/analytics?track=${selected}&days=0`),validateData:d=>window.SpikeReclaimAnalytics.validate(d,selected,0),cancel:()=>{},change:renderForward});
       try{
         const receipts=await Promise.allSettled([requests.json('/static/strategy-booklet/research.json'),requests.json(`/static/strategy-booklet/${selected}-history.json`)]);if(!open||token!==epoch)return;
@@ -438,7 +492,12 @@
     dialog.addEventListener('click',e=>{
       if(e.target===dialog||e.target.closest('[data-book-close]'))close();
       if(e.target.closest('[data-book-refresh]')){analytics?.refresh();queueCharts();}
-      if(e.target.closest('[data-book-retry]'))show(track);
+      if(e.target.closest('[data-book-retry]'))show(track,breadthPending||{});
+      const scope=e.target.closest('[data-breadth-scope]'),jump=e.target.closest('[data-breadth-jump]');
+      if(scope&&breadthData&&scope.dataset.breadthScope!==breadthScope){renderBreadthScope(scope.dataset.breadthScope);breadthReplay?.setScope(breadthScope);window.SpikeBreadthBookRoute?.write({chapter:'research',scope:breadthScope});}
+      if(jump)jumpBreadth(jump.dataset.breadthJump);
+      const period=e.target.closest('#rs-breadth-stats [data-period]');
+      if(period&&breadthReplay?.selectPeriod(period.dataset.period))jumpBreadth('replay');
       const mode=e.target.closest('[data-history-mode]');
       if(mode&&history){historyMode=mode.dataset.historyMode;dialog.querySelectorAll('[data-history-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===mode)));queueCharts();}
       const range=e.target.closest('[data-history-range]'),step=e.target.closest('[data-history-step]');
@@ -448,7 +507,7 @@
         if(historyView.period==='custom'){const end=history.points.at(-1)[0];setHistoryView({period:'custom',start:Math.max(history.points[0][0],end-(historyView.end-historyView.start)),end});}
         else setHistoryView(historyWindow(history,historyView.period));
       }
-      const chapter=e.target.closest('[data-book-chapter]');if(chapter)el('#rs-'+chapter.dataset.bookChapter).scrollIntoView({behavior:matchReduced()?'instant':'smooth',block:'start'});
+      const chapter=e.target.closest('[data-book-chapter]');if(chapter&&track===BREADTH)window.SpikeBreadthBookRoute?.write({chapter:chapter.dataset.bookChapter,scope:breadthScope});if(chapter)el('#rs-'+chapter.dataset.bookChapter).scrollIntoView({behavior:matchReduced()?'instant':'smooth',block:'start'});
     });
     dialog.addEventListener('keydown',e=>{
       if(!e.target.matches('.rs-history-chart')||!history)return;
@@ -458,7 +517,7 @@
     new MutationObserver(()=>{if(open)queueCharts();}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
     window.addEventListener('resize',()=>{if(picker.matches(':popover-open'))positionPicker();positionCalendar();});
     document.addEventListener('visibilitychange',()=>{analytics?.setActive(active&&open&&!document.hidden&&visibleCharts.has(el('.rs-forward-chart')));if(!document.hidden)queueCharts();});
-    sync();return {sync,close,getOrder:()=>[...layout.main,...layout.more],setActive(value){active=value;if(!value){if(picker.matches(':popover-open'))picker.hidePopover();close(true);}}};
+    sync();return {sync,close,show,getOrder:()=>[...layout.main,...layout.more].filter(t=>tracks.includes(t)),setActive(value){active=value;if(value&&!open){const dest=window.SpikeBreadthBookRoute?.read(location.search);if(dest)show(BREADTH,dest);}if(!value){if(picker.matches(':popover-open'))picker.hidePopover();close(true);}}};
   }
   window.SpikeStrategyBook={...api,create};
 })();
