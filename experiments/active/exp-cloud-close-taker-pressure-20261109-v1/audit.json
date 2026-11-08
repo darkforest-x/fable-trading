@@ -1,0 +1,133 @@
+{
+  "source": "experiments/active/exp-monday-1618-flow-20261023-v1/inputs",
+  "symbols": [
+    "BTC",
+    "ETH",
+    "SOL",
+    "BNB",
+    "XRP",
+    "DOGE",
+    "ADA",
+    "AVAX",
+    "LINK",
+    "LTC",
+    "DOT",
+    "TRX"
+  ],
+  "source_coverage": {
+    "BTC": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "ETH": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "SOL": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "BNB": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "XRP": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "DOGE": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "ADA": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "AVAX": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "LINK": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "LTC": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "DOT": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "TRX": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    }
+  },
+  "flow_status_counts": {
+    "valid_opposing": 779,
+    "valid_not_opposing": 630,
+    "outside_common_observation_window": 370
+  },
+  "pairing": {
+    "flow_available": {
+      "actual_events": 736,
+      "control_events_independently_eligible": 672,
+      "paired_actual_events": 672,
+      "paired_control_events": 672,
+      "unmatched_actual_events": 64,
+      "unmatched_control_events": 0
+    },
+    "opposing_factor": {
+      "actual_events": 439,
+      "control_events_independently_eligible": 340,
+      "paired_actual_events": 246,
+      "paired_control_events": 246,
+      "unmatched_actual_events": 193,
+      "unmatched_control_events": 94
+    }
+  },
+  "coverage_rows": 1319,
+  "flow_feature_rule": {
+    "raw_fields": {
+      "total_volume": "Binance native 15m kline base-asset volume",
+      "taker_buy_volume": "Binance native 15m kline taker-buy base-asset volume"
+    },
+    "formula": "imbalance=(2*sum(taker_buy_volume)-sum(total_volume))/sum(total_volume); qualify iff side*imbalance<0",
+    "window": "Exactly 48 continuous UTC 15m bars in [key_open_ms, confirmation_ms); the final bar closes exactly at confirmation_ms.",
+    "actual_clock": "For each Binance signal, use its own entry_ms as confirmation and entry_ms-12h as the key open.",
+    "control_clock": "For each matched Binance control, use its own entry_ms as confirmation and entry_ms-12h as the key open; never reuse its parent's signal clock.",
+    "invalid_windows": [
+      "missing or non-contiguous 15m bars",
+      "unknown/nonfinite native flow",
+      "negative flow",
+      "zero aggregate base volume",
+      "taker-buy base volume above total base volume"
+    ],
+    "invalid_data_policy": "Retain in the event screen with an explicit flow_status; never qualify. No proxy or imputation."
+  }
+}

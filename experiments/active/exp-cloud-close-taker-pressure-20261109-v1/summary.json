@@ -1,0 +1,182 @@
+{
+  "config_id": "exp-cloud-close-taker-pressure-20261109-v1",
+  "symbols_loaded": [
+    "BTC",
+    "ETH",
+    "SOL",
+    "BNB",
+    "XRP",
+    "DOGE",
+    "ADA",
+    "AVAX",
+    "LINK",
+    "LTC",
+    "DOT",
+    "TRX"
+  ],
+  "source_coverage": {
+    "BTC": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "ETH": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "SOL": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "BNB": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "XRP": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "DOGE": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "ADA": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "AVAX": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "LINK": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "LTC": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "DOT": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    },
+    "TRX": {
+      "rows": 143136,
+      "first_ms": 1661990400000,
+      "last_ms": 1790811900000,
+      "source": "Binance Vision USD-M klines15m raw monthly archives"
+    }
+  },
+  "input_events": {
+    "eligible_panel_actual": 934,
+    "eligible_panel_control": 845,
+    "panel_actual_parent_ids": 934,
+    "panel_parent_ids_with_control": 845
+  },
+  "flow_status_counts": {
+    "valid_opposing": 779,
+    "valid_not_opposing": 630,
+    "outside_common_observation_window": 370
+  },
+  "pairing": {
+    "flow_available": {
+      "actual_events": 736,
+      "control_events_independently_eligible": 672,
+      "paired_actual_events": 672,
+      "paired_control_events": 672,
+      "unmatched_actual_events": 64,
+      "unmatched_control_events": 0
+    },
+    "opposing_factor": {
+      "actual_events": 439,
+      "control_events_independently_eligible": 340,
+      "paired_actual_events": 246,
+      "paired_control_events": 246,
+      "unmatched_actual_events": 193,
+      "unmatched_control_events": 94
+    }
+  },
+  "scenario_counts": {
+    "available_actual": {
+      "events": 736,
+      "paths": 1472,
+      "funded": 508
+    },
+    "available_paired_actual": {
+      "events": 672,
+      "paths": 1344,
+      "funded": 460
+    },
+    "available_paired_control": {
+      "events": 672,
+      "paths": 1344,
+      "funded": 486
+    },
+    "opposing_actual": {
+      "events": 439,
+      "paths": 878,
+      "funded": 345
+    },
+    "opposing_control": {
+      "events": 340,
+      "paths": 680,
+      "funded": 290
+    },
+    "opposing_paired_actual": {
+      "events": 246,
+      "paths": 492,
+      "funded": 210
+    },
+    "opposing_paired_control": {
+      "events": 246,
+      "paths": 492,
+      "funded": 211
+    }
+  },
+  "dev_and_all_gates": {
+    "available_actual": {
+      "dev": true,
+      "all": false
+    },
+    "opposing_actual": {
+      "dev": true,
+      "all": true
+    }
+  },
+  "fees_and_paths": {
+    "taker_per_fill": 0.0005,
+    "resting_maker_per_fill": 0.0002,
+    "two_leg_paths": "frozen tp_r=0 and tp_r=2; all original fills and exit reasons retained",
+    "runner": "cloud_close_volatility_expansion.fund('Binance') -> corrected Binance quotes -> cloud_close_scaleout.simulate -> VectorBT"
+  },
+  "limitations": [
+    "Coverage is restricted to the fixed 12-major Binance USD-M 15m archive panel, 2022-09 through 2026-09.",
+    "This tests recorded taker flow as an event-time association; it does not establish historical publication latency.",
+    "Unavailable or anomalous flow is audited and excluded; no OHLCV proxy is used."
+  ],
+  "coverage_by_symbol_month_csv": "experiments/active/exp-cloud-close-taker-pressure-20261109-v1/flow_coverage_by_symbol_month.csv",
+  "source_commit": "ca1abff38b26ebd2d1ee97322a88e10da80d532d",
+  "training_eligible": false,
+  "production_eligible": false
+}
