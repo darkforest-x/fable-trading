@@ -1,0 +1,10 @@
+{
+  "id": "exp-cloud-close-risk-budget-20261109-v1",
+  "parent": "exp-cloud-close-leadership-20261109-v1",
+  "factor": "Sensitivity of position size to actual open-to-stop percent. Share = clip((0.05 / stop_fraction)^exponent, 0.25, 2.0). Exponents [0, 0.5, 1, 1.5]. Regular half and fully inverse sensitivities compare shrinkage towards equal notional. Cap total simultaneous collateral at actual available free cash, no borrowing. All thresholds defined before this run.",
+  "exponents": [0, 0.5, 1, 1.5],
+  "account": "At an open distribute available cash in proportion to the currently scheduled causal risk weights of flat slots, using neutral weight one for vacant future slots, also cap each entry at current NAV/9 times its weight. Do not resize existing positions. Use the original 75% target plus 25% runner; paired legs share a single monetary allocation.",
+  "eligibility": "Frozen parent requires 90 days of continuous prior data plus at least ten rankable contracts, no restriction on rank. Nine slots, known low prior ATR priority, one open position per symbol. Reduced universe is a selection from earlier research.",
+  "selection": "Choose on development through 2024 by NAV with >=100 trades, >=30% net wins, >=2.5 equal-notional payoff and <=35% hourly DD upper bound. Base fallback, paired controls and extra 5bp slippage on selected and development leader when new. Previously analyzed later periods reported separately.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_risk_budget"
+}
