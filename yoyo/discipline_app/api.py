@@ -216,6 +216,39 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
         except MonitorUnavailable as error:
             raise HTTPException(503, str(error)) from None
 
+    # 2.7.0 strategy frame (owner 2026-11-09): older records, booklets and saved backtest trades. GET only;
+    # all four read the monitor's published files/routes (monitor_feed.py, strategy_book.py).
+    @app.get('/v1/monitor/paper/history', dependencies=[Depends(auth)])
+    def monitor_paper_history(track: str = Query(pattern=r'^[a-z0-9-]{1,20}$'),
+                              tab: Literal['closed', 'events'] = 'closed', offset: int = Query(default=0, ge=0, le=100000)):
+        try:
+            return app.state.monitor.paper_history(track, tab, offset)
+        except MonitorUnavailable as error:
+            raise HTTPException(503, str(error)) from None
+
+    @app.get('/v1/monitor/booklet', dependencies=[Depends(auth)])
+    def monitor_booklet(track: str = Query(pattern=r'^[a-z0-9-]{1,20}$')):
+        try:
+            return app.state.monitor.booklet(track)
+        except MonitorUnavailable as error:
+            raise HTTPException(503, str(error)) from None
+
+    @app.get('/v1/monitor/backtest', dependencies=[Depends(auth)])
+    def monitor_backtest(track: str = Query(pattern=r'^[a-z0-9-]{1,20}$'), sort: Literal['time', 'pnl'] = 'time',
+                         direction: Literal['asc', 'desc'] = 'desc', offset: int = Query(default=0, ge=0, le=100000)):
+        try:
+            return app.state.monitor.backtest(track, sort, direction, offset)
+        except MonitorUnavailable as error:
+            raise HTTPException(503, str(error)) from None
+
+    @app.get('/v1/monitor/backtest/candles', dependencies=[Depends(auth)])
+    def monitor_backtest_candles(track: str = Query(pattern=r'^[a-z0-9-]{1,20}$'), trade: int = Query(gt=0, lt=10_000_000_000),
+                                 period: Literal['5m', '15m', '1H', '4H'] = '1H'):
+        try:
+            return app.state.monitor.backtest_candles(track, trade, period)
+        except MonitorUnavailable as error:
+            raise HTTPException(503, str(error)) from None
+
     @app.get('/v1/monitor/alerts', dependencies=[Depends(auth)])
     def monitor_alerts():
         try:

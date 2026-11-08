@@ -1,0 +1,63 @@
+import XCTest
+@testable import SpikeDiscipline
+
+/// 2.7.0 strategy frame: payloads exactly as monitor_feed.py / strategy_book.py project them
+/// (placeholder numbers, nulls and integers included).
+final class StrategyFrameTests: XCTestCase {
+    func testDecodesBreadthAccountRowsAndSignals() throws {
+        let json = #"{"now_ms":1794000000000,"paper_only":true,"equity_basis":"realized","research":[{"key":"breadth-ema20","label":"全市场下轨反弹","title":"研究小册"}],"accounts":[{"key":"live-breadth","label":"live-breadth","title":"全市场宽度信号 · SOL 计资金","group":"live","kind":"breadth","equity":1032.4,"start_equity":1000.0,"pnl":32.4,"refilled":false,"return_pct":3.24,"started_ms":1793900000000,"open_count":1,"stats":{"closed":1,"wins":1,"mean_net_bp":325.0,"win_pct":100.0},"breadth_rule":{"count_min":31,"count_max":62,"bar_minutes":5,"observe_minutes":30,"hold_days":6,"funded":"SOL-USDT-SWAP","shadows":["BTC-USDT-SWAP","ETH-USDT-SWAP"],"leverage":1.0,"taker_bp":5.0},"hold":{"symbol":"SOL-USDT-SWAP","fill_ms":1793800000000,"due_ms":1794318400000}}],"detail":{"key":"live-breadth","open":[{"id":9260000101,"symbol":"BTC-USDT-SWAP","side":"long","entry":76020.0,"target":null,"stage":"holding","funded":false,"notional":1000.0,"fill_ms":1793800000000,"score":null,"shadow":true,"due_ms":1794318400000,"mark":76861.0,"unrealized_bp":110.6,"remaining_notional":null,"stop":null}],"closed":[],"touches":[],"breadth_signals":[{"id":9260000200,"symbol":"SOL-USDT-SWAP","status":"followers","candle_ms":1793790000000,"observed_ms":1,"decision_ms":1793791800000,"n":40,"new_n":3},{"id":9260000201,"symbol":null,"status":"watching","candle_ms":1793999000000,"observed_ms":null,"decision_ms":1794000720000,"n":37,"new_n":null}]},"signals":[]}"#
+        let p = try API.decoder.decode(PaperSnapshot.self, from: Data(json.utf8))
+        let a = try XCTUnwrap(p.accounts.first)
+        XCTAssertTrue(a.isBreadth)
+        XCTAssertEqual(a.breadthRule?.countMax, 62)
+        XCTAssertEqual(a.breadthRule?.shadows.count, 2)
+        XCTAssertEqual(a.hold?.dueMs, 1_794_318_400_000)
+        XCTAssertEqual(a.stats.winPct, 100)
+        XCTAssertEqual(p.research?.first?.key, "breadth-ema20")
+        XCTAssertEqual(p.detail.open.first?.shadow, true)
+        XCTAssertEqual(p.detail.breadthSignals?.count, 2)
+        let signals = try XCTUnwrap(p.detail.breadthSignals)
+        XCTAssertEqual(StrategyFmt.breadthStatus(signals[0], now: p.nowMs), "观察期有新币 · 取消 +3")
+        XCTAssertEqual(StrategyFmt.breadthStatus(signals[1], now: p.nowMs), "观察中 · 剩 12分")
+        XCTAssertEqual(StrategyFmt.breadthTone("busy"), .warn)
+    }
+
+    /// A 2.6 service (no strategy-frame fields) still decodes.
+    func testOldServicePayloadStillDecodes() throws {
+        let json = #"{"now_ms":1,"accounts":[{"key":"spike","label":"spike","group":"replica","equity":1.0,"start_equity":1.0,"return_pct":0.0,"started_ms":null,"stats":{"closed":0,"wins":0,"mean_net_bp":null}}],"detail":{"key":"spike","open":[],"closed":[]},"signals":[]}"#
+        let p = try API.decoder.decode(PaperSnapshot.self, from: Data(json.utf8))
+        XCTAssertFalse(p.accounts[0].isBreadth)
+        XCTAssertNil(p.research)
+        XCTAssertNil(p.detail.breadthSignals)
+    }
+
+    func testDecodesBookletBacktestAndCandles() throws {
+        let booklet = #"{"key":"live-wick6x3","label":"live-wick6x3","title":"插针收盘 · 6份3倍","kind":"fib","paper":true,"facts":[{"label":"入场分门槛","value":"≥ 0.5","unit":""}],"flow":[{"title":"划区间","text":"…"}],"history":{"start_ms":1577836800000,"end_ms":1793000000000,"note":"占位","refilled":false,"unit":"%","summary":{"start":1000.0,"end":16438.4,"pnl":15438.4,"return_pct":1543.8,"max_drawdown_pct":19.3,"win_pct":66.0,"trades":400,"profit_factor":1.69,"no_losses":false,"cash_added":0.0,"avg_win":143.2,"avg_loss":-164.4},"drawdown_basis":"realized","points":[[1577836800000,1000.0,0.0],[1793000000000,16438.4,-2.1]],"yearly":[["2020",12.5],["2021",null]],"monthly":[["2020-01",1.2]],"sides":{"headers":["方向","成交笔数","胜率 %","净盈亏 USDT"],"rows":[["做多",210,66.2,8000.1]]}},"history_error":null,"research":{"status":"模拟运行","note":"n","detail":null,"table":{"headers":["区间","样本数"],"rows":[["2025",10],[null,"x"]]},"capital":null,"controls":{"note":"c","headers":["a"],"rows":[[1]]},"sections":[{"title":"分节","note":null,"headers":["a","b"],"rows":[[1,2.5]]}],"methodology":"m","period_note":null},"backtest":true,"notes":["历史为币安回测"]}"#
+        let b = try API.decoder.decode(Booklet.self, from: Data(booklet.utf8))
+        XCTAssertEqual(b.history?.points.count, 2)
+        XCTAssertEqual(b.history?.yearly.map(\.period), ["2020", "2021"])
+        XCTAssertNil(b.history?.yearly[1].value)
+        XCTAssertEqual(b.research?.table?.rows[1].first, .empty)
+        XCTAssertEqual(b.research?.table?.rows[0][1].display, "10")
+        XCTAssertEqual(b.research?.sections.first?.rows[0][1].display, "2.50")
+
+        let page = #"{"track":"live-breadth","total":13,"offset":0,"has_more":false,"sort":"time","direction":"desc","meta":{"trades":13,"pnl":2373.47,"start":"2023-01-01","end":"2026-09-29T14:45:00+00:00","source":"Binance","note":"n","basis":"b","limitation":"l"},"rows":[{"id":13,"symbol":"SOLUSDT","coin":"SOL","side":"long","entry_ms":1790174700000,"exit_ms":1790693100000,"pnl":168.36,"return_pct":5.25,"exit_reason":"time_6d","score":null,"count":53,"new_coins":0,"kind":"breadth","entry_price":114.46,"exit_price":120.59,"entry_start_ms":1790174700000,"entry_end_ms":1790174700000,"exit_start_ms":1790693100000,"exit_end_ms":1790693100000}]}"#
+        let bt = try API.decoder.decode(BacktestPage.self, from: Data(page.utf8))
+        XCTAssertEqual(bt.rows.first?.coin, "SOL")
+        XCTAssertEqual(bt.rows.first?.count, 53)
+        XCTAssertEqual(StrategyFmt.utcTime(bt.rows.first?.entryMs), "2026-09-23 14:45")
+
+        let chart = #"{"track":"live-breadth","trade":{"id":13,"symbol":"SOLUSDT","coin":"SOL","side":"long","entry_ms":1,"exit_ms":2,"pnl":1.0,"return_pct":1.0,"exit_reason":null,"score":null,"count":null,"new_coins":null,"kind":null,"entry_price":1.0,"exit_price":1.1,"entry_start_ms":null,"entry_end_ms":null,"exit_start_ms":null,"exit_end_ms":null},"bar":"1H","source":"Binance","note":"n","candles":[{"time":1790000000000,"open":1.0,"high":1.2,"low":0.9,"close":1.1,"volume":5.0}],"weekly_ranges":[{"week":"2026-09-21","start_ms":1,"end_ms":2,"expires_ms":3,"high":1.1,"low":0.9,"upper":1.2,"lower":0.8}]}"#
+        let c = try API.decoder.decode(BacktestChartData.self, from: Data(chart.utf8))
+        XCTAssertEqual(c.candles.count, 1)
+        XCTAssertEqual(c.weeklyRanges.first?.upper, 1.2)
+    }
+
+    func testSpanAndDecimals() {
+        XCTAssertEqual(StrategyFmt.span(2 * 86_400_000 + 4 * 3_600_000), "2天4小时")
+        XCTAssertEqual(StrategyFmt.span(12 * 60_000), "12分")
+        XCTAssertEqual(StrategyFmt.signedMoney(-74.141), "−74.14")
+        XCTAssertEqual(StrategyFmt.decimals(114.46), 2)
+        XCTAssertEqual(StrategyFmt.decimals(0.0123), 6)
+    }
+}

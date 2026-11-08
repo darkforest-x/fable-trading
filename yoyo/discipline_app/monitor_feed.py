@@ -26,14 +26,29 @@ import time
 from urllib.parse import urlencode
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+from .strategy_book import (BookUnavailable, project_backtest, project_booklet, project_breadth_ema20,
+                            project_candles, project_history)
 
 SOURCE = 'http://127.0.0.1:8766'
 SYMBOL = re.compile(r'[A-Z0-9]{1,40}-USDT-SWAP')
-# Monitor track keys in workbench order (yoyo/monitor/static/monday-reclaim-paper.js).
-LIVE_TRACKS = ('live-allin3', 'live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far')
+TRACK_KEY = re.compile(r'[a-z0-9][a-z0-9-]{0,19}')
+# 2.7.0 (owner 2026-11-09 “新策略在 App 里看不到”): the account list follows the monitor's own
+# ``tracks``. These tuples only fix the display order of the accounts known today (the web
+# picker order, reclaim-strategy-book.js); any account the monitor adds later is appended after
+# them, live- keys in the live group, so a new account appears without an app release.
+LIVE_TRACKS = ('live-breadth', 'live-allin3', 'live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far')
 REPLICA_TRACKS = ('spike', 'v3add20', 'allin3', '60', '5', 'v3', 'v3add', 'v3lock')
 TRACKS = LIVE_TRACKS + REPLICA_TRACKS
-LABELS = {'60': '60m', '5': '5m'}
+LABELS = {'60': '60m', '5': '5m', 'breadth-ema20': '全市场下轨反弹'}
+# Subtitles copied from reclaim-strategy-book.js TITLES (display text only).
+TITLES = {'live-breadth': '全市场宽度信号 · SOL 计资金', 'live-wick6x3': '插针收盘 · 6份3倍', 'live-wick3x3': '插针收盘 · 3份3倍',
+          'live-wick6x3hi': '插针收盘 · 6份3倍 · 高分加仓', 'live-wick3x3far': '插针收盘 · 3份3倍 · 离1.618≥1.5%',
+          'live-allin3': '触价前评分 · 模拟运行', '60': '等待回收', '5': '快速确认', 'v3': '分数决定目标', 'v3add': '逆向分步加仓',
+          'spike': '排列过滤插针', 'v3lock': '回收后锁住利润', 'allin3': '单仓 · 梭哈3倍', 'v3add20': '20份动态保证金 · 3倍加仓'}
+# Strategies with a research booklet but no forward paper account (owner 2026-11-09: “也要能看小册”).
+RESEARCH = (dict(key='breadth-ema20', label='全市场下轨反弹', title='BTC + 山寨篮子 · 只有研究小册，无前向账户'),)
+BREADTH_STATUS = frozenset(('taken', 'closed', 'followers', 'busy', 'out_of_band', 'watching', 'entering', 'price_missing'))
+TOUCH_STATUS = frozenset(('scored', 'excluded', 'feature_error'))
 MAX_ROWS = 60
 
 
@@ -65,8 +80,12 @@ def _position(row, closed):
     if not symbol or not side:
         return None
     item = dict(id=_ms(row.get('id')), symbol=symbol, side=side, entry=_num(row.get('entry')),
-                target=_num(row.get('target')), stage=str(row.get('stage') or ''), funded=row.get('taken') == 1,
-                notional=_num(row.get('notional')), fill_ms=_ms(row.get('fill_ms')), score=_num(row.get('score')))
+                target=_num(row.get('target')), stage=str(row.get('stage') or '')[:24], funded=row.get('taken') == 1,
+                notional=_num(row.get('notional')), fill_ms=_ms(row.get('fill_ms')), score=_num(row.get('score')),
+                # Breadth comparison rows (breadth_paper.py: taken=0, note='comparison') are BTC/ETH shadows
+                # that never move the account; ``due_ms`` is the six-day exit time of a holding.
+                shadow=row.get('taken') != 1 and row.get('note') == 'comparison',
+                due_ms=_ms(row.get('decision_ms')) if row.get('stage') == 'holding' else None)
     if closed:
         item.update(exit_price=_num(row.get('exit_price')), exit_ms=_ms(row.get('exit_ms')),
                     reason=str(row.get('reason') or ''), net_bp=_num(row.get('net_bp')), pnl=_num(row.get('pnl')))
@@ -79,44 +98,144 @@ def _position(row, closed):
     return item
 
 
+def ordered_tracks(tracks):
+    """Known accounts in workbench order, then any new monitor account (live- keys with the live group)."""
+    keys = [k for k, v in tracks.items() if isinstance(k, str) and TRACK_KEY.fullmatch(k) and isinstance(v, dict)]
+    known = [k for k in TRACKS if k in keys]
+    extra = [k for k in keys if k not in TRACKS]
+    live = lambda k: k.startswith('live-')
+    return ([k for k in known if live(k)] + [k for k in extra if live(k)] +
+            [k for k in known if not live(k)] + [k for k in extra if not live(k)])
+
+
+def _refills(value):
+    """Allin top-ups are cash, not P&L (monday-reclaim-paper.js ``refillTotal``); None when unreadable."""
+    refills = value.get('refills')
+    if refills is None:
+        return 0.0
+    if not isinstance(refills, list):
+        return None
+    total = 0.0
+    for r in refills:
+        before, after = (_num(r.get('equity_before')), _num(r.get('equity_after'))) if isinstance(r, dict) else (None, None)
+        if before is None or after is None:
+            return None
+        total += after - before
+    return total
+
+
+def _breadth_rule(config):
+    if not isinstance(config, dict) or _num(config.get('hold_days')) is None:
+        return None
+    shadows = [s for s in (config.get('shadows') or []) if _symbol(s)]
+    return dict(count_min=_num(config.get('count_min')), count_max=_num(config.get('count_max')),
+                bar_minutes=_num(config.get('bar_minutes')), observe_minutes=_num(config.get('observe_minutes')),
+                hold_days=_num(config.get('hold_days')), funded=_symbol(config.get('funded')), shadows=shadows[:4],
+                leverage=_num(config.get('leverage')), taker_bp=_num(config.get('taker_bp')))
+
+
+def _account(key, value, config):
+    equity, start = _num(value.get('equity')), _num(value.get('start_equity'))
+    stats = value.get('stats') if isinstance(value.get('stats'), dict) else {}
+    closed, wins = _num(stats.get('taken_closed')), _num(stats.get('wins'))
+    added = _refills(value)
+    pnl = equity - start - added if equity is not None and start is not None and added is not None else None
+    rule = _breadth_rule(config)
+    funded_open = [r for r in (value.get('open') or []) if isinstance(r, dict) and r.get('taken') == 1]
+    hold = None
+    if rule:
+        holding = next((r for r in funded_open if r.get('stage') == 'holding'), None)
+        if holding:
+            hold = dict(symbol=_symbol(holding.get('symbol')), fill_ms=_ms(holding.get('fill_ms')),
+                        due_ms=_ms(holding.get('decision_ms')))
+    return dict(key=key, label=LABELS.get(key, key), title=TITLES.get(key, ''),
+                group='live' if key.startswith('live-') else 'replica', kind='breadth' if rule else 'fib',
+                equity=equity, start_equity=start, pnl=pnl, refilled=bool(added),
+                return_pct=pnl/start*100 if pnl is not None and start else None,
+                started_ms=_ms(value.get('started_ms')), open_count=len(funded_open),
+                stats=dict(closed=closed, wins=wins, mean_net_bp=_num(stats.get('mean_net_bp')),
+                           win_pct=wins/closed*100 if closed and wins is not None else None),
+                breadth_rule=rule, hold=hold)
+
+
+def _touch(row):
+    symbol, side = _symbol(row.get('symbol')), _side(row.get('side'))
+    if not symbol or not side or row.get('status') not in TOUCH_STATUS:
+        return None
+    return dict(id=_ms(row.get('id')), symbol=symbol, side=side, level=_num(row.get('level')),
+                score=_num(row.get('score')), status=row['status'], taken=row.get('taken') == 1,
+                observed_ms=_ms(row.get('observed_ms')))
+
+
+def _breadth_signal(row):
+    if not isinstance(row, dict) or row.get('status') not in BREADTH_STATUS:
+        return None
+    return dict(id=_ms(row.get('id')), symbol=_symbol(row.get('symbol')), status=row['status'],
+                candle_ms=_ms(row.get('candle_ms')), observed_ms=_ms(row.get('observed_ms')),
+                decision_ms=_ms(row.get('decision_ms')), n=_num(row.get('n')), new_n=_num(row.get('new_n')))
+
+
+def _keep(row, breadth):
+    """1.618 accounts list funded rows only (unfunded rows are score-gate shadows, monday-reclaim-paper.js
+    ``funded``); the breadth account also keeps its BTC/ETH comparison rows."""
+    if not isinstance(row, dict):
+        return False
+    if row.get('taken') == 1 and (_num(row.get('notional')) or 0) > 0:
+        return True
+    return breadth and row.get('note') == 'comparison'
+
+
 def project_paper(raw, track):
     try:
         tracks = raw['tracks']
-        accounts = []
-        for key in TRACKS:
-            value = tracks.get(key)
-            if not isinstance(value, dict):
-                continue
-            equity, start = _num(value.get('equity')), _num(value.get('start_equity'))
-            stats = value.get('stats') if isinstance(value.get('stats'), dict) else {}
-            accounts.append(dict(
-                key=key, label=LABELS.get(key, key), group='live' if key in LIVE_TRACKS else 'replica',
-                equity=equity, start_equity=start,
-                return_pct=(equity/start-1)*100 if equity is not None and start else None,
-                started_ms=_ms(value.get('started_ms')),
-                stats=dict(closed=_num(stats.get('taken_closed')), wins=_num(stats.get('wins')),
-                           mean_net_bp=_num(stats.get('mean_net_bp')))))
+        accounts = [_account(key, tracks[key], raw.get(key)) for key in ordered_tracks(tracks)]
         if not accounts:
             raise ValueError('no paper accounts')
-        detail = tracks.get(track) if isinstance(tracks.get(track), dict) else {}
-        # Unfunded rows are score-gate shadows (monday-reclaim-paper.js `funded`), not paper trades.
-        funded = lambda r: isinstance(r, dict) and r.get('taken') == 1 and (_num(r.get('notional')) or 0) > 0
+        if track not in tracks or not isinstance(tracks[track], dict):
+            raise MonitorUnavailable('未知模拟账户')
+        detail = tracks[track]
+        breadth = _breadth_rule(raw.get(track)) is not None
         rows = lambda name, closed: [p for p in (_position(r, closed) for r in (detail.get(name) or [])
-                                                 if funded(r)) if p][:MAX_ROWS]
-        signals = []
-        for row in raw.get('signals') or []:
-            symbol, side = _symbol(row.get('symbol')), _side(row.get('side'))
-            if symbol and side and row.get('status') in ('scored', 'excluded', 'feature_error'):
-                signals.append(dict(id=_ms(row.get('id')), symbol=symbol, side=side, level=_num(row.get('level')),
-                                    score=_num(row.get('score')), status=row['status'], taken=row.get('taken') == 1,
-                                    observed_ms=_ms(row.get('observed_ms'))))
-        signals.sort(key=lambda s: -(s['observed_ms'] or 0))
+                                                 if _keep(r, breadth)) if p][:MAX_ROWS]
+        touches = [t for t in (_touch(r) for r in raw.get('signals') or [] if isinstance(r, dict)) if t]
+        touches.sort(key=lambda s: -(s['observed_ms'] or 0))
+        # live-allin3 scores its own touches before the touch candle (live_signals, monday-reclaim-paper.js
+        # ``signalRows``); every other 1.618 account shares the monitor's touch list.
+        own = raw.get('live_signals') if track == 'live-allin3' else raw.get('signals')
+        own = [t for t in (_touch(r) for r in own or [] if isinstance(r, dict)) if t]
+        own.sort(key=lambda s: -(s['observed_ms'] or 0))
+        config = raw.get(track) if isinstance(raw.get(track), dict) else {}
+        signals = [b for b in (_breadth_signal(r) for r in config.get('signals') or []) if b] if breadth else []
+        signals.sort(key=lambda s: -(s['candle_ms'] or 0))
         # Monitor equity excludes floating P&L (monday-reclaim-paper.js header note).
         return dict(now_ms=_ms(raw['now_ms']), paper_only=True, equity_basis='realized', accounts=accounts,
-                    detail=dict(key=track, open=rows('open', False), closed=rows('closed', True)),
-                    signals=signals[:MAX_ROWS])
+                    research=[dict(r) for r in RESEARCH],
+                    detail=dict(key=track, open=rows('open', False), closed=rows('closed', True),
+                                touches=[] if breadth else own[:MAX_ROWS], breadth_signals=signals[:MAX_ROWS]),
+                    # Kept for 2.6.x apps: the shared 1.618 touch list, unchanged.
+                    signals=touches[:MAX_ROWS])
+    except MonitorUnavailable:
+        raise
     except (KeyError, TypeError, AttributeError, ValueError) as error:
         raise MonitorUnavailable('模拟盘数据暂不可用') from error
+
+
+def project_paper_history(raw, track, tab, breadth):
+    """Older records of one account (the monitor's history pages: rows before today's start)."""
+    try:
+        rows = [r for r in raw['rows'] if isinstance(r, dict)]
+        positions, touches, signals = [], [], []
+        if tab == 'closed':
+            positions = [p for p in (_position(r, True) for r in rows if _keep(r, breadth)) if p]
+        elif breadth:
+            signals = [b for b in (_breadth_signal(r) for r in rows if r.get('breadth') is True) if b]
+        else:
+            touches = [t for t in (_touch(r) for r in rows) if t]
+        total = _ms(raw.get('total')) or 0
+        return dict(track=track, tab=tab, total=total, has_more=bool(raw.get('has_more')), now_ms=_ms(raw.get('now_ms')),
+                    count=len(rows), positions=positions, touches=touches, breadth_signals=signals)
+    except (KeyError, TypeError, AttributeError) as error:
+        raise MonitorUnavailable('历史记录暂不可用') from error
 
 
 def project_alerts(raw):
@@ -237,7 +356,9 @@ def project_touch_scores(rows):
 
 def _http(path, body=None):
     if body is None:
-        with urlopen(SOURCE + path, timeout=4) as response:
+        # Saved backtest K-lines and the frozen breadth ledger are slow first reads on the monitor.
+        slow = path.startswith('/api/strategy-backtest') or path.startswith('/static/')
+        with urlopen(SOURCE + path, timeout=30 if slow else 4) as response:
             return json.load(response)
     # The monitor guards its switch with a same-origin check meant for browsers on the public
     # tunnel; this authenticated loopback service is a trusted same-host client.
@@ -260,27 +381,87 @@ class MonitorFeed:
         self._cache = {}
         self._history = (0, None, [])  # (fetched_at, week, rows) for touches before today
 
-    def _read(self, path, project, load=None):
+    def _read(self, path, project, load=None, ttl=None):
         with self._lock:
             hit = self._cache.get(path)
             now = time.time()
-            if hit and now - hit[0] < self._ttl:
+            if hit and now - hit[0] < (self._ttl if ttl is None else ttl):
                 return hit[1]
         try:
             value = load() if load else project(self._fetch(path))
+        except MonitorUnavailable:
+            raise
+        except BookUnavailable as error:
+            raise MonitorUnavailable(str(error)) from None
         except (OSError, ValueError) as error:
             raise MonitorUnavailable('监控服务暂未连接，请稍后重试') from error
         with self._lock:
             self._cache[path] = (time.time(), value)
-            if len(self._cache) > 32:
+            if len(self._cache) > 64:
                 self._cache.pop(next(iter(self._cache)))
         return value
 
+    def _raw_paper(self, track):
+        # Raw snapshot (5 s) shared by the account projection and the booklet's rule facts.
+        path = '/api/monday-reclaim-paper?' + urlencode(dict(list_period='today', track=track))
+        return self._read('raw:' + path, None, lambda: self._fetch(path))
+
     def paper(self, track):
-        if track not in TRACKS:
+        if not TRACK_KEY.fullmatch(track or ''):
             raise MonitorUnavailable('未知模拟账户')
-        return self._read('/api/monday-reclaim-paper?' + urlencode(dict(list_period='today', track=track)),
-                          lambda raw: project_paper(raw, track))
+        # Validated against the monitor's own tracks inside the projection (unknown → 503).
+        return self._read('paper:' + track, None, lambda: project_paper(self._raw_paper(track), track))
+
+    def _breadth(self, track):
+        raw = self._raw_paper(track)
+        if not isinstance(raw.get('tracks'), dict) or track not in raw['tracks']:
+            raise MonitorUnavailable('未知模拟账户')
+        return isinstance(raw.get(track), dict) and _num(raw[track].get('hold_days')) is not None
+
+    def paper_history(self, track, tab, offset):
+        """Records before today (closed trades or touches/signals), newest first, 50 per page."""
+        if not TRACK_KEY.fullmatch(track or '') or tab not in ('closed', 'events'):
+            raise MonitorUnavailable('未知模拟账户')
+        breadth = self._breadth(track)
+        scope = 'all' if tab == 'events' or breadth else 'funded'
+        query = urlencode(dict(track=track, tab=tab, scope=scope, sort='time_desc', limit=50, offset=int(offset)))
+        return self._read('/api/monday-reclaim-paper/history?' + query,
+                          lambda raw: project_paper_history(raw, track, tab, breadth), ttl=30)
+
+    def booklet(self, track):
+        """Strategy booklet: overview facts, rules, saved equity path and the original research tables."""
+        if track == 'breadth-ema20':
+            return self._read('booklet:' + track, None, lambda: project_breadth_ema20(
+                self._fetch('/static/strategy-booklet/breadth-ema20-data.json')), ttl=600)
+        if not TRACK_KEY.fullmatch(track or ''):
+            raise MonitorUnavailable('未知策略')
+
+        def load():
+            raw = self._raw_paper(track)
+            if not isinstance(raw.get('tracks'), dict) or track not in raw['tracks']:
+                raise MonitorUnavailable('未知策略')
+            research = self._read('/static/strategy-booklet/research.json', lambda v: v, ttl=600)
+            history, error = None, None
+            try:
+                history = self._read(f'/static/strategy-booklet/{track}-history.json',
+                                     lambda v: project_history(v, track), ttl=600)
+            except MonitorUnavailable as failure:
+                error = str(failure) or '历史资金曲线暂时无法读取'
+            return project_booklet(track, LABELS.get(track, track), TITLES.get(track, ''), raw, research, history, error)
+        return self._read('booklet:' + track, None, load, ttl=60)
+
+    def backtest(self, track, sort, direction, offset):
+        if not TRACK_KEY.fullmatch(track or '') or sort not in ('time', 'pnl') or direction not in ('asc', 'desc'):
+            raise MonitorUnavailable('未知策略')
+        query = urlencode(dict(track=track, sort=sort, direction=direction, offset=int(offset), limit=50))
+        return self._read('/api/strategy-backtest?' + query, lambda v: project_backtest(v, track), ttl=300)
+
+    def backtest_candles(self, track, trade, period):
+        if not TRACK_KEY.fullmatch(track or '') or period not in ('5m', '15m', '1H', '4H'):
+            raise MonitorUnavailable('未知策略')
+        query = urlencode(dict(track=track, trade=int(trade), period=period))
+        return self._read('/api/strategy-backtest/candles?' + query,
+                          lambda v: project_candles(v, track, int(trade)), ttl=600)
 
     def alerts(self):
         return self._read('/api/spike-alerts', project_alerts)

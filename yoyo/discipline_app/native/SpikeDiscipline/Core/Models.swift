@@ -8,7 +8,20 @@ struct Health: Codable { let service: String; let mode: String; let liveEnabled:
 struct StateProbe: Codable { let mode: String; let accountId: String? }
 
 struct PaperAccount: Codable, Identifiable, Hashable {
-    struct Stats: Codable, Hashable { let closed: Double?; let wins: Double?; let meanNetBp: Double? }
+    struct Stats: Codable, Hashable { let closed: Double?; let wins: Double?; let meanNetBp: Double?; var winPct: Double? = nil }
+    /// live-breadth rule (breadth_paper.py RULE): coin-count band, observation and holding window.
+    struct BreadthRule: Codable, Hashable {
+        let countMin: Double?
+        let countMax: Double?
+        let barMinutes: Double?
+        let observeMinutes: Double?
+        let holdDays: Double?
+        let funded: String?
+        let shadows: [String]
+        let leverage: Double?
+        let takerBp: Double?
+    }
+    struct Hold: Codable, Hashable { let symbol: String?; let fillMs: Double?; let dueMs: Double? }
     let key: String
     let label: String
     let group: String
@@ -17,6 +30,24 @@ struct PaperAccount: Codable, Identifiable, Hashable {
     let returnPct: Double?
     let startedMs: Double?
     let stats: Stats
+    // 2.7.0 strategy frame; optional so a 2.6 service still decodes.
+    var title: String? = nil
+    var kind: String? = nil
+    var pnl: Double? = nil
+    var refilled: Bool? = nil
+    var openCount: Int? = nil
+    var breadthRule: BreadthRule? = nil
+    var hold: Hold? = nil
+    var id: String { key }
+    var isBreadth: Bool { kind == "breadth" }
+    var subtitle: String { title ?? "" }
+}
+
+/// A strategy with a research booklet but no forward paper account (breadth-ema20).
+struct ResearchStrategy: Codable, Identifiable, Hashable {
+    let key: String
+    let label: String
+    let title: String
     var id: String { key }
 }
 
@@ -39,6 +70,11 @@ struct PaperPosition: Codable, Identifiable, Hashable {
     let reason: String?
     let netBp: Double?
     let pnl: Double?
+    /// Breadth comparison row (BTC/ETH): never moves the account.
+    var shadow: Bool? = nil
+    /// Breadth holding: the six-day exit time.
+    var dueMs: Double? = nil
+    var rowKey: String { "\(Int(id ?? 0))-\(symbol)-\(Int(fillMs ?? 0))" }
 }
 
 struct PaperSignal: Codable, Identifiable, Hashable {
@@ -53,12 +89,45 @@ struct PaperSignal: Codable, Identifiable, Hashable {
     var rowId: String { "\(id ?? 0)-\(symbol)" }
 }
 
+/// One market-wide breadth signal of live-breadth (breadth_paper.py ``paper_signal``).
+struct BreadthSignal: Codable, Identifiable, Hashable {
+    let id: Double?
+    let symbol: String?
+    let status: String
+    let candleMs: Double?
+    let observedMs: Double?
+    let decisionMs: Double?
+    let n: Double?
+    let newN: Double?
+    var rowId: String { "\(Int(id ?? 0))-\(Int(candleMs ?? 0))" }
+}
+
 struct PaperSnapshot: Codable {
-    struct Detail: Codable { let key: String; let open: [PaperPosition]; let closed: [PaperPosition] }
+    struct Detail: Codable {
+        let key: String
+        let open: [PaperPosition]
+        let closed: [PaperPosition]
+        var touches: [PaperSignal]? = nil
+        var breadthSignals: [BreadthSignal]? = nil
+    }
     let nowMs: Double
     let accounts: [PaperAccount]
     let detail: Detail
     let signals: [PaperSignal]
+    var research: [ResearchStrategy]? = nil
+}
+
+/// Older records of one account (before today), 50 per page.
+struct PaperHistoryPage: Codable {
+    let track: String
+    let tab: String
+    let total: Int
+    let hasMore: Bool
+    let nowMs: Double?
+    let count: Int
+    let positions: [PaperPosition]
+    let touches: [PaperSignal]
+    let breadthSignals: [BreadthSignal]
 }
 
 struct Alarm: Codable, Identifiable, Hashable {

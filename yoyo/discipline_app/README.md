@@ -6,6 +6,16 @@ Owner 2026-11-07 否定 1.0.x 网页改版（“和我的预期差一大截 做�
 
 阶段：0 骨架、授权与接口客户端 → 1 监控（模拟盘 / 报警 / 云带）与前台报警通知 → 2 1.618 原生 K 线 → 3 持仓 / 统计 / 纪律 / 设置（含平仓、撤单、止损）→ 4 合约下单票据（真金链路，最后迁移并单独测试）。阶段 0、1 已完成：XCTest 6 项（报警判定、格式化、服务端载荷解码）通过；iPhone 17 Pro 模拟器连合成 fixture 验收监控三段、报警横幅与未读角标，开单写入 0。2026-11-07 15:03 已装到 iPhone Air 并启动，设备回读 com.spike.discipline.native 2.0.0 / 1（与 1.x 并存）。2.0.1（2，11-07）按 owner“还要调整”（玻璃更通透、配色与背景、排版与密度、交互与动画）：流动网格渐变背景、更通透的 clear 玻璃卡、涨跌胶囊、点账户卡缩放转场进详情、数字滚动、列表进出渐显、下拉刷新、切换触感、铃铛弹跳、横幅上滑关闭；已装到 iPhone。2.0.2（3）按 owner 反馈：大标题与右上按钮同一行（inlineLarge）；五个页面左右滑动切换、跟手翻页，自制液态玻璃底栏透镜随滚动移动；点按、翻页、分段、开关、刷新、展开、报警全部有触感，设置可关；外观可选跟随系统 / 浅色 / 深色；去掉令牌输入——真机构建时由 `native/tools/genpbx.py` 生成的构建步骤把本机 `access-token` 写入包内（不入 Git，模拟器构建不写），App 自动连接，服务端校验保留（公网入口可下真金单）。11-07 已装到 iPhone 并启动，设备回读 2.0.2 / 3。2.0.3（4）按 owner“灰色不好看 / 卡片点进去卡卡的”：内容卡改为白色磨砂（材质+白色填充+亮边+柔和阴影），液态玻璃只用于底栏、工具栏、分段、横幅等控件；背景改为静态浅蓝白（参考 #EEF2F7）并铺满导航容器（`containerBackground(for: .navigation)`），修掉状态栏白/黑条；去掉每页 30fps 流动背景与滚动模糊；左右翻页改用系统分页 TabView，底栏透镜读页面实时位置跟随。已装到 iPhone 并启动，设备回读 2.0.3 / 4。DEBUG 构建可用启动参数 `-SpikeServiceURL`（仅回环地址）、`-SpikeQAToken`、`-SpikeQATab`、`-SpikeQASegment` 做模拟器验收，发布构建不读取。
 
+### 2.7.0（15）· 模拟盘策略框架、监控页左右滑动切菜单（owner 11-09）
+
+- 账户列表按监控 `/api/monday-reclaim-paper` 的 `tracks` 驱动（`monitor_feed.py`），不再写死；已知账户按网页顺序（live-breadth 起头），新出现的账户自动追加，live- 归前向组。`live-breadth` 新增后 App 显示 14 个账户；`breadth-ema20`（全市场下轨反弹）没有前向账户，单列为“研究小册”。
+- 每个账户：净值、已实现盈亏（allin 补款不计收益）、胜率；持仓 / 已结束（可加载更早）/ 触价（live-allin3 用自己的触价前评分）；“策略小册”（概况、规则、历史资金曲线与回撤、年度收益、原研究表，来源 `static/strategy-booklet/research.json` 与 `<track>-history.json`，breadth-ema20 读 `breadth-ema20-data.json`）；“历史开单”（`/api/strategy-backtest` 分页，点开用原 CandleChart 回放币安 K 线与原成交价）。
+- live-breadth 按语义显示：SOL 计入资金，BTC/ETH 标“影子 · 对照”不动资金，6 天持有进度与到期时间，信号状态（已开仓 / 观察中 · 剩 X / 观察期有新币 · 取消 +n / 已有持仓 · 跳过 / 币数不在区间）。
+- 新增只读 GET：`/v1/monitor/paper/history`、`/v1/monitor/booklet`、`/v1/monitor/backtest`、`/v1/monitor/backtest/candles`（周期 5m/15m/1H/4H）；投影白名单在 `strategy_book.py`，来源路径、提交号、模型特征不出服务。旧版 App 读的顶层 `signals` 不变。
+- 监控页标题与分段固定，4 个菜单是横向分页、各自纵向滚动与下拉刷新，分段滑块跟手；滑过第一 / 最后一个菜单交给主 tab（合约 / 1.618）。主 tab 分页在监控页保持可用——锁住它会让边缘拖动失效（见 `docs/learnings/nested-pager-edge-handoff-needs-the-outer-pager-enabled.md`）。
+- Stitch（GEMINI_3_8_FLASH）：模拟盘 `59777299a3284e88a4edc59fdea2294f`、账户详情 `f88adbbd640045b9a60d563068f10db6`、小册 `c85cd00cb6c14b0f8e7d5eebd3cce9d5`、历史开单 `04710b2877bf422395b19a310c10edce`、K 线回放 `4b7277a8035e4df0a4cdf0d9d12a879e`（账户详情与 K 线回放两个请求客户端超时，经 list_screens + get_screen 取回，未重发）；素材在 `design/native-2.7.0/`。
+- 验证：服务测试 256 项通过（1 项跳过），XCTest 27 项通过。iPhone 17 Pro 模拟器连 fixture 18923（合成数据，交易所写入 0）：14 个账户 + 研究小册、左右滑动切 4 个菜单与边缘交给主 tab、live-breadth 持仓 / 信号 / 小册 / 历史开单 / K 线、spike 与 live-wick6x3 的小册与开单、breadth-ema20 小册；截图在 `evidence/native-2.7.0/`。小册曲线长按读数未截图验证（模拟器工具无法在按住时截图）。真机安装需 owner 连接手机，未做。
+
 ### 2.6.2（14）· 往周区间线看全历史（owner 11-09“历史的区间线只能看到最近几周的，我需要看全历史的”）
 
 - 原因：往周周一区间只读 3 页 1H（约 37 天），本机 1H 缓存又只留 800 根，所以只有最近约 5 周。

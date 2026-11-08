@@ -11,7 +11,8 @@ from yoyo.discipline_app.api import create_app
 from yoyo.discipline_app.book import Book
 from yoyo.discipline_app.monitor_feed import (MonitorFeed, MonitorUnavailable, TRACKS, project_alerts,
                                               project_cloud, project_notifications, project_paper,
-                                              project_touch_scores)
+                                              project_paper_history, project_touch_scores)
+from yoyo.discipline_app.strategy_book import downsample, project_breadth_ema20
 from test_discipline_service import Clock, market
 
 TOKEN = 'monitor-fixture-token-not-a-secret-0123456789'
@@ -33,7 +34,26 @@ def paper_raw():
                      reason='target', net_bp=95.0, pnl=2.85),
                 dict(id=5, symbol='bad symbol', side=1, taken=1, notional=1.0),
                 dict(id=4, symbol='DDD-USDT-SWAP', side=1, entry=2.0, stage='closed', taken=0, notional=0.0)])
-    return dict(now_ms=1_790_000_200_000, tracks=tracks, signals=[
+    # live-breadth (breadth_paper.py shape): SOL funded, BTC/ETH comparison rows, six-day holding.
+    breadth_row = lambda i, symbol, funded, stage='holding': dict(
+        id=9_260_000_000+i, track=9260, symbol=symbol, side=1, entry=100.0, target=None, fill_ms=1_790_000_000_000,
+        decision_ms=1_790_518_400_000, stage=stage, taken=int(funded), notional=1000.0, note=None if funded else 'comparison',
+        mark=101.0, unrealized_bp=100.0, exit_ms=None, exit_price=None, reason=None, net_bp=None, pnl=None, error=None)
+    tracks['live-breadth'] = dict(track(1000.0), detail_omitted=False, confirm_minutes=None,
+                                  open=[breadth_row(1, 'SOL-USDT-SWAP', True), breadth_row(2, 'BTC-USDT-SWAP', False),
+                                        breadth_row(3, 'ETH-USDT-SWAP', False), dict(breadth_row(4, 'XRP-USDT-SWAP', False), note=None)],
+                                  closed=[])
+    breadth_config = dict(track='live-breadth', count_min=31, count_max=62, bar_minutes=5, observe_minutes=30, hold_days=6,
+                          funded='SOL-USDT-SWAP', shadows=['BTC-USDT-SWAP', 'ETH-USDT-SWAP'], start_equity=1000.0,
+                          source='internal-experiment-path', signals=[
+                              dict(id=9_260_000_005, symbol='SOL-USDT-SWAP', side=1, candle_ms=1_789_999_000_000, observed_ms=1,
+                                   decision_ms=1_790_000_800_000, n=42, new_n=0, status='taken', breadth=True, error='trace'),
+                              dict(id=9_260_000_006, symbol='SOL-USDT-SWAP', side=1, candle_ms=1_790_000_100_000, n=40, new_n=3,
+                                   status='followers', breadth=True),
+                              dict(id=9_260_000_007, symbol='SOL-USDT-SWAP', side=1, candle_ms=1_790_000_150_000, status='internal_state')])
+    return dict(now_ms=1_790_000_200_000, tracks=tracks, **{'live-breadth': breadth_config}, live_signals=[
+        dict(id=11, symbol='EEE-USDT-SWAP', side=1, level=1.0, score=0.61, status='scored', taken=1, observed_ms=1_790_000_160_000)],
+        signals=[
         dict(id=1, symbol='AAA-USDT-SWAP', side=-1, level=1.2, score=0.8, status='scored', taken=1,
              observed_ms=1_790_000_050_000, features={'x': 1}, levels='{}'),
         dict(id=2, symbol='CCC-USDT-SWAP', side=1, level=3.0, score=0.3, status='scored', taken=0,
@@ -81,6 +101,39 @@ def history_raw():
                 total=3, has_more=False, now_ms=1_790_000_200_000, day_start_ms=1_790_000_000_000)
 
 
+def research_raw():
+    return dict(version=1, methodology='方法说明', period_note='区间说明', integrity='internal', accounts={'live-wick6x3': dict(
+        status='模拟运行', note='占位说明', headers=['区间', '样本数'], rows=[['2025', 10]],
+        sections=[dict(title='分节', headers=['a', 'b'], rows=[[1, 2]])],
+        sources=[dict(path='experiments/active/internal', commit='abc123')])})
+
+
+def booklet_history_raw():
+    points = [[1_700_000_000_000 + i*3_600_000, 1000.0 + i, float(i), -0.5, 0.0] for i in range(900)]
+    return dict(schema=1, meta=dict(track='live-wick6x3', note='占位', sources=['internal-path']), refilled=False, points=points,
+                monthly=[['2024-01', 1.5]], yearly=[['2024', 9.0]], summary=dict(start=1000.0, end=1899.0, return_pct=89.9,
+                max_drawdown_pct=4.0, win_pct=60.0, trades=40, profit_factor=1.5, profit_factor_state='finite'),
+                distribution=dict(labels=[], values=[]), holding=dict(labels=[], values=[]), sides=[['做多', 20, 60.0, 100.0]],
+                recent=[], source_commit='deadbeef')
+
+
+def backtest_raw():
+    row = dict(id=3, symbol='AAAUSDT', side=-1, entry_ms=1_700_000_000_000, exit_ms=1_700_000_600_000, pnl=-5.0, return_pct=-1.0,
+               exit_reason=11, entry_rules=dict(status='saved', score=0.61, kind='first_touch', source_net_bp=-100.0),
+               fills=dict(entry_price=1.0, exit_price=1.01, entry_start_ms=1_699_999_700_000))
+    return dict(schema=1, track='live-wick6x3', meta=dict(trades=1, pnl=-5.0, note='占位', source='Binance', source_commit='x',
+                sources=['internal']), ranking=[], rows=[row, dict(row, symbol='bad')], total=1, offset=0, has_more=False,
+                sort='time', direction='desc')
+
+
+def candles_raw():
+    bars = [dict(time=1_700_000_000_000 + i*900_000, open=1.0, high=1.1, low=0.9, close=1.05, volume=10.0) for i in range(5)]
+    return dict(schema=1, track='live-wick6x3', trade_id=3, symbol='AAAUSDT', source='Binance', bar='15m', candles=bars,
+                weekly_ranges=[dict(symbol='AAAUSDT', week='2023-11-13', state='ready', start_ms=1, end_ms=2, expires_ms=3,
+                                    high=1.1, low=0.9, upper=1.22, lower=0.78)],
+                backtestTrade=backtest_raw()['rows'][0], note='占位')
+
+
 def walk(value):
     if isinstance(value, dict):
         for k, v in value.items():
@@ -97,16 +150,89 @@ def test_paper_projection_is_whitelisted_and_paper_only():
     assert value['paper_only'] is True
     assert not keys & {'features', 'rule', 'note', 'levels', 'shadow_closed', 'detail_omitted'}
     assert [a['key'] for a in value['accounts']] == list(TRACKS)
+    assert value['accounts'][0]['key'] == 'live-breadth' and value['research'][0]['key'] == 'breadth-ema20'
     live = next(a for a in value['accounts'] if a['key'] == 'live-wick6x3')
     assert live['group'] == 'live' and round(live['return_pct'], 6) == -4.0 and 'open' not in live
+    assert live['pnl'] == -40.0 and live['stats']['win_pct'] == 75.0 and live['kind'] == 'fib' and live['title']
     assert next(a for a in value['accounts'] if a['key'] == '60')['label'] == '60m'
     assert value['detail']['open'][0] == dict(id=7, symbol='AAA-USDT-SWAP', side='short', entry=1.2, target=1.1,
                                               stage='open', funded=True, notional=300.0, fill_ms=1_790_000_100_000,
                                               score=0.8, mark=1.25, unrealized_bp=-41.0, remaining_notional=300.0,
-                                              stop=1.44)
+                                              stop=1.44, shadow=False, due_ms=None)
     assert [p['symbol'] for p in value['detail']['closed']] == ['BBB-USDT-SWAP']  # shadow and malformed rows dropped
     assert value['equity_basis'] == 'realized'
     assert [s['id'] for s in value['signals']] == [2, 1]
+
+
+def test_accounts_follow_the_monitor_tracks_new_ones_appear_without_a_release():
+    raw = paper_raw()
+    raw['tracks']['live-zeta'] = dict(raw['tracks']['spike'])
+    raw['tracks']['omega'] = dict(raw['tracks']['spike'])
+    raw['tracks']['../bad'] = dict(raw['tracks']['spike'])
+    del raw['tracks']['v3lock']
+    keys = [a['key'] for a in project_paper(raw, 'live-zeta')['accounts']]
+    live = [k for k in TRACKS if k.startswith('live-')]
+    assert keys == live + ['live-zeta'] + [k for k in TRACKS if not k.startswith('live-') and k != 'v3lock'] + ['omega']
+    with pytest.raises(MonitorUnavailable):
+        project_paper(raw, 'v3lock')  # an account the monitor no longer has is an honest 503
+
+
+def test_allin_refills_are_cash_not_pnl():
+    raw = paper_raw()
+    raw['tracks']['allin3'] = dict(raw['tracks']['allin3'], equity=1500.0, refills=[dict(equity_before=50.0, equity_after=1000.0)])
+    allin = next(a for a in project_paper(raw, 'spike')['accounts'] if a['key'] == 'allin3')
+    assert allin['pnl'] == -450.0 and allin['refilled'] is True
+    raw['tracks']['allin3']['refills'] = [dict(equity_before=None)]
+    assert next(a for a in project_paper(raw, 'spike')['accounts'] if a['key'] == 'allin3')['pnl'] is None
+
+
+def test_breadth_account_keeps_comparison_rows_hold_progress_and_signal_states():
+    value = project_paper(paper_raw(), 'live-breadth')
+    account = value['accounts'][0]
+    assert account['kind'] == 'breadth' and account['open_count'] == 1
+    assert account['breadth_rule'] == dict(count_min=31, count_max=62, bar_minutes=5, observe_minutes=30, hold_days=6,
+                                   funded='SOL-USDT-SWAP', shadows=['BTC-USDT-SWAP', 'ETH-USDT-SWAP'], leverage=None, taker_bp=None)
+    assert account['hold'] == dict(symbol='SOL-USDT-SWAP', fill_ms=1_790_000_000_000, due_ms=1_790_518_400_000)
+    rows = {p['symbol']: p for p in value['detail']['open']}
+    assert set(rows) == {'SOL-USDT-SWAP', 'BTC-USDT-SWAP', 'ETH-USDT-SWAP'}  # unfunded non-comparison rows dropped
+    assert rows['SOL-USDT-SWAP']['funded'] and not rows['SOL-USDT-SWAP']['shadow']
+    assert rows['BTC-USDT-SWAP']['shadow'] and not rows['BTC-USDT-SWAP']['funded']
+    assert rows['SOL-USDT-SWAP']['due_ms'] == 1_790_518_400_000
+    signals = value['detail']['breadth_signals']
+    assert [s['status'] for s in signals] == ['followers', 'taken'] and signals[0]['new_n'] == 3
+    assert value['detail']['touches'] == [] and 'source' not in set(walk(value)) and 'error' not in set(walk(value))
+    # 2.6.x apps keep decoding the shared touch list unchanged.
+    assert [s['id'] for s in value['signals']] == [2, 1]
+
+
+def test_each_account_lists_its_own_touches():
+    raw = paper_raw()
+    assert [t['id'] for t in project_paper(raw, 'live-allin3')['detail']['touches']] == [11]
+    assert [t['id'] for t in project_paper(raw, 'spike')['detail']['touches']] == [2, 1]
+
+
+def test_history_pages_keep_breadth_shadows_and_drop_unfunded_fib_rows():
+    row = lambda i, taken, note=None, breadth=False: dict(id=i, symbol='AAA-USDT-SWAP', side=1, entry=1.0, stage='closed', taken=taken,
+                                                          notional=10.0 if taken else 0.0, note=note, exit_ms=5, pnl=1.0, net_bp=3.0,
+                                                          reason='time_6d', breadth=breadth)
+    raw = dict(rows=[row(1, 1), row(2, 0, 'comparison'), row(3, 0)], total=9, has_more=True, now_ms=7)
+    assert [p['id'] for p in project_paper_history(raw, 'live-breadth', 'closed', True)['positions']] == [1, 2]
+    fib = project_paper_history(raw, 'spike', 'closed', False)
+    assert [p['id'] for p in fib['positions']] == [1] and fib['total'] == 9 and fib['has_more'] is True
+    events = dict(rows=[dict(id=4, symbol='SOL-USDT-SWAP', status='busy', candle_ms=3, n=40, breadth=True)], total=1)
+    assert project_paper_history(events, 'live-breadth', 'events', True)['breadth_signals'][0]['status'] == 'busy'
+
+
+def test_downsample_keeps_extremes_and_ends():
+    points = [[i, 1000 + (i % 50) * (-1 if i % 2 else 1), 0.0, 0.0] for i in range(5000)]
+    out = downsample(points, 200)
+    assert len(out) <= 200 and out[0] == points[0] and out[-1] == points[-1]
+    assert min(p[1] for p in out) == min(p[1] for p in points) and max(p[1] for p in out) == max(p[1] for p in points)
+
+
+def test_breadth_ema20_booklet_rejects_other_ledgers():
+    with pytest.raises(ValueError):
+        project_breadth_ema20(dict(schema_version='other'))
 
 
 def test_alert_and_cloud_projections_drop_receipts_text_and_internals():
@@ -147,7 +273,10 @@ def client(tmp_path):
             s['week'] = '2026-11-02'
         return raw
     payloads = {'/api/monday-reclaim-paper': paper_with_week, '/api/spike-alerts': alerts_raw, '/api/cloud-signals': cloud_raw,
-                '/api/monday-fib': fib_raw, '/api/monday-reclaim-paper/history': history_raw}
+                '/api/monday-fib': fib_raw, '/api/monday-reclaim-paper/history': history_raw,
+                '/static/strategy-booklet/research.json': research_raw,
+                '/static/strategy-booklet/live-wick6x3-history.json': booklet_history_raw,
+                '/api/strategy-backtest': backtest_raw, '/api/strategy-backtest/candles': candles_raw}
 
     def fetch(path, body=None):
         calls.append((path, body) if body is not None else path)
@@ -163,7 +292,9 @@ def test_monitor_routes_need_token_are_get_only_and_never_touch_the_ledger(clien
     http, book, calls, app = client
     before = book.snapshot()
     for path in ('/v1/monitor/paper', '/v1/monitor/alerts', '/v1/monitor/cloud', '/v1/monitor/notifications',
-                 '/v1/monitor/touch-scores'):
+                 '/v1/monitor/touch-scores', '/v1/monitor/paper/history?track=live-wick6x3&tab=closed',
+                 '/v1/monitor/booklet?track=live-wick6x3', '/v1/monitor/backtest?track=live-wick6x3',
+                 '/v1/monitor/backtest/candles?track=live-wick6x3&trade=3&period=15m'):
         assert http.get(path).status_code == 401
         assert http.get(path, headers=AUTH).status_code == 200
         assert http.post(path, headers=AUTH, json={}).status_code == 405
@@ -237,3 +368,29 @@ def test_touch_scores_projection_drops_other_weeks_and_bad_rows():
     out = project_touch_scores(rows)
     assert out['week'] == '2026-11-02' and [s['symbol'] for s in out['scores']] == ['AAA-USDT-SWAP']
     assert out['scores'][0]['side'] == 'lower'
+
+
+def test_strategy_frame_routes_project_booklet_backtest_and_candles_without_internals(client):
+    http, book, calls, _ = client
+    before = book.snapshot()
+    booklet = http.get('/v1/monitor/booklet?track=live-wick6x3', headers=AUTH).json()
+    assert booklet['key'] == 'live-wick6x3' and booklet['paper'] is True and len(booklet['flow']) == 4
+    assert booklet['facts'][1]['label'] == '入场分门槛'
+    assert len(booklet['history']['points']) <= 480 and booklet['history']['points'][0][1] == 1000.0
+    assert booklet['research']['table']['rows'] == [['2025', 10]] and booklet['research']['sections'][0]['title'] == '分节'
+    assert not {'sources', 'source_commit', 'commit', 'path', 'integrity'} & set(walk(booklet))
+    trades = http.get('/v1/monitor/backtest?track=live-wick6x3&sort=pnl', headers=AUTH).json()
+    assert [r['coin'] for r in trades['rows']] == ['AAA'] and trades['rows'][0]['side'] == 'short'
+    assert trades['rows'][0]['exit_reason'] is None and trades['rows'][0]['score'] == 0.61
+    assert not {'source_commit', 'sources', 'entry_rules', 'ranking'} & set(walk(trades))
+    assert any(isinstance(c, str) and c.startswith('/api/strategy-backtest?') and 'sort=pnl' in c and 'limit=50' in c for c in calls)
+    chart = http.get('/v1/monitor/backtest/candles?track=live-wick6x3&trade=3&period=15m', headers=AUTH).json()
+    assert len(chart['candles']) == 5 and chart['trade']['entry_price'] == 1.0 and chart['weekly_ranges'][0]['upper'] == 1.22
+    assert http.get('/v1/monitor/backtest/candles?track=live-wick6x3&trade=3&period=1m', headers=AUTH).status_code == 422
+    assert http.get('/v1/monitor/booklet?track=../x', headers=AUTH).status_code == 422
+    assert http.get('/v1/monitor/booklet?track=nope', headers=AUTH).status_code == 503
+    history = http.get('/v1/monitor/paper/history?track=live-wick6x3&tab=events', headers=AUTH).json()
+    assert history['tab'] == 'events' and history['positions'] == []
+    assert any(isinstance(c, str) and 'history?' in c and 'tab=events' in c and 'scope=all' in c for c in calls)
+    after = book.snapshot()
+    assert before['positions'] == after['positions'] and before['pending'] == after['pending']

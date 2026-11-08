@@ -99,7 +99,8 @@ struct RootView: View {
         .scrollIndicators(.hidden)
         .scrollEdgeEffectHidden(true, for: .all)
         .scrollPosition(id: $scrolled)
-        // The 1.618 page is a full-screen chart: horizontal drags pan the chart, not the pages.
+        // The 1.618 page is a full-screen chart: horizontal drags pan the chart, not the pages. 监控 nests its
+        // own menu pager (owner 2026-11-09); UIKit gives it drags first and hands edge drags back here.
         .scrollDisabled(tab == .fib && target == nil)
         .onScrollGeometryChange(for: CGFloat.self) { geo in
             geo.contentOffset.x / max(geo.containerSize.width, 1)
