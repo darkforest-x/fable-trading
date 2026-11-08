@@ -97,6 +97,12 @@ def _ms(value) -> int:
     return int(stamp.tz_convert("UTC").value // 1_000_000)
 
 
+def _timestamp_column_ms(values: pd.Series) -> pd.Series:
+    """Convert timezone-aware timestamps to epoch ms independent of pandas unit."""
+    parsed = pd.to_datetime(values, utc=True)
+    return parsed.map(lambda stamp: int(stamp.value // 1_000_000)).astype("int64")
+
+
 def _ema_points(bars: pd.DataFrame, step_ms: int) -> pd.DataFrame:
     """Source recurrence: close-only EMA20/50, reset at any absent UTC bar."""
     a = b = None
@@ -262,8 +268,8 @@ def _read_parent(config: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame
     if missing:
         raise ValueError(f"Frozen signals.csv missing required fields: {missing}")
     signals["source_row_number"] = np.arange(1, len(signals) + 1, dtype=np.int64)
-    signals["key_open_ms"] = pd.to_datetime(signals.key_open_bjt, utc=True).astype("int64") // 1_000_000
-    signals["confirmation_ms"] = pd.to_datetime(signals.confirmed_bjt, utc=True).astype("int64") // 1_000_000
+    signals["key_open_ms"] = _timestamp_column_ms(signals.key_open_bjt)
+    signals["confirmation_ms"] = _timestamp_column_ms(signals.confirmed_bjt)
     signals["parent_id"] = signals.source_row_number.map(lambda n: f"signal-row-{int(n):05d}")
     if signals.duplicated(["symbol", "week"]).any():
         raise ValueError("The frozen 12H first-key ledger has multiple signal rows per symbol/NY week")
@@ -288,8 +294,10 @@ def _read_parent(config: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame
                                    "source_path_12h", "source_path_1h"]],
                            on="source_row_number", how="left", suffixes=("_signal", "_path"),
                            validate="one_to_one")
-    if joined.event_id.isna().any() or not joined.parent_id.eq(joined.source_row_number.map(
-            lambda n: f"signal-row-{int(n):05d}")).all():
+    expected_parent = joined.source_row_number.map(lambda n: f"signal-row-{int(n):05d}")
+    if (joined.event_id.isna().any()
+            or not joined.parent_id_signal.eq(expected_parent).all()
+            or not joined.parent_id_path.eq(expected_parent).all()):
         raise ValueError("Parent source_row_number join is incomplete or nonunique")
     for signal_key, path_key in (("key_open_ms_signal", "key_open_ms_path"),
                                  ("confirmation_ms_signal", "confirmation_ms_path")):
@@ -299,6 +307,9 @@ def _read_parent(config: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame
                         ("side_signal", "side_path")):
         if not joined[left].astype(str).eq(joined[right].astype(str)).all():
             raise ValueError(f"Frozen signal/path identity mismatch: {left}")
+    joined["symbol"] = joined.symbol_signal
+    joined["week"] = joined.week_signal
+    joined["side"] = joined.side_signal
     if len(joined) != 12_707 or joined.symbol.nunique() != 286:
         raise ValueError(f"Unexpected frozen parent event inventory: {len(joined)} rows / {joined.symbol.nunique()} symbols")
     for symbol, rows in actual.groupby("symbol", sort=False):
@@ -365,9 +376,10 @@ def _scan_first_4h(symbol: str, decision_ms: int, bars4: pd.DataFrame,
         if stamp not in bar_times:
             return {"screen_reason": "missing_4h_bar_before_first_key",
                     "four_h_key": None, "missing_4h_before_entry": 1}
-        point = points4.loc[stamp]
+        point = points4.loc[stamp].to_dict()
+        point["time"] = int(stamp)
         bar = bars4.loc[stamp]
-        item = _signal_4h(symbol, stamp, bar.to_dict(), point.to_dict(), anchor)
+        item = _signal_4h(symbol, stamp, bar.to_dict(), point, anchor)
         if item is not None:
             # Keep the production source's NY-week/shared-direction first-key rule.
             selected = first_eligible([item])
