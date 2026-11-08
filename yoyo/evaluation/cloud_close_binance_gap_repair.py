@@ -39,7 +39,8 @@ def rebuild(job):
     restored = pd.concat([prior[keep],daily[prior.columns]]).sort_index()
     if not restored.index.is_unique:
         raise ValueError(f'{ticker}: duplicate merged candles')
-    keys = source.build_inputs(restored,ticker,None,key_timeframes=['12H','4H'])[4].assign(symbol=ticker)
+    keys = source.build_inputs(restored,ticker,None,key_timeframes=['12H','4H'])[4]
+    keys = keys.reset_index(drop=True).assign(symbol=ticker)
     previous = pd.read_csv(venue.ARCHIVE/'results/symbols'/ticker/'signals.csv.gz',dtype={'symbol':str})
     previous = previous[previous.tf.isin(['12H','4H'])]
     def past(frame):
