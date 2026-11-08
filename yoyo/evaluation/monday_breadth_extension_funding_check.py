@@ -24,8 +24,15 @@ def month_archive(symbol,month):
 
 def run():
     d=pd.read_parquet(EXP/'alt/member_strategy_returns.parquet').query('epoch==3 and strategy=="baseline_6h"').copy()
+    # Preserve the exact thirteen event/member pairs flagged by the original
+    # cross-month cadence check, even after the ALT builder learned event-day cadence.
+    audit_path=EXP/'risk/alt_6h_official_interval_checks.csv'
+    candidates=d.selected_funded_net_pct.isna()
+    if audit_path.is_file():
+        flagged=pd.read_csv(audit_path,parse_dates=['decision'])[['symbol','decision']]
+        candidates |= pd.MultiIndex.from_frame(d[['symbol','decision']]).isin(pd.MultiIndex.from_frame(flagged))
     repaired=[]
-    for i,r in d[d.selected_funded_net_pct.isna()].iterrows():
+    for i,r in d[candidates].iterrows():
         start,end=r.decision,r.selected_exit_time
         month=start.strftime('%Y-%m')
         official=month_archive(r.symbol,month)
@@ -54,7 +61,7 @@ def run():
     assert len(check)==25
     np.testing.assert_allclose(check.verified_funded_pct,check.funded_pct,atol=1e-6)
     check.to_csv(EXP/'risk/alt_6h_funding_reconciliation.csv',index=False)
-    if repaired:pd.DataFrame(repaired).to_csv(EXP/'risk/alt_6h_official_interval_checks.csv',index=False)
+    if repaired:pd.DataFrame(repaired).to_csv(audit_path,index=False)
 
 
 if __name__=='__main__':

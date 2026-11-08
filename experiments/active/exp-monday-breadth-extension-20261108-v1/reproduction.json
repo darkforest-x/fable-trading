@@ -19,6 +19,7 @@
     "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_risk",
     "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_integrated",
     "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_case_cost",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_funding_check",
     "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_results"
   ],
   "interpretation": [
@@ -27,6 +28,7 @@
     "Growth compounds each sleeve independently as if all its unlevered capital is deployed. Equal sleeves initially split 50/50 with no rebalancing. Portfolio risk marks use synchronized five-minute closes and realized settlements. Single closed-trade and before-funding drawdowns use separate headings in the source files.",
     "Six single-account pairs and the BTC-specific exit family include all frozen variations; do not pool p-values across repeated variants. The equal-sleeve paired test compares each sleeve's mean matched event with an equal-weighted mean across sleeves on a fees-only basis. Unmatched periods receive no imputed return. It does not reconstruct a tradable random portfolio.",
     "A single calendar-year row resets initial weights on January 1 for comparison. The three development periods are 2020-2022, 2023-2024 and 2025. Fixed-time original schedules purge trades overlapping these period cutoffs. Forks using a later exit apply their own boundary check.",
-    "The post-hoc integrated overlay keeps rare BTC entries independent of the below-EMA filter, which vetoes ordinary BTC bookings only after original source reservations. 75% deployment is relative to current equity of each sleeve per signal; each idle quarter holds cash. Prior-window membership is unchanged. The historical risk reconstruction of the two sleeves is matched at every 5-minute close, excluding historical ALT funding. The 2026 mark includes funding on held legs."
+    "The post-hoc integrated overlay keeps rare BTC entries independent of the below-EMA filter, which vetoes ordinary BTC bookings only after original source reservations. 75% deployment is relative to current equity of each sleeve per signal; each idle quarter holds cash. Prior-window membership is unchanged. The historical risk reconstruction of the two sleeves is matched at every 5-minute close, excluding historical ALT funding. The 2026 mark includes funding on held legs.",
+    "Original six-hour baskets also reconcile for all 25/25 2026 events. Thirteen formerly flagged constituent rows were independently reconciled to the interval recorded in each Binance monthly fundingRate archive."
   ]
 }
