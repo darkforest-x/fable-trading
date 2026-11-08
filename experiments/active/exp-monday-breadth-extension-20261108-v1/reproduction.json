@@ -1,0 +1,31 @@
+{
+  "experiment_id": "exp-monday-breadth-extension-20261108-v1",
+  "framework": "local VectorBT 1.2.0, cached native parent fills and identical native handling for new fills",
+  "input": "experiments/active/exp-monday-breadth-frequency-20261108-v1/reproduction.json",
+  "other_inputs": [
+    "experiments/active/exp-monday-breadth-optimization-20261108-v1/reproduction.json",
+    "data/research/monday_breadth_optimization_20261108 for native policy fills, local quoted prices and historical Binance USD-M funding"
+  ],
+  "from_repository_root_in_order": [
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_pairs",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_dual",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_sleeves",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_partial",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_partial_marks",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_btc",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_alt --run",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_btc --mirror below",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_history_risk",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_risk",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_integrated",
+    "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.monday_breadth_extension_results"
+  ],
+  "interpretation": [
+    "Initial and follow-up bars were closed by the last 2026-10-27 UTC research candle. Previously inspected 2026 market history is a retrospective comparison. The September example motivated the target.",
+    "2026 rows use actual funding when available, 0.05% per market fill or 0.02% per profit limit fill, 1x without modeled slippage, separate 0.20 percentage-point round-trip sensitivity. On older assets some realized rates are valued at the archived mark candle open.",
+    "Growth compounds each sleeve independently as if all its unlevered capital is deployed. Equal sleeves initially split 50/50 with no rebalancing. Portfolio risk marks use synchronized five-minute closes and realized settlements. Single closed-trade and before-funding drawdowns use separate headings in the source files.",
+    "Six single-account pairs and the BTC-specific exit family include all frozen variations; do not pool p-values across repeated variants. The equal-sleeve paired test compares each sleeve's mean matched event with an equal-weighted mean across sleeves on a fees-only basis. Unmatched periods receive no imputed return. It does not reconstruct a tradable random portfolio.",
+    "A single calendar-year row resets initial weights on January 1 for comparison. The three development periods are 2020-2022, 2023-2024 and 2025. Fixed-time original schedules purge trades overlapping these period cutoffs. Forks using a later exit apply their own boundary check.",
+    "The post-hoc integrated overlay keeps rare BTC entries independent of the below-EMA filter, which vetoes ordinary BTC bookings only after original source reservations. 75% deployment is relative to current equity of each sleeve per signal; each idle quarter holds cash. Prior-window membership is unchanged. The historical risk reconstruction of the two sleeves is matched at every 5-minute close, excluding historical ALT funding. The 2026 mark includes funding on held legs."
+  ]
+}
