@@ -443,7 +443,8 @@
       const h=validateHistory(window.SpikeBreadthHistory.createBreadthBookHistory(breadthData,{track:BREADTH,scope}),BREADTH);
       closeCalendar();stopCharts();history=h;historyView=null;historyMode='equity';breadthScope=scope;
       el('[data-breadth-path]').innerHTML=historyHTML(history);
-      el('#rs-breadth-stats').innerHTML='<h3>统计分析</h3>'+window.SpikeBreadthBook.statsHTML(breadthData,{scope});
+      el('#rs-breadth-stats').innerHTML='<h3>统计分析</h3>'+window.SpikeBreadthBook.statsHTML(breadthData,{scope,history:h});
+      el('#rs-rules').innerHTML='<div class="rs-section-title"><h2>执行规则</h2></div>'+window.SpikeBreadthBook.rulesHTML(breadthData,{scope});
       dialog.querySelectorAll('[data-breadth-scope]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.breadthScope===scope)));
       observeCharts();queueCharts();
     }
@@ -455,9 +456,8 @@
         breadthData=data;
         el('#rs-research').innerHTML='<div class="rs-section-title"><h2>历史回测</h2><span class="rs-badge">组合回测</span></div><div class="rs-breadth-tools"><div class="rs-chart-modes" role="group" aria-label="回测区间"><button type="button" data-breadth-scope="all_history_fee_only">全历史 · 仅手续费</button><button type="button" data-breadth-scope="2026_actual_funded">2026 · 含资金费</button></div><button class="rs-text-button" type="button" data-breadth-jump="replay">查看回测交易与 K 线</button><button class="rs-text-button" type="button" data-breadth-jump="stats">统计分析</button></div><div data-breadth-path></div><p class="rs-chart-status" role="status"></p><div id="rs-breadth-stats"></div>';
         renderBreadthScope(options.scope==='2026_actual_funded'?options.scope:'all_history_fee_only');
-        el('#rs-rules').innerHTML='<div class="rs-section-title"><h2>执行规则</h2></div>'+window.SpikeBreadthBook.rulesHTML(data);
         const p=data.provenance;
-        el('#rs-sources').innerHTML='<div class="rs-section-title"><h2>口径与来源</h2></div><p>原实验：'+esc(p.experiment_id)+'</p><p>信号覆盖至 '+esc(historyDate(Date.parse(data.signal_cutoff_exclusive_utc)-1))+'（UTC）。普通 BTC 的 EMA20 条件是在看过这段历史后选出的，2026 年并非盲测。</p>'+[['BTC 逐笔账本',p.event_sources.BTC],['山寨篮子与成员退出',p.event_sources.ALT],['山寨资金费核对',p.ALT_2026_funding]].map(([name,path])=>'<details class="rs-source-note"><summary>'+esc(name)+'</summary><p>'+esc(path)+'</p></details>').join('');
+        el('#rs-sources').innerHTML='<div class="rs-section-title"><h2>口径与来源</h2></div>'+window.SpikeBreadthBook.originHTML()+'<p>原实验 · '+esc(p.experiment_id)+'</p><p>信号覆盖至 '+esc(historyDate(Date.parse(data.signal_cutoff_exclusive_utc)-1))+'（UTC）。普通 BTC 的 EMA20 条件是在看过这段历史后选出的，2026 年并非盲测。</p>'+[['BTC 逐笔账本',p.event_sources.BTC],['山寨篮子与成员退出',p.event_sources.ALT],['山寨资金费核对',p.ALT_2026_funding],['山寨开单间隔实验',p.spacing_study]].filter(([,path])=>path).map(([name,path])=>'<details class="rs-source-note"><summary>'+esc(name)+'</summary><p>'+esc(path)+'</p></details>').join('');
         if(options.chapter&&options.chapter!=='overview'){const dest=options.chapter==='stats'?el('#rs-breadth-stats'):el('#rs-'+options.chapter);dest?.scrollIntoView({block:'start',behavior:'instant'});}
       }catch(error){if(open&&epoch===token)el('#rs-research').innerHTML='<p class="rs-warning">回测资料暂时不可用：'+esc(error.message)+'</p><button type="button" data-book-retry>重试读取</button>';}
     }
@@ -500,6 +500,8 @@
       const scope=e.target.closest('[data-breadth-scope]'),jump=e.target.closest('[data-breadth-jump]');
       if(scope&&breadthData&&scope.dataset.breadthScope!==breadthScope){renderBreadthScope(scope.dataset.breadthScope);window.SpikeBreadthBookRoute?.write({chapter:'research',scope:breadthScope});}
       if(jump)jumpBreadth(jump.dataset.breadthJump);
+      const example=e.target.closest('[data-breadth-case]');
+      if(example&&breadthData)openBreadthReplay({eventId:example.dataset.breadthCase,memberSymbol:example.dataset.member,scope:breadthScope});
       const period=e.target.closest('#rs-breadth-stats [data-period]');
       if(period&&breadthData){
         const entryPeriod=period.dataset.period;
