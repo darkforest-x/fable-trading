@@ -264,8 +264,19 @@ def read_paths():
         if frame[col].isna().any():
             raise ValueError('Executed trade has no execution timestamp')
         frame[col] = frame[col].astype('int64')
-    if frame.duplicated(['event_id','tp_r']).any():
-        raise ValueError('Nonunique path identity')
+    if frame.duplicated(['event_id','tp_r']).any() or not frame.groupby('event_id').size().eq(7).all():
+        raise ValueError('Executed paths must contain all seven prespecified exits')
+    if (frame.exit_bar_ms < frame.entry_ms).any() or not frame.exit_phase.isin(['open','intrabar','close']).all():
+        raise ValueError('Invalid exit clock')
+    if not np.array_equal(frame.exit_fee_rate.lt(TAKER),frame.exit_reason.str.startswith('take_profit')):
+        raise ValueError('Fee class differs from actual fill type')
+    runner = frame[frame.tp_r.eq(0)].set_index('parent_id')
+    control = runner[runner.is_control]
+    actual = runner[~runner.is_control]
+    if not control.index.is_unique or not actual.index.is_unique or not control.index.isin(actual.index).all():
+        raise ValueError('Invalid matched control identity')
+    if (control.entry_ms.to_numpy() <= actual.loc[control.index,'entry_ms'].to_numpy()).any():
+        raise ValueError('Control inherits direction or stop geometry from a later parent')
     return frame
 
 def main():
