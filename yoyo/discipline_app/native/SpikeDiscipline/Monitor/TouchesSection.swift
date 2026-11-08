@@ -5,11 +5,11 @@ import SwiftUI
 /// Read-only: rows open the coin's chart; nothing here places orders.
 struct TouchesSection: View {
     @Environment(AccountStore.self) private var account
+    @Environment(SessionStore.self) private var session
+    @Environment(TouchFeed.self) private var feed
     @Environment(\.openChart) private var openChart
     let connection: Connection
     let refresh: Int
-    @State private var data: PaperSnapshot?
-    @State private var error: String?
     @AppStorage("touch.side") private var side = "all"
     @AppStorage("touch.sort") private var sort = "latest"
     @State private var sortMenu = false
@@ -18,7 +18,7 @@ struct TouchesSection: View {
 
     private var rows: [PaperSignal] {
         let quotes = account.state?.quotes ?? [:]
-        let filtered = (data?.signals ?? []).filter { side == "all" || (side == "long" ? $0.side == .long : $0.side == .short) }
+        let filtered = feed.signals.filter { side == "all" || (side == "long" ? $0.side == .long : $0.side == .short) }
         switch sort {
         case "earliest": return filtered.sorted { ($0.observedMs ?? 0) < ($1.observedMs ?? 0) }
         case "score": return filtered.sorted { ($0.score ?? -1) > ($1.score ?? -1) }
@@ -36,24 +36,22 @@ struct TouchesSection: View {
                 sortButton
             }
             .zIndex(2)
-            LoadState(loading: data == nil && error == nil, error: error, stale: data != nil)
+            LoadState(loading: !feed.loaded && feed.error == nil, error: feed.error, stale: feed.loaded)
             SectionHeader(title: "今日触价", count: rows.count, trailing: Self.sorts.first { $0.0 == sort }?.1)
-            if let data, rows.isEmpty {
-                Text(data.signals.isEmpty ? "今天还没有触价" : "没有符合筛选的触价").font(.footnote).foregroundStyle(Color.muted)
+            if feed.loaded && rows.isEmpty {
+                Text(feed.signals.isEmpty ? "今天还没有触价" : "没有符合筛选的触价").font(.footnote).foregroundStyle(Color.muted)
                     .frame(maxWidth: .infinity).padding(14).glassCard(cornerRadius: 18)
             } else if !rows.isEmpty {
                 VStack(spacing: 0) {
                     ForEach(Array(rows.enumerated()), id: \.offset) { index, signal in
-                        row(signal, now: data?.nowMs ?? 0)
+                        row(signal, now: feed.nowMs)
                         if index < rows.count - 1 { Divider().padding(.leading, 54) }
                     }
                 }
                 .glassCard(cornerRadius: 18)
             }
         }
-        .modifier(Polled(key: "touches-\(refresh)", every: .seconds(10),
-                         load: { try await API.get("/v1/monitor/paper", query: [URLQueryItem(name: "track", value: "live-wick6x3")], connection: connection) },
-                         value: $data, error: $error))
+        .task(id: refresh) { await feed.watch(connection: connection, session: session) }
     }
 
     private var sortButton: some View {
@@ -91,22 +89,24 @@ struct TouchesSection: View {
 
     private func row(_ signal: PaperSignal, now: Double) -> some View {
         let volume = Trading.turnover(account.state?.quotes[signal.symbol])
+        let excluded = signal.status == "excluded" || signal.status == "feature_error"
         return Button { Haptics.open(); openChart(signal.symbol) } label: {
             HStack(spacing: 11) {
-                CoinLogo(coin: Fmt.coin(signal.symbol), size: 30)
+                CoinLogo(coin: Fmt.coin(signal.symbol), size: 32)
                 VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 6) { Text(Fmt.coin(signal.symbol)).font(.subheadline.weight(.semibold)).foregroundStyle(Color.ink); SidePill(side: signal.side) }
-                    Text(sort == "volume" ? Trading.turnoverLabel(volume) : "\(Fmt.signalStatus(signal)) · 1.618 \(Fmt.price(signal.level))")
-                        .font(.caption2).foregroundStyle(Color.muted).lineLimit(1)
+                    HStack(spacing: 6) {
+                        Text(Fmt.coin(signal.symbol)).font(.system(size: 16, weight: .semibold)).foregroundStyle(Color.ink)
+                        SidePill(side: signal.side)
+                    }
+                    Text(sort == "volume" ? Trading.turnoverLabel(volume) : Fmt.clock(signal.observedMs, now: now))
+                        .font(.system(size: 12).monospacedDigit()).foregroundStyle(Color.muted).lineLimit(1)
                 }
                 Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(signal.score.map { String(format: "%.2f", $0) } ?? "—").font(.subheadline.weight(.bold)).monospacedDigit().foregroundStyle(Color.ink)
-                    Text(Fmt.clock(signal.observedMs, now: now)).font(.caption2).foregroundStyle(Color.muted)
-                }
+                ScoreBadge(score: signal.score)
                 Image(systemName: "chevron.right").font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
             }
-            .padding(.horizontal, 12).frame(minHeight: 52).contentShape(.rect)
+            .padding(.horizontal, 12).frame(minHeight: 56).contentShape(.rect)
+            .opacity(excluded ? 0.5 : 1)
         }
         .buttonStyle(RowPressStyle())
     }

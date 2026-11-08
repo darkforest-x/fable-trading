@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=402, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>天才交易员 · 统计 (iOS 26 402x874pt)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        accent: '#0A84FF',
+        profit: '#169873',
+        loss: '#D7355D',
+        mainText: '#111827',
+        secText: '#6B7280',
+      },
+      fontFamily: {
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace']
+      }
+    }
+  }
+}
+</script>
+<style>
+  * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+  body {
+    background: #0B0E14;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px 0;
+  }
+
+  /* iPhone 16/17 Pro iOS 26 chassis */
+  .device-frame {
+    width: 402px;
+    height: 874px;
+    background: #F4F6F9;
+    border-radius: 54px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 0 12px #1E232E, 0 30px 80px rgba(0,0,0,0.55);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Soft organic ambient mesh gradient behind white frosted cards */
+  .ambient-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: 
+      radial-gradient(circle at 18% 12%, rgba(207, 224, 255, 0.75) 0%, transparent 45%),
+      radial-gradient(circle at 85% 18%, rgba(226, 220, 255, 0.60) 0%, transparent 42%),
+      radial-gradient(circle at 80% 65%, rgba(211, 242, 230, 0.55) 0%, transparent 45%),
+      radial-gradient(circle at 20% 80%, rgba(207, 224, 255, 0.50) 0%, transparent 40%);
+    z-index: 0;
+  }
+
+  /* iOS 26 Liquid Frosted Card */
+  .frosted-card {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border-radius: 26px;
+    box-shadow: 0 8px 24px -4px rgba(17, 24, 39, 0.04), 0 1px 2px rgba(17, 24, 39, 0.02);
+  }
+
+  .frosted-subtile {
+    background: rgba(255, 255, 255, 0.60);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 4px 14px -2px rgba(17, 24, 39, 0.03);
+  }
+
+  .frosted-pill {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 2px 8px rgba(17, 24, 39, 0.04);
+  }
+
+  .frosted-tabbar {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(32px) saturate(190%);
+    -webkit-backdrop-filter: blur(32px) saturate(190%);
+    box-shadow: 0 -8px 26px rgba(17, 24, 39, 0.05);
+  }
+
+  /* Hide scrollbar */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+</head>
+<body>
+
+<div class="device-frame">
+  <!-- Soft organic ambient light background -->
+  <div class="ambient-glow"></div>
+
+  <!-- Dynamic Island & Status Bar (iOS 26) -->
+  <div class="relative z-30 pt-3 px-7 flex items-center justify-between text-mainText text-[14px] font-semibold tracking-tight">
+    <span>9:41</span>
+    <!-- Dynamic Island pill -->
+    <div class="w-[122px] h-[34px] bg-black rounded-full absolute left-1/2 -translate-x-1/2 top-2.5 flex items-center justify-between px-3">
+      <div class="w-3 h-3 rounded-full bg-slate-900 border border-slate-800"></div>
+      <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/80 animate-pulse"></div>
+    </div>
+    <div class="flex items-center gap-1.5 text-mainText">
+      <svg class="w-4 h-3.5" viewBox="0 0 18 14" fill="currentColor">
+        <path d="M1 10.5C1 9.94772 1.44772 9.5 2 9.5H3.5C4.05228 9.5 4.5 9.94772 4.5 10.5V13C4.5 13.5523 4.05228 14 3.5 14H2C1.44772 14 1 13.5523 1 13V10.5Z"/>
+        <path d="M5.5 7.5C5.5 6.94772 5.94772 6.5 6.5 6.5H8C8.55228 6.5 9 6.94772 9 7.5V13C9 13.5523 8.55228 14 8 14H6.5C5.94772 14 5.5 13.5523 5.5 13V7.5Z"/>
+        <path d="M10 4.5C10 3.94772 10.4477 3.5 11 3.5H12.5C13.0523 3.5 13.5 3.94772 13.5 4.5V13C13.5 13.5523 13.0523 14 12.5 14H11C10.4477 14 10 13.5523 10 13V4.5Z"/>
+        <path d="M14.5 1.5C14.5 0.947715 14.9477 0.5 15.5 0.5H17C17.5523 0.5 18 0.947715 18 1.5V13C18 13.5523 17.5523 14 17 14H15.5C14.9477 14 14.5 13.5523 14.5 13V1.5Z"/>
+      </svg>
+      <svg class="w-3.5 h-3.5" viewBox="0 0 16 12" fill="currentColor">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M8 0C4.93 0 2.19 1.25 0.22 3.28C-0.07 3.58 -0.07 4.05 0.22 4.34L7.47 11.66C7.76 11.95 8.24 11.95 8.53 11.66L15.78 4.34C16.07 4.05 16.07 3.58 15.78 3.28C13.81 1.25 11.07 0 8 0Z"/>
+      </svg>
+      <div class="w-6 h-3 rounded-md border border-current p-0.5 flex items-center">
+        <div class="h-full w-4 bg-current rounded-sm"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top App Bar: 标题 '统计' + 右侧圆角齿轮 -->
+  <header class="relative z-20 px-6 pt-5 pb-2 flex items-center justify-between">
+    <h1 class="text-[32px] font-bold text-mainText tracking-tight">统计</h1>
+    <button class="w-10 h-10 rounded-full frosted-pill flex items-center justify-center text-secText active:scale-95 transition-transform" aria-label="设置">
+      <svg class="w-5 h-5 text-mainText" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- Scrollable Main Content -->
+  <main class="relative z-10 flex-1 overflow-y-auto no-scrollbar px-4 pb-28 space-y-3.5">
+    
+    <!-- Hero Card: 净值 1,000.00 USDT + 累计 +12.40 USDT (+1.24%) + 已实现/浮动 -->
+    <section class="frosted-card p-5">
+      <div class="flex items-center justify-between mb-1.5">
+        <span class="text-[13px] font-medium text-secText">净值</span>
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-profit text-[11px] font-semibold">
+          <span class="w-1.5 h-1.5 rounded-full bg-profit"></span>
+          实盘沙盒
+        </span>
+      </div>
+
+      <div class="flex items-baseline gap-1.5 mb-2">
+        <h2 class="text-[34px] font-bold text-mainText font-mono tracking-tight leading-none">1,000.00</h2>
+        <span class="text-[14px] font-semibold text-secText">USDT</span>
+      </div>
+
+      <div class="flex items-center gap-1.5 text-[14px] font-semibold text-profit mb-4 font-mono">
+        <span>累计 +12.40 USDT</span>
+        <span class="text-[12px] px-1.5 py-0.5 rounded bg-emerald-500/10 font-medium">(+1.24%)</span>
+      </div>
+
+      <!-- Divider hairline -->
+      <div class="h-[1px] bg-black/[0.04] w-full mb-3.5"></div>
+
+      <!-- Two small metrics: 已实现 / 浮动 -->
+      <div class="grid grid-cols-2 gap-3 text-[13px]">
+        <div class="flex flex-col">
+          <span class="text-secText text-[12px] mb-0.5">已实现</span>
+          <span class="text-mainText font-semibold font-mono text-[15px]">+14.20 <span class="text-[11px] text-secText font-sans">USDT</span></span>
+        </div>
+        <div class="flex flex-col pl-4 border-l border-black/[0.04]">
+          <span class="text-secText text-[12px] mb-0.5">浮动</span>
+          <span class="text-loss font-semibold font-mono text-[15px]">-1.80 <span class="text-[11px] text-secText font-sans">USDT</span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Compact Segmented Control: 7天 / 30天 / 全部 -->
+    <div class="p-1 rounded-full frosted-subtile flex items-center justify-between text-[13px] font-medium text-secText">
+      <button class="flex-1 py-1.5 text-center rounded-full text-secText active:scale-95 transition-all">7天</button>
+      <button class="flex-1 py-1.5 text-center rounded-full bg-white text-mainText font-semibold shadow-sm transition-all">30天</button>
+      <button class="flex-1 py-1.5 text-center rounded-full text-secText active:scale-95 transition-all">全部</button>
+    </div>
+
+    <!-- 2x2 Grid of Metric Tiles with SF-style tinted circular icons -->
+    <section class="grid grid-cols-2 gap-2.5">
+      <!-- Tile 1: 已平仓 12 笔 (list icon) -->
+      <div class="frosted-subtile p-3.5 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-full bg-blue-500/10 flex items-center justify-center text-accent shrink-0">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"/>
+            <line x1="8" y1="12" x2="21" y2="12"/>
+            <line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/>
+            <line x1="3" y1="12" x2="3.01" y2="12"/>
+            <line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <div class="text-[11px] text-secText leading-tight">已平仓</div>
+          <div class="text-[16px] font-bold text-mainText font-mono leading-snug">12 <span class="text-[12px] font-normal text-secText font-sans">笔</span></div>
+        </div>
+      </div>
+
+      <!-- Tile 2: 胜率 58% (target icon) -->
+      <div class="frosted-subtile p-3.5 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center text-profit shrink-0">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <circle cx="12" cy="12" r="6"/>
+            <circle cx="12" cy="12" r="2"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <div class="text-[11px] text-secText leading-tight">胜率</div>
+          <div class="text-[16px] font-bold text-mainText font-mono leading-snug">58%</div>
+        </div>
+      </div>
+
+      <!-- Tile 3: 盈亏比 1.8 (scale icon) -->
+      <div class="frosted-subtile p-3.5 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
+            <path d="M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
+            <path d="M7 21h10"/>
+            <path d="M12 3v18"/>
+            <path d="M3 7h18"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <div class="text-[11px] text-secText leading-tight">盈亏比</div>
+          <div class="text-[16px] font-bold text-mainText font-mono leading-snug">1.8</div>
+        </div>
+      </div>
+
+      <!-- Tile 4: 平均 R 0.42 (sigma icon) -->
+      <div class="frosted-subtile p-3.5 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600 shrink-0">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 4H6l7 8-7 8h12"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <div class="text-[11px] text-secText leading-tight">平均 R</div>
+          <div class="text-[16px] font-bold text-mainText font-mono leading-snug">+0.42</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cumulative PnL Step-Line Chart Card -->
+    <!-- Total at top + interactive vertical rule with date & amount bubble -->
+    <section class="frosted-card p-4.5 pt-4">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-[13px] font-semibold text-mainText">累计盈亏走势</span>
+        <span class="text-profit font-mono font-bold text-[14px]">+12.40 USDT</span>
+      </div>
+
+      <!-- Interactive SVG Chart Area -->
+      <div class="relative w-full h-[150px] mt-2 select-none">
+        <svg class="w-full h-full overflow-visible" viewBox="0 0 340 130" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#169873" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="#169873" stop-opacity="0.0"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Horizontal zero reference line -->
+          <line x1="0" y1="102" x2="340" y2="102" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="3 3"/>
+
+          <!-- Shaded Area beneath step line -->
+          <path d="M 0,102 L 0,102 L 34,102 L 34,92 L 68,92 L 68,82 L 102,82 L 102,96 L 136,96 L 136,78 L 170,78 L 170,64 L 204,64 L 204,50 L 238,50 L 238,36 L 272,36 L 272,48 L 306,48 L 306,26 L 340,26 L 340,102 Z" fill="url(#chartGradient)" />
+
+          <!-- Step Line (阶梯折线) -->
+          <path d="M 0,102 L 34,102 L 34,92 L 68,92 L 68,82 L 102,82 L 102,96 L 136,96 L 136,78 L 170,78 L 170,64 L 204,64 L 204,50 L 238,50 L 238,36 L 272,36 L 272,48 L 306,48 L 306,26 L 340,26" fill="none" stroke="#169873" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <!-- Vertical Rule (touch inspection state at x = 238) -->
+          <line x1="238" y1="10" x2="238" y2="120" stroke="#0A84FF" stroke-width="1.2" stroke-dasharray="2 2"/>
+          <circle cx="238" cy="36" r="4.5" fill="#FFFFFF" stroke="#0A84FF" stroke-width="2.5"/>
+        </svg>
+
+        <!-- Touch value bubble pinned over the inspection line -->
+        <div class="absolute left-[238px] -top-1 -translate-x-1/2 flex flex-col items-center pointer-events-none">
+          <div class="px-2.5 py-1 rounded-lg bg-mainText text-white text-[11px] font-mono shadow-md flex items-center gap-1.5 whitespace-nowrap">
+            <span class="text-[10px] text-gray-300">11-04</span>
+            <span class="font-bold text-emerald-400">+9.60 U</span>
+          </div>
+          <div class="w-1.5 h-1.5 bg-mainText rotate-45 -mt-1"></div>
+        </div>
+
+        <!-- Date scale labels -->
+        <div class="flex justify-between text-[10px] font-mono text-secText mt-2 px-1">
+          <span>10-09</span>
+          <span>10-18</span>
+          <span>10-27</span>
+          <span>11-05</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 多空 Row with Two Tiles (做多 green / 做空 red) -->
+    <section class="grid grid-cols-2 gap-2.5">
+      <!-- 做多 Long -->
+      <div class="frosted-subtile p-3.5">
+        <div class="flex items-center justify-between mb-2">
+          <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-profit font-semibold text-[12px]">做多</span>
+          <span class="text-[12px] font-mono text-secText">8 笔</span>
+        </div>
+        <div class="flex items-baseline justify-between">
+          <span class="text-[12px] text-secText">胜率 <span class="font-mono text-mainText font-semibold">62%</span></span>
+          <span class="text-profit font-mono font-bold text-[14px]">+14.20 U</span>
+        </div>
+      </div>
+
+      <!-- 做空 Short -->
+      <div class="frosted-subtile p-3.5">
+        <div class="flex items-center justify-between mb-2">
+          <span class="px-2 py-0.5 rounded-full bg-rose-500/10 text-loss font-semibold text-[12px]">做空</span>
+          <span class="text-[12px] font-mono text-secText">4 笔</span>
+        </div>
+        <div class="flex items-baseline justify-between">
+          <span class="text-[12px] text-secText">胜率 <span class="font-mono text-mainText font-semibold">50%</span></span>
+          <span class="text-loss font-mono font-bold text-[14px]">-1.80 U</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 币种 List with Coin Logos, Net PnL and Win Rate -->
+    <section class="frosted-card p-3.5">
+      <div class="text-[13px] font-semibold text-mainText px-1.5 mb-2.5">标的归集</div>
+      
+      <div class="space-y-1">
+        <!-- Coin 1: BTC -->
+        <div class="flex items-center justify-between p-2 rounded-xl hover:bg-black/[0.02] transition-colors">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold text-[13px]">
+              ₿
+            </div>
+            <div>
+              <div class="text-[14px] font-semibold text-mainText font-mono leading-none">BTC</div>
+              <div class="text-[11px] text-secText mt-1">胜率 <span class="font-mono">75%</span> · 4笔</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-[14px] font-bold text-profit font-mono leading-none">+8.50 <span class="text-[10px] text-secText font-sans">U</span></div>
+            <div class="text-[11px] text-profit/80 mt-1 font-mono">+68.5%</div>
+          </div>
+        </div>
+
+        <!-- Coin 2: SOL -->
+        <div class="flex items-center justify-between p-2 rounded-xl hover:bg-black/[0.02] transition-colors">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-purple-500/10 text-purple-600 flex items-center justify-center font-bold text-[11px]">
+              SOL
+            </div>
+            <div>
+              <div class="text-[14px] font-semibold text-mainText font-mono leading-none">SOL</div>
+              <div class="text-[11px] text-secText mt-1">胜率 <span class="font-mono">60%</span> · 5笔</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-[14px] font-bold text-profit font-mono leading-none">+5.70 <span class="text-[10px] text-secText font-sans">U</span></div>
+            <div class="text-[11px] text-profit/80 mt-1 font-mono">+45.9%</div>
+          </div>
+        </div>
+
+        <!-- Coin 3: ETH -->
+        <div class="flex items-center justify-between p-2 rounded-xl hover:bg-black/[0.02] transition-colors">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-[12px]">
+              Ξ
+            </div>
+            <div>
+              <div class="text-[14px] font-semibold text-mainText font-mono leading-none">ETH</div>
+              <div class="text-[11px] text-secText mt-1">胜率 <span class="font-mono">33%</span> · 3笔</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-[14px] font-bold text-loss font-mono leading-none">-1.80 <span class="text-[10px] text-secText font-sans">U</span></div>
+            <div class="text-[11px] text-loss/80 mt-1 font-mono">-14.5%</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Small 交易纪律 Row with Shield Icon and Chevron -->
+    <section class="frosted-subtile p-3.5 flex items-center justify-between active:scale-[0.99] transition-transform cursor-pointer">
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-full bg-emerald-500/10 text-profit flex items-center justify-center shrink-0">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <span class="text-[14px] font-semibold text-mainText">交易纪律</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-secText">
+        <span class="text-[12px] text-profit font-medium">执行率 100%</span>
+        <svg class="w-4 h-4 text-secText" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- iOS 26 Icon-Only Floating Frosted Tab Bar -->
+  <nav class="absolute bottom-5 inset-x-5 h-[62px] rounded-full frosted-tabbar z-30 flex items-center justify-around px-2 shadow-lg border border-white/60">
+    <!-- Tab 1: K线 / 行情 -->
+    <button class="w-12 h-12 rounded-full flex items-center justify-center text-secText hover:text-mainText active:scale-90 transition-all">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="20" x2="18" y2="10"/>
+        <line x1="12" y1="20" x2="12" y2="4"/>
+        <line x1="6" y1="20" x2="6" y2="14"/>
+      </svg>
+    </button>
+
+    <!-- Tab 2: 监控 / 报警 -->
+    <button class="w-12 h-12 rounded-full flex items-center justify-center text-secText hover:text-mainText active:scale-90 transition-all">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+    </button>
+
+    <!-- Tab 3: 1.618 核心扩展 (Accent circle) -->
+    <button class="w-10 h-10 rounded-full bg-accent text-white flex items-center justify-center shadow-md active:scale-90 transition-all">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+    </button>
+
+    <!-- Tab 4: 持仓 / 保护 -->
+    <button class="w-12 h-12 rounded-full flex items-center justify-center text-secText hover:text-mainText active:scale-90 transition-all">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+    </button>
+
+    <!-- Tab 5: 统计 (Active) -->
+    <button class="w-12 h-12 rounded-full flex items-center justify-center text-accent active:scale-90 transition-all">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="20" x2="18" y2="4"/>
+        <line x1="6" y1="20" x2="6" y2="14"/>
+        <line x1="12" y1="20" x2="12" y2="10"/>
+        <circle cx="18" cy="4" r="2" fill="currentColor"/>
+      </svg>
+    </button>
+  </nav>
+
+  <!-- iOS Home Indicator -->
+  <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-36 h-1 bg-black/20 rounded-full pointer-events-none z-40"></div>
+</div>
+
+</body>
+</html>

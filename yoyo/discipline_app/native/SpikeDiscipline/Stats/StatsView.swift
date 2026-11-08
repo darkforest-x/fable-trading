@@ -1,8 +1,10 @@
 import Charts
 import SwiftUI
 
-/// 统计 (Statistics.tsx): app-managed trades only. Account hero, 交易纪律 link, period,
-/// closed-trade summary, cumulative net PnL steps, long/short and per-symbol tables.
+/// 统计 (owner 2026-11-08 “去掉没用的文字，保持简洁可用，图标好看一点，交互好一点”;
+/// Stitch screen b4127036a8594e26aed72c8918cd1a5b): app-managed trades only — equity hero, period,
+/// four icon tiles, a cumulative net PnL step chart you can scrub, long / short, per-coin rows and
+/// the 交易纪律 entry. Accounting rules are unchanged from 2.x; only the explanatory copy is gone.
 struct StatsView: View {
     @Environment(SessionStore.self) private var session
     @Environment(AccountStore.self) private var account
@@ -10,52 +12,51 @@ struct StatsView: View {
     let active: Bool
     @AppStorage("stats.days") private var days = 30
     @State private var data: Statistics?
-    @State private var dataKey = ""
     @State private var error: String?
     @State private var loading = false
     @State private var discipline = false
+    @State private var picked: String?
 
     private var key: String { "\(session.connection?.accountId ?? "")|\(session.connection?.mode ?? "")|\(days)" }
 
     var body: some View {
-            ZStack {
-                AmbientBackground()
-                ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
+        ZStack {
+            AmbientBackground()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
                     PageHeader(title: "统计") {
                         RoundIcon(systemName: "gearshape") { showSettings = true }.accessibilityLabel("设置")
                     }
                     if session.connection == nil { ConnectPrompt() }
-                    if let error { StatusNote(text: "统计暂不可用\(data == nil ? "" : "，以下为上次记录")：\(error)", systemImage: "exclamationmark.triangle", tint: .amber) }
                     hero
-                    Button { Haptics.open(); discipline = true } label: { disciplineRow }.buttonStyle(CardPressStyle())
-                    SoftSegment(selection: $days, options: [(7, "近 7 天"), (30, "近 30 天"), (0, "全部")])
-                    summary
+                    SoftSegment(selection: $days, options: [(7, "7天"), (30, "30天"), (0, "全部")])
+                    tiles
                     curve
                     directions
                     symbols
-                    explainer
+                    Button { Haptics.open(); discipline = true } label: { disciplineRow }.buttonStyle(CardPressStyle())
                 }
                 .padding(.horizontal, 14)
                 .padding(.bottom, 24)
             }
-            .refreshable { await load(force: true); Haptics.success() }
+            .refreshable { await load(); Haptics.success() }
             .contentMargins(.bottom, 96, for: .scrollContent)
             .scrollEdgeEffectHidden(true, for: [.top, .bottom])
-            }
+        }
         .sheet(isPresented: $discipline) {
             NavigationStack { DisciplineView() }.presentationDragIndicator(.visible)
         }
+        .onChange(of: days) { _, _ in Haptics.select(); picked = nil }
         .task(id: "\(key)|\(active)") {
             guard active, session.connection != nil else { return }
             while !Task.isCancelled {
-                await load(force: false)
+                await load()
                 try? await Task.sleep(for: .seconds(10))
             }
         }
     }
 
-    private func load(force: Bool) async {
+    private func load() async {
         guard let connection = session.connection else { return }
         let requested = key
         loading = true
@@ -64,7 +65,7 @@ struct StatsView: View {
             let next = try await account.statistics(days: days)
             guard next.mode == connection.mode, next.periodDays == days, next.accountId == connection.accountId else { throw APIError(status: 0, message: "统计响应与当前账户不匹配") }
             guard requested == key else { return }
-            withAnimation(.snappy) { data = next; dataKey = requested }
+            withAnimation(.snappy) { data = next }
             error = nil
         } catch is CancellationError {
         } catch {
@@ -72,197 +73,235 @@ struct StatsView: View {
         }
     }
 
-    private var current: Statistics? { dataKey == key ? data : data }
     private var live: Bool { session.connection?.mode == "okx_live" }
 
     private func tone(_ text: String?) -> Color {
-        guard let v = text.flatMap(Double.init), v != 0 else { return .primary }
+        guard let v = text.flatMap(Double.init), v != 0 else { return Color.ink }
         return v > 0 ? .up : .down
     }
 
+    // MARK: hero
+
     private var hero: some View {
-        let s = current, state = account.state
+        let s = data, state = account.state
         let currentAt = state.map { live ? ($0.privateAt ?? 0) : $0.serverTime } ?? 0
         let cachedAt = s.map { $0.accountUpdatedAt ?? $0.serverTime } ?? 0
         let useCurrent = state != nil && currentAt > 0 && currentAt >= cachedAt
         let equity = useCurrent ? state?.equity : s?.account.equity
         let updatedAt = useCurrent ? currentAt : cachedAt
-        let stale = !account.online || updatedAt == 0 || Date().timeIntervalSince1970 - updatedAt > 15 || (useCurrent && state?.privateError != nil)
+        let stale = error != nil || !account.online || updatedAt == 0 || Date().timeIntervalSince1970 - updatedAt > 15 || (useCurrent && state?.privateError != nil)
         let a = s?.account
-        return VStack(alignment: .leading, spacing: 12) {
+        return VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(live ? "OKX USDT 当前净值" : "当前模拟账户净值").font(.subheadline.weight(.semibold))
+                Text("净值").font(.subheadline.weight(.medium)).foregroundStyle(Color.muted)
                 Spacer()
-                Text(updatedAt > 0 ? "\(stale ? "上次记录" : "截至") \(Self.time(updatedAt))\(loading ? " · 更新中" : "")" : loading ? "正在读取…" : "待连接")
-                    .font(.caption).foregroundStyle(.secondary)
+                tag(stale ? (updatedAt > 0 ? "上次 \(Self.time(updatedAt))" : loading ? "读取中" : "待连接") : live ? "实盘 · 仅 App 交易" : "模拟",
+                    tint: stale ? .amber : live ? .down : .up)
             }
             HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text(Fmt.amount(equity)).font(.system(size: 38, weight: .bold, design: .rounded).monospacedDigit())
+                Text(Fmt.amount(equity)).font(.system(size: 38, weight: .bold, design: .rounded).monospacedDigit()).foregroundStyle(Color.ink)
                     .contentTransition(.numericText(value: Double(equity ?? "0") ?? 0)).animation(.snappy, value: equity)
-                Text("USDT").font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+                Text("USDT").font(.subheadline.weight(.semibold)).foregroundStyle(Color.muted)
             }
             HStack(spacing: 6) {
-                Text(live ? "App 累计净盈亏" : "累计净盈亏").font(.subheadline).foregroundStyle(.secondary)
-                Text(Fmt.amount(a?.netPnl) + " USDT").font(.subheadline.weight(.bold).monospacedDigit()).foregroundStyle(tone(a?.netPnl))
-                if let r = a?.returnFraction { Text("(\(Fmt.fractionPercent(r, 2))%)").font(.subheadline.monospacedDigit()).foregroundStyle(.secondary) }
+                Text("累计 \(Fmt.signed(a?.netPnl.flatMap(Double.init))) USDT").font(.subheadline.weight(.bold).monospacedDigit()).foregroundStyle(tone(a?.netPnl))
+                if let r = a?.returnFraction {
+                    Text("\((Double(r) ?? 0) > 0 ? "+" : "")\(Fmt.fractionPercent(r, 2))%").font(.caption.weight(.bold).monospacedDigit())
+                        .foregroundStyle(tone(r)).padding(.horizontal, 7).padding(.vertical, 3).background(tone(r).opacity(0.1), in: .capsule)
+                }
             }
-            HStack {
-                Metric(title: live ? "App 已实现净盈亏" : "已实现净盈亏", value: Fmt.amount(a?.realizedPnl), tone: tone(a?.realizedPnl))
-                Metric(title: live ? "App 当前浮动盈亏" : "当前浮动盈亏", value: Fmt.amount(a?.unrealizedPnl), tone: tone(a?.unrealizedPnl))
+            Divider().padding(.vertical, 2)
+            HStack(spacing: 0) {
+                heroMetric("已实现", a?.realizedPnl)
+                Divider().frame(height: 32).padding(.horizontal, 14)
+                heroMetric("浮动", a?.unrealizedPnl)
             }
-            if live {
-                Text((a?.returnMethod == "app_managed_fixed_capital" && a?.initialEquity != nil ? "固定本金 \(Fmt.amount(a?.initialEquity)) USDT；" : "") + "盈亏仅统计本 App 管理交易，外部仓位不计入。")
-                    .font(.caption).foregroundStyle(.secondary)
-            }
-            if stale && equity != nil { Text("当前显示上次记录，等待账户数据更新。").font(.caption).foregroundStyle(Color.amber) }
         }
         .padding(18).glassCard(cornerRadius: 26)
+    }
+
+    private func heroMetric(_ title: String, _ value: String?) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(title).font(.caption).foregroundStyle(Color.muted)
+            HStack(alignment: .firstTextBaseline, spacing: 3) {
+                Text(Fmt.signed(value.flatMap(Double.init))).font(.headline.monospacedDigit()).foregroundStyle(tone(value))
+                Text("USDT").font(.caption2.weight(.medium)).foregroundStyle(Color.muted)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func tag(_ text: String, tint: Color) -> some View {
+        HStack(spacing: 4) {
+            Circle().fill(tint).frame(width: 6, height: 6)
+            Text(text).font(.system(size: 11, weight: .semibold).monospacedDigit()).foregroundStyle(tint)
+        }
+        .padding(.horizontal, 8).padding(.vertical, 4)
+        .background(tint.opacity(0.1), in: .capsule)
+    }
+
+    // MARK: tiles
+
+    private var tiles: some View {
+        let s = data?.closed
+        return LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+            tile("list.bullet", .accentColor, "已平仓", s.map { "\($0.count)" } ?? "—", "笔")
+            tile("scope", .up, "胜率", Fmt.fractionPercent(s?.winRate), "%")
+            tile("scalemass", .indigo, "盈亏比", Fmt.amount(s?.payoffRatio), nil)
+            tile("sum", .amber, "平均 R", Fmt.signed(s?.averageNetR.flatMap(Double.init)), nil)
+        }
+    }
+
+    private func tile(_ icon: String, _ tint: Color, _ title: String, _ value: String, _ unit: String?) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon).font(.system(size: 16, weight: .semibold)).foregroundStyle(tint)
+                .frame(width: 40, height: 40).background(tint.opacity(0.12), in: .circle)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title).font(.caption).foregroundStyle(Color.muted)
+                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                    Text(value).font(.title3.weight(.bold).monospacedDigit()).foregroundStyle(Color.ink).contentTransition(.numericText())
+                    if let unit { Text(unit).font(.caption.weight(.medium)).foregroundStyle(Color.muted) }
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(12).glassCard(cornerRadius: 20)
+        .accessibilityElement(children: .combine)
+    }
+
+    // MARK: curve
+
+    private var curve: some View {
+        let points = data?.curve ?? []
+        let net = data?.closed.netPnl
+        let last = Double(points.last?.pnl ?? "0") ?? 0
+        let hue = last >= 0 ? Color.up : Color.down
+        let selected = picked.flatMap { d in points.first { $0.date == d } }
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("累计盈亏").font(.headline).foregroundStyle(Color.ink)
+                Spacer()
+                Text(Fmt.signed(net.flatMap(Double.init)) + " USDT").font(.headline.monospacedDigit()).foregroundStyle(tone(net))
+                    .contentTransition(.numericText())
+            }
+            if points.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "chart.line.uptrend.xyaxis").font(.title2).foregroundStyle(Color.muted.opacity(0.7))
+                    Text(session.connection == nil ? "连接后查看" : loading && data == nil ? "正在读取…" : error != nil && data == nil ? "记录暂不可用" : "暂无已平仓记录")
+                        .font(.subheadline.weight(.semibold)).foregroundStyle(Color.muted)
+                }
+                .frame(maxWidth: .infinity).padding(.vertical, 30)
+            } else {
+                Chart {
+                    RuleMark(y: .value("零", 0)).foregroundStyle(Color.muted.opacity(0.35)).lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 5]))
+                    ForEach(points, id: \.date) { p in
+                        AreaMark(x: .value("日期", p.date), y: .value("净盈亏", Double(p.pnl) ?? 0))
+                            .interpolationMethod(.stepEnd)
+                            .foregroundStyle(LinearGradient(colors: [hue.opacity(0.22), hue.opacity(0.02)], startPoint: .top, endPoint: .bottom))
+                        LineMark(x: .value("日期", p.date), y: .value("净盈亏", Double(p.pnl) ?? 0))
+                            .interpolationMethod(.stepEnd)
+                            .foregroundStyle(hue)
+                            .lineStyle(StrokeStyle(lineWidth: 2.5, lineJoin: .round))
+                    }
+                    if let p = selected {
+                        RuleMark(x: .value("日期", p.date)).foregroundStyle(Color.accentColor.opacity(0.6)).lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                            .annotation(position: .top, spacing: 4, overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                                HStack(spacing: 6) {
+                                    Text(Self.day(p.date)).foregroundStyle(.white.opacity(0.8))
+                                    Text(Fmt.signed(Double(p.pnl)) + " U").foregroundStyle(.white)
+                                }
+                                .font(.system(size: 11, weight: .semibold).monospacedDigit())
+                                .padding(.horizontal, 9).padding(.vertical, 5)
+                                .background(Color(white: 0.12), in: .capsule)
+                            }
+                        PointMark(x: .value("日期", p.date), y: .value("净盈亏", Double(p.pnl) ?? 0))
+                            .symbolSize(70).foregroundStyle(Color.accentColor)
+                    } else if let p = points.last {
+                        PointMark(x: .value("日期", p.date), y: .value("净盈亏", Double(p.pnl) ?? 0)).foregroundStyle(hue)
+                    }
+                }
+                .chartXSelection(value: $picked)
+                .chartXAxis {
+                    AxisMarks(values: [points.first!.date, points.last!.date]) { value in
+                        AxisValueLabel { Text(Self.day(value.as(String.self) ?? "")).font(.caption2.monospacedDigit()) }
+                    }
+                }
+                .chartYAxis { AxisMarks(position: .trailing) { _ in AxisGridLine().foregroundStyle(Color.muted.opacity(0.12)); AxisValueLabel() } }
+                .frame(height: 180)
+                .onChange(of: picked) { _, now in if now != nil { Haptics.select() } }
+            }
+        }
+        .padding(16).glassCard()
+    }
+
+    // MARK: sides / coins
+
+    private var directions: some View {
+        HStack(spacing: 10) {
+            ForEach(["long", "short"], id: \.self) { side in
+                let row = data?.sides.first { $0.side == side }, hue = side == "long" ? Color.up : Color.down
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text(side == "long" ? "做多" : "做空").font(.caption.weight(.bold)).foregroundStyle(hue)
+                            .padding(.horizontal, 8).padding(.vertical, 3).background(hue.opacity(0.12), in: .capsule)
+                        Spacer()
+                        Text("\(row.map { "\($0.count)" } ?? "—") 笔").font(.caption.monospacedDigit()).foregroundStyle(Color.muted)
+                    }
+                    Text(Fmt.signed((row?.netPnl).flatMap(Double.init)) + " U").font(.headline.monospacedDigit()).foregroundStyle(tone(row?.netPnl))
+                    Text("胜率 \(Fmt.fractionPercent(row?.winRate))%").font(.caption.monospacedDigit()).foregroundStyle(Color.muted)
+                }
+                .padding(14)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .glassCard(cornerRadius: 20)
+            }
+        }
+    }
+
+    @ViewBuilder private var symbols: some View {
+        if let rows = data?.symbols, !rows.isEmpty {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("币种").font(.headline).foregroundStyle(Color.ink).padding(.bottom, 4)
+                ForEach(Array(rows.enumerated()), id: \.element.symbol) { index, row in
+                    HStack(spacing: 10) {
+                        CoinLogo(coin: Fmt.coin(row.symbol), size: 28)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(Fmt.coin(row.symbol)).font(.subheadline.weight(.semibold)).foregroundStyle(Color.ink)
+                            Text("\(row.count) 笔 · 胜率 \(Fmt.fractionPercent(row.winRate))%").font(.caption.monospacedDigit()).foregroundStyle(Color.muted)
+                        }
+                        Spacer()
+                        Text(Fmt.signed(Double(row.netPnl))).font(.subheadline.weight(.bold).monospacedDigit()).foregroundStyle(tone(row.netPnl))
+                    }
+                    .padding(.vertical, 6)
+                    if index < rows.count - 1 { Divider().padding(.leading, 38) }
+                }
+            }
+            .padding(16).glassCard()
+        }
     }
 
     private var disciplineRow: some View {
         let state = account.state
         return HStack(spacing: 12) {
-            Image(systemName: "checkmark.shield.fill").font(.title3).foregroundStyle(.blue)
-                .frame(width: 40, height: 40).background(Color.blue.opacity(0.12), in: .circle)
+            Image(systemName: "checkmark.shield.fill").font(.system(size: 16, weight: .semibold)).foregroundStyle(Color.accentColor)
+                .frame(width: 40, height: 40).background(Color.accentColor.opacity(0.12), in: .circle)
             VStack(alignment: .leading, spacing: 2) {
-                Text("交易纪律").font(.headline).foregroundStyle(.primary)
-                Text(state.map { "今日开仓 \($0.daily?.entries ?? 0) / \($0.discipline?.entriesLimit ?? $0.policy?.maxEntries ?? 3) 次 · \($0.blockers.isEmpty ? "规则生效中" : "开仓受限")" } ?? "连接后读取规则")
-                    .font(.caption).foregroundStyle(.secondary)
+                Text("交易纪律").font(.subheadline.weight(.semibold)).foregroundStyle(Color.ink)
+                Text(state.map { "今日 \($0.daily?.entries ?? 0) / \($0.discipline?.entriesLimit ?? $0.policy?.maxEntries ?? 3) 次" + ($0.blockers.isEmpty ? "" : " · 开仓受限") } ?? "—")
+                    .font(.caption.monospacedDigit()).foregroundStyle(Color.muted)
             }
             Spacer()
-            Image(systemName: "chevron.right").font(.subheadline.weight(.semibold)).foregroundStyle(.tertiary)
+            Image(systemName: "chevron.right").font(.caption.weight(.bold)).foregroundStyle(Color.muted.opacity(0.6))
         }
         .padding(14).glassCard()
     }
 
-    private var summary: some View {
-        let s = current?.closed
-        return VStack(alignment: .leading, spacing: 12) {
-            HStack { Text("已平仓表现").font(.headline); Spacer(); Text("仅计完全平仓").font(.caption).foregroundStyle(.secondary) }
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                stat("已平仓", s.map { "\($0.count)" } ?? "—", "笔")
-                stat("胜率", Fmt.fractionPercent(s?.winRate), "%")
-                stat("盈亏比", Fmt.amount(s?.payoffRatio), "均盈 ÷ 均亏")
-                stat("平均净 R", Fmt.amount(s?.averageNetR), "R")
-            }
-            if let s, s.count > 0, s.payoffRatio == nil {
-                Text(s.losses == 0 ? "暂无亏损样本" : s.wins == 0 ? "暂无盈利样本" : "盈亏比暂无可比样本").font(.caption).foregroundStyle(.secondary)
-            }
-            HStack(spacing: 14) {
-                Text("盈利 \(s.map { "\($0.wins)" } ?? "—")").foregroundStyle(Color.up)
-                Text("亏损 \(s.map { "\($0.losses)" } ?? "—")").foregroundStyle(Color.down)
-                Text("净零 \(s.map { "\($0.flat)" } ?? "—")").foregroundStyle(.secondary)
-            }
-            .font(.subheadline.weight(.semibold).monospacedDigit())
-            HStack {
-                Text(live ? "周期内已平仓交易手续费" : "周期内已结手续费").font(.subheadline).foregroundStyle(.secondary)
-                Spacer()
-                Text(Fmt.amount(current?.fees) + " USDT").font(.subheadline.weight(.semibold).monospacedDigit())
-            }
-        }
-        .padding(16).glassCard()
-    }
-
-    private func stat(_ title: String, _ value: String, _ unit: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(title).font(.caption).foregroundStyle(.secondary)
-            Text(value).font(.title2.weight(.bold).monospacedDigit()).contentTransition(.numericText())
-            Text(unit).font(.caption2).foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private var curve: some View {
-        let points = current?.curve ?? []
-        let net = current?.closed.netPnl
-        return VStack(alignment: .leading, spacing: 10) {
-            Text("已平仓累计净盈亏").font(.headline)
-            Text(Fmt.amount(net) + " USDT").font(.title2.weight(.bold).monospacedDigit()).foregroundStyle(tone(net))
-            if points.isEmpty {
-                VStack(spacing: 6) {
-                    Image(systemName: "chart.line.uptrend.xyaxis").font(.title2).foregroundStyle(.secondary)
-                    Text(session.connection == nil ? "连接后查看统计" : loading && current == nil ? "正在读取记录…" : error != nil && current == nil ? "记录暂不可用" : "暂无已平仓记录").font(.subheadline.weight(.semibold))
-                    Text("完成交易后生成统计曲线").font(.caption).foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity).padding(.vertical, 24)
-            } else {
-                let last = Double(points.last?.pnl ?? "0") ?? 0
-                Chart {
-                    RuleMark(y: .value("零", 0)).foregroundStyle(.secondary.opacity(0.4)).lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 5]))
-                    ForEach(points, id: \.date) { p in
-                        LineMark(x: .value("日期", p.date), y: .value("净盈亏", Double(p.pnl) ?? 0))
-                            .interpolationMethod(.stepEnd)
-                            .foregroundStyle(last >= 0 ? Color.up : Color.down)
-                            .lineStyle(StrokeStyle(lineWidth: 2.5, lineJoin: .round))
-                    }
-                    if let p = points.last {
-                        PointMark(x: .value("日期", p.date), y: .value("净盈亏", Double(p.pnl) ?? 0)).foregroundStyle(last >= 0 ? Color.up : Color.down)
-                    }
-                }
-                .chartXAxis { AxisMarks(values: [points.first!.date, points.last!.date]) { AxisValueLabel() } }
-                .frame(height: 170)
-            }
-            Text("按平仓日累计净盈亏，不是历史账户净值。").font(.caption).foregroundStyle(.secondary)
-        }
-        .padding(16).glassCard()
-    }
-
-    private var directions: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("多空表现").font(.headline)
-            HStack(spacing: 10) {
-                ForEach(["long", "short"], id: \.self) { side in
-                    let row = current?.sides.first { $0.side == side }
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(side == "long" ? "做多" : "做空").font(.subheadline.weight(.bold)).foregroundStyle(side == "long" ? Color.up : Color.down)
-                        Text("\(row.map { "\($0.count)" } ?? "—") 笔 · 胜率 \(Fmt.fractionPercent(row?.winRate))%").font(.caption).foregroundStyle(.secondary)
-                        Text(Fmt.amount(row?.netPnl) + " USDT").font(.headline.monospacedDigit()).foregroundStyle(tone(row?.netPnl))
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12).background(Color.field, in: .rect(cornerRadius: 14))
-                }
-            }
-        }
-        .padding(16).glassCard()
-    }
-
-    private var symbols: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("币种表现").font(.headline)
-            if let rows = current?.symbols, !rows.isEmpty {
-                Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 8) {
-                    GridRow { Text("合约"); Text("笔数"); Text("净盈亏"); Text("胜率") }.font(.caption).foregroundStyle(.secondary)
-                    ForEach(rows, id: \.symbol) { row in
-                        GridRow {
-                            Text(Fmt.coin(row.symbol)).font(.subheadline.weight(.semibold))
-                            Text("\(row.count)").monospacedDigit()
-                            Text(Fmt.amount(row.netPnl)).monospacedDigit().foregroundStyle(tone(row.netPnl))
-                            Text(Fmt.fractionPercent(row.winRate) + "%").monospacedDigit()
-                        }
-                        .font(.subheadline)
-                    }
-                }
-            } else {
-                Text((current == nil ? "读取服务后显示" : "暂无已平仓合约") + "。净盈亏单位为 USDT。").font(.caption).foregroundStyle(.secondary)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16).glassCard()
-    }
-
-    private var explainer: some View {
-        Explainer(title: "统计口径", paragraphs: [
-            "账户概览始终显示当前全量数据。周期为最近 7 / 30 个连续自然时长天数；交易归属以完全平仓时刻为准，手续费按当前交易模式的结算记录归集。",
-            "胜率 = 净盈利笔数 ÷ 已平仓笔数，净零也计入分母。盈亏比 = 平均盈利 ÷ 平均亏损绝对值，两侧均有样本才计算。平均净 R = 每笔完整净盈亏 ÷ 各自初始固定风险 R 后的算术平均。",
-            live ? "实盘盈亏仅统计本 App 管理交易，已实现净盈亏包含交易所结算的手续费与资金费，浮动盈亏按剩余持仓计价。累计百分比 = App 累计净盈亏 ÷ 本人确认的固定本金；充提、外部交易和统计周期不改变分母。未设置固定本金时不计算百分比；这不是全账户资金加权收益率。"
-                : "净盈亏已计入模型手续费及成交滑点；没有再次扣除风险预留。未计资金费，不代表交易所账户收益。",
-        ])
-    }
-
     static func time(_ seconds: Double) -> String {
-        let f = DateFormatter(); f.timeZone = TimeZone(identifier: "Asia/Shanghai"); f.dateFormat = "HH:mm:ss"
+        let f = DateFormatter(); f.timeZone = TimeZone(identifier: "Asia/Shanghai"); f.dateFormat = "HH:mm"
         return f.string(from: Date(timeIntervalSince1970: seconds))
     }
+
+    /// "2026-11-04" → "11-04".
+    static func day(_ text: String) -> String { text.count >= 10 ? String(text.dropFirst(5).prefix(5)) : text }
 }
 
 struct Explainer: View {

@@ -10,6 +10,9 @@ struct SpikeDisciplineApp: App {
     @State private var account = AccountStore()
     @State private var fib = FibStore()
     @State private var ticket = TicketModel()
+    @State private var chartStyle = ChartStyle()
+    @State private var mondayHistory = MondayHistory()
+    @State private var touchFeed = TouchFeed()
     @AppStorage("appearance") private var appearance = "system"
     var body: some Scene {
         WindowGroup {
@@ -19,6 +22,9 @@ struct SpikeDisciplineApp: App {
                 .environment(account)
                 .environment(fib)
                 .environment(ticket)
+                .environment(chartStyle)
+                .environment(mondayHistory)
+                .environment(touchFeed)
                 .preferredColorScheme(appearance == "light" ? .light : appearance == "dark" ? .dark : nil)
         }
     }

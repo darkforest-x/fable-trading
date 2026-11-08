@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>天才交易员 · Institutional Light Terminal</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "outline-variant": "#c0c6d6",
+            "surface-container-high": "#e1e8fd",
+            "outline": "#717786",
+            "primary-container": "#0073e0",
+            "background": "#f9f9ff",
+            "secondary-container": "#85f4c9",
+            "on-secondary-fixed": "#002116",
+            "primary": "#005ab3",
+            "on-tertiary": "#ffffff",
+            "on-primary-fixed": "#001b3e",
+            "secondary-fixed": "#88f7cc",
+            "surface-container": "#e9edff",
+            "on-background": "#141b2b",
+            "on-tertiary-container": "#fffbff",
+            "tertiary-container": "#d6345c",
+            "inverse-on-surface": "#edf0ff",
+            "tertiary-fixed-dim": "#ffb2bb",
+            "on-primary-fixed-variant": "#00468d",
+            "on-surface": "#141b2b",
+            "surface-dim": "#d3daef",
+            "surface-container-highest": "#dce2f7",
+            "primary-fixed": "#d6e3ff",
+            "tertiary-fixed": "#ffd9dd",
+            "surface-container-low": "#f1f3ff",
+            "on-surface-variant": "#414754",
+            "on-error-container": "#93000a",
+            "surface-container-lowest": "#ffffff",
+            "surface-bright": "#f9f9ff",
+            "tertiary": "#b41645",
+            "on-error": "#ffffff",
+            "on-secondary": "#ffffff",
+            "error-container": "#ffdad6",
+            "on-primary": "#ffffff",
+            "inverse-primary": "#aac7ff",
+            "on-tertiary-fixed-variant": "#910033",
+            "error": "#ba1a1a",
+            "secondary": "#006c50",
+            "surface": "#f9f9ff",
+            "on-secondary-fixed-variant": "#00513b",
+            "on-secondary-container": "#007153",
+            "surface-variant": "#dce2f7",
+            "inverse-surface": "#293040",
+            "on-tertiary-fixed": "#400012",
+            "secondary-fixed-dim": "#6adbb1",
+            "primary-fixed-dim": "#aac7ff",
+            "on-primary-container": "#fefcff",
+            "surface-tint": "#005db8"
+          },
+          borderRadius: {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "space-sm": "0.5rem",
+            "space-lg": "1rem",
+            "space-xs": "0.25rem",
+            "gutter": "0.75rem",
+            "margin": "1rem",
+            "space-md": "0.75rem",
+            "space-xl": "1.5rem"
+          },
+          fontFamily: {
+            "body-sm": ["Inter", "sans-serif"],
+            "headline-lg": ["Inter", "sans-serif"],
+            "headline-sm": ["Inter", "sans-serif"],
+            "headline-md": ["Inter", "sans-serif"],
+            "headline-xl": ["Inter", "sans-serif"],
+            "label-sm": ["Inter", "sans-serif"],
+            "ticker-numeric-lg": ["Inter", "sans-serif"],
+            "label-md": ["Inter", "sans-serif"],
+            "label-lg": ["Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"],
+            "body-lg": ["Inter", "sans-serif"],
+            "ticker-numeric-md": ["Inter", "sans-serif"],
+            "ticker-numeric-sm": ["Inter", "sans-serif"]
+          },
+          fontSize: {
+            "body-sm": ["13px", { lineHeight: "18px", letterSpacing: "0.005em", fontWeight: "400" }],
+            "headline-lg": ["28px", { lineHeight: "34px", letterSpacing: "-0.015em", fontWeight: "600" }],
+            "headline-sm": ["17px", { lineHeight: "22px", letterSpacing: "-0.005em", fontWeight: "600" }],
+            "headline-md": ["22px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "headline-xl": ["34px", { lineHeight: "41px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.02em", fontWeight: "600" }],
+            "ticker-numeric-lg": ["24px", { lineHeight: "28px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "500" }],
+            "label-lg": ["15px", { lineHeight: "20px", letterSpacing: "-0.005em", fontWeight: "500" }],
+            "body-md": ["15px", { lineHeight: "20px", letterSpacing: "0em", fontWeight: "400" }],
+            "body-lg": ["17px", { lineHeight: "24px", letterSpacing: "0em", fontWeight: "400" }],
+            "ticker-numeric-md": ["15px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "500" }],
+            "ticker-numeric-sm": ["12px", { lineHeight: "14px", letterSpacing: "0.01em", fontWeight: "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Liquid Frosted Glass Utility - Strictly NO dark borders */
+    .glass-deck {
+      background: rgba(255, 255, 255, 0.74);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      box-shadow: 
+        inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95), 
+        inset 0 -0.5px 0.5px 0 rgba(255, 255, 255, 0.4),
+        0 8px 32px -4px rgba(17, 24, 39, 0.05),
+        0 2px 8px -2px rgba(17, 24, 39, 0.02);
+      border: none;
+    }
+    .glass-deck-subtle {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      box-shadow: 
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.9), 
+        0 4px 16px -2px rgba(17, 24, 39, 0.04);
+      border: none;
+    }
+    .glass-pill-active {
+      background: #FFFFFF;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), inset 0 1px 1px rgba(255,255,255,1);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.35); opacity: 0.75; }
+    }
+    .pulse-live {
+      animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-container-lowest text-on-surface antialiased select-none overflow-hidden m-0 p-0 font-body-md flex items-center justify-center min-h-screen">
+<!-- iPhone 16 Pro Viewport Shell (402pt x 874pt standard iOS container) -->
+<main class="relative w-full max-w-[402px] h-[874px] bg-white overflow-hidden shadow-2xl rounded-[48px] flex flex-col">
+<!-- FULL SCREEN CANDLESTICK CHART CANVAS (Absolute inset-0 covering 100% of height and width, pure white background, NO grid lines) -->
+<div class="absolute inset-0 w-full h-full z-0 overflow-hidden bg-white pointer-events-auto">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 402 874">
+<defs>
+<!-- Subtle area gradient fill for monday range projection -->
+<lineargradient id="mondayRangeFill" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#30D158" stop-opacity="0.04"></stop>
+<stop offset="100%" stop-color="#30D158" stop-opacity="0.00"></stop>
+</lineargradient>
+</defs>
+<!-- Previous Week Light Reference Cluster (Localized faint ray bands) -->
+<g opacity="0.38">
+<line stroke="#17191D" stroke-dasharray="3 3" stroke-width="0.8" x1="28" x2="152" y1="418" y2="418"></line>
+<line stroke="#9399A2" stroke-dasharray="2 3" stroke-width="0.8" x1="28" x2="152" y1="492" y2="492"></line>
+<rect fill="#30D158" fill-opacity="0.015" height="74" width="70" x="74" y="440"></rect>
+</g>
+<!-- Current Week Monday Projection Zone -->
+<rect fill="url(#mondayRangeFill)" height="152" width="168" x="178" y="380"></rect>
+<!-- Institutional Level Reference Lines -->
+<!-- 1. 上 1.618 (78,429.9) - Thin dark grey #17191D line -->
+<g id="fib-upper">
+<line stroke="#17191D" stroke-width="0.9" x1="12" x2="334" y1="264" y2="264"></line>
+<text class="font-ticker-numeric-sm text-[11px] font-semibold tracking-tight" fill="#17191D" text-anchor="end" x="330" y="258">上 1.618 (78,429.9)</text>
+</g>
+<!-- 2. 周一高 (77,912) - Grey #9399A2 hairline ray -->
+<g id="monday-high">
+<line stroke="#9399A2" stroke-dasharray="4 2" stroke-width="0.85" x1="172" x2="334" y1="334" y2="334"></line>
+<text class="font-ticker-numeric-sm text-[11px] font-medium" fill="#9399A2" text-anchor="end" x="330" y="328">周一高 (77,912)</text>
+</g>
+<!-- 3. 周一低 (76,520) - Grey #9399A2 hairline ray -->
+<g id="monday-low">
+<line stroke="#9399A2" stroke-dasharray="4 2" stroke-width="0.85" x1="172" x2="334" y1="486" y2="486"></line>
+<text class="font-ticker-numeric-sm text-[11px] font-medium" fill="#9399A2" text-anchor="end" x="330" y="500">周一低 (76,520)</text>
+</g>
+<!-- 4. 下 1.618 (75,339.68) - Thin dark grey #17191D line -->
+<g id="fib-lower">
+<line stroke="#17191D" stroke-width="0.9" x1="12" x2="334" y1="608" y2="608"></line>
+<text class="font-ticker-numeric-sm text-[11px] font-semibold tracking-tight" fill="#17191D" text-anchor="end" x="330" y="602">下 1.618 (75,339.68)</text>
+</g>
+<!-- CANDLESTICKS ENGINE (Neutral candles in #8B9099; Monday foundational anchor candles in vivid #30D158) -->
+<!-- Historical cluster - Past Week neutral candles (#8B9099) -->
+<!-- Candle 1 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="28" x2="28" y1="400" y2="455"></line>
+<rect fill="#8B9099" height="28" rx="0.5" width="6" x="25" y="415"></rect>
+<!-- Candle 2 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="42" x2="42" y1="410" y2="470"></line>
+<rect fill="#FFFFFF" height="34" rx="0.5" stroke="#8B9099" stroke-width="1.2" width="6" x="39" y="426"></rect>
+<!-- Candle 3 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="56" x2="56" y1="390" y2="445"></line>
+<rect fill="#8B9099" height="22" rx="0.5" width="6" x="53" y="405"></rect>
+<!-- Candle 4 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="70" x2="70" y1="418" y2="482"></line>
+<rect fill="#8B9099" height="38" rx="0.5" width="6" x="67" y="430"></rect>
+<!-- Candle 5 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="84" x2="84" y1="440" y2="505"></line>
+<rect fill="#FFFFFF" height="40" rx="0.5" stroke="#8B9099" stroke-width="1.2" width="6" x="81" y="452"></rect>
+<!-- Candle 6 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="98" x2="98" y1="432" y2="475"></line>
+<rect fill="#8B9099" height="24" rx="0.5" width="6" x="95" y="440"></rect>
+<!-- Candle 7 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="112" x2="112" y1="420" y2="464"></line>
+<rect fill="#FFFFFF" height="25" rx="0.5" stroke="#8B9099" stroke-width="1.2" width="6" x="109" y="425"></rect>
+<!-- Candle 8 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="126" x2="126" y1="395" y2="442"></line>
+<rect fill="#8B9099" height="30" rx="0.5" width="6" x="123" y="402"></rect>
+<!-- Candle 9 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="140" x2="140" y1="385" y2="430"></line>
+<rect fill="#8B9099" height="24" rx="0.5" width="6" x="137" y="392"></rect>
+<!-- Candle 10 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="154" x2="154" y1="375" y2="420"></line>
+<rect fill="#FFFFFF" height="28" rx="0.5" stroke="#8B9099" stroke-width="1.2" width="6" x="151" y="380"></rect>
+<!-- MONDAY ANCHOR CANDLES (Vivid Monday Green #30D158 solid fill and wick) -->
+<!-- Monday Candle A (Opening drive low) -->
+<line stroke="#30D158" stroke-width="1.4" x1="172" x2="172" y1="410" y2="486"></line>
+<rect fill="#30D158" height="52" rx="0.5" width="6" x="169" y="422"></rect>
+<!-- Monday Candle B (Session expansion up to Monday High) -->
+<line stroke="#30D158" stroke-width="1.4" x1="186" x2="186" y1="334" y2="440"></line>
+<rect fill="#30D158" height="74" rx="0.5" width="6" x="183" y="348"></rect>
+<!-- Monday Candle C (Anchor consolidation) -->
+<line stroke="#30D158" stroke-width="1.4" x1="200" x2="200" y1="352" y2="420"></line>
+<rect fill="#30D158" height="42" rx="0.5" width="6" x="197" y="365"></rect>
+<!-- Current Week Neutral Candles (#8B9099) proceeding through price discovery -->
+<!-- Candle 14 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="214" x2="214" y1="315" y2="390"></line>
+<rect fill="#FFFFFF" height="50" rx="0.5" stroke="#8B9099" stroke-width="1.2" width="6" x="211" y="325"></rect>
+<!-- Candle 15 (Pushing near Upper 1.618) -->
+<line stroke="#8B9099" stroke-width="1.2" x1="228" x2="228" y1="272" y2="340"></line>
+<rect fill="#8B9099" height="45" rx="0.5" width="6" x="225" y="280"></rect>
+<!-- Candle 16 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="242" x2="242" y1="288" y2="355"></line>
+<rect fill="#8B9099" height="44" rx="0.5" width="6" x="239" y="296"></rect>
+<!-- Candle 17 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="256" x2="256" y1="330" y2="402"></line>
+<rect fill="#FFFFFF" height="48" rx="0.5" stroke="#8B9099" stroke-width="1.2" width="6" x="253" y="342"></rect>
+<!-- Candle 18 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="270" x2="270" y1="370" y2="445"></line>
+<rect fill="#8B9099" height="42" rx="0.5" width="6" x="267" y="385"></rect>
+<!-- Candle 19 -->
+<line stroke="#8B9099" stroke-width="1.2" x1="284" x2="284" y1="410" y2="495"></line>
+<rect fill="#8B9099" height="50" rx="0.5" width="6" x="281" y="430"></rect>
+<!-- Candle 20 (Crosshair pinned candle at 11/08 16:00: Open 75,936.1 Close 75,913.7) -->
+<line stroke="#8B9099" stroke-width="1.2" x1="298" x2="298" y1="520" y2="558"></line>
+<rect fill="#8B9099" height="18" rx="0.5" width="6" x="295" y="534"></rect>
+<!-- ACTIVE CROSSHAIR (Subtle dotted line on tap at 11/08 16:00 & 75,913.7) -->
+<!-- Vertical crosshair ray -->
+<line opacity="0.75" stroke="#0A84FF" stroke-dasharray="3 3" stroke-width="0.9" x1="298" x2="298" y1="0" y2="874"></line>
+<!-- Horizontal crosshair ray at 75,913.7 (y=548) -->
+<line opacity="0.75" stroke="#0A84FF" stroke-dasharray="3 3" stroke-width="0.9" x1="0" x2="402" y1="548" y2="548"></line>
+<!-- Crosshair center lens anchor point -->
+<circle cx="298" cy="548" fill="#0A84FF" fill-opacity="0.18" r="3.5"></circle>
+<circle cx="298" cy="548" fill="#0A84FF" r="1.8"></circle>
+</svg>
+<!-- SLIM RIGHT-SIDE PRICE AXIS (Clean Institutional numbers) -->
+<div class="absolute right-0 top-0 bottom-0 w-16 pointer-events-none flex flex-col justify-between py-24 pr-2 font-ticker-numeric-sm text-[11px] text-outline select-none">
+<span class="text-right">78,500</span>
+<span class="text-right">78,000</span>
+<span class="text-right">77,500</span>
+<span class="text-right">77,000</span>
+<span class="text-right">76,500</span>
+<span class="text-right">76,000</span>
+<span class="text-right">75,500</span>
+</div>
+<!-- PRICE PILL ON RIGHT AXIS (Active Crosshair Price: 75,913.7 at y=548px) -->
+<div class="absolute right-1 top-[538px] z-10 pointer-events-none">
+<div class="bg-[#111827] text-white font-ticker-numeric-sm text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-md flex items-center">
+          75,913.7
+        </div>
+</div>
+<!-- TIME AXIS ALONG BOTTOM JUST ABOVE DOCK -->
+<div class="absolute bottom-[114px] left-0 right-16 px-4 flex justify-between pointer-events-none font-ticker-numeric-sm text-[10px] text-outline">
+<span>11/08 08:00</span>
+<span>11/08 14:00</span>
+<span class="text-right">11/08 20:00</span>
+</div>
+<!-- TIME PILL ON BOTTOM AXIS (Active Crosshair Time: 11/08 16:00 aligned with x=298px) -->
+<div class="absolute bottom-[112px] left-[262px] z-10 pointer-events-none transform -translate-x-1/2">
+<div class="bg-[#111827] text-white font-ticker-numeric-sm text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-md">
+          11/08 16:00
+        </div>
+</div>
+</div>
+<!-- TOP SECTION: STATUS BAR & FLOATING GLASS CONTROLS -->
+<header class="relative z-30 pt-3 px-4 flex flex-col gap-2 pointer-events-none">
+<!-- iOS Status Bar (time 9:41, Cellular, WiFi, Battery in dark grey #111827) -->
+<div class="w-full flex items-center justify-between text-[#111827] font-semibold text-[14px] px-2 h-7">
+<span class="tracking-tight font-headline-sm text-headline-sm">9:41</span>
+<!-- Dynamic Island Silhouette Clearance -->
+<div class="w-[124px] h-[34px] bg-[#000000] rounded-full mx-auto -mt-1 flex items-center justify-end px-3">
+<span class="w-2.5 h-2.5 rounded-full bg-[#111827]/40"></span>
+</div>
+<div class="flex items-center space-x-1.5 text-[#111827]">
+<span class="material-symbols-outlined text-[15px]" data-icon="signal_cellular_alt">signal_cellular_alt</span>
+<span class="material-symbols-outlined text-[15px]" data-icon="wifi">wifi</span>
+<span class="material-symbols-outlined text-[17px]" data-icon="battery_full">battery_full</span>
+</div>
+</div>
+<!-- TopAppBar Shared Component Anchor execution -->
+<div class="w-full hidden">
+<span class="candlestick_chart tune">BTC/USDT 68,420.50 +2.45%</span>
+</div>
+<!-- HORIZONTALLY SCROLLING FROSTED GLASS RIBBON OF TOUCHED COINS -->
+<div class="w-full flex items-center pointer-events-auto mt-1">
+<div class="flex-1 flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 pr-2">
+<!-- BLUR chip -->
+<div class="glass-deck-subtle flex items-center gap-1.5 px-2.5 py-1.5 rounded-full active:scale-[0.96] transition-transform cursor-pointer shrink-0">
+<span class="w-4 h-4 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-[8px] font-bold text-white shadow-xs">B</span>
+<span class="font-headline-sm text-[12px] font-bold text-[#111827]">BLUR</span>
+<span class="font-ticker-numeric-sm text-[11px] text-[#6B7280]">0.0864</span>
+</div>
+<!-- SUI chip -->
+<div class="glass-deck-subtle flex items-center gap-1.5 px-2.5 py-1.5 rounded-full active:scale-[0.96] transition-transform cursor-pointer shrink-0">
+<span class="w-4 h-4 rounded-full bg-gradient-to-tr from-blue-400 to-indigo-500 flex items-center justify-center text-[8px] font-bold text-white shadow-xs">S</span>
+<span class="font-headline-sm text-[12px] font-bold text-[#111827]">SUI</span>
+<span class="font-ticker-numeric-sm text-[11px] text-[#6B7280]">2.148</span>
+</div>
+<!-- SOL chip -->
+<div class="glass-deck-subtle flex items-center gap-1.5 px-2.5 py-1.5 rounded-full active:scale-[0.96] transition-transform cursor-pointer shrink-0">
+<span class="w-4 h-4 rounded-full bg-gradient-to-tr from-purple-500 to-emerald-400 flex items-center justify-center text-[8px] font-bold text-white shadow-xs">SOL</span>
+<span class="font-ticker-numeric-sm text-[11px] text-[#6B7280]">188.4</span>
+</div>
+<!-- DOGE chip -->
+<div class="glass-deck-subtle flex items-center gap-1.5 px-2.5 py-1.5 rounded-full active:scale-[0.96] transition-transform cursor-pointer shrink-0">
+<span class="w-4 h-4 rounded-full bg-gradient-to-tr from-yellow-300 to-amber-500 flex items-center justify-center text-[8px] font-bold text-white shadow-xs">D</span>
+<span class="font-headline-sm text-[12px] font-bold text-[#111827]">DOGE</span>
+<span class="font-ticker-numeric-sm text-[11px] text-[#6B7280]">0.164</span>
+</div>
+</div>
+<!-- Pinned Frosted Chips on the right edge: BTC & ETH -->
+<div class="flex items-center gap-1 pl-1.5 border-l border-white/60 shrink-0">
+<div class="glass-deck flex items-center gap-1 px-2.5 py-1.5 rounded-full active:scale-[0.96] transition-transform cursor-pointer bg-white/90">
+<span class="w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center text-[8px] font-bold text-white shadow-xs">₿</span>
+<span class="font-headline-sm text-[12px] font-bold text-[#111827]">BTC</span>
+</div>
+<div class="glass-deck-subtle flex items-center gap-1 px-2.5 py-1.5 rounded-full active:scale-[0.96] transition-transform cursor-pointer">
+<span class="w-4 h-4 rounded-full bg-slate-700 flex items-center justify-center text-[8px] font-bold text-white shadow-xs">Ξ</span>
+<span class="font-headline-sm text-[12px] font-bold text-[#111827]">ETH</span>
+</div>
+</div>
+</div>
+<!-- FLOATING FROSTED COIN CARD (Directly below ribbon) -->
+<div class="w-full glass-deck rounded-2xl p-3 flex items-center justify-between pointer-events-auto">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md font-bold text-[#111827] tracking-tight">BTC / USDT</span>
+<!-- Live Green Pulse Indicator (#169873) -->
+<span class="w-2 h-2 rounded-full bg-[#169873] pulse-live"></span>
+</div>
+<div class="flex items-baseline gap-2 mt-0.5">
+<span class="font-ticker-numeric-lg text-[27px] font-bold text-[#111827] tracking-tight">75,913.7</span>
+<span class="font-ticker-numeric-sm text-ticker-numeric-sm text-[#169873] font-semibold bg-[#169873]/10 px-1.5 py-0.5 rounded-md">+2.45%</span>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<div class="flex items-center gap-1 bg-white/80 px-2.5 py-1 rounded-full text-[11px] font-medium text-[#6B7280]">
+<span class="material-symbols-outlined text-[13px] text-[#0A84FF]" data-icon="tune">tune</span>
+<span>天才交易员</span>
+</div>
+<div class="text-right font-ticker-numeric-sm text-[11px] text-[#6B7280]">
+            高 78,429.9 · 低 75,339.6
+          </div>
+</div>
+</div>
+<!-- FLOATING FROSTED OHLC READOUT LINE (Triggered by active Crosshair at 11/08 16:00) -->
+<div class="w-full glass-deck-subtle rounded-full px-3 py-1 flex items-center justify-between text-[11px] font-ticker-numeric-sm text-[#414754] pointer-events-auto">
+<div class="flex items-center gap-1.5 font-medium truncate">
+<span class="text-[#111827] font-semibold">11/08 16:00</span>
+<span>·</span>
+<span>开 <strong class="text-[#111827] font-medium">75,936.1</strong></span>
+<span>高 <strong class="text-[#111827] font-medium">75,936.1</strong></span>
+<span>低 <strong class="text-[#111827] font-medium">75,913.6</strong></span>
+<span>收 <strong class="text-[#111827] font-medium">75,913.7</strong></span>
+</div>
+</div>
+</header>
+<!-- SPACER TO PRESERVE VIEWPORT GEOMETRY -->
+<div class="flex-1 pointer-events-none"></div>
+<!-- BOTTOM FLOATING CONTROLS: DOCK & TAB BAR -->
+<footer class="relative z-30 pb-3 px-3 flex flex-col gap-2.5 pointer-events-auto">
+<!-- FLOATING DOCK: PERIOD CHIPS, POPOVER TRIGGER, FOLLOW, & ⚡ 开单 BUTTON -->
+<div class="w-full glass-deck rounded-full p-1.5 flex items-center justify-between">
+<!-- Period Granularity Track -->
+<div class="flex items-center gap-0.5 bg-black/[0.03] p-0.5 rounded-full">
+<button class="px-2.5 py-1 rounded-full text-[12px] font-label-md font-medium text-[#6B7280] active:scale-[0.96] transition-transform">5m</button>
+<!-- Active chip '15m' in pure elevated white with subtle blue indicator -->
+<button class="glass-pill-active px-2.5 py-1 rounded-full text-[12px] font-label-md font-bold text-[#0A84FF] active:scale-[0.96] transition-transform flex items-center gap-0.5">
+            15m
+          </button>
+<button class="px-2 py-1 rounded-full text-[12px] font-label-md font-medium text-[#6B7280] active:scale-[0.96] transition-transform">1H</button>
+<button class="px-2 py-1 rounded-full text-[12px] font-label-md font-medium text-[#6B7280] active:scale-[0.96] transition-transform">4H</button>
+<button class="px-2 py-1 rounded-full text-[12px] font-label-md font-medium text-[#6B7280] active:scale-[0.96] transition-transform">12H</button>
+<button class="px-2 py-1 rounded-full text-[12px] font-label-md font-medium text-[#6B7280] active:scale-[0.96] transition-transform">1D</button>
+</div>
+<!-- Auxiliary Action Cluster -->
+<div class="flex items-center gap-1.5 pr-0.5">
+<!-- Chart settings popover trigger (内部线 / 六均线 / 云带 / K线配色) -->
+<button class="w-8 h-8 rounded-full glass-deck-subtle flex items-center justify-center text-[#111827] active:scale-[0.96] transition-transform" title="指标与配色">
+<span class="material-symbols-outlined text-[17px]" data-icon="tune">tune</span>
+</button>
+<!-- Follow / crosshair target button -->
+<button class="w-8 h-8 rounded-full glass-deck-subtle flex items-center justify-center text-[#111827] active:scale-[0.96] transition-transform" title="对齐十字">
+<span class="material-symbols-outlined text-[17px]" data-icon="near_me">near_me</span>
+</button>
+<!-- Solid '⚡ 开单' pill button in accent #0A84FF with white text -->
+<button class="bg-[#0A84FF] text-white font-label-md font-semibold text-[13px] px-3.5 py-1.5 rounded-full shadow-sm active:scale-[0.96] transition-transform flex items-center gap-1">
+<span>⚡ 开单</span>
+</button>
+</div>
+</div>
+<!-- FLOATING ICON-ONLY TAB BAR (Ultra-clean frosted glass pill at bottom, 5 icons: chart, alert, 1.618 fib/trend, shield, analytics. Active: 1.618) -->
+<nav aria-label="Bottom Navigation" class="w-full glass-deck rounded-full px-4 py-2 flex items-center justify-between">
+<!-- Tab 1: Candlestick Chart -->
+<button aria-label="行情" class="flex items-center justify-center text-[#6B7280] hover:text-[#0A84FF] p-2 rounded-full active:scale-[0.96] transition-transform">
+<span class="material-symbols-outlined text-[22px]" data-icon="candlestick_chart">candlestick_chart</span>
+</button>
+<!-- Tab 2: Alert / Bell -->
+<button aria-label="提醒" class="flex items-center justify-center text-[#6B7280] hover:text-[#0A84FF] p-2 rounded-full active:scale-[0.96] transition-transform">
+<span class="material-symbols-outlined text-[22px]" data-icon="notifications">notifications</span>
+</button>
+<!-- Tab 3: ACTIVE TAB 1.618 fib/trend (Active: Flex items center justify center bg-primary text-on-primary rounded-full p-2.5 shadow-sm) -->
+<button aria-label="1.618 斐波那契战法" class="flex items-center justify-center bg-[#0A84FF] text-white rounded-full p-2.5 shadow-md active:scale-[0.96] transition-transform">
+<span class="material-symbols-outlined material-symbols-fill text-[20px]" data-icon="show_chart" style="font-variation-settings: 'FILL' 1;">show_chart</span>
+</button>
+<!-- Tab 4: Shield / Security Risk -->
+<button aria-label="风控" class="flex items-center justify-center text-[#6B7280] hover:text-[#0A84FF] p-2 rounded-full active:scale-[0.96] transition-transform">
+<span class="material-symbols-outlined text-[22px]" data-icon="shield">shield</span>
+</button>
+<!-- Tab 5: Statistics / Analytics -->
+<button aria-label="统计" class="flex items-center justify-center text-[#6B7280] hover:text-[#0A84FF] p-2 rounded-full active:scale-[0.96] transition-transform">
+<span class="material-symbols-outlined text-[22px]" data-icon="query_stats">query_stats</span>
+</button>
+</nav>
+<!-- Native iOS Home Indicator Pill -->
+<div class="w-full flex justify-center pt-1 pb-1">
+<div class="w-32 h-1 bg-[#111827]/25 rounded-full"></div>
+</div>
+</footer>
+</main>
+<!-- MICRO-INTERACTIONS & SEAMLESS TAP LOGIC SCRIPT -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Period chip interactive toggle
+      const periodButtons = document.querySelectorAll('.font-label-md');
+      periodButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          if (btn.innerText.includes('开单')) return;
+          periodButtons.forEach(b => {
+            if (!b.innerText.includes('开单')) {
+              b.classList.remove('glass-pill-active', 'text-[#0A84FF]', 'font-bold');
+              b.classList.add('text-[#6B7280]', 'font-medium');
+            }
+          });
+          btn.classList.add('glass-pill-active', 'text-[#0A84FF]', 'font-bold');
+          btn.classList.remove('text-[#6B7280]', 'font-medium');
+        });
+      });
+    });
+  </script>
+</body></html>

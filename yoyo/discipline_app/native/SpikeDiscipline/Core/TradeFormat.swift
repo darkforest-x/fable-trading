@@ -32,6 +32,13 @@ extension Fmt {
         f.dateFormat = "yyyy-MM-dd HH:mm:ss"; return f
     }()
 
+    /// Beijing calendar day "yyyy-MM-dd" (today filters).
+    static func beijingDay(_ date: Date) -> String { dayKeyFormatter.string(from: date) }
+    private static let dayKeyFormatter: DateFormatter = {
+        let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.timeZone = TimeZone(identifier: "Asia/Shanghai")
+        f.dateFormat = "yyyy-MM-dd"; return f
+    }()
+
     static func coinQuantity(_ text: String?) -> String {
         guard let value = text.flatMap(Double.init), value.isFinite else { return "—" }
         return value.formatted(.number.precision(.fractionLength(0...12)).locale(Locale(identifier: "en_US")))

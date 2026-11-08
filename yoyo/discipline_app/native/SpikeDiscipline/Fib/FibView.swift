@@ -1,45 +1,56 @@
 import SwiftUI
 
-/// 1.618 (owner 2026-11-07): the chart covers the whole screen, down to the bottom edge, like a
-/// wallpaper (workbench monday-fib-chart.js wallpaper view). Floating frosted controls only: coin
-/// capsule (tap to switch), period capsule, and one slim bar with 内部线 / 六均线 / 云带, follow and a
-/// small 开单 pill. Cloud band on by default. Layout reference: Stitch design/native-2.3.0 fib-fullscreen.
+/// 1.618 (owner 2026-11-08, replicating the web mobile workbench): a full-screen chart with floating
+/// controls only — the coin strip (today's touches, BTC / ETH pinned), the coin card (tap to open
+/// 最新触价), and one bottom bar with periods, chart settings, follow and a small 开单 pill.
+/// Previous weeks' ranges and custom candle colours come from ChartStyle / MondayHistory.
 struct FibView: View {
     @Environment(SessionStore.self) private var session
     @Environment(AccountStore.self) private var account
     @Environment(FibStore.self) private var fib
+    @Environment(ChartStyle.self) private var style
+    @Environment(MondayHistory.self) private var history
+    @Environment(TouchFeed.self) private var touches
     let active: Bool
     var onQuick: (FibContract, CandlePeriod) -> Void
     @State private var candles = CandleStore()
     @State private var chooser = false
-    @State private var periods = false
+    @State private var settings = false
     @State private var follow = 0
 
-    static let choices: [CandlePeriod] = [.m1, .m5, .m15, .h1, .h4, .h12]
+    static let choices: [CandlePeriod] = [.m1, .m5, .m15, .h1, .h4, .h12, .d1]
+    static let pinned = ["BTC-USDT-SWAP", "ETH-USDT-SWAP"]
 
     var body: some View {
         GeometryReader { proxy in
-            let top = proxy.safeAreaInsets.top
+            let top = proxy.safeAreaInsets.top, bottom = proxy.safeAreaInsets.bottom
             ZStack(alignment: .top) {
-                chart(top: top).ignoresSafeArea()
-                VStack(spacing: 8) {
-                    HStack(alignment: .top) {
-                        coinButton
-                        Spacer(minLength: 8)
-                    }
+                chart(top: top, bottom: bottom).ignoresSafeArea()
+                VStack(alignment: .leading, spacing: 8) {
+                    coinStrip
+                    coinCard
                     Spacer(minLength: 0)
                     if fib.current == nil && fib.error != nil && candles.bars.isEmpty { offlineNote }
                     dock
                 }
-                .padding(.horizontal, 14)
-                .padding(.top, 6)
+                .padding(.horizontal, 12)
+                .padding(.top, 4)
                 .padding(.bottom, 78)
             }
         }
         .sheet(isPresented: $chooser) { FibChooser().presentationDetents([.large]).presentationDragIndicator(.visible) }
+        .sheet(isPresented: $settings) { ChartSettingsSheet().presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
         .task(id: active) {
-            guard active else { candles.stop(); return }
+            guard active else { candles.stopAndSave(); return }
             await fib.poll()
+        }
+        .task(id: "\(active)|\(session.connection?.token.hashValue ?? 0)") {
+            guard active, let connection = session.connection else { return }
+            await touches.watch(connection: connection, session: session)
+        }
+        .task(id: "\(fib.chartSymbol)|\(style.showHistory)|\(active)") {
+            guard active, style.showHistory else { return }
+            await history.load(fib.chartSymbol, connection: session.connection)
         }
         .onChange(of: chartKey) { _, _ in showCandles() }
         .onChange(of: active) { _, now in if now { showCandles() } }
@@ -54,121 +65,135 @@ struct FibView: View {
         candles.show(symbol: symbol, period: fib.period, connection: session.connection)
     }
 
-    private var decimals: Int {
-        if let tick = account.state?.instruments[fib.chartSymbol]?.tick { return Fmt.decimals(tick: tick) }
-        guard let row = fib.selected else { return 4 }
+    private func decimals(_ symbol: String) -> Int {
+        if let tick = account.state?.instruments[symbol]?.tick { return Fmt.decimals(tick: tick) }
+        guard let row = fib.current?.items.first(where: { $0.symbol == symbol }) else { return 4 }
         let places = [row.high, row.low].map { v -> Int in let t = String(v).split(separator: "."); return t.count > 1 ? t[1].count : 0 }.max() ?? 2
         return min(12, max(2, places))
     }
 
-    private var lastPrice: Double? { candles.bars.last?.close ?? fib.selected?.price }
+    private func price(_ symbol: String) -> Double? {
+        if symbol == fib.chartSymbol, let last = candles.bars.last?.close { return last }
+        if let q = account.state?.quotes[symbol], let v = Double(q.last) { return v }
+        return fib.current?.items.first { $0.symbol == symbol }?.price
+    }
+
+    /// Touches whose latest touch happened today (Beijing day).
+    private var todayRows: [FibContract] {
+        let today = Fmt.beijingDay(Date())
+        return fib.rows.filter { row in row.latestTouch.map { Fmt.beijingDay(Date(timeIntervalSince1970: $0.occurredMs / 1000)) == today } ?? false }
+    }
 
     // MARK: pieces
 
-    private func chart(top: CGFloat) -> some View {
-        let row = fib.selected
+    private func chart(top: CGFloat, bottom: CGFloat) -> some View {
+        let row = fib.selected, symbol = fib.chartSymbol
+        let past = style.showHistory ? (history.ranges[symbol] ?? []) : []
         return ZStack {
-            CandleChart(bars: candles.bars, generation: candles.generation, period: fib.period, decimals: decimals,
-                        range: row.flatMap { fib.range(for: $0) }, innerLines: fib.showInternal, averages: fib.showAverages, cloud: fib.showCloud,
-                        watermark: fib.chartSymbol.isEmpty ? nil : Fmt.coin(fib.chartSymbol) + "USDT", followToken: follow, wallpaper: true,
-                        insets: EdgeInsets(top: top + 58, leading: 0, bottom: 0, trailing: 0),
+            CandleChart(bars: candles.bars, generation: candles.generation, period: fib.period, decimals: decimals(symbol),
+                        range: row.flatMap { fib.range(for: $0) }, history: past, innerLines: fib.showInternal, averages: fib.showAverages,
+                        cloud: fib.showCloud, colors: style.colors,
+                        watermark: symbol.isEmpty ? nil : Fmt.coin(symbol) + "USDT", followToken: follow, wallpaper: true,
+                        topInset: top + 58, bottomOverlay: bottom + 78 + 50,
                         onNeedOlder: { candles.loadOlder() })
-            if candles.bars.isEmpty && !fib.chartSymbol.isEmpty {
+            if candles.bars.isEmpty && !symbol.isEmpty {
                 if candles.error == nil { ProgressView() } else { Text(candles.error ?? "").font(.footnote).foregroundStyle(Color.muted) }
             }
         }
     }
 
-    /// Coin capsule (tap to switch): logo, coin, live price; the dot marks this week's touched edge.
-    private var coinButton: some View {
-        Button { Haptics.open(); chooser = true } label: {
-            HStack(spacing: 8) {
-                if !fib.chartSymbol.isEmpty { CoinLogo(coin: Fmt.coin(fib.chartSymbol), size: 30) }
-                VStack(alignment: .leading, spacing: 0) {
-                    HStack(spacing: 3) {
-                        Text(fib.chartSymbol.isEmpty ? "选择币种" : Fmt.coin(fib.chartSymbol)).font(.system(size: 16, weight: .bold))
-                        Image(systemName: "chevron.down").font(.system(size: 10, weight: .bold)).foregroundStyle(Color.muted)
-                    }
-                    if let price = lastPrice {
-                        Text(price.formatted(.number.precision(.fractionLength(decimals)).grouping(.never)))
-                            .font(.system(size: 13, weight: .semibold).monospacedDigit())
-                            .foregroundStyle((candles.bars.last.map { $0.close >= $0.open } ?? true) ? ChartPalette.up : ChartPalette.down)
-                            .contentTransition(.numericText(value: price)).animation(.snappy, value: price)
-                    }
+    /// Web-mobile floating coin strip: today's touched coins scroll; BTC and ETH stay pinned at the right.
+    private var coinStrip: some View {
+        HStack(spacing: 0) {
+            ScrollView(.horizontal) {
+                let others = todayRows.filter { !Self.pinned.contains($0.symbol) }
+                HStack(spacing: 4) {
+                    ForEach(others) { row in stripChip(row.symbol, edge: row.latestTouch?.side) }
+                    if others.isEmpty { Text("今日暂无其他触价").font(.system(size: 12, weight: .medium)).foregroundStyle(Color.muted).padding(.horizontal, 10) }
                 }
-                if let touch = fib.selected?.latestTouch {
-                    Circle().fill(touch.side == .upper ? ChartPalette.upper : ChartPalette.lower).frame(width: 6, height: 6)
-                        .accessibilityLabel(touch.side == .upper ? "本周触及上沿 1.618" : "本周触及下沿 1.618")
-                }
+                .padding(.horizontal, 4)
             }
-            .foregroundStyle(Color.ink)
-            .padding(.leading, 6).padding(.trailing, 14).padding(.vertical, 6)
-            .frosted(Capsule())
+            .scrollIndicators(.hidden)
+            Divider().frame(height: 26).padding(.horizontal, 2)
+            HStack(spacing: 2) { ForEach(Self.pinned, id: \.self) { stripChip($0, edge: nil, compact: true) } }
+                .padding(.trailing, 4)
         }
-        .buttonStyle(CardPressStyle())
-        .accessibilityLabel("切换币种，当前 \(Fmt.coin(fib.chartSymbol))")
+        .frame(height: 48)
+        .frosted(RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 
-    /// Period chip at the bottom-left (owner Notion #76); the list opens upward. Custom drawn —
-    /// the system menu drew a grey halo on device.
-    private var periodChip: some View {
-        Button { Haptics.tap(); withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { periods.toggle() } } label: {
-            HStack(spacing: 3) {
-                Text(fib.period.rawValue).font(.system(size: 13, weight: .bold).monospacedDigit()).lineLimit(1)
-                Image(systemName: "chevron.up").font(.system(size: 8, weight: .bold)).rotationEffect(.degrees(periods ? 180 : 0))
+    private func stripChip(_ symbol: String, edge: Edge?, compact: Bool = false) -> some View {
+        let on = symbol == fib.chartSymbol, coin = Fmt.coin(symbol)
+        return Button { Haptics.select(); withAnimation(.snappy) { fib.focus(symbol) } } label: {
+            HStack(spacing: 5) {
+                CoinLogo(coin: coin, size: 20)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(coin).font(.system(size: 12, weight: .bold)).foregroundStyle(Color.ink).lineLimit(1)
+                    if !compact {
+                        Text(price(symbol).map { $0.formatted(.number.precision(.significantDigits(1...5)).grouping(.never)) } ?? "—")
+                            .font(.system(size: 10, weight: .medium).monospacedDigit()).foregroundStyle(edge == .upper ? ChartPalette.down : ChartPalette.up)
+                    }
+                }
             }
-            .fixedSize()
-            .foregroundStyle(Color.white)
-            .padding(.horizontal, 10).frame(height: 34)
-            .background(Color.accentColor, in: .capsule)
-            .contentShape(.capsule)
+            .padding(.horizontal, 7).frame(height: 40)
+            .background(on ? Color.accentColor.opacity(0.12) : .clear, in: .rect(cornerRadius: 16))
+            .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("K线周期 \(fib.period.rawValue)")
+        .accessibilityLabel("查看 \(coin)")
     }
 
-    private var periodList: some View {
-        @Bindable var fib = fib
-        return VStack(spacing: 2) {
-            ForEach(Self.choices.reversed()) { p in
-                Button {
-                    Haptics.select(); fib.period = p
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { periods = false }
-                } label: {
-                    Text(p.rawValue).font(.system(size: 14, weight: .semibold).monospacedDigit())
-                        .foregroundStyle(fib.period == p ? Color.white : Color.ink)
-                        .frame(width: 56, height: 34)
-                        .background(fib.period == p ? Color.accentColor : .clear, in: .capsule)
-                        .contentShape(.capsule)
+    /// Floating coin card (tap → 最新触价 list): logo, coin, live price and this week's touch.
+    private var coinCard: some View {
+        let symbol = fib.chartSymbol, touch = fib.selected?.latestTouch
+        return Button { Haptics.open(); chooser = true } label: {
+            HStack(spacing: 9) {
+                if !symbol.isEmpty { CoinLogo(coin: Fmt.coin(symbol), size: 30) }
+                VStack(alignment: .leading, spacing: 1) {
+                    HStack(spacing: 3) {
+                        Text(symbol.isEmpty ? "选择币种" : Fmt.coin(symbol)).font(.system(size: 17, weight: .bold)).foregroundStyle(Color.ink)
+                        Text("/ USDT").font(.system(size: 11, weight: .medium)).foregroundStyle(Color.muted)
+                        Image(systemName: "chevron.down").font(.system(size: 9, weight: .bold)).foregroundStyle(Color.muted)
+                    }
+                    if let touch {
+                        Text("\(touch.side == .upper ? "上沿" : "下沿") · \(FibView.touchTime(touch.occurredMs))")
+                            .font(.system(size: 11, weight: .medium)).foregroundStyle(touch.side == .upper ? ChartPalette.down : ChartPalette.up)
+                    } else {
+                        Text("本周未触价").font(.system(size: 11, weight: .medium)).foregroundStyle(Color.muted)
+                    }
                 }
-                .buttonStyle(.plain)
+                if let p = price(symbol) {
+                    Text(p.formatted(.number.precision(.fractionLength(decimals(symbol))).grouping(.never)))
+                        .font(.system(size: 16, weight: .bold).monospacedDigit())
+                        .foregroundStyle((candles.bars.last.map { $0.close >= $0.open } ?? true) ? ChartPalette.up : ChartPalette.down)
+                        .contentTransition(.numericText(value: p)).animation(.snappy, value: p)
+                        .padding(.leading, 4)
+                }
             }
+            .padding(.leading, 8).padding(.trailing, 14).padding(.vertical, 8)
+            .frosted(RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
-        .padding(4)
-        .frosted(RoundedRectangle(cornerRadius: 20, style: .continuous), veil: 0.85)
-        .transition(.scale(scale: 0.8, anchor: .bottomLeading).combined(with: .opacity))
+        .buttonStyle(CardPressStyle())
+        .accessibilityLabel("最新触价列表，当前 \(Fmt.coin(symbol))")
     }
 
-    /// One slim frosted bar: layer chips, follow, and a small 开单 pill.
+    /// One slim bar: period chips, chart settings, follow, and a small 开单 pill.
     private var dock: some View {
         @Bindable var fib = fib
         let locked = account.pendingEntry != nil || account.closeAttempt != nil || session.connection == nil
         let row = fib.selected
-        return HStack(spacing: 4) {
-            periodChip
-            ToggleChip(title: "内部线", on: $fib.showInternal)
-            ToggleChip(title: "六均线", on: $fib.showAverages)
-            ToggleChip(title: "云带", on: $fib.showCloud)
-            Spacer(minLength: 0)
-            Button { Haptics.tap(); follow += 1 } label: {
-                Image(systemName: "arrow.right.to.line").font(.system(size: 13, weight: .bold)).foregroundStyle(Color.ink)
-                    .frame(width: 30, height: 34).contentShape(.circle)
+        return HStack(spacing: 2) {
+            PeriodChips(selection: $fib.period)
+            Button { Haptics.open(); settings = true } label: {
+                Image(systemName: "slider.horizontal.3").font(.system(size: 14, weight: .bold)).foregroundStyle(Color.ink).frame(width: 32, height: 34).contentShape(.rect)
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("跟随最新")
+            .buttonStyle(.plain).accessibilityLabel("图表设置")
+            Button { Haptics.tap(); follow += 1 } label: {
+                Image(systemName: "arrow.right.to.line").font(.system(size: 13, weight: .bold)).foregroundStyle(Color.ink).frame(width: 30, height: 34).contentShape(.rect)
+            }
+            .buttonStyle(.plain).accessibilityLabel("跟随最新")
             Button { if let row { Haptics.open(); onQuick(row, fib.period) } } label: {
-                HStack(spacing: 3) { Image(systemName: "bolt.fill"); Text("开单") }
-                    .font(.system(size: 13, weight: .bold)).lineLimit(1).fixedSize()
+                HStack(spacing: 3) { Image(systemName: "bolt.fill"); Text("开单") }.font(.system(size: 13, weight: .bold)).lineLimit(1).fixedSize()
             }
             .buttonStyle(.pill(.solid(.accentColor), height: 34))
             .disabled(locked || row == nil || !fib.fresh || !fib.live)
@@ -176,9 +201,6 @@ struct FibView: View {
         }
         .padding(5)
         .frosted(Capsule())
-        .overlay(alignment: .bottomLeading) {
-            if periods { periodList.offset(x: 2, y: -52) }
-        }
     }
 
     private var offlineNote: some View {
@@ -192,6 +214,34 @@ struct FibView: View {
     static func touchTime(_ ms: Double) -> String {
         let f = DateFormatter(); f.timeZone = TimeZone(identifier: "Asia/Shanghai"); f.dateFormat = "MM/dd HH:mm"
         return f.string(from: Date(timeIntervalSince1970: ms / 1000))
+    }
+}
+
+/// Horizontally scrolling period chips that keep the selected period in view (1.618 and 合约 docks).
+struct PeriodChips: View {
+    @Binding var selection: CandlePeriod
+    var body: some View {
+        ScrollViewReader { reader in
+            ScrollView(.horizontal) {
+                HStack(spacing: 1) {
+                    ForEach(FibView.choices) { p in
+                        Button { Haptics.select(); selection = p } label: {
+                            Text(p.rawValue).font(.system(size: 13, weight: .bold).monospacedDigit())
+                                .foregroundStyle(selection == p ? Color.white : Color.ink)
+                                .padding(.horizontal, 8).frame(height: 34)
+                                .background(selection == p ? Color.accentColor : .clear, in: .capsule)
+                                .contentShape(.capsule)
+                        }
+                        .buttonStyle(.plain)
+                        .id(p)
+                        .accessibilityAddTraits(selection == p ? .isSelected : [])
+                    }
+                }
+            }
+            .scrollIndicators(.hidden)
+            .onAppear { reader.scrollTo(selection, anchor: .center) }
+            .onChange(of: selection) { _, now in withAnimation(.snappy) { reader.scrollTo(now, anchor: .center) } }
+        }
     }
 }
 
@@ -214,5 +264,41 @@ struct ToggleChip: View {
 struct TrailingIcon: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 3) { configuration.title; configuration.icon }
+    }
+}
+
+/// 图表设置: layers and candle colours (presets or custom), shared by 1.618 and 合约.
+struct ChartSettingsSheet: View {
+    @Environment(FibStore.self) private var fib
+    @Environment(ChartStyle.self) private var style
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        @Bindable var fib = fib
+        @Bindable var style = style
+        NavigationStack {
+            Form {
+                Section("图层") {
+                    Toggle("云带", isOn: $fib.showCloud)
+                    Toggle("六均线", isOn: $fib.showAverages)
+                    Toggle("内部线 0.705 · 0.618 · 0.5", isOn: $fib.showInternal)
+                    Toggle("历史周区间", isOn: $style.showHistory)
+                }
+                Section("K 线配色") {
+                    SoftSegment(selection: $style.palette, options: ChartStyle.Palette.allCases.map { ($0, $0.title) })
+                        .listRowBackground(Color.clear).listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+                    if style.palette == .custom {
+                        ColorPicker("上涨", selection: $style.customUp, supportsOpacity: false)
+                        ColorPicker("下跌", selection: $style.customDown, supportsOpacity: false)
+                    }
+                    Toggle("周一 K 线高亮", isOn: $style.mondayHighlight)
+                    if style.mondayHighlight { ColorPicker("周一颜色", selection: $style.mondayColor, supportsOpacity: false) }
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .background(Color.canvas)
+            .navigationTitle("图表设置").navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { CloseButton { dismiss() } }.sharedBackgroundVisibility(.hidden) }
+            .onChange(of: style.palette) { _, _ in Haptics.select() }
+        }
     }
 }

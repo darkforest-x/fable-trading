@@ -29,7 +29,9 @@ final class CandleStore {
         guard symbol != self.symbol || period != self.period || connection != self.connection || runner == nil else { return }
         stop()
         self.symbol = symbol; self.period = period; self.connection = connection
-        raw = []; historyEnd = false; error = nil; generation += 1
+        historyEnd = false; error = nil; generation += 1
+        // Draw the cached series at once (owner 2026-11-08 “启动加载 K 线很慢”), then refresh it.
+        raw = symbol.isEmpty ? [] : CandleCache.read(symbol: symbol, period: period.source)
         guard !symbol.isEmpty else { return }
         let generation = generation
         runner = Task { await self.run(generation) }
@@ -49,7 +51,10 @@ final class CandleStore {
         do {
             let first = try await page(before: nil)
             guard current(generation) else { return }
+            // A cached series older than the fresh page's first bar may have a gap: start clean then.
+            if let oldest = first.first?.time, let cachedLast = raw.last?.time, cachedLast < oldest { raw = [] }
             raw = Candle.merge(raw, first); error = nil
+            CandleCache.write(symbol: symbol, period: period.source, bars: raw)
         } catch {
             if current(generation) { self.error = "K线暂不可用" }
         }
@@ -67,6 +72,7 @@ final class CandleStore {
             guard current(generation), !streaming else { continue }
             if let latest = try? await page(before: nil), current(generation) {
                 raw = Candle.merge(raw, latest); error = nil
+                CandleCache.write(symbol: symbol, period: period.source, bars: raw)
             }
         }
     }
@@ -128,8 +134,15 @@ final class CandleStore {
         }
     }
 
+    func stopAndSave() { if !symbol.isEmpty { CandleCache.write(symbol: symbol, period: period.source, bars: raw) }; stop() }
+
     private func page(before: Int?) async throws -> [Candle] {
-        var query = [URLQueryItem(name: "symbol", value: symbol), URLQueryItem(name: "period", value: period.source.rawValue)]
+        try await Self.page(symbol: symbol, period: period.source, before: before, connection: connection)
+    }
+
+    /// One page of OKX rows: service relay first, public OKX only against the production service.
+    static func page(symbol: String, period: CandlePeriod, before: Int?, connection: Connection?) async throws -> [Candle] {
+        var query = [URLQueryItem(name: "symbol", value: symbol), URLQueryItem(name: "period", value: period.rawValue)]
         if let before { query.append(URLQueryItem(name: "before", value: String(before))) }
         if let connection, let value: CandlePage = try? await API.get("/v1/market/candles", query: query, connection: connection) {
             return Candle.parse(value.data)
@@ -138,11 +151,45 @@ final class CandleStore {
         // must never mix real market prices into synthetic candles. `after` pages backwards in OKX's naming.
         guard AppConfig.serviceURL == AppConfig.productionURL else { throw APIError(status: 0, message: "K线暂不可用") }
         var components = URLComponents(url: AppConfig.okxRestURL.appendingPathComponent(before == nil ? "api/v5/market/candles" : "api/v5/market/history-candles"), resolvingAgainstBaseURL: false)!
-        components.queryItems = [URLQueryItem(name: "instId", value: symbol), URLQueryItem(name: "bar", value: period.source.rawValue), URLQueryItem(name: "limit", value: "300")]
+        components.queryItems = [URLQueryItem(name: "instId", value: symbol), URLQueryItem(name: "bar", value: period.rawValue), URLQueryItem(name: "limit", value: "300")]
             + (before.map { [URLQueryItem(name: "after", value: String($0 * 1000))] } ?? [])
         var request = URLRequest(url: components.url!)
         request.timeoutInterval = 9
         let (data, _) = try await URLSession.shared.data(for: request)
         return Candle.parse(try JSONDecoder().decode(CandlePage.self, from: data).data)
+    }
+}
+
+/// Native on-disk candle cache (Caches/candles): the last 800 bars per service host × symbol × period,
+/// written off the main thread. Keyed by host so fixture and production series never mix.
+enum CandleCache {
+    private static let queue = DispatchQueue(label: "candle-cache", qos: .utility)
+    private static var directory: URL {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("candles", isDirectory: true)
+    }
+    private static func url(_ symbol: String, _ period: CandlePeriod) -> URL {
+        let host = (AppConfig.serviceURL.host ?? "service") + "-" + String(AppConfig.serviceURL.port ?? 443)
+        return directory.appendingPathComponent("\(host)_\(symbol)_\(period.rawValue).bin")
+    }
+
+    static func read(symbol: String, period: CandlePeriod) -> [Candle] {
+        guard let data = try? Data(contentsOf: url(symbol, period)),
+              let rows = try? PropertyListDecoder().decode([[Double]].self, from: data) else { return [] }
+        let bars = rows.compactMap { r -> Candle? in
+            r.count == 7 ? Candle(time: r[0], open: r[1], high: r[2], low: r[3], close: r[4], volume: r[5], confirmed: r[6] == 1) : nil
+        }
+        // A week-old series is not worth drawing.
+        guard let last = bars.last, Date().timeIntervalSince1970 - last.time < 7 * 86_400 else { return [] }
+        return bars
+    }
+
+    static func write(symbol: String, period: CandlePeriod, bars: [Candle]) {
+        let rows = bars.suffix(800).map { [$0.time, $0.open, $0.high, $0.low, $0.close, $0.volume, $0.confirmed ? 1 : 0] }
+        let target = url(symbol, period)
+        queue.async {
+            try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            let encoder = PropertyListEncoder(); encoder.outputFormat = .binary
+            if let data = try? encoder.encode(Array(rows)) { try? data.write(to: target, options: .atomic) }
+        }
     }
 }

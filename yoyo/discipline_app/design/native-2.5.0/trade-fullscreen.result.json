@@ -1,0 +1,522 @@
+{
+ "id": 3,
+ "jsonrpc": "2.0",
+ "result": {
+  "content": [
+   {
+    "text": "{\"projectId\":\"8978791379095391159\",\"sessionId\":\"4832612516137849153\",\"outputComponents\":[{\"designSystem\":{\"name\":\"assets/aef5362842b249d59480b9bb7c0d9d1b\",\"designSystem\":{\"displayName\":\"Luminous Pure Glass\",\"styleGuidelines\":\"## Brand & Style\\n\\nThis design system expresses the discipline and clarity of an elite financial interface through an ultra-refined \\\"iOS 26\\\" optical glass aesthetic. Designed specifically for full-screen immersive chart environments, it strips away opaque containers, harsh divider lines, and visual friction in favor of crystalline floating surfaces.\\n\\nThe emotional tone is calm, precise, and authoritative. It combines pristine light-mode minimalism with advanced optical glassmorphism:\\n- **Optical Float:** Interactive components hover effortlessly above continuous data visualizations without breaking analytical focus.\\n- **Specular Precision:** Surfaces evoke chemically strengthened glass with micro-highlight rim lighting and deep Gaussian refraction.\\n- **Data First:** The full-canvas candlestick chart serves as the live substrate; controls and readouts feel like weightless precision instruments resting on an illuminated optical plate.\\n\\n## Layout & Spacing\\n\\nEngineered specifically around the target 402x874pt iOS mobile viewport:\\n\\n- **Viewport Architecture:** Full-bleed background layer dedicated to interactive chart graphics. Content floats above with safe areas reserved for dynamic island (`54pt` top) and home indicator (`34pt` bottom).\\n- **Horizontal Margins:** Fixed `16px` (`margin`) screen edges to anchor floating pill docks, action buttons, and sheet panels.\\n- **Component Flow:** Vertical rhythm follows micro-increments (4px / 8px / 12px) to maximize available canvas real estate for multi-timeframe charts.\\n- **Dock & Island Elevation:** Floating trading triggers and time-interval selectors maintain `12px` clearance from edge boundaries, ensuring gesture safety without blocking underlying data trends.\\n\\n## Elevation & Depth\\n\\nVisual hierarchy uses physical optical dispersion rather than drop shadows or opaque borders:\\n\\n- **Surface Glass Recipe:** Base layer `rgba(255, 255, 255, 0.72)` supported by high-radius blur filter `backdrop-filter: blur(28px) saturate(190%)`.\\n- **Specular Rim Rim Lighting:** Instead of boundary strokes, surfaces implement an inset rim glow: `box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), inset 0 -0.5px 0.5px 0 rgba(255, 255, 255, 0.3)`.\\n- **Luminous Soft Shadows:** Diffusion without gray dirtiness. Shadows are ultra-diffuse and tinted by ambient light: `box-shadow: 0 12px 32px -4px rgba(17, 24, 39, 0.06), 0 4px 16px -2px rgba(10, 132, 255, 0.04)`.\\n- **Layer Stacking Hierarchy:**\\n  - *Tier 0 (Substrate):* Clean white canvas with interactive candle/vector series (`#FFFFFF` background).\\n  - *Tier 1 (Surface Glass):* Floating intervals, toolbar pill indicators, and instrument chips (`0.72` opacity).\\n  - *Tier 2 (Interactive Floating Docks):* Execution dock and quick-trade panels with active specular reflection (`0.82` opacity).\\n  - *Tier 3 (Modals & Precision Sheets):* Deep blur frosted overlays with intensified top highlight rings (`0.88` opacity).\\n\\n## Components\\n\\n### Floating Docks & Navigation\\n- **Trading Dock:** Anchored `16px` above the bottom safe area. Encased in an ultra-pure glass pill housing Buy/Sell action triggers and lot-size steppers.\\n- **Timeframe Selector:** Floating horizontal pill centered at the top sub-header. Active interval displays in `#0A84FF` with a soft white glow capsule underneath; inactive tabs use `#6B7280`.\\n\\n### Action Buttons\\n- **Primary Execution (Long):** Gradient-free high-luminance Emerald Jade (`#169873`) with white typographic ink, soft specular rim, and jade halo shadow (`0 8px 24px -2px rgba(22, 152, 115, 0.35)`).\\n- **Primary Execution (Short):** Intense Crimson (`#D7355D`) with white typographic ink and crimson halo shadow (`0 8px 24px -2px rgba(215, 53, 93, 0.35)`).\\n- **Secondary / Utility Controls:** Translucent frosted white pills with `#111827` glyphs and white specular inset strokes.\\n\\n### Candlestick Elements & Charts\\n- **Bullish Candle:** Solid `#169873` body and wicks.\\n- **Bearish Candle:** Solid `#D7355D` body and wicks.\\n- **Crosshair Reticle:** 1px dotted `#0A84FF` with floating glass coordinate badges at axes.\\n\\n### Metric Chips & Data Displays\\n- **Price Ticker Badges:** JetBrains Mono numbers within compact frosted pills. Change metrics (+/-) tint the surface lightly with `rgba(22, 152, 115, 0.08)` or `rgba(215, 53, 93, 0.08)`.\\n- **Order Book Depth Rows:** Transparent horizontal bars rendered as soft tonal washes behind tabular prices without borders.\\n\\n### Input Fields & Steppers\\n- Segmented numeric inputs with pure glass interiors, no border lines, and floating plus/minus circular actuators.\",\"theme\":{\"colorMode\":\"LIGHT\",\"font\":\"SPACE_GROTESK\",\"roundness\":\"ROUND_FULL\",\"customColor\":\"#0a84ff\",\"headlineFont\":\"SPACE_GROTESK\",\"bodyFont\":\"MANROPE\",\"labelFont\":\"JETBRAINS_MONO\",\"namedColors\":{\"surface_container\":\"#e9edff\",\"on_surface\":\"#141b2b\",\"surface_container_highest\":\"#dce2f7\",\"surface_container_low\":\"#f1f3ff\",\"secondary_container\":\"#dce2f3\",\"surface_container_high\":\"#e1e8fd\",\"secondary\":\"#585f6c\",\"surface_dim\":\"#d3daef\",\"error\":\"#ba1a1a\",\"inverse_surface\":\"#293040\",\"outline_variant\":\"#c0c6d6\",\"secondary_fixed\":\"#dce2f3\",\"on_secondary\":\"#ffffff\",\"outline\":\"#717786\",\"on_secondary_fixed_variant\":\"#404754\",\"tertiary_fixed_dim\":\"#ffb691\",\"tertiary\":\"#9a4100\",\"on_tertiary_fixed_variant\":\"#793100\",\"on_tertiary\":\"#ffffff\",\"on_tertiary_fixed\":\"#341100\",\"background\":\"#f9f9ff\",\"on_secondary_container\":\"#5e6572\",\"secondary_fixed_dim\":\"#c0c7d6\",\"on_tertiary_container\":\"#fffbff\",\"surface_tint\":\"#005db8\",\"surface\":\"#f9f9ff\",\"on_error\":\"#ffffff\",\"primary\":\"#005ab3\",\"primary_fixed\":\"#d6e3ff\",\"on_primary_fixed_variant\":\"#00468d\",\"on_background\":\"#141b2b\",\"surface_container_lowest\":\"#ffffff\",\"on_primary_container\":\"#fefcff\",\"error_container\":\"#ffdad6\",\"on_surface_variant\":\"#414754\",\"on_error_container\":\"#93000a\",\"on_secondary_fixed\":\"#151c27\",\"on_primary\":\"#ffffff\",\"tertiary_fixed\":\"#ffdbcb\",\"on_primary_fixed\":\"#001b3e\",\"primary_container\":\"#0073e0\",\"primary_fixed_dim\":\"#aac7ff\",\"surface_bright\":\"#f9f9ff\",\"surface_variant\":\"#dce2f7\",\"inverse_primary\":\"#aac7ff\",\"tertiary_container\":\"#c25300\",\"inverse_on_surface\":\"#edf0ff\"},\"designMd\":\"---\\nname: Luminous Pure Glass\\ncolors:\\n  surface: '#f9f9ff'\\n  surface-dim: '#d3daef'\\n  surface-bright: '#f9f9ff'\\n  surface-container-lowest: '#ffffff'\\n  surface-container-low: '#f1f3ff'\\n  surface-container: '#e9edff'\\n  surface-container-high: '#e1e8fd'\\n  surface-container-highest: '#dce2f7'\\n  on-surface: '#141b2b'\\n  on-surface-variant: '#414754'\\n  inverse-surface: '#293040'\\n  inverse-on-surface: '#edf0ff'\\n  outline: '#717786'\\n  outline-variant: '#c0c6d6'\\n  surface-tint: '#005db8'\\n  primary: '#005ab3'\\n  on-primary: '#ffffff'\\n  primary-container: '#0073e0'\\n  on-primary-container: '#fefcff'\\n  inverse-primary: '#aac7ff'\\n  secondary: '#585f6c'\\n  on-secondary: '#ffffff'\\n  secondary-container: '#dce2f3'\\n  on-secondary-container: '#5e6572'\\n  tertiary: '#9a4100'\\n  on-tertiary: '#ffffff'\\n  tertiary-container: '#c25300'\\n  on-tertiary-container: '#fffbff'\\n  error: '#ba1a1a'\\n  on-error: '#ffffff'\\n  error-container: '#ffdad6'\\n  on-error-container: '#93000a'\\n  primary-fixed: '#d6e3ff'\\n  primary-fixed-dim: '#aac7ff'\\n  on-primary-fixed: '#001b3e'\\n  on-primary-fixed-variant: '#00468d'\\n  secondary-fixed: '#dce2f3'\\n  secondary-fixed-dim: '#c0c7d6'\\n  on-secondary-fixed: '#151c27'\\n  on-secondary-fixed-variant: '#404754'\\n  tertiary-fixed: '#ffdbcb'\\n  tertiary-fixed-dim: '#ffb691'\\n  on-tertiary-fixed: '#341100'\\n  on-tertiary-fixed-variant: '#793100'\\n  background: '#f9f9ff'\\n  on-background: '#141b2b'\\n  surface-variant: '#dce2f7'\\ntypography:\\n  headline-xl:\\n    fontFamily: Space Grotesk\\n    fontSize: 32px\\n    fontWeight: '700'\\n    lineHeight: 38px\\n    letterSpacing: -0.03em\\n  headline-lg:\\n    fontFamily: Space Grotesk\\n    fontSize: 24px\\n    fontWeight: '600'\\n    lineHeight: 30px\\n    letterSpacing: -0.02em\\n  headline-md:\\n    fontFamily: Space Grotesk\\n    fontSize: 20px\\n    fontWeight: '600'\\n    lineHeight: 26px\\n    letterSpacing: -0.015em\\n  body-lg:\\n    fontFamily: Manrope\\n    fontSize: 17px\\n    fontWeight: '500'\\n    lineHeight: 24px\\n    letterSpacing: -0.01em\\n  body-md:\\n    fontFamily: Manrope\\n    fontSize: 15px\\n    fontWeight: '400'\\n    lineHeight: 22px\\n    letterSpacing: -0.005em\\n  body-sm:\\n    fontFamily: Manrope\\n    fontSize: 13px\\n    fontWeight: '400'\\n    lineHeight: 18px\\n    letterSpacing: 0em\\n  mono-price-lg:\\n    fontFamily: JetBrains Mono\\n    fontSize: 22px\\n    fontWeight: '600'\\n    lineHeight: 26px\\n    letterSpacing: -0.02em\\n  mono-price-md:\\n    fontFamily: JetBrains Mono\\n    fontSize: 15px\\n    fontWeight: '500'\\n    lineHeight: 20px\\n    letterSpacing: -0.01em\\n  label-caps:\\n    fontFamily: Manrope\\n    fontSize: 11px\\n    fontWeight: '600'\\n    lineHeight: 14px\\n    letterSpacing: 0.06em\\n  label-mono-sm:\\n    fontFamily: JetBrains Mono\\n    fontSize: 10px\\n    fontWeight: '400'\\n    lineHeight: 12px\\n    letterSpacing: 0.02em\\nrounded:\\n  sm: 0.5rem\\n  DEFAULT: 1rem\\n  md: 1.5rem\\n  lg: 2rem\\n  xl: 3rem\\n  full: 9999px\\nspacing:\\n  gutter: 0.75rem\\n  margin: 1rem\\n  space-xs: 0.25rem\\n  space-sm: 0.5rem\\n  space-md: 0.75rem\\n  space-lg: 1rem\\n  space-xl: 1.5rem\\n---\\n\\n## Brand & Style\\n\\nThis design system expresses the discipline and clarity of an elite financial interface through an ultra-refined \\\"iOS 26\\\" optical glass aesthetic. Designed specifically for full-screen immersive chart environments, it strips away opaque containers, harsh divider lines, and visual friction in favor of crystalline floating surfaces.\\n\\nThe emotional tone is calm, precise, and authoritative. It combines pristine light-mode minimalism with advanced optical glassmorphism:\\n- **Optical Float:** Interactive components hover effortlessly above continuous data visualizations without breaking analytical focus.\\n- **Specular Precision:** Surfaces evoke chemically strengthened glass with micro-highlight rim lighting and deep Gaussian refraction.\\n- **Data First:** The full-canvas candlestick chart serves as the live substrate; controls and readouts feel like weightless precision instruments resting on an illuminated optical plate.\\n\\n## Colors\\n\\nThe palette is engineered for clinical legibility and immediate signal recognition over luminous, high-key backgrounds:\\n\\n- **System Accent (`#0A84FF`):** iOS Electric Blue reserved for active states, selected chart tools, primary execution buttons, and temporal focus indicators.\\n- **Market Signal - Long (`#169873`):** Pine Jade green. Used for bullish candles, profit matrices, and buy confirmations. Optimized for contrast against translucent white backdrops without eye fatigue.\\n- **Market Signal - Short (`#D7355D`):** Crimson Raspberry red. Used for bearish candles, drawdown warnings, and sell confirmations.\\n- **Primary Ink (`#111827`):** Near-black slate for prices, primary figures, and active headings.\\n- **Secondary Ink (`#6B7280`):** Neutral gray for metrics labels, order book depths, and axis timestamps.\\n- **Glass Substrate:** `rgba(255, 255, 255, 0.72)` base fill combined with `rgba(255, 255, 255, 0.95)` inner specular reflection borders. Dark borders, heavy stroke outlines, and opaque grays are strictly prohibited.\\n\\n## Typography\\n\\nTypography balances typographic precision with rapid numeric parsing:\\n- **Headlines (`Space Grotesk`):** Delivers clean geometry, crisp apexes, and structural tension suited for trading instrument names and core navigation modals.\\n- **Body & Controls (`Manrope`):** Smooth, open apertures provide optimal legibility at compact iOS sizes without geometric clutter.\\n- **Market Data & Figures (`JetBrains Mono`):** Fixed-width tabular metrics for real-time tickers, bid/ask spreads, chart cursor readouts, and execution sizes, preventing optical jitter during price updates.\\n\\n## Layout & Spacing\\n\\nEngineered specifically around the target 402x874pt iOS mobile viewport:\\n\\n- **Viewport Architecture:** Full-bleed background layer dedicated to interactive chart graphics. Content floats above with safe areas reserved for dynamic island (`54pt` top) and home indicator (`34pt` bottom).\\n- **Horizontal Margins:** Fixed `16px` (`margin`) screen edges to anchor floating pill docks, action buttons, and sheet panels.\\n- **Component Flow:** Vertical rhythm follows micro-increments (4px / 8px / 12px) to maximize available canvas real estate for multi-timeframe charts.\\n- **Dock & Island Elevation:** Floating trading triggers and time-interval selectors maintain `12px` clearance from edge boundaries, ensuring gesture safety without blocking underlying data trends.\\n\\n## Elevation & Depth\\n\\nVisual hierarchy uses physical optical dispersion rather than drop shadows or opaque borders:\\n\\n- **Surface Glass Recipe:** Base layer `rgba(255, 255, 255, 0.72)` supported by high-radius blur filter `backdrop-filter: blur(28px) saturate(190%)`.\\n- **Specular Rim Rim Lighting:** Instead of boundary strokes, surfaces implement an inset rim glow: `box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), inset 0 -0.5px 0.5px 0 rgba(255, 255, 255, 0.3)`.\\n- **Luminous Soft Shadows:** Diffusion without gray dirtiness. Shadows are ultra-diffuse and tinted by ambient light: `box-shadow: 0 12px 32px -4px rgba(17, 24, 39, 0.06), 0 4px 16px -2px rgba(10, 132, 255, 0.04)`.\\n- **Layer Stacking Hierarchy:**\\n  - *Tier 0 (Substrate):* Clean white canvas with interactive candle/vector series (`#FFFFFF` background).\\n  - *Tier 1 (Surface Glass):* Floating intervals, toolbar pill indicators, and instrument chips (`0.72` opacity).\\n  - *Tier 2 (Interactive Floating Docks):* Execution dock and quick-trade panels with active specular reflection (`0.82` opacity).\\n  - *Tier 3 (Modals & Precision Sheets):* Deep blur frosted overlays with intensified top highlight rings (`0.88` opacity).\\n\\n## Shapes\\n\\nThe interface embraces organic fluid geometry inspired by continuous curvature (squircle / continuous corner smoothing):\\n\\n- **Continuous Capsule Form:** Buttons, status badges, indicator switchers, and floating parameter pills use full pill-radius shaping (`rounded-full`).\\n- **Sheet and Dock Panels:** Floating trays and bottom cards utilize `rounded-3xl` (28pt-32pt) with smoothed corners that mirror iOS native chassis corners.\\n- **Compact Chips:** Input steppers and quick-interval selectors use high pill geometry to maintain a soft, tactile, touch-friendly presence.\\n\\n## Components\\n\\n### Floating Docks & Navigation\\n- **Trading Dock:** Anchored `16px` above the bottom safe area. Encased in an ultra-pure glass pill housing Buy/Sell action triggers and lot-size steppers.\\n- **Timeframe Selector:** Floating horizontal pill centered at the top sub-header. Active interval displays in `#0A84FF` with a soft white glow capsule underneath; inactive tabs use `#6B7280`.\\n\\n### Action Buttons\\n- **Primary Execution (Long):** Gradient-free high-luminance Emerald Jade (`#169873`) with white typographic ink, soft specular rim, and jade halo shadow (`0 8px 24px -2px rgba(22, 152, 115, 0.35)`).\\n- **Primary Execution (Short):** Intense Crimson (`#D7355D`) with white typographic ink and crimson halo shadow (`0 8px 24px -2px rgba(215, 53, 93, 0.35)`).\\n- **Secondary / Utility Controls:** Translucent frosted white pills with `#111827` glyphs and white specular inset strokes.\\n\\n### Candlestick Elements & Charts\\n- **Bullish Candle:** Solid `#169873` body and wicks.\\n- **Bearish Candle:** Solid `#D7355D` body and wicks.\\n- **Crosshair Reticle:** 1px dotted `#0A84FF` with floating glass coordinate badges at axes.\\n\\n### Metric Chips & Data Displays\\n- **Price Ticker Badges:** JetBrains Mono numbers within compact frosted pills. Change metrics (+/-) tint the surface lightly with `rgba(22, 152, 115, 0.08)` or `rgba(215, 53, 93, 0.08)`.\\n- **Order Book Depth Rows:** Transparent horizontal bars rendered as soft tonal washes behind tabular prices without borders.\\n\\n### Input Fields & Steppers\\n- Segmented numeric inputs with pure glass interiors, no border lines, and floating plus/minus circular actuators.\",\"colorVariant\":\"FIDELITY\",\"overridePrimaryColor\":\"#0a84ff\",\"overrideSecondaryColor\":\"#6b7280\",\"overrideNeutralColor\":\"#111827\",\"spacingScale\":2,\"typography\":{\"mono-price-lg\":{\"fontFamily\":\"JetBrains Mono\",\"fontSize\":\"22px\",\"fontWeight\":\"600\",\"lineHeight\":\"26px\",\"letterSpacing\":\"-0.02em\"},\"label-caps\":{\"fontFamily\":\"Manrope\",\"fontSize\":\"11px\",\"fontWeight\":\"600\",\"lineHeight\":\"14px\",\"letterSpacing\":\"0.06em\"},\"body-lg\":{\"fontFamily\":\"Manrope\",\"fontSize\":\"17px\",\"fontWeight\":\"500\",\"lineHeight\":\"24px\",\"letterSpacing\":\"-0.01em\"},\"headline-lg\":{\"fontFamily\":\"Space Grotesk\",\"fontSize\":\"24px\",\"fontWeight\":\"600\",\"lineHeight\":\"30px\",\"letterSpacing\":\"-0.02em\"},\"label-mono-sm\":{\"fontFamily\":\"JetBrains Mono\",\"fontSize\":\"10px\",\"fontWeight\":\"400\",\"lineHeight\":\"12px\",\"letterSpacing\":\"0.02em\"},\"headline-md\":{\"fontFamily\":\"Space Grotesk\",\"fontSize\":\"20px\",\"fontWeight\":\"600\",\"lineHeight\":\"26px\",\"letterSpacing\":\"-0.015em\"},\"body-md\":{\"fontFamily\":\"Manrope\",\"fontSize\":\"15px\",\"fontWeight\":\"400\",\"lineHeight\":\"22px\",\"letterSpacing\":\"-0.005em\"},\"mono-price-md\":{\"fontFamily\":\"JetBrains Mono\",\"fontSize\":\"15px\",\"fontWeight\":\"500\",\"lineHeight\":\"20px\",\"letterSpacing\":\"-0.01em\"},\"headline-xl\":{\"fontFamily\":\"Space Grotesk\",\"fontSize\":\"32px\",\"fontWeight\":\"700\",\"lineHeight\":\"38px\",\"letterSpacing\":\"-0.03em\"},\"body-sm\":{\"fontFamily\":\"Manrope\",\"fontSize\":\"13px\",\"fontWeight\":\"400\",\"lineHeight\":\"18px\",\"letterSpacing\":\"0em\"}},\"spacing\":{\"space-md\":\"0.75rem\",\"space-sm\":\"0.5rem\",\"space-xl\":\"1.5rem\",\"gutter\":\"0.75rem\",\"margin\":\"1rem\",\"space-lg\":\"1rem\",\"space-xs\":\"0.25rem\"},\"headlineFontFamily\":\"Space Grotesk\",\"bodyFontFamily\":\"Manrope\",\"labelFontFamily\":\"JetBrains Mono\"}},\"version\":\"1\"}},{\"design\":{\"screens\":[{\"screenshot\":{\"name\":\"projects/8978791379095391159/files/36aa81ee7208464f809e7ec10399687e\",\"downloadUrl\":\"https://stitch.googleapis.com/v1/projects/8978791379095391159/files/36aa81ee7208464f809e7ec10399687e:download\"},\"htmlCode\":{\"name\":\"projects/8978791379095391159/files/86e06d4fa59149a6b9bdcf6b7c95e215\",\"downloadUrl\":\"https://stitch.googleapis.com/v1/projects/8978791379095391159/files/86e06d4fa59149a6b9bdcf6b7c95e215:download\",\"mimeType\":\"text/html\"},\"id\":\"2e91dcebc5c34a41bd0855aa2cabe437\",\"generatedBy\":\"figaro_agent\",\"width\":\"780\",\"height\":\"1768\",\"title\":\"天才交易员 · 合约 (iOS 26 全屏K线壁纸与极简白透玻璃)\",\"prompt\":\"Design the mobile screen for App '天才交易员', strictly for iPhone (iOS 26, 402x874pt viewport), light mode, minimal frosted glass aesthetic.\\nPure white canvas background (#F9F9FF / #FFFFFF).\\nSame full-screen chart as 1.618: the chart is an edge-to-edge wallpaper canvas filling the entire screen (absolute inset-0), with candlestick bars, subtle grid, horizontal price axis markings, and time axis at bottom.\\nABSOLUTELY NO cards stacked under the chart. All controls are floating over the chart canvas.\\nFloating controls strictly styled with white frosted glass (semi-transparent white rgba(255,255,255,0.78), backdrop-blur-2xl, soft ambient shadow, specular highlight edge, NO dark borders):\\n1. Top floating bar (under Dynamic Island / status bar):\\n   - Top-left frosted capsule: coin logo pill with coin name 'FLY', chevron-down icon, real-time price '20.78', and a pulsing green live dot (#169873).\\n   - Top-right frosted budget chip: exact text '今日 4 次 · 日亏余 7.53U'.\\n2. The open position's entry and stop drawn as labelled horizontal reference lines directly on the chart:\\n   - Entry line (e.g. at 20.35, subtle blue/neutral line with label '入场 20.35')\\n   - Stop line (e.g. at 19.80, dashed red line #D7355D with label '止损 19.80 (-1.0R)')\\n3. Slim frosted dock floating just above the action buttons with period chips: '1m', '5m', '15m' (selected/active with subtle blue tint or pill highlight), '1H', '4H', '1D'.\\n4. Bottom floating action bar:\\n   - Two pills side by side:\\n     * '做多' with green tint (subtle #169873 translucent tint, green text/accent)\\n     * '做空' with red solid (#D7355D solid fill, white text)\\n     * tapping opens an iOS bottom order sheet.\\n5. Floating icon-only bottom tab bar at the very bottom above home indicator:\\n   - 4-5 minimalist clean outline icons (candlestick chart active, lightning/radar, shield/discipline, wallet/positions, analytics/person).\\nColor tokens:\\n- Accent: #0A84FF\\n- Long: #169873\\n- Short: #D7355D\\n- Text primary: #111827\\n- Secondary text: #6B7280\\nSynthetic placeholder numbers only. Chinese copy exactly as given. Pure iPhone native feel, exquisite glass specular highlights.\",\"name\":\"projects/8978791379095391159/screens/2e91dcebc5c34a41bd0855aa2cabe437\",\"theme\":{\"colorMode\":\"LIGHT\",\"font\":\"SPACE_GROTESK\",\"roundness\":\"ROUND_FULL\",\"customColor\":\"#0a84ff\",\"headlineFont\":\"SPACE_GROTESK\",\"bodyFont\":\"MANROPE\",\"labelFont\":\"JETBRAINS_MONO\",\"namedColors\":{\"surface_dim\":\"#d3daef\",\"on_tertiary_container\":\"#fffbff\",\"inverse_primary\":\"#aac7ff\",\"surface\":\"#f9f9ff\",\"on_secondary\":\"#ffffff\",\"on_tertiary_fixed_variant\":\"#793100\",\"on_tertiary_fixed\":\"#341100\",\"secondary\":\"#585f6c\",\"background\":\"#f9f9ff\",\"outline\":\"#717786\",\"surface_tint\":\"#005db8\",\"on_secondary_container\":\"#5e6572\",\"surface_variant\":\"#dce2f7\",\"surface_container_high\":\"#e1e8fd\",\"surface_container_highest\":\"#dce2f7\",\"on_surface\":\"#141b2b\",\"error_container\":\"#ffdad6\",\"tertiary_fixed_dim\":\"#ffb691\",\"on_error\":\"#ffffff\",\"surface_container\":\"#e9edff\",\"surface_container_low\":\"#f1f3ff\",\"on_tertiary\":\"#ffffff\",\"on_secondary_fixed_variant\":\"#404754\",\"secondary_container\":\"#dce2f3\",\"on_error_container\":\"#93000a\",\"on_secondary_fixed\":\"#151c27\",\"on_primary_fixed\":\"#001b3e\",\"on_surface_variant\":\"#414754\",\"tertiary_fixed\":\"#ffdbcb\",\"surface_container_lowest\":\"#ffffff\",\"primary_fixed_dim\":\"#aac7ff\",\"primary_container\":\"#0073e0\",\"surface_bright\":\"#f9f9ff\",\"tertiary\":\"#9a4100\",\"on_primary_fixed_variant\":\"#00468d\",\"tertiary_container\":\"#c25300\",\"inverse_on_surface\":\"#edf0ff\",\"secondary_fixed\":\"#dce2f3\",\"outline_variant\":\"#c0c6d6\",\"inverse_surface\":\"#293040\",\"on_primary_container\":\"#fefcff\",\"error\":\"#ba1a1a\",\"on_primary\":\"#ffffff\",\"primary_fixed\":\"#d6e3ff\",\"secondary_fixed_dim\":\"#c0c7d6\",\"primary\":\"#005ab3\",\"on_background\":\"#141b2b\"},\"colorVariant\":\"FIDELITY\",\"overridePrimaryColor\":\"#0a84ff\",\"overrideSecondaryColor\":\"#6b7280\",\"overrideNeutralColor\":\"#111827\",\"spacingScale\":2,\"typography\":{\"mono-price-lg\":{\"fontFamily\":\"JetBrains Mono\",\"fontSize\":\"22px\",\"fontWeight\":\"600\",\"lineHeight\":\"26px\",\"letterSpacing\":\"-0.02em\"},\"headline-md\":{\"fontFamily\":\"Space Grotesk\",\"fontSize\":\"20px\",\"fontWeight\":\"600\",\"lineHeight\":\"26px\",\"letterSpacing\":\"-0.015em\"},\"label-mono-sm\":{\"fontFamily\":\"JetBrains Mono\",\"fontSize\":\"10px\",\"fontWeight\":\"400\",\"lineHeight\":\"12px\",\"letterSpacing\":\"0.02em\"},\"headline-xl\":{\"fontFamily\":\"Space Grotesk\",\"fontSize\":\"32px\",\"fontWeight\":\"700\",\"lineHeight\":\"38px\",\"letterSpacing\":\"-0.03em\"},\"body-lg\":{\"fontFamily\":\"Manrope\",\"fontSize\":\"17px\",\"fontWeight\":\"500\",\"lineHeight\":\"24px\",\"letterSpacing\":\"-0.01em\"},\"body-sm\":{\"fontFamily\":\"Manrope\",\"fontSize\":\"13px\",\"fontWeight\":\"400\",\"lineHeight\":\"18px\",\"letterSpacing\":\"0em\"},\"label-caps\":{\"fontFamily\":\"Manrope\",\"fontSize\":\"11px\",\"fontWeight\":\"600\",\"lineHeight\":\"14px\",\"letterSpacing\":\"0.06em\"},\"body-md\":{\"fontFamily\":\"Manrope\",\"fontSize\":\"15px\",\"fontWeight\":\"400\",\"lineHeight\":\"22px\",\"letterSpacing\":\"-0.005em\"},\"mono-price-md\":{\"fontFamily\":\"JetBrains Mono\",\"fontSize\":\"15px\",\"fontWeight\":\"500\",\"lineHeight\":\"20px\",\"letterSpacing\":\"-0.01em\"},\"headline-lg\":{\"fontFamily\":\"Space Grotesk\",\"fontSize\":\"24px\",\"fontWeight\":\"600\",\"lineHeight\":\"30px\",\"letterSpacing\":\"-0.02em\"}},\"spacing\":{\"space-md\":\"0.75rem\",\"space-sm\":\"0.5rem\",\"space-xl\":\"1.5rem\",\"gutter\":\"0.75rem\",\"margin\":\"1rem\",\"space-xs\":\"0.25rem\",\"space-lg\":\"1rem\"},\"headlineFontFamily\":\"Space Grotesk\",\"bodyFontFamily\":\"Manrope\",\"labelFontFamily\":\"JetBrains Mono\"},\"deviceType\":\"MOBILE\",\"screenType\":\"DESIGN\",\"screenMetadata\":{\"agentType\":\"PRO_AGENT\",\"status\":\"COMPLETE\"},\"designSystem\":{\"name\":\"assets/aef5362842b249d59480b9bb7c0d9d1b\",\"designSystem\":{\"displayName\":\"Luminous Pure Glass\",\"styleGuidelines\":\"## Brand & Style\\n\\nThis design system expresses the discipline and clarity of an elite financial interface through an ultra-refined \\\"iOS 26\\\" optical glass aesthetic. Designed specifically for full-screen immersive chart environments, it strips away opaque containers, harsh divider lines, and visual friction in favor of crystalline floating surfaces.\\n\\nThe emotional tone is calm, precise, and authoritative. It combines pristine light-mode minimalism with advanced optical glassmorphism:\\n- **Optical Float:** Interactive components hover effortlessly above continuous data visualizations without breaking analytical focus.\\n- **Specular Precision:** Surfaces evoke chemically strengthened glass with micro-highlight rim lighting and deep Gaussian refraction.\\n- **Data First:** The full-canvas candlestick chart serves as the live substrate; controls and readouts feel like weightless precision instruments resting on an illuminated optical plate.\\n\\n## Layout & Spacing\\n\\nEngineered specifically around the target 402x874pt iOS mobile viewport:\\n\\n- **Viewport Architecture:** Full-bleed background layer dedicated to interactive chart graphics. Content floats above with safe areas reserved for dynamic island (`54pt` top) and home indicator (`34pt` bottom).\\n- **Horizontal Margins:** Fixed `16px` (`margin`) screen edges to anchor floating pill docks, action buttons, and sheet panels.\\n- **Component Flow:** Vertical rhythm follows micro-increments (4px / 8px / 12px) to maximize available canvas real estate for multi-timeframe charts.\\n- **Dock & Island Elevation:** Floating trading triggers and time-interval selectors maintain `12px` clearance from edge boundaries, ensuring gesture safety without blocking underlying data trends.\\n\\n## Elevation & Depth\\n\\nVisual hierarchy uses physical optical dispersion rather than drop shadows or opaque borders:\\n\\n- **Surface Glass Recipe:** Base layer `rgba(255, 255, 255, 0.72)` supported by high-radius blur filter `backdrop-filter: blur(28px) saturate(190%)`.\\n- **Specular Rim Rim Lighting:** Instead of boundary strokes, surfaces implement an inset rim glow: `box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), inset 0 -0.5px 0.5px 0 rgba(255, 255, 255, 0.3)`.\\n- **Luminous Soft Shadows:** Diffusion without gray dirtiness. Shadows are ultra-diffuse and tinted by ambient light: `box-shadow: 0 12px 32px -4px rgba(17, 24, 39, 0.06), 0 4px 16px -2px rgba(10, 132, 255, 0.04)`.\\n- **Layer Stacking Hierarchy:**\\n  - *Tier 0 (Substrate):* Clean white canvas with interactive candle/vector series (`#FFFFFF` background).\\n  - *Tier 1 (Surface Glass):* Floating intervals, toolbar pill indicators, and instrument chips (`0.72` opacity).\\n  - *Tier 2 (Interactive Floating Docks):* Execution dock and quick-trade panels with active specular reflection (`0.82` opacity).\\n  - *Tier 3 (Modals & Precision Sheets):* Deep blur frosted overlays with intensified top highlight rings (`0.88` opacity).\\n\\n## Components\\n\\n### Floating Docks & Navigation\\n- **Trading Dock:** Anchored `16px` above the bottom safe area. Encased in an ultra-pure glass pill housing Buy/Sell action triggers and lot-size steppers.\\n- **Timeframe Selector:** Floating horizontal pill centered at the top sub-header. Active interval displays in `#0A84FF` with a soft white glow capsule underneath; inactive tabs use `#6B7280`.\\n\\n### Action Buttons\\n- **Primary Execution (Long):** Gradient-free high-luminance Emerald Jade (`#169873`) with white typographic ink, soft specular rim, and jade halo shadow (`0 8px 24px -2px rgba(22, 152, 115, 0.35)`).\\n- **Primary Execution (Short):** Intense Crimson (`#D7355D`) with white typographic ink and crimson halo shadow (`0 8px 24px -2px rgba(215, 53, 93, 0.35)`).\\n- **Secondary / Utility Controls:** Translucent frosted white pills with `#111827` glyphs and white specular inset strokes.\\n\\n### Candlestick Elements & Charts\\n- **Bullish Candle:** Solid `#169873` body and wicks.\\n- **Bearish Candle:** Solid `#D7355D` body and wicks.\\n- **Crosshair Reticle:** 1px dotted `#0A84FF` with floating glass coordinate badges at axes.\\n\\n### Metric Chips & Data Displays\\n- **Price Ticker Badges:** JetBrains Mono numbers within compact frosted pills. Change metrics (+/-) tint the surface lightly with `rgba(22, 152, 115, 0.08)` or `rgba(215, 53, 93, 0.08)`.\\n- **Order Book Depth Rows:** Transparent horizontal bars rendered as soft tonal washes behind tabular prices without borders.\\n\\n### Input Fields & Steppers\\n- Segmented numeric inputs with pure glass interiors, no border lines, and floating plus/minus circular actuators.\",\"theme\":{\"colorMode\":\"LIGHT\",\"font\":\"SPACE_GROTESK\",\"roundness\":\"ROUND_FULL\",\"customColor\":\"#0a84ff\",\"headlineFont\":\"SPACE_GROTESK\",\"bodyFont\":\"MANROPE\",\"labelFont\":\"JETBRAINS_MONO\",\"namedColors\":{\"on_primary_container\":\"#fefcff\",\"on_tertiary_container\":\"#fffbff\",\"error_container\":\"#ffdad6\",\"on_error\":\"#ffffff\",\"primary\":\"#005ab3\",\"background\":\"#f9f9ff\",\"on_tertiary_fixed\":\"#341100\",\"tertiary_container\":\"#c25300\",\"inverse_on_surface\":\"#edf0ff\",\"on_primary_fixed\":\"#001b3e\",\"surface_container\":\"#e9edff\",\"on_surface\":\"#141b2b\",\"inverse_primary\":\"#aac7ff\",\"surface_variant\":\"#dce2f7\",\"on_surface_variant\":\"#414754\",\"surface_container_low\":\"#f1f3ff\",\"on_error_container\":\"#93000a\",\"on_secondary_fixed\":\"#151c27\",\"primary_fixed\":\"#d6e3ff\",\"secondary_fixed_dim\":\"#c0c7d6\",\"outline_variant\":\"#c0c6d6\",\"inverse_surface\":\"#293040\",\"on_background\":\"#141b2b\",\"secondary_fixed\":\"#dce2f3\",\"surface_dim\":\"#d3daef\",\"tertiary_fixed_dim\":\"#ffb691\",\"primary_container\":\"#0073e0\",\"primary_fixed_dim\":\"#aac7ff\",\"tertiary_fixed\":\"#ffdbcb\",\"surface_container_high\":\"#e1e8fd\",\"on_tertiary_fixed_variant\":\"#793100\",\"error\":\"#ba1a1a\",\"surface_bright\":\"#f9f9ff\",\"secondary\":\"#585f6c\",\"surface_tint\":\"#005db8\",\"on_secondary_fixed_variant\":\"#404754\",\"tertiary\":\"#9a4100\",\"outline\":\"#717786\",\"on_secondary_container\":\"#5e6572\",\"surface_container_highest\":\"#dce2f7\",\"surface_container_lowest\":\"#ffffff\",\"surface\":\"#f9f9ff\",\"on_primary_fixed_variant\":\"#00468d\",\"on_tertiary\":\"#ffffff\",\"on_secondary\":\"#ffffff\",\"on_primary\":\"#ffffff\",\"secondary_container\":\"#dce2f3\"},\"designMd\":\"---\\nname: Luminous Pure Glass\\ncolors:\\n  surface: '#f9f9ff'\\n  surface-dim: '#d3daef'\\n  surface-bright: '#f9f9ff'\\n  surface-container-lowest: '#ffffff'\\n  surface-container-low: '#f1f3ff'\\n  surface-container: '#e9edff'\\n  surface-container-high: '#e1e8fd'\\n  surface-container-highest: '#dce2f7'\\n  on-surface: '#141b2b'\\n  on-surface-variant: '#414754'\\n  inverse-surface: '#293040'\\n  inverse-on-surface: '#edf0ff'\\n  outline: '#717786'\\n  outline-variant: '#c0c6d6'\\n  surface-tint: '#005db8'\\n  primary: '#005ab3'\\n  on-primary: '#ffffff'\\n  primary-container: '#0073e0'\\n  on-primary-container: '#fefcff'\\n  inverse-primary: '#aac7ff'\\n  secondary: '#585f6c'\\n  on-secondary: '#ffffff'\\n  secondary-container: '#dce2f3'\\n  on-secondary-container: '#5e6572'\\n  tertiary: '#9a4100'\\n  on-tertiary: '#ffffff'\\n  tertiary-container: '#c25300'\\n  on-tertiary-container: '#fffbff'\\n  error: '#ba1a1a'\\n  on-error: '#ffffff'\\n  error-container: '#ffdad6'\\n  on-error-container: '#93000a'\\n  primary-fixed: '#d6e3ff'\\n  primary-fixed-dim: '#aac7ff'\\n  on-primary-fixed: '#001b3e'\\n  on-primary-fixed-variant: '#00468d'\\n  secondary-fixed: '#dce2f3'\\n  secondary-fixed-dim: '#c0c7d6'\\n  on-secondary-fixed: '#151c27'\\n  on-secondary-fixed-variant: '#404754'\\n  tertiary-fixed: '#ffdbcb'\\n  tertiary-fixed-dim: '#ffb691'\\n  on-tertiary-fixed: '#341100'\\n  on-tertiary-fixed-variant: '#793100'\\n  background: '#f9f9ff'\\n  on-background: '#141b2b'\\n  surface-variant: '#dce2f7'\\ntypography:\\n  headline-xl:\\n    fontFamily: Space Grotesk\\n    fontSize: 32px\\n    fontWeight: '700'\\n    lineHeight: 38px\\n    letterSpacing: -0.03em\\n  headline-lg:\\n    fontFamily: Space Grotesk\\n    fontSize: 24px\\n    fontWeight: '600'\\n    lineHeight: 30px\\n    letterSpacing: -0.02em\\n  headline-md:\\n    fontFamily: Space Grotesk\\n    fontSize: 20px\\n    fontWeight: '600'\\n    lineHeight: 26px\\n    letterSpacing: -0.015em\\n  body-lg:\\n    fontFamily: Manrope\\n    fontSize: 17px\\n    fontWeight: '500'\\n    lineHeight: 24px\\n    letterSpacing: -0.01em\\n  body-md:\\n    fontFamily: Manrope\\n    fontSize: 15px\\n    fontWeight: '400'\\n    lineHeight: 22px\\n    letterSpacing: -0.005em\\n  body-sm:\\n    fontFamily: Manrope\\n    fontSize: 13px\\n    fontWeight: '400'\\n    lineHeight: 18px\\n    letterSpacing: 0em\\n  mono-price-lg:\\n    fontFamily: JetBrains Mono\\n    fontSize: 22px\\n    fontWeight: '600'\\n    lineHeight: 26px\\n    letterSpacing: -0.02em\\n  mono-price-md:\\n    fontFamily: JetBrains Mono\\n    fontSize: 15px\\n    fontWeight: '500'\\n    lineHeight: 20px\\n    letterSpacing: -0.01em\\n  label-caps:\\n    fontFamily: Manrope\\n    fontSize: 11px\\n    fontWeight: '600'\\n    lineHeight: 14px\\n    letterSpacing: 0.06em\\n  label-mono-sm:\\n    fontFamily: JetBrains Mono\\n    fontSize: 10px\\n    fontWeight: '400'\\n    lineHeight: 12px\\n    letterSpacing: 0.02em\\nrounded:\\n  sm: 0.5rem\\n  DEFAULT: 1rem\\n  md: 1.5rem\\n  lg: 2rem\\n  xl: 3rem\\n  full: 9999px\\nspacing:\\n  gutter: 0.75rem\\n  margin: 1rem\\n  space-xs: 0.25rem\\n  space-sm: 0.5rem\\n  space-md: 0.75rem\\n  space-lg: 1rem\\n  space-xl: 1.5rem\\n---\\n\\n## Brand & Style\\n\\nThis design system expresses the discipline and clarity of an elite financial interface through an ultra-refined \\\"iOS 26\\\" optical glass aesthetic. Designed specifically for full-screen immersive chart environments, it strips away opaque containers, harsh divider lines, and visual friction in favor of crystalline floating surfaces.\\n\\nThe emotional tone is calm, precise, and authoritative. It combines pristine light-mode minimalism with advanced optical glassmorphism:\\n- **Optical Float:** Interactive components hover effortlessly above continuous data visualizations without breaking analytical focus.\\n- **Specular Precision:** Surfaces evoke chemically strengthened glass with micro-highlight rim lighting and deep Gaussian refraction.\\n- **Data First:** The full-canvas candlestick chart serves as the live substrate; controls and readouts feel like weightless precision instruments resting on an illuminated optical plate.\\n\\n## Colors\\n\\nThe palette is engineered for clinical legibility and immediate signal recognition over luminous, high-key backgrounds:\\n\\n- **System Accent (`#0A84FF`):** iOS Electric Blue reserved for active states, selected chart tools, primary execution buttons, and temporal focus indicators.\\n- **Market Signal - Long (`#169873`):** Pine Jade green. Used for bullish candles, profit matrices, and buy confirmations. Optimized for contrast against translucent white backdrops without eye fatigue.\\n- **Market Signal - Short (`#D7355D`):** Crimson Raspberry red. Used for bearish candles, drawdown warnings, and sell confirmations.\\n- **Primary Ink (`#111827`):** Near-black slate for prices, primary figures, and active headings.\\n- **Secondary Ink (`#6B7280`):** Neutral gray for metrics labels, order book depths, and axis timestamps.\\n- **Glass Substrate:** `rgba(255, 255, 255, 0.72)` base fill combined with `rgba(255, 255, 255, 0.95)` inner specular reflection borders. Dark borders, heavy stroke outlines, and opaque grays are strictly prohibited.\\n\\n## Typography\\n\\nTypography balances typographic precision with rapid numeric parsing:\\n- **Headlines (`Space Grotesk`):** Delivers clean geometry, crisp apexes, and structural tension suited for trading instrument names and core navigation modals.\\n- **Body & Controls (`Manrope`):** Smooth, open apertures provide optimal legibility at compact iOS sizes without geometric clutter.\\n- **Market Data & Figures (`JetBrains Mono`):** Fixed-width tabular metrics for real-time tickers, bid/ask spreads, chart cursor readouts, and execution sizes, preventing optical jitter during price updates.\\n\\n## Layout & Spacing\\n\\nEngineered specifically around the target 402x874pt iOS mobile viewport:\\n\\n- **Viewport Architecture:** Full-bleed background layer dedicated to interactive chart graphics. Content floats above with safe areas reserved for dynamic island (`54pt` top) and home indicator (`34pt` bottom).\\n- **Horizontal Margins:** Fixed `16px` (`margin`) screen edges to anchor floating pill docks, action buttons, and sheet panels.\\n- **Component Flow:** Vertical rhythm follows micro-increments (4px / 8px / 12px) to maximize available canvas real estate for multi-timeframe charts.\\n- **Dock & Island Elevation:** Floating trading triggers and time-interval selectors maintain `12px` clearance from edge boundaries, ensuring gesture safety without blocking underlying data trends.\\n\\n## Elevation & Depth\\n\\nVisual hierarchy uses physical optical dispersion rather than drop shadows or opaque borders:\\n\\n- **Surface Glass Recipe:** Base layer `rgba(255, 255, 255, 0.72)` supported by high-radius blur filter `backdrop-filter: blur(28px) saturate(190%)`.\\n- **Specular Rim Rim Lighting:** Instead of boundary strokes, surfaces implement an inset rim glow: `box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), inset 0 -0.5px 0.5px 0 rgba(255, 255, 255, 0.3)`.\\n- **Luminous Soft Shadows:** Diffusion without gray dirtiness. Shadows are ultra-diffuse and tinted by ambient light: `box-shadow: 0 12px 32px -4px rgba(17, 24, 39, 0.06), 0 4px 16px -2px rgba(10, 132, 255, 0.04)`.\\n- **Layer Stacking Hierarchy:**\\n  - *Tier 0 (Substrate):* Clean white canvas with interactive candle/vector series (`#FFFFFF` background).\\n  - *Tier 1 (Surface Glass):* Floating intervals, toolbar pill indicators, and instrument chips (`0.72` opacity).\\n  - *Tier 2 (Interactive Floating Docks):* Execution dock and quick-trade panels with active specular reflection (`0.82` opacity).\\n  - *Tier 3 (Modals & Precision Sheets):* Deep blur frosted overlays with intensified top highlight rings (`0.88` opacity).\\n\\n## Shapes\\n\\nThe interface embraces organic fluid geometry inspired by continuous curvature (squircle / continuous corner smoothing):\\n\\n- **Continuous Capsule Form:** Buttons, status badges, indicator switchers, and floating parameter pills use full pill-radius shaping (`rounded-full`).\\n- **Sheet and Dock Panels:** Floating trays and bottom cards utilize `rounded-3xl` (28pt-32pt) with smoothed corners that mirror iOS native chassis corners.\\n- **Compact Chips:** Input steppers and quick-interval selectors use high pill geometry to maintain a soft, tactile, touch-friendly presence.\\n\\n## Components\\n\\n### Floating Docks & Navigation\\n- **Trading Dock:** Anchored `16px` above the bottom safe area. Encased in an ultra-pure glass pill housing Buy/Sell action triggers and lot-size steppers.\\n- **Timeframe Selector:** Floating horizontal pill centered at the top sub-header. Active interval displays in `#0A84FF` with a soft white glow capsule underneath; inactive tabs use `#6B7280`.\\n\\n### Action Buttons\\n- **Primary Execution (Long):** Gradient-free high-luminance Emerald Jade (`#169873`) with white typographic ink, soft specular rim, and jade halo shadow (`0 8px 24px -2px rgba(22, 152, 115, 0.35)`).\\n- **Primary Execution (Short):** Intense Crimson (`#D7355D`) with white typographic ink and crimson halo shadow (`0 8px 24px -2px rgba(215, 53, 93, 0.35)`).\\n- **Secondary / Utility Controls:** Translucent frosted white pills with `#111827` glyphs and white specular inset strokes.\\n\\n### Candlestick Elements & Charts\\n- **Bullish Candle:** Solid `#169873` body and wicks.\\n- **Bearish Candle:** Solid `#D7355D` body and wicks.\\n- **Crosshair Reticle:** 1px dotted `#0A84FF` with floating glass coordinate badges at axes.\\n\\n### Metric Chips & Data Displays\\n- **Price Ticker Badges:** JetBrains Mono numbers within compact frosted pills. Change metrics (+/-) tint the surface lightly with `rgba(22, 152, 115, 0.08)` or `rgba(215, 53, 93, 0.08)`.\\n- **Order Book Depth Rows:** Transparent horizontal bars rendered as soft tonal washes behind tabular prices without borders.\\n\\n### Input Fields & Steppers\\n- Segmented numeric inputs with pure glass interiors, no border lines, and floating plus/minus circular actuators.\",\"colorVariant\":\"FIDELITY\",\"overridePrimaryColor\":\"#0a84ff\",\"overrideSecondaryColor\":\"#6b7280\",\"overrideNeutralColor\":\"#111827\",\"spacingScale\":2,\"typography\":{\"label-caps\":{\"fontFamily\":\"Manrope\",\"fontSize\":\"11px\",\"fontWeight\":\"600\",\"lineHeight\":\"14px\",\"letterSpacing\":\"0.06em\"},\"mono-price-lg\":{\"fontFamily\":\"JetBrains Mono\",\"fontSize\":\"22px\",\"fontWeight\":\"600\",\"lineHeight\":\"26px\",\"letterSpacing\":\"-0.02em\"},\"headline-lg\":{\"fontFamily\":\"Space Grotesk\",\"fontSize\":\"24px\",\"fontWeight\":\"600\",\"lineHeight\":\"30px\",\"letterSpacing\":\"-0.02em\"},\"label-mono-sm\":{\"fontFamily\":\"JetBrains Mono\",\"fontSize\":\"10px\",\"fontWeight\":\"400\",\"lineHeight\":\"12px\",\"letterSpacing\":\"0.02em\"},\"body-lg\":{\"fontFamily\":\"Manrope\",\"fontSize\":\"17px\",\"fontWeight\":\"500\",\"lineHeight\":\"24px\",\"letterSpacing\":\"-0.01em\"},\"headline-md\":{\"fontFamily\":\"Space Grotesk\",\"fontSize\":\"20px\",\"fontWeight\":\"600\",\"lineHeight\":\"26px\",\"letterSpacing\":\"-0.015em\"},\"body-sm\":{\"fontFamily\":\"Manrope\",\"fontSize\":\"13px\",\"fontWeight\":\"400\",\"lineHeight\":\"18px\",\"letterSpacing\":\"0em\"},\"mono-price-md\":{\"fontFamily\":\"JetBrains Mono\",\"fontSize\":\"15px\",\"fontWeight\":\"500\",\"lineHeight\":\"20px\",\"letterSpacing\":\"-0.01em\"},\"body-md\":{\"fontFamily\":\"Manrope\",\"fontSize\":\"15px\",\"fontWeight\":\"400\",\"lineHeight\":\"22px\",\"letterSpacing\":\"-0.005em\"},\"headline-xl\":{\"fontFamily\":\"Space Grotesk\",\"fontSize\":\"32px\",\"fontWeight\":\"700\",\"lineHeight\":\"38px\",\"letterSpacing\":\"-0.03em\"}},\"spacing\":{\"space-lg\":\"1rem\",\"space-xs\":\"0.25rem\",\"gutter\":\"0.75rem\",\"space-md\":\"0.75rem\",\"space-sm\":\"0.5rem\",\"margin\":\"1rem\",\"space-xl\":\"1.5rem\"},\"headlineFontFamily\":\"Space Grotesk\",\"bodyFontFamily\":\"Manrope\",\"labelFontFamily\":\"JetBrains Mono\"}},\"version\":\"1\"}}],\"theme\":{}}},{\"text\":\"# 「天才交易员」iPhone 402×874pt 全屏壁纸 K 线合约工作台已交付\\n\\n已按照您的全部要求，为 App **「天才交易员」** 打造了符合 **iOS 26** 极简白透磨砂玻璃（White Frosted Glass）标准的合约主屏：\\n\\n👉 **交付画板**：`天才交易员 · 合约 (iOS 26 全屏K线壁纸与极简白透玻璃)` — **天才交易员 · 合约 (iOS 26 全屏K线壁纸与极简白透玻璃)**\\n\\n---\\n\\n### 🎨 核心视觉与交互设计细节\\n\\n1. **全屏壁纸 K 线架构 (Full-Screen Wallpaper Chart)**：\\n   - K 线 Canvas 作为底层壁纸铺满整个 402×874pt 视口（`absolute inset-0`），顶部状态栏与底部安全区完全透出真实 K 线刻度与网格；\\n   - **图表下方无任何堆叠卡片或生硬容器**，所有交互控制均以高透白磨砂玻璃浮岛形态悬浮呈现。\\n\\n2. **顶栏双浮动微光胶囊 (Top Floating Glass Controls)**：\\n   - **左侧标的胶囊**：白透毛玻璃胶囊内聚合币种 Logo、加粗大字号 `FLY`、下拉箭头 `chevron-down`、最新实时报价 `20.78` 以及高亮呼吸绿点；\\n   - **右侧风控预算芯片**：独立白透胶囊精准呈现给定中文文案 `今日 4 次 · 日亏余 7.53U`，字阶克制优雅。\\n\\n3. **图表持仓标线直绘 (On-Chart Position Reference Lines)**：\\n   - **入场基准线**：直接在 K 线价格位 20.35 处绘制平滑水平线，配有发光端点与 `入场 20.35` 标牌；\\n   - **止损防线**：在 19.80 处绘制标准红色点虚线，配有 `止损 19.80 (-1.0R)` 标牌，盈亏预期直观透彻。\\n\\n4. **超纤细周期悬浮坞 (Slim Frosted Period Dock)**：\\n   - 悬浮在图表底部上方，收纳 `1m`、`5m`、`15m`（当前激活高亮）、`1H`、`4H`、`1D` 六个紧凑分段标签，支持快速切换。\\n\\n5. **底部双色下单浮动条与纯图标底栏 (Bottom Action Bar & Icon-Only Tab Bar)**：\\n   - **双色下单胶囊**：并排呈现 **`做多 20.78`**（多头绿色淡透底 `rgba(22, 152, 115, 0.12)` + 翠绿文字）与 **`做空 20.77`**（空头实色饱和红 `#D7355D` + 纯白高对比文字）；\\n   - **纯图标底栏 (Icon-Only Tab Bar)**：极简药丸玻璃底座，收纳 4 枚精细线性图标（合约【高亮激活】、行情/雷达、持仓/订单、个人中心），无任何文字冗余，给图表保留最大留白。\\n\\n6. **色彩与材质契约**：\\n   - **主强调色**：Apple Blue `#0A84FF`\\n   - **多头语义**：`#169873`（Long Green）\\n   - **空头语义**：`#D7355D`（Short Crimson）\\n   - **主文字与次级字**：`#111827` 与 `#6B7280`\\n   - **材质**：高透白玻璃 `rgba(255, 255, 255, 0.75)`、双层微光镜面高光外沿与柔和投影，杜绝任何深色黑边。\\n\\n所有数据均为合成演示占位，画板已同步发布在画布中央，可直接查验细节！\"},{\"suggestion\":\"点击「做多 / 做空」展开 65dvh 白透玻璃开单底抽屉交互态\"},{\"suggestion\":\"添加持仓收益卡与保本止损（BE）动态推进标记\"},{\"suggestion\":\"设计暗色模式（Dark Glass）自适应规范对比画板\"}]}",
+    "type": "text"
+   }
+  ],
+  "structuredContent": {
+   "outputComponents": [
+    {
+     "designSystem": {
+      "designSystem": {
+       "displayName": "Luminous Pure Glass",
+       "styleGuidelines": "## Brand & Style\n\nThis design system expresses the discipline and clarity of an elite financial interface through an ultra-refined \"iOS 26\" optical glass aesthetic. Designed specifically for full-screen immersive chart environments, it strips away opaque containers, harsh divider lines, and visual friction in favor of crystalline floating surfaces.\n\nThe emotional tone is calm, precise, and authoritative. It combines pristine light-mode minimalism with advanced optical glassmorphism:\n- **Optical Float:** Interactive components hover effortlessly above continuous data visualizations without breaking analytical focus.\n- **Specular Precision:** Surfaces evoke chemically strengthened glass with micro-highlight rim lighting and deep Gaussian refraction.\n- **Data First:** The full-canvas candlestick chart serves as the live substrate; controls and readouts feel like weightless precision instruments resting on an illuminated optical plate.\n\n## Layout & Spacing\n\nEngineered specifically around the target 402x874pt iOS mobile viewport:\n\n- **Viewport Architecture:** Full-bleed background layer dedicated to interactive chart graphics. Content floats above with safe areas reserved for dynamic island (`54pt` top) and home indicator (`34pt` bottom).\n- **Horizontal Margins:** Fixed `16px` (`margin`) screen edges to anchor floating pill docks, action buttons, and sheet panels.\n- **Component Flow:** Vertical rhythm follows micro-increments (4px / 8px / 12px) to maximize available canvas real estate for multi-timeframe charts.\n- **Dock & Island Elevation:** Floating trading triggers and time-interval selectors maintain `12px` clearance from edge boundaries, ensuring gesture safety without blocking underlying data trends.\n\n## Elevation & Depth\n\nVisual hierarchy uses physical optical dispersion rather than drop shadows or opaque borders:\n\n- **Surface Glass Recipe:** Base layer `rgba(255, 255, 255, 0.72)` supported by high-radius blur filter `backdrop-filter: blur(28px) saturate(190%)`.\n- **Specular Rim Rim Lighting:** Instead of boundary strokes, surfaces implement an inset rim glow: `box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), inset 0 -0.5px 0.5px 0 rgba(255, 255, 255, 0.3)`.\n- **Luminous Soft Shadows:** Diffusion without gray dirtiness. Shadows are ultra-diffuse and tinted by ambient light: `box-shadow: 0 12px 32px -4px rgba(17, 24, 39, 0.06), 0 4px 16px -2px rgba(10, 132, 255, 0.04)`.\n- **Layer Stacking Hierarchy:**\n  - *Tier 0 (Substrate):* Clean white canvas with interactive candle/vector series (`#FFFFFF` background).\n  - *Tier 1 (Surface Glass):* Floating intervals, toolbar pill indicators, and instrument chips (`0.72` opacity).\n  - *Tier 2 (Interactive Floating Docks):* Execution dock and quick-trade panels with active specular reflection (`0.82` opacity).\n  - *Tier 3 (Modals & Precision Sheets):* Deep blur frosted overlays with intensified top highlight rings (`0.88` opacity).\n\n## Components\n\n### Floating Docks & Navigation\n- **Trading Dock:** Anchored `16px` above the bottom safe area. Encased in an ultra-pure glass pill housing Buy/Sell action triggers and lot-size steppers.\n- **Timeframe Selector:** Floating horizontal pill centered at the top sub-header. Active interval displays in `#0A84FF` with a soft white glow capsule underneath; inactive tabs use `#6B7280`.\n\n### Action Buttons\n- **Primary Execution (Long):** Gradient-free high-luminance Emerald Jade (`#169873`) with white typographic ink, soft specular rim, and jade halo shadow (`0 8px 24px -2px rgba(22, 152, 115, 0.35)`).\n- **Primary Execution (Short):** Intense Crimson (`#D7355D`) with white typographic ink and crimson halo shadow (`0 8px 24px -2px rgba(215, 53, 93, 0.35)`).\n- **Secondary / Utility Controls:** Translucent frosted white pills with `#111827` glyphs and white specular inset strokes.\n\n### Candlestick Elements & Charts\n- **Bullish Candle:** Solid `#169873` body and wicks.\n- **Bearish Candle:** Solid `#D7355D` body and wicks.\n- **Crosshair Reticle:** 1px dotted `#0A84FF` with floating glass coordinate badges at axes.\n\n### Metric Chips & Data Displays\n- **Price Ticker Badges:** JetBrains Mono numbers within compact frosted pills. Change metrics (+/-) tint the surface lightly with `rgba(22, 152, 115, 0.08)` or `rgba(215, 53, 93, 0.08)`.\n- **Order Book Depth Rows:** Transparent horizontal bars rendered as soft tonal washes behind tabular prices without borders.\n\n### Input Fields & Steppers\n- Segmented numeric inputs with pure glass interiors, no border lines, and floating plus/minus circular actuators.",
+       "theme": {
+        "bodyFont": "MANROPE",
+        "bodyFontFamily": "Manrope",
+        "colorMode": "LIGHT",
+        "colorVariant": "FIDELITY",
+        "customColor": "#0a84ff",
+        "designMd": "---\nname: Luminous Pure Glass\ncolors:\n  surface: '#f9f9ff'\n  surface-dim: '#d3daef'\n  surface-bright: '#f9f9ff'\n  surface-container-lowest: '#ffffff'\n  surface-container-low: '#f1f3ff'\n  surface-container: '#e9edff'\n  surface-container-high: '#e1e8fd'\n  surface-container-highest: '#dce2f7'\n  on-surface: '#141b2b'\n  on-surface-variant: '#414754'\n  inverse-surface: '#293040'\n  inverse-on-surface: '#edf0ff'\n  outline: '#717786'\n  outline-variant: '#c0c6d6'\n  surface-tint: '#005db8'\n  primary: '#005ab3'\n  on-primary: '#ffffff'\n  primary-container: '#0073e0'\n  on-primary-container: '#fefcff'\n  inverse-primary: '#aac7ff'\n  secondary: '#585f6c'\n  on-secondary: '#ffffff'\n  secondary-container: '#dce2f3'\n  on-secondary-container: '#5e6572'\n  tertiary: '#9a4100'\n  on-tertiary: '#ffffff'\n  tertiary-container: '#c25300'\n  on-tertiary-container: '#fffbff'\n  error: '#ba1a1a'\n  on-error: '#ffffff'\n  error-container: '#ffdad6'\n  on-error-container: '#93000a'\n  primary-fixed: '#d6e3ff'\n  primary-fixed-dim: '#aac7ff'\n  on-primary-fixed: '#001b3e'\n  on-primary-fixed-variant: '#00468d'\n  secondary-fixed: '#dce2f3'\n  secondary-fixed-dim: '#c0c7d6'\n  on-secondary-fixed: '#151c27'\n  on-secondary-fixed-variant: '#404754'\n  tertiary-fixed: '#ffdbcb'\n  tertiary-fixed-dim: '#ffb691'\n  on-tertiary-fixed: '#341100'\n  on-tertiary-fixed-variant: '#793100'\n  background: '#f9f9ff'\n  on-background: '#141b2b'\n  surface-variant: '#dce2f7'\ntypography:\n  headline-xl:\n    fontFamily: Space Grotesk\n    fontSize: 32px\n    fontWeight: '700'\n    lineHeight: 38px\n    letterSpacing: -0.03em\n  headline-lg:\n    fontFamily: Space Grotesk\n    fontSize: 24px\n    fontWeight: '600'\n    lineHeight: 30px\n    letterSpacing: -0.02em\n  headline-md:\n    fontFamily: Space Grotesk\n    fontSize: 20px\n    fontWeight: '600'\n    lineHeight: 26px\n    letterSpacing: -0.015em\n  body-lg:\n    fontFamily: Manrope\n    fontSize: 17px\n    fontWeight: '500'\n    lineHeight: 24px\n    letterSpacing: -0.01em\n  body-md:\n    fontFamily: Manrope\n    fontSize: 15px\n    fontWeight: '400'\n    lineHeight: 22px\n    letterSpacing: -0.005em\n  body-sm:\n    fontFamily: Manrope\n    fontSize: 13px\n    fontWeight: '400'\n    lineHeight: 18px\n    letterSpacing: 0em\n  mono-price-lg:\n    fontFamily: JetBrains Mono\n    fontSize: 22px\n    fontWeight: '600'\n    lineHeight: 26px\n    letterSpacing: -0.02em\n  mono-price-md:\n    fontFamily: JetBrains Mono\n    fontSize: 15px\n    fontWeight: '500'\n    lineHeight: 20px\n    letterSpacing: -0.01em\n  label-caps:\n    fontFamily: Manrope\n    fontSize: 11px\n    fontWeight: '600'\n    lineHeight: 14px\n    letterSpacing: 0.06em\n  label-mono-sm:\n    fontFamily: JetBrains Mono\n    fontSize: 10px\n    fontWeight: '400'\n    lineHeight: 12px\n    letterSpacing: 0.02em\nrounded:\n  sm: 0.5rem\n  DEFAULT: 1rem\n  md: 1.5rem\n  lg: 2rem\n  xl: 3rem\n  full: 9999px\nspacing:\n  gutter: 0.75rem\n  margin: 1rem\n  space-xs: 0.25rem\n  space-sm: 0.5rem\n  space-md: 0.75rem\n  space-lg: 1rem\n  space-xl: 1.5rem\n---\n\n## Brand & Style\n\nThis design system expresses the discipline and clarity of an elite financial interface through an ultra-refined \"iOS 26\" optical glass aesthetic. Designed specifically for full-screen immersive chart environments, it strips away opaque containers, harsh divider lines, and visual friction in favor of crystalline floating surfaces.\n\nThe emotional tone is calm, precise, and authoritative. It combines pristine light-mode minimalism with advanced optical glassmorphism:\n- **Optical Float:** Interactive components hover effortlessly above continuous data visualizations without breaking analytical focus.\n- **Specular Precision:** Surfaces evoke chemically strengthened glass with micro-highlight rim lighting and deep Gaussian refraction.\n- **Data First:** The full-canvas candlestick chart serves as the live substrate; controls and readouts feel like weightless precision instruments resting on an illuminated optical plate.\n\n## Colors\n\nThe palette is engineered for clinical legibility and immediate signal recognition over luminous, high-key backgrounds:\n\n- **System Accent (`#0A84FF`):** iOS Electric Blue reserved for active states, selected chart tools, primary execution buttons, and temporal focus indicators.\n- **Market Signal - Long (`#169873`):** Pine Jade green. Used for bullish candles, profit matrices, and buy confirmations. Optimized for contrast against translucent white backdrops without eye fatigue.\n- **Market Signal - Short (`#D7355D`):** Crimson Raspberry red. Used for bearish candles, drawdown warnings, and sell confirmations.\n- **Primary Ink (`#111827`):** Near-black slate for prices, primary figures, and active headings.\n- **Secondary Ink (`#6B7280`):** Neutral gray for metrics labels, order book depths, and axis timestamps.\n- **Glass Substrate:** `rgba(255, 255, 255, 0.72)` base fill combined with `rgba(255, 255, 255, 0.95)` inner specular reflection borders. Dark borders, heavy stroke outlines, and opaque grays are strictly prohibited.\n\n## Typography\n\nTypography balances typographic precision with rapid numeric parsing:\n- **Headlines (`Space Grotesk`):** Delivers clean geometry, crisp apexes, and structural tension suited for trading instrument names and core navigation modals.\n- **Body & Controls (`Manrope`):** Smooth, open apertures provide optimal legibility at compact iOS sizes without geometric clutter.\n- **Market Data & Figures (`JetBrains Mono`):** Fixed-width tabular metrics for real-time tickers, bid/ask spreads, chart cursor readouts, and execution sizes, preventing optical jitter during price updates.\n\n## Layout & Spacing\n\nEngineered specifically around the target 402x874pt iOS mobile viewport:\n\n- **Viewport Architecture:** Full-bleed background layer dedicated to interactive chart graphics. Content floats above with safe areas reserved for dynamic island (`54pt` top) and home indicator (`34pt` bottom).\n- **Horizontal Margins:** Fixed `16px` (`margin`) screen edges to anchor floating pill docks, action buttons, and sheet panels.\n- **Component Flow:** Vertical rhythm follows micro-increments (4px / 8px / 12px) to maximize available canvas real estate for multi-timeframe charts.\n- **Dock & Island Elevation:** Floating trading triggers and time-interval selectors maintain `12px` clearance from edge boundaries, ensuring gesture safety without blocking underlying data trends.\n\n## Elevation & Depth\n\nVisual hierarchy uses physical optical dispersion rather than drop shadows or opaque borders:\n\n- **Surface Glass Recipe:** Base layer `rgba(255, 255, 255, 0.72)` supported by high-radius blur filter `backdrop-filter: blur(28px) saturate(190%)`.\n- **Specular Rim Rim Lighting:** Instead of boundary strokes, surfaces implement an inset rim glow: `box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), inset 0 -0.5px 0.5px 0 rgba(255, 255, 255, 0.3)`.\n- **Luminous Soft Shadows:** Diffusion without gray dirtiness. Shadows are ultra-diffuse and tinted by ambient light: `box-shadow: 0 12px 32px -4px rgba(17, 24, 39, 0.06), 0 4px 16px -2px rgba(10, 132, 255, 0.04)`.\n- **Layer Stacking Hierarchy:**\n  - *Tier 0 (Substrate):* Clean white canvas with interactive candle/vector series (`#FFFFFF` background).\n  - *Tier 1 (Surface Glass):* Floating intervals, toolbar pill indicators, and instrument chips (`0.72` opacity).\n  - *Tier 2 (Interactive Floating Docks):* Execution dock and quick-trade panels with active specular reflection (`0.82` opacity).\n  - *Tier 3 (Modals & Precision Sheets):* Deep blur frosted overlays with intensified top highlight rings (`0.88` opacity).\n\n## Shapes\n\nThe interface embraces organic fluid geometry inspired by continuous curvature (squircle / continuous corner smoothing):\n\n- **Continuous Capsule Form:** Buttons, status badges, indicator switchers, and floating parameter pills use full pill-radius shaping (`rounded-full`).\n- **Sheet and Dock Panels:** Floating trays and bottom cards utilize `rounded-3xl` (28pt-32pt) with smoothed corners that mirror iOS native chassis corners.\n- **Compact Chips:** Input steppers and quick-interval selectors use high pill geometry to maintain a soft, tactile, touch-friendly presence.\n\n## Components\n\n### Floating Docks & Navigation\n- **Trading Dock:** Anchored `16px` above the bottom safe area. Encased in an ultra-pure glass pill housing Buy/Sell action triggers and lot-size steppers.\n- **Timeframe Selector:** Floating horizontal pill centered at the top sub-header. Active interval displays in `#0A84FF` with a soft white glow capsule underneath; inactive tabs use `#6B7280`.\n\n### Action Buttons\n- **Primary Execution (Long):** Gradient-free high-luminance Emerald Jade (`#169873`) with white typographic ink, soft specular rim, and jade halo shadow (`0 8px 24px -2px rgba(22, 152, 115, 0.35)`).\n- **Primary Execution (Short):** Intense Crimson (`#D7355D`) with white typographic ink and crimson halo shadow (`0 8px 24px -2px rgba(215, 53, 93, 0.35)`).\n- **Secondary / Utility Controls:** Translucent frosted white pills with `#111827` glyphs and white specular inset strokes.\n\n### Candlestick Elements & Charts\n- **Bullish Candle:** Solid `#169873` body and wicks.\n- **Bearish Candle:** Solid `#D7355D` body and wicks.\n- **Crosshair Reticle:** 1px dotted `#0A84FF` with floating glass coordinate badges at axes.\n\n### Metric Chips & Data Displays\n- **Price Ticker Badges:** JetBrains Mono numbers within compact frosted pills. Change metrics (+/-) tint the surface lightly with `rgba(22, 152, 115, 0.08)` or `rgba(215, 53, 93, 0.08)`.\n- **Order Book Depth Rows:** Transparent horizontal bars rendered as soft tonal washes behind tabular prices without borders.\n\n### Input Fields & Steppers\n- Segmented numeric inputs with pure glass interiors, no border lines, and floating plus/minus circular actuators.",
+        "font": "SPACE_GROTESK",
+        "headlineFont": "SPACE_GROTESK",
+        "headlineFontFamily": "Space Grotesk",
+        "labelFont": "JETBRAINS_MONO",
+        "labelFontFamily": "JetBrains Mono",
+        "namedColors": {
+         "background": "#f9f9ff",
+         "error": "#ba1a1a",
+         "error_container": "#ffdad6",
+         "inverse_on_surface": "#edf0ff",
+         "inverse_primary": "#aac7ff",
+         "inverse_surface": "#293040",
+         "on_background": "#141b2b",
+         "on_error": "#ffffff",
+         "on_error_container": "#93000a",
+         "on_primary": "#ffffff",
+         "on_primary_container": "#fefcff",
+         "on_primary_fixed": "#001b3e",
+         "on_primary_fixed_variant": "#00468d",
+         "on_secondary": "#ffffff",
+         "on_secondary_container": "#5e6572",
+         "on_secondary_fixed": "#151c27",
+         "on_secondary_fixed_variant": "#404754",
+         "on_surface": "#141b2b",
+         "on_surface_variant": "#414754",
+         "on_tertiary": "#ffffff",
+         "on_tertiary_container": "#fffbff",
+         "on_tertiary_fixed": "#341100",
+         "on_tertiary_fixed_variant": "#793100",
+         "outline": "#717786",
+         "outline_variant": "#c0c6d6",
+         "primary": "#005ab3",
+         "primary_container": "#0073e0",
+         "primary_fixed": "#d6e3ff",
+         "primary_fixed_dim": "#aac7ff",
+         "secondary": "#585f6c",
+         "secondary_container": "#dce2f3",
+         "secondary_fixed": "#dce2f3",
+         "secondary_fixed_dim": "#c0c7d6",
+         "surface": "#f9f9ff",
+         "surface_bright": "#f9f9ff",
+         "surface_container": "#e9edff",
+         "surface_container_high": "#e1e8fd",
+         "surface_container_highest": "#dce2f7",
+         "surface_container_low": "#f1f3ff",
+         "surface_container_lowest": "#ffffff",
+         "surface_dim": "#d3daef",
+         "surface_tint": "#005db8",
+         "surface_variant": "#dce2f7",
+         "tertiary": "#9a4100",
+         "tertiary_container": "#c25300",
+         "tertiary_fixed": "#ffdbcb",
+         "tertiary_fixed_dim": "#ffb691"
+        },
+        "overrideNeutralColor": "#111827",
+        "overridePrimaryColor": "#0a84ff",
+        "overrideSecondaryColor": "#6b7280",
+        "roundness": "ROUND_FULL",
+        "spacing": {
+         "gutter": "0.75rem",
+         "margin": "1rem",
+         "space-lg": "1rem",
+         "space-md": "0.75rem",
+         "space-sm": "0.5rem",
+         "space-xl": "1.5rem",
+         "space-xs": "0.25rem"
+        },
+        "spacingScale": 2,
+        "typography": {
+         "body-lg": {
+          "fontFamily": "Manrope",
+          "fontSize": "17px",
+          "fontWeight": "500",
+          "letterSpacing": "-0.01em",
+          "lineHeight": "24px"
+         },
+         "body-md": {
+          "fontFamily": "Manrope",
+          "fontSize": "15px",
+          "fontWeight": "400",
+          "letterSpacing": "-0.005em",
+          "lineHeight": "22px"
+         },
+         "body-sm": {
+          "fontFamily": "Manrope",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "letterSpacing": "0em",
+          "lineHeight": "18px"
+         },
+         "headline-lg": {
+          "fontFamily": "Space Grotesk",
+          "fontSize": "24px",
+          "fontWeight": "600",
+          "letterSpacing": "-0.02em",
+          "lineHeight": "30px"
+         },
+         "headline-md": {
+          "fontFamily": "Space Grotesk",
+          "fontSize": "20px",
+          "fontWeight": "600",
+          "letterSpacing": "-0.015em",
+          "lineHeight": "26px"
+         },
+         "headline-xl": {
+          "fontFamily": "Space Grotesk",
+          "fontSize": "32px",
+          "fontWeight": "700",
+          "letterSpacing": "-0.03em",
+          "lineHeight": "38px"
+         },
+         "label-caps": {
+          "fontFamily": "Manrope",
+          "fontSize": "11px",
+          "fontWeight": "600",
+          "letterSpacing": "0.06em",
+          "lineHeight": "14px"
+         },
+         "label-mono-sm": {
+          "fontFamily": "JetBrains Mono",
+          "fontSize": "10px",
+          "fontWeight": "400",
+          "letterSpacing": "0.02em",
+          "lineHeight": "12px"
+         },
+         "mono-price-lg": {
+          "fontFamily": "JetBrains Mono",
+          "fontSize": "22px",
+          "fontWeight": "600",
+          "letterSpacing": "-0.02em",
+          "lineHeight": "26px"
+         },
+         "mono-price-md": {
+          "fontFamily": "JetBrains Mono",
+          "fontSize": "15px",
+          "fontWeight": "500",
+          "letterSpacing": "-0.01em",
+          "lineHeight": "20px"
+         }
+        }
+       }
+      },
+      "name": "assets/aef5362842b249d59480b9bb7c0d9d1b",
+      "version": "1"
+     }
+    },
+    {
+     "design": {
+      "screens": [
+       {
+        "designSystem": {
+         "designSystem": {
+          "displayName": "Luminous Pure Glass",
+          "styleGuidelines": "## Brand & Style\n\nThis design system expresses the discipline and clarity of an elite financial interface through an ultra-refined \"iOS 26\" optical glass aesthetic. Designed specifically for full-screen immersive chart environments, it strips away opaque containers, harsh divider lines, and visual friction in favor of crystalline floating surfaces.\n\nThe emotional tone is calm, precise, and authoritative. It combines pristine light-mode minimalism with advanced optical glassmorphism:\n- **Optical Float:** Interactive components hover effortlessly above continuous data visualizations without breaking analytical focus.\n- **Specular Precision:** Surfaces evoke chemically strengthened glass with micro-highlight rim lighting and deep Gaussian refraction.\n- **Data First:** The full-canvas candlestick chart serves as the live substrate; controls and readouts feel like weightless precision instruments resting on an illuminated optical plate.\n\n## Layout & Spacing\n\nEngineered specifically around the target 402x874pt iOS mobile viewport:\n\n- **Viewport Architecture:** Full-bleed background layer dedicated to interactive chart graphics. Content floats above with safe areas reserved for dynamic island (`54pt` top) and home indicator (`34pt` bottom).\n- **Horizontal Margins:** Fixed `16px` (`margin`) screen edges to anchor floating pill docks, action buttons, and sheet panels.\n- **Component Flow:** Vertical rhythm follows micro-increments (4px / 8px / 12px) to maximize available canvas real estate for multi-timeframe charts.\n- **Dock & Island Elevation:** Floating trading triggers and time-interval selectors maintain `12px` clearance from edge boundaries, ensuring gesture safety without blocking underlying data trends.\n\n## Elevation & Depth\n\nVisual hierarchy uses physical optical dispersion rather than drop shadows or opaque borders:\n\n- **Surface Glass Recipe:** Base layer `rgba(255, 255, 255, 0.72)` supported by high-radius blur filter `backdrop-filter: blur(28px) saturate(190%)`.\n- **Specular Rim Rim Lighting:** Instead of boundary strokes, surfaces implement an inset rim glow: `box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), inset 0 -0.5px 0.5px 0 rgba(255, 255, 255, 0.3)`.\n- **Luminous Soft Shadows:** Diffusion without gray dirtiness. Shadows are ultra-diffuse and tinted by ambient light: `box-shadow: 0 12px 32px -4px rgba(17, 24, 39, 0.06), 0 4px 16px -2px rgba(10, 132, 255, 0.04)`.\n- **Layer Stacking Hierarchy:**\n  - *Tier 0 (Substrate):* Clean white canvas with interactive candle/vector series (`#FFFFFF` background).\n  - *Tier 1 (Surface Glass):* Floating intervals, toolbar pill indicators, and instrument chips (`0.72` opacity).\n  - *Tier 2 (Interactive Floating Docks):* Execution dock and quick-trade panels with active specular reflection (`0.82` opacity).\n  - *Tier 3 (Modals & Precision Sheets):* Deep blur frosted overlays with intensified top highlight rings (`0.88` opacity).\n\n## Components\n\n### Floating Docks & Navigation\n- **Trading Dock:** Anchored `16px` above the bottom safe area. Encased in an ultra-pure glass pill housing Buy/Sell action triggers and lot-size steppers.\n- **Timeframe Selector:** Floating horizontal pill centered at the top sub-header. Active interval displays in `#0A84FF` with a soft white glow capsule underneath; inactive tabs use `#6B7280`.\n\n### Action Buttons\n- **Primary Execution (Long):** Gradient-free high-luminance Emerald Jade (`#169873`) with white typographic ink, soft specular rim, and jade halo shadow (`0 8px 24px -2px rgba(22, 152, 115, 0.35)`).\n- **Primary Execution (Short):** Intense Crimson (`#D7355D`) with white typographic ink and crimson halo shadow (`0 8px 24px -2px rgba(215, 53, 93, 0.35)`).\n- **Secondary / Utility Controls:** Translucent frosted white pills with `#111827` glyphs and white specular inset strokes.\n\n### Candlestick Elements & Charts\n- **Bullish Candle:** Solid `#169873` body and wicks.\n- **Bearish Candle:** Solid `#D7355D` body and wicks.\n- **Crosshair Reticle:** 1px dotted `#0A84FF` with floating glass coordinate badges at axes.\n\n### Metric Chips & Data Displays\n- **Price Ticker Badges:** JetBrains Mono numbers within compact frosted pills. Change metrics (+/-) tint the surface lightly with `rgba(22, 152, 115, 0.08)` or `rgba(215, 53, 93, 0.08)`.\n- **Order Book Depth Rows:** Transparent horizontal bars rendered as soft tonal washes behind tabular prices without borders.\n\n### Input Fields & Steppers\n- Segmented numeric inputs with pure glass interiors, no border lines, and floating plus/minus circular actuators.",
+          "theme": {
+           "bodyFont": "MANROPE",
+           "bodyFontFamily": "Manrope",
+           "colorMode": "LIGHT",
+           "colorVariant": "FIDELITY",
+           "customColor": "#0a84ff",
+           "designMd": "---\nname: Luminous Pure Glass\ncolors:\n  surface: '#f9f9ff'\n  surface-dim: '#d3daef'\n  surface-bright: '#f9f9ff'\n  surface-container-lowest: '#ffffff'\n  surface-container-low: '#f1f3ff'\n  surface-container: '#e9edff'\n  surface-container-high: '#e1e8fd'\n  surface-container-highest: '#dce2f7'\n  on-surface: '#141b2b'\n  on-surface-variant: '#414754'\n  inverse-surface: '#293040'\n  inverse-on-surface: '#edf0ff'\n  outline: '#717786'\n  outline-variant: '#c0c6d6'\n  surface-tint: '#005db8'\n  primary: '#005ab3'\n  on-primary: '#ffffff'\n  primary-container: '#0073e0'\n  on-primary-container: '#fefcff'\n  inverse-primary: '#aac7ff'\n  secondary: '#585f6c'\n  on-secondary: '#ffffff'\n  secondary-container: '#dce2f3'\n  on-secondary-container: '#5e6572'\n  tertiary: '#9a4100'\n  on-tertiary: '#ffffff'\n  tertiary-container: '#c25300'\n  on-tertiary-container: '#fffbff'\n  error: '#ba1a1a'\n  on-error: '#ffffff'\n  error-container: '#ffdad6'\n  on-error-container: '#93000a'\n  primary-fixed: '#d6e3ff'\n  primary-fixed-dim: '#aac7ff'\n  on-primary-fixed: '#001b3e'\n  on-primary-fixed-variant: '#00468d'\n  secondary-fixed: '#dce2f3'\n  secondary-fixed-dim: '#c0c7d6'\n  on-secondary-fixed: '#151c27'\n  on-secondary-fixed-variant: '#404754'\n  tertiary-fixed: '#ffdbcb'\n  tertiary-fixed-dim: '#ffb691'\n  on-tertiary-fixed: '#341100'\n  on-tertiary-fixed-variant: '#793100'\n  background: '#f9f9ff'\n  on-background: '#141b2b'\n  surface-variant: '#dce2f7'\ntypography:\n  headline-xl:\n    fontFamily: Space Grotesk\n    fontSize: 32px\n    fontWeight: '700'\n    lineHeight: 38px\n    letterSpacing: -0.03em\n  headline-lg:\n    fontFamily: Space Grotesk\n    fontSize: 24px\n    fontWeight: '600'\n    lineHeight: 30px\n    letterSpacing: -0.02em\n  headline-md:\n    fontFamily: Space Grotesk\n    fontSize: 20px\n    fontWeight: '600'\n    lineHeight: 26px\n    letterSpacing: -0.015em\n  body-lg:\n    fontFamily: Manrope\n    fontSize: 17px\n    fontWeight: '500'\n    lineHeight: 24px\n    letterSpacing: -0.01em\n  body-md:\n    fontFamily: Manrope\n    fontSize: 15px\n    fontWeight: '400'\n    lineHeight: 22px\n    letterSpacing: -0.005em\n  body-sm:\n    fontFamily: Manrope\n    fontSize: 13px\n    fontWeight: '400'\n    lineHeight: 18px\n    letterSpacing: 0em\n  mono-price-lg:\n    fontFamily: JetBrains Mono\n    fontSize: 22px\n    fontWeight: '600'\n    lineHeight: 26px\n    letterSpacing: -0.02em\n  mono-price-md:\n    fontFamily: JetBrains Mono\n    fontSize: 15px\n    fontWeight: '500'\n    lineHeight: 20px\n    letterSpacing: -0.01em\n  label-caps:\n    fontFamily: Manrope\n    fontSize: 11px\n    fontWeight: '600'\n    lineHeight: 14px\n    letterSpacing: 0.06em\n  label-mono-sm:\n    fontFamily: JetBrains Mono\n    fontSize: 10px\n    fontWeight: '400'\n    lineHeight: 12px\n    letterSpacing: 0.02em\nrounded:\n  sm: 0.5rem\n  DEFAULT: 1rem\n  md: 1.5rem\n  lg: 2rem\n  xl: 3rem\n  full: 9999px\nspacing:\n  gutter: 0.75rem\n  margin: 1rem\n  space-xs: 0.25rem\n  space-sm: 0.5rem\n  space-md: 0.75rem\n  space-lg: 1rem\n  space-xl: 1.5rem\n---\n\n## Brand & Style\n\nThis design system expresses the discipline and clarity of an elite financial interface through an ultra-refined \"iOS 26\" optical glass aesthetic. Designed specifically for full-screen immersive chart environments, it strips away opaque containers, harsh divider lines, and visual friction in favor of crystalline floating surfaces.\n\nThe emotional tone is calm, precise, and authoritative. It combines pristine light-mode minimalism with advanced optical glassmorphism:\n- **Optical Float:** Interactive components hover effortlessly above continuous data visualizations without breaking analytical focus.\n- **Specular Precision:** Surfaces evoke chemically strengthened glass with micro-highlight rim lighting and deep Gaussian refraction.\n- **Data First:** The full-canvas candlestick chart serves as the live substrate; controls and readouts feel like weightless precision instruments resting on an illuminated optical plate.\n\n## Colors\n\nThe palette is engineered for clinical legibility and immediate signal recognition over luminous, high-key backgrounds:\n\n- **System Accent (`#0A84FF`):** iOS Electric Blue reserved for active states, selected chart tools, primary execution buttons, and temporal focus indicators.\n- **Market Signal - Long (`#169873`):** Pine Jade green. Used for bullish candles, profit matrices, and buy confirmations. Optimized for contrast against translucent white backdrops without eye fatigue.\n- **Market Signal - Short (`#D7355D`):** Crimson Raspberry red. Used for bearish candles, drawdown warnings, and sell confirmations.\n- **Primary Ink (`#111827`):** Near-black slate for prices, primary figures, and active headings.\n- **Secondary Ink (`#6B7280`):** Neutral gray for metrics labels, order book depths, and axis timestamps.\n- **Glass Substrate:** `rgba(255, 255, 255, 0.72)` base fill combined with `rgba(255, 255, 255, 0.95)` inner specular reflection borders. Dark borders, heavy stroke outlines, and opaque grays are strictly prohibited.\n\n## Typography\n\nTypography balances typographic precision with rapid numeric parsing:\n- **Headlines (`Space Grotesk`):** Delivers clean geometry, crisp apexes, and structural tension suited for trading instrument names and core navigation modals.\n- **Body & Controls (`Manrope`):** Smooth, open apertures provide optimal legibility at compact iOS sizes without geometric clutter.\n- **Market Data & Figures (`JetBrains Mono`):** Fixed-width tabular metrics for real-time tickers, bid/ask spreads, chart cursor readouts, and execution sizes, preventing optical jitter during price updates.\n\n## Layout & Spacing\n\nEngineered specifically around the target 402x874pt iOS mobile viewport:\n\n- **Viewport Architecture:** Full-bleed background layer dedicated to interactive chart graphics. Content floats above with safe areas reserved for dynamic island (`54pt` top) and home indicator (`34pt` bottom).\n- **Horizontal Margins:** Fixed `16px` (`margin`) screen edges to anchor floating pill docks, action buttons, and sheet panels.\n- **Component Flow:** Vertical rhythm follows micro-increments (4px / 8px / 12px) to maximize available canvas real estate for multi-timeframe charts.\n- **Dock & Island Elevation:** Floating trading triggers and time-interval selectors maintain `12px` clearance from edge boundaries, ensuring gesture safety without blocking underlying data trends.\n\n## Elevation & Depth\n\nVisual hierarchy uses physical optical dispersion rather than drop shadows or opaque borders:\n\n- **Surface Glass Recipe:** Base layer `rgba(255, 255, 255, 0.72)` supported by high-radius blur filter `backdrop-filter: blur(28px) saturate(190%)`.\n- **Specular Rim Rim Lighting:** Instead of boundary strokes, surfaces implement an inset rim glow: `box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), inset 0 -0.5px 0.5px 0 rgba(255, 255, 255, 0.3)`.\n- **Luminous Soft Shadows:** Diffusion without gray dirtiness. Shadows are ultra-diffuse and tinted by ambient light: `box-shadow: 0 12px 32px -4px rgba(17, 24, 39, 0.06), 0 4px 16px -2px rgba(10, 132, 255, 0.04)`.\n- **Layer Stacking Hierarchy:**\n  - *Tier 0 (Substrate):* Clean white canvas with interactive candle/vector series (`#FFFFFF` background).\n  - *Tier 1 (Surface Glass):* Floating intervals, toolbar pill indicators, and instrument chips (`0.72` opacity).\n  - *Tier 2 (Interactive Floating Docks):* Execution dock and quick-trade panels with active specular reflection (`0.82` opacity).\n  - *Tier 3 (Modals & Precision Sheets):* Deep blur frosted overlays with intensified top highlight rings (`0.88` opacity).\n\n## Shapes\n\nThe interface embraces organic fluid geometry inspired by continuous curvature (squircle / continuous corner smoothing):\n\n- **Continuous Capsule Form:** Buttons, status badges, indicator switchers, and floating parameter pills use full pill-radius shaping (`rounded-full`).\n- **Sheet and Dock Panels:** Floating trays and bottom cards utilize `rounded-3xl` (28pt-32pt) with smoothed corners that mirror iOS native chassis corners.\n- **Compact Chips:** Input steppers and quick-interval selectors use high pill geometry to maintain a soft, tactile, touch-friendly presence.\n\n## Components\n\n### Floating Docks & Navigation\n- **Trading Dock:** Anchored `16px` above the bottom safe area. Encased in an ultra-pure glass pill housing Buy/Sell action triggers and lot-size steppers.\n- **Timeframe Selector:** Floating horizontal pill centered at the top sub-header. Active interval displays in `#0A84FF` with a soft white glow capsule underneath; inactive tabs use `#6B7280`.\n\n### Action Buttons\n- **Primary Execution (Long):** Gradient-free high-luminance Emerald Jade (`#169873`) with white typographic ink, soft specular rim, and jade halo shadow (`0 8px 24px -2px rgba(22, 152, 115, 0.35)`).\n- **Primary Execution (Short):** Intense Crimson (`#D7355D`) with white typographic ink and crimson halo shadow (`0 8px 24px -2px rgba(215, 53, 93, 0.35)`).\n- **Secondary / Utility Controls:** Translucent frosted white pills with `#111827` glyphs and white specular inset strokes.\n\n### Candlestick Elements & Charts\n- **Bullish Candle:** Solid `#169873` body and wicks.\n- **Bearish Candle:** Solid `#D7355D` body and wicks.\n- **Crosshair Reticle:** 1px dotted `#0A84FF` with floating glass coordinate badges at axes.\n\n### Metric Chips & Data Displays\n- **Price Ticker Badges:** JetBrains Mono numbers within compact frosted pills. Change metrics (+/-) tint the surface lightly with `rgba(22, 152, 115, 0.08)` or `rgba(215, 53, 93, 0.08)`.\n- **Order Book Depth Rows:** Transparent horizontal bars rendered as soft tonal washes behind tabular prices without borders.\n\n### Input Fields & Steppers\n- Segmented numeric inputs with pure glass interiors, no border lines, and floating plus/minus circular actuators.",
+           "font": "SPACE_GROTESK",
+           "headlineFont": "SPACE_GROTESK",
+           "headlineFontFamily": "Space Grotesk",
+           "labelFont": "JETBRAINS_MONO",
+           "labelFontFamily": "JetBrains Mono",
+           "namedColors": {
+            "background": "#f9f9ff",
+            "error": "#ba1a1a",
+            "error_container": "#ffdad6",
+            "inverse_on_surface": "#edf0ff",
+            "inverse_primary": "#aac7ff",
+            "inverse_surface": "#293040",
+            "on_background": "#141b2b",
+            "on_error": "#ffffff",
+            "on_error_container": "#93000a",
+            "on_primary": "#ffffff",
+            "on_primary_container": "#fefcff",
+            "on_primary_fixed": "#001b3e",
+            "on_primary_fixed_variant": "#00468d",
+            "on_secondary": "#ffffff",
+            "on_secondary_container": "#5e6572",
+            "on_secondary_fixed": "#151c27",
+            "on_secondary_fixed_variant": "#404754",
+            "on_surface": "#141b2b",
+            "on_surface_variant": "#414754",
+            "on_tertiary": "#ffffff",
+            "on_tertiary_container": "#fffbff",
+            "on_tertiary_fixed": "#341100",
+            "on_tertiary_fixed_variant": "#793100",
+            "outline": "#717786",
+            "outline_variant": "#c0c6d6",
+            "primary": "#005ab3",
+            "primary_container": "#0073e0",
+            "primary_fixed": "#d6e3ff",
+            "primary_fixed_dim": "#aac7ff",
+            "secondary": "#585f6c",
+            "secondary_container": "#dce2f3",
+            "secondary_fixed": "#dce2f3",
+            "secondary_fixed_dim": "#c0c7d6",
+            "surface": "#f9f9ff",
+            "surface_bright": "#f9f9ff",
+            "surface_container": "#e9edff",
+            "surface_container_high": "#e1e8fd",
+            "surface_container_highest": "#dce2f7",
+            "surface_container_low": "#f1f3ff",
+            "surface_container_lowest": "#ffffff",
+            "surface_dim": "#d3daef",
+            "surface_tint": "#005db8",
+            "surface_variant": "#dce2f7",
+            "tertiary": "#9a4100",
+            "tertiary_container": "#c25300",
+            "tertiary_fixed": "#ffdbcb",
+            "tertiary_fixed_dim": "#ffb691"
+           },
+           "overrideNeutralColor": "#111827",
+           "overridePrimaryColor": "#0a84ff",
+           "overrideSecondaryColor": "#6b7280",
+           "roundness": "ROUND_FULL",
+           "spacing": {
+            "gutter": "0.75rem",
+            "margin": "1rem",
+            "space-lg": "1rem",
+            "space-md": "0.75rem",
+            "space-sm": "0.5rem",
+            "space-xl": "1.5rem",
+            "space-xs": "0.25rem"
+           },
+           "spacingScale": 2,
+           "typography": {
+            "body-lg": {
+             "fontFamily": "Manrope",
+             "fontSize": "17px",
+             "fontWeight": "500",
+             "letterSpacing": "-0.01em",
+             "lineHeight": "24px"
+            },
+            "body-md": {
+             "fontFamily": "Manrope",
+             "fontSize": "15px",
+             "fontWeight": "400",
+             "letterSpacing": "-0.005em",
+             "lineHeight": "22px"
+            },
+            "body-sm": {
+             "fontFamily": "Manrope",
+             "fontSize": "13px",
+             "fontWeight": "400",
+             "letterSpacing": "0em",
+             "lineHeight": "18px"
+            },
+            "headline-lg": {
+             "fontFamily": "Space Grotesk",
+             "fontSize": "24px",
+             "fontWeight": "600",
+             "letterSpacing": "-0.02em",
+             "lineHeight": "30px"
+            },
+            "headline-md": {
+             "fontFamily": "Space Grotesk",
+             "fontSize": "20px",
+             "fontWeight": "600",
+             "letterSpacing": "-0.015em",
+             "lineHeight": "26px"
+            },
+            "headline-xl": {
+             "fontFamily": "Space Grotesk",
+             "fontSize": "32px",
+             "fontWeight": "700",
+             "letterSpacing": "-0.03em",
+             "lineHeight": "38px"
+            },
+            "label-caps": {
+             "fontFamily": "Manrope",
+             "fontSize": "11px",
+             "fontWeight": "600",
+             "letterSpacing": "0.06em",
+             "lineHeight": "14px"
+            },
+            "label-mono-sm": {
+             "fontFamily": "JetBrains Mono",
+             "fontSize": "10px",
+             "fontWeight": "400",
+             "letterSpacing": "0.02em",
+             "lineHeight": "12px"
+            },
+            "mono-price-lg": {
+             "fontFamily": "JetBrains Mono",
+             "fontSize": "22px",
+             "fontWeight": "600",
+             "letterSpacing": "-0.02em",
+             "lineHeight": "26px"
+            },
+            "mono-price-md": {
+             "fontFamily": "JetBrains Mono",
+             "fontSize": "15px",
+             "fontWeight": "500",
+             "letterSpacing": "-0.01em",
+             "lineHeight": "20px"
+            }
+           }
+          }
+         },
+         "name": "assets/aef5362842b249d59480b9bb7c0d9d1b",
+         "version": "1"
+        },
+        "deviceType": "MOBILE",
+        "generatedBy": "figaro_agent",
+        "height": "1768",
+        "htmlCode": {
+         "downloadUrl": "https://stitch.googleapis.com/v1/projects/8978791379095391159/files/86e06d4fa59149a6b9bdcf6b7c95e215:download",
+         "mimeType": "text/html",
+         "name": "projects/8978791379095391159/files/86e06d4fa59149a6b9bdcf6b7c95e215"
+        },
+        "id": "2e91dcebc5c34a41bd0855aa2cabe437",
+        "name": "projects/8978791379095391159/screens/2e91dcebc5c34a41bd0855aa2cabe437",
+        "prompt": "Design the mobile screen for App '天才交易员', strictly for iPhone (iOS 26, 402x874pt viewport), light mode, minimal frosted glass aesthetic.\nPure white canvas background (#F9F9FF / #FFFFFF).\nSame full-screen chart as 1.618: the chart is an edge-to-edge wallpaper canvas filling the entire screen (absolute inset-0), with candlestick bars, subtle grid, horizontal price axis markings, and time axis at bottom.\nABSOLUTELY NO cards stacked under the chart. All controls are floating over the chart canvas.\nFloating controls strictly styled with white frosted glass (semi-transparent white rgba(255,255,255,0.78), backdrop-blur-2xl, soft ambient shadow, specular highlight edge, NO dark borders):\n1. Top floating bar (under Dynamic Island / status bar):\n   - Top-left frosted capsule: coin logo pill with coin name 'FLY', chevron-down icon, real-time price '20.78', and a pulsing green live dot (#169873).\n   - Top-right frosted budget chip: exact text '今日 4 次 · 日亏余 7.53U'.\n2. The open position's entry and stop drawn as labelled horizontal reference lines directly on the chart:\n   - Entry line (e.g. at 20.35, subtle blue/neutral line with label '入场 20.35')\n   - Stop line (e.g. at 19.80, dashed red line #D7355D with label '止损 19.80 (-1.0R)')\n3. Slim frosted dock floating just above the action buttons with period chips: '1m', '5m', '15m' (selected/active with subtle blue tint or pill highlight), '1H', '4H', '1D'.\n4. Bottom floating action bar:\n   - Two pills side by side:\n     * '做多' with green tint (subtle #169873 translucent tint, green text/accent)\n     * '做空' with red solid (#D7355D solid fill, white text)\n     * tapping opens an iOS bottom order sheet.\n5. Floating icon-only bottom tab bar at the very bottom above home indicator:\n   - 4-5 minimalist clean outline icons (candlestick chart active, lightning/radar, shield/discipline, wallet/positions, analytics/person).\nColor tokens:\n- Accent: #0A84FF\n- Long: #169873\n- Short: #D7355D\n- Text primary: #111827\n- Secondary text: #6B7280\nSynthetic placeholder numbers only. Chinese copy exactly as given. Pure iPhone native feel, exquisite glass specular highlights.",
+        "screenMetadata": {
+         "agentType": "PRO_AGENT",
+         "status": "COMPLETE"
+        },
+        "screenType": "DESIGN",
+        "screenshot": {
+         "downloadUrl": "https://stitch.googleapis.com/v1/projects/8978791379095391159/files/36aa81ee7208464f809e7ec10399687e:download",
+         "name": "projects/8978791379095391159/files/36aa81ee7208464f809e7ec10399687e"
+        },
+        "theme": {
+         "bodyFont": "MANROPE",
+         "bodyFontFamily": "Manrope",
+         "colorMode": "LIGHT",
+         "colorVariant": "FIDELITY",
+         "customColor": "#0a84ff",
+         "font": "SPACE_GROTESK",
+         "headlineFont": "SPACE_GROTESK",
+         "headlineFontFamily": "Space Grotesk",
+         "labelFont": "JETBRAINS_MONO",
+         "labelFontFamily": "JetBrains Mono",
+         "namedColors": {
+          "background": "#f9f9ff",
+          "error": "#ba1a1a",
+          "error_container": "#ffdad6",
+          "inverse_on_surface": "#edf0ff",
+          "inverse_primary": "#aac7ff",
+          "inverse_surface": "#293040",
+          "on_background": "#141b2b",
+          "on_error": "#ffffff",
+          "on_error_container": "#93000a",
+          "on_primary": "#ffffff",
+          "on_primary_container": "#fefcff",
+          "on_primary_fixed": "#001b3e",
+          "on_primary_fixed_variant": "#00468d",
+          "on_secondary": "#ffffff",
+          "on_secondary_container": "#5e6572",
+          "on_secondary_fixed": "#151c27",
+          "on_secondary_fixed_variant": "#404754",
+          "on_surface": "#141b2b",
+          "on_surface_variant": "#414754",
+          "on_tertiary": "#ffffff",
+          "on_tertiary_container": "#fffbff",
+          "on_tertiary_fixed": "#341100",
+          "on_tertiary_fixed_variant": "#793100",
+          "outline": "#717786",
+          "outline_variant": "#c0c6d6",
+          "primary": "#005ab3",
+          "primary_container": "#0073e0",
+          "primary_fixed": "#d6e3ff",
+          "primary_fixed_dim": "#aac7ff",
+          "secondary": "#585f6c",
+          "secondary_container": "#dce2f3",
+          "secondary_fixed": "#dce2f3",
+          "secondary_fixed_dim": "#c0c7d6",
+          "surface": "#f9f9ff",
+          "surface_bright": "#f9f9ff",
+          "surface_container": "#e9edff",
+          "surface_container_high": "#e1e8fd",
+          "surface_container_highest": "#dce2f7",
+          "surface_container_low": "#f1f3ff",
+          "surface_container_lowest": "#ffffff",
+          "surface_dim": "#d3daef",
+          "surface_tint": "#005db8",
+          "surface_variant": "#dce2f7",
+          "tertiary": "#9a4100",
+          "tertiary_container": "#c25300",
+          "tertiary_fixed": "#ffdbcb",
+          "tertiary_fixed_dim": "#ffb691"
+         },
+         "overrideNeutralColor": "#111827",
+         "overridePrimaryColor": "#0a84ff",
+         "overrideSecondaryColor": "#6b7280",
+         "roundness": "ROUND_FULL",
+         "spacing": {
+          "gutter": "0.75rem",
+          "margin": "1rem",
+          "space-lg": "1rem",
+          "space-md": "0.75rem",
+          "space-sm": "0.5rem",
+          "space-xl": "1.5rem",
+          "space-xs": "0.25rem"
+         },
+         "spacingScale": 2,
+         "typography": {
+          "body-lg": {
+           "fontFamily": "Manrope",
+           "fontSize": "17px",
+           "fontWeight": "500",
+           "letterSpacing": "-0.01em",
+           "lineHeight": "24px"
+          },
+          "body-md": {
+           "fontFamily": "Manrope",
+           "fontSize": "15px",
+           "fontWeight": "400",
+           "letterSpacing": "-0.005em",
+           "lineHeight": "22px"
+          },
+          "body-sm": {
+           "fontFamily": "Manrope",
+           "fontSize": "13px",
+           "fontWeight": "400",
+           "letterSpacing": "0em",
+           "lineHeight": "18px"
+          },
+          "headline-lg": {
+           "fontFamily": "Space Grotesk",
+           "fontSize": "24px",
+           "fontWeight": "600",
+           "letterSpacing": "-0.02em",
+           "lineHeight": "30px"
+          },
+          "headline-md": {
+           "fontFamily": "Space Grotesk",
+           "fontSize": "20px",
+           "fontWeight": "600",
+           "letterSpacing": "-0.015em",
+           "lineHeight": "26px"
+          },
+          "headline-xl": {
+           "fontFamily": "Space Grotesk",
+           "fontSize": "32px",
+           "fontWeight": "700",
+           "letterSpacing": "-0.03em",
+           "lineHeight": "38px"
+          },
+          "label-caps": {
+           "fontFamily": "Manrope",
+           "fontSize": "11px",
+           "fontWeight": "600",
+           "letterSpacing": "0.06em",
+           "lineHeight": "14px"
+          },
+          "label-mono-sm": {
+           "fontFamily": "JetBrains Mono",
+           "fontSize": "10px",
+           "fontWeight": "400",
+           "letterSpacing": "0.02em",
+           "lineHeight": "12px"
+          },
+          "mono-price-lg": {
+           "fontFamily": "JetBrains Mono",
+           "fontSize": "22px",
+           "fontWeight": "600",
+           "letterSpacing": "-0.02em",
+           "lineHeight": "26px"
+          },
+          "mono-price-md": {
+           "fontFamily": "JetBrains Mono",
+           "fontSize": "15px",
+           "fontWeight": "500",
+           "letterSpacing": "-0.01em",
+           "lineHeight": "20px"
+          }
+         }
+        },
+        "title": "天才交易员 · 合约 (iOS 26 全屏K线壁纸与极简白透玻璃)",
+        "width": "780"
+       }
+      ],
+      "theme": {}
+     }
+    },
+    {
+     "text": "# 「天才交易员」iPhone 402×874pt 全屏壁纸 K 线合约工作台已交付\n\n已按照您的全部要求，为 App **「天才交易员」** 打造了符合 **iOS 26** 极简白透磨砂玻璃（White Frosted Glass）标准的合约主屏：\n\n👉 **交付画板**：`天才交易员 · 合约 (iOS 26 全屏K线壁纸与极简白透玻璃)` — **天才交易员 · 合约 (iOS 26 全屏K线壁纸与极简白透玻璃)**\n\n---\n\n### 🎨 核心视觉与交互设计细节\n\n1. **全屏壁纸 K 线架构 (Full-Screen Wallpaper Chart)**：\n   - K 线 Canvas 作为底层壁纸铺满整个 402×874pt 视口（`absolute inset-0`），顶部状态栏与底部安全区完全透出真实 K 线刻度与网格；\n   - **图表下方无任何堆叠卡片或生硬容器**，所有交互控制均以高透白磨砂玻璃浮岛形态悬浮呈现。\n\n2. **顶栏双浮动微光胶囊 (Top Floating Glass Controls)**：\n   - **左侧标的胶囊**：白透毛玻璃胶囊内聚合币种 Logo、加粗大字号 `FLY`、下拉箭头 `chevron-down`、最新实时报价 `20.78` 以及高亮呼吸绿点；\n   - **右侧风控预算芯片**：独立白透胶囊精准呈现给定中文文案 `今日 4 次 · 日亏余 7.53U`，字阶克制优雅。\n\n3. **图表持仓标线直绘 (On-Chart Position Reference Lines)**：\n   - **入场基准线**：直接在 K 线价格位 20.35 处绘制平滑水平线，配有发光端点与 `入场 20.35` 标牌；\n   - **止损防线**：在 19.80 处绘制标准红色点虚线，配有 `止损 19.80 (-1.0R)` 标牌，盈亏预期直观透彻。\n\n4. **超纤细周期悬浮坞 (Slim Frosted Period Dock)**：\n   - 悬浮在图表底部上方，收纳 `1m`、`5m`、`15m`（当前激活高亮）、`1H`、`4H`、`1D` 六个紧凑分段标签，支持快速切换。\n\n5. **底部双色下单浮动条与纯图标底栏 (Bottom Action Bar & Icon-Only Tab Bar)**：\n   - **双色下单胶囊**：并排呈现 **`做多 20.78`**（多头绿色淡透底 `rgba(22, 152, 115, 0.12)` + 翠绿文字）与 **`做空 20.77`**（空头实色饱和红 `#D7355D` + 纯白高对比文字）；\n   - **纯图标底栏 (Icon-Only Tab Bar)**：极简药丸玻璃底座，收纳 4 枚精细线性图标（合约【高亮激活】、行情/雷达、持仓/订单、个人中心），无任何文字冗余，给图表保留最大留白。\n\n6. **色彩与材质契约**：\n   - **主强调色**：Apple Blue `#0A84FF`\n   - **多头语义**：`#169873`（Long Green）\n   - **空头语义**：`#D7355D`（Short Crimson）\n   - **主文字与次级字**：`#111827` 与 `#6B7280`\n   - **材质**：高透白玻璃 `rgba(255, 255, 255, 0.75)`、双层微光镜面高光外沿与柔和投影，杜绝任何深色黑边。\n\n所有数据均为合成演示占位，画板已同步发布在画布中央，可直接查验细节！"
+    },
+    {
+     "suggestion": "点击「做多 / 做空」展开 65dvh 白透玻璃开单底抽屉交互态"
+    },
+    {
+     "suggestion": "添加持仓收益卡与保本止损（BE）动态推进标记"
+    },
+    {
+     "suggestion": "设计暗色模式（Dark Glass）自适应规范对比画板"
+    }
+   ],
+   "projectId": "8978791379095391159",
+   "sessionId": "4832612516137849153"
+  }
+ }
+}

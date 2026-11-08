@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>天才交易员 - iOS 26 Pro Chart</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary-fixed": "#dce2f3",
+            "on-surface-variant": "#414754",
+            "surface": "#f9f9ff",
+            "outline-variant": "#c0c6d6",
+            "background": "#f9f9ff",
+            "on-secondary-container": "#5e6572",
+            "on-primary": "#ffffff",
+            "surface-tint": "#005db8",
+            "surface-container": "#e9edff",
+            "surface-dim": "#d3daef",
+            "secondary": "#585f6c",
+            "on-surface": "#141b2b",
+            "on-secondary-fixed": "#151c27",
+            "on-secondary-fixed-variant": "#404754",
+            "surface-variant": "#dce2f7",
+            "primary": "#005ab3",
+            "secondary-fixed-dim": "#c0c7d6",
+            "on-background": "#141b2b",
+            "primary-fixed": "#d6e3ff",
+            "on-primary-fixed": "#001b3e",
+            "on-primary-fixed-variant": "#00468d",
+            "tertiary-fixed-dim": "#ffb691",
+            "secondary-container": "#dce2f3",
+            "inverse-surface": "#293040",
+            "surface-container-highest": "#dce2f7",
+            "on-primary-container": "#fefcff",
+            "error": "#ba1a1a",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#f1f3ff",
+            "error-container": "#ffdad6",
+            "tertiary-fixed": "#ffdbcb",
+            "on-error": "#ffffff",
+            "primary-fixed-dim": "#aac7ff",
+            "outline": "#717786",
+            "inverse-primary": "#aac7ff",
+            "tertiary": "#9a4100",
+            "on-tertiary-container": "#fffbff",
+            "surface-container-high": "#e1e8fd",
+            "primary-container": "#0073e0",
+            "on-tertiary-fixed": "#341100",
+            "tertiary-container": "#c25300",
+            "on-secondary": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "surface-bright": "#f9f9ff",
+            "inverse-on-surface": "#edf0ff",
+            "on-tertiary-fixed-variant": "#793100",
+            "on-error-container": "#93000a"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-md": "0.75rem",
+            "space-lg": "1rem",
+            "margin": "1rem",
+            "space-sm": "0.5rem",
+            "gutter": "0.75rem",
+            "space-xl": "1.5rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "body-sm": ["Manrope"],
+            "headline-md": ["Space Grotesk"],
+            "label-caps": ["Manrope"],
+            "headline-xl": ["Space Grotesk"],
+            "mono-price-lg": ["JetBrains Mono"],
+            "body-lg": ["Manrope"],
+            "headline-lg": ["Space Grotesk"],
+            "mono-price-md": ["JetBrains Mono"],
+            "body-md": ["Manrope"],
+            "label-mono-sm": ["JetBrains Mono"]
+          },
+          "fontSize": {
+            "body-sm": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "26px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600" }],
+            "headline-xl": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "mono-price-lg": ["22px", { "lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-lg": ["17px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "headline-lg": ["24px", { "lineHeight": "30px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "mono-price-md": ["15px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "body-md": ["15px", { "lineHeight": "22px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "label-mono-sm": ["10px", { "lineHeight": "12px", "letterSpacing": "0.02em", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      line-height: 1;
+      vertical-align: middle;
+    }
+    .optical-glass {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), 
+                  inset 0 -0.5px 0.5px 0 rgba(255, 255, 255, 0.3),
+                  0 12px 32px -4px rgba(17, 24, 39, 0.06), 
+                  0 4px 16px -2px rgba(10, 132, 255, 0.04);
+    }
+    .optical-glass-dock {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(32px) saturate(200%);
+      -webkit-backdrop-filter: blur(32px) saturate(200%);
+      box-shadow: inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.98),
+                  0 16px 36px -6px rgba(17, 24, 39, 0.08);
+    }
+    .optical-glass-subtle {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.9),
+                  0 4px 14px -2px rgba(17, 24, 39, 0.04);
+    }
+    @keyframes pulse-emerald {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.25); }
+    }
+    .animate-live-dot {
+      animation: pulse-emerald 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    /* iOS native canvas viewport locking */
+    body {
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased h-full w-full flex items-center justify-center p-0 m-0 overflow-hidden font-body-md">
+<!-- iPhone iOS 26 Container (402x874) -->
+<main class="relative w-full max-w-[402px] h-[874px] bg-white overflow-hidden shadow-2xl rounded-[50px] flex flex-col justify-between select-none">
+<!-- SUBSTRATE LAYER: Full Bleed Interactive Candlestick Wallpaper Chart -->
+<div class="absolute inset-0 w-full h-full pointer-events-none z-0">
+<svg class="w-full h-full" fill="none" viewbox="0 0 402 874" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<lineargradient id="chartGlow" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#0A84FF" stop-opacity="0.08"></stop>
+<stop offset="60%" stop-color="#169873" stop-opacity="0.03"></stop>
+<stop offset="100%" stop-color="#ffffff" stop-opacity="0"></stop>
+</lineargradient>
+<pattern height="48" id="lightGrid" patternunits="userSpaceOnUse" width="48">
+<path d="M 48 0 L 0 0 0 48" fill="none" stroke="#F1F3FF" stroke-width="0.8"></path>
+</pattern>
+</defs>
+<!-- Dynamic Grid Substrate -->
+<rect fill="#FFFFFF" height="874" width="402"></rect>
+<rect fill="url(#lightGrid)" height="874" width="402"></rect>
+<!-- Ambient Trend Flow Light Aura -->
+<path d="M 0 520 C 70 510, 110 460, 170 470 C 220 480, 270 380, 340 370 L 402 360 L 402 874 L 0 874 Z" fill="url(#chartGlow)"></path>
+<!-- Price Horizontal Scale Guidelines -->
+<g stroke="#E9EDFF" stroke-dasharray="3 3" stroke-width="0.75">
+<line x1="0" x2="352" y1="230" y2="230"></line>
+<line x1="0" x2="352" y1="310" y2="310"></line>
+<line x1="0" x2="352" y1="390" y2="390"></line>
+<line x1="0" x2="352" y1="470" y2="470"></line>
+<line x1="0" x2="352" y1="550" y2="550"></line>
+<line x1="0" x2="352" y1="630" y2="630"></line>
+</g>
+<!-- Right Price Axis Markings (JetBrains Mono) -->
+<g fill="#717786" font-family="JetBrains Mono" font-size="10" opacity="0.85" text-anchor="start">
+<text x="356" y="233">21.80</text>
+<text x="356" y="313">21.20</text>
+<text x="356" y="393">20.80</text>
+<text x="356" y="473">20.40</text>
+<text x="356" y="553">20.00</text>
+<text x="356" y="633">19.60</text>
+</g>
+<!-- Time Axis Markings (Bottom edge aligned) -->
+<g fill="#A0A7B8" font-family="JetBrains Mono" font-size="9" text-anchor="middle">
+<text x="50" y="805">14:00</text>
+<text x="130" y="805">14:30</text>
+<text x="210" y="805">15:00</text>
+<text x="290" y="805">15:30</text>
+<text x="365" y="805">16:00</text>
+</g>
+<!-- Candlestick Series (Historic to Current Live Candle) -->
+<!-- Candles left (Consolidation) -->
+<g stroke-linecap="round">
+<!-- C1 Red -->
+<line stroke="#D7355D" stroke-width="1.2" x1="30" x2="30" y1="560" y2="615"></line>
+<rect fill="#D7355D" height="30" rx="1.5" width="8" x="26" y="575"></rect>
+<!-- C2 Green -->
+<line stroke="#169873" stroke-width="1.2" x1="48" x2="48" y1="550" y2="600"></line>
+<rect fill="#169873" height="25" rx="1.5" width="8" x="44" y="565"></rect>
+<!-- C3 Green -->
+<line stroke="#169873" stroke-width="1.2" x1="66" x2="66" y1="540" y2="590"></line>
+<rect fill="#169873" height="32" rx="1.5" width="8" x="62" y="548"></rect>
+<!-- C4 Red -->
+<line stroke="#D7355D" stroke-width="1.2" x1="84" x2="84" y1="535" y2="575"></line>
+<rect fill="#D7355D" height="20" rx="1.5" width="8" x="80" y="542"></rect>
+<!-- C5 Red -->
+<line stroke="#D7355D" stroke-width="1.2" x1="102" x2="102" y1="520" y2="565"></line>
+<rect fill="#D7355D" height="30" rx="1.5" width="8" x="98" y="525"></rect>
+<!-- C6 Green Impulsive -->
+<line stroke="#169873" stroke-width="1.2" x1="120" x2="120" y1="485" y2="545"></line>
+<rect fill="#169873" height="42" rx="1.5" width="8" x="116" y="495"></rect>
+<!-- C7 Green Continuation -->
+<line stroke="#169873" stroke-width="1.2" x1="138" x2="138" y1="460" y2="515"></line>
+<rect fill="#169873" height="35" rx="1.5" width="8" x="134" y="470"></rect>
+<!-- C8 Retest Red -->
+<line stroke="#D7355D" stroke-width="1.2" x1="156" x2="156" y1="465" y2="505"></line>
+<rect fill="#D7355D" height="22" rx="1.5" width="8" x="152" y="472"></rect>
+<!-- C9 Doji Green -->
+<line stroke="#169873" stroke-width="1.2" x1="174" x2="174" y1="455" y2="495"></line>
+<rect fill="#169873" height="8" rx="1.5" width="8" x="170" y="470"></rect>
+<!-- C10 Green Breakout -->
+<line stroke="#169873" stroke-width="1.2" x1="192" x2="192" y1="420" y2="480"></line>
+<rect fill="#169873" height="42" rx="1.5" width="8" x="188" y="430"></rect>
+<!-- C11 Green continuation -->
+<line stroke="#169873" stroke-width="1.2" x1="210" x2="210" y1="395" y2="445"></line>
+<rect fill="#169873" height="32" rx="1.5" width="8" x="206" y="405"></rect>
+<!-- C12 Small pullback Red -->
+<line stroke="#D7355D" stroke-width="1.2" x1="228" x2="228" y1="390" y2="430"></line>
+<rect fill="#D7355D" height="18" rx="1.5" width="8" x="224" y="400"></rect>
+<!-- C13 Small green -->
+<line stroke="#169873" stroke-width="1.2" x1="246" x2="246" y1="380" y2="420"></line>
+<rect fill="#169873" height="20" rx="1.5" width="8" x="242" y="388"></rect>
+<!-- C14 Bullish run green -->
+<line stroke="#169873" stroke-width="1.2" x1="264" x2="264" y1="350" y2="400"></line>
+<rect fill="#169873" height="35" rx="1.5" width="8" x="260" y="360"></rect>
+<!-- C15 Extended top red -->
+<line stroke="#D7355D" stroke-width="1.2" x1="282" x2="282" y1="330" y2="385"></line>
+<rect fill="#D7355D" height="26" rx="1.5" width="8" x="278" y="345"></rect>
+<!-- C16 Strong consolidation green -->
+<line stroke="#169873" stroke-width="1.2" x1="300" x2="300" y1="335" y2="380"></line>
+<rect fill="#169873" height="24" rx="1.5" width="8" x="296" y="346"></rect>
+<!-- C17 Live dynamic candle at 20.78 -->
+<line stroke="#169873" stroke-width="1.4" x1="318" x2="318" y1="318" y2="368"></line>
+<rect fill="#169873" height="34" rx="1.5" width="8" x="314" y="325"></rect>
+</g>
+<!-- Current Live Price Reticle / Coordinate (20.78) -->
+<line opacity="0.75" stroke="#0A84FF" stroke-dasharray="2 3" stroke-width="1" x1="0" x2="336" y1="335" y2="335"></line>
+</svg>
+<!-- Current Price Glowing Floating Tag (Live on reticle) -->
+<div class="absolute right-[46px] top-[322px] px-2 py-0.5 rounded-full bg-primary-container text-white text-[11px] font-mono-price-md shadow-sm flex items-center gap-1">
+<span>20.78</span>
+</div>
+<!-- ENTRY REFERENCE LINE (20.35) -->
+<div class="absolute left-0 right-0 top-[476px] flex items-center z-10">
+<div class="flex-1 h-[1px] bg-primary/40"></div>
+<div class="optical-glass px-2.5 py-0.5 rounded-full mr-12 flex items-center gap-1.5 shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="text-on-surface font-mono-price-md font-semibold text-[11px] tracking-tight">入场 20.35</span>
+</div>
+</div>
+<!-- STOP REFERENCE LINE (19.80) -->
+<div class="absolute left-0 right-0 top-[590px] flex items-center z-10">
+<div class="flex-1 border-b border-dashed border-[#D7355D]/70"></div>
+<div class="optical-glass px-2.5 py-0.5 rounded-full mr-12 flex items-center gap-1.5 shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-[#D7355D]"></span>
+<span class="text-[#D7355D] font-mono-price-md font-semibold text-[11px] tracking-tight">止损 19.80 (-1.0R)</span>
+</div>
+</div>
+</div>
+<!-- TIER 1: Top Floating Header Bar (Under Dynamic Island) -->
+<header class="relative z-30 pt-12 px-space-md w-full flex items-center justify-between pointer-events-auto">
+<!-- Top Left: Coin Logo Pill & Live Ticker -->
+<button class="optical-glass h-11 px-3 rounded-full flex items-center gap-2 active:scale-95 transition-transform duration-150">
+<!-- Coin Token Avatar with Specular Edge -->
+<div class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="currency_bitcoin">currency_bitcoin</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="font-headline-md text-body-lg font-bold text-on-surface tracking-tight">FLY</span>
+<span class="material-symbols-outlined text-[15px] text-secondary" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</div>
+<div class="h-3 w-[1px] bg-outline-variant/60 mx-0.5"></div>
+<!-- Live Price & Pulsing Green Live Dot -->
+<div class="flex items-center gap-1.5">
+<span class="font-mono-price-md text-body-md font-bold text-on-surface">20.78</span>
+<span class="relative flex h-2 w-2">
+<span class="animate-live-dot absolute inline-flex h-full w-full rounded-full bg-[#169873] opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-[#169873]"></span>
+</span>
+</div>
+</button>
+<!-- Top Right: Frosted Budget & Discipline Chip -->
+<div class="optical-glass h-11 px-3.5 rounded-full flex items-center shadow-sm">
+<span class="text-[12px] font-body-sm font-semibold text-on-surface-variant tracking-normal">
+          今日 4 次 · 日亏余 7.53U
+        </span>
+</div>
+</header>
+<!-- Mid Canvas Floating Indicator: Precision Crosshair Watermark -->
+<div class="relative z-10 flex-1 pointer-events-none">
+<!-- Watermark / Status Badge -->
+<div class="absolute left-4 top-4 optical-glass-subtle px-2.5 py-1 rounded-full flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#169873]"></span>
+<span class="text-[11px] font-label-mono-sm text-secondary font-medium">多头持仓中 · 杠杆 10x</span>
+</div>
+</div>
+<!-- TIER 2 & 3: Bottom Stacking Floating Controls (Strictly Glass Over Chart) -->
+<section class="relative z-40 px-space-md pb-2 flex flex-col gap-2.5 pointer-events-auto">
+<!-- 1. Slim Frosted Dock: Timeframe Period Chips -->
+<div class="optical-glass h-9 px-2 rounded-full flex items-center justify-between shadow-sm">
+<button class="flex-1 py-1 text-center rounded-full text-[12px] font-label-caps font-semibold text-secondary hover:text-on-surface active:scale-95 transition-all">
+          1m
+        </button>
+<button class="flex-1 py-1 text-center rounded-full text-[12px] font-label-caps font-semibold text-secondary hover:text-on-surface active:scale-95 transition-all">
+          5m
+        </button>
+<!-- 15m Active Chip with Specular Pill highlight -->
+<button class="flex-1 py-1 text-center rounded-full text-[12px] font-label-caps font-bold text-primary bg-primary-fixed shadow-sm active:scale-95 transition-all">
+          15m
+        </button>
+<button class="flex-1 py-1 text-center rounded-full text-[12px] font-label-caps font-semibold text-secondary hover:text-on-surface active:scale-95 transition-all">
+          1H
+        </button>
+<button class="flex-1 py-1 text-center rounded-full text-[12px] font-label-caps font-semibold text-secondary hover:text-on-surface active:scale-95 transition-all">
+          4H
+        </button>
+<button class="flex-1 py-1 text-center rounded-full text-[12px] font-label-caps font-semibold text-secondary hover:text-on-surface active:scale-95 transition-all">
+          1D
+        </button>
+</div>
+<!-- 2. Dual Action Execution Buttons (做多 / 做空) -->
+<div class="grid grid-cols-2 gap-3 w-full">
+<!-- 做多 (Long Button): Green tint translucent, green typography & specular ring -->
+<button class="h-13 py-3 rounded-full flex items-center justify-center gap-1.5 transition-all duration-150 active:scale-95 shadow-md" id="open-long-btn" style="background: rgba(22, 152, 115, 0.14); backdrop-filter: blur(24px); box-shadow: inset 0 1px 1px 0 rgba(255,255,255,0.9), 0 8px 20px -2px rgba(22, 152, 115, 0.25);">
+<span class="material-symbols-outlined text-[19px] text-[#169873]" data-icon="north_east">north_east</span>
+<span class="font-headline-md text-headline-md font-bold text-[#169873] tracking-wide">做多</span>
+<span class="font-mono-price-md text-[13px] text-[#169873]/80 ml-0.5">20.78</span>
+</button>
+<!-- 做空 (Short Button): Solid Intense Crimson #D7355D, white text, specular rim -->
+<button class="h-13 py-3 rounded-full bg-[#D7355D] text-white flex items-center justify-center gap-1.5 transition-all duration-150 active:scale-95" id="open-short-btn" style="box-shadow: inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.4), 0 10px 24px -2px rgba(215, 53, 93, 0.38);">
+<span class="material-symbols-outlined text-[19px] text-white" data-icon="south_east">south_east</span>
+<span class="font-headline-md text-headline-md font-bold text-white tracking-wide">做空</span>
+<span class="font-mono-price-md text-[13px] text-white/90 ml-0.5">20.77</span>
+</button>
+</div>
+<!-- 3. Floating Bottom Navigation Bar (Shared Component: BottomNavBar style execution) -->
+<nav aria-label="Main Navigation" class="optical-glass-dock h-14 rounded-full flex items-center justify-around px-3 mb-1 shadow-lg">
+<!-- Tab 1: Chart (Active) -->
+<button aria-label="Candlestick Chart" class="flex items-center justify-center bg-primary text-on-primary rounded-full w-10 h-10 shadow-sm active:scale-90 transition-transform duration-150">
+<span class="material-symbols-outlined text-[20px]" data-icon="candlestick_chart">candlestick_chart</span>
+</button>
+<!-- Tab 2: Radar / Stats (Inactive) -->
+<button aria-label="Radar Signals" class="flex items-center justify-center text-secondary hover:text-primary active:scale-90 transition-transform duration-150 w-10 h-10">
+<span class="material-symbols-outlined text-[20px]" data-icon="query_stats">query_stats</span>
+</button>
+<!-- Tab 3: Discipline / Swap (Inactive) -->
+<button aria-label="Trading Rules" class="flex items-center justify-center text-secondary hover:text-primary active:scale-90 transition-transform duration-150 w-10 h-10">
+<span class="material-symbols-outlined text-[20px]" data-icon="swap_horiz">swap_horiz</span>
+</button>
+<!-- Tab 4: Profile / Person (Inactive) -->
+<button aria-label="User Account" class="flex items-center justify-center text-secondary hover:text-primary active:scale-90 transition-transform duration-150 w-10 h-10">
+<span class="material-symbols-outlined text-[20px]" data-icon="person">person</span>
+</button>
+</nav>
+<!-- iOS Home Indicator -->
+<div class="w-full flex justify-center pb-1">
+<div class="w-36 h-1 bg-on-surface/20 rounded-full"></div>
+</div>
+</section>
+<!-- iOS Glass Bottom Sheet Order Modal (Simulated Tap Trigger) -->
+<div class="fixed inset-x-0 bottom-0 max-w-[402px] mx-auto optical-glass-dock rounded-t-[36px] p-5 z-50 transform translate-y-full transition-transform duration-300 ease-out shadow-2xl flex flex-col gap-4" id="order-sheet">
+<!-- Sheet Handle -->
+<div class="w-12 h-1 bg-outline/40 rounded-full mx-auto -mt-1 cursor-pointer" id="close-sheet-handle"></div>
+<div class="flex justify-between items-center">
+<div>
+<span class="text-label-caps text-secondary uppercase font-semibold">快速下单 · 市价委托</span>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">FLY / USDT</h3>
+</div>
+<button class="w-8 h-8 rounded-full optical-glass flex items-center justify-center text-secondary" id="close-sheet-btn">
+<span class="material-symbols-outlined text-[18px]" data-icon="close">close</span>
+</button>
+</div>
+<!-- Lot Size Segmented Input -->
+<div class="optical-glass px-4 py-3 rounded-2xl flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-[11px] text-secondary font-medium">仓位数量 (手)</span>
+<span class="font-mono-price-lg text-mono-price-lg font-bold text-on-surface">1,000.00</span>
+</div>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center font-bold text-primary active:scale-90 transition-transform">-</button>
+<button class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center font-bold text-primary active:scale-90 transition-transform">+</button>
+</div>
+</div>
+<!-- Execution Trigger in Sheet -->
+<button class="w-full py-3.5 rounded-full bg-primary text-white font-headline-md font-bold text-body-lg shadow-md active:scale-95 transition-transform">
+        确认挂单 · 锁定止损
+      </button>
+</div>
+</main>
+<script>
+    // Lightweight micro-interaction for bottom order sheet
+    const orderSheet = document.getElementById('order-sheet');
+    const openLongBtn = document.getElementById('open-long-btn');
+    const openShortBtn = document.getElementById('open-short-btn');
+    const closeSheetBtn = document.getElementById('close-sheet-btn');
+    const closeSheetHandle = document.getElementById('close-sheet-handle');
+
+    function openSheet() {
+      orderSheet.classList.remove('translate-y-full');
+      orderSheet.classList.add('translate-y-0');
+    }
+
+    function closeSheet() {
+      orderSheet.classList.remove('translate-y-0');
+      orderSheet.classList.add('translate-y-full');
+    }
+
+    openLongBtn.addEventListener('click', openSheet);
+    openShortBtn.addEventListener('click', openSheet);
+    closeSheetBtn.addEventListener('click', closeSheet);
+    closeSheetHandle.addEventListener('click', closeSheet);
+  </script>
+</body></html>

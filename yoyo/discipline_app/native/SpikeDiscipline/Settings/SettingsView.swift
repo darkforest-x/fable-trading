@@ -10,6 +10,7 @@ struct SettingsView: View {
     @State private var haptics = Haptics.enabled
     @State private var barkBusy = false
     @AppStorage("spike-confirm-trades") private var confirmTrades = false
+    @AppStorage("touch.highScore") private var highScore = 0.5
 
     var body: some View {
         @Bindable var notices = notices
@@ -37,6 +38,16 @@ struct SettingsView: View {
                         }
                     }
                 } header: { Text("交易操作") }
+                Section {
+                    HStack {
+                        Text("高分阈值")
+                        Spacer()
+                        Text(String(format: "%.2f", highScore)).font(.body.monospacedDigit().weight(.semibold)).foregroundStyle(Color.accentColor)
+                    }
+                    Slider(value: $highScore, in: 0.3...0.8, step: 0.05)
+                } header: { Text("触价评分") } footer: {
+                    Text("评分达到阈值的触价在列表中高亮。服务端的“通过评分”指 live-wick6x3 模拟账户的入场门槛（触价 5m 收盘评分 ≥ 0.5）。")
+                }
                 Section {
                     Toggle("App 内报警弹窗", isOn: $notices.prefs.popup)
                     Toggle("报警声音", isOn: $notices.prefs.sound)
@@ -74,6 +85,7 @@ struct SettingsView: View {
             .onChange(of: notices.prefs) { _, _ in Haptics.select() }
             .onChange(of: appearance) { _, _ in Haptics.select() }
             .onChange(of: confirmTrades) { _, _ in Haptics.select() }
+            .onChange(of: highScore) { _, _ in Haptics.select() }
             .scrollContentBackground(.hidden)
             .background(AmbientBackground())
             .navigationTitle("设置与账户")
