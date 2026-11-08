@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from yoyo.evaluation.cloud_allmarket_screen import load_signals
+from yoyo.evaluation.cloud_allmarket_screen import _week_cluster_ci, load_signals
 from yoyo.evaluation.cloud_peak10_inputs import HOUR, ROOT, dump
 from yoyo.monitor.monday_fib import week_window
 
@@ -149,6 +149,9 @@ def main():
     result = {"counts": ledger.tag.value_counts().to_dict(), "all": metrics(ledger),
               "earlier_weekly_touches": int(ledger.touch_in_key_bar.eq(False).sum()),
               "overall": common(eligible),
+              "first_touch_inside_original_key": common(eligible[eligible.touch_in_key_bar.eq(True)]),
+              "early_stop_matched_week_interval": _week_cluster_ci(
+                  eligible, eligible[eligible.tag.eq("overlap")], metric="early", reps=2000, seed=20261108),
               "year": {str(y): common(g) for y, g in eligible.groupby("year")},
               "symbol": {s: common(g) for s, g in eligible.groupby("symbol")}}
     if not overlap.empty:
