@@ -119,6 +119,7 @@
         '<div class="bb-chart-grid">'+panel('结算净值 · 初始 1,000 USDT','<div data-equity class="bb-equity"></div>'+note('曲线按已退出事件结算，两边各从 500 USDT 独立复利。上方最大回撤采用同步 5 分钟盯市。'))+
         panel('按入场类型',table(['类型','入场数','胜率','笔均净收益'],sizes)+note('篮子成员等权，一篮计一笔。笔均净收益与组合复利收益分别计算。'))+'</div>'+
         panel('加 EMA20 条件前后',table(['组合','入场数','组合净收益','最大回撤'],[['原组合',base.event_count,pct(base.growth_pct),pct(base.max_drawdown_pct,false)],['普通 BTC 加 4H EMA20',s.event_count,pct(s.growth_pct),pct(s.max_drawdown_pct,false)]])+note('在所选区间内，对新组合每笔额外扣 0.20 个百分点的往返成本，净收益为 '+pct(stress.growth_pct)+'，最大回撤为 '+pct(stress.max_drawdown_pct,false)+'。'))+
+        (funded?'<details class="bb-panel bb-details"><summary>对照图 · 2026 年净值和日内最深回撤</summary><a href="'+BASE+'breadth-ema20-2026-equity.png" target="_blank" rel="noopener"><img loading="lazy" class="bb-comparison" src="'+BASE+'breadth-ema20-2026-equity.png" alt="原组合与加入 EMA20 条件的组合：每日收盘净值，以及每日最深的五分钟盯市回撤"></a></details>':'')+
         panel('逐年表现',table(['UTC 年','入场数','BTC','山寨篮子','年度收益'],years,true)+note('每年重新等额分配，统一只扣手续费。2026 年统计截至 10 月 27 日 UTC，已入场持仓继续跟踪至退出。'))+
         '<details class="bb-panel bb-details"><summary>查看所选区间的逐月入场统计</summary>'+table(['UTC 月','入场数','盈利笔数','胜率','笔均净收益'],monthRows,true)+'</details>'+
         (control?panel('2026 匹配随机入场对照',note(control.matched+' / '+control.total+' 次有可比入场，覆盖 '+control.matched_months+' 个月。两组笔均收益相差 '+number(control.edge_pp,3)+' 个百分点，按月检验 p = '+number(control.p_month,3)+'。急跌 BTC 的可匹配样本为 '+control.case_matched+'。')):'')+
