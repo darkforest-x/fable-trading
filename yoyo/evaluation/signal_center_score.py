@@ -102,13 +102,13 @@ def five_minute(job):
     return f[["open", "high", "low", "close", "volume"]]
 
 
-def monday_ranges(f):
+def monday_ranges(f, source_minutes=5):
     ny = f.index.tz_convert(NY)
     monday = ny.normalize() - pd.to_timedelta(ny.weekday, unit="D")
     is_mon = ny.weekday == 0
     g = f[is_mon].groupby(monday[is_mon])
     r = g.agg(high=("high", "max"), low=("low", "min"), n=("close", "size"))
-    r = r[(r.n == 288) & (r.high > r.low)].copy()
+    r = r[(r.n == 1440 // source_minutes) & (r.high > r.low)].copy()
     width = r.high - r.low
     r["upper"], r["lower"] = r.high + .618 * width, r.low - .618 * width
     r["end"] = (r.index + pd.Timedelta(days=1)).tz_convert("UTC").as_unit("ns")
@@ -117,12 +117,12 @@ def monday_ranges(f):
     return r
 
 
-def tf_bars(f, minutes):
+def tf_bars(f, minutes, source_minutes=5):
     """Complete UTC-aligned bars with EMA20/50, Wilder ATR14 and next-bar cross price."""
     b = f.resample(f"{minutes}min", origin="epoch", label="left", closed="left").agg(
         open=("open", "first"), high=("high", "max"), low=("low", "min"),
         close=("close", "last"), volume=("volume", "sum"), n=("close", "size"))
-    b = b[b.n == minutes // 5].drop(columns="n").copy()
+    b = b[b.n == minutes // source_minutes].drop(columns="n").copy()
     b.index = b.index.as_unit("ns")
     step = minutes * 60 * NS
     t = b.index.asi8
@@ -238,26 +238,29 @@ def _ctx(path):
     return _CTX
 
 
-def build_inputs(f, sym, ctx, *, key_timeframes=None):
+def build_inputs(f, sym, ctx, *, key_timeframes=None, source_minutes=5):
     """Signals, causal features, matched controls and stop schedules for one symbol.
 
     ``f`` is complete 5m OHLCV indexed by bar open. Reads no trade outcome.
     Returns (f_rounded, tick, decimals, close_ns5, signals, raw, entries, schedules).
     With key_timeframes only the key columns for those timeframes are needed;
-    skip model features and sampling of model-training controls.
+    skip model features and sampling of model-training controls. Key-only extraction also
+    accepts complete 15m OHLCV on exact open clocks with source_minutes=15.
     """
+    if source_minutes not in (5, 15) or (source_minutes != 5 and key_timeframes is None):
+        raise ValueError("15m source supports only closed-key extraction")
     f = f.copy()
     decimals = max(2, min(9, int(np.ceil(-np.log10(f[["open", "high", "low", "close"]].to_numpy().min()))) + 7))
     tick = 10.0 ** (-decimals)
     f[["open", "high", "low", "close"]] = f[["open", "high", "low", "close"]].round(decimals)
-    close_ns5 = f.index.asi8 + 300 * NS
+    close_ns5 = f.index.asi8 + source_minutes * 60 * NS
     pos_of = pd.Index(close_ns5)
-    mr = monday_ranges(f)
+    mr = monday_ranges(f, source_minutes)
     pct = stop_pct(sym)
     sig_parts, raw_parts, entries, schedules = [], [], [], {}
     timeframes = TFS.items() if key_timeframes is None else [(tf, TFS[tf]) for tf in key_timeframes]
     for tf, m in timeframes:
-        b = tf_bars(f, m)
+        b = tf_bars(f, m, source_minutes)
         if len(b) < 60:
             continue
         step = m * 60 * NS
@@ -290,7 +293,7 @@ def build_inputs(f, sym, ctx, *, key_timeframes=None):
         raw = j[side != 0]
         raw_parts.append(pd.DataFrame(dict(tf=tf, close_ns=raw.close_ns.to_numpy(), side=raw.side.to_numpy())))
         first = raw.groupby("wk").head(1).copy()
-        first = first[first.pos < len(f) - 2]
+        first = first[first.pos < len(f) - 2] if source_minutes == 5 else first[first.close_ns <= close_ns5[-1] - 600 * NS]
         if first.empty:
             continue
         s = first.side.to_numpy()
