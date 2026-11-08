@@ -1,0 +1,8 @@
+{
+  "id": "exp-cloud-close-binance-volume-20261109-v1",
+  "factor": "One entry filter based on volume of the completed original V1.7 12H key divided by the median of the prior 20 completed native 12H volumes of the same contract. Independent bins below 1x, 1x through below 2x, and at least 2x, or no filter. These inputs are already saved for the frozen Binance UM signal cohort; the OKX frozen OHLC-only study has no native volume column.",
+  "bins": {"below_median":[0,1],"one_to_two":[1,2],"double_or_more":[2,null]},
+  "parent": "Original intrabar stop/EMA, 75% at 2R, nine unlevered slots, low prior ATR priority, 90-day coverage. Frozen Binance H1 fills 2020 through 2026-09-23; only eligible decision features are joined. No model score or labels.",
+  "selection": "Rank by pre-2025 NAV amongst >=100 trades, wins >=30%, actual equal-notional and funded USDT payoff each >=2.5, conservative hourly DD <=35%. No pick if none qualify. Show 2025 and 2026 YTD, matched later controls for same selected signal parents and extra market slippage 5bp for a qualified dev pick.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_binance_volume"
+}
