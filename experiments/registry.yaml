@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-retest-cvd-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2bb363ff37
+    status: inconclusive
+    question: 'Does order-flow divergence at the second test of the same Monday 1.618 improve after-fee win rate on 15m or 1h?'
+    single_variable: 'Classify by CVD at the new limit fill versus the most adverse first probe. Both groups enter only after a separately confirmed 15m or 1h closed recovery of 0.236 times NY Monday range and a return before next Monday.'
+    result: '71,062 first tests, 49,925 distinct second fills on 632 Binance UM contracts. Settled determinate 15m divergence 101/539 (18.74%) versus 6,654/35,586 (18.70%), difference +0.04 percentage points (weekly 95% CI -3.37 to +3.51). 1h 193/1,080 (17.87%) versus 5,949/31,715 (18.76%), -0.89 points (-3.40 to +1.69). Among comparable price holds: -1.60 / +0.42 points, both intervals span zero.'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-retest-cvd-20261108-v1/summary.json
+    notes: 'All determinate divergence calls were absorption candidates; no settled regular-divergence sample. Retest-time unclassifiable views 8465 (15m) / 8260 (1h) including missing flow. Fully observable endpoint proxy differences +0.44 / -0.97 points. Native NautilusTrader 1.231.0; maker 2bp / taker 5bp, no slippage or funding, original near-edge TP / next-hour reclaim exit. Results are observational. Notion https://app.notion.com/p/4128856479af8196818ed62a13d96167'
+
   - experiment_id: exp-cloud-allmarket-screen-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 081a4befd0

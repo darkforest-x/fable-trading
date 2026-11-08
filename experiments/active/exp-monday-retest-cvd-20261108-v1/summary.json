@@ -1,0 +1,809 @@
+{
+  "symbols": 632,
+  "first_touches": 71062,
+  "distinct_retest_fills": 49925,
+  "closed_distinct_fills": 49904,
+  "distinct_shared_across_timeframes": 35732,
+  "first_utc": "2020-01-10 15:00:00+00:00",
+  "last_retest_utc": "2026-09-23 03:55:00+00:00",
+  "setup_counts": {
+    "15m": {
+      "retested": 44596,
+      "no_recovery": 13299,
+      "no_retest": 13034,
+      "no_recovery_right_censored": 89,
+      "no_retest_right_censored": 42,
+      "source_bad_event": 2
+    },
+    "1h": {
+      "retested": 41061,
+      "no_recovery": 15200,
+      "no_retest": 14658,
+      "no_recovery_right_censored": 95,
+      "no_retest_right_censored": 46,
+      "source_bad_event": 2
+    }
+  },
+  "by_timeframe": {
+    "15m": {
+      "all": {
+        "divergent": {
+          "label_events": 539,
+          "wins": 101,
+          "total": 539,
+          "rate": 0.18738404452690166,
+          "mean_net_bp": -19.036449881433402,
+          "net_bp_missing": 0
+        },
+        "none": {
+          "label_events": 35592,
+          "wins": 6654,
+          "total": 35586,
+          "rate": 0.18698364525375147,
+          "mean_net_bp": 7.421808007816374,
+          "net_bp_missing": 6
+        },
+        "diff_pp": 0.040039927315019264,
+        "ci95_pp": [
+          -3.369751104270223,
+          3.510609137364033
+        ],
+        "weeks": 350
+      },
+      "pre_retest_subbar": {
+        "divergent": {
+          "label_events": 2119,
+          "wins": 416,
+          "total": 2119,
+          "rate": 0.19631901840490798,
+          "mean_net_bp": -17.92594440601774,
+          "net_bp_missing": 0
+        },
+        "none": {
+          "label_events": 41714,
+          "wins": 8003,
+          "total": 41707,
+          "rate": 0.19188625410602536,
+          "mean_net_bp": 3.4271414360892085,
+          "net_bp_missing": 7
+        },
+        "diff_pp": 0.4432764298882619,
+        "ci95_pp": [
+          -1.4979057906514028,
+          2.3634854813927544
+        ],
+        "weeks": 350
+      },
+      "pre_retest_subbar_by_label": {
+        "absorption": {
+          "events": 2119,
+          "closed": 2119,
+          "wins": 416,
+          "win_rate": 0.19631901840490798,
+          "mean_net_bp": -17.92594440601774
+        },
+        "none": {
+          "events": 41714,
+          "closed": 41707,
+          "wins": 8003,
+          "win_rate": 0.19188625410602536,
+          "mean_net_bp": 3.4271414360892085
+        },
+        "nan": {
+          "events": 763,
+          "closed": 750,
+          "wins": 126,
+          "win_rate": 0.168,
+          "mean_net_bp": -12.371677310061461
+        }
+      },
+      "by_label": {
+        "absorption": {
+          "events": 539,
+          "closed": 539,
+          "wins": 101,
+          "win_rate": 0.18738404452690166,
+          "mean_net_bp": -19.036449881433402
+        },
+        "ambiguous": {
+          "events": 7702,
+          "closed": 7701,
+          "wins": 1664,
+          "win_rate": 0.21607583430723282,
+          "mean_net_bp": -19.335294325599254
+        },
+        "endpoint_missing": {
+          "events": 639,
+          "closed": 626,
+          "wins": 103,
+          "win_rate": 0.1645367412140575,
+          "mean_net_bp": -12.465836852156395
+        },
+        "intervening_flow_missing": {
+          "events": 124,
+          "closed": 124,
+          "wins": 23,
+          "win_rate": 0.18548387096774194,
+          "mean_net_bp": -11.896323492711252
+        },
+        "none": {
+          "events": 35592,
+          "closed": 35586,
+          "wins": 6654,
+          "win_rate": 0.18698364525375147,
+          "mean_net_bp": 7.421808007816374
+        }
+      },
+      "by_period": {
+        "2025": {
+          "divergent": {
+            "label_events": 182,
+            "wins": 30,
+            "total": 182,
+            "rate": 0.16483516483516483,
+            "mean_net_bp": -17.726013325922576,
+            "net_bp_missing": 0
+          },
+          "none": {
+            "label_events": 9936,
+            "wins": 1928,
+            "total": 9936,
+            "rate": 0.19404186795491143,
+            "mean_net_bp": 8.61108290688596,
+            "net_bp_missing": 0
+          },
+          "diff_pp": -2.92067031197466,
+          "ci95_pp": [
+            -8.325943118312091,
+            2.9645824323749825
+          ],
+          "weeks": 52
+        },
+        "2026": {
+          "divergent": {
+            "label_events": 143,
+            "wins": 30,
+            "total": 143,
+            "rate": 0.2097902097902098,
+            "mean_net_bp": -7.832355802102649,
+            "net_bp_missing": 0
+          },
+          "none": {
+            "label_events": 9736,
+            "wins": 1982,
+            "total": 9731,
+            "rate": 0.2036789641352379,
+            "mean_net_bp": 10.489141322112648,
+            "net_bp_missing": 5
+          },
+          "diff_pp": 0.6111245654971897,
+          "ci95_pp": [
+            -6.289277571278457,
+            8.478467699031539
+          ],
+          "weeks": 38
+        },
+        "through_2024": {
+          "divergent": {
+            "label_events": 214,
+            "wins": 41,
+            "total": 214,
+            "rate": 0.19158878504672897,
+            "mean_net_bp": -27.63778121997204,
+            "net_bp_missing": 0
+          },
+          "none": {
+            "label_events": 15920,
+            "wins": 2744,
+            "total": 15919,
+            "rate": 0.1723726364721402,
+            "mean_net_bp": 4.804504415971884,
+            "net_bp_missing": 1
+          },
+          "diff_pp": 1.9216148574588754,
+          "ci95_pp": [
+            -3.190782001111102,
+            7.539520286488225
+          ],
+          "weeks": 260
+        }
+      },
+      "by_side": {
+        "-1": {
+          "divergent": {
+            "label_events": 126,
+            "wins": 18,
+            "total": 126,
+            "rate": 0.14285714285714285,
+            "mean_net_bp": -31.146538517304165,
+            "net_bp_missing": 0
+          },
+          "none": {
+            "label_events": 18885,
+            "wins": 3921,
+            "total": 18880,
+            "rate": 0.20768008474576272,
+            "mean_net_bp": 5.914222567030165,
+            "net_bp_missing": 5
+          },
+          "diff_pp": -6.482294188861987,
+          "ci95_pp": [
+            -12.146776544132306,
+            0.25735265137684027
+          ],
+          "weeks": 347
+        },
+        "1": {
+          "divergent": {
+            "label_events": 413,
+            "wins": 83,
+            "total": 413,
+            "rate": 0.2009685230024213,
+            "mean_net_bp": -15.341846568794868,
+            "net_bp_missing": 0
+          },
+          "none": {
+            "label_events": 16707,
+            "wins": 2733,
+            "total": 16706,
+            "rate": 0.16359391835268766,
+            "mean_net_bp": 9.125579893488803,
+            "net_bp_missing": 1
+          },
+          "diff_pp": 3.7374604649733634,
+          "ci95_pp": [
+            -0.1790837567983429,
+            7.821152589242388
+          ],
+          "weeks": 315
+        }
+      },
+      "both_endpoints_one_minute": {
+        "divergent": {
+          "label_events": 382,
+          "wins": 69,
+          "total": 382,
+          "rate": 0.1806282722513089,
+          "mean_net_bp": -30.878585327717506,
+          "net_bp_missing": 0
+        },
+        "none": {
+          "label_events": 16506,
+          "wins": 3587,
+          "total": 16500,
+          "rate": 0.2173939393939394,
+          "mean_net_bp": 11.643378180507828,
+          "net_bp_missing": 6
+        },
+        "diff_pp": -3.6765667142630494,
+        "ci95_pp": [
+          -7.432012158169374,
+          0.28625921932965676
+        ],
+        "weeks": 344
+      },
+      "held_extreme_within_quarter_atr": {
+        "divergent": {
+          "label_events": 539,
+          "wins": 101,
+          "total": 539,
+          "rate": 0.18738404452690166,
+          "mean_net_bp": -19.036449881433402,
+          "net_bp_missing": 0
+        },
+        "none": {
+          "label_events": 955,
+          "wins": 194,
+          "total": 954,
+          "rate": 0.20335429769392033,
+          "mean_net_bp": -1.4435741675876175,
+          "net_bp_missing": 1
+        },
+        "diff_pp": -1.5970253167018666,
+        "ci95_pp": [
+          -5.926772263092294,
+          2.771749521486911
+        ],
+        "weeks": 299
+      },
+      "pierced_extreme": {
+        "divergent": {
+          "label_events": 0,
+          "wins": 0,
+          "total": 0,
+          "rate": null,
+          "mean_net_bp": null,
+          "net_bp_missing": 0
+        },
+        "none": {
+          "label_events": 1,
+          "wins": 0,
+          "total": 1,
+          "rate": 0.0,
+          "mean_net_bp": -73.5342746037523,
+          "net_bp_missing": 0
+        },
+        "diff_pp": null,
+        "ci95_pp": null,
+        "weeks": 2
+      },
+      "ambiguity_bounds": {
+        "left_arm": [
+          "absorption",
+          "regular"
+        ],
+        "right_arm": [
+          "none"
+        ],
+        "left": {
+          "possible_label_events": 8241,
+          "minimum_label_denominator": 539,
+          "maximum_label_denominator": 8241,
+          "possible_outcome_denominator": 8240,
+          "minimum_denominator": 539,
+          "maximum_denominator": 8240,
+          "outcome_denominator_scope": "numeric net_bp events; ties remain in total",
+          "mandatory_outcomes": {
+            "n": 539,
+            "wins": 101,
+            "losses": 438,
+            "flat": 0
+          },
+          "optional_outcomes": {
+            "n": 7701,
+            "wins": 1664,
+            "losses": 6037,
+            "flat": 0
+          },
+          "win_rate_bounds": [
+            0.015358880778588808,
+            0.8011802088061734
+          ],
+          "mean_net_bp_bounds": [
+            -424.8271369785633,
+            328.71200453594633
+          ]
+        },
+        "right": {
+          "possible_label_events": 43294,
+          "minimum_label_denominator": 35592,
+          "maximum_label_denominator": 43294,
+          "possible_outcome_denominator": 43287,
+          "minimum_denominator": 35586,
+          "maximum_denominator": 43287,
+          "outcome_denominator_scope": "numeric net_bp events; ties remain in total",
+          "mandatory_outcomes": {
+            "n": 35586,
+            "wins": 6654,
+            "losses": 28932,
+            "flat": 0
+          },
+          "optional_outcomes": {
+            "n": 7701,
+            "wins": 1664,
+            "losses": 6037,
+            "flat": 0
+          },
+          "win_rate_bounds": [
+            0.15986353698676212,
+            0.2233020134228188
+          ],
+          "mean_net_bp_bounds": [
+            -13.718222066941827,
+            25.04222421428655
+          ]
+        },
+        "joint_feasible_set_overlap_events": 7701,
+        "win_rate_diff_bounds": [
+          -0.20794313264423,
+          0.6413166718194112
+        ],
+        "mean_net_bp_diff_bounds": [
+          -449.86936119284985,
+          342.4302266028882
+        ],
+        "conservative_difference_bound": true,
+        "sharp_for_win_rate_difference": true,
+        "sharp_for_joint_difference": false,
+        "sharpness_by_metric": {
+          "win_rate_diff": true,
+          "mean_net_bp_diff": false
+        },
+        "sharpness_note": "Win-rate difference bounds are sharp when both arms have fixed numeric outcomes, or their feasible memberships do not overlap. Mean-net-bp bounds are guaranteed sharp when feasible memberships do not overlap; with overlap they are conservative outer bounds.",
+        "unknown_feasible_set_outcomes_excluded": 750,
+        "missing_net_bp_events_excluded": 7,
+        "denominator_note": "Bounds use numeric-net_bp events per arm. Denominators range from mandatory to all feasible arm members. Events with no feasible set are excluded, never assigned to none."
+      }
+    },
+    "1h": {
+      "all": {
+        "divergent": {
+          "label_events": 1080,
+          "wins": 193,
+          "total": 1080,
+          "rate": 0.1787037037037037,
+          "mean_net_bp": -9.430703932300561,
+          "net_bp_missing": 0
+        },
+        "none": {
+          "label_events": 31721,
+          "wins": 5949,
+          "total": 31715,
+          "rate": 0.18757685637710864,
+          "mean_net_bp": 5.88921898930312,
+          "net_bp_missing": 6
+        },
+        "diff_pp": -0.8873152673404938,
+        "ci95_pp": [
+          -3.3959882532854957,
+          1.6912460799799238
+        ],
+        "weeks": 350
+      },
+      "pre_retest_subbar": {
+        "divergent": {
+          "label_events": 3037,
+          "wins": 555,
+          "total": 3037,
+          "rate": 0.18274613105037865,
+          "mean_net_bp": -19.48874916680279,
+          "net_bp_missing": 0
+        },
+        "none": {
+          "label_events": 37238,
+          "wins": 7164,
+          "total": 37231,
+          "rate": 0.1924202949155274,
+          "mean_net_bp": 2.342889938935642,
+          "net_bp_missing": 7
+        },
+        "diff_pp": -0.9674163865148744,
+        "ci95_pp": [
+          -2.724663214555767,
+          0.8599880068401973
+        ],
+        "weeks": 350
+      },
+      "pre_retest_subbar_by_label": {
+        "absorption": {
+          "events": 3037,
+          "closed": 3037,
+          "wins": 555,
+          "win_rate": 0.18274613105037865,
+          "mean_net_bp": -19.48874916680279
+        },
+        "none": {
+          "events": 37238,
+          "closed": 37231,
+          "wins": 7164,
+          "win_rate": 0.1924202949155274,
+          "mean_net_bp": 2.342889938935642
+        },
+        "nan": {
+          "events": 786,
+          "closed": 774,
+          "wins": 129,
+          "win_rate": 0.16666666666666666,
+          "mean_net_bp": -28.111698820688765
+        }
+      },
+      "by_label": {
+        "absorption": {
+          "events": 1080,
+          "closed": 1080,
+          "wins": 193,
+          "win_rate": 0.1787037037037037,
+          "mean_net_bp": -9.430703932300561
+        },
+        "ambiguous": {
+          "events": 7474,
+          "closed": 7473,
+          "wins": 1577,
+          "win_rate": 0.2110263615683126,
+          "mean_net_bp": -19.878310705463814
+        },
+        "endpoint_missing": {
+          "events": 669,
+          "closed": 657,
+          "wins": 108,
+          "win_rate": 0.1643835616438356,
+          "mean_net_bp": -31.005393587487067
+        },
+        "intervening_flow_missing": {
+          "events": 117,
+          "closed": 117,
+          "wins": 21,
+          "win_rate": 0.1794871794871795,
+          "mean_net_bp": -11.862489745590663
+        },
+        "none": {
+          "events": 31721,
+          "closed": 31715,
+          "wins": 5949,
+          "win_rate": 0.18757685637710864,
+          "mean_net_bp": 5.88921898930312
+        }
+      },
+      "by_period": {
+        "2025": {
+          "divergent": {
+            "label_events": 366,
+            "wins": 53,
+            "total": 366,
+            "rate": 0.1448087431693989,
+            "mean_net_bp": -21.191728353873916,
+            "net_bp_missing": 0
+          },
+          "none": {
+            "label_events": 8854,
+            "wins": 1727,
+            "total": 8854,
+            "rate": 0.1950530833521572,
+            "mean_net_bp": 5.403585631064016,
+            "net_bp_missing": 0
+          },
+          "diff_pp": -5.024434018275831,
+          "ci95_pp": [
+            -9.277190390380158,
+            -0.8710894342459431
+          ],
+          "weeks": 52
+        },
+        "2026": {
+          "divergent": {
+            "label_events": 260,
+            "wins": 65,
+            "total": 260,
+            "rate": 0.25,
+            "mean_net_bp": 17.269380588371224,
+            "net_bp_missing": 0
+          },
+          "none": {
+            "label_events": 8645,
+            "wins": 1742,
+            "total": 8640,
+            "rate": 0.20162037037037037,
+            "mean_net_bp": 7.533711243016306,
+            "net_bp_missing": 5
+          },
+          "diff_pp": 4.837962962962964,
+          "ci95_pp": [
+            -1.0623286405444452,
+            10.469361835115164
+          ],
+          "weeks": 38
+        },
+        "through_2024": {
+          "divergent": {
+            "label_events": 454,
+            "wins": 75,
+            "total": 454,
+            "rate": 0.16519823788546256,
+            "mean_net_bp": -15.240146745249495,
+            "net_bp_missing": 0
+          },
+          "none": {
+            "label_events": 14222,
+            "wins": 2480,
+            "total": 14221,
+            "rate": 0.17438998663947683,
+            "mean_net_bp": 5.1924595969795915,
+            "net_bp_missing": 1
+          },
+          "diff_pp": -0.9191748754014267,
+          "ci95_pp": [
+            -4.331648114409948,
+            2.799753196213773
+          ],
+          "weeks": 260
+        }
+      },
+      "by_side": {
+        "-1": {
+          "divergent": {
+            "label_events": 211,
+            "wins": 32,
+            "total": 211,
+            "rate": 0.15165876777251186,
+            "mean_net_bp": -20.17631386699996,
+            "net_bp_missing": 0
+          },
+          "none": {
+            "label_events": 17261,
+            "wins": 3535,
+            "total": 17256,
+            "rate": 0.20485628187297172,
+            "mean_net_bp": 3.5796387569364323,
+            "net_bp_missing": 5
+          },
+          "diff_pp": -5.319751410045987,
+          "ci95_pp": [
+            -9.973259695389434,
+            -0.24785381165739265
+          ],
+          "weeks": 346
+        },
+        "1": {
+          "divergent": {
+            "label_events": 869,
+            "wins": 161,
+            "total": 869,
+            "rate": 0.1852704257767549,
+            "mean_net_bp": -6.821585754830398,
+            "net_bp_missing": 0
+          },
+          "none": {
+            "label_events": 14460,
+            "wins": 2414,
+            "total": 14459,
+            "rate": 0.16695483781727644,
+            "mean_net_bp": 8.645572574593912,
+            "net_bp_missing": 1
+          },
+          "diff_pp": 1.8315587959478463,
+          "ci95_pp": [
+            -1.105212913710812,
+            4.943219226417947
+          ],
+          "weeks": 313
+        }
+      },
+      "both_endpoints_one_minute": {
+        "divergent": {
+          "label_events": 681,
+          "wins": 125,
+          "total": 681,
+          "rate": 0.18355359765051396,
+          "mean_net_bp": -18.96988646065366,
+          "net_bp_missing": 0
+        },
+        "none": {
+          "label_events": 12206,
+          "wins": 2711,
+          "total": 12200,
+          "rate": 0.22221311475409836,
+          "mean_net_bp": 8.557295541382091,
+          "net_bp_missing": 6
+        },
+        "diff_pp": -3.8659517103584395,
+        "ci95_pp": [
+          -7.010526837664926,
+          -0.7176951780802487
+        ],
+        "weeks": 341
+      },
+      "held_extreme_within_quarter_atr": {
+        "divergent": {
+          "label_events": 1079,
+          "wins": 193,
+          "total": 1079,
+          "rate": 0.1788693234476367,
+          "mean_net_bp": -9.389769311974618,
+          "net_bp_missing": 0
+        },
+        "none": {
+          "label_events": 1698,
+          "wins": 296,
+          "total": 1695,
+          "rate": 0.17463126843657817,
+          "mean_net_bp": -10.141185017837953,
+          "net_bp_missing": 3
+        },
+        "diff_pp": 0.42380550110585335,
+        "ci95_pp": [
+          -2.9561187860860025,
+          4.0189271603541785
+        ],
+        "weeks": 319
+      },
+      "pierced_extreme": {
+        "divergent": {
+          "label_events": 0,
+          "wins": 0,
+          "total": 0,
+          "rate": null,
+          "mean_net_bp": null,
+          "net_bp_missing": 0
+        },
+        "none": {
+          "label_events": 1,
+          "wins": 0,
+          "total": 1,
+          "rate": 0.0,
+          "mean_net_bp": -73.5342746037523,
+          "net_bp_missing": 0
+        },
+        "diff_pp": null,
+        "ci95_pp": null,
+        "weeks": 2
+      },
+      "ambiguity_bounds": {
+        "left_arm": [
+          "absorption",
+          "regular"
+        ],
+        "right_arm": [
+          "none"
+        ],
+        "left": {
+          "possible_label_events": 8554,
+          "minimum_label_denominator": 1080,
+          "maximum_label_denominator": 8554,
+          "possible_outcome_denominator": 8553,
+          "minimum_denominator": 1080,
+          "maximum_denominator": 8553,
+          "outcome_denominator_scope": "numeric net_bp events; ties remain in total",
+          "mandatory_outcomes": {
+            "n": 1080,
+            "wins": 193,
+            "losses": 887,
+            "flat": 0
+          },
+          "optional_outcomes": {
+            "n": 7473,
+            "wins": 1577,
+            "losses": 5896,
+            "flat": 0
+          },
+          "win_rate_bounds": [
+            0.027666284403669725,
+            0.6661648475724501
+          ],
+          "mean_net_bp_bounds": [
+            -276.81452442731893,
+            241.37330501128676
+          ]
+        },
+        "right": {
+          "possible_label_events": 39195,
+          "minimum_label_denominator": 31721,
+          "maximum_label_denominator": 39195,
+          "possible_outcome_denominator": 39188,
+          "minimum_denominator": 31715,
+          "maximum_denominator": 39188,
+          "outcome_denominator_scope": "numeric net_bp events; ties remain in total",
+          "mandatory_outcomes": {
+            "n": 31715,
+            "wins": 5949,
+            "losses": 25766,
+            "flat": 0
+          },
+          "optional_outcomes": {
+            "n": 7473,
+            "wins": 1577,
+            "losses": 5896,
+            "flat": 0
+          },
+          "win_rate_bounds": [
+            0.1581718114381431,
+            0.22606031479034003
+          ],
+          "mean_net_bp_bounds": [
+            -16.510408109659867,
+            24.669665451364978
+          ]
+        },
+        "joint_feasible_set_overlap_events": 7473,
+        "win_rate_diff_bounds": [
+          -0.1983940303866703,
+          0.507993036134307
+        ],
+        "mean_net_bp_diff_bounds": [
+          -301.4841898786839,
+          257.88371312094665
+        ],
+        "conservative_difference_bound": true,
+        "sharp_for_win_rate_difference": true,
+        "sharp_for_joint_difference": false,
+        "sharpness_by_metric": {
+          "win_rate_diff": true,
+          "mean_net_bp_diff": false
+        },
+        "sharpness_note": "Win-rate difference bounds are sharp when both arms have fixed numeric outcomes, or their feasible memberships do not overlap. Mean-net-bp bounds are guaranteed sharp when feasible memberships do not overlap; with overlap they are conservative outer bounds.",
+        "unknown_feasible_set_outcomes_excluded": 774,
+        "missing_net_bp_events_excluded": 7,
+        "denominator_note": "Bounds use numeric-net_bp events per arm. Denominators range from mandatory to all feasible arm members. Events with no feasible set are excluded, never assigned to none."
+      }
+    }
+  }
+}
