@@ -1,0 +1,17 @@
+{
+  "experiment_id": "exp-monday-pa-followthrough-20261108-v1",
+  "source_experiment": "exp-monday-12h-partial-recovery-20261026-v1",
+  "symbols": ["BTC", "ETH"],
+  "first_ny_week": "2024-01-01",
+  "last_ny_week": "2026-10-19",
+  "split_utc": "2026-01-01T00:00:00Z",
+  "horizon_5m_bars": 48,
+  "bootstrap_draws": 10000,
+  "seed": 20261108,
+  "cohort": "Full OKX NY weeks in the common archive; first post-Monday touch of each side using the monitor's unrounded levels. Include both directions. Require two adjacent strict inside closes; neither the confirmation nor its four-hour label may pass the weekly reset.",
+  "factor": "Second close strictly above touch-bar high (lower touch) or below touch-bar low (upper touch), versus two inside closes without breaking that extreme. No threshold sweep.",
+  "primary_outcome": "At exactly 4h after the second close, is price strictly further inward than that second close? Ties count as no. This is a directional price label, with no entries, projected trading returns or fees.",
+  "inference": "Report 2024-25 and 2026 separately, each asset and both, both directions as diagnostics. Resample complete NY week clusters within each period including zero-event weeks. A positive group difference with a lower bound above zero in 2026 and positive data in both assets is evidence for prospective follow-up only. No trading decision.",
+  "training_eligible": false,
+  "production_eligible": false
+}
