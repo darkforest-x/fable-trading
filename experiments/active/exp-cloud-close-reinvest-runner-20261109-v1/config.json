@@ -1,0 +1,47 @@
+{
+  "id": "exp-cloud-close-reinvest-runner-20261109-v1",
+  "question": "Does one cash-capped re-entry after the original 2R partial has closed improve the existing OKX 2/3-at-2R plus 1/3 cloud-runner funded account?",
+  "single_variable": "At most one additional position per originally funded signal: buy back the already-closed 2/3 partial at the first existing profit-confirm-entry H1 open, after its completed 12H close confirms the original shadow at +2R.",
+  "baseline": {
+    "venue": "OKX USDT perpetual",
+    "starting_cash_usdt": 1000,
+    "slots": 9,
+    "position": "2/3 maker limit at 2R plus 1/3 unchanged original cloud runner",
+    "selection_and_order": "Existing value-based 90-day eligibility, original per-entry low-prior-ATR order, same-contract exclusion, and funded event set from cloud_close_eligibility_repair/thirds",
+    "frozen_funded_ledger": "experiments/active/exp-cloud-close-eligibility-repair-20261109-v1/thirds/funded_OKX.csv.gz"
+  },
+  "reentry": {
+    "opportunity_source": "experiments/active/exp-cloud-close-profit-confirm-entry-20261109-v1/opportunities.csv.gz",
+    "source_semantics": "Reuse the previously generated real-signal 12H confirmation path; shadow PnL is never credited.",
+    "partial_fill_gate": "The matching original 2R target leg must have exited in a strictly earlier H1 bar than the re-entry open.",
+    "runner_live_gate": "The original runner must remain open at the re-entry H1 open; an original open-phase exit at that same timestamp is already closed and disqualifies the candidate.",
+    "direction": "Same symbol and side as the original funded event.",
+    "entry": "Exact H1 opening quote at the existing profit-confirm-entry confirmation boundary.",
+    "protective_exit": "Reuse the existing +0.5 original-R protected shadow path and its native exit; if the original runner exits in an earlier phase of the same H1 bar, synchronize the add-on close to the runner fill. Require the shadow exit no later than the runner exit. Same-bar unequal stop fills require an OHLC barrier-order proof.",
+    "frequency": "At most one re-entry for each original funded signal; no new signal or shadow trade is added."
+  },
+  "capital_and_execution": {
+    "max_addon_notional": "Minimum of the actually funded original 2R leg entry notional and VectorBT current free cash at the order callback.",
+    "leverage": "None; lock cash for every long and short order; never permit a negative-cash fill.",
+    "same_open_priority": "All original target/runner callbacks retain their frozen per-slot order and run before add-on callbacks at the same H1 open; add-ons may consume only remaining free cash.",
+    "original_runner": "Unchanged; the same original slot remains occupied through runner exit, and the re-entry closes no later than the runner.",
+    "fees": "Original market entries and market/stop exits taker 5bp per fill; original 2R resting target maker 2bp; re-entry entry and exit taker 5bp each.",
+    "slippage": "Zero in the registered actual case; optional 5bp per market fill only if the development gate passes.",
+    "not_included": "Perpetual funding, book impact, exchange liquidation tiers, and capacity beyond available cash."
+  },
+  "evaluation": {
+    "chronological_periods": ["all", "development_through_2024-12-31", "2025", "2026"],
+    "development_gate": "At least 100 closed position rows, net win rate >=30%, equal-notional net payoff >=2.5, USDT net payoff >=2.5, and conservative OHLC DD bound <=35%.",
+    "conditional_checks": "Only after development passes, evaluate the pre-existing matched control path, paired actual subset, and +5bp market-fill slippage.",
+    "accounting": "One shared 1000U VectorBT cash account; record actual quantity, per-position fee-net cash PnL, NAV, intrahour OHLC upper/lower NAV and conservative drawdown bound. Primary win/payoff metrics count one row per original parent with add-on PnL merged into it; report add-on legs separately without double-counting them.",
+    "zero_add_reconciliation": "Before the reinvestment case, run the same local callback with add-ons disabled and require all 1,569 frozen original event cash PnLs/notionals plus every hourly NAV/open/upper/lower field to match the frozen funded account. Stop if this parity gate fails."
+  },
+  "implementation": {
+    "engine": "VectorBT Portfolio.from_order_func with cash_sharing=true and local account callback",
+    "source_paths": "experiments/active/exp-cloud-close-reward-20261109-v1/paths.csv.gz",
+    "source_quotes": "Existing OKX H1 bars loaded by cloud_close_reward_account.quotes",
+    "builder": "yoyo/evaluation/cloud_close_reinvest_runner.py",
+    "smoke_command": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_reinvest_runner --smoke",
+    "full_command": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_reinvest_runner"
+  }
+}
