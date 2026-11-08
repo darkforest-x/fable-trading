@@ -32,7 +32,7 @@ CONTEXT_MS = 3 * 60 * 60 * 1000
 PERIOD_MS = {"BTC": 60 * 60 * 1000, "ALT": 15 * 60 * 1000}
 EXPECTED_EVENTS = 398
 EXPECTED_2026_EVENTS = 48
-SYMBOL_RE = re.compile(r"^[A-Z0-9]{1,64}USDT$")
+SYMBOL_RE = re.compile(r"^\w{1,64}USDT$")
 FILE_KEY_RE = re.compile(r"^[A-Za-z0-9_-]{1,100}$")
 OHLC = ("open", "high", "low", "close")
 
