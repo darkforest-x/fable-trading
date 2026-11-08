@@ -9,6 +9,7 @@ from yoyo.evaluation import cloud_close_eligibility_repair as repair
 from yoyo.evaluation import cloud_close_reward_account as wallet
 from yoyo.evaluation import cloud_close_same_time_control as pair
 from yoyo.evaluation import cloud_close_scaleout as split
+from yoyo.evaluation import cloud_close_thirds as thirds
 
 EXP = wallet.ROOT/'experiments/active/exp-cloud-close-second-reclaim-20261109-v1'
 SHARE = 2 / 3
@@ -55,6 +56,24 @@ def meets(row):
     return bool(wallet.qualifies(row) and row['payoff_usdt']>=2.5 and row['trades']>=100)
 
 
+def same_parent_diagnostic(second):
+    """Compare two observed entry times in the same week after the second key has occurred."""
+    original = thirds.okx_paths()
+    first = pair.returns(original[~original.is_control],SHARE)
+    later = pair.returns(second,SHARE)
+    common = first.join(later,how='inner',lsuffix='_first',rsuffix='_second')
+    if not common.entry_second.gt(common.entry_first).all():
+        raise ValueError('Second key must be strictly later in every same-parent pair')
+    difference = common.net_second-common.net_first
+    interval,weeks = pair.uncertainty.draws_by_week(difference,common.entry_first)
+    return dict(eligible_at_both_clocks=len(common),signal_weeks=weeks,
+                mean_first_pct=100*common.net_first.mean(),mean_second_pct=100*common.net_second.mean(),
+                mean_difference_pp=100*difference.mean(),difference_95pct_interval_pp=interval,
+                second_improved_pct=100*difference.gt(0).mean(),
+                median_wait_hours=(common.entry_second-common.entry_first).median()/wallet.HOUR,
+                interpretation='Retrospective same-parent equal-notional diagnostic. The existence of a later key was unknown when the first key closed.')
+
+
 def main():
     if (EXP/'summary.json').is_file():
         raise FileExistsError('Funded second-reclaim experiment already exists')
@@ -86,7 +105,8 @@ def main():
     summary = dict(second_reclaim_account=audit,eligible_parent_pairs=controls.parent_id.nunique(),
                    first_reference_refined_dd_upper_pct=refined['refined_upper_pct'],
                    eligible_dev=meets(actual['dev']),passes_full_risk_and_payoff=meets(actual['all']),
-                   reaches_wealth_target=bool(actual['all']['final_usdt']>1_001_000),checks=checks)
+                   reaches_wealth_target=bool(actual['all']['final_usdt']>1_001_000),checks=checks,
+                   same_parent_diagnostic=same_parent_diagnostic(real))
     (EXP/'summary.json').write_text(json.dumps(summary,indent=2,allow_nan=False)+'\n')
     print(table[table.period.eq('all')].to_string(index=False))
 
