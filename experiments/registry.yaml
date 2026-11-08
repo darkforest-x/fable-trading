@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-live-wick-deep-midpoint-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1e2624e516
+    status: rejected
+    question: Can the same E20 entries improve payoff by giving the deeper entry closes a midpoint target?
+    single_variable: Exit at the Monday midpoint only for the previously defined at-least-1.5-percent-beyond entry band. Keep original near target elsewhere.
+    result: 398 paired candidates, overall payoff 0.957 to 0.982 and mean net falls 4.74bp. From 2025 254 funded in both accounts, payoff 0.903 to 0.906, average net 145.50 to 117.97bp, wins 65.75 to 62.60 percent, realized drawdown 19.27 to 25.07 percent. 2026 through September payoff 0.859 to 0.801.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-live-wick-deep-midpoint-20261109-v1/summary.json
+    notes: Saved worst-of-two native legs on identical entry IDs, no new trades or sizing change. From-2025 paired weekly 95 percent interval for mean difference -83.99 to +25.88bp. P=0.969 versus random midpoint assignment within year and side. Notion 4128856479af8135a1d2c5b584caf11e.
+
   - experiment_id: exp-live-wick-score040-oct-20261109-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 8889a8ce6a
