@@ -86,7 +86,10 @@ def funded_relative(events,curve):
         times=pd.date_range(t.decision,t.exit_time,freq='5min')
         marks[t.decision]=curve.loc[times].to_numpy()/wealth
         wealth*=1+t.funded_pct/100
-        np.testing.assert_allclose(curve.at[t.exit_time],wealth,atol=1e-7)
+        if not events.decision.eq(t.exit_time).any():
+            np.testing.assert_allclose(curve.at[t.exit_time],wealth,atol=1e-7)
+        # The synchronized mark at a shared boundary may already include the next entry fee.
+        marks[t.decision][-1]=1+t.funded_pct/100
     return marks
 
 
@@ -97,14 +100,32 @@ def run():
     alt=parent[parent.candidate_id.eq('freq36_ALT')]
     partial=pd.read_parquet(EXP/'partial/events.parquet').query('exit_policy=="half_then_6d"')
     btc=pd.read_parquet(EXP/'dual/events.parquet').query('strategy=="medium_time"')
-    variants={'simple':btc,'half_then_6d':partial}
+    mirror=EXP/'btc/below'
+    selected=pd.read_csv(mirror/'rule_summary.csv').query('priority_rank_within_frequency_eligible==1')
+    if len(selected)!=1:
+        raise ValueError('Expected one eligible development-ranked reversal filter')
+    rule=selected.rule.item()
+    gate=pd.read_csv(mirror/'opportunities.csv',parse_dates=['decision']).set_index('decision')['accept_'+rule]
+    integrated=partial[partial.source.eq('case') | partial.decision.isin(gate[gate].index)].copy()
+    below=btc[btc.decision.isin(gate[gate].index)]
+    variants={'simple':btc,'half_then_6d':partial,'below_medium':below,'below_plus_case':integrated}
+    integrated.to_parquet(out/'integrated_btc_events.parquet',index=False)
     endpoints=pd.concat([g[['decision','exit_time']] for g in [alt,btc,partial]])
     idx=pd.date_range(endpoints.decision.min().floor('D'),endpoints.exit_time.max(),freq='5min')
     quotes,_=prices.load_full_ohlc('BTCUSDT',idx[0],idx[-1],repair_missing=False)
     fills=pd.read_parquet(funding.FUNDED_CACHE,filters=[('policy_id','=',4)]).set_index('entry_time')
-    alt_paths=alt_marks(alt)
-    np.savez_compressed(out/'alt_6h_marks.npz',timestamps_ns=pd.DatetimeIndex(sorted(alt_paths)).as_unit('ns').asi8,
-                        unit_fee_values=np.stack([alt_paths[t] for t in sorted(alt_paths)]))
+    cache=out/'alt_6h_marks.npz'
+    if cache.exists():
+        with np.load(cache) as packs:
+            times=pd.to_datetime(packs['timestamps_ns'],utc=True)
+            alt_paths=dict(zip(times,packs['unit_fee_values'],strict=True))
+        if set(alt.decision)!=set(alt_paths):raise ValueError('ALT mark clock changed')
+        for r in alt.itertuples():
+            np.testing.assert_allclose(alt_paths[r.decision][-1],1+r.net_pct/100,atol=5e-7)
+    else:
+        alt_paths=alt_marks(alt)
+        np.savez_compressed(cache,timestamps_ns=pd.DatetimeIndex(sorted(alt_paths)).as_unit('ns').asi8,
+                            unit_fee_values=np.stack([alt_paths[t] for t in sorted(alt_paths)]))
     curves=pd.read_parquet(EXP/'sleeves/equity_5m.parquet')
     a26=alt[alt.epoch.eq(3)]
     funded_alt=funded_relative(a26,curves.ALT)
@@ -130,10 +151,14 @@ def run():
             for slip in (0.,.2):
                 for period,aa,bb,ap,bp,ii in [('all_fee',alt,book,alt_paths,paths,idx),
                                                ('2026_funded',a26,b26,funded_alt,funded_btc,curves.index)]:
-                    curve=(sleeve(aa,ap,ii,stake,slip)+sleeve(bb,bp,ii,stake,slip))/2
+                    ac=sleeve(aa,ap,ii,stake,slip)
+                    bc=sleeve(bb,bp,ii,stake,slip)
+                    curve=(ac+bc)/2
                     vals=stats(curve)
                     rows.append(dict(strategy=name,scope=period,sleeve_deployment=stake,extra_roundtrip_pp=slip,
-                                     distinct=pd.concat([aa.decision,bb.decision]).nunique(),**vals))
+                                     distinct=pd.concat([aa.decision,bb.decision]).nunique(),btc_n=len(bb),alt_n=len(aa),
+                                     btc_growth_pct=stats(bc)['growth_pct'],btc_dd_pct=stats(bc)['max_dd_pct'],
+                                     alt_growth_pct=stats(ac)['growth_pct'],alt_dd_pct=stats(ac)['max_dd_pct'],**vals))
     pd.DataFrame(rows).to_csv(out/'accounts.csv',index=False)
 
 
