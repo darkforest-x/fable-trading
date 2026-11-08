@@ -34,9 +34,9 @@
   function rulesHTML(data) {
     const {btc_medium:m,btc_case:c,alt:a} = data.rules;
     const flow = rows => '<ol class="bb-flow">'+rows.map(r=>'<li>'+esc(r)+'</li>').join('')+'</ol>';
-    return '<div class="bb-sections">'+panel('全市场下轨怎么数',note('各币按冻结的周一区间计算 1.618 下轨。每周每个币只计首次触及；先按 UTC 对齐的窗口收集触价币，在窗口收盘后才知道数量。研究账本包含通知冷却期间的触价。'))+
+    return '<div class="bb-sections">'+panel('全市场下轨怎么数',note('取纽约时间周一的最高价 H 和最低价 L。周一结束后冻结下轨 L − 0.618 × (H − L)。每个币每周第一次触及下轨才计数。用 5 分钟 K 线记录首触，按 UTC 对齐的窗口汇总，窗口收盘后才知道数量。研究账本包含通知冷却期间的触价。'))+
       '<div class="bb-rules">'+
-      panel('普通 BTC',flow(['在 '+m.initial_window_min/60+' 小时窗口，至少 '+m.initial_touch_count_min+' 个币首次触及下轨。','再观察 '+m.post_window_wait_min+' 分钟，新增币为 '+m.new_coins_max+'，且至少 '+number(100*m.reclaim_fraction_min)+'% 的可观测成员收回下轨。','最近一根已收盘的 4 小时 BTC 收盘价 ≤ 20 周期 EMA 时，按决策时刻的下一根 K 线开盘价买 BTC。','持仓 '+m.max_hold_hours/24+' 天，到期开盘价退出。']))+
+      panel('普通 BTC',flow(['在 '+m.initial_window_min/60+' 小时窗口，至少 '+m.initial_touch_count_min+' 个币首次触及下轨。','再观察 '+m.post_window_wait_min+' 分钟，新增币为 '+m.new_coins_max+'，且至少 '+number(100*m.reclaim_fraction_min)+'% 的可观测成员收回下轨。','最近一根已收盘的 4 小时 BTC 收盘价 ≤ 20 周期 EMA 时，按观察结束时刚开盘的 5 分钟 K 线开盘价买 BTC。','持仓 '+m.max_hold_hours/24+' 天，到期开盘价退出。']))+
       panel('急跌 BTC',flow([c.initial_window_min+' 分钟触价币数占近 28 天活跃币数至少 '+number(c.market_share_28d_min_pct)+'%。','再观察 '+c.post_window_wait_min+' 分钟，新增币数不超过初始数的 '+number(c.new_coins_to_initial_max_pct)+'%，山寨成员观察期涨幅中位数 ≥ '+number(c.alt_move_min_pct)+'%。','按决策开盘价买 BTC，初始保护止损为 6%。按手续费和已结算资金费更新一万点目标价，触及时卖出一半。','余仓沿用 6% 止损，最晚持有 '+c.max_hold_hours/24+' 天。此分支直接使用急跌条件。']))+
       panel('山寨篮子',flow([a.initial_window_min+' 分钟内至少 '+a.initial_touch_count_min+' 个币触轨，占近 28 天活跃币数至少 '+number(a.market_share_28d_min_pct)+'%。','窗口收盘即可决策，按等权买入信号中的合格山寨。排除 BTC、ETH、SOL、USTC。','持仓 '+a.hold_hours+' 小时，各成员按到期开盘价卖出。两次篮子入场至少间隔 24 小时。']))+'</div>'+
       panel('仓位与成本',note('初始资金 1,000 USDT，BTC 和山寨各分 500；两边各自以可用资金的 100% 入场、独立复利，不跨侧调仓。两类 BTC 信号共用一份仓位；原有的六天预留期继续生效，EMA 筛掉的时段不会重新补单。')+note('活跃币数取截至窗口收盘前 28 天有任一方向首触记录的不同币数。市价单边手续费 0.05%，限价单边 0.02%。全历史统计扣手续费；2026 专项另计资金费。'))+'</div>';
@@ -239,6 +239,7 @@
         if(received.schema_version!=='breadth-ema20.v1'||!Array.isArray(received.events))throw Error('回测账本版本不匹配');
         data=received;entries=[...data.events].sort((a,b)=>b.entry_time.localeCompare(a.entry_time)||a.asset.localeCompare(b.asset));
         chosen=entries.find(e=>e.event_id===eventId)||entries[0];render();
+        if(standalone && section==='history' && eventId===chosen?.event_id && innerWidth<=720)body.querySelector('.bb-detail')?.scrollIntoView({block:'start'});
       } catch(err) {
         if(!lifetime.signal.aborted)body.innerHTML='<p role="status" class="bb-error">'+esc(err.message)+'</p><button data-action="retry">重新读取账本</button>';
       }
