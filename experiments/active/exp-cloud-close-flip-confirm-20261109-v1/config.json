@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-cloud-close-flip-confirm-20261109-v1",
+  "question": "With the frozen nine-slot account, 75% original 2R scale-out, low-prior-ATR entry priority, and fixed protected stop, does confirming an adverse EMA20/EMA50 reversal on 1, 2, or 3 consecutive completed 12H closes improve on the existing intrabar EMA-cross exit?",
+  "single_variable": "EMA exit confirmation cadence only: existing intrabar strict EMA cross baseline versus 1, 2, or 3 consecutive actually confirmed adverse 12H EMA20/EMA50 closes, exiting at the next available 1H open. All event rows, controls, stop, 2R limit, scale-out, fees, priority, slots, and account rules are frozen.",
+  "target_r": [0.0, 2.0],
+  "frozen_source": {
+    "signals_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/signals.csv",
+    "expected_signal_rows": 12707,
+    "parent_paths": "experiments/active/exp-cloud-close-reward-20261109-v1/paths.csv.gz",
+    "parent_path_config": "experiments/active/exp-cloud-close-reward-20261109-v1/paths_config.json",
+    "inputs": [
+      "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs",
+      "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs"
+    ],
+    "parent_id": "signal-row-{source_row_number:05d}",
+    "join_key": "paths.source_row_number equals the 1-based data-row ordinal in frozen signals.csv; cross-check symbol, week, side, key_open_bjt, confirmed_bjt",
+    "input_cutoff_utc": "2026-11-08T12:00:00Z",
+    "future_path_completeness_filter": false
+  },
+  "frozen_parent": {
+    "reward_parent": "exp-cloud-close-reward-20261109-v1",
+    "scaleout_parent": "exp-cloud-close-scaleout-20261109-v1",
+    "capacity_parent": "exp-cloud-close-slots-20261109-v1",
+    "priority_parent": "exp-cloud-close-priority-20261109-v1",
+    "slots": 9,
+    "scaleout_fraction": 0.75,
+    "target_r": 2.0,
+    "priority": "low_prior_atr",
+    "priority_feature": "prior_atr_pct",
+    "priority_ties": "existing CRC32(symbol), symbol, event_id order",
+    "control_priority": "the frozen parent's prior_atr_pct inherited through source_row_number"
+  },
+  "cadence": {
+    "baseline": "Existing V1.7 intrabar strict EMA cross, reused from the frozen parent paths.",
+    "candidates_consecutive_adverse_12h_closes": [1, 2, 3],
+    "adverse_definition": "At each actually present, EMA-ready UTC12H close, adverse means side * (EMA20 - EMA50) < 0; exact zero is non-adverse and resets the streak.",
+    "consecutive_definition": "Only adjacent actual 12H bar opens exactly 12 hours apart count; a missing 12H bar, unready EMA, or zero/opposite EMA spread resets the run.",
+    "causality": "Count only completed 12H closes strictly later than the frozen entry_ms. Once N consecutive adverse closes are complete, exit at the first observed 1H open whose timestamp is at or after that close time. An exit may not occur at the entry timestamp.",
+    "intrabar_cross": "Disabled only for candidate modes; original confirmed EMA spread is gated until the consecutive-close threshold is met.",
+    "gap_and_stale_precedence": "Keep the original VectorBT callback precedence: a first next-observed 1H open after a data gap or the existing stale-12H deadline is marked before the bar's OHLC or cadence exit; never backfill the previous close.",
+    "entry_alignment": "Every executable frozen signal and matched control must have strict side-aligned confirmed EMA20/EMA50 spread at entry; fail closed if this invariant is violated."
+  },
+  "fixed_execution": {
+    "entry": "Frozen parent exact 1H open at the completed UTC12H confirmation timestamp, taker market fill.",
+    "stop": "Keep each frozen signal's original touched-1.618 outside default stop fixed; matched controls keep the inherited parent risk fraction. Same stop for both scale-out legs throughout.",
+    "take_profit": "Original resting 2R limit at actual entry plus side * 2 * actual entry-to-stop risk; close 75% at maker fee and keep 25% runner.",
+    "costs": {
+      "taker_per_fill": 0.0005,
+      "resting_maker_per_fill": 0.0002
+    },
+    "controls": "Reuse the parent's same-symbol, same-NY-week, same-side, EMA-aligned, prior-ATR-matched random non-signal confirmations, strictly after the parent confirmation; preserve unmatched rows and the paired parent identity.",
+    "capacity": "Reuse the existing nine-slot scale-out capacity runner; one position per symbol, frozen low-prior-ATR same-time ordering, no leverage or rebalancing."
+  },
+  "selection": {
+    "development_period": "through 2024-12-31 UTC; 2025-01-01 is exclusive cutoff",
+    "candidate_set": ["intrabar_baseline", "confirmed_1x12h", "confirmed_2x12h", "confirmed_3x12h"],
+    "eligible_if": "At least 100 closed development positions, fee-net wins >=30%, equal-notional fee-net payoff >=2.5, conservative hourly drawdown bound <=35%.",
+    "pick": "Highest development funded account growth among eligible baseline/cadence modes; if none qualify, retain intrabar_baseline. Show the highest-growth mode descriptively even when it fails a gate.",
+    "later_periods": "Report 2025 and 2026 YTD after the development pick; do not use them to select cadence.",
+    "historical_exploration": "Sequential historical research; development and later years have been seen in prior cloud-close screens."
+  },
+  "execution": {
+    "framework": "Local VectorBT 1.2.0 Portfolio.from_order_func",
+    "runtime": "/Users/zhangzc/.local/bin/vectorbt-python",
+    "path_callback": "Reuse yoyo.evaluation.cloud_close_reward_paths._order_func via _simulate_symbol; do not implement another fill simulator.",
+    "account_runner": "Reuse yoyo.evaluation.cloud_close_slots.run, which delegates 75%/25% legs to cloud_close_scaleout and cloud_close_reward_account.",
+    "event_batch_size": 8,
+    "self_check_command": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_flip_confirmation --self-check",
+    "generation_command": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_flip_confirmation",
+    "source_registration_precedes_generation": true
+  },
+  "required_checks": [
+    "Synthetic 1/2/3 close counter opens only after the Nth actual confirmation; a missing 12H open resets the run.",
+    "Synthetic same-bar stop/2R dual touch resolves to the original protective stop and records ambiguity.",
+    "Synthetic entry-open stop remains an immediate next-open stop with both fills at the observed entry open.",
+    "Synthetic unexpected H1 gap closes at the next observed open with gap flag and outranks the cadence trigger.",
+    "Strict EMA alignment is checked on every executable frozen event and control at its entry open.",
+    "Every safe bound returned by _safe_path_end is chronological; series_tail_close is allowed only at the true hourly file tail.",
+    "No parent rows, signal/control pairings, TP legs, or source identities are dropped; unmatched and no-entry rows remain explicit.",
+    "Development pick and selected/best-mode checks include matched controls, paired signals, and 5bp adverse market-fill stress."
+  ],
+  "outputs": {
+    "paths_csv_gz": "experiments/active/exp-cloud-close-flip-confirm-20261109-v1/paths.csv.gz",
+    "paths_audit_json": "experiments/active/exp-cloud-close-flip-confirm-20261109-v1/paths_audit.json",
+    "account_metrics_csv": "experiments/active/exp-cloud-close-flip-confirm-20261109-v1/account_metrics.csv",
+    "summary_json": "experiments/active/exp-cloud-close-flip-confirm-20261109-v1/summary.json"
+  }
+}
