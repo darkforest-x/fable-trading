@@ -42,7 +42,7 @@ def main():
         raise ValueError('Expected the coverage-only parent')
     paths=wallet.read_paths()
     paths=paths[paths.tp_r.isin([0,2])].copy()
-    rankable=leader.leadership().index
+    rankable=leader.leadership().dropna().index
     paths=paths[pd.MultiIndex.from_frame(paths[['entry_ms','symbol']]).isin(rankable)].copy()
     src=pd.read_csv(wallet.SOURCE/'signals.csv',usecols=['prior_atr_pct'])
     src.index=pd.RangeIndex(1,len(src)+1)
