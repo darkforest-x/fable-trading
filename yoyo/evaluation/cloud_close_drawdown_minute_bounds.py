@@ -22,6 +22,18 @@ def main():
     raw = wallet.ROOT/'data/research/cloud_close_drawdown_bounds_1m_20261109/quotes.csv'
     quotes = pd.read_csv(raw,dtype={'symbol':str},keep_default_na=False)
     legs = five.funded_legs()
+    # A close-stage fee can be paid while another contract is at its adverse
+    # extreme in the same hour. Allow that fee on every unrefined hourly floor.
+    # At a simultaneous open, also include equity immediately before entry fees.
+    late = legs[~legs.exit_phase.eq('open')]
+    exit_clock = pd.to_datetime(late.exit_bar_ms+wallet.HOUR,unit='ms',utc=True)
+    exit_fees = (abs(late.signed_size)*late.exit_price*late.exit_fee_rate).groupby(exit_clock).sum()
+    coarse_hours = equity.index.difference(five_hours.index)
+    equity.loc[coarse_hours,'lower_nav'] -= exit_fees.reindex(coarse_hours,fill_value=0)
+    open_clock = pd.to_datetime(legs.entry_ms+wallet.HOUR,unit='ms',utc=True)
+    entry_fees = (abs(legs.signed_size)*legs.entry_price*wallet.TAKER).groupby(open_clock).sum()
+    pre_entry = equity.open_nav + entry_fees.reindex(equity.index,fill_value=0)
+    equity['upper_nav'] = np.maximum(equity.upper_nav,pre_entry)
     rows = []
     for stamp in [five.PEAK,trough]:
         end = stamp+pd.Timedelta(hours=1)
@@ -30,7 +42,7 @@ def main():
                 or fine['refined_lower'] < fine['previous_lower']-1e-4
                 or fine['refined_upper'] > fine['previous_upper']+1e-4):
             raise ValueError('Minute source incomplete or inconsistent with five-minute marks')
-        equity.loc[end,['lower_nav','upper_nav']] = [fine['refined_lower'],fine['refined_upper']]
+        equity.loc[end,['lower_nav','upper_nav']] = [fine['refined_lower'],max(fine['refined_upper'],pre_entry.loc[end])]
         rows.append(fine)
     records = pd.DataFrame(rows)
     records.to_csv(five.EXP/'minute_refinement.csv',index=False)
