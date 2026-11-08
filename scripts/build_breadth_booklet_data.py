@@ -206,7 +206,7 @@ def build_btc_events() -> list[dict[str, Any]]:
             }
             exit_policy = "half_then_6d"
             reason = number(fill.reason)
-            exit_fee_rate = number(fill.exit_fee_rate)
+            exit_fee_rate = number(fill.get("exit_fee_rate", 0.0005))
         else:
             raise ValueError(f"Unexpected integrated BTC source: {source}")
 
