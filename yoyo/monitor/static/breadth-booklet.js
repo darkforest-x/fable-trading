@@ -139,7 +139,9 @@
     function detailHeader(row) {
       const net=actual(row);
       const points=row.asset==='BTC' && finite(net) && finite(row.entry_price)?' · 每枚 BTC 净收益 '+number(row.entry_price*net/100)+' 点':'';
-      return '<div class="bb-head"><div><h2>'+NAMES[branch(row)]+' · 开仓图</h2><div class="bb-meta">'+bjt(row.entry_time)+' 北京时间 · '+held(row)+'</div></div></div>'+
+      const rows=filtered(),index=rows.indexOf(row);
+      const controls='<div class="bb-chart-nav" role="group" aria-label="逐笔回看"><button data-step="-1" aria-label="上一笔开仓" title="上一笔" '+(index===0?'disabled':'')+'>‹</button><button data-step="1" aria-label="下一笔开仓" title="下一笔" '+(index===rows.length-1?'disabled':'')+'>›</button></div>';
+      return '<div class="bb-head"><div><h2 tabindex="-1">'+NAMES[branch(row)]+' · 开仓图</h2><div class="bb-meta">'+bjt(row.entry_time)+' 北京时间 · '+held(row)+'</div></div>'+controls+'</div>'+
         '<p><strong class="'+tone(net)+'">'+pct(net)+'</strong>'+esc(points)+'</p>'+note(facts(row))+(row.asset==='ALT'?'<label class="bb-chart-select">成分币<select data-field="symbol"></select></label>':'')+
         '<div data-chart-area role="status">正在读取 Binance 永续 K 线…</div><div data-fill-list></div>';
     }
@@ -261,12 +263,14 @@
       }
       if(action==='retry-chart'){detail();return;}
       const row=event.target.closest('[data-id]');
-      if(row || action==='case'){
-        const id=action==='case'?CASE:row.dataset.id;
+      if(row || action==='case' || btn?.dataset.step){
+        const rows=filtered();
+        const id=btn?.dataset.step?rows[rows.indexOf(chosen)+Number(btn.dataset.step)]?.event_id:action==='case'?CASE:row.dataset.id;
+        if(!id)return;
         if(action==='case'){year='all';kind='all';}
         chosen=entries.find(e=>e.event_id===id)||null;chosenSymbol='';block=null;render();
         const detailNode=body.querySelector('.bb-detail');
-        if(innerWidth<=720) detailNode?.scrollIntoView({block:'start'});
+        if(innerWidth<=720 || btn?.dataset.step){detailNode?.querySelector('h2')?.focus({preventScroll:true});if(innerWidth<=720)detailNode?.scrollIntoView({block:'start'});}
         else body.querySelector('tr[aria-current="true"] button')?.focus({preventScroll:true});
       }
       if(action==='prev'||action==='next'){
