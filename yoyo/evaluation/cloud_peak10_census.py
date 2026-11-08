@@ -55,7 +55,7 @@ def features(s, original_bar, prior_atr):
     entry = s['entry']
     r = s['range']
     o, h, l, c = [original_bar[k] for k in OHLC]
-    atr = prior_atr['atr14']
+    atr = prior_atr['atr14'] or np.nan
     outward = (entry-l if side == 1 else h-entry)
     wick = (min(o,c)-l if side == 1 else h-max(o,c))
     return dict(close_distance_r=(c-entry)*side / abs(entry-s['stop']),
@@ -92,9 +92,9 @@ def finer_order(frame, s, p):
     return 'source_disagrees'
 
 
-def census(spec):
+def census(spec, folder=None):
     symbol = spec['instId']
-    folder = EXP/'inputs'/spec['symbol']
+    folder = EXP/'inputs'/spec['symbol'] if folder is None else folder
     bars = pd.read_csv(folder/'bars12h.csv.gz', index_col='time', float_precision='round_trip')
     hour = pd.read_csv(folder/'bars1h.csv.gz', index_col='time', float_precision='round_trip')
     calendar = anchors(hour, bars, symbol)
@@ -111,7 +111,7 @@ def census(spec):
             continue
         s = signal(symbol, bar, ema[idx], calendar[week], CUTOFF)
         if s:
-            assert idx and atr[idx-1]['atr14'] > 0 and ema[idx]['count'] >= 50
+            assert idx and ema[idx]['count'] >= 50
             used.add(week)
             selected.append(dict(idx=idx, signal=s))
     payload = json.dumps(dict(bars=records, signals=selected, cutoff=CUTOFF), allow_nan=False)
