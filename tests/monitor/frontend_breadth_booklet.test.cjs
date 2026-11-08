@@ -109,3 +109,18 @@ test('cadence comparison keeps settlement risk separate from five-minute marked 
   for(const label of ['+377.67%','+377.43%','64 / 3','34 / 4','538 个山寨信号'])assert.ok(all.includes(label),label);
   assert.ok(!all.includes('含资金费盯市回撤'));
 });
+
+test('changing BTC admission and splitting capital preserve scope and actual case admission', () => {
+  const rows=data.summaries.frequency_review.btc_variants;
+  const check=(scope,names)=>assert.deepEqual(rows.filter(r=>r.scope===scope).map(r=>[
+    r.variant,r.distinct_entries,Number(r.growth_pct.toFixed(2)),Number(r.marked_dd_pct.toFixed(2)),r.sep16_admitted,
+  ]),names);
+  check('2026',[
+    ['current',48,42.03,6.59,true],['early_ema',54,17.33,13.10,false],['reserved_case',57,16.86,7.92,true],
+  ]);
+  check('all_history',[
+    ['current',398,466.60,26.75,true],['early_ema',431,234.73,25.57,false],['reserved_case',469,232.14,19.13,true],
+  ]);
+  const html=ui.statsHTML(data,{scope:'2026_actual_funded'});
+  for(const text of ['+30.86 USDT','51 个北京时间交易日','32 个自然周','尚未回测'])assert.ok(html.includes(text),text);
+});

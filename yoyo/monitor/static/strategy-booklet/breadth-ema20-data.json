@@ -4,6 +4,8 @@
   "signal_cutoff_exclusive_utc": "2026-10-28T00:00:00Z",
   "provenance": {
     "experiment_id": "exp-monday-breadth-extension-20261108-v1",
+    "btc_admission_study": "experiments/active/exp-monday-breadth-btc-admission-20261108-v1/summary.csv",
+    "btc_reserve_study": "experiments/active/exp-monday-breadth-btc-reserve-20261108-v1/partition_summary.csv",
     "spacing_study": "experiments/active/exp-monday-breadth-alt-spacing-20261108-v1/portfolio_summary.csv",
     "event_sources": {
       "BTC": "experiments/active/exp-monday-breadth-extension-20261108-v1/risk/integrated_btc_events.parquet",
@@ -330,6 +332,98 @@
       "slipped_funded_points": 9805.55603251294
     },
     "frequency_review": {
+      "btc_variants": [
+        {
+          "variant": "current",
+          "scope": "all_history",
+          "btc_count": 159,
+          "alt_count": 239,
+          "total_legs": 398,
+          "distinct_entries": 398,
+          "growth_pct": 466.5972646107158,
+          "settlement_dd_pct": 24.070678351757092,
+          "marked_dd_pct": 26.754594080518203,
+          "sep16_admitted": true,
+          "september_funded_pnl_usdt": null,
+          "active_days_bjt": null,
+          "active_weeks_bjt": null
+        },
+        {
+          "variant": "current",
+          "scope": "2026",
+          "btc_count": 23,
+          "alt_count": 25,
+          "total_legs": 48,
+          "distinct_entries": 48,
+          "growth_pct": 42.027715577223034,
+          "settlement_dd_pct": 3.544251455893188,
+          "marked_dd_pct": 6.585153626570717,
+          "sep16_admitted": true,
+          "september_funded_pnl_usdt": null,
+          "active_days_bjt": null,
+          "active_weeks_bjt": null
+        },
+        {
+          "variant": "early_ema",
+          "scope": "all_history",
+          "btc_count": 192,
+          "alt_count": 239,
+          "total_legs": 431,
+          "distinct_entries": 431,
+          "growth_pct": 234.73028185753185,
+          "settlement_dd_pct": 21.87858991856696,
+          "marked_dd_pct": 25.57092765791007,
+          "sep16_admitted": false,
+          "september_funded_pnl_usdt": null,
+          "active_days_bjt": null,
+          "active_weeks_bjt": null
+        },
+        {
+          "variant": "early_ema",
+          "scope": "2026",
+          "btc_count": 29,
+          "alt_count": 25,
+          "total_legs": 54,
+          "distinct_entries": 54,
+          "growth_pct": 17.33234956290567,
+          "settlement_dd_pct": 10.663706081043289,
+          "marked_dd_pct": 13.098294618748696,
+          "sep16_admitted": false,
+          "september_funded_pnl_usdt": null,
+          "active_days_bjt": null,
+          "active_weeks_bjt": null
+        },
+        {
+          "variant": "reserved_case",
+          "scope": "all_history",
+          "btc_count": 230,
+          "alt_count": 239,
+          "total_legs": 469,
+          "distinct_entries": 469,
+          "growth_pct": 232.1427427867275,
+          "settlement_dd_pct": 16.277870914541314,
+          "marked_dd_pct": 19.12861720003657,
+          "sep16_admitted": true,
+          "september_funded_pnl_usdt": null,
+          "active_days_bjt": null,
+          "active_weeks_bjt": null
+        },
+        {
+          "variant": "reserved_case",
+          "scope": "2026",
+          "btc_count": 32,
+          "alt_count": 25,
+          "total_legs": 57,
+          "distinct_entries": 57,
+          "growth_pct": 16.855772202926577,
+          "settlement_dd_pct": 6.658745644084563,
+          "marked_dd_pct": 7.917033517927685,
+          "sep16_admitted": true,
+          "september_funded_pnl_usdt": 30.85518466009175,
+          "active_days_bjt": 51.0,
+          "active_weeks_bjt": 32.0
+        }
+      ],
       "spacing": [
         {
           "minimum_gap_hours": 24,
