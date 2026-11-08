@@ -1,0 +1,10 @@
+{
+  "id": "exp-cloud-close-market-taker-pressure-20261109-v1",
+  "parent": "exp-cloud-close-taker-pressure-20261109-v1",
+  "question": "Does the fixed counter-side taker flow rule from the twelve-major panel transfer to all corrected historical Binance V1.7 12H signals?",
+  "factor": "Strictly negative side times (twice taker buy base volume minus base volume)/base volume over the completed 12H key. No threshold changes.",
+  "coverage": "Attempt every eligible actual and control on their own clock. Reuse registered Binance Vision monthly 15m or 5m archives and the original February 2022 repair daily files. Each key requires a complete UTC grid, nonnegative known native flow and all twelve reconstructed H1 OHLC matching the corrected price history. Missing archives or nonreconciling windows are independently counted. Compare to the full frozen account and separately to the identical flow-available universe. Compare overlapping pilot event classifications before account replay.",
+  "economics": "Original market entries on executable first H1 open coincident with 12H confirmation, nine slots, low prior ATR, original stop and cloud exit. Two thirds at 2R; 1000 USDT shared funding; 5bp taker, 2bp resting limit per fill. Reprice opposed cohort under extra 5bp per market fill. Funding, capacity, tick/lot rounding not modeled.",
+  "validation": "No fitting; preserve development through 2024, calendar 2025 and 2026 through September 23. Evaluate independently passing later controls and matched parents, plus actual universe excluding the twelve pilot symbols. No independence claim about previously observed years.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_market_taker_pressure"
+}
