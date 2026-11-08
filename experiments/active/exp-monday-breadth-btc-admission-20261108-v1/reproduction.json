@@ -1,0 +1,36 @@
+{
+  "experiment_id": "exp-monday-breadth-btc-admission-20261108-v1",
+  "framework": "Local VectorBT study inputs and frozen native 144h BTC outcomes; no new order or trade simulator.",
+  "inputs": [
+    "experiments/active/exp-monday-breadth-optimization-20261108-v1/features/signals.csv.gz",
+    "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes720_wait10.csv.gz",
+    "experiments/active/exp-monday-breadth-frequency-20261108-v1/fixed/locked_events.parquet",
+    "experiments/active/exp-monday-breadth-frequency-20261108-v1/btc_target/threshold_events.parquet",
+    "experiments/active/exp-monday-breadth-extension-20261108-v1/risk/integrated_btc_events.parquet",
+    "data/research/monday_breadth_optimization_20261108/btc_funded_exit_fills.parquet",
+    "experiments/active/exp-monday-breadth-extension-20261108-v1/sleeves/equity_5m.parquet",
+    "experiments/active/exp-monday-breadth-extension-20261108-v1/risk/alt_6h_marks.npz"
+  ],
+  "command_from_repository_root": "/Users/zhangzc/.local/bin/vectorbt-python experiments/active/exp-monday-breadth-btc-admission-20261108-v1/builder.py",
+  "builder": "experiments/active/exp-monday-breadth-btc-admission-20261108-v1/builder.py",
+  "primary_outputs": [
+    "summary.csv",
+    "ordinary_stream.parquet",
+    "btc_events.parquet",
+    "admission_audit.csv",
+    "candidate_audit.parquet",
+    "yearly_counts.csv",
+    "key_trade.csv",
+    "curve_2026_5m.parquet",
+    "btc_2026_mark_coverage.csv",
+    "coverage.json"
+  ],
+  "coverage_contract": {
+    "ordinary_btc": "Every selected ordinary BTC clock must map to its frozen 144h VectorBT outcome and reconcile the cached BTC price return.",
+    "case_btc": "Every case-first admitted BTC clock must map to the existing native policy 4 half-target/half-six-day fill.",
+    "baseline": "Reproduce the frozen 159-event BTC below-EMA-after-reservation ledger and the frozen 50/50 account growth and marked DD before reporting the candidate.",
+    "2026": "Require local BTC 5m close and realized funding coverage through each held position exit; reuse original ALT funded 5m curve.",
+    "random": "Only preserve already matched controls on exact asset + decision keys; added clocks have no control coverage."
+  },
+  "notes": "Input market observations end at the registered 2026-10-27 UTC signal candle. 2026 results are retrospective, not a fresh blind period."
+}

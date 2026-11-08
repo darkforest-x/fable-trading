@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-monday-breadth-btc-admission-20261108-v1",
+  "question": "Does moving the ordinary BTC completed-4h-close <= EMA20 veto before its original six-day reservation restore later eligible entries, while retaining the case-first BTC clock and the independent original ALT 24h-spacing sleeve?",
+  "single_variable": "Only move the ordinary BTC EMA20 veto from after the original six-day frequency reservation to immediately before it. Keep the causal breadth rule, case branch priority and half-target/half-six-day exit, ordinary BTC 144h VectorBT exit, BTC six-day reservation, ALT fixed 6h exit and 24h admission spacing, 50/50 starting capital, no transfers, and fees unchanged.",
+  "btc_signal": {
+    "minutes": 720,
+    "wait_min": 10,
+    "breadth": "N2_100000",
+    "diffusion": "zero",
+    "confirmation": "reclaim_ge75",
+    "hold_hours": 144,
+    "ema_gate": "completed UTC 4h BTC close <= EMA20"
+  },
+  "baseline": "Existing case-first dual BTC schedule, then suppress ordinary events above the completed 4h EMA20; suppressed events keep the earlier reservation occupied.",
+  "candidate": "Apply the same ordinary BTC EMA20 gate before the original per-epoch six-day-plus-24h-minimum frequency admission, then preserve the case-first six-day dual-source schedule.",
+  "alt": "Reuse original freq36_ALT fixed 6h exit stream and 24h minimum admission spacing unchanged.",
+  "fees": "Existing VectorBT 0.05% taker on ordinary BTC entry and exit; native policy 4 BTC case fills with the original maker/taker exit legs. Historical account return is fee-only. 2026 account marks apply locally archived realized Binance USD-M funding.",
+  "capital": "Independent BTC and ALT sleeves, 50% initial capital each, no transfers or rebalancing; each sleeve deploys its own capital as in the frozen extension risk study.",
+  "controls": "Reuse a matched random control only when both asset and exact event clock match the existing strategy. Newly admitted clocks receive no imputed control; no new controls are fitted in this experiment.",
+  "known_trade_audit": "Explicitly audit the 2026-09-15 19:20 UTC BTC 5% case target and any six-day booking that prevents it.",
+  "no_live_changes": true
+}
