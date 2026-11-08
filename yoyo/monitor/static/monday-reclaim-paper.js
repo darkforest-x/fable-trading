@@ -327,6 +327,7 @@
     watch=window.SpikeReclaimWatchlist.create({root,createFeed,onScore:score=>{const node=el('symbol-score');node.hidden=!!replay||!score;node.classList.toggle('is-high',!!score?.high);node.querySelector('b').textContent=score?.text||'';node.title=score?.title||'';node.setAttribute('aria-label',score?.title||'');},getContext:()=>({track:feed.getState().data?.tracks[state.track],signals:signalRows(feed.getState().data,state.track),symbol:chartSymbol,period:state.period}),onOpen:()=>{backtest?.setOpen(false,false);analytics?.setOpen(false,false);if(recordsOpen)setRecords(false,false);},onSelect:symbol=>{leaveBacktest(false);state.track=window.SpikeReclaimWatchlist.holdingTrack(feed.getState().data?.tracks,symbol,state.track,book.getOrder());state.symbol=symbol;state.trade='';shown=50;pinned=null;chart.resetFocus();sync();render(feed.getState());}});
     analytics=window.SpikeReclaimAnalytics.create({root,createFeed,onOpen:()=>{backtest?.setOpen(false,false);watch.setOpen(false,false);if(matchMedia('(max-width:700px)').matches)setRecords(false,false);},onTrack:selectTrack});
     backtest=window.SpikeStrategyBacktest.create({root,onOpen:()=>{watch?.setOpen(false,false);analytics?.setOpen(false,false);setRecords(false,false);quick?.close();},onSelect:value=>{
+      if(cloudLayout)setCloudLayout(false);
       if(!replay)liveState={...state};const raw=value.options||value.replayOptions||value,source=raw.replay_source||raw.source;
       const options=source==='breadth-ema20'?{replay_source:source,event_id:raw.event_id||value.row.event_id,scope:raw.scope||value.row.scope||''}:{};
       replay={track:value.track,row:value.row,options};if(TRACKS.includes(value.track))state.track=value.track;state.trade='';state.symbol=value.row.symbol.replace(/USDT$/,'-USDT-SWAP');state.period=window.SpikeStrategyBacktest.periodFor(value.row,state.period);pinned=null;chart.resetFocus();render(feed.getState());
@@ -376,6 +377,7 @@
     root.addEventListener('error',event=>{if(event.target.tagName==='IMG')event.target.hidden=true;},true);
   }
   function leaveBacktest(restore=true){
+    if(replay&&cloudLayout)setCloudLayout(false);
     if(replay&&restore&&liveState)state={...liveState};if(replay?.track==='breadth-ema20')backtest?.clearReplayLink();replay=null;liveState=null;backtest?.setOpen(false,false);chart?.resetFocus();
   }
   function selectTrack(track){
@@ -403,7 +405,7 @@
   }
   function setCloudLayout(value){
     if(value===cloudLayout||!chartSymbol)return;
-    if(value){focus?.reset();setIndicators(false);setRecords(false,false);watch?.setOpen(false,false);analytics?.setOpen(false,false);backtest?.setOpen(false,false);cloudLayout=true;root.classList.add('is-cloud-layout');chart?.setActive(false);openCloud();}
+    if(value){focus?.reset();setIndicators(false);setRecords(false,false);watch?.setOpen(false,false);analytics?.setOpen(false,false);if(!replay)backtest?.setOpen(false,false);cloudLayout=true;root.classList.add('is-cloud-layout');chart?.setActive(false);openCloud();}
     else window.SpikeCloudSignals?.closeEmbedded();
   }
   function sync(){window.SpikeNavigation?.sync('signals',{pane:'reclaim',...state});}
