@@ -1,0 +1,12 @@
+{
+  "experiment_id": "exp-live-wick-two-closes-exit-20261109-v1",
+  "single_variable": "Exit a surviving original position at the immediately following 5m open after two consecutive completed post-entry 5m closes strictly beyond the touch candle's adverse extreme. Mirror long and short. Equality breaks the sequence. Keep original target, E20, H1 reclaim and all entry and sizing rules.",
+  "cohort": "experiments/active/exp-live-wick-confirmed-swing-20261107-v1/events.csv.gz",
+  "order": "experiments/active/exp-live-ema-cloud-filter-20261103-v1/candidates.csv.gz",
+  "base": "experiments/active/exp-monday-limit-close-survivor-paths-20261101-v10",
+  "costs": "Original actual-fill maker 2bp and taker 5bp. Separately 10bp at market entry and on non-target exits. Binance data through 2026-10-27, no funding.",
+  "execution": "One alternative policy on both native OHLC and OLHC paths, with normal stops and targets active through the opening print. Original baseline fills are reused. The latest archived baseline exit bounds the needed price history because the only additional action is final liquidation of the position. Choose the worse net path independently for each policy; ties choose OHLC as in baseline.",
+  "evaluation": "Original 416 candidate opportunities and chronological 2020-24, 2025, 2026 splits. Re-run the saved 6-slot 3x allocation for both start dates. Primary objective is a higher average winner / absolute average loser on funded trades; check net expectancy, win rate, drawdown, backstops avoided, winners foregone and weekly paired uncertainty. A higher ratio with reduced expectancy is a tradeoff, not a general improvement.",
+  "seed": 20261109,
+  "bootstrap_draws": 5000
+}
