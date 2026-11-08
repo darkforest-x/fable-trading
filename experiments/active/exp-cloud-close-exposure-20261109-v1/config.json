@@ -1,0 +1,44 @@
+{
+  "experiment_id": "exp-cloud-close-exposure-20261109-v1",
+  "purpose": "Research the effect of per-position nominal exposure on the development-selected, original unsplit 12H cloud-close account. This is not an execution instruction.",
+  "selection": {
+    "exit_pick_source": "experiments/active/exp-cloud-close-reward-20261109-v1/account_summary.json:pick",
+    "admission_pick_source": "experiments/active/exp-cloud-close-admission-20261109-v1/summary.json:pick",
+    "admission_exit_source": "experiments/active/exp-cloud-close-admission-20261109-v1/summary.json:parent_tp_r",
+    "fallback": "The parent reward study falls back to tp_r=0 (original V1.7 cloud runner); admission falls back to rule=all. No later-period tuning.",
+    "source_paths": "experiments/active/exp-cloud-close-reward-20261109-v1/paths.csv.gz",
+    "no_scaleout": true,
+    "controls": "Exclude is_control rows; admission rule is the parent study's fixed development pick."
+  },
+  "account": {
+    "starting_usdt": 1000,
+    "slots": 12,
+    "allocation": "Use the shared account and reward wallet's prepare/admit logic: fixed crc32(symbol), symbol, event_id priority; one position per symbol; occupied slot release only after the exit bar; no rebalancing. At entry cap each slot by min(NAV/12, free_cash/currently_flat_slots), then apply the exposure multiple to notional.",
+    "exposure_multiples": [0.5, 1.0, 1.5, 2.0, 3.0],
+    "marking": "Hourly OHLC, three stages per hour, using the source wallet's causal marks and gap convention. Hold a positive collateral share for either direction: price = 1 + max(1, exposure) * side * (spot / entry_spot - 1). Transform high/low in side-aware sorted order. For exposure below 1, position size is proportionally reduced and margin leverage remains 1x.",
+    "margin": "Isolated collateral is fully reserved per position. For exposure >=1, initial margin is at most one twelfth of current NAV; for exposure <1, notional is proportionally smaller and fully collateralized. Entry fees are included in position sizing.",
+    "maintenance_margin_rate_assumption": 0.10,
+    "maintenance_policy": "Vectorized boundary audit only. If any admitted position reaches the fee-inclusive isolated maintenance threshold under the scenario, mark that entire exposure/scenario invalid and report breach count and worst normalized equity shortfall. Do not synthesize liquidation fills or assume no liquidation. Same-hour threshold/strategy-exit ambiguity resolves conservatively as a breach.",
+    "unquoted_hours": "Use the wallet prepare module's prior-observed-close carry convention and disclose unquoted position-hours; the missing intrahour path is not verified."
+  },
+  "costs": {
+    "market_and_stop_fee_per_fill": 0.0005,
+    "resting_limit_fee_per_fill": 0.0002,
+    "base_adverse_slippage_per_market_fill": 0.0,
+    "stress_additional_adverse_slippage_per_market_fill": 0.0005,
+    "funding": "Not modeled; report as a limitation.",
+    "capacity_and_lot_rounding": "Not modeled; report as a limitation."
+  },
+  "periods": {
+    "development_end_exclusive_utc": "2025-01-01T00:00:00Z",
+    "report": ["development", "2025", "2026_ytd", "full_history"]
+  },
+  "one_x_baseline": {
+    "reuse_existing_reward_or_admission_artifacts": true,
+    "do_not_rerun_full_vectorbt_account": true,
+    "verify_trade_count_cash_pnl_and_terminal_nav_against_parent_artifacts": true,
+    "source_artifact": "reward funded_tp{tp_r}.csv.gz / hourly_tp{tp_r}.csv.gz when admission pick is all; otherwise admission funded_{rule}.csv.gz / hourly_{rule}.csv.gz"
+  },
+  "outputs": ["account_metrics.csv", "summary.json", "funded_*.csv.gz", "hourly_*.csv.gz"],
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_exposure"
+}
