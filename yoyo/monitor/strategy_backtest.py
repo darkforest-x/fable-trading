@@ -27,8 +27,8 @@ IDENTITIES = ROOT / 'experiments/active/exp-monday-limit-reclaim-20261024-v1/sym
 # paths that continue past it; read only, appended after the identity's own files.
 EXTENSION = ROOT / 'experiments/active/exp-monday-limit-live-october-20261101-v1/symbols'
 EXTENDED = ('live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far')
-TRACKS = ('60', '5', 'v3', 'v3add', 'spike', 'v3lock', 'allin3', 'v3add20', 'live-allin3', 'live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far')
-SAVED_FILLS = ('live-allin3', 'live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far')
+TRACKS = ('60', '5', 'v3', 'v3add', 'spike', 'v3lock', 'allin3', 'v3add20', 'live-allin3', 'live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far', 'live-breadth')
+SAVED_FILLS = ('live-allin3', 'live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far', 'live-breadth')
 PERIODS = {'1m': 60000, '2m': 120000, '3m': 180000, '5m': 300000, '15m': 900000, '1H': 3600000, '4H': 14400000,
            '12H': 43200000, '1D': 86400000}
 SLOTS = BoundedSemaphore(2)
@@ -38,6 +38,9 @@ def ledger(track, directory=LEDGERS):
     if track == 'live-allin3':
         from .strategy_live_allin3 import ledger as live_ledger
         return live_ledger()
+    if track == 'live-breadth':  # owner 2026-11-08: 13 saved SOL cases of the breadth signal
+        from .strategy_live_breadth import ledger as breadth_ledger
+        return breadth_ledger()
     if track in ('live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far'):
         from .strategy_live_wick import ledger as wick_ledger
         return wick_ledger(track)
