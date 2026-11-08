@@ -10,6 +10,7 @@ from types import SimpleNamespace
 import numpy as np
 import pandas as pd
 
+from yoyo.data.altseason_funding import FundingClient, normalize
 from yoyo.evaluation import monday_breadth_extension_risk as risk
 from yoyo.evaluation import monday_breadth_opt_funding as funding
 from yoyo.evaluation import monday_breadth_opt_payoffs as prices
@@ -39,7 +40,24 @@ def btc_curves(grid):
     return [risk.sleeve(btc, paths, grid, 1, 0) for paths in (fee, funded)]
 
 
+def direct_funding(client, symbol, start, end):
+    """Fetch only missing exchange settlements, including three days of adjacent clocks."""
+    lo = (start - pd.Timedelta(days=3)).value // 10**6
+    hi = (end + pd.Timedelta(days=3)).value // 10**6
+    payload, _ = client.get("/fapi/v1/fundingRate", {
+        "symbol": symbol, "startTime": lo, "endTime": hi-1, "limit": 1000,
+    })
+    if len(payload) >= 1000:
+        raise ValueError("Truncated funding history")
+    rows = normalize("binance", symbol, payload, lo, hi)
+    rows.index = pd.to_datetime(rows.funding_time, unit="ms", utc=True).dt.floor("5min")
+    if rows.index.has_duplicates:
+        raise ValueError(f"Duplicate funding clocks on {symbol}")
+    return rows.sort_index()
+
+
 def incremental_paths(new):
+    client = FundingClient("binance", Path("data/research/monday_breadth_alt_spacing_20261108/funding"))
     members = new.merge(member_bridge(), on=["minutes", "known"])
     if not members.groupby("decision").size().equals(new.set_index("decision").member_count.astype(int).sort_index()):
         raise ValueError("New event membership disagrees with native fills")
@@ -65,6 +83,9 @@ def incremental_paths(new):
                 except FileNotFoundError:
                     ok = False
             if not ok or history.loc[row:end].price_proxy.any():
+                history = direct_funding(client, symbol, row, end)
+                ok = _interval_history_complete(history, row, end)
+            if not ok:
                 uncovered.append(symbol)
                 continue
             charges = accumulated_cost(history.realized_rate*history.mark_price, row, end, times)
