@@ -9,8 +9,10 @@ data, calculate strategy outcomes, fill missing candles, or render images.
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import gzip
 import hashlib
+import io
 import json
 import math
 import os
@@ -32,6 +34,7 @@ CONTEXT_MS = 3 * 60 * 60 * 1000
 PERIOD_MS = {"BTC": 60 * 60 * 1000, "ALT": 15 * 60 * 1000}
 EXPECTED_EVENTS = 398
 EXPECTED_2026_EVENTS = 48
+SOURCE_READ_WORKERS = 3
 SYMBOL_RE = re.compile(r"^\w{1,64}USDT$")
 FILE_KEY_RE = re.compile(r"^[A-Za-z0-9_-]{1,100}$")
 OHLC = ("open", "high", "low", "close")
@@ -229,12 +232,21 @@ def source_entries(receipt: dict[str, Any]) -> list[dict[str, Any]]:
     if not isinstance(raw, list):
         return []
     entries: list[dict[str, Any]] = []
-    seen: set[str] = set()
+    by_identity: dict[tuple[int, int] | str, dict[str, Any]] = {}
+    seen_candidate_sets: set[tuple[str, ...]] = set()
     for item in sorted((x for x in raw if isinstance(x, dict)),
                        key=lambda x: (int(x.get("priority") or 999), str(x.get("kind", "")))):
+        if not (item.get("resolved_path") or item.get("path") or item.get("aliases")):
+            continue
         candidate_values = [item.get("resolved_path"), item.get("path"), *(item.get("aliases") or [])]
-        resolved: Path | None = None
-        chosen: str | None = None
+        candidate_set = tuple(sorted({str(value) for value in candidate_values if value}))
+        if candidate_set and candidate_set in seen_candidate_sets:
+            continue
+        if candidate_set:
+            seen_candidate_sets.add(candidate_set)
+        candidates: list[Path] = []
+        candidate_names: set[str] = set()
+        identity: tuple[int, int] | str | None = None
         for candidate in candidate_values:
             if not candidate:
                 continue
@@ -242,15 +254,31 @@ def source_entries(receipt: dict[str, Any]) -> list[dict[str, Any]]:
             if path.is_file():
                 try:
                     resolved = path.resolve(strict=True)
+                    stat = resolved.stat()
+                    key: tuple[int, int] | str = (stat.st_dev, stat.st_ino) if stat.st_ino else str(resolved)
                 except OSError:
                     resolved = path
-                chosen = str(candidate)
-                break
-        identity = str(resolved) if resolved else str(item.get("resolved_path") or item.get("path") or "")
-        if identity in seen:
+                    key = str(path)
+                if str(path) not in candidate_names:
+                    candidates.append(path)
+                    candidate_names.add(str(path))
+                if identity is None:
+                    identity = key
+        if identity is None:
+            identity = str(item.get("resolved_path") or item.get("path") or "")
+        if identity in by_identity:
+            existing = by_identity[identity]
+            for candidate in candidates:
+                if str(candidate) not in {str(path) for path in existing["candidates"]}:
+                    existing["candidates"].append(candidate)
+            existing["kinds"] = sorted(set(existing["kinds"] + [str(item.get("kind", "unknown"))]))
             continue
-        seen.add(identity)
-        entries.append({"meta": item, "resolved": resolved, "chosen": chosen})
+        chosen = str(candidates[0]) if candidates else None
+        resolved = candidates[0].resolve(strict=False) if candidates else None
+        entry = {"meta": item, "resolved": resolved, "chosen": chosen,
+                 "candidates": candidates, "kinds": [str(item.get("kind", "unknown"))]}
+        entries.append(entry)
+        by_identity[identity] = entry
     return entries
 
 
@@ -258,10 +286,14 @@ def source_file_record(symbol: str, item: dict[str, Any]) -> dict[str, Any]:
     meta, path = item["meta"], item["resolved"]
     current = None
     if path and path.is_file():
-        st = path.stat()
-        current = {"bytes": st.st_size, "mtime_ns": st.st_mtime_ns}
+        try:
+            st = path.stat()
+            current = {"bytes": st.st_size, "mtime_ns": st.st_mtime_ns}
+        except OSError:
+            current = None
     return {
         "kind": meta.get("kind"),
+        "kinds": item.get("kinds", []),
         "path": safe_repo_path(item["chosen"] or meta.get("path") or meta.get("resolved_path") or ""),
         "receipt_bytes": meta.get("bytes"),
         "receipt_mtime_ns": meta.get("mtime_ns"),
@@ -269,6 +301,132 @@ def source_file_record(symbol: str, item: dict[str, Any]) -> dict[str, Any]:
         "priority": meta.get("priority"),
         "has_low": meta.get("has_low", True),
     }
+
+
+def _row_ts(line: bytes, path: Path) -> int:
+    try:
+        return int(line.split(b",", 1)[0])
+    except (ValueError, IndexError) as exc:
+        raise ChartBuildError(f"invalid sorted Binance CSV timestamp in {safe_repo_path(path)}") from exc
+
+
+def _line_start_at_or_before(handle: Any, offset: int, header_end: int) -> int:
+    cursor = offset
+    while cursor > header_end:
+        block_start = max(header_end, cursor - 4096)
+        handle.seek(block_start)
+        block = handle.read(cursor - block_start)
+        newline = block.rfind(b"\n")
+        if newline >= 0:
+            return block_start + newline + 1
+        cursor = block_start
+    return header_end
+
+
+def _lower_bound_csv_ts(handle: Any, target: int, header_end: int, file_size: int, path: Path) -> int:
+    """Find the first row at/after target in a sorted plain CSV without scanning older rows."""
+    low, high = header_end, file_size
+    while low < high:
+        middle = (low + high) // 2
+        position = _line_start_at_or_before(handle, middle, header_end)
+        handle.seek(position)
+        line = handle.readline()
+        if not line:
+            high = position
+            break
+        if _row_ts(line, path) < target:
+            low = handle.tell()
+        else:
+            high = position
+    return low
+
+
+def read_plain_csv_windows(path: Path, windows: list[tuple[int, int]]) -> Any:
+    """Use binary timestamp search for the project's sorted, uncompressed OHLC series."""
+    import pandas as pd
+
+    file_size = path.stat().st_size
+    lines: list[bytes] = []
+    with path.open("rb") as handle:
+        header = handle.readline()
+        columns = header.decode("utf-8-sig").rstrip("\r\n").split(",")
+        if not columns or columns[0] != "ts":
+            # Older or alternate layouts remain correct through the streaming reader.
+            return read_streaming_csv_windows(path, windows)
+        header_end = handle.tell()
+        for start, end in windows:
+            position = _lower_bound_csv_ts(handle, start, header_end, file_size, path)
+            handle.seek(position)
+            while True:
+                line = handle.readline()
+                if not line:
+                    break
+                stamp = _row_ts(line, path)
+                if stamp >= end:
+                    break
+                if stamp >= start:
+                    lines.append(line)
+    if not lines:
+        return pd.DataFrame(columns=["ts", *OHLC])
+    payload = header + b"".join(lines)
+    return pd.read_csv(io.BytesIO(payload), usecols=lambda name: name in {"ts", *OHLC},
+                       float_precision="round_trip")
+
+
+def read_streaming_csv_windows(path: Path, windows: list[tuple[int, int]]) -> Any:
+    import numpy as np
+    import pandas as pd
+
+    frames = []
+    for chunk in pd.read_csv(path, usecols=lambda name: name in {"ts", *OHLC}, chunksize=100_000,
+                             float_precision="round_trip"):
+        if "ts" not in chunk or any(name not in chunk for name in OHLC):
+            raise ChartBuildError(f"OHLC 5m source lacks required columns: {safe_repo_path(path)}")
+        ts = pd.to_numeric(chunk["ts"], errors="coerce").to_numpy(dtype="float64")
+        finite = np.isfinite(ts)
+        wanted = np.zeros(len(chunk), dtype=bool)
+        for start, end in windows:
+            wanted |= finite & (ts >= start) & (ts < end)
+        if wanted.any():
+            selected = chunk.loc[wanted, ["ts", *OHLC]].copy()
+            selected["ts"] = pd.to_numeric(selected["ts"], errors="raise").astype("int64")
+            for column in OHLC:
+                selected[column] = pd.to_numeric(selected[column], errors="raise")
+            frames.append(selected)
+    if not frames:
+        return pd.DataFrame(columns=["ts", *OHLC])
+    return pd.concat(frames, ignore_index=True)
+
+
+def read_compressed_csv_windows(path: Path, windows: list[tuple[int, int]]) -> Any:
+    import numpy as np
+    import pandas as pd
+
+    frames = []
+    for chunk in pd.read_csv(path, usecols=lambda name: name in {"ts", *OHLC}, chunksize=100_000,
+                             float_precision="round_trip"):
+        if "ts" not in chunk or any(name not in chunk for name in OHLC):
+            raise ChartBuildError(f"OHLC 5m source lacks required columns: {safe_repo_path(path)}")
+        ts = pd.to_numeric(chunk["ts"], errors="coerce").to_numpy(dtype="float64")
+        finite = np.isfinite(ts)
+        wanted = np.zeros(len(chunk), dtype=bool)
+        for start, end in windows:
+            wanted |= finite & (ts >= start) & (ts < end)
+        if wanted.any():
+            selected = chunk.loc[wanted, ["ts", *OHLC]].copy()
+            selected["ts"] = pd.to_numeric(selected["ts"], errors="raise").astype("int64")
+            for column in OHLC:
+                selected[column] = pd.to_numeric(selected[column], errors="raise")
+            frames.append(selected)
+    if not frames:
+        return pd.DataFrame(columns=["ts", *OHLC])
+    return pd.concat(frames, ignore_index=True)
+
+
+def read_source_windows(path: Path, windows: list[tuple[int, int]]) -> Any:
+    if path.suffix.lower() == ".gz":
+        return read_compressed_csv_windows(path, windows)
+    return read_plain_csv_windows(path, windows)
 
 
 def read_symbol_bars(symbol: str, asset: str, windows: list[tuple[int, int]]) -> tuple[Any, dict[str, Any]]:
@@ -288,46 +446,31 @@ def read_symbol_bars(symbol: str, asset: str, windows: list[tuple[int, int]]) ->
     missing_source_files = []
     wanted_start = windows[0][0] if windows else 0
     wanted_end = windows[-1][1] if windows else 0
-    source_paths: list[Path] = []
+    read_errors = []
     for item in sources:
-        meta, source = item["meta"], item["resolved"]
-        if not source or not source.is_file():
-            if item["chosen"] is None:
-                missing_source_files.append(safe_repo_path(meta.get("path") or meta.get("resolved_path") or ""))
-            continue
+        meta = item["meta"]
         if meta.get("has_low") is False:
             continue
-        if source in source_paths:
+        if not item["candidates"]:
+            missing_source_files.append(safe_repo_path(meta.get("path") or meta.get("resolved_path") or ""))
             continue
-        source_paths.append(source)
-        try:
-            reader = pd.read_csv(source, usecols=lambda name: name in {"ts", *OHLC}, chunksize=100_000,
-                                 float_precision="round_trip")
-            for chunk in reader:
-                if "ts" not in chunk or any(name not in chunk for name in OHLC):
-                    raise ChartBuildError(f"OHLC 5m source lacks required columns: {safe_repo_path(source)}")
-                ts = pd.to_numeric(chunk["ts"], errors="coerce").to_numpy(dtype="float64")
-                finite_ts = np.isfinite(ts)
-                wanted = np.zeros(len(chunk), dtype=bool)
-                for start, end in windows:
-                    wanted |= finite_ts & (ts >= start) & (ts < end)
-                if not wanted.any():
-                    continue
-                selected = chunk.loc[wanted, ["ts", *OHLC]].copy()
-                selected["ts"] = pd.to_numeric(selected["ts"], errors="raise").astype("int64")
-                for column in OHLC:
-                    selected[column] = pd.to_numeric(selected[column], errors="raise")
-                selected = selected[(selected.ts >= wanted_start) & (selected.ts < wanted_end)]
-                if not selected.empty:
-                    frames.append(selected)
-        except ChartBuildError:
-            raise
-        except Exception as exc:
-            raise ChartBuildError(f"failed reading {safe_repo_path(source)} for {symbol}: {exc}") from exc
+        loaded = False
+        for source in item["candidates"]:
+            try:
+                selected = read_source_windows(source, windows)
+            except Exception as exc:
+                read_errors.append({"path": safe_repo_path(source), "error": str(exc)[:240]})
+                continue
+            loaded = True
+            if not selected.empty:
+                frames.append(selected[(selected.ts >= wanted_start) & (selected.ts < wanted_end)])
+            break
+        if not loaded:
+            missing_source_files.append(safe_repo_path(item["chosen"] or meta.get("path") or meta.get("resolved_path") or ""))
     if not frames:
         return pd.DataFrame(columns=["ts", *OHLC]), {
             "symbol": symbol, "status": "no_window_bars", "receipt": safe_repo_path(path),
-            "files": file_records, "missing_source_files": missing_source_files, "conflict_bars": 0,
+            "files": file_records, "missing_source_files": missing_source_files, "read_errors": read_errors, "conflict_bars": 0,
         }
     frame = pd.concat(frames, ignore_index=True)
     frame = frame.drop_duplicates()
@@ -357,6 +500,7 @@ def read_symbol_bars(symbol: str, asset: str, windows: list[tuple[int, int]]) ->
         "venue": receipt.get("venue", "Binance USD-M"),
         "files": file_records,
         "missing_source_files": missing_source_files,
+        "read_errors": read_errors,
         "conflict_bars": len(conflicts),
         "requested_windows": len(windows),
         "requested_start_ms": wanted_start,
@@ -627,22 +771,29 @@ def build(events_path: Path = DEFAULT_EVENTS, output_dir: Path = DEFAULT_OUTPUT,
     charts: dict[tuple[int, int | None], dict[str, Any]] = {}
     source_inventory: dict[str, Any] = {}
     build_started = time.monotonic()
-    for n, (symbol, jobs) in enumerate(sorted(by_symbol.items()), start=1):
-        asset = "BTC" if symbol == "BTCUSDT" else "ALT"
-        frame, receipt_info = read_symbol_bars(symbol, asset, [(job["start_ms"], job["end_ms"]) for job in jobs])
-        source_inventory[symbol] = receipt_info
-        for job in jobs:
-            key = (job["event"]["index"], job.get("member_index"))
-            chart = build_chart(job, frame, receipt_info["status"])
-            if receipt_info.get("conflict_bars"):
-                chart["source_conflict_bars_for_symbol"] = receipt_info["conflict_bars"]
-            charts[key] = chart
-        if n == 1 or n % 25 == 0 or n == len(by_symbol):
-            elapsed = max(time.monotonic() - build_started, 1e-9)
-            rate = n / elapsed
-            eta = (len(by_symbol) - n) / rate if rate else float("inf")
-            print(f"[charts] symbols {n}/{len(by_symbol)} ({rate:.2f}/s; eta {eta:.0f}s); "
-                  f"current={symbol}; chart_bars={sum(len(x.get('bars', [])) for x in charts.values())}", file=sys.stderr)
+    symbol_jobs = sorted(by_symbol.items())
+    with concurrent.futures.ThreadPoolExecutor(max_workers=SOURCE_READ_WORKERS) as pool:
+        futures = {
+            pool.submit(read_symbol_bars, symbol, "BTC" if symbol == "BTCUSDT" else "ALT",
+                        [(job["start_ms"], job["end_ms"]) for job in jobs]): (symbol, jobs)
+            for symbol, jobs in symbol_jobs
+        }
+        for n, future in enumerate(concurrent.futures.as_completed(futures), start=1):
+            symbol, jobs = futures[future]
+            frame, receipt_info = future.result()
+            source_inventory[symbol] = receipt_info
+            for job in jobs:
+                key = (job["event"]["index"], job.get("member_index"))
+                chart = build_chart(job, frame, receipt_info["status"])
+                if receipt_info.get("conflict_bars"):
+                    chart["source_conflict_bars_for_symbol"] = receipt_info["conflict_bars"]
+                charts[key] = chart
+            if n == 1 or n % 25 == 0 or n == len(by_symbol):
+                elapsed = max(time.monotonic() - build_started, 1e-9)
+                rate = n / elapsed
+                eta = (len(by_symbol) - n) / rate if rate else float("inf")
+                print(f"[charts] symbols {n}/{len(by_symbol)} ({rate:.2f}/s; eta {eta:.0f}s); "
+                      f"current={symbol}; chart_bars={sum(len(x.get('bars', [])) for x in charts.values())}", file=sys.stderr)
 
     event_files: list[dict[str, Any]] = []
     expected_block_names: set[str] = set()
@@ -712,7 +863,7 @@ def build(events_path: Path = DEFAULT_EVENTS, output_dir: Path = DEFAULT_OUTPUT,
         "source": "Binance USD-M",
         "interval": "5m",
         "input_data_hashes": "not computed; local source path, byte size, and mtime receipts only",
-        "symbols": source_inventory,
+        "symbols": dict(sorted(source_inventory.items())),
     }
     source_packed = gzip_bytes(compact_json(source_payload))
     source_relpath = "sources.json.gz"
