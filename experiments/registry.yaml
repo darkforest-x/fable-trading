@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-live-wick-two-closes-exit-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7ebf62bf64
+    status: rejected
+    question: Do two consecutive adverse closes beyond the entry wick improve the live-wick6x3 payoff without sacrificing net expectancy?
+    single_variable: Close a surviving position at the next open after two consecutive strict post-entry wick failures. Entry, native target, E20, original hourly decision, sizing and costs fixed.
+    result: In the 2025-start 272 funded trades payoff rises 0.918 to 1.207, but wins fall 65.81 to 51.84 percent, net mean 150.40 to 64.50bp, realized drawdown 19.27 to 25.74 percent. 113 early exits replace 5 of 11 backstops (saving 12.20 percentage points per intercepted stop) and turn 38 winners into losses including 24 original target hits. On all 400 funded trades payoff 0.958 to 1.257 while mean net falls 153.81 to 81.54bp.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-live-wick-two-closes-exit-20261109-v1/summary.json
+    notes: 416 paired events, 832 alternative native paths, priority for existing opening gap brackets, close times and opening prices checked. Two baseline funded equity paths matched trade for trade. Recent paired NY-week 95 percent interval on payoff delta +0.077 to +0.499 and mean net delta -140.67 to -30.56bp. Notion 4128856479af812da315f84638cc1e93.
+
   - experiment_id: exp-live-wick-deep-midpoint-20261109-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 1e2624e516
