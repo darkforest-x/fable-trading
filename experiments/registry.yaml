@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-key-extreme-stop-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "919ff35c56"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Change only the protective stop to the observed low or high of the completed 12H key; preserve the baseline's original 2R order price, fees and slot rules."
+    result: "Of 11780 eligible signals, 2019 funded; 1000 to 7435.87U vs 8788.77U. Cash payoff rose to 3.761 but win rate fell to 25.46%; observed DD 31.53%, hourly upper 36.85%. Failed development and full gates."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-key-extreme-stop-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af81e3bae2cd6f75dbc8f5."
+
   - experiment_id: exp-cloud-close-cross-venue-key-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "48c3e32b2c"
