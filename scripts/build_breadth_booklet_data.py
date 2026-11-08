@@ -15,6 +15,8 @@ EXPERIMENT = ROOT / "experiments/active/exp-monday-breadth-extension-20261108-v1
 FREQUENCY = ROOT / "experiments/active/exp-monday-breadth-frequency-20261108-v1"
 OPTIMIZATION = ROOT / "experiments/active/exp-monday-breadth-optimization-20261108-v1"
 SPACING = ROOT / "experiments/active/exp-monday-breadth-alt-spacing-20261108-v1"
+BTC_ADMISSION = ROOT / "experiments/active/exp-monday-breadth-btc-admission-20261108-v1"
+BTC_RESERVE = ROOT / "experiments/active/exp-monday-breadth-btc-reserve-20261108-v1"
 OUTPUT = ROOT / "yoyo/monitor/static/strategy-booklet/breadth-ema20-data.json"
 BTC_PARTIAL_FILLS = ROOT / "data/research/monday_breadth_optimization_20261108/btc_funded_exit_fills.parquet"
 
@@ -478,7 +480,29 @@ def record(row: pd.Series) -> dict[str, Any]:
     return {str(key): clean(value) for key, value in row.items()}
 
 
-def frequency_review() -> dict[str, Any]:
+def btc_admission_review(accounts: pd.DataFrame) -> list[dict[str, Any]]:
+    variants = pd.read_csv(BTC_ADMISSION / "summary.csv")
+    variants["scope"] = variants.scope.map({"all_fee": "all_history", "2026_funded": "2026"})
+    variants["variant"] = variants.variant.map({
+        "baseline_below_post_reservation": "current", "ema_before_reservation": "early_ema",
+    })
+    reserve = pd.read_csv(BTC_RESERVE / "partition_summary.csv")
+    reserve = reserve.loc[reserve.scope.isin(["all_history", "2026"])].assign(variant="reserved_case")
+    rows = pd.concat([variants, reserve], ignore_index=True)
+    if rows.duplicated(["variant", "scope"]).any() or len(rows.dropna(subset=["variant", "scope"])) != 6:
+        raise ValueError("Expected three BTC allocation rules in both cost scopes")
+    original = accounts.query('strategy == "below_plus_case" and sleeve_deployment == 1 and extra_roundtrip_pp == 0')
+    for source, scope in [("all_fee", "all_history"), ("2026_funded", "2026")]:
+        check = rows[(rows.scope == scope) & rows.variant.eq("current")].iloc[0]
+        reference = original[original.scope.eq(source)].iloc[0]
+        np.testing.assert_allclose([check.growth_pct, check.marked_dd_pct, check.distinct_entries],
+                                   [reference.growth_pct, reference.max_dd_pct, reference.distinct], atol=1e-6)
+    cols = ["variant", "scope", "btc_count", "alt_count", "total_legs", "distinct_entries",
+            "growth_pct", "settlement_dd_pct", "marked_dd_pct", "sep16_admitted"]
+    return clean(rows[cols].to_dict("records"))
+
+
+def frequency_review(accounts: pd.DataFrame) -> dict[str, Any]:
     periods = {"2026_to_2026-10-27", "all_history"}
     branch = pd.read_csv(SPACING / "spacing_summary.csv")
     portfolio = pd.read_csv(SPACING / "portfolio_summary.csv")
@@ -509,6 +533,7 @@ def frequency_review() -> dict[str, Any]:
     if list(high_frequency.candidate_id) != ["account_36", "account_72"]:
         raise ValueError("Missing high-frequency account comparison")
     return {
+        "btc_variants": btc_admission_review(accounts),
         "spacing": clean(joined.drop(columns="selected").sort_values("minimum_gap_hours", ascending=False).to_dict("records")),
         "higher_frequency_2026": clean(high_frequency.to_dict("records")),
         "extra_baskets_2026": clean(extra[["entry_bjt", "member_count", "net_pct", "selected_6h", "selected_12h"]].to_dict("records")),
@@ -630,7 +655,7 @@ def build_summaries(events: list[dict[str, Any]]) -> dict[str, Any]:
             "without_case_growth_pct": number(sensitivity.loc[sensitivity.subset.eq("omit_owner_case_entry"), "growth_funded"].item()),
             "slipped_funded_points": number(slipped_case.funded_points.item()),
         },
-        "frequency_review": frequency_review(),
+        "frequency_review": frequency_review(accounts),
     }
 
 
@@ -680,6 +705,8 @@ def build_payload() -> dict[str, Any]:
         "signal_cutoff_exclusive_utc": "2026-10-28T00:00:00Z",
         "provenance": {
             "experiment_id": "exp-monday-breadth-extension-20261108-v1",
+            "btc_admission_study": str(BTC_ADMISSION.relative_to(ROOT) / "summary.csv"),
+            "btc_reserve_study": str(BTC_RESERVE.relative_to(ROOT) / "partition_summary.csv"),
             "spacing_study": str(SPACING.relative_to(ROOT) / "portfolio_summary.csv"),
             "event_sources": {
                 "BTC": "experiments/active/exp-monday-breadth-extension-20261108-v1/risk/integrated_btc_events.parquet",

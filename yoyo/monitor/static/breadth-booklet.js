@@ -64,9 +64,25 @@
     return note((funded?'2026 年至 10 月 27 日':'2020 年至 2026 年 10 月 27 日')+'。共有 '+rows[0].raw_rule_signals+' 个山寨信号满足价格和币数条件。只改两次入场之间的最短间隔，持仓仍为六小时。BTC 的入场、退出和 50% 起始配置沿用现版。三行都从 1,000 USDT 起步，仅扣手续费。')+
       table(['最短间隔','山寨笔数','组合笔数','组合净收益','结算回撤','新入选 / 被替换','新增笔均收益','新增胜率'],tableRows)+
       note('新入选和被替换均与 24 小时原版逐笔比较。收益按每次实际占用资金复利。结算回撤只看平仓时点，持仓期间可能承受更大回撤。新增事件缺少匹配随机对照。')+
-      note(funded?'这一年，缩到 12 小时多出 3 笔。再缩到 6 小时，入选的仍是同样 3 笔。三笔中仅一笔赚钱。':'全历史缩到 6 小时，实际新增 64 笔，同时挤掉原版 3 笔。新增单的胜率为 40.63%，更多的成交降低了组合收益。')+
+      note(funded?'这一年，缩到 12 小时多出 3 笔。再缩到 6 小时，入选的仍是同样 3 笔。三笔中仅一笔赚钱。按北京时间计，有开仓的日期从 44 天增至 45 天，覆盖的自然周仍是 30 周。':'全历史缩到 6 小时，实际新增 64 笔，同时挤掉原版 3 笔。新增单的胜率为 40.63%，更多的成交降低了组合收益。')+
       (funded&&extras.length?'<details class="bb-panel bb-details"><summary>查看 2026 年新入选的山寨篮子</summary>'+table(['开仓（北京时间）','成员数','六小时手续费后收益','入选间隔'],extras)+'</details>':'')+
       (funded?table(['最短间隔','仅手续费盯市回撤','资金费完整篮子','含资金费组合收益','含资金费盯市回撤'],markedRows)+note('盯市按两边资金的同期 5 分钟收盘净值计算。含资金费结果仅列出每笔均有覆盖的组合。'):'');
+  }
+
+  function btcVariantsHTML(review, funded) {
+    if(!review.btc_variants)return '';
+    const scope=funded?'2026':'all_history';
+    const names={current:'现版',early_ema:'普通 BTC 先验 EMA',reserved_case:'急跌 BTC 单留一份资金'};
+    const rows=review.btc_variants.filter(r=>r.scope===scope).map(r=>[
+      names[r.variant],r.btc_count,r.total_legs,r.distinct_entries,pct(r.growth_pct),
+      pct(r.marked_dd_pct,false),pct(r.settlement_dd_pct,false),r.sep16_admitted?'入场':'错过'
+    ]);
+    return panel('给急跌 BTC 留仓位会怎样',
+      note((funded?'2026 年至 10 月 27 日，含实际资金费。':'全历史，仅扣手续费。')+'三行各从 1,000 USDT 起步，山寨始终占起始资金的一半，两次入场至少相隔 24 小时。')+
+      table(['BTC 准入与资金','BTC 笔数','组合笔数','不同开仓时点','组合净收益','5 分钟盯市回撤','结算回撤','9 月 16 日急跌'],rows)+
+      note('先验 EMA 后，未通过的普通 BTC 信号立即释放六天名额。9 月 12 日 08:10（北京时间）一笔普通 BTC 得以开仓，持有六天。9 月 16 日急跌信号出现时，BTC 资金已占用。原版在那次急跌每 BTC 实现了约一万点净收益。')+
+      note('分仓方案从一开始把 250 USDT 分给普通 BTC，250 USDT 分给急跌 BTC，500 USDT 分给山寨。三份独立复利，两路 BTC 可同时有仓。单笔 BTC 的点数相同，分到这笔的资金决定它对组合赚了多少。')+
+      note('这些比较使用已看过的行情。同一轮下跌可以触发多笔。结算回撤按平仓净值计算，表内空缺表示该口径没有核实。'));
   }
 
   function frequencyHTML(data, funded, entries) {
@@ -84,6 +100,7 @@
     if(!review)return panel('为什么开单少',timing+admission);
     const frequent=review.higher_frequency_2026.map(r=>[r.candidate_id==='account_36'?'36 次档':'72 次档',r.n,pct(r.funded_mean),pct(r.marked_close_dd_before_funding,false)]);
     return panel('为什么开单少',timing+admission)+
+      btcVariantsHTML(review,funded)+
       panel('缩短山寨入场间隔',spacingHTML(review,funded))+
       '<details class="bb-panel bb-details"><summary>曾试过的高频组合 · 2026 年至 10 月 27 日</summary>'+
       note('将 BTC、ETH、SOL 和山寨篮子四路提醒合到一个账户，空仓时接最早一笔。下表中的 36 和 72 是选规则时设定的年度笔数门槛。')+
