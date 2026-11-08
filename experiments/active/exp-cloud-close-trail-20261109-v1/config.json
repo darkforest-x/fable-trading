@@ -1,0 +1,8 @@
+{
+  "id":"exp-cloud-close-trail-20261109-v1",
+  "baseline":"Unfiltered V1.7 confirmation-open runner without a resting target. Reuse the original frozen close-reward no-TP fills and controls; no rerun of the baseline.",
+  "hypothesis":"Let a position run, then protect profit after a favorable move of 2 actual entry-to-stop R. Only after an H1 candle closes, ratchet the extra exit to the prior high-water price minus the giveback for a long (mirror for a short). One variable: giveback distance in original R units [1,2,3,4]. Original protective exits stay active from entry. The trailing order first becomes active at the next tradable hour; if price has already passed it, liquidate at that open. No entry-hour retrospective adjustments. If a previously resting trail and original threshold can both exit during the same hour, the nearer adverse threshold executes first; marked gaps exit at the observed open.",
+  "sizing":"Same unlevered twelve-position pooled cash account, fees, chronology and signal set. No signal gating. Fixed 2R activation is not optimized. Both sides market fee 5bp and slippage stress 5bp each. No funding/capacity.",
+  "selection":"Return the strongest development-growth configuration meeting win>=30%, payoff>=2.5, DD conservative bound<=35%, >=100 trades. If none qualify, show original plus descriptive highest dev growth. 2025 and 2026 evaluated after the development choice; these years have been used in earlier research.",
+  "command":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_trail"
+}
