@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-limit-alarm-episode-diag-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3783a72b4a
+    status: rejected
+    question: 'Owner 2026-11-08 "你能基于这些研究 再找找还有没有更好的方案吗 做成策略": does universe growth or position inside an alarm episode explain the 25-coin alarm-entry rule''s weak 2025 consistently enough to change the rule?'
+    single_variable: 'None; read-only diagnostic of saved NautilusTrader fills (alarm, combo and threshold studies) split by follower rank, minutes after the alarm bar, final episode size, and causal rank caps 5/10/20/40; active universe per year.'
+    result: 'Active universe (distinct symbols touching in the prior 8 weeks, yearly median) 91/119/170/257/432/541 for 2021-2026, so 25 coins fell from about 21 percent of the universe in 2022 to under 5 percent in 2026; but 2025 and 2026 have similar universes and opposite outcomes, and every saved threshold 10-75 was flat or negative in 2025, so share normalisation does not explain or repair 2025. near30 by minutes after alarm 0-5: +236/+27/+59bp (2020-24/2025/2026); rank 41+: +299/-99/+94bp. Rank caps drop trades that are positive in 2020-24 and 2026 and negative only in 2025 (cap20 dropped +209/-55/+84bp; same pattern for opp30 and near18). No bucket is negative in all three periods; decision rule (drop only what loses in every period) keeps the frozen 10-29 rule unchanged.'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-limit-alarm-episode-diag-20261108-v1/summary.json
+    notes: 'All periods were seen before; stability check, not a blind test. Episode size is only known after the 30-minute window and is diagnostic only. 2025 losses sit in episodes with 31+ followers (582 trades, -69bp) that cannot be identified at entry.'
+
   - experiment_id: exp-monday-breadth-extension-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 645c60527f4b552a8a1e792bb1a0fcd9f3a1cc53

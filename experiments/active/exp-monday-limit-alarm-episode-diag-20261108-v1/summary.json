@@ -1,0 +1,1140 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-limit-alarm-episode-diag-20261108-v1",
+    "question": "Owner 2026-11-08 '你能基于这些研究 再找找还有没有更好的方案吗 做成策略': does universe growth or position inside an alarm episode explain the 25-coin alarm-entry rule's weak 2025, consistently enough to justify a rule change?",
+    "single_variable": "None (read-only diagnostic of saved NautilusTrader fills). Splits: follower rank, minutes after the alarm bar, final episode size (not causal), and causal rank caps; plus the active universe size per year.",
+    "decision_rule": "A rank cap or minute cut becomes a candidate only if the dropped trades are negative in each of 2020-24, 2025 and 2026 for near30; otherwise keep the frozen 10-29 rule.",
+    "source": "experiments/active/exp-monday-limit-alarm-entry-20261029-v1",
+    "combo": "experiments/active/exp-monday-limit-alarm-combo-20261031-v1",
+    "threshold_study": "experiments/active/exp-monday-limit-alarm-threshold-20261101-v1",
+    "threshold": 25,
+    "variants": [
+      "near30",
+      "opp30",
+      "near18"
+    ],
+    "slippage_bp": 10.0,
+    "universe_weeks": 8,
+    "rank_bins": [
+      0,
+      5,
+      10,
+      20,
+      40,
+      100000
+    ],
+    "rank_labels": [
+      "1-5",
+      "6-10",
+      "11-20",
+      "21-40",
+      "41+"
+    ],
+    "minute_bins": [
+      0,
+      5,
+      10,
+      15,
+      20,
+      30
+    ],
+    "minute_labels": [
+      "0-5",
+      "5-10",
+      "10-15",
+      "15-20",
+      "20-30"
+    ],
+    "size_bins": [
+      0,
+      5,
+      15,
+      30,
+      100000
+    ],
+    "size_labels": [
+      "<=5",
+      "6-15",
+      "16-30",
+      "31+"
+    ],
+    "rank_caps": [
+      5,
+      10,
+      20,
+      40
+    ],
+    "bootstrap_seed": 20261108,
+    "fees": "As the source fills: maker 0.02 / taker 0.05 percent (OKX Lv1, read 2026-10-23), 10bp slippage on non-target exits, worse intrabar path",
+    "in_sample": "All periods were looked at before; this checks stability, it is not a blind test",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "results": {
+    "universe_median_by_year": {
+      "2020": 24.0,
+      "2021": 91.0,
+      "2022": 119.0,
+      "2023": 169.5,
+      "2024": 257.0,
+      "2025": 432.0,
+      "2026": 541.0
+    },
+    "alarms_per_year_by_threshold": {
+      "2020": {
+        "10": 1,
+        "15": 0,
+        "20": 0,
+        "25": 0,
+        "35": 0,
+        "50": 0,
+        "75": 0
+      },
+      "2021": {
+        "10": 17,
+        "15": 12,
+        "20": 5,
+        "25": 3,
+        "35": 2,
+        "50": 0,
+        "75": 0
+      },
+      "2022": {
+        "10": 39,
+        "15": 24,
+        "20": 14,
+        "25": 8,
+        "35": 3,
+        "50": 1,
+        "75": 0
+      },
+      "2023": {
+        "10": 54,
+        "15": 35,
+        "20": 27,
+        "25": 22,
+        "35": 15,
+        "50": 9,
+        "75": 5
+      },
+      "2024": {
+        "10": 73,
+        "15": 45,
+        "20": 33,
+        "25": 24,
+        "35": 13,
+        "50": 10,
+        "75": 6
+      },
+      "2025": {
+        "10": 132,
+        "15": 84,
+        "20": 56,
+        "25": 43,
+        "35": 22,
+        "50": 8,
+        "75": 5
+      },
+      "2026": {
+        "10": 99,
+        "15": 57,
+        "20": 36,
+        "25": 29,
+        "35": 23,
+        "50": 11,
+        "75": 3
+      }
+    },
+    "rank_caps": {
+      "near30": {
+        "cap5": {
+          "2020-24": {
+            "kept": {
+              "trades": 134,
+              "episodes": 35,
+              "trade_mean_bp": 173.79171978163217,
+              "episode_mean_bp": 178.27442066939554,
+              "ci95_bp": [
+                54.90405931578215,
+                308.95027532393885
+              ]
+            },
+            "dropped": {
+              "trades": 555,
+              "episodes": 20,
+              "trade_mean_bp": 188.52056950088422,
+              "episode_mean_bp": 279.79000338924527,
+              "ci95_bp": [
+                111.51235716429319,
+                483.0148479190149
+              ]
+            },
+            "dropped_sum_pct": 1046.2891607299075
+          },
+          "2025": {
+            "kept": {
+              "trades": 149,
+              "episodes": 37,
+              "trade_mean_bp": 59.51501071857891,
+              "episode_mean_bp": 102.90233300820486,
+              "ci95_bp": [
+                16.836086905604628,
+                189.2122732036827
+              ]
+            },
+            "dropped": {
+              "trades": 708,
+              "episodes": 23,
+              "trade_mean_bp": -8.681847017766653,
+              "episode_mean_bp": 99.13329172041115,
+              "ci95_bp": [
+                14.85308148517869,
+                186.89114747716005
+              ]
+            },
+            "dropped_sum_pct": -61.46747688578791
+          },
+          "2026": {
+            "kept": {
+              "trades": 99,
+              "episodes": 24,
+              "trade_mean_bp": 55.63265825861485,
+              "episode_mean_bp": 112.32771592108196,
+              "ci95_bp": [
+                23.249844895454984,
+                229.5728383898016
+              ]
+            },
+            "dropped": {
+              "trades": 501,
+              "episodes": 17,
+              "trade_mean_bp": 69.21671829781054,
+              "episode_mean_bp": 32.79233175446881,
+              "ci95_bp": [
+                -10.147042542647219,
+                78.2226161922038
+              ]
+            },
+            "dropped_sum_pct": 346.77575867203086
+          }
+        },
+        "cap10": {
+          "2020-24": {
+            "kept": {
+              "trades": 225,
+              "episodes": 35,
+              "trade_mean_bp": 188.20476562117867,
+              "episode_mean_bp": 193.1612197878403,
+              "ci95_bp": [
+                70.73912435917772,
+                326.7695286644113
+              ]
+            },
+            "dropped": {
+              "trades": 464,
+              "episodes": 14,
+              "trade_mean_bp": 184.420116937423,
+              "episode_mean_bp": 211.01454738842352,
+              "ci95_bp": [
+                74.08395382663787,
+                384.3020944301224
+              ]
+            },
+            "dropped_sum_pct": 855.7093425896426
+          },
+          "2025": {
+            "kept": {
+              "trades": 255,
+              "episodes": 37,
+              "trade_mean_bp": 64.58755191979832,
+              "episode_mean_bp": 111.15563679464051,
+              "ci95_bp": [
+                25.674906491905574,
+                197.19282374919942
+              ]
+            },
+            "dropped": {
+              "trades": 602,
+              "episodes": 17,
+              "trade_mean_bp": -22.838599387141368,
+              "episode_mean_bp": 78.49118815609961,
+              "ci95_bp": [
+                -15.947978125331051,
+                177.07654567656343
+              ]
+            },
+            "dropped_sum_pct": -137.48836831059103
+          },
+          "2026": {
+            "kept": {
+              "trades": 176,
+              "episodes": 24,
+              "trade_mean_bp": 38.986309067352835,
+              "episode_mean_bp": 109.45290886842115,
+              "ci95_bp": [
+                23.26522245193001,
+                227.77303194787632
+              ]
+            },
+            "dropped": {
+              "trades": 424,
+              "episodes": 13,
+              "trade_mean_bp": 78.5934401862072,
+              "episode_mean_bp": 78.65567800260168,
+              "ci95_bp": [
+                39.25182477709737,
+                127.01612816425852
+              ]
+            },
+            "dropped_sum_pct": 333.23618638951854
+          }
+        },
+        "cap20": {
+          "2020-24": {
+            "kept": {
+              "trades": 346,
+              "episodes": 35,
+              "trade_mean_bp": 162.14439297763624,
+              "episode_mean_bp": 196.20025743138265,
+              "ci95_bp": [
+                76.4327843111712,
+                323.14577243199994
+              ]
+            },
+            "dropped": {
+              "trades": 343,
+              "episodes": 10,
+              "trade_mean_bp": 209.3733135669601,
+              "episode_mean_bp": 248.96658967007025,
+              "ci95_bp": [
+                80.57269661339087,
+                469.43538391397124
+              ]
+            },
+            "dropped_sum_pct": 718.1504655346731
+          },
+          "2025": {
+            "kept": {
+              "trades": 407,
+              "episodes": 37,
+              "trade_mean_bp": 67.1817354681851,
+              "episode_mean_bp": 116.99391947646268,
+              "ci95_bp": [
+                34.847400684004135,
+                200.32423036808302
+              ]
+            },
+            "dropped": {
+              "trades": 450,
+              "episodes": 12,
+              "trade_mean_bp": -54.71550539347084,
+              "episode_mean_bp": 55.131748151144556,
+              "ci95_bp": [
+                -51.34660429749139,
+                169.82135060720617
+              ]
+            },
+            "dropped_sum_pct": -246.2197742706188
+          },
+          "2026": {
+            "kept": {
+              "trades": 288,
+              "episodes": 24,
+              "trade_mean_bp": 48.62177453323562,
+              "episode_mean_bp": 117.88345593967439,
+              "ci95_bp": [
+                31.424583412284598,
+                235.37211306658946
+              ]
+            },
+            "dropped": {
+              "trades": 312,
+              "episodes": 10,
+              "trade_mean_bp": 83.9171088757503,
+              "episode_mean_bp": 74.38490352918899,
+              "ci95_bp": [
+                43.478087057064535,
+                113.08703342805165
+              ]
+            },
+            "dropped_sum_pct": 261.82137969234094
+          }
+        },
+        "cap40": {
+          "2020-24": {
+            "kept": {
+              "trades": 476,
+              "episodes": 35,
+              "trade_mean_bp": 134.9557669540197,
+              "episode_mean_bp": 205.92268617757193,
+              "ci95_bp": [
+                88.20355144131335,
+                330.82542696226506
+              ]
+            },
+            "dropped": {
+              "trades": 213,
+              "episodes": 4,
+              "trade_mean_bp": 298.9580349935026,
+              "episode_mean_bp": 198.98420683825765,
+              "ci95_bp": [
+                -33.25130397281042,
+                431.21971764932573
+              ]
+            },
+            "dropped_sum_pct": 636.7806145361606
+          },
+          "2025": {
+            "kept": {
+              "trades": 590,
+              "episodes": 37,
+              "trade_mean_bp": 49.191071168228746,
+              "episode_mean_bp": 121.42968036676376,
+              "ci95_bp": [
+                40.91942876130863,
+                203.16484684223366
+              ]
+            },
+            "dropped": {
+              "trades": 267,
+              "episodes": 6,
+              "trade_mean_bp": -98.50840105155622,
+              "episode_mean_bp": 49.651187142694205,
+              "ci95_bp": [
+                -118.06443560001179,
+                302.1959625929621
+              ]
+            },
+            "dropped_sum_pct": -263.0174308076551
+          },
+          "2026": {
+            "kept": {
+              "trades": 449,
+              "episodes": 24,
+              "trade_mean_bp": 57.795741395309676,
+              "episode_mean_bp": 121.99699240841024,
+              "ci95_bp": [
+                37.40940828296574,
+                238.1590346316196
+              ]
+            },
+            "dropped": {
+              "trades": 151,
+              "episodes": 7,
+              "trade_mean_bp": 94.27100098219809,
+              "episode_mean_bp": 78.55727081768643,
+              "ci95_bp": [
+                35.57880938622141,
+                130.32058692637165
+              ]
+            },
+            "dropped_sum_pct": 142.34921148311912
+          }
+        }
+      },
+      "opp30": {
+        "cap5": {
+          "2020-24": {
+            "kept": {
+              "trades": 134,
+              "episodes": 35,
+              "trade_mean_bp": 98.16488422710933,
+              "episode_mean_bp": 128.3186770476572,
+              "ci95_bp": [
+                -15.015443730859767,
+                282.83952981654045
+              ]
+            },
+            "dropped": {
+              "trades": 555,
+              "episodes": 20,
+              "trade_mean_bp": 262.1462042807594,
+              "episode_mean_bp": 374.3168926543568,
+              "ci95_bp": [
+                78.12808845976328,
+                736.9414108964843
+              ]
+            },
+            "dropped_sum_pct": 1454.9114337582143
+          },
+          "2025": {
+            "kept": {
+              "trades": 149,
+              "episodes": 37,
+              "trade_mean_bp": 20.812261831002324,
+              "episode_mean_bp": 35.32307592292445,
+              "ci95_bp": [
+                -56.060849466089294,
+                151.31581362585928
+              ]
+            },
+            "dropped": {
+              "trades": 708,
+              "episodes": 23,
+              "trade_mean_bp": -11.313636223374498,
+              "episode_mean_bp": 46.658014779867216,
+              "ci95_bp": [
+                -46.265326627169884,
+                159.9126197144027
+              ]
+            },
+            "dropped_sum_pct": -80.10054446149144
+          },
+          "2026": {
+            "kept": {
+              "trades": 99,
+              "episodes": 24,
+              "trade_mean_bp": 87.13304495022088,
+              "episode_mean_bp": 85.7900938883259,
+              "ci95_bp": [
+                -24.129867745715387,
+                228.8194159391713
+              ]
+            },
+            "dropped": {
+              "trades": 501,
+              "episodes": 17,
+              "trade_mean_bp": 22.81501309156049,
+              "episode_mean_bp": -15.534093300119203,
+              "ci95_bp": [
+                -45.57977247563274,
+                13.215563967420293
+              ]
+            },
+            "dropped_sum_pct": 114.30321558871806
+          }
+        },
+        "cap10": {
+          "2020-24": {
+            "kept": {
+              "trades": 225,
+              "episodes": 35,
+              "trade_mean_bp": 195.8125353558916,
+              "episode_mean_bp": 202.51780429310867,
+              "ci95_bp": [
+                40.203808922108394,
+                386.1127004754301
+              ]
+            },
+            "dropped": {
+              "trades": 464,
+              "episodes": 14,
+              "trade_mean_bp": 246.95564096374676,
+              "episode_mean_bp": 87.67644794852323,
+              "ci95_bp": [
+                -19.3699658767917,
+                225.55032113024544
+              ]
+            },
+            "dropped_sum_pct": 1145.8741740717849
+          },
+          "2025": {
+            "kept": {
+              "trades": 255,
+              "episodes": 37,
+              "trade_mean_bp": 12.560339947588638,
+              "episode_mean_bp": 32.66311899262488,
+              "ci95_bp": [
+                -59.43287385195261,
+                154.08220085196996
+              ]
+            },
+            "dropped": {
+              "trades": 602,
+              "episodes": 17,
+              "trade_mean_bp": -13.474940398612798,
+              "episode_mean_bp": 94.18537122408522,
+              "ci95_bp": [
+                -37.87051603099539,
+                256.1484507974479
+              ]
+            },
+            "dropped_sum_pct": -81.11914119964904
+          },
+          "2026": {
+            "kept": {
+              "trades": 176,
+              "episodes": 24,
+              "trade_mean_bp": 35.918687620267,
+              "episode_mean_bp": 72.23725623128767,
+              "ci95_bp": [
+                -24.64916853485022,
+                213.0197057989427
+              ]
+            },
+            "dropped": {
+              "trades": 424,
+              "episodes": 13,
+              "trade_mean_bp": 32.39340563154878,
+              "episode_mean_bp": 16.52379792577249,
+              "ci95_bp": [
+                -5.700530924677021,
+                39.51071013770099
+              ]
+            },
+            "dropped_sum_pct": 137.34803987776684
+          }
+        },
+        "cap20": {
+          "2020-24": {
+            "kept": {
+              "trades": 346,
+              "episodes": 35,
+              "trade_mean_bp": 112.38123913405303,
+              "episode_mean_bp": 190.10060174806364,
+              "ci95_bp": [
+                31.812760571985212,
+                371.1828196545045
+              ]
+            },
+            "dropped": {
+              "trades": 343,
+              "episodes": 10,
+              "trade_mean_bp": 349.1583939413171,
+              "episode_mean_bp": 138.44233454181213,
+              "ci95_bp": [
+                -23.099620729952335,
+                369.35343574310616
+              ]
+            },
+            "dropped_sum_pct": 1197.6132912187177
+          },
+          "2025": {
+            "kept": {
+              "trades": 407,
+              "episodes": 37,
+              "trade_mean_bp": 42.11227509398353,
+              "episode_mean_bp": 49.925408986401756,
+              "ci95_bp": [
+                -39.18797407920534,
+                163.09286939788075
+              ]
+            },
+            "dropped": {
+              "trades": 450,
+              "episodes": 12,
+              "trade_mean_bp": -48.997163103513564,
+              "episode_mean_bp": 71.6534097275113,
+              "ci95_bp": [
+                -87.55425390524863,
+                300.8257869757329
+              ]
+            },
+            "dropped_sum_pct": -220.48723396581101
+          },
+          "2026": {
+            "kept": {
+              "trades": 288,
+              "episodes": 24,
+              "trade_mean_bp": 29.682412579209192,
+              "episode_mean_bp": 81.34182477742668,
+              "ci95_bp": [
+                -14.48389419088316,
+                221.42799697175298
+              ]
+            },
+            "dropped": {
+              "trades": 312,
+              "episodes": 10,
+              "trade_mean_bp": 36.88448136580584,
+              "episode_mean_bp": 21.85089936089856,
+              "ci95_bp": [
+                -2.599862743578961,
+                51.480961616526315
+              ]
+            },
+            "dropped_sum_pct": 115.07958186131422
+          }
+        },
+        "cap40": {
+          "2020-24": {
+            "kept": {
+              "trades": 476,
+              "episodes": 35,
+              "trade_mean_bp": 80.60201423926198,
+              "episode_mean_bp": 194.6857092062338,
+              "ci95_bp": [
+                41.2887558904056,
+                376.60887539672405
+              ]
+            },
+            "dropped": {
+              "trades": 213,
+              "episodes": 4,
+              "trade_mean_bp": 564.6886341988985,
+              "episode_mean_bp": 377.1981378788807,
+              "ci95_bp": [
+                -51.50986686910889,
+                932.6316213673878
+              ]
+            },
+            "dropped_sum_pct": 1202.7867908436538
+          },
+          "2025": {
+            "kept": {
+              "trades": 590,
+              "episodes": 37,
+              "trade_mean_bp": 36.08811949516201,
+              "episode_mean_bp": 49.9851262026513,
+              "ci95_bp": [
+                -36.048359580531304,
+                161.86031485905178
+              ]
+            },
+            "dropped": {
+              "trades": 267,
+              "episodes": 6,
+              "trade_mean_bp": -98.13115331638724,
+              "episode_mean_bp": 198.00267086846745,
+              "ci95_bp": [
+                -124.80731327113477,
+                765.7024504946163
+              ]
+            },
+            "dropped_sum_pct": -262.0101793547539
+          },
+          "2026": {
+            "kept": {
+              "trades": 449,
+              "episodes": 24,
+              "trade_mean_bp": 34.286950163157115,
+              "episode_mean_bp": 87.53968160194457,
+              "ci95_bp": [
+                -9.977522850249304,
+                222.71120986479934
+              ]
+            },
+            "dropped": {
+              "trades": 151,
+              "episodes": 7,
+              "trade_mean_bp": 30.871870103881633,
+              "episode_mean_bp": 20.72534601492188,
+              "ci95_bp": [
+                -18.73427657678965,
+                72.43427790136408
+              ]
+            },
+            "dropped_sum_pct": 46.61652385686127
+          }
+        }
+      },
+      "near18": {
+        "cap5": {
+          "2020-24": {
+            "kept": {
+              "trades": 134,
+              "episodes": 35,
+              "trade_mean_bp": 142.27188283045874,
+              "episode_mean_bp": 154.13923123249702,
+              "ci95_bp": [
+                17.786823425818554,
+                288.6885634758224
+              ]
+            },
+            "dropped": {
+              "trades": 555,
+              "episodes": 20,
+              "trade_mean_bp": 102.2396773803245,
+              "episode_mean_bp": 209.68371728675146,
+              "ci95_bp": [
+                56.43364453711166,
+                380.4186307966022
+              ]
+            },
+            "dropped_sum_pct": 567.4302094608009
+          },
+          "2025": {
+            "kept": {
+              "trades": 149,
+              "episodes": 37,
+              "trade_mean_bp": 59.51501071857891,
+              "episode_mean_bp": 102.90233300820486,
+              "ci95_bp": [
+                16.836086905604628,
+                189.2122732036827
+              ]
+            },
+            "dropped": {
+              "trades": 708,
+              "episodes": 23,
+              "trade_mean_bp": -8.174331852994975,
+              "episode_mean_bp": 99.33104666628806,
+              "ci95_bp": [
+                15.441402449162494,
+                186.89114747716005
+              ]
+            },
+            "dropped_sum_pct": -57.874269519204425
+          },
+          "2026": {
+            "kept": {
+              "trades": 99,
+              "episodes": 24,
+              "trade_mean_bp": 55.63265825861485,
+              "episode_mean_bp": 112.32771592108196,
+              "ci95_bp": [
+                23.249844895454984,
+                229.5728383898016
+              ]
+            },
+            "dropped": {
+              "trades": 501,
+              "episodes": 17,
+              "trade_mean_bp": 69.21671829781054,
+              "episode_mean_bp": 32.79233175446881,
+              "ci95_bp": [
+                -10.147042542647219,
+                78.2226161922038
+              ]
+            },
+            "dropped_sum_pct": 346.77575867203086
+          }
+        },
+        "cap10": {
+          "2020-24": {
+            "kept": {
+              "trades": 225,
+              "episodes": 35,
+              "trade_mean_bp": 125.17896601190036,
+              "episode_mean_bp": 150.6432836972341,
+              "ci95_bp": [
+                18.311063972597733,
+                280.6447683443736
+              ]
+            },
+            "dropped": {
+              "trades": 464,
+              "episodes": 14,
+              "trade_mean_bp": 102.67712476871547,
+              "episode_mean_bp": 185.37087993799818,
+              "ci95_bp": [
+                50.25824281265501,
+                359.4097641239202
+              ]
+            },
+            "dropped_sum_pct": 476.4218589268398
+          },
+          "2025": {
+            "kept": {
+              "trades": 255,
+              "episodes": 37,
+              "trade_mean_bp": 65.99665284787025,
+              "episode_mean_bp": 112.12677392074416,
+              "ci95_bp": [
+                27.247128459649776,
+                197.41486381719122
+              ]
+            },
+            "dropped": {
+              "trades": 602,
+              "episodes": 17,
+              "trade_mean_bp": -22.838599387141368,
+              "episode_mean_bp": 78.49118815609961,
+              "ci95_bp": [
+                -15.947978125331051,
+                177.07654567656343
+              ]
+            },
+            "dropped_sum_pct": -137.48836831059103
+          },
+          "2026": {
+            "kept": {
+              "trades": 176,
+              "episodes": 24,
+              "trade_mean_bp": 38.986309067352835,
+              "episode_mean_bp": 109.45290886842115,
+              "ci95_bp": [
+                23.26522245193001,
+                227.77303194787632
+              ]
+            },
+            "dropped": {
+              "trades": 424,
+              "episodes": 13,
+              "trade_mean_bp": 78.5934401862072,
+              "episode_mean_bp": 78.65567800260168,
+              "ci95_bp": [
+                39.25182477709737,
+                127.01612816425852
+              ]
+            },
+            "dropped_sum_pct": 333.23618638951854
+          }
+        },
+        "cap20": {
+          "2020-24": {
+            "kept": {
+              "trades": 346,
+              "episodes": 35,
+              "trade_mean_bp": 107.22044547927898,
+              "episode_mean_bp": 159.5993599863106,
+              "ci95_bp": [
+                32.95065630841405,
+                284.2285093197738
+              ]
+            },
+            "dropped": {
+              "trades": 343,
+              "episodes": 10,
+              "trade_mean_bp": 112.85474959046951,
+              "episode_mean_bp": 214.35341541007037,
+              "ci95_bp": [
+                53.46020213292704,
+                432.0959626727505
+              ]
+            },
+            "dropped_sum_pct": 387.0917910953104
+          },
+          "2025": {
+            "kept": {
+              "trades": 407,
+              "episodes": 37,
+              "trade_mean_bp": 68.06458740100659,
+              "episode_mean_bp": 117.47948803951452,
+              "ci95_bp": [
+                35.80395265631173,
+                201.09962812319012
+              ]
+            },
+            "dropped": {
+              "trades": 450,
+              "episodes": 12,
+              "trade_mean_bp": -54.71550539347084,
+              "episode_mean_bp": 55.131748151144556,
+              "ci95_bp": [
+                -51.34660429749139,
+                169.82135060720617
+              ]
+            },
+            "dropped_sum_pct": -246.2197742706188
+          },
+          "2026": {
+            "kept": {
+              "trades": 288,
+              "episodes": 24,
+              "trade_mean_bp": 48.62177453323562,
+              "episode_mean_bp": 117.88345593967439,
+              "ci95_bp": [
+                31.424583412284598,
+                235.37211306658946
+              ]
+            },
+            "dropped": {
+              "trades": 312,
+              "episodes": 10,
+              "trade_mean_bp": 83.9171088757503,
+              "episode_mean_bp": 74.38490352918899,
+              "ci95_bp": [
+                43.478087057064535,
+                113.08703342805165
+              ]
+            },
+            "dropped_sum_pct": 261.82137969234094
+          }
+        },
+        "cap40": {
+          "2020-24": {
+            "kept": {
+              "trades": 476,
+              "episodes": 35,
+              "trade_mean_bp": 75.83541124246149,
+              "episode_mean_bp": 172.21620880669266,
+              "ci95_bp": [
+                51.02963562922939,
+                294.7064178613045
+              ]
+            },
+            "dropped": {
+              "trades": 213,
+              "episodes": 4,
+              "trade_mean_bp": 186.43097414999949,
+              "episode_mean_bp": 119.54239856681698,
+              "ci95_bp": [
+                -33.25130397281042,
+                318.3847892172648
+              ]
+            },
+            "dropped_sum_pct": 397.0979749394989
+          },
+          "2025": {
+            "kept": {
+              "trades": 590,
+              "episodes": 37,
+              "trade_mean_bp": 49.800089365954754,
+              "episode_mean_bp": 121.67246464828969,
+              "ci95_bp": [
+                41.16100167022519,
+                203.56317989455053
+              ]
+            },
+            "dropped": {
+              "trades": 267,
+              "episodes": 6,
+              "trade_mean_bp": -98.50840105155622,
+              "episode_mean_bp": 49.651187142694205,
+              "ci95_bp": [
+                -118.06443560001179,
+                302.1959625929621
+              ]
+            },
+            "dropped_sum_pct": -263.0174308076551
+          },
+          "2026": {
+            "kept": {
+              "trades": 449,
+              "episodes": 24,
+              "trade_mean_bp": 57.795741395309676,
+              "episode_mean_bp": 121.99699240841024,
+              "ci95_bp": [
+                37.40940828296574,
+                238.1590346316196
+              ]
+            },
+            "dropped": {
+              "trades": 151,
+              "episodes": 7,
+              "trade_mean_bp": 94.27100098219809,
+              "episode_mean_bp": 78.55727081768643,
+              "ci95_bp": [
+                35.57880938622141,
+                130.32058692637165
+              ]
+            },
+            "dropped_sum_pct": 142.34921148311912
+          }
+        }
+      }
+    },
+    "same_sign_all_periods": [
+      {
+        "variant": "near18",
+        "split": "minutes_b",
+        "bucket": "0-5",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "near18",
+        "split": "rank_b",
+        "bucket": "1-5",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "near18",
+        "split": "rank_b",
+        "bucket": "11-20",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "near18",
+        "split": "rank_b",
+        "bucket": "6-10",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "near18",
+        "split": "size_b",
+        "bucket": "16-30",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "near18",
+        "split": "size_b",
+        "bucket": "6-15",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "near18",
+        "split": "size_b",
+        "bucket": "<=5",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "near30",
+        "split": "minutes_b",
+        "bucket": "0-5",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "near30",
+        "split": "rank_b",
+        "bucket": "1-5",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "near30",
+        "split": "rank_b",
+        "bucket": "11-20",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "near30",
+        "split": "rank_b",
+        "bucket": "21-40",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "near30",
+        "split": "rank_b",
+        "bucket": "6-10",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "near30",
+        "split": "size_b",
+        "bucket": "16-30",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "near30",
+        "split": "size_b",
+        "bucket": "6-15",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "near30",
+        "split": "size_b",
+        "bucket": "<=5",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "opp30",
+        "split": "rank_b",
+        "bucket": "1-5",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "opp30",
+        "split": "size_b",
+        "bucket": "6-15",
+        "sum": 3,
+        "count": 3
+      },
+      {
+        "variant": "opp30",
+        "split": "size_b",
+        "bucket": "<=5",
+        "sum": 3,
+        "count": 3
+      }
+    ]
+  },
+  "source_commit": "a4030905a195afe199151cf85ac9d23968376a19",
+  "training_eligible": false,
+  "production_eligible": false
+}
