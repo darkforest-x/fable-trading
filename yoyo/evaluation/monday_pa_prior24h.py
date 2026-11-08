@@ -56,7 +56,10 @@ def event_data(events, cfg, symbol):
         move = side*(b.close-b.day_ago)
         row.update(aligned=bool(move>0), delta_over_atr=move/b.atr, atr_pct=100*b.atr/b.close)
         key = f"{symbol}:{e.week}:{side}"
-        if key in pos.index and pos.at[key,"entry_time"] == t:
+        # The native engine stamps this bar at its close, while the archive indexes opens.
+        if key in pos.index and f.index[pos.at[key,"entry_i"]] == t:
+            if pos.at[key,"entry_time"] != now:
+                raise ValueError(f"Native entry event clock mismatch for {key}")
             row.update(native_r=pos.at[key,"total_mark_r"], native_closed=bool(pos.at[key,"closed"]))
             if key in pairs.index:
                 row["paired_excess_r"] = row["native_r"] - pairs.at[key,"random_r"]
