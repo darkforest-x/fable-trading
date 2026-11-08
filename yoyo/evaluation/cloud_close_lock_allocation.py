@@ -11,8 +11,8 @@ from yoyo.evaluation import cloud_close_reward_account as wallet
 EXP=wallet.ROOT/'experiments/active/exp-cloud-close-lock-allocation-20261109-v1'
 
 
-def simulate(data,allocation,slip=0.):
-    pos,equity=wallet.account(data,exposure=allocation,slip=slip)
+def simulate(data,allocation,slip=0.,drawdown_power=0.):
+    pos,equity=wallet.account(data,exposure=allocation,slip=slip,drawdown_power=drawdown_power)
     periods={'all':(None,None),'dev':(None,'2025-01-01T00:00Z'),
              '2025':('2025-01-01T00:00Z','2026-01-01T00:00Z'),'2026':('2026-01-01T00:00Z',None)}
     return {p:wallet.summarize(pos,equity,*bounds) for p,bounds in periods.items()},pos,equity

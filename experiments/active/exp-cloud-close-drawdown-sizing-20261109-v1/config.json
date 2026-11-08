@@ -1,0 +1,9 @@
+{
+  "id": "exp-cloud-close-drawdown-sizing-20261109-v1",
+  "parent": "Fully funded 2R-activated +0.5R lock, 90-day eligible, 9 slots, low prior ATR. This earlier full-size account had excessive drawdown.",
+  "factor": "Adapt only future opening notional to own marked drawdown. Current drawdown d = 1 - current marked NAV / maximum observed NAV (starts at 1000). Fresh 12H entry budget = original NAV/9 times max(0.1, max(0,1 - d/0.35)^p). Preset sensitivity exponent p 0,0.5,1,2,4; zero reuses the full-size original. The original free cash cap still applies. Never resize or close an existing holding proactively. The 10% size minimum prevents a permanently inactive portfolio. No guaranteed DD cap.",
+  "powers": [0, 0.5, 1, 2, 4],
+  "timing": "Track past vectorbt account stages (at the open, after open exits, and after hourly exits and the close); new entries use the current simultaneous opening marks before exits. No intrahour extremes or closing valuations from the future may reduce exposure before a preceding market loss.",
+  "selection": "Highest development NAV through 2024 with >=100 trades, both realized payoff definitions >=2.5, wins >=30%, and hourly DD bound <=35%; if none, no new candidate. Disclose 2025/26 prior inspection. For picked policy run controls and 5bp extra slippage on their own evolving equity states.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_drawdown_sizing"
+}

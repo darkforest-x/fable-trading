@@ -141,6 +141,16 @@ def pre_segment(c):
 
 
 @njit(cache=True)
+def pre_segment_with_drawdown(c, peak, power):
+    nav = pre_segment(c)[0]
+    peak[0] = max(peak[0],nav)
+    # Current open and past marked account stages alone inform the next order.
+    # Sizing never changes existing positions or the reported portfolio value.
+    remaining = max(0.,1. - (1. - nav/peak[0])/.35)
+    return (nav * max(.1,remaining**power),)
+
+
+@njit(cache=True)
 def account_order(c, nav, actions, prices, fees, market_slip, exposure, weights, reservation,
                   full_slots, slot_weights):
     action = actions[c.i, c.col]
@@ -194,7 +204,8 @@ def account_order(c, nav, actions, prices, fees, market_slip, exposure, weights,
                        lock_cash=True, allow_partial=False, raise_reject=True)
 
 
-def account(data, slip=0., exposure=1., weights=(1.,), full_slots=0, slot_weights=None):
+def account(data, slip=0., exposure=1., weights=(1.,), full_slots=0, slot_weights=None,
+            drawdown_power=0.):
     actions = data['actions']
     weights = np.asarray(weights, dtype=float)
     if np.any(weights<=0) or not np.isclose(weights.sum(), 1) or actions.shape[1]%len(weights):
@@ -204,9 +215,13 @@ def account(data, slip=0., exposure=1., weights=(1.,), full_slots=0, slot_weight
     elif (full_slots or slot_weights.shape!=(actions.shape[0]//3,actions.shape[1]//len(weights))
           or np.any(slot_weights<=0) or not np.isfinite(slot_weights).all()):
         raise ValueError('Invalid per-position reservation weights')
+    if drawdown_power<0. or not np.isfinite(drawdown_power):
+        raise ValueError('Drawdown sizing exponent must be finite and nonnegative')
+    segment = pre_segment_with_drawdown if drawdown_power else pre_segment
+    segment_args = (np.array([1000.]),drawdown_power) if drawdown_power else ()
     pf = vbt.Portfolio.from_order_func(data['marks'], account_order, actions, data['prices'],
         data['fees'], slip, exposure, weights, np.zeros(1), full_slots, slot_weights,
-        pre_segment_func_nb=pre_segment, cash_sharing=True,
+        pre_segment_func_nb=segment, pre_segment_args=segment_args, cash_sharing=True,
         group_by=True, init_cash=1000., max_orders=int(np.count_nonzero(actions))+1,
         fill_pos_record=False)
     orders = pf.orders.records
