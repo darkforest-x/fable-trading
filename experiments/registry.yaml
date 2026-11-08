@@ -77,17 +77,17 @@ experiments:
 
   - experiment_id: exp-cloud-close-second-reclaim-20261109-v1
     source_repo: "darkforest-x/fable-trading"
-    source_commit: "dd2627f7fc"
-    status: "active"
+    source_commit: "109484db4f"
+    status: "rejected"
     question: "Does a second within-week 12H wick reclaim deliver higher net portfolio growth under the existing two-thirds partial and drawdown cap?"
     single_variable: "Replace the first eligible weekly 12H entry with the first later same-direction wick reclaim under the identical Monday anchor. Rebuild each second key's own clock, causal stop and native exit paths."
-    result: "Preregistered after a fixed three-symbol availability check: 64 of 128 original signal weeks had a second qualifying candle. Trade returns unknown at registration."
+    result: "12707 first keys reconciled; 6602 repeat keys, 6042 complete non-repeat weeks and 63 right-censored. Of 6147 eligible actual repeats, 1449 funded: 1000 to 3727.98U, 32.23% wins, 2.519 cash payoff, 39.35% observed / 41.30% bound DD. Same-parent retrospective, 6139 pairs across 319 weeks, second-minus-first +1.281pp [0.855,1.768]; occurrence of both keys unknown when entering the first. Failed development and full guardrails."
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
     artifacts: []
-    canonical_report: "experiments/active/exp-cloud-close-second-reclaim-20261109-v1/config.json"
+    canonical_report: "experiments/active/exp-cloud-close-second-reclaim-20261109-v1/summary.json"
     notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af8151a47ff085c245482e."
 
   - experiment_id: exp-cloud-close-early-equity-stop-20261109-v1
