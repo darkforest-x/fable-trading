@@ -25,8 +25,9 @@ from yoyo.evaluation import monday_breadth_reversal_window as fixed_engine
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "experiments/active/exp-monday-breadth-frequency-20261108-v1"
-OUTPUT = ROOT / "experiments/active/exp-monday-breadth-extension-20261108-v1/btc"
+OUTPUT_ROOT = ROOT / "experiments/active/exp-monday-breadth-extension-20261108-v1/btc"
 OPPORTUNITIES = SOURCE / "fixed/locked_events.parquet"
+OWNER_TARGET = SOURCE / "btc_target/threshold_events.parquet"
 BTC_SYMBOL = "BTCUSDT"
 TAKER = 0.0005
 HOLD_HOURS = 144
@@ -38,13 +39,20 @@ PERIODS = {
     "2025": (pd.Timestamp("2025-01-01", tz="UTC"), pd.Timestamp("2026-01-01", tz="UTC")),
     "2026_to_ledger_end": (pd.Timestamp("2026-01-01", tz="UTC"), SIGNAL_CUTOFF),
 }
-RULES = (
+RULES_ABOVE = (
     "4h_ema20",
     "4h_ema50",
     "1d_ema20",
     "1d_ema50",
     "4h_reclaim_ema20",
 )
+RULES_BELOW = (
+    "below_4h_ema20",
+    "below_4h_ema50",
+    "below_1d_ema20",
+    "below_1d_ema50",
+)
+RULES = RULES_ABOVE
 MINIMUMS = {"2020_2022": 41, "2023_2024": 40, "2025": 24}
 
 
@@ -182,14 +190,21 @@ def _asof_features(times: pd.DatetimeIndex | pd.Series, htf: dict[int, pd.DataFr
 
 
 def _gate(features: pd.DataFrame, rule: str) -> np.ndarray:
-    if rule not in RULES:
+    below = rule.startswith("below_")
+    base_rule = rule.removeprefix("below_") if below else rule
+    valid_rules = set(RULES_ABOVE) | set(RULES_BELOW)
+    if rule not in valid_rules:
         raise ValueError(f"Unknown trend rule: {rule}")
-    if rule == "4h_reclaim_ema20":
+    if base_rule == "4h_reclaim_ema20":
+        if below:
+            raise ValueError("The reclaim event has no inverse mirror rule")
         return features["4h_reclaim_ema20"].fillna(0).astype(bool).to_numpy()
-    hours, ema = rule.split("_")
+    hours, ema = base_rule.split("_")
     close = pd.to_numeric(features[f"{hours}_close"], errors="coerce")
     value = pd.to_numeric(features[f"{hours}_{ema}"], errors="coerce")
-    return close.gt(value).fillna(False).to_numpy(dtype=bool)
+    comparable = close.notna() & value.notna()
+    condition = close.le(value) if below else close.gt(value)
+    return (comparable & condition).to_numpy(dtype=bool)
 
 
 def _attach_opportunity_returns(events: pd.DataFrame, frame: pd.DataFrame,
@@ -308,6 +323,37 @@ def _attach_funding(events: pd.DataFrame, history: pd.DataFrame, frame: pd.DataF
     if result.funding_points_cost.isna().any() or result.funded_net_pct.isna().any():
         raise ValueError("2026 funding history does not cover every fixed 144h event")
     return result
+
+
+def _owner_target_reference(htf: dict[int, pd.DataFrame]) -> pd.DataFrame:
+    """Expose the 2026-09-16 owner target's gate states without joining the test sample."""
+    if not OWNER_TARGET.is_file():
+        raise FileNotFoundError(OWNER_TARGET)
+    cached = pd.read_parquet(OWNER_TARGET)
+    cached["decision"] = pd.to_datetime(cached.decision, utc=True)
+    decision = pd.Timestamp("2026-09-15 19:20", tz="UTC")
+    target = cached.loc[
+        cached.candidate_id.eq("case_target_funded_BTC")
+        & pd.to_numeric(cached.threshold_pct, errors="coerce").eq(5.0)
+        & cached.decision.eq(decision)
+    ].copy()
+    if len(target) != 1:
+        raise ValueError("Expected one cached owner-target event at 2026-09-16 03:20 BJT")
+    row = target.iloc[0].to_dict()
+    features = _asof_features(pd.DatetimeIndex([decision]), htf).iloc[0]
+    out = {
+        **row,
+        "decision_bjt": decision.tz_convert("Asia/Shanghai"),
+        "reference_scope": "Owner 10k BTC target reference only; outside the 246 freq36_BTC opportunity clock and excluded from all frequency/performance statistics.",
+        "included_in_246_freq36_BTC_clock": False,
+    }
+    for column, value in features.items():
+        if column != "query_time":
+            out[column] = value
+    for base_rule in ("4h_ema20", "4h_ema50", "1d_ema20", "1d_ema50"):
+        out[f"accept_{base_rule}_above"] = bool(_gate(features.to_frame().T, base_rule)[0])
+        out[f"accept_below_{base_rule}"] = bool(_gate(features.to_frame().T, f"below_{base_rule}")[0])
+    return pd.DataFrame([out])
 
 
 def _month_inputs(events: pd.DataFrame, frame: pd.DataFrame, htf: dict[int, pd.DataFrame]) -> tuple[
@@ -494,7 +540,7 @@ def _control_summaries(controls: dict[str, pd.DataFrame], events: pd.DataFrame,
             "mean_base_candidate_pool_n": float(paired.unfiltered_match_pool_n.mean()) if "unfiltered_match_pool_n" in paired else np.nan,
         })
     summary = pd.DataFrame(summaries)
-    summary["p_holm_five_rules"] = _holm(summary.p_month, family_size=len(RULES))
+    summary[f"p_holm_{len(RULES)}_rules"] = _holm(summary.p_month, family_size=len(RULES))
     control_events = pd.concat(control_event_rows, ignore_index=True) if control_event_rows else pd.DataFrame()
     if not draws.empty:
         draws = draws.drop(columns=["control_position"], errors="ignore")
@@ -503,7 +549,13 @@ def _control_summaries(controls: dict[str, pd.DataFrame], events: pd.DataFrame,
     return summary, control_events
 
 
-def run() -> dict[str, Path]:
+def run(mirror: str = "above") -> dict[str, Path]:
+    global RULES
+    if mirror not in {"above", "below"}:
+        raise ValueError("mirror must be above or below")
+    RULES = RULES_BELOW if mirror == "below" else RULES_ABOVE
+    output_dir = OUTPUT_ROOT / "below" if mirror == "below" else OUTPUT_ROOT
+    family_label = f"{len(RULES)}_rules"
     events = _read_opportunities()
     raw, price_receipt = _load_btc(events)
     htf = {4: _higher_timeframe(raw, 4), 24: _higher_timeframe(raw, 24)}
@@ -578,11 +630,11 @@ def run() -> dict[str, Path]:
             "active_months_all_history": int(selected.month.nunique()),
             "baseline_active_months_all_history": int(events.month.nunique()),
             "development_2020_2025_month_p_vs_baseline": development_p.loc[rule],
-            "development_2020_2025_month_p_holm_five_rules": development_holm.loc[rule],
+            f"development_2020_2025_month_p_holm_{family_label}": development_holm.loc[rule],
             "price_month_p_vs_baseline_all_history": price_p.loc[rule],
-            "price_month_p_holm_five_rules_all_history": price_holm.loc[rule],
+            f"price_month_p_holm_{family_label}_all_history": price_holm.loc[rule],
             "2026_funded_month_p_vs_baseline": funded_p_series.loc[rule],
-            "2026_funded_month_p_holm_five_rules": funded_holm.loc[rule],
+            f"2026_funded_month_p_holm_{family_label}": funded_holm.loc[rule],
         }
         row.update({f"accepted_all_history_{k}": v for k, v in _mean_win_metrics(selected.net_pct).items()})
         row.update({f"accepted_all_history_{k}": v for k, v in _equity_metrics(selected.net_pct).items()})
@@ -723,22 +775,38 @@ def run() -> dict[str, Path]:
         part["per_original_opportunity_funded_pct_skips_zero"] = part.funded_net_pct.where(part.accepted, 0.0)
         y2026_by_rule.append(part)
     y2026_rules = pd.concat(y2026_by_rule, ignore_index=True)
-    september_file = OUTPUT / "sep16_17_bjt_opportunities.csv"
+    september_file = output_dir / "sep16_17_bjt_opportunities.csv"
+    owner_target_impact = _owner_target_reference(htf)
 
-    OUTPUT.mkdir(parents=True, exist_ok=True)
+    if mirror == "below":
+        rule_definitions = {
+            rule: f"last completed {rule.removeprefix('below_').split('_')[0]} close <= EMA{rule.rsplit('ema', 1)[1]}; close and EMA must both be non-NaN"
+            for rule in RULES
+        }
+    else:
+        rule_definitions = {
+            "4h_ema20": "last completed 4h close > EMA20",
+            "4h_ema50": "last completed 4h close > EMA50",
+            "1d_ema20": "last completed 1d close > EMA20",
+            "1d_ema50": "last completed 1d close > EMA50",
+            "4h_reclaim_ema20": "last completed 4h close > EMA20 and immediately prior completed 4h close <= its EMA20",
+        }
+
+    output_dir.mkdir(parents=True, exist_ok=True)
     paths = {
-        "opportunities": OUTPUT / "opportunities.csv",
-        "rule_summary": OUTPUT / "rule_summary.csv",
-        "monthly_summary": OUTPUT / "monthly_summary.csv",
-        "funded_2026_opportunities": OUTPUT / "funded_2026_opportunities.csv",
-        "control_coverage_2026": OUTPUT / "control_coverage_2026.csv",
-        "control_events_2026": OUTPUT / "control_events_2026.csv",
-        "control_draws_2026": OUTPUT / "control_draws_2026.parquet",
-        "control_summary_2026": OUTPUT / "control_summary_2026.csv",
+        "opportunities": output_dir / "opportunities.csv",
+        "rule_summary": output_dir / "rule_summary.csv",
+        "monthly_summary": output_dir / "monthly_summary.csv",
+        "funded_2026_opportunities": output_dir / "funded_2026_opportunities.csv",
+        "control_coverage_2026": output_dir / "control_coverage_2026.csv",
+        "control_events_2026": output_dir / "control_events_2026.csv",
+        "control_draws_2026": output_dir / "control_draws_2026.parquet",
+        "control_summary_2026": output_dir / "control_summary_2026.csv",
         "sep16_17_bjt_opportunities": september_file,
-        "price_receipt": OUTPUT / "price_receipt.json",
-        "funding_receipt": OUTPUT / "funding_receipt.json",
-        "run_manifest": OUTPUT / "run_manifest.json",
+        "sep16_owner_target_impact": output_dir / "sep16_owner_target_impact.csv",
+        "price_receipt": output_dir / "price_receipt.json",
+        "funding_receipt": output_dir / "funding_receipt.json",
+        "run_manifest": output_dir / "run_manifest.json",
     }
     opportunity_rows.to_csv(paths["opportunities"], index=False)
     summary.to_csv(paths["rule_summary"], index=False)
@@ -749,10 +817,15 @@ def run() -> dict[str, Path]:
     control_data["draws"].to_parquet(paths["control_draws_2026"], index=False)
     control_summary.to_csv(paths["control_summary_2026"], index=False)
     september.to_csv(paths["sep16_17_bjt_opportunities"], index=False)
+    owner_target_impact.to_csv(paths["sep16_owner_target_impact"], index=False)
     paths["price_receipt"].write_text(json.dumps(price_receipt, ensure_ascii=False, indent=2, default=str) + "\n", encoding="utf-8")
     paths["funding_receipt"].write_text(json.dumps(funding_receipt, ensure_ascii=False, indent=2, default=str) + "\n", encoding="utf-8")
     manifest = {
         "experiment_id": "exp-monday-breadth-extension-20261108-v1",
+        "mirror_mode": mirror,
+        "post_original_result_exploration": mirror == "below",
+        "confirmatory_claim": False if mirror == "below" else None,
+        "output_scope": "btc/below" if mirror == "below" else "btc",
         "builder": str(Path(__file__).relative_to(ROOT)),
         "git_revision": _git_revision(),
         "opportunity_input": str(OPPORTUNITIES.relative_to(ROOT)),
@@ -763,13 +836,7 @@ def run() -> dict[str, Path]:
         "trigger_clock": "The 246 locked alert times remain fixed. No cooldown reset, replacement entry, or additional fill is created after filtering.",
         "entry_exit": "Entry at the locked 5m decision open; fixed 144h exit at the corresponding 5m open from the original locked VectorBT result.",
         "trend_asof": "For each 5m entry time, use the most recent complete UTC 4h or 1d candle whose close time is <= entry time. Higher-timeframe candles require all 5m OHLC bars; EMAs require 20/50 consecutive complete candles and use only those closed candles.",
-        "rules": {
-            "4h_ema20": "last completed 4h close > EMA20",
-            "4h_ema50": "last completed 4h close > EMA50",
-            "1d_ema20": "last completed 1d close > EMA20",
-            "1d_ema50": "last completed 1d close > EMA50",
-            "4h_reclaim_ema20": "last completed 4h close > EMA20 and immediately prior completed 4h close <= its EMA20",
-        },
+        "rules": rule_definitions,
         "frequency_gate": MINIMUMS,
         "ranking": "Among frequency-eligible gates, sort by the smallest accepted-mean lift versus the same-period original opportunities across 2020-2022, 2023-2024, and 2025. 2026 does not select the gates.",
         "costs": {
@@ -781,13 +848,14 @@ def run() -> dict[str, Path]:
         },
         "2026_funding": "Realized BTC USD-M 2026 funding history and mark prices from the existing normalized local cache; funding cost is applied to the same fixed 144h entry/exit interval for actuals and random controls.",
         "controls": control_receipt,
-        "selection_inference": "Two-sided UTC-month block sign-flip p-values with Holm correction across the five pre-specified rules, separately for 2020-2025 development-period price-only incremental return, all-history price-only incremental return, 2026 funded incremental return, and 2026 funded matched-control edge.",
+        "selection_inference": f"Two-sided UTC-month block sign-flip p-values with Holm correction across these {len(RULES)} {mirror} rules, separately for 2020-2025 development-period price-only incremental return, all-history price-only incremental return, 2026 funded incremental return, and 2026 funded matched-control edge. The below mirror was requested after the above-rule results were observed and is exploratory, not independent confirmation.",
+        "owner_target_reference": "sep16_owner_target_impact.csv records the existing cached 2026-09-16 03:20 BJT 10k BTC target, outside the 246-event opportunity clock; its gate states do not enter frequency/performance statistics.",
         "primary_output_fields": [
             "accept_<rule>", "net_pct", "gross_price_pct", "total_fee_pct", "period",
             "per_original_opportunity_<rule>_net_pct", "funded_net_pct", "funding_points_cost",
             "trend_filtered_match_pool_n", "random_net_pct", "random_funded_net_pct",
             "worst_three_period_accepted_mean_lift_pp", "frequency_gate_pass",
-            "price_month_p_holm_five_rules", "2026_funded_month_p_holm_five_rules",
+            f"price_month_p_holm_{family_label}_all_history", f"2026_funded_month_p_holm_{family_label}",
         ],
         "production_eligible": False,
     }
@@ -795,9 +863,9 @@ def run() -> dict[str, Path]:
     print(summary[["rule", "frequency_gate_pass", "worst_three_period_accepted_mean_lift_pp",
                    "2020_2022_n_accepted", "2023_2024_n_accepted", "2025_n_accepted",
                    "2026_accepted_n", "2026_incremental_mean_funded_per_original_opportunity_pp",
-                   "2026_funded_month_p_holm_five_rules"]].to_string(index=False), flush=True)
+                   f"2026_funded_month_p_holm_{family_label}"]].to_string(index=False), flush=True)
     print(control_summary[["rule", "accepted_2026_n", "matched_events_n",
-                           "mean_paired_edge_funded_pp", "p_holm_five_rules"]].to_string(index=False), flush=True)
+                           "mean_paired_edge_funded_pp", f"p_holm_{family_label}"]].to_string(index=False), flush=True)
     return paths
 
 
@@ -806,8 +874,9 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=("run",), nargs="?", default="run")
-    parser.parse_args()
-    run()
+    parser.add_argument("--mirror", choices=("above", "below"), default="above")
+    args = parser.parse_args()
+    run(args.mirror)
 
 
 if __name__ == "__main__":
