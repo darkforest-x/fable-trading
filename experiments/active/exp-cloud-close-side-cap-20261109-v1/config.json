@@ -1,0 +1,8 @@
+{
+  "id": "exp-cloud-close-side-cap-20261109-v1",
+  "parent": "The full-size 2R-activated +0.5R lock on the 90d-eligible V1.7 close. Prior dev win rate and both payoff measures qualified but DD was excessive; changing directional concentration is a separate alternative to reducing all weights.",
+  "caps": [1, 2, 3, 4, 6, 9],
+  "factor": "Maximum concurrently open positions in either one direction. Keep nine total slots, NAV/9 base notional, one position per symbol, full cash reservation and frozen prior ATR ordering. Delayed release until after the exit hour. Capping shorts and longs symmetrically reduces common-direction concentrations when candidate times cluster.",
+  "selection": "Pre-2025 terminal wealth subject to 100 closed, 30% net wins, both equal-notional and actual-cash payoff >=2.5, <=35% hourly conservative DD; no candidate if none pass. Later periods already inspected. Additional 5bp slippage and individual-parent matched controls for dev pick if qualified.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_side_cap"
+}
