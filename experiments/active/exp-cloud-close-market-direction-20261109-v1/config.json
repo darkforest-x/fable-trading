@@ -1,0 +1,10 @@
+{
+  "id":"exp-cloud-close-market-direction-20261109-v1",
+  "hypothesis":"Large sustained moves after the 12H V1.7 close may be more profitable when a majority of eligible other contracts already trend in the same direction over the prior 90 days.",
+  "only_change":"At a confirmed 12H V1.7 signal, gate the existing 2R-activated +0.5R lock runner on the fraction of other eligible contracts with strictly positive prior 90-day returns for a long, or strictly negative for a short. Exclude the candidate from its peer count. Use the same eligible universe of at least ten contracts including the candidate. Flat-return peers stay in denominator.",
+  "timing":"181 consecutive closed 12H prices ending at or before the opening of the 12H key. Each actual and subsequent control is separately screened at its own decision clock. Retain nine slots, prior ATR priority, original entries and funded VectorBT exits.",
+  "thresholds":[0.5,0.6666666666666666],
+  "development":"Through 2024; select highest funded terminal NAV among base and qualifying gates (at least 100 funded, win >=30%, payoff by cash and return >=2.5, DD bound <=35%). Report 2025 and 2026 separately, control pairs and adverse 5bp slippage for a newly qualifying arm. Later years already explored. If a new gate passes development and the full set, then take the frozen gate to Binance.",
+  "costs":"5bp taker both sides; no funding or market impact. No leverage.",
+  "runner":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_market_direction"
+}
