@@ -537,6 +537,9 @@ def _event_return_rows(member_ledger: pd.DataFrame, events: pd.DataFrame) -> pd.
         complete = group.member_outcome_complete & group.selected_exit_hours.notna()
         complete_group = group[complete]
         all_complete = len(complete_group) == int(expected)
+        exited_6h = int((complete & group.selected_exit_hours.eq(6)).sum())
+        exited_12h = int((complete & group.selected_exit_hours.eq(12)).sum())
+        exited_24h = int((complete & group.selected_exit_hours.eq(24)).sum())
         record = {
             "strategy": strategy, "event_key": event_key, "decision": decision,
             "epoch": int(epoch), "period_name": period_name,
@@ -547,12 +550,14 @@ def _event_return_rows(member_ledger: pd.DataFrame, events: pd.DataFrame) -> pd.
             "gross_pct": float(complete_group.selected_gross_pct.mean()) if all_complete else np.nan,
             "member_win_pct": float(100 * complete_group.selected_net_pct.gt(0).mean()) if all_complete else np.nan,
             "member_gross_win_pct": float(100 * complete_group.selected_gross_pct.gt(0).mean()) if all_complete else np.nan,
-            "exit_6h_members": int(group.selected_exit_hours.eq(6).sum()),
-            "exit_12h_members": int(group.selected_exit_hours.eq(12).sum()),
-            "exit_24h_members": int(group.selected_exit_hours.eq(24).sum()),
-            "exit_6h_pct": 100 * int(group.selected_exit_hours.eq(6).sum()) / int(expected),
-            "exit_12h_pct": 100 * int(group.selected_exit_hours.eq(12).sum()) / int(expected),
-            "exit_24h_pct": 100 * int(group.selected_exit_hours.eq(24).sum()) / int(expected),
+            "exit_6h_members": exited_6h, "exit_12h_members": exited_12h,
+            "exit_24h_members": exited_24h,
+            "exit_6h_pct": 100 * exited_6h / int(expected),
+            "exit_12h_pct": 100 * exited_12h / int(expected),
+            "exit_24h_pct": 100 * exited_24h / int(expected),
+            "selected_exit_6h_members": int(group.selected_exit_hours.eq(6).sum()),
+            "selected_exit_12h_members": int(group.selected_exit_hours.eq(12).sum()),
+            "selected_exit_24h_members": int(group.selected_exit_hours.eq(24).sum()),
             "max_selected_hold_hours": float(group.selected_exit_hours.max()) if group.selected_exit_hours.notna().any() else np.nan,
         }
         records.append(record)
@@ -878,11 +883,13 @@ def build_oos_trajectory(actual_ledger: pd.DataFrame, oos_paths: dict,
     for strategy in STRATEGIES:
         group = actual_ledger[(actual_ledger.strategy.eq(strategy)) & actual_ledger.epoch.eq(3)].copy()
         group = group.sort_values(["decision", "symbol"], kind="stable")
-        cumulative = 0.0
-        peak = 0.0
-        max_dd_pp = 0.0
-        max_dd_pct = 0.0
+        state = {
+            basis: {"cumulative": 0.0, "peak": 0.0, "max_dd_pp": 0.0,
+                    "max_dd_pct": 0.0, "path_valid": True, "complete_events": 0}
+            for basis in ("net", "funded")
+        }
         full_event_count = 0
+        strategy_rows = []
         for event_key, event in group.groupby("event_key", sort=False):
             decision = event.decision.iloc[0]
             valid_members = []
@@ -911,9 +918,9 @@ def build_oos_trajectory(actual_ledger: pd.DataFrame, oos_paths: dict,
             if event_complete:
                 full_event_count += 1
             for basis in ("net", "funded"):
-                prior_cum = cumulative
-                prior_peak = peak
                 complete_basis = event_complete and (basis == "net" or all(x[3] for x in valid_members))
+                s = state[basis]
+                running_peak = s["peak"]
                 for step in range(maximum + 1):
                     clock = decision + pd.Timedelta(minutes=5 * step)
                     member_marks = []
@@ -936,17 +943,19 @@ def build_oos_trajectory(actual_ledger: pd.DataFrame, oos_paths: dict,
                                     value -= 100 * cost / row.entry_open if np.isfinite(cost) else np.nan
                         member_marks.append(value)
                     mark = float(np.mean(member_marks)) if member_marks and np.isfinite(member_marks).all() else np.nan
-                    account_value = prior_cum + mark if np.isfinite(mark) else np.nan
+                    path_is_complete = complete_basis and s["path_valid"] and np.isfinite(mark)
+                    account_value = s["cumulative"] + mark if path_is_complete else np.nan
                     if np.isfinite(account_value):
-                        current_peak = max(prior_peak, account_value)
-                        dd_pp = current_peak - account_value
-                        denom = 100 + current_peak
+                        running_peak = max(running_peak, account_value)
+                        dd_pp = running_peak - account_value
+                        denom = 100 + running_peak
                         dd_pct = 100 * dd_pp / denom if denom > 0 else np.nan
-                        max_dd_pp = max(max_dd_pp, dd_pp) if basis == "net" else max_dd_pp
-                        max_dd_pct = max(max_dd_pct, dd_pct) if basis == "net" and np.isfinite(dd_pct) else max_dd_pct
+                        s["max_dd_pp"] = max(s["max_dd_pp"], dd_pp)
+                        if np.isfinite(dd_pct):
+                            s["max_dd_pct"] = max(s["max_dd_pct"], dd_pct)
                     else:
-                        current_peak, dd_pp, dd_pct = prior_peak, np.nan, np.nan
-                    trajectories.append({
+                        dd_pp, dd_pct = np.nan, np.nan
+                    row_out = {
                         "strategy": strategy, "basis": basis, "event_key": event_key,
                         "decision": decision, "clock": clock, "elapsed_hours": step / 12,
                         "expected_members": int(event.expected_members.iloc[0]),
@@ -956,14 +965,23 @@ def build_oos_trajectory(actual_ledger: pd.DataFrame, oos_paths: dict,
                         "fixed_notional_cumulative_pnl_pp": account_value,
                         "drawdown_from_peak_pp": dd_pp,
                         "drawdown_from_peak_pct_initial_100": dd_pct,
-                    })
-                if event_complete and np.isfinite(event.selected_net_pct).all():
-                    cumulative += float(event.selected_net_pct.mean())
-                    peak = max(peak, cumulative)
-                # A funded account path is tracked separately and does not
-                # overwrite the no-funding trajectory's fixed-notional path.
+                        "equity_method": "fixed_notional_additive_event_average_pct; no compounding",
+                    }
+                    trajectories.append(row_out)
+                    strategy_rows.append(row_out)
+                if complete_basis and s["path_valid"]:
+                    selected_col = "selected_net_pct" if basis == "net" else "selected_funded_net_pct"
+                    if np.isfinite(event[selected_col]).all():
+                        s["cumulative"] += float(event[selected_col].mean())
+                        s["peak"] = max(running_peak, s["cumulative"])
+                        s["complete_events"] += 1
+                    else:
+                        s["path_valid"] = False
+                else:
+                    s["path_valid"] = False
+        strategy_frame = pd.DataFrame(strategy_rows)
         for basis in ("net", "funded"):
-            part = pd.DataFrame([r for r in trajectories if r["strategy"] == strategy and r["basis"] == basis])
+            part = strategy_frame[strategy_frame.basis.eq(basis)]
             if part.empty:
                 continue
             dd = part.dropna(subset=["drawdown_from_peak_pp"])
@@ -971,10 +989,12 @@ def build_oos_trajectory(actual_ledger: pd.DataFrame, oos_paths: dict,
                 "strategy": strategy, "basis": basis,
                 "oos_events": int(group.event_key.nunique()),
                 "full_price_path_events": int(full_event_count),
+                "complete_events_for_equity_path": int(state[basis]["complete_events"]),
                 "trajectory_rows": int(len(part)),
-                "max_marked_drawdown_pp": float(dd.drawdown_from_peak_pp.max()) if len(dd) else np.nan,
-                "max_marked_drawdown_pct_initial_100": float(dd.drawdown_from_peak_pct_initial_100.max()) if len(dd) else np.nan,
-                "complete_path_coverage_pct": 100 * full_event_count / group.event_key.nunique() if group.event_key.nunique() else 0,
+                "max_marked_drawdown_pp": state[basis]["max_dd_pp"] if len(dd) else np.nan,
+                "max_marked_drawdown_pct_initial_100": state[basis]["max_dd_pct"] if len(dd) else np.nan,
+                "complete_path_coverage_pct": 100 * state[basis]["complete_events"] / group.event_key.nunique() if group.event_key.nunique() else 0,
+                "equity_method": "fixed_notional_additive_event_average_pct; no compounding",
             })
     return pd.DataFrame(trajectories), pd.DataFrame(summaries)
 
@@ -993,6 +1013,14 @@ def run(*, prices_only: bool = False) -> dict:
         for col in ("known", "decision", "entry_time", "selected_exit_time"):
             if col in actual:
                 actual[col] = pd.to_datetime(actual[col], utc=True)
+        if actual.duplicated(["event_key", "symbol"]).any():
+            raise ValueError("Persisted price stage has duplicate locked constituent keys")
+        expected_keys = set(zip(members.event_key, members.symbol))
+        actual_keys = set(zip(actual.event_key, actual.symbol))
+        if actual_keys != expected_keys:
+            raise ValueError("Persisted price stage does not match the frozen event/member support")
+        if not actual.cache_time_parity.fillna(False).all():
+            raise ValueError("Persisted price stage failed native cache entry-clock parity")
         cached = actual
         empty_members = members.iloc[:0][["symbol", "decision"]]
         quotes, _, random_receipts = load_quotes_for_entries(empty_members, matches)
@@ -1014,6 +1042,8 @@ def run(*, prices_only: bool = False) -> dict:
             json.dump({"symbols_loaded": len(price_receipts), "source_receipts": price_receipts},
                       f, indent=2, ensure_ascii=False, default=str)
         actual = add_actual_close_decisions(cached, quotes)
+        if actual.duplicated(["event_key", "symbol"]).any():
+            raise ValueError("Actual price merge has duplicate locked constituent keys")
         actual.to_parquet(actual_input, index=False)
         if oos_paths:
             path_rows = [
@@ -1223,6 +1253,20 @@ def run(*, prices_only: bool = False) -> dict:
         "actual_oos_unique_events": int(events.epoch.eq(3).sum()),
         "actual_oos_events_with_funding_parity": int(funded_parity.matches_audit_when_complete.sum()),
         "actual_oos_events_total_funding_parity": int(len(funded_parity)),
+        "funding_actual_2026_fixed_fill_rows": int(((funding_fills.fill_side.eq("actual"))
+                                                     & funding_fills.entry_time.dt.year.eq(2026)).sum()),
+        "funding_actual_2026_complete_fill_rows": int(((funding_fills.fill_side.eq("actual"))
+                                                        & funding_fills.entry_time.dt.year.eq(2026)
+                                                        & funding_fills.funding_complete).sum()),
+        "funding_random_2026_fixed_fill_rows": int(((funding_fills.fill_side.eq("random"))
+                                                     & funding_fills.entry_time.dt.year.eq(2026)).sum()),
+        "funding_random_2026_complete_fill_rows": int(((funding_fills.fill_side.eq("random"))
+                                                        & funding_fills.entry_time.dt.year.eq(2026)
+                                                        & funding_fills.funding_complete).sum()),
+        "funding_symbol_months_checked": int(len(funding_receipt)),
+        "funding_symbol_months_with_unverified_intervals": int(
+            funding_receipt.unverified_intervals.map(bool).sum()
+        ) if "unverified_intervals" in funding_receipt else 0,
         "control_eligible_events_fee_net": int(control_pairs[(control_pairs.basis.eq("fee_net")) & control_pairs.eligible_80pct].event_key.nunique()),
         "control_total_events_fee_net": int(control_pairs.basis.eq("fee_net").event_key.nunique()),
         "control_eligible_events_funded_net": int(control_pairs[(control_pairs.basis.eq("funded_net")) & control_pairs.eligible_80pct].event_key.nunique()),
