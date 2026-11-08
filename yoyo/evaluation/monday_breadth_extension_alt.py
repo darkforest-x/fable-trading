@@ -182,6 +182,11 @@ def load_control_matches(events: pd.DataFrame) -> pd.DataFrame:
         raise FileNotFoundError(f"No locked OOS random controls for {CANDIDATE}")
     _utc_column(matches, "decision")
     _utc_column(matches, "random_entry")
+    if "entry_time" in matches:
+        _utc_column(matches, "entry_time")
+        if not matches.entry_time.eq(matches.random_entry).all():
+            raise ValueError("Matching source entry_time differs from its random_entry")
+        matches = matches.rename(columns={"entry_time": "source_random_entry"})
     event_cols = events[["event_key", "decision", "expected_members"]]
     matches = matches.merge(event_cols, on="decision", how="left", validate="many_to_one")
     if matches.event_key.isna().any():
@@ -376,7 +381,7 @@ def _actual_settlements(history: pd.DataFrame, start: pd.Timestamp,
 
 def _interval_history_complete(history: pd.DataFrame, start: pd.Timestamp,
                                end: pd.Timestamp) -> bool:
-    """Require finite observed marks and bracketing clocks on the actual schedule."""
+    """Verify all observed fills against the contract's declared settlement cadence."""
     if history.empty:
         return False
     start = pd.Timestamp(start).tz_convert("UTC")
@@ -390,14 +395,34 @@ def _interval_history_complete(history: pd.DataFrame, start: pd.Timestamp,
     if before.empty or after.empty:
         return False
     observed = pd.concat([before.tail(1), inside, after.head(1)])
-    diffs = local.index.to_series().diff().dropna().dt.total_seconds().to_numpy() / 3600
     gaps = observed.index.to_series().diff().dropna().dt.total_seconds().to_numpy() / 3600
-    if not len(diffs) or not len(gaps):
+    if not len(gaps):
         return False
-    cadence = float(np.median(diffs))
-    # Gaps exceeding this bound trigger an official monthly archive check. This
-    # detects a missing settlement while allowing ordinary schedule changes.
-    return bool(gaps.max() <= max(1.75 * cadence, cadence + 1.0))
+    gap_hours = float(5 / 60 + 1e-6)  # timestamps are floored to 5m by the funding adapter
+    for i, gap in enumerate(gaps):
+        left, right = observed.iloc[i], observed.iloc[i + 1]
+        declared = []
+        if "funding_interval_hours" in observed:
+            for row in (left, right):
+                value = pd.to_numeric(pd.Series([row.get("funding_interval_hours")]), errors="coerce").iloc[0]
+                if np.isfinite(value) and value > 0:
+                    declared.append(float(value))
+        if declared:
+            if not any(abs(gap - value) <= gap_hours for value in declared):
+                return False
+            continue
+        # Older normalized local files may not carry the official interval
+        # field. Fall back only to cadence inside the same UTC month, never a
+        # median spanning a prior contract schedule.
+        month = observed.index[i].strftime("%Y-%m")
+        month_rows = local.loc[local.index.strftime("%Y-%m") == month]
+        month_diffs = month_rows.index.to_series().diff().dropna().dt.total_seconds().to_numpy() / 3600
+        if not len(month_diffs):
+            return False
+        cadence = float(np.median(month_diffs))
+        if abs(gap - cadence) > gap_hours:
+            return False
+    return True
 
 
 def _funding_rates_for_needed_intervals(
@@ -439,6 +464,10 @@ def _funding_rates_for_needed_intervals(
                        if not _interval_history_complete(combined, a, b)]
             settlement_rows = [len(_actual_settlements(combined, a, b)) for a, b in intervals] if not combined.empty else []
             month_rows = combined[combined.index.strftime("%Y-%m") == month] if not combined.empty else combined
+            interval_hours = []
+            if not month_rows.empty and "funding_interval_hours" in month_rows:
+                parsed_hours = pd.to_numeric(month_rows.funding_interval_hours, errors="coerce").dropna()
+                interval_hours = sorted({float(value) for value in parsed_hours if value > 0})
             receipts.append({
                 "symbol": symbol, "month": month,
                 "required_intervals": len(intervals),
@@ -450,6 +479,11 @@ def _funding_rates_for_needed_intervals(
                 "observed_cadence_hours_median": float(
                     month_rows.index.to_series().diff().dropna().dt.total_seconds().median() / 3600
                 ) if len(month_rows) > 1 else np.nan,
+                "official_funding_interval_hours_values": interval_hours,
+                "official_funding_interval_rows": int(
+                    pd.to_numeric(month_rows.funding_interval_hours, errors="coerce").notna().sum()
+                ) if not month_rows.empty and "funding_interval_hours" in month_rows else 0,
+                "cadence_proof_source": "official_funding_interval_hours" if interval_hours else "within_month_observed_clock_spacing_or_unverified",
                 "mark_source_proxy_rows": int(month_rows.price_proxy.fillna(False).sum())
                     if not month_rows.empty and "price_proxy" in month_rows else 0,
             })
@@ -460,6 +494,37 @@ def _funding_rates_for_needed_intervals(
         if i % 50 == 0 or i == len(symbols):
             print(f"loaded 2026 funding {i}/{len(symbols)} symbols", flush=True)
     return histories, pd.DataFrame(receipts)
+
+
+def funding_history_proof_rows(
+        histories: dict[str, pd.DataFrame],
+        needed: dict[str, dict[str, list[tuple[pd.Timestamp, pd.Timestamp]]]]) -> pd.DataFrame:
+    """Persist in-window funding rows plus one preceding/following on-clock proof row."""
+    parts = []
+    for symbol, by_month in needed.items():
+        history = histories.get(symbol, pd.DataFrame())
+        if history.empty:
+            continue
+        keep: set[pd.Timestamp] = set()
+        for intervals in by_month.values():
+            for start, end in intervals:
+                lo = int(history.index.searchsorted(start, side="left"))
+                hi = int(history.index.searchsorted(end, side="right"))
+                left = max(0, lo - 1)
+                right = min(len(history.index), hi + 1)
+                keep.update(history.index[left:right])
+        if not keep:
+            continue
+        part = history.loc[history.index.isin(keep)].copy().reset_index()
+        clock_col = part.columns[0]
+        part = part.rename(columns={clock_col: "settlement_time"})
+        part["symbol"] = symbol
+        if "price_proxy" in part:
+            part["rate_source"] = np.where(part.price_proxy.fillna(False), "monthly_archive", "normalized_local")
+        else:
+            part["rate_source"] = "unknown_local_source"
+        parts.append(part)
+    return pd.concat(parts, ignore_index=True, sort=False) if parts else pd.DataFrame()
 
 
 def _funding_valid(history: pd.DataFrame, start: pd.Timestamp, end: pd.Timestamp) -> bool:
@@ -1000,7 +1065,8 @@ def build_oos_trajectory(actual_ledger: pd.DataFrame, oos_paths: dict,
     return pd.DataFrame(trajectories), pd.DataFrame(summaries)
 
 
-def run(*, prices_only: bool = False, resume_prices: bool = False) -> dict:
+def run(*, prices_only: bool = False, resume_prices: bool = False,
+        resume_audit: bool = False) -> dict:
     started = time.time()
     OUT.mkdir(parents=True, exist_ok=True)
     rule, events, members = load_locked_members()
@@ -1025,7 +1091,7 @@ def run(*, prices_only: bool = False, resume_prices: bool = False) -> dict:
         if not actual.cache_time_parity.fillna(False).all():
             raise ValueError("Persisted price stage failed native cache entry-clock parity")
         cached = actual
-        if resume_prices:
+        if resume_prices or resume_audit:
             quotes = pd.DataFrame()
             random_receipts = []
         else:
@@ -1100,8 +1166,9 @@ def run(*, prices_only: bool = False, resume_prices: bool = False) -> dict:
         events=("event_key", "nunique"), complete_events=("all_members_complete", "sum"),
         mean_event_net_pct=("net_pct", "mean"), median_event_net_pct=("net_pct", "median"),
         event_win_pct=("net_pct", lambda x: 100 * x.gt(0).mean()),
-        member_exit_6h_pct=("exit_6h_pct", "mean"), member_exit_12h_pct=("exit_12h_pct", "mean"),
-        member_exit_24h_pct=("exit_24h_pct", "mean"),
+        event_weighted_exit_6h_pct=("exit_6h_pct", "mean"),
+        event_weighted_exit_12h_pct=("exit_12h_pct", "mean"),
+        event_weighted_exit_24h_pct=("exit_24h_pct", "mean"),
     )
     exit_rows = []
     for strategy, part in actual_ledger.groupby("strategy", sort=False):
@@ -1121,7 +1188,22 @@ def run(*, prices_only: bool = False, resume_prices: bool = False) -> dict:
                 "exit_12h_pct_all_constituents": 100 * sub.selected_exit_hours.eq(12).sum() / denominator if denominator else np.nan,
                 "exit_24h_pct_all_constituents": 100 * sub.selected_exit_hours.eq(24).sum() / denominator if denominator else np.nan,
             })
-    pd.DataFrame(exit_rows).to_csv(OUT / "constituent_exit_distribution_price_only.csv", index=False)
+    exit_distribution = pd.DataFrame(exit_rows)
+    exit_distribution.to_csv(OUT / "constituent_exit_distribution_price_only.csv", index=False)
+    all_member_exit = exit_distribution[exit_distribution.period.eq("all_239")].set_index("strategy")
+    for horizon in (6, 12, 24):
+        price_metrics[f"all_constituent_{horizon}h_exit_count"] = price_metrics.strategy.map(
+            all_member_exit[f"actual_{horizon}h_exits"]
+        )
+        price_metrics[f"all_constituent_{horizon}h_exit_pct"] = price_metrics.strategy.map(
+            all_member_exit[f"exit_{horizon}h_pct_all_constituents"]
+        )
+    price_period = price_event_rows.groupby(["strategy", "period_name"], as_index=False).agg(
+        events=("event_key", "nunique"), complete_events=("all_members_complete", "sum"),
+        mean_event_net_pct=("net_pct", "mean"), median_event_net_pct=("net_pct", "median"),
+        event_win_pct=("net_pct", lambda x: 100 * x.gt(0).mean()),
+    )
+    price_period.to_csv(OUT / "price_stage_period_summary.csv", index=False)
     price_metrics.to_csv(OUT / "price_stage_summary.csv", index=False)
     price_stage = {
         "locked_entries": len(events), "locked_constituent_rows": len(members),
@@ -1143,7 +1225,16 @@ def run(*, prices_only: bool = False, resume_prices: bool = False) -> dict:
     if prices_only or resume_prices:
         return price_stage
 
-    native_random = native_random_fills(matches, quotes)
+    if resume_audit:
+        native_path = OUT / "control_native_vectorbt_fills.parquet"
+        if not native_path.is_file():
+            raise FileNotFoundError("--resume-audit needs native control fills saved on disk")
+        native_random = pd.read_parquet(native_path)
+        for col in ("entry_time", "exit_time_6h", "exit_time_12h", "exit_time_24h"):
+            if col in native_random:
+                native_random[col] = pd.to_datetime(native_random[col], utc=True)
+    else:
+        native_random = native_random_fills(matches, quotes)
     native_random.to_parquet(OUT / "control_native_vectorbt_fills.parquet", index=False)
 
     # Build 2026 native-fill funding rows. Historical folds use the same native
@@ -1161,6 +1252,8 @@ def run(*, prices_only: bool = False, resume_prices: bool = False) -> dict:
             if interval not in by_month:
                 by_month.append(interval)
     histories, funding_receipt = _funding_rates_for_needed_intervals(required)
+    proof_rows = funding_history_proof_rows(histories, required)
+    proof_rows.to_parquet(OUT / "funding_history_used_2026.parquet", index=False)
     funding_fills = funding_for_fill_rows(funding_fill_table, histories)
     funding_fills.to_parquet(OUT / "funding_fill_ledger_2026.parquet", index=False)
     funding_receipt.to_csv(OUT / "funding_coverage.csv", index=False)
@@ -1315,7 +1408,8 @@ if __name__ == "__main__":
     parser.add_argument("--run", action="store_true", help="materialize the frozen 6/12/24h comparison")
     parser.add_argument("--prices-only", action="store_true", help="materialize all constituent price outcomes first")
     parser.add_argument("--resume-prices", action="store_true", help="aggregate the persisted price stage without re-reading OHLC")
+    parser.add_argument("--resume-audit", action="store_true", help="resume funding/control audit from saved quotes and native fills")
     args = parser.parse_args()
-    if not (args.run or args.prices_only or args.resume_prices):
-        raise SystemExit("Use --prices-only, --resume-prices, or --run to execute the frozen local-data study")
-    run(prices_only=args.prices_only, resume_prices=args.resume_prices)
+    if not (args.run or args.prices_only or args.resume_prices or args.resume_audit):
+        raise SystemExit("Use --prices-only, --resume-prices, --resume-audit, or --run")
+    run(prices_only=args.prices_only, resume_prices=args.resume_prices, resume_audit=args.resume_audit)
