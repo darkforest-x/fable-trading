@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-young-contracts-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "808d483567"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Fund only perps with a confirmed original V1.7 weekly 12H close less than 90 days after their own venue's recorded listing time, versus an unrestricted metadata-covered age comparator. Use each later control's own age."
+    result: "OKX 844 young signals, 591 funded, 2341U, 34.35% wins, cash payoff 2.427. Binance 1955 young signals, 1008 funded, 2372U, 32.64%, payoff 2.396, observed DD 39.87%. Full-age portfolio 7015/5839U respectively. OKX 111 actuals without listing metadata and five pre-listTime ZEC events excluded. Corrected original Binance eligibility reconciles 86422 historical event/leg keys before removing the 90-day gate for the new trading universe."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-young-contracts-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41288564-79af-814f-9025-ee887009ec76."
+
   - experiment_id: exp-cloud-close-efficient-trend-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "5ef5bb7809"
@@ -28,7 +43,7 @@ experiments:
     reuse_allowed: true
     artifacts: []
     canonical_report: "experiments/active/exp-cloud-close-efficient-trend-20261109-v1/summary.json"
-    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion pending sync after Notion transport recovery."
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41288564-79af-8109-b68c-c64da8b736fc."
 
   - experiment_id: exp-cloud-close-hourly-stoch-20261109-v1
     source_repo: "darkforest-x/fable-trading"
@@ -58,7 +73,7 @@ experiments:
     reuse_allowed: true
     artifacts: []
     canonical_report: "experiments/active/exp-cloud-close-week-age-20261109-v1/summary.json"
-    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion pending sync after Notion transport recovery."
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41288564-79af-81ef-bfeb-ededd0b4d08e."
 
   - experiment_id: exp-cloud-close-protect-remainder-20261109-v1
     source_repo: "darkforest-x/fable-trading"

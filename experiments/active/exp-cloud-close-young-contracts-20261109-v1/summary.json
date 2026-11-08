@@ -1,0 +1,361 @@
+{
+  "experiment_id": "exp-cloud-close-young-contracts-20261109-v1",
+  "factor": "Actual exchange listing age at entry, 0 <= age < 90 days; no other strategy change.",
+  "account": {
+    "starting_usdt": 1000,
+    "slots": 9,
+    "target_fraction": 0.6666666666666666,
+    "runner_fraction": 0.3333333333333333,
+    "extra_market_slippage_per_fill": 0.0005
+  },
+  "candidate_paths": {
+    "OKX": {
+      "path": "experiments/active/exp-ma-morphology-top20-20260922-v1/inputs/raw/instruments.json",
+      "archive_mtime_utc": "2026-09-22T13:11:16.744848+00:00",
+      "archive_payload_server_time": null,
+      "source_field": "data[].listTime (milliseconds UTC)",
+      "instrument_count_usdt_swaps_with_list_time": 471,
+      "state_counts": {
+        "live": 471
+      },
+      "snapshot_scope": "archived OKX instruments snapshot; delisted rows are not guaranteed present",
+      "raw_actual_events": 12707,
+      "source_signal_rows": 12707,
+      "prior_atr_priority": "signals.csv prior_atr_pct keyed by one-based source_row_number; ascending as in V1.7 account"
+    },
+    "Binance": {
+      "listing_metadata": {
+        "path": "data/kline_preholdout_binance_um15m/exchange_info.json",
+        "snapshot_server_time_utc": "2026-08-28T09:36:55.468000+00:00",
+        "source_field": "symbols[].onboardDate (milliseconds UTC)",
+        "contract_filter": "contractType=PERPETUAL, quoteAsset=USDT, marginAsset=USDT",
+        "instrument_count_with_onboard_date": 654,
+        "status_counts": {
+          "TRADING": 524,
+          "SETTLING": 129,
+          "PENDING_TRADING": 1
+        },
+        "snapshot_scope": "archived exchangeInfo snapshot; already-delisted rows are not guaranteed present",
+        "path_symbol_count": 632,
+        "missing_path_symbols": [],
+        "path_symbol_status_counts": {
+          "TRADING": 504,
+          "SETTLING": 128
+        },
+        "path_event_status_counts": {
+          "TRADING": 39864,
+          "SETTLING": 7464
+        }
+      },
+      "raw_paths": {
+        "raw_work_files": 632,
+        "repaired_contract_files": 43,
+        "raw_preeligibility_paths": true,
+        "path_source_events": {
+          "transfer_work_raw": 39925,
+          "feb2022_gap_repaired_raw": 7403
+        },
+        "prior_90d_rank_flag_false_actual_events": 2143,
+        "eligible_at_own_time_used_as_filter": false,
+        "raw_actual_events": 24769,
+        "raw_control_events": 22559,
+        "archived_exchange_info_mapping_missing_symbols": []
+      }
+    }
+  },
+  "listing_counts": {
+    "OKX": {
+      "actual": {
+        "events": 12707,
+        "by_listing_class": {
+          "age_ge_90d": 11747,
+          "young_lt_90d": 844,
+          "missing_listing_time": 111,
+          "entry_before_list_time": 5
+        },
+        "by_year_and_class": {
+          "2020:age_ge_90d": 265,
+          "2020:young_lt_90d": 70,
+          "2021:age_ge_90d": 742,
+          "2021:missing_listing_time": 5,
+          "2021:young_lt_90d": 80,
+          "2022:age_ge_90d": 1136,
+          "2022:missing_listing_time": 10,
+          "2022:young_lt_90d": 27,
+          "2023:age_ge_90d": 1399,
+          "2023:entry_before_list_time": 5,
+          "2023:missing_listing_time": 12,
+          "2023:young_lt_90d": 64,
+          "2024:age_ge_90d": 1833,
+          "2024:missing_listing_time": 26,
+          "2024:young_lt_90d": 143,
+          "2025:age_ge_90d": 2527,
+          "2025:missing_listing_time": 31,
+          "2025:young_lt_90d": 242,
+          "2026:age_ge_90d": 3845,
+          "2026:missing_listing_time": 27,
+          "2026:young_lt_90d": 218
+        }
+      },
+      "control": {
+        "events": 11658,
+        "by_listing_class": {
+          "age_ge_90d": 10786,
+          "young_lt_90d": 762,
+          "missing_listing_time": 106,
+          "entry_before_list_time": 4
+        },
+        "by_year_and_class": {
+          "2020:age_ge_90d": 234,
+          "2020:young_lt_90d": 61,
+          "2021:age_ge_90d": 667,
+          "2021:missing_listing_time": 5,
+          "2021:young_lt_90d": 76,
+          "2022:age_ge_90d": 1049,
+          "2022:missing_listing_time": 10,
+          "2022:young_lt_90d": 22,
+          "2023:age_ge_90d": 1309,
+          "2023:entry_before_list_time": 4,
+          "2023:missing_listing_time": 12,
+          "2023:young_lt_90d": 61,
+          "2024:age_ge_90d": 1671,
+          "2024:missing_listing_time": 23,
+          "2024:young_lt_90d": 125,
+          "2025:age_ge_90d": 2302,
+          "2025:missing_listing_time": 30,
+          "2025:young_lt_90d": 219,
+          "2026:age_ge_90d": 3554,
+          "2026:missing_listing_time": 26,
+          "2026:young_lt_90d": 198
+        }
+      },
+      "all_age": {
+        "actual_events": 12591,
+        "control_events_after_own_age_filter": 11548,
+        "matched_control_events": 11548,
+        "paired_actual_events": 11548
+      },
+      "accounts": {
+        "all_age:actual": {
+          "candidate_events": 12591,
+          "funded_positions": 1695,
+          "unfunded_or_rejected_events": 10896,
+          "unquoted_position_hours": 0,
+          "final_cash_reconciled_usdt": 7014.875555128504,
+          "final_marked_nav_usdt": 7014.875554699613
+        },
+        "all_age:paired_actual": {
+          "candidate_events": 11548,
+          "funded_positions": 1569,
+          "unfunded_or_rejected_events": 9979,
+          "unquoted_position_hours": 0,
+          "final_cash_reconciled_usdt": 5269.61356319884,
+          "final_marked_nav_usdt": 5269.613562747828
+        },
+        "all_age:matched_control": {
+          "candidate_events": 11548,
+          "funded_positions": 1814,
+          "unfunded_or_rejected_events": 9734,
+          "unquoted_position_hours": 0,
+          "final_cash_reconciled_usdt": 3093.5488577190426,
+          "final_marked_nav_usdt": 3093.548857449196
+        },
+        "all_age:extra_slippage_5bp": {
+          "candidate_events": 12591,
+          "funded_positions": 1695,
+          "unfunded_or_rejected_events": 10896,
+          "unquoted_position_hours": 0,
+          "final_cash_reconciled_usdt": 5927.8686851168095,
+          "final_marked_nav_usdt": 5927.86868489272
+        },
+        "young_lt_90d:actual": {
+          "candidate_events": 844,
+          "funded_positions": 591,
+          "unfunded_or_rejected_events": 253,
+          "unquoted_position_hours": 0,
+          "final_cash_reconciled_usdt": 2340.769487932371,
+          "final_marked_nav_usdt": 2340.769487932372
+        },
+        "young_lt_90d:paired_actual": {
+          "candidate_events": 762,
+          "funded_positions": 546,
+          "unfunded_or_rejected_events": 216,
+          "unquoted_position_hours": 0,
+          "final_cash_reconciled_usdt": 2523.3493404910473,
+          "final_marked_nav_usdt": 2523.349340491044
+        },
+        "young_lt_90d:matched_control": {
+          "candidate_events": 762,
+          "funded_positions": 561,
+          "unfunded_or_rejected_events": 201,
+          "unquoted_position_hours": 0,
+          "final_cash_reconciled_usdt": 2323.260653933141,
+          "final_marked_nav_usdt": 2323.260653933143
+        },
+        "young_lt_90d:extra_slippage_5bp": {
+          "candidate_events": 844,
+          "funded_positions": 591,
+          "unfunded_or_rejected_events": 253,
+          "unquoted_position_hours": 0,
+          "final_cash_reconciled_usdt": 2207.1457068250966,
+          "final_marked_nav_usdt": 2207.1457068250998
+        }
+      },
+      "young_lt_90d": {
+        "actual_events": 844,
+        "control_events_after_own_age_filter": 762,
+        "matched_control_events": 762,
+        "paired_actual_events": 762
+      }
+    },
+    "Binance": {
+      "actual": {
+        "events": 24769,
+        "by_listing_class": {
+          "age_ge_90d": 22814,
+          "young_lt_90d": 1955
+        },
+        "by_year_and_class": {
+          "2020:age_ge_90d": 313,
+          "2020:young_lt_90d": 191,
+          "2021:age_ge_90d": 1238,
+          "2021:young_lt_90d": 137,
+          "2022:age_ge_90d": 1916,
+          "2022:young_lt_90d": 74,
+          "2023:age_ge_90d": 2732,
+          "2023:young_lt_90d": 234,
+          "2024:age_ge_90d": 3902,
+          "2024:young_lt_90d": 352,
+          "2025:age_ge_90d": 5967,
+          "2025:young_lt_90d": 752,
+          "2026:age_ge_90d": 6746,
+          "2026:young_lt_90d": 215
+        }
+      },
+      "control": {
+        "events": 22559,
+        "by_listing_class": {
+          "age_ge_90d": 20799,
+          "young_lt_90d": 1760
+        },
+        "by_year_and_class": {
+          "2020:age_ge_90d": 273,
+          "2020:young_lt_90d": 173,
+          "2021:age_ge_90d": 1108,
+          "2021:young_lt_90d": 119,
+          "2022:age_ge_90d": 1776,
+          "2022:young_lt_90d": 63,
+          "2023:age_ge_90d": 2530,
+          "2023:young_lt_90d": 217,
+          "2024:age_ge_90d": 3541,
+          "2024:young_lt_90d": 321,
+          "2025:age_ge_90d": 5417,
+          "2025:young_lt_90d": 680,
+          "2026:age_ge_90d": 6154,
+          "2026:young_lt_90d": 187
+        }
+      },
+      "all_age": {
+        "actual_events": 24769,
+        "control_events_after_own_age_filter": 22559,
+        "matched_control_events": 22559,
+        "paired_actual_events": 22559
+      },
+      "accounts": {
+        "all_age:actual": {
+          "candidate_events": 24769,
+          "funded_positions": 1573,
+          "unfunded_or_rejected_events": 23196,
+          "unquoted_position_hours": 0,
+          "final_cash_reconciled_usdt": 5838.905190047503,
+          "final_marked_nav_usdt": 5838.905190020805
+        },
+        "all_age:paired_actual": {
+          "candidate_events": 22559,
+          "funded_positions": 1466,
+          "unfunded_or_rejected_events": 21093,
+          "unquoted_position_hours": 0,
+          "final_cash_reconciled_usdt": 4572.320514695891,
+          "final_marked_nav_usdt": 4572.3205146651835
+        },
+        "all_age:matched_control": {
+          "candidate_events": 22559,
+          "funded_positions": 1828,
+          "unfunded_or_rejected_events": 20731,
+          "unquoted_position_hours": 0,
+          "final_cash_reconciled_usdt": 3739.0458094363858,
+          "final_marked_nav_usdt": 3739.045809216415
+        },
+        "all_age:extra_slippage_5bp": {
+          "candidate_events": 24769,
+          "funded_positions": 1573,
+          "unfunded_or_rejected_events": 23196,
+          "unquoted_position_hours": 0,
+          "final_cash_reconciled_usdt": 4991.755981155171,
+          "final_marked_nav_usdt": 4991.755981129405
+        },
+        "young_lt_90d:actual": {
+          "candidate_events": 1955,
+          "funded_positions": 1008,
+          "unfunded_or_rejected_events": 947,
+          "unquoted_position_hours": 0,
+          "final_cash_reconciled_usdt": 2371.792035320953,
+          "final_marked_nav_usdt": 2371.7920353209543
+        },
+        "young_lt_90d:paired_actual": {
+          "candidate_events": 1760,
+          "funded_positions": 916,
+          "unfunded_or_rejected_events": 844,
+          "unquoted_position_hours": 0,
+          "final_cash_reconciled_usdt": 3030.4796602092238,
+          "final_marked_nav_usdt": 3030.4796602092215
+        },
+        "young_lt_90d:matched_control": {
+          "candidate_events": 1760,
+          "funded_positions": 951,
+          "unfunded_or_rejected_events": 809,
+          "unquoted_position_hours": 0,
+          "final_cash_reconciled_usdt": 4413.135886899189,
+          "final_marked_nav_usdt": 4413.135886899196
+        },
+        "young_lt_90d:extra_slippage_5bp": {
+          "candidate_events": 1955,
+          "funded_positions": 1008,
+          "unfunded_or_rejected_events": 947,
+          "unquoted_position_hours": 0,
+          "final_cash_reconciled_usdt": 2145.1295560509407,
+          "final_marked_nav_usdt": 2145.1295560509398
+        }
+      },
+      "young_lt_90d": {
+        "actual_events": 1955,
+        "control_events_after_own_age_filter": 1760,
+        "matched_control_events": 1760,
+        "paired_actual_events": 1760
+      }
+    }
+  },
+  "binance_preeligibility_key_reconciliation": {
+    "result": "pass",
+    "raw_source_events": 47328,
+    "raw_actual_events_with_prior_rank_flag_false": 2143,
+    "raw_control_events_with_prior_rank_flag_false": 1919,
+    "old_rank_and_coverage_arm_event_path_keys": 86422,
+    "old_arm_key_set_matches_repaired_assembled": true,
+    "note": "Eligibility used only for this source-key reconciliation, never in young/all-age cohort selection."
+  },
+  "metadata_limitations": [
+    "OKX instrument archive is a dated current-instrument snapshot and does not guarantee delisted records; all-age is limited to symbols with a mapped listTime and nonnegative entry age.",
+    "OKX four path tickers lack a mapped USDT swap listTime; pre-listTime ZEC events are excluded as listing/relisting ambiguity. No first-candle proxy is used.",
+    "Binance exchangeInfo is a 2026-08-28 snapshot; already-delisted symbols may be absent. Its 632 path symbols all have a USDT perpetual onboardDate in this archive.",
+    "Funding, exchange depth/capacity, tick/lot rounding and subsequent delisting behavior are not modeled."
+  ],
+  "periods": [
+    "all",
+    "dev",
+    "2025",
+    "2026"
+  ],
+  "account_metrics": "account_metrics.csv",
+  "listing_audit": "listing_audit.csv.gz"
+}
