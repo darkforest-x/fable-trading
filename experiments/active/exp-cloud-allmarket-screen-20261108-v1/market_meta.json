@@ -1,0 +1,47 @@
+{
+  "cutoff_utc": "2026-11-08T12:00:00+00:00",
+  "official_instruments_fetched_at_utc": "2026-11-08T14:27:43+00:00",
+  "official_endpoint": "https://www.okx.com/api/v5/public/instruments?instType=SWAP",
+  "official_swaps_returned": 543,
+  "official_category_counts_usdt_swap": {
+    "3": 230,
+    "1": 289,
+    "4": 9
+  },
+  "current_crypto_usdt_swap_count": 289,
+  "current_top20_count": 20,
+  "current_non_top20_count": 269,
+  "archived_category1_snapshot_candidates": 0,
+  "archived_notice_crypto_candidates": [
+    "ICX",
+    "LRC"
+  ],
+  "excluded_same_name_noncrypto": [
+    {
+      "symbol": "QNT",
+      "instId": "QNT-USDT-SWAP",
+      "instCategory": "3",
+      "listTime": "1780655400000",
+      "reason": "current OKX instrument is not category 1; no verified historical category-1 snapshot"
+    },
+    {
+      "symbol": "WEN",
+      "instId": "WEN-USDT-SWAP",
+      "instCategory": "3",
+      "listTime": "1782383400000",
+      "reason": "current OKX instrument is not category 1; no verified historical category-1 snapshot"
+    }
+  ],
+  "delisted_category_snapshot": "experiments/active/exp-eth-h1-gainers-mfe16-20261021-v1/inputs/instruments_swap_20261021.json",
+  "top20_inputs_reused_from": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs",
+  "scope_note": "Current scope is official live instCategory=1 USDT swaps at capture, listTime<=cutoff; archive cohort uses only official category-1 snapshot candidates or ICX/LRC official delisting notices. Category-3 QNT/WEN are not admitted.",
+  "input_counts": {
+    "complete": 255,
+    "reused": 20,
+    "partial": 16
+  },
+  "input_finished": true,
+  "usable_symbols": 291,
+  "transport_errors": 0,
+  "finished_at_utc": "2026-11-08T14:39:01+00:00"
+}
