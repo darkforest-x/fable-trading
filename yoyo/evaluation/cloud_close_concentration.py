@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from yoyo.evaluation import cloud_close_leadership as leader
+from yoyo.evaluation import repair_io
 from yoyo.evaluation import cloud_close_reward_account as wallet
 from yoyo.evaluation import cloud_close_side_exit as asymmetric
 from yoyo.evaluation import cloud_close_slots as capacity
@@ -14,11 +15,18 @@ from yoyo.evaluation import cloud_close_slots as capacity
 EXP = wallet.ROOT / 'experiments/active/exp-cloud-close-concentration-20261109-v1'
 
 
-def main():
+def main(output_dir=None):
+    output_dir = repair_io.new_output_dir(
+        output_dir, root=wallet.ROOT, historical_dir=EXP,
+        artifacts=('account_metrics.csv','summary.json'), description=__doc__)
     cfg = json.loads((EXP/'config.json').read_text())
     paths = wallet.read_paths()
     paths = paths[~paths.is_control & paths.tp_r.isin([0,2])].copy()
-    paths = paths[pd.MultiIndex.from_frame(paths[['entry_ms','symbol']]).isin(leader.leadership().index)].copy()
+    rank = leader.leadership().dropna()
+    event_clock = pd.MultiIndex.from_frame(paths[['entry_ms','symbol']])
+    paths = paths[event_clock.isin(rank.index)].copy()
+    if paths.duplicated(['event_id','tp_r']).any() or not paths.groupby('event_id').size().eq(2).all():
+        raise ValueError('Eligible native events must have one complete tp0/tp2 pair')
     source = pd.read_csv(wallet.SOURCE/'signals.csv',usecols=['prior_atr_pct'])
     source.index = pd.RangeIndex(1,len(source)+1)
     paths['entry_order'] = paths.source_row_number.map(source.prior_atr_pct).fillna(np.inf)
@@ -46,10 +54,13 @@ def main():
             rows.extend(dict(parent=name,excluded=count,period=p,**m) for p,m in result.items())
             gc.collect()
     table = pd.DataFrame(rows)
-    table.to_csv(EXP/'account_metrics.csv',index=False)
-    (EXP/'summary.json').write_text(json.dumps(dict(development_contributors_usdt=exclusions),
-                                                indent=2,allow_nan=False)+'\n')
+    table.to_csv(output_dir/'account_metrics.csv',index=False)
+    summary = dict(experiment_id=cfg['id'], output_dir=str(output_dir),
+                   eligible_actual_events=int(paths.event_id.nunique()),
+                   development_contributors_usdt=exclusions)
+    (output_dir/'summary.json').write_text(json.dumps(summary,indent=2,allow_nan=False)+'\n')
     print(table[table.period.eq('all')].to_string(index=False))
+    return dict(output_dir=str(output_dir), account_metrics=table, summary=summary)
 
 
 if __name__=='__main__':

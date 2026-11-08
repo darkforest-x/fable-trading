@@ -5,8 +5,9 @@ import json
 import numpy as np
 import pandas as pd
 
-from yoyo.evaluation import cloud_close_binance_transfer as venue
+from yoyo.evaluation import cloud_close_binance_gap_repair as repaired
 from yoyo.evaluation import cloud_close_leadership as leader
+from yoyo.evaluation import repair_io
 from yoyo.evaluation import cloud_close_reward_account as wallet
 from yoyo.evaluation import cloud_close_same_time_control as simultaneous
 from yoyo.evaluation import cloud_close_slots as capacity
@@ -17,6 +18,8 @@ EXP = wallet.ROOT / 'experiments/active/exp-cloud-close-prior-expectancy-2026110
 
 def scored_paths(paths):
     """At each entry_ms use only 8–12 prior published returns, exit_bar_ms + H1 < entry_ms."""
+    if paths.duplicated(['event_id','tp_r']).any() or not paths.groupby('event_id').size().eq(2).all():
+        raise ValueError('Prior expectancy requires one native tp0/tp2 pair per event')
     real = paths[~paths.is_control]
     closed = simultaneous.returns(real)
     roster = real[real.tp_r.eq(0)].set_index('parent_id')
@@ -42,17 +45,36 @@ def scored_paths(paths):
 
 def load_paths(exchange):
     if exchange == 'Binance':
-        paths = pd.read_csv(venue.EXP / 'fills.csv.gz', dtype={'symbol': str},
-                            keep_default_na=False, float_precision='round_trip')
-        paths = paths[paths.eligible].copy()
+        # Reassemble corrected native fills: 43 repaired contracts plus the
+        # 589 unaffected contracts, with market-wide rankability recomputed.
+        paths = repaired.assembled(set(repaired.patch.affected_tickers()))
     else:
+        if exchange != 'OKX':
+            raise ValueError(f'Unsupported venue: {exchange}')
         paths = wallet.read_paths()
-        paths = paths[paths.tp_r.isin([0, 2]) &
-                      pd.MultiIndex.from_frame(paths[['entry_ms','symbol']]).isin(leader.leadership().index)].copy()
+        rank = leader.leadership().dropna()
+        event_clock = pd.MultiIndex.from_frame(paths[['entry_ms','symbol']])
+        paths = paths[paths.tp_r.isin([0, 2]) & event_clock.isin(rank.index)].copy()
         source = pd.read_csv(wallet.SOURCE / 'signals.csv', usecols=['prior_atr_pct'])
         source.index = pd.RangeIndex(1, len(source)+1)
         paths['entry_order'] = paths.source_row_number.map(source.prior_atr_pct).fillna(np.inf)
-    return scored_paths(paths[paths.parent_id.isin(paths.loc[~paths.is_control, 'parent_id'])])
+    if paths.duplicated(['event_id','tp_r']).any() or not paths.groupby('event_id').size().eq(2).all():
+        raise ValueError(f'{exchange} paths have duplicate or incomplete native target legs')
+    event_rows = paths[paths.tp_r.eq(0)].copy()
+    if event_rows.event_id.duplicated().any():
+        raise ValueError(f'{exchange} has more than one metadata row per event')
+    actual = event_rows[~event_rows.is_control]
+    controls = event_rows[event_rows.is_control]
+    if actual.parent_id.duplicated().any() or controls.parent_id.duplicated().any():
+        raise ValueError(f'{exchange} has duplicate actual/control parent identities')
+    # Controls must pass their own timestamp gate and also belong to an
+    # eligible real parent. Drop eligible-control orphans before scoring.
+    eligible_parent_ids = set(actual.parent_id)
+    paths = paths[paths.parent_id.isin(eligible_parent_ids)].copy()
+    kept_controls = paths[paths.is_control]
+    if not kept_controls.parent_id.isin(eligible_parent_ids).all():
+        raise ValueError(f'{exchange} control lacks an eligible actual parent')
+    return scored_paths(paths)
 
 
 def subset(paths, threshold):
@@ -64,10 +86,16 @@ def subset(paths, threshold):
 def simulate(exchange, events, slip=0.):
     if exchange == 'OKX':
         return capacity.run(events, 9, .75, slip)[0]
-    return venue.account(events, True, slip)[0][0]
+    if exchange == 'Binance':
+        data = repaired.prepare(events)
+        return repaired.scaleout.simulate(data, .75, slip)[0]
+    raise ValueError(f'Unsupported venue: {exchange}')
 
 
-def main():
+def main(output_dir=None):
+    output_dir = repair_io.new_output_dir(
+        output_dir, root=wallet.ROOT, historical_dir=EXP,
+        artifacts=('account_metrics.csv','summary.json'), description=__doc__)
     cfg = json.loads((EXP / 'config.json').read_text())
     paths = load_paths('OKX')
     baseline = pd.read_csv(leader.EXP / 'account_metrics.csv')
@@ -97,10 +125,18 @@ def main():
                                      ('slippage_5bp', actual, .0005)]:
                 checks[exchange][name] = simulate(exchange, pool, slip)
     table = pd.DataFrame(rows)
-    table.to_csv(EXP / 'account_metrics.csv', index=False)
-    (EXP / 'summary.json').write_text(json.dumps(dict(pick=pick, counts=counts, checks=checks),
-                                                  indent=2, allow_nan=False)+'\n')
+    summary = dict(experiment_id=cfg['id'],output_dir=str(output_dir),pick=pick,
+                   counts=counts,checks=checks,
+                   binance_input=(str(repaired.EXP.relative_to(wallet.ROOT))
+                                  if pick in cfg['thresholds'] else None),
+                   binance_source_contract=(
+                       'Gap-repaired native fills for the 43 affected contracts plus the 589 unchanged contracts; '
+                       'recomputed own-entry 90d rankability and updated H1 quotes, no Binance re-selection.'
+                       if pick in cfg['thresholds'] else None))
+    table.to_csv(output_dir / 'account_metrics.csv', index=False)
+    (output_dir / 'summary.json').write_text(json.dumps(summary,indent=2,allow_nan=False)+'\n')
     print(table[table.period.eq('all')].to_string(index=False))
+    return dict(output_dir=str(output_dir),account_metrics=table,summary=summary)
 
 
 if __name__=='__main__':
