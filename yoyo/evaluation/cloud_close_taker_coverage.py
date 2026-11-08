@@ -4,6 +4,7 @@ import json
 import time
 from concurrent.futures import ThreadPoolExecutor
 from urllib.error import HTTPError, URLError
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 import numpy as np
@@ -22,7 +23,7 @@ def fetch(ticker,minutes,period):
     filename = f'{ticker}-{minutes}m-{period}.zip'
     path = CACHE/ticker/filename
     if not path.is_file():
-        url = f'{PUBLIC}/{frequency}/klines/{ticker}/{minutes}m/{filename}'
+        url = f"{PUBLIC}/{frequency}/klines/{quote(ticker, safe='')}/{minutes}m/{quote(filename, safe='')}"
         for attempt in range(3):
             try:
                 with urlopen(Request(url,headers={'User-Agent':'fable-historical-kline-research/1'}),timeout=20) as response:
