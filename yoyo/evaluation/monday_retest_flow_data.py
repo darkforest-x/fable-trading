@@ -13,6 +13,7 @@ timestamp and OHLCV. Gaps in that original timeline are retained.
 """
 from __future__ import annotations
 
+import json
 from io import BytesIO
 from pathlib import Path
 from zipfile import BadZipFile, ZipFile
@@ -170,7 +171,73 @@ def _validate_bars(bars: np.ndarray, step_ms: int, label: str,
         raise ValueError(f"{label}: flow fields may be finite or NaN, not infinite")
 
 
-def _series_ranges(paths: list[Path], ranges: list[tuple[int, int]]) -> np.ndarray:
+def _series_bounds(path: Path, symbol: str) -> tuple[int, int] | None:
+    """Get cheap source bounds from its registered audit or plain CSV edges."""
+    root = path.parent.parent
+    audit = root / "audits" / f"{symbol}.json"
+    if audit.is_file():
+        try:
+            metadata = json.loads(audit.read_text(encoding="utf-8"))
+            first = metadata.get("first_time")
+            last = metadata.get("last_time")
+            if first is None and metadata.get("first_ms") is not None:
+                first = pd.Timestamp(int(metadata["first_ms"]), unit="ms", tz="UTC")
+            if last is None and metadata.get("last_ms") is not None:
+                last = pd.Timestamp(int(metadata["last_ms"]), unit="ms", tz="UTC")
+            if first is not None and last is not None:
+                return _utc_ms(first, "source first"), _utc_ms(last, "source last")
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            # A range hint only controls whether a source file can be skipped.
+            # If it cannot be parsed, fall through to a local CSV edge check.
+            pass
+
+    if path.suffix == ".gz" or path.suffix == ".zip" or not path.is_file():
+        return None
+
+    def parse_timestamp(line: bytes) -> int | None:
+        if not line.strip():
+            return None
+        try:
+            stamp = int(float(line.split(b",", 1)[0].strip()))
+        except (ValueError, OverflowError):
+            return None
+        return stamp // 1_000 if stamp > 1e14 else stamp
+
+    try:
+        with path.open("rb") as handle:
+            first_ts = None
+            for line in handle:
+                first_ts = parse_timestamp(line)
+                if first_ts is not None:
+                    break
+            size = path.stat().st_size
+            offset = max(0, size - 65_536)
+            handle.seek(offset)
+            if offset:
+                handle.readline()  # discard a possibly partial CSV row
+            tail = handle.read()
+        last_ts = None
+        for line in reversed(tail.splitlines()):
+            last_ts = parse_timestamp(line)
+            if last_ts is not None:
+                break
+    except OSError:
+        return None
+    if first_ts is None or last_ts is None:
+        return None
+    return first_ts, last_ts
+
+
+def _overlaps_ranges(bounds: tuple[int, int] | None,
+                     ranges: list[tuple[int, int]]) -> bool:
+    if bounds is None:
+        return True
+    first, last = bounds
+    return any(last >= start and first <= end for start, end in ranges)
+
+
+def _series_ranges(paths: list[Path], ranges: list[tuple[int, int]],
+                   symbol: str) -> np.ndarray:
     """Read only requested time spans from original job series, in chunks."""
     ranges = [(int(start), int(end)) for start, end in ranges if end >= start]
     if not ranges:
@@ -178,6 +245,8 @@ def _series_ranges(paths: list[Path], ranges: list[tuple[int, int]]) -> np.ndarr
     chunks_out: list[np.ndarray] = []
     for path in paths:
         if not path.is_file():
+            continue
+        if not _overlaps_ranges(_series_bounds(path, symbol), ranges):
             continue
         try:
             header = pd.read_csv(path, nrows=0, compression="infer")
@@ -252,9 +321,28 @@ def _join_raw_flow(series: np.ndarray, raw: np.ndarray) -> np.ndarray:
     raw = raw[np.argsort(raw[:, TS], kind="stable")]
     unique_ts, starts, counts = np.unique(raw[:, TS], return_index=True, return_counts=True)
     locations = np.searchsorted(unique_ts, series[:, TS])
-    found = (locations < len(unique_ts))
-    found[found] &= unique_ts[locations[found]] == series[found, TS]
-    for row_i in np.flatnonzero(found):
+    valid = locations < len(unique_ts)
+    found = np.zeros(len(series), dtype=bool)
+    found[valid] = unique_ts[locations[valid]] == series[valid, TS]
+
+    # Handle the overwhelmingly common unique raw timestamp path in bulk.
+    row_indices = np.flatnonzero(found)
+    group_indices = locations[row_indices]
+    single = counts[group_indices] == 1
+    single_rows = row_indices[single]
+    if len(single_rows):
+        raw_rows = starts[locations[single_rows]]
+        same_price = np.equal(
+            raw[raw_rows, OPEN:VOL + 1],
+            series[single_rows, OPEN:VOL + 1],
+        ).all(axis=1)
+        known_flow = np.isfinite(raw[raw_rows, COUNT:BUY + 1]).all(axis=1)
+        accepted = same_price & known_flow
+        out[single_rows[accepted], COUNT:BUY + 1] = raw[raw_rows[accepted], COUNT:BUY + 1]
+
+    # Only repeated timestamps need row-wise reconciliation.
+    repeated_rows = row_indices[~single]
+    for row_i in repeated_rows:
         group_i = locations[row_i]
         group = raw[starts[group_i]:starts[group_i] + counts[group_i]]
         same_price = np.equal(group[:, OPEN:VOL + 1], series[row_i, OPEN:VOL + 1]).all(axis=1)
@@ -264,6 +352,16 @@ def _join_raw_flow(series: np.ndarray, raw: np.ndarray) -> np.ndarray:
         if np.equal(matching[:, COUNT:BUY + 1], matching[0, COUNT:BUY + 1]).all():
             out[row_i, COUNT:BUY + 1] = matching[0, COUNT:BUY + 1]
     return out
+
+
+def _drop_exact_rows(bars: np.ndarray) -> np.ndarray:
+    """Drop only byte-identical rows, including rows with the same NaNs."""
+    if len(bars) < 2:
+        return bars
+    contiguous = np.ascontiguousarray(bars, dtype=np.float64)
+    row_dtype = np.dtype((np.void, contiguous.dtype.itemsize * contiguous.shape[1]))
+    _, first_indices = np.unique(contiguous.view(row_dtype).ravel(), return_index=True)
+    return contiguous[np.sort(first_indices)]
 
 
 def load_series(symbol: str, job: dict, expected: dict) -> np.ndarray:
@@ -317,7 +415,7 @@ def load_series(symbol: str, job: dict, expected: dict) -> np.ndarray:
             missing_month_ranges.append((max(first, month_start), min(last, next_start - step_ms)))
 
     if missing_month_ranges:
-        fallback = _series_ranges(series_paths, missing_month_ranges)
+        fallback = _series_ranges(series_paths, missing_month_ranges, symbol)
         if len(fallback):
             raw_parts.append(fallback)
 
@@ -325,7 +423,7 @@ def load_series(symbol: str, job: dict, expected: dict) -> np.ndarray:
     if len(raw):
         raw = raw[np.argsort(raw[:, TS], kind="stable")]
         in_range = (raw[:, TS] >= first) & (raw[:, TS] <= last)
-        raw = raw[in_range]
+        raw = _drop_exact_rows(raw[in_range])
         _validate_bars(raw, step_ms, f"{symbol} monthly/fallback source", allow_unknown_flow=True)
 
     has_duplicates = len(raw) > 1 and bool((np.diff(raw[:, TS]) == 0).any())
@@ -341,7 +439,7 @@ def load_series(symbol: str, job: dict, expected: dict) -> np.ndarray:
     # The archive timeline diverges from the historical source's frozen receipt.
     # Rebuild canonical prices from only this job's paths, then join flow on
     # timestamp + OHLCV equality. This path is deliberately uncommon.
-    baseline_rows = _series_ranges(series_paths, [(first, last)])
+    baseline_rows = _series_ranges(series_paths, [(first, last)], symbol)
     baseline = _canonical_series(baseline_rows, expected, step_ms, symbol)
     return _join_raw_flow(baseline, raw)
 
