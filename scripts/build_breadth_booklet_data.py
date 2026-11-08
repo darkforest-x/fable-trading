@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENT = ROOT / "experiments/active/exp-monday-breadth-extension-20261108-v1"
 FREQUENCY = ROOT / "experiments/active/exp-monday-breadth-frequency-20261108-v1"
 OPTIMIZATION = ROOT / "experiments/active/exp-monday-breadth-optimization-20261108-v1"
+SPACING = ROOT / "experiments/active/exp-monday-breadth-alt-spacing-20261108-v1"
 OUTPUT = ROOT / "yoyo/monitor/static/strategy-booklet/breadth-ema20-data.json"
 BTC_PARTIAL_FILLS = ROOT / "data/research/monday_breadth_optimization_20261108/btc_funded_exit_fills.parquet"
 
@@ -477,6 +478,34 @@ def record(row: pd.Series) -> dict[str, Any]:
     return {str(key): clean(value) for key, value in row.items()}
 
 
+def frequency_review() -> dict[str, Any]:
+    periods = {"2026_to_2026-10-27", "all_history"}
+    branch = pd.read_csv(SPACING / "spacing_summary.csv")
+    portfolio = pd.read_csv(SPACING / "portfolio_summary.csv")
+    keys = ["minimum_gap_hours", "period"]
+    joined = portfolio.loc[portfolio.period.isin(periods), keys + [
+        "alt_legs", "total_legs", "distinct_entry_times", "combo_50_50_fee_only_growth_pct",
+        "combo_50_50_settlement_drawdown_pct",
+    ]].merge(branch[keys + [
+        "selected", "new_vs_24h", "replaced_24h", "new_mean_net_pct", "new_win_pct",
+    ]], on=keys, validate="one_to_one")
+    if set(zip(joined.period, joined.minimum_gap_hours)) != {
+        (period, hours) for period in periods for hours in (6, 12, 24)
+    } or not joined.alt_legs.equals(joined.selected):
+        raise ValueError("Incomplete or inconsistent ALT spacing comparison")
+    archived = pd.read_csv(FREQUENCY / "audit/fixed/performance.csv")
+    high_frequency = archived.loc[
+        archived.period.astype(str).eq("2026") & archived.candidate_id.isin(["account_36", "account_72"]),
+        ["candidate_id", "n", "funded_mean", "marked_close_dd_before_funding"]
+    ].sort_values("candidate_id")
+    if list(high_frequency.candidate_id) != ["account_36", "account_72"]:
+        raise ValueError("Missing high-frequency account comparison")
+    return {
+        "spacing": clean(joined.drop(columns="selected").sort_values("minimum_gap_hours", ascending=False).to_dict("records")),
+        "higher_frequency_2026": clean(high_frequency.to_dict("records")),
+    }
+
+
 def build_summaries(events: list[dict[str, Any]]) -> dict[str, Any]:
     accounts = pd.read_csv(EXPERIMENT / "risk/accounts.csv")
     integrated_years = pd.read_csv(EXPERIMENT / "risk/integrated_years.csv")
@@ -489,6 +518,10 @@ def build_summaries(events: list[dict[str, Any]]) -> dict[str, Any]:
     actual_2026 = accounts[(accounts.strategy == "below_plus_case") & (accounts.scope == "2026_funded") & (accounts.extra_roundtrip_pp == 0)].iloc[0]
     actual_2026_stress = accounts[(accounts.strategy == "below_plus_case") & (accounts.scope == "2026_funded") & (accounts.extra_roundtrip_pp == 0.2)].iloc[0]
     actual_sensitivity = sensitivity[sensitivity.subset.eq("all_2026")].iloc[0]
+    slipped = pd.read_csv(EXPERIMENT / "partial/sep16_native_cost_sensitivity.csv")
+    slipped_case = slipped.loc[slipped.rule.eq("half_then_6d") & slipped.slip_market_bp_per_side.eq(10) & slipped.slip_limit_bp.eq(0)]
+    if len(slipped_case) != 1 or slipped_case.iloc[0].exit_legs != 1:
+        raise ValueError("September case slippage sensitivity does not reconcile")
     original_rows = accounts[accounts.strategy.eq("half_then_6d")]
 
     def scope_summary(source: pd.Series, scope: str, *, funded: bool) -> dict[str, Any]:
@@ -582,6 +615,11 @@ def build_summaries(events: list[dict[str, Any]]) -> dict[str, Any]:
             "2026_actual_funded": baseline_pair("2026_funded", original_2026, original_2026_stress),
         },
         "matched_control_2026": matched,
+        "september_case_review": {
+            "without_case_growth_pct": number(sensitivity.loc[sensitivity.subset.eq("omit_owner_case_entry"), "growth_funded"].item()),
+            "slipped_funded_points": number(slipped_case.funded_points.item()),
+        },
+        "frequency_review": frequency_review(),
     }
 
 
@@ -631,6 +669,7 @@ def build_payload() -> dict[str, Any]:
         "signal_cutoff_exclusive_utc": "2026-10-28T00:00:00Z",
         "provenance": {
             "experiment_id": "exp-monday-breadth-extension-20261108-v1",
+            "spacing_study": str(SPACING.relative_to(ROOT) / "portfolio_summary.csv"),
             "event_sources": {
                 "BTC": "experiments/active/exp-monday-breadth-extension-20261108-v1/risk/integrated_btc_events.parquet",
                 "ALT": "experiments/active/exp-monday-breadth-extension-20261108-v1/alt/event_results.csv.gz + alt/member_strategy_returns.parquet",
