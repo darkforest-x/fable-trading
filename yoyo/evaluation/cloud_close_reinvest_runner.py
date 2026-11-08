@@ -238,6 +238,25 @@ def prepare(base: pd.DataFrame, opportunities: pd.DataFrame, slots: int = 9, *,
             addon[np.abs(addon) == 1] *= 3
         return np.concatenate([original, addon], axis=2).reshape(-1, slots * 3)
 
+    # Re-entry columns are reused by later parents in the same slot. Preserve
+    # the original target-entry row for each add-on so runtime TP caps remain
+    # event-specific after the slot has been reused.
+    target_entry_rows = np.full((len(addon_data['actions']), slots), -1,
+                                dtype=np.int64)
+    if len(addon_paths):
+        entry_row_by_event = {
+            str(row.event_id): _stage(int(row.entry_ms), 'entry', start)
+            for row in selected.itertuples(index=False)
+        }
+        for row in addon_paths.itertuples(index=False):
+            reentry_row = _stage(int(row.entry_ms), 'entry', start)
+            slot = int(row.slot)
+            if not (0 <= reentry_row < len(target_entry_rows)):
+                raise ValueError(f'Re-entry time outside prepared data: {row.event_id}')
+            if target_entry_rows[reentry_row, slot] >= 0:
+                raise ValueError('Two re-entry parents map to one slot at the same H1 open')
+            target_entry_rows[reentry_row, slot] = entry_row_by_event[str(row.event_id)]
+
     return dict(selected=selected, candidates=addon_paths.reset_index(drop=True),
                 candidate_counts=candidate_counts, skips=original_data['skips'],
                 gap_marks=original_data['gap_marks'] + addon_data['gap_marks'],
@@ -245,6 +264,7 @@ def prepare(base: pd.DataFrame, opportunities: pd.DataFrame, slots: int = 9, *,
                 actions=combine('actions'),
                 high=np.concatenate([original_data['high'], addon_data['high']], axis=1),
                 low=np.concatenate([original_data['low'], addon_data['low']], axis=1),
+                target_entry_rows=target_entry_rows,
                 start=start, slots=slots, reinvest=reinvest)
 
 
@@ -257,7 +277,8 @@ def _pre_segment(c):
 
 @njit(cache=True)
 def _order_func(c, nav, actions, prices, fees, market_slip, reservation,
-                target_notional, add_budget, add_cash_before, slots):
+                target_notional, add_budget, add_cash_before,
+                target_entry_rows, slots):
     action = actions[c.i, c.col]
     if action == 0:
         return NoOrder
@@ -290,7 +311,7 @@ def _order_func(c, nav, actions, prices, fees, market_slip, reservation,
                 free_slots += int(not occupied)
             reservation[slot] = min(nav / slots,
                                     c.free_cash_now / max(1, free_slots))
-            target_notional[slot] = 0.
+            target_notional[c.i, slot] = 0.
         budget = reservation[slot] * BASE_WEIGHTS[leg]
         if budget < 1.e-8:
             return NoOrder
@@ -298,7 +319,7 @@ def _order_func(c, nav, actions, prices, fees, market_slip, reservation,
                          (price * (1. + slip) * (1. + fee)))
         if leg == 0:
             fill_price = price * (1. + slip if action > 0 else 1. - slip)
-            target_notional[slot] = abs(size) * fill_price
+            target_notional[c.i, slot] = abs(size) * fill_price
         return nb.order_nb(size=size, price=price, fees=fee, slippage=slip,
                            lock_cash=True, allow_partial=False, raise_reject=True)
     if abs(action) == 3:
@@ -307,13 +328,16 @@ def _order_func(c, nav, actions, prices, fees, market_slip, reservation,
         if c.last_position[slot * 2] != 0.:
             raise ValueError('Re-entry target leg must be flat before the add-on')
         if c.last_position[slot * 2 + 1] == 0.:
-            add_cash_before[slot] = max(0., c.free_cash_now)
-            add_budget[slot] = 0.
+            add_cash_before[c.i, slot] = max(0., c.free_cash_now)
+            add_budget[c.i, slot] = 0.
             return NoOrder
         cash = max(0., c.free_cash_now)
-        budget = min(target_notional[slot], cash)
-        add_cash_before[slot] = cash
-        add_budget[slot] = budget
+        target_entry_row = target_entry_rows[c.i, slot]
+        if target_entry_row < 0:
+            raise ValueError('Re-entry lacks its parent target-entry row')
+        budget = min(target_notional[target_entry_row, slot], cash)
+        add_cash_before[c.i, slot] = cash
+        add_budget[c.i, slot] = budget
         if budget < 1.e-8:
             return NoOrder
         size = (1 if action > 0 else -1) * (budget * (1. - 1.e-10) /
@@ -349,13 +373,14 @@ def account(data: dict, *, slip: float = 0., initial_cash: float = 1000.):
     """Run the combined account in one cash-sharing VectorBT portfolio."""
     slots = int(data['slots'])
     reservation = np.zeros(slots, dtype=np.float64)
-    target_notional = np.zeros(slots, dtype=np.float64)
-    add_budget = np.zeros(slots, dtype=np.float64)
-    add_cash_before = np.zeros(slots, dtype=np.float64)
+    target_notional = np.zeros((len(data['actions']), slots), dtype=np.float64)
+    add_budget = np.zeros((len(data['actions']), slots), dtype=np.float64)
+    add_cash_before = np.zeros((len(data['actions']), slots), dtype=np.float64)
     actions = data['actions']
     portfolio = vbt.Portfolio.from_order_func(
         data['marks'], _order_func, actions, data['prices'], data['fees'], slip,
-        reservation, target_notional, add_budget, add_cash_before, slots,
+        reservation, target_notional, add_budget, add_cash_before,
+        data['target_entry_rows'], slots,
         pre_segment_func_nb=_pre_segment, cash_sharing=True, group_by=True,
         init_cash=initial_cash, max_orders=int(np.count_nonzero(actions)) + 1,
         fill_pos_record=False)
@@ -411,9 +436,12 @@ def account(data: dict, *, slip: float = 0., initial_cash: float = 1000.):
             if addon is None:
                 original['reinvest_status'] = 'no_free_cash'
             else:
+                addon_row = int(addon_entry)
+                available_cash = float(add_cash_before[addon_row, slot])
+                requested_budget = float(add_budget[addon_row, slot])
                 if addon['notional'] > target['notional'] + 1e-6:
                     raise ValueError(f'Re-entry exceeded released target-leg notional: {row.event_id}')
-                if addon['notional'] > float(add_cash_before[slot]) + 1e-6:
+                if addon['notional'] > available_cash + 1e-6:
                     raise ValueError(f'Re-entry exceeded free cash at order time: {row.event_id}')
                 original['reinvest_status'] = 'filled'
                 original['reinvest_cash_pnl'] = addon['cash_pnl']
@@ -435,8 +463,8 @@ def account(data: dict, *, slip: float = 0., initial_cash: float = 1000.):
                                source_exit_price=c.get('source_addon_exit_price', np.nan),
                                actual_exit_reason=c.exit_reason,
                                target_notional_cap=float(target['notional']),
-                               available_cash_before=float(add_cash_before[slot]),
-                               requested_budget=float(add_budget[slot]),
+                               available_cash_before=available_cash,
+                               requested_budget=requested_budget,
                                sync_to_runner=bool(c.sync_to_runner),
                                same_bar_exit_order=c.same_bar_exit_order)
                 reentry_rows.append(reentry)
