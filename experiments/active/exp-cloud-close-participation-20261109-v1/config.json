@@ -1,0 +1,9 @@
+{
+  "id": "exp-cloud-close-participation-20261109-v1",
+  "factor": "At the exact 12H decision boundary, require the fraction of contemporaneously eligible contracts with a fresh same-side original V1.7 signal to belong to one predefined range: below 2%, 2% through below 10%, or 10% and above. The denominator is all contracts with 90 days of complete trailing 12h information eligible at the key OPEN; at least ten are needed. This normalized simultaneous-market participation differs from an absolute count of five alerts.",
+  "bins": {"isolated":[0,0.02],"moderate":[0.02,0.10],"broad":[0.10,1.01]},
+  "parent": "Full-size 2R-activated +0.5R lock, nine positions, known previous ATR priority, entry at confirmed 12H boundary. Previously explored history; membership is the surviving part of the recoverable cohort.",
+  "controls": "Select earlier real parents by their own observed market participation before they opened, then reuse only matched later controls of those parents. The random time does not itself need to have a fresh V1.7 key.",
+  "selection": "Dev NAV maximum through 2024 with both realized payoff metrics >=2.5, wins >=30%, >=100 closed positions and hourly DD upper bound <=35%. No fallback qualifies automatically. Check additional 5bp slippage and matched controls for dev pick, and report later years.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_participation"
+}
