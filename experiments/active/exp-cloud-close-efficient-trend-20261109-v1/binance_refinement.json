@@ -1,0 +1,451 @@
+{
+  "id": "exp-cloud-close-efficient-trend-20261109-v1-binance-dd-refinement",
+  "venue": "Binance",
+  "source_account": "exp-cloud-close-efficient-trend-20261109-v1, scenario=actual, policy=trend_efficiency",
+  "source_h1_file": "experiments/active/exp-cloud-close-efficient-trend-20261109-v1/hourly_Binance.csv.gz",
+  "source_funded_file": "experiments/active/exp-cloud-close-efficient-trend-20261109-v1/funded_Binance.csv.gz",
+  "source_decisions_file": "experiments/active/exp-cloud-close-efficient-trend-20261109-v1/decisions_Binance.csv.gz",
+  "resolution_used": "5m",
+  "threshold_drawdown_pct": 35.0,
+  "periods": {
+    "full": {
+      "observed_lower_pct": 34.21994396271314,
+      "refined_upper_pct": 34.859973407176724,
+      "original_h1_upper_pct": 35.18048446045784,
+      "fee_adjusted_h1_upper_pct": 35.18048446045784,
+      "interval_straddles_35pct": false,
+      "passes_35pct_upper_bound": true,
+      "fails_35pct_lower_bound": false
+    },
+    "development": {
+      "observed_lower_pct": 34.21994396271314,
+      "refined_upper_pct": 34.859973407176724,
+      "original_h1_upper_pct": 35.18048446045784,
+      "fee_adjusted_h1_upper_pct": 35.18048446045784,
+      "interval_straddles_35pct": false,
+      "passes_35pct_upper_bound": true,
+      "fails_35pct_lower_bound": false
+    }
+  },
+  "baseline_h1_metrics": {
+    "full": {
+      "final_usdt": 8772.84230679136,
+      "dd_mark_pct": 34.21994396271314,
+      "dd_bound_pct": 35.18048446045784,
+      "trades": 1629
+    },
+    "development": {
+      "final_usdt": 7885.655963408748,
+      "dd_mark_pct": 34.21994396271314,
+      "dd_bound_pct": 35.18048446045784,
+      "trades": 1190
+    }
+  },
+  "critical_windows_by_period": {
+    "full": [
+      {
+        "peak_hour_end_utc": "2023-02-20T18:00:00+00:00",
+        "trough_hour_end_utc": "2023-04-30T16:00:00+00:00",
+        "h1_upper_dd_at_trough_pct": 35.18048446045784,
+        "h1_trough_lower_usdt": 5675.025732976948,
+        "h1_prior_upper_peak_usdt": 8755.119018924146
+      }
+    ],
+    "development": [
+      {
+        "peak_hour_end_utc": "2023-02-20T18:00:00+00:00",
+        "trough_hour_end_utc": "2023-04-30T16:00:00+00:00",
+        "h1_upper_dd_at_trough_pct": 35.18048446045784,
+        "h1_trough_lower_usdt": 5675.025732976948,
+        "h1_prior_upper_peak_usdt": 8755.119018924146
+      }
+    ]
+  },
+  "raw_h1_critical_windows_by_period": {
+    "full": [
+      {
+        "peak_hour_end_utc": "2023-02-20T18:00:00+00:00",
+        "trough_hour_end_utc": "2023-04-30T16:00:00+00:00",
+        "h1_upper_dd_at_trough_pct": 35.18048446045784,
+        "h1_trough_lower_usdt": 5675.025732976948,
+        "h1_prior_upper_peak_usdt": 8755.119018924146
+      }
+    ],
+    "development": [
+      {
+        "peak_hour_end_utc": "2023-02-20T18:00:00+00:00",
+        "trough_hour_end_utc": "2023-04-30T16:00:00+00:00",
+        "h1_upper_dd_at_trough_pct": 35.18048446045784,
+        "h1_trough_lower_usdt": 5675.025732976948,
+        "h1_prior_upper_peak_usdt": 8755.119018924146
+      }
+    ]
+  },
+  "fee_adjusted_h1_critical_windows_by_period": {
+    "full": [
+      {
+        "peak_hour_end_utc": "2023-02-20T18:00:00+00:00",
+        "trough_hour_end_utc": "2023-04-30T16:00:00+00:00",
+        "h1_upper_dd_at_trough_pct": 35.18048446045784,
+        "h1_trough_lower_usdt": 5675.025732976948,
+        "h1_prior_upper_peak_usdt": 8755.119018924146
+      }
+    ],
+    "development": [
+      {
+        "peak_hour_end_utc": "2023-02-20T18:00:00+00:00",
+        "trough_hour_end_utc": "2023-04-30T16:00:00+00:00",
+        "h1_upper_dd_at_trough_pct": 35.18048446045784,
+        "h1_trough_lower_usdt": 5675.025732976948,
+        "h1_prior_upper_peak_usdt": 8755.119018924146
+      }
+    ]
+  },
+  "refined_windows": [
+    {
+      "hour_end_utc": "2023-02-20T18:00:00+00:00",
+      "step_ms": 300000,
+      "active_symbols": [
+        "1INCH",
+        "DUSK",
+        "IOTX",
+        "OMG",
+        "STG",
+        "STMX",
+        "STORJ",
+        "XTZ"
+      ],
+      "observed_symbols": [
+        "1INCH",
+        "DUSK",
+        "IOTX",
+        "OMG",
+        "STG",
+        "STMX",
+        "STORJ",
+        "XTZ"
+      ],
+      "refined_lower_usdt": 8629.090997268448,
+      "refined_upper_usdt": 8715.103589022601,
+      "previous_lower_usdt": 8607.800819838296,
+      "previous_upper_usdt": 8755.119018924146,
+      "min_observed_subbar_close_nav_usdt": 8644.750828617123,
+      "max_observed_subbar_close_nav_usdt": 8700.889262993764,
+      "pre_entry_fee_upper_bound_usdt": 8655.101819912297,
+      "final_upper_nav_usdt": 8715.103589022601,
+      "h1_nav_self_check": 8644.75082861712,
+      "native_quote_cache_info": "CacheInfo(hits=0, misses=0, maxsize=180, currsize=0)"
+    },
+    {
+      "hour_end_utc": "2023-04-30T16:00:00+00:00",
+      "step_ms": 300000,
+      "active_symbols": [
+        "1000SHIB",
+        "1000XEC",
+        "API3",
+        "CTSI",
+        "DOT",
+        "LUNA2",
+        "TRX",
+        "XMR"
+      ],
+      "observed_symbols": [
+        "1000SHIB",
+        "1000XEC",
+        "API3",
+        "CTSI",
+        "DOT",
+        "LUNA2",
+        "TRX",
+        "XMR"
+      ],
+      "refined_lower_usdt": 5687.29219257518,
+      "refined_upper_usdt": 5745.815404936679,
+      "previous_lower_usdt": 5675.025732976948,
+      "previous_upper_usdt": 5752.678084704827,
+      "min_observed_subbar_close_nav_usdt": 5703.6429312853,
+      "max_observed_subbar_close_nav_usdt": 5727.809384485076,
+      "pre_entry_fee_upper_bound_usdt": 5711.765596961795,
+      "final_upper_nav_usdt": 5745.815404936679,
+      "h1_nav_self_check": 5720.699316266888,
+      "native_quote_cache_info": "CacheInfo(hits=5, misses=8, maxsize=180, currsize=8)"
+    }
+  ],
+  "five_minute_refinement": {
+    "period_bounds": {
+      "full": {
+        "observed_lower_pct": 34.21994396271314,
+        "refined_upper_pct": 34.859973407176724,
+        "original_h1_upper_pct": 35.18048446045784,
+        "fee_adjusted_h1_upper_pct": 35.18048446045784,
+        "interval_straddles_35pct": false,
+        "passes_35pct_upper_bound": true,
+        "fails_35pct_lower_bound": false
+      },
+      "development": {
+        "observed_lower_pct": 34.21994396271314,
+        "refined_upper_pct": 34.859973407176724,
+        "original_h1_upper_pct": 35.18048446045784,
+        "fee_adjusted_h1_upper_pct": 35.18048446045784,
+        "interval_straddles_35pct": false,
+        "passes_35pct_upper_bound": true,
+        "fails_35pct_lower_bound": false
+      }
+    },
+    "windows": [
+      {
+        "hour_end_utc": "2023-02-20T18:00:00+00:00",
+        "step_ms": 300000,
+        "active_symbols": [
+          "1INCH",
+          "DUSK",
+          "IOTX",
+          "OMG",
+          "STG",
+          "STMX",
+          "STORJ",
+          "XTZ"
+        ],
+        "observed_symbols": [
+          "1INCH",
+          "DUSK",
+          "IOTX",
+          "OMG",
+          "STG",
+          "STMX",
+          "STORJ",
+          "XTZ"
+        ],
+        "refined_lower_usdt": 8629.090997268448,
+        "refined_upper_usdt": 8715.103589022601,
+        "previous_lower_usdt": 8607.800819838296,
+        "previous_upper_usdt": 8755.119018924146,
+        "min_observed_subbar_close_nav_usdt": 8644.750828617123,
+        "max_observed_subbar_close_nav_usdt": 8700.889262993764,
+        "pre_entry_fee_upper_bound_usdt": 8655.101819912297,
+        "final_upper_nav_usdt": 8715.103589022601,
+        "h1_nav_self_check": 8644.75082861712,
+        "native_quote_cache_info": "CacheInfo(hits=0, misses=0, maxsize=180, currsize=0)"
+      },
+      {
+        "hour_end_utc": "2023-04-30T16:00:00+00:00",
+        "step_ms": 300000,
+        "active_symbols": [
+          "1000SHIB",
+          "1000XEC",
+          "API3",
+          "CTSI",
+          "DOT",
+          "LUNA2",
+          "TRX",
+          "XMR"
+        ],
+        "observed_symbols": [
+          "1000SHIB",
+          "1000XEC",
+          "API3",
+          "CTSI",
+          "DOT",
+          "LUNA2",
+          "TRX",
+          "XMR"
+        ],
+        "refined_lower_usdt": 5687.29219257518,
+        "refined_upper_usdt": 5745.815404936679,
+        "previous_lower_usdt": 5675.025732976948,
+        "previous_upper_usdt": 5752.678084704827,
+        "min_observed_subbar_close_nav_usdt": 5703.6429312853,
+        "max_observed_subbar_close_nav_usdt": 5727.809384485076,
+        "pre_entry_fee_upper_bound_usdt": 5711.765596961795,
+        "final_upper_nav_usdt": 5745.815404936679,
+        "h1_nav_self_check": 5720.699316266888,
+        "native_quote_cache_info": "CacheInfo(hits=5, misses=8, maxsize=180, currsize=8)"
+      }
+    ],
+    "source_audit": {
+      "resolution": "5m",
+      "source": "Binance official USD-M daily klines",
+      "contracts_and_archives": [
+        {
+          "symbol": "1000SHIB",
+          "date_utc": "2023-04-30",
+          "interval": "5m",
+          "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/1000SHIBUSDT/5m/1000SHIBUSDT-5m-2023-04-30.zip",
+          "archive_path": "data/research/cloud_close_efficiency_binance_dd/official_5m/1000SHIBUSDT/1000SHIBUSDT-5m-2023-04-30.zip",
+          "sha256": "4c24684596c675ce3db026b875c3644e187b07e3517cf7e4a07255a7465fdca8",
+          "hour_open_ms": 1682866800000,
+          "rows": 12
+        },
+        {
+          "symbol": "1000XEC",
+          "date_utc": "2023-04-30",
+          "interval": "5m",
+          "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/1000XECUSDT/5m/1000XECUSDT-5m-2023-04-30.zip",
+          "archive_path": "data/research/cloud_close_efficiency_binance_dd/official_5m/1000XECUSDT/1000XECUSDT-5m-2023-04-30.zip",
+          "sha256": "a27fb697b7d15f3a378cb5e924268c5c2323fbd2afb06a5bfbe4281d4cd84e9a",
+          "hour_open_ms": 1682866800000,
+          "rows": 12
+        },
+        {
+          "symbol": "1INCH",
+          "date_utc": "2023-02-20",
+          "interval": "5m",
+          "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/1INCHUSDT/5m/1INCHUSDT-5m-2023-02-20.zip",
+          "archive_path": "data/research/cloud_close_efficiency_binance_dd/official_5m/1INCHUSDT/1INCHUSDT-5m-2023-02-20.zip",
+          "sha256": "4fd54f3e78b53a2fc5c0957d94ef9c6a2290a79e4b9d4c58a31e6031fa1d69bd",
+          "hour_open_ms": 1676912400000,
+          "rows": 12
+        },
+        {
+          "symbol": "API3",
+          "date_utc": "2023-04-30",
+          "interval": "5m",
+          "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/API3USDT/5m/API3USDT-5m-2023-04-30.zip",
+          "archive_path": "data/research/cloud_close_efficiency_binance_dd/official_5m/API3USDT/API3USDT-5m-2023-04-30.zip",
+          "sha256": "194b715dc370ac72668c2ce1fbd760104c9ffb60bcbde099904a011875beea06",
+          "hour_open_ms": 1682866800000,
+          "rows": 12
+        },
+        {
+          "symbol": "CTSI",
+          "date_utc": "2023-04-30",
+          "interval": "5m",
+          "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/CTSIUSDT/5m/CTSIUSDT-5m-2023-04-30.zip",
+          "archive_path": "data/research/cloud_close_efficiency_binance_dd/official_5m/CTSIUSDT/CTSIUSDT-5m-2023-04-30.zip",
+          "sha256": "ba475c3a29c1b526a5233948bb3539b3983d38d55989a23edb256ea66643eff4",
+          "hour_open_ms": 1682866800000,
+          "rows": 12
+        },
+        {
+          "symbol": "DOT",
+          "date_utc": "2023-04-30",
+          "interval": "5m",
+          "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/DOTUSDT/5m/DOTUSDT-5m-2023-04-30.zip",
+          "archive_path": "data/research/cloud_close_efficiency_binance_dd/official_5m/DOTUSDT/DOTUSDT-5m-2023-04-30.zip",
+          "sha256": "24abb96dbf03fcc35a595fdf808157c860456358fdfc069a1b34017d4cad0b6d",
+          "hour_open_ms": 1682866800000,
+          "rows": 12
+        },
+        {
+          "symbol": "DUSK",
+          "date_utc": "2023-02-20",
+          "interval": "5m",
+          "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/DUSKUSDT/5m/DUSKUSDT-5m-2023-02-20.zip",
+          "archive_path": "data/research/cloud_close_efficiency_binance_dd/official_5m/DUSKUSDT/DUSKUSDT-5m-2023-02-20.zip",
+          "sha256": "d98530bee0df6f1366dddde5dbc87694469c780fb088966326c33d8e6e758662",
+          "hour_open_ms": 1676912400000,
+          "rows": 12
+        },
+        {
+          "symbol": "IOTX",
+          "date_utc": "2023-02-20",
+          "interval": "5m",
+          "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/IOTXUSDT/5m/IOTXUSDT-5m-2023-02-20.zip",
+          "archive_path": "data/research/cloud_close_efficiency_binance_dd/official_5m/IOTXUSDT/IOTXUSDT-5m-2023-02-20.zip",
+          "sha256": "e362b5a19799deb08c8ccb4b8342ef699690436eacbaa5ffc17fa35f6f652dc5",
+          "hour_open_ms": 1676912400000,
+          "rows": 12
+        },
+        {
+          "symbol": "LUNA2",
+          "date_utc": "2023-04-30",
+          "interval": "5m",
+          "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/LUNA2USDT/5m/LUNA2USDT-5m-2023-04-30.zip",
+          "archive_path": "data/research/cloud_close_efficiency_binance_dd/official_5m/LUNA2USDT/LUNA2USDT-5m-2023-04-30.zip",
+          "sha256": "cbfe9560574e82e5486aa20ea2093403adb7c7793662b7e8398e3542709a3f3e",
+          "hour_open_ms": 1682866800000,
+          "rows": 12
+        },
+        {
+          "symbol": "OMG",
+          "date_utc": "2023-02-20",
+          "interval": "5m",
+          "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/OMGUSDT/5m/OMGUSDT-5m-2023-02-20.zip",
+          "archive_path": "data/research/cloud_close_efficiency_binance_dd/official_5m/OMGUSDT/OMGUSDT-5m-2023-02-20.zip",
+          "sha256": "d3cd71f9906351dd6b001f21f4e88059b251dd817f964956bbebe962766b7698",
+          "hour_open_ms": 1676912400000,
+          "rows": 12
+        },
+        {
+          "symbol": "STG",
+          "date_utc": "2023-02-20",
+          "interval": "5m",
+          "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/STGUSDT/5m/STGUSDT-5m-2023-02-20.zip",
+          "archive_path": "data/research/cloud_close_efficiency_binance_dd/official_5m/STGUSDT/STGUSDT-5m-2023-02-20.zip",
+          "sha256": "d29d6fed9a118cee59839e84a596b95048edcf20465ab054a537059d342db5e5",
+          "hour_open_ms": 1676912400000,
+          "rows": 12
+        },
+        {
+          "symbol": "STMX",
+          "date_utc": "2023-02-20",
+          "interval": "5m",
+          "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/STMXUSDT/5m/STMXUSDT-5m-2023-02-20.zip",
+          "archive_path": "data/research/cloud_close_efficiency_binance_dd/official_5m/STMXUSDT/STMXUSDT-5m-2023-02-20.zip",
+          "sha256": "ac1aa7d3c661c031a79e025b3d3f5b7e7e61d5c7f4cd8cc6b2dc22584ede75e3",
+          "hour_open_ms": 1676912400000,
+          "rows": 12
+        },
+        {
+          "symbol": "STORJ",
+          "date_utc": "2023-02-20",
+          "interval": "5m",
+          "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/STORJUSDT/5m/STORJUSDT-5m-2023-02-20.zip",
+          "archive_path": "data/research/cloud_close_efficiency_binance_dd/official_5m/STORJUSDT/STORJUSDT-5m-2023-02-20.zip",
+          "sha256": "aa193011af56cf8e009ca1ccee60d635400f22a1aea5c343095ba6bf093316d7",
+          "hour_open_ms": 1676912400000,
+          "rows": 12
+        },
+        {
+          "symbol": "TRX",
+          "date_utc": "2023-04-30",
+          "interval": "5m",
+          "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/TRXUSDT/5m/TRXUSDT-5m-2023-04-30.zip",
+          "archive_path": "data/research/cloud_close_efficiency_binance_dd/official_5m/TRXUSDT/TRXUSDT-5m-2023-04-30.zip",
+          "sha256": "249914220ddb68714cc71f55bf33298da5909cc88e0a1055e893fc73befdefcf",
+          "hour_open_ms": 1682866800000,
+          "rows": 12
+        },
+        {
+          "symbol": "XMR",
+          "date_utc": "2023-04-30",
+          "interval": "5m",
+          "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/XMRUSDT/5m/XMRUSDT-5m-2023-04-30.zip",
+          "archive_path": "data/research/cloud_close_efficiency_binance_dd/official_5m/XMRUSDT/XMRUSDT-5m-2023-04-30.zip",
+          "sha256": "83c46090d00e643bb868de6b4c202a32f804aa5020481c87b5431f65d82d55ef",
+          "hour_open_ms": 1682866800000,
+          "rows": 12
+        },
+        {
+          "symbol": "XTZ",
+          "date_utc": "2023-02-20",
+          "interval": "5m",
+          "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/XTZUSDT/5m/XTZUSDT-5m-2023-02-20.zip",
+          "archive_path": "data/research/cloud_close_efficiency_binance_dd/official_5m/XTZUSDT/XTZUSDT-5m-2023-02-20.zip",
+          "sha256": "15cfdabbce4da7c70342e1dd36aa2e654899fd893a00b8899c939b4124191ac2",
+          "hour_open_ms": 1676912400000,
+          "rows": 12
+        }
+      ],
+      "rows": 192,
+      "cache": "data/research/cloud_close_efficiency_binance_dd/5m_quotes.csv.gz",
+      "reused": false,
+      "cache_size_bytes": 2233
+    }
+  },
+  "one_minute_refinement": null,
+  "accounting_reconciliation": {
+    "funded_positions": 1629,
+    "native_exit_legs": 3258,
+    "selected_full_runner_positions": 24,
+    "selected_partial_positions": 1605,
+    "cash_start_plus_pnl_usdt": 8772.842307253512,
+    "h1_terminal_nav_usdt": 8772.84230679136,
+    "max_per_event_cash_reconciliation_error_usdt": 2.2737367544323206e-13,
+    "exit_path_fee_classes_preserved": true,
+    "original_entry_order_prices_and_quantities_preserved": true
+  },
+  "native_binance_only": true,
+  "no_repricing_or_order_changes": true,
+  "status": "pass"
+}
