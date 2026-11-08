@@ -674,18 +674,20 @@ def run() -> None:
     # Build year and source attribution from exact selected event identities.
     yearly = []
     for year in sorted(set(baseline.decision.dt.year) | set(new_events.decision.dt.year) | set(alt_all.decision.dt.year)):
+        old_year_decisions = set(baseline.loc[baseline.decision.dt.year.eq(year), "decision"])
         for name, btc in [("baseline_below_post_reservation", baseline),
                           ("ema_before_reservation", new_events)]:
             b = btc[btc.decision.dt.year.eq(year)]
             a = alt_all[alt_all.decision.dt.year.eq(year)]
+            year_decisions = set(b.decision)
             yearly.append(dict(
                 variant=name, year=int(year), btc_count=len(b),
                 btc_medium_count=int(b.source.eq("medium").sum()),
                 btc_case_count=int(b.source.eq("case").sum()),
                 alt_count=len(a), total_legs=len(b) + len(a),
                 distinct_entries=len(set(b.decision) | set(a.decision)),
-                btc_added_vs_baseline=(len(set(b.decision) - old_decisions) if name == "ema_before_reservation" else 0),
-                btc_removed_vs_baseline=(len(old_decisions - set(b.decision)) if name == "ema_before_reservation" else 0),
+                btc_added_vs_baseline=(len(year_decisions - old_year_decisions) if name == "ema_before_reservation" else 0),
+                btc_removed_vs_baseline=(len(old_year_decisions - year_decisions) if name == "ema_before_reservation" else 0),
             ))
 
     # Save all owned outputs only after every reconciliation and coverage assertion passed.
