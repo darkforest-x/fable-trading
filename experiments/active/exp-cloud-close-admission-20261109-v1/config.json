@@ -1,0 +1,20 @@
+{
+  "id": "exp-cloud-close-admission-20261109-v1",
+  "source": "exp-cloud-close-reward-20261109-v1",
+  "frozen_before_reward_results": true,
+  "factor": "Each candidate changes one admission rule relative to the common development-selected exit and 12-slot unlevered account. Baseline fallback is the untargeted cloud exit if no exit candidate meets all development gates. Entries retain original V1.7 week locking even when an admission is rejected. No stacked filters or symbol picks.",
+  "eligibility": ["all", "long", "short", "btc_aligned", "btc_opposite", "relative_strength_positive", "tight_reclaim", "same_side_stoch", "large_wick", "wide_monday", "strong_cloud", "prior_market_breadth"],
+  "definitions": {
+    "btc_aligned": "Source btc_same_side == 1 at 12H confirmation",
+    "btc_opposite": "Source btc_same_side == 0 at 12H confirmation",
+    "relative_strength_positive": "side-adjusted prior 14-bar return minus BTC return > 0; pre-key closes",
+    "tight_reclaim": "signal close within half the reference stop distance of touched extension (close_distance_r <=0.5)",
+    "same_side_stoch": "V1.7 same-side Stoch event on the confirmed key",
+    "large_wick": "touched-side wick >= one half of the key candle range",
+    "wide_monday": "Monday width >=5 percent, in source percent units",
+    "strong_cloud": "absolute confirmed EMA spread >=1 ATR per source",
+    "prior_market_breadth": "at least 5 original same-side V1.7 signals on this 12H close across the available cohort, measured after confirmation and before opening orders"
+  },
+  "decision": "Development-only rank absolute funded growth among candidates meeting unchanged 35% DD upper bound, >=30% wins, >=2.5 equal-notional payoff, >=100 closed development trades (minimum declared for this screen). Later years, original unfiltered comparator, survival universe and search multiplicity disclosed. No retuning from later results. Per-parent matched controls benchmark the picked event set.",
+  "command": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_admission"
+}
