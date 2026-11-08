@@ -139,7 +139,10 @@ class ExitPolicy:
                 raise ValueError("Time and R breakeven triggers cannot be combined")
         if self.rsi_scaleout and (self.partial_close_r is not None or self.fixed_target_r is not None):
             raise ValueError("RSI reductions cannot combine with other partial/target policies")
-        values = [self.trail_arm_r, self.trail_atr_multiple]
+        if (math.isnan(self.trail_arm_r) or self.trail_arm_r <= 0
+                or (math.isinf(self.trail_arm_r) and not self.target_from_entry)):
+            raise ValueError("Trail arm R must be finite and positive, or +inf with a per-entry target")
+        values = [self.trail_atr_multiple]
         if self.breakeven_r is not None:
             values.append(self.breakeven_r)
         if self.partial_close_r is not None:
@@ -291,6 +294,7 @@ class IndependentCloseStrategy(Strategy):
         self.atr, self.hour = np.asarray(atr), np.asarray(hour)
         self.execution_minutes = execution_minutes
         self.entry_order_mode = entry_order_mode
+        self.market_open = entry_order_mode == "market_open"
         self.pending, self.opportunity_rows = {}, []
         # Reclaim scale-in legs (entry column 'parent'): they share the parent's
         # confirmation clock and are cancelled when the parent closes unfilled.
@@ -359,6 +363,24 @@ class IndependentCloseStrategy(Strategy):
                 state.remaining if quantity is None else quantity)), reduce_only=not entering,
         )
         self._submit(order, state, "entry" if entering else reason)
+
+    def _enter_at_open(self, source, i):
+        """Submit a market entry at the observed open, before later path segments."""
+        row = dict(source)
+        entry_open = float(self.prices[i, 0])
+        if abs(entry_open-row["entry"]) > max(self.eps, 2*math.ulp(entry_open), 2*math.ulp(row["entry"])):
+            raise RuntimeError(f"Opening entry differs from bar open for {row['trade_id']}")
+        open_time = self.frame.index[i]-pd.Timedelta(minutes=self.execution_minutes)
+        if row.get("entry_time") is not None and not row.get("signal_entry_time"):
+            row["signal_entry_time"] = row["entry_time"]
+        row.update(entry_time=str(open_time), entry_open_time=str(open_time),
+                   entry_interval_start=str(open_time), entry_close_time=str(self.frame.index[i]))
+        units = max(1, int(1000/entry_open))
+        state = TradeState(row, PositionId(row["trade_id"]), self.instrument.make_qty(units),
+                           row["stop"], entry_open)
+        self.active[row["trade_id"]] = state
+        self._market(state, entering=True)
+        self.max_open = max(self.max_open, len(self.active))
 
     def _submit_protective_stop(self, state):
         side = state.source["side"]
@@ -499,6 +521,10 @@ class IndependentCloseStrategy(Strategy):
                     quantity=float(event.last_qty), commission=float(event.commission),
                     position_id=str(event.position_id),
                     client_order_id=str(event.client_order_id))
+        point_phase = self.point_phases.get(event.ts_event, (i, 0))[1]
+        if self.market_open:
+            fill.update(bar_open_time=str(self.frame.index[i]-pd.Timedelta(minutes=self.execution_minutes)),
+                        bar_close_time=str(self.frame.index[i]), intrabar_phase=point_phase)
         self.fill_rows.append(fill)
         state.fills.append(fill)
         if event.last_qty != requested:
@@ -526,11 +552,14 @@ class IndependentCloseStrategy(Strategy):
                 self.active[row["trade_id"]] = state
                 self.opportunity_rows.append(dict(trade_id=row["trade_id"], status="filled",
                     submitted_i=row["signal_entry_i"], fill_i=i, expire_i=row["expire_i"]))
-            elif i != state.source["entry_i"] or abs(price-state.source["entry"]) > max(
-                    self.eps, 2*math.ulp(price), 2*math.ulp(state.source["entry"])):
+            elif (i != state.source["entry_i"]
+                    or (self.market_open and (point_phase != 0
+                        or abs(price-self.prices[i, 0]) > max(self.eps, 2*math.ulp(price), 2*math.ulp(self.prices[i, 0]))))
+                    or (not self.market_open and abs(price-state.source["entry"]) > max(
+                        self.eps, 2*math.ulp(price), 2*math.ulp(state.source["entry"])) )):
                 # Fixed-point native Price -> float may differ by one ULP at
                 # large notionals; keep tolerance far below one market tick.
-                raise RuntimeError("Entry did not fill at the signal bar close")
+                raise RuntimeError("Entry did not fill at its configured close/open price")
             if self.policy.reclaim_next_bar:
                 # Fill-derived clock only. The touch timeframe candle and its
                 # immediate successor must both close before protection exists.
@@ -642,7 +671,8 @@ class IndependentCloseStrategy(Strategy):
             fee_r=self.policy.round_trip_cost*entry/risk,
             net_r=gross-self.policy.round_trip_cost*entry/risk,
             net_notional_bp=(gross*risk/entry-self.policy.round_trip_cost)*10000,
-            exit_time=str(self.frame.index[i]-pd.Timedelta(minutes=self.execution_minutes if gap else 0)),
+            exit_time=str(self.frame.index[i]-pd.Timedelta(minutes=self.execution_minutes
+                if gap or (self.market_open and point_phase == 0) else 0)),
             framework_exit_time=str(self.frame.index[i]),
             framework_position_id=str(event.position_id),
             framework_commission=state.fees, quantity=float(state.quantity),
@@ -742,6 +772,14 @@ class IndependentCloseStrategy(Strategy):
     def on_bar(self, bar):
         i = self.indices[bar.ts_event]
         if self.policy.intrabar_path:
+            point_phase = self.point_phases[bar.ts_event][1]
+            if self.market_open and point_phase == 0:
+                # The first synthetic segment ends at this bar's opening print.
+                # Submit after matching that segment so a pre-entry gap cannot
+                # trigger the new position's brackets; later segments then see
+                # the position and its protection.
+                for source in self.by_entry.get(i, ()):
+                    self._enter_at_open(source, i)
             # Native matching precedes this callback at each OHLC segment.
             # The boundary lies beyond the favorable approach to the limit;
             # reaching it cancels only entries that are still pending.
@@ -762,7 +800,7 @@ class IndependentCloseStrategy(Strategy):
                         state.stop, state.stop_kind = state.be_price, 1
                         self.modify_order(state.stop_order,
                             trigger_price=self.instrument.make_price(state.stop))
-            if self.point_phases[bar.ts_event][1] != 3:
+            if point_phase != 3:
                 return
         if self.entry_fill_model is not None:
             # The current bar has finished matching. Later gap stops must use
@@ -776,7 +814,7 @@ class IndependentCloseStrategy(Strategy):
         for state in list(self.active.values()):
             row = state.source
             entry, side, risk = row["entry"], row["side"], row["risk"]
-            if i > int(row["entry_i"]):
+            if i > int(row["entry_i"]) or (self.market_open and i == int(row["entry_i"])):
                 state.peak = max(state.peak, side*((high if side > 0 else low)-entry)/risk)
             if row.get("fill_close_exit") is True or row.get("fill_close_exit") is np.True_:
                 if i == int(row["entry_i"]):
@@ -932,7 +970,7 @@ class IndependentCloseStrategy(Strategy):
             if i >= int(state.source["expire_i"]):
                 self._cancel_pending(key, i, 'expired')
         self._update_pending(i)
-        for source in self.by_entry.get(i, []):
+        for source in (() if self.market_open else self.by_entry.get(i, [])):
             row = dict(source)
             side, entry = row["side"], row["entry"]
             be_cost = p.round_trip_cost if p.breakeven_includes_cost else 0.
@@ -1003,6 +1041,10 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     Frame index is UTC close time. ATR is NaN except at completed management
     closes; hour contains confirmed direction only at completed hourly closes.
     Entries need unique trade_id, entry_i, side, entry, stop, risk and end_i.
+    ``entry_order_mode="market_open"`` is a standalone static-bracket mode:
+    entry_i names the bar whose opening print fills the market order, with
+    fixed stop/target active for the remaining explicit OHLC path. It requires
+    a monotone explicit path and a continuous, unbatched replay.
     No future excursion or expected-exit fields are read by the strategy.
     Optional batch_bars streams the same native engine across bounded chunks;
     open orders and positions survive batch boundaries (1.231.0 run docstring).
@@ -1013,9 +1055,27 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     started = time.perf_counter()
     if skip_idle_bars and (batch_bars is None or not policy.reclaim_next_bar):
         raise ValueError("Idle skipping requires streamed reclaim entries")
-    if entry_order_mode not in ("market", "limit"):
+    if entry_order_mode not in ("market", "limit", "market_open"):
         raise ValueError("Unknown entry order mode")
     limit_entry = entry_order_mode == "limit"
+    market_open = entry_order_mode == "market_open"
+    if market_open:
+        if not (policy.target_from_entry and policy.intrabar_path is not None
+                and policy.monotone_segments and not policy.opposite_hour_exit
+                and policy.breakeven_r is None and not policy.breakeven_on_touch
+                and policy.time_breakeven_minutes is None and policy.partial_close_r is None
+                and not policy.rsi_scaleout and not policy.confirmed_pivot_exit
+                and not policy.structural_pivot_stop and not policy.target_breakeven
+                and not policy.reclaim_next_bar and not policy.reclaim_backstop):
+            raise ValueError("market_open requires a standalone static stop/target and explicit monotone OHLC path")
+        if batch_bars is not None or skip_idle_bars or (entry_updates is not None and len(entry_updates)):
+            raise ValueError("market_open requires a continuous, unbatched path without pending amendments")
+        if "stop_update_i" in entries:
+            updates = entries.stop_update_i.to_numpy(float)
+            if np.isfinite(updates[updates >= 0]).any():
+                raise ValueError("market_open supports static initial stops only")
+        if "target_price" not in entries or not np.isfinite(entries.target_price.to_numpy(float)).all():
+            raise ValueError("market_open requires a finite per-entry target_price")
     if policy.reclaim_next_bar and not limit_entry and "parent" in entries:
         raise ValueError("Scale-in legs on the reclaim rule require resting limit entries")
     market_rows = (entries.order_mode.astype(str) == "market").to_numpy() if "order_mode" in entries else np.zeros(len(entries), bool)
@@ -1079,8 +1139,8 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     if limit_entry and not (policy.confirmed_pivot_exit or policy.target_from_entry
                             or policy.fixed_target_r is not None):
         raise ValueError("Resting entry requires initial-stop/pivot or fixed-target management")
-    if execution_minutes not in (1,5):
-        raise ValueError("Execution resolution must be 1m or 5m")
+    if execution_minutes not in (1, 5, 60) or (execution_minutes == 60 and not market_open):
+        raise ValueError("Execution resolution must be 1m or 5m, or 60m for market_open static brackets")
     if batch_bars is not None and (not isinstance(batch_bars, int) or batch_bars < 2):
         raise ValueError("Streaming batch size must be an integer of at least two bars")
     if policy.rsi_scaleout:
@@ -1153,7 +1213,9 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     if (np.abs(prices/market_tick-np.rint(prices/market_tick)) > 1e-5).any():
         raise ValueError("OHLC does not lie on the configured tick grid")
     for k, r in enumerate(entries.itertuples()):
-        if r.side not in (-1, 1) or not 0 <= r.entry_i < r.end_i < len(frame):
+        if (r.side not in (-1, 1) or not 0 <= r.entry_i < len(frame)
+                or not (r.entry_i <= r.end_i if market_open else r.entry_i < r.end_i)
+                or r.end_i >= len(frame)):
             raise ValueError("Invalid entry direction or bounded interval")
         if pyramid[k]:
             continue  # validated above; stop entries rest beyond the price, not limits
@@ -1162,7 +1224,9 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
                     or r.side*(prices[int(r.entry_i), 3]-r.entry) < tick-tick*1e-7
                     or abs(r.entry/market_tick-round(r.entry/market_tick)) > 1e-5):
                 raise ValueError("Limit must be favorable, tick-aligned, and have a bounded expiry")
-        elif abs(prices[int(r.entry_i), 3]-r.entry) > tick*1e-7:
+        elif market_open and abs(prices[int(r.entry_i), 0]-r.entry) > tick*1e-7:
+            raise ValueError("Opening entry differs from bar open")
+        elif not market_open and abs(prices[int(r.entry_i), 3]-r.entry) > tick*1e-7:
             raise ValueError("Entry differs from completed close")
         if policy.reclaim_next_bar:
             minutes = getattr(r, "reclaim_minutes", None)
@@ -1173,6 +1237,8 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
                                  "and entry-notional normalization")
         elif r.stop <= 0 or r.risk < tick-tick*1e-7 or abs(r.side*(r.entry-r.stop)-r.risk) > tick*1e-7:
             raise ValueError("Invalid initial risk")
+        if market_open and abs(r.stop/tick-round(r.stop/tick)) > 1e-5:
+            raise ValueError("market_open stop must be aligned to the protection tick")
         update_i = getattr(r, "stop_update_i", -1)
         if np.isfinite(update_i) and update_i >= 0:
             update = r.stop_update
@@ -1208,7 +1274,8 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             liquidity_consumption=False,
         )
         engine.add_instrument(instrument)
-        bar_type = BarType.from_str(f"{instrument.id}-{execution_minutes}-MINUTE-LAST-EXTERNAL")
+        interval = "1-HOUR" if execution_minutes == 60 else f"{execution_minutes}-MINUTE"
+        bar_type = BarType.from_str(f"{instrument.id}-{interval}-LAST-EXTERNAL")
         execution_frame, point_phases = ((None, None) if batch_bars is not None else
             ohlc_path_frame(frame, policy.intrabar_path)
             if policy.intrabar_path else (frame.copy(), None))
@@ -1309,6 +1376,13 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             accounting=("independent entry-notional fractions; no initial risk stop; not R or portfolio returns"
                         if policy.reclaim_next_bar else "independent original-risk R; frozen account; not portfolio returns"),
         )
+        if market_open:
+            audit.update(
+                entry_order_mode="market_open",
+                entry_fill="Market order fills at the current bar opening print after the pre-entry gap segment; static stop/target are active for the remaining explicit path",
+                entry_time_basis="logical bar-open time; synthetic path timestamps are execution ordering only",
+                entry_bar_mfe="included only for surviving positions after the opening fill",
+            )
         if limit_entry:
             audit.update(entry_order_mode="limit", opportunities=strategy.opportunity_rows,
                 cancelled=cancelled, pending_amendments=strategy.pending_update_rows,
