@@ -1,0 +1,765 @@
+{
+  "experiment_id": "exp-cloud-close-okx-agreement-20261109-v1",
+  "counts": {
+    "90d_actual_opportunities": 11780,
+    "90d_paired_control_opportunities": 10816,
+    "90d_strict_parent_pairs": 10816,
+    "90d_control_is_paired_control_cohort": true,
+    "4h_actual_opportunities": 7039,
+    "4h_paired_control_opportunities": 6695,
+    "4h_strict_parent_pairs": 6695,
+    "4h_actual_reasons": {
+      "passes_4h_agreement": 7039,
+      "no_first_eligible_4h_key_by_12h_confirmation": 4523,
+      "first_4h_direction_differs": 218
+    },
+    "4h_control_reasons": {
+      "passes_4h_agreement": 6748,
+      "no_first_eligible_4h_key_by_12h_confirmation": 3739,
+      "first_4h_direction_differs": 346
+    },
+    "event_screen_reasons_all": {
+      "passes_4h_agreement": 13787,
+      "no_first_eligible_4h_key_by_12h_confirmation": 8262,
+      "outside_90d_coverage": 1752,
+      "unmatched_or_unexecutable_control": 1049,
+      "first_4h_direction_differs": 564
+    },
+    "weekly_first_key_status": {
+      "first_key": 8230,
+      "complete_no_key": 4459,
+      "right_censored_at_input_tail": 18
+    },
+    "anchor_sources": {
+      "monday_fib.baseline_complete_archived_H1": 12707
+    },
+    "account_opportunities_and_funded_positions": {
+      "baseline_90d_actual": {
+        "opportunities": 11780,
+        "funded_positions": 1569
+      },
+      "baseline_90d_paired_actual": {
+        "opportunities": 10816,
+        "funded_positions": 1480
+      },
+      "baseline_90d_paired_control": {
+        "opportunities": 10816,
+        "funded_positions": 1712
+      },
+      "agreement_4h_actual": {
+        "opportunities": 7039,
+        "funded_positions": 1329
+      },
+      "agreement_4h_paired_actual": {
+        "opportunities": 6695,
+        "funded_positions": 1272
+      },
+      "agreement_4h_paired_control": {
+        "opportunities": 6695,
+        "funded_positions": 1377
+      },
+      "baseline_90d_actual_slip5bp": {
+        "opportunities": 11780,
+        "funded_positions": 1569
+      },
+      "agreement_4h_actual_slip5bp": {
+        "opportunities": 7039,
+        "funded_positions": 1329
+      }
+    }
+  },
+  "account_metrics": {
+    "baseline_90d_actual": {
+      "opportunities": 11780,
+      "metrics": {
+        "all": {
+          "final_usdt": 15921.15416892638,
+          "multiple": 15.92115416892638,
+          "dd_mark_pct": 37.95030434506488,
+          "dd_bound_pct": 43.73196105427216,
+          "trades": 1569,
+          "win_pct": 33.1421287444232,
+          "payoff": 3.7641904025249207,
+          "payoff_usdt": 2.7456424716097447,
+          "median_net_pct": -2.840922407549211
+        },
+        "dev": {
+          "final_usdt": 12675.163289562966,
+          "multiple": 12.675163289562967,
+          "dd_mark_pct": 35.92104221001235,
+          "dd_bound_pct": 39.2045897767229,
+          "trades": 1085,
+          "win_pct": 34.00921658986175,
+          "payoff": 4.160614151114812,
+          "payoff_usdt": 2.9120538340698645,
+          "median_net_pct": -2.840922407549211
+        },
+        "2025": {
+          "final_usdt": 13990.927082097021,
+          "multiple": 1.1038064569643444,
+          "dd_mark_pct": 36.67353829864661,
+          "dd_bound_pct": 43.73196105427216,
+          "trades": 258,
+          "win_pct": 25.1937984496124,
+          "payoff": 2.5761358100051606,
+          "payoff_usdt": 2.4576590969857586,
+          "median_net_pct": -3.281401124425387
+        },
+        "2026": {
+          "final_usdt": 15921.15416892638,
+          "multiple": 1.137962772266843,
+          "dd_mark_pct": 18.792106828723863,
+          "dd_bound_pct": 19.920282032694235,
+          "trades": 210,
+          "win_pct": 33.80952380952381,
+          "payoff": 2.6052421903818463,
+          "payoff_usdt": 2.5672788791502867,
+          "median_net_pct": -1.7248174928234672
+        },
+        "2026_to_2026-09-23": {
+          "final_usdt": 15485.803097988806,
+          "multiple": 1.1068461015571047,
+          "dd_mark_pct": 18.792106828723863,
+          "dd_bound_pct": 19.920282032694235,
+          "trades": 171,
+          "win_pct": 30.409356725146196,
+          "payoff": 2.4461498218060442,
+          "payoff_usdt": 2.3726574136226732,
+          "median_net_pct": -2.925342087476134
+        },
+        "2026_after_2026-09-23": {
+          "final_usdt": 15921.15416892638,
+          "multiple": 1.028112915305898,
+          "dd_mark_pct": 5.058780943472785,
+          "dd_bound_pct": 5.546034484464202,
+          "trades": 31,
+          "win_pct": 41.935483870967744,
+          "payoff": 2.3380500612701036,
+          "payoff_usdt": 2.3247797437217588,
+          "median_net_pct": -0.1
+        },
+        "all_to_2026-09-23": {
+          "final_usdt": 15485.803097988806,
+          "multiple": 15.485803097988807,
+          "dd_mark_pct": 37.95030434506488,
+          "dd_bound_pct": 43.73196105427216,
+          "trades": 1530,
+          "win_pct": 32.745098039215684,
+          "payoff": 3.7910225104415463,
+          "payoff_usdt": 2.6979036981712916,
+          "median_net_pct": -3.006453784194929
+        }
+      },
+      "slippage_per_market_fill": 0.0
+    },
+    "baseline_90d_paired_actual": {
+      "opportunities": 10816,
+      "metrics": {
+        "all": {
+          "final_usdt": 8747.040336961241,
+          "multiple": 8.747040336961241,
+          "dd_mark_pct": 41.0611832781958,
+          "dd_bound_pct": 45.034183877821285,
+          "trades": 1480,
+          "win_pct": 34.72972972972973,
+          "payoff": 3.2273253071897097,
+          "payoff_usdt": 2.452171544032294,
+          "median_net_pct": -3.1974970039717956
+        },
+        "dev": {
+          "final_usdt": 6875.074978701739,
+          "multiple": 6.87507497870174,
+          "dd_mark_pct": 41.0611832781958,
+          "dd_bound_pct": 41.64860505224443,
+          "trades": 1064,
+          "win_pct": 34.68045112781955,
+          "payoff": 3.5419964167152194,
+          "payoff_usdt": 2.540355523945933,
+          "median_net_pct": -3.2269321850944075
+        },
+        "2025": {
+          "final_usdt": 7486.6518637701265,
+          "multiple": 1.0889556676782417,
+          "dd_mark_pct": 37.19926222193146,
+          "dd_bound_pct": 45.034183877821285,
+          "trades": 217,
+          "win_pct": 28.110599078341014,
+          "payoff": 2.2000673686031043,
+          "payoff_usdt": 2.0574978460468354,
+          "median_net_pct": -3.338276292428202
+        },
+        "2026": {
+          "final_usdt": 8747.040336961241,
+          "multiple": 1.1683514201175114,
+          "dd_mark_pct": 19.409875403132126,
+          "dd_bound_pct": 22.24058725440091,
+          "trades": 183,
+          "win_pct": 37.15846994535519,
+          "payoff": 2.3642714818818917,
+          "payoff_usdt": 2.325228532094161,
+          "median_net_pct": -3.0380178290508573
+        },
+        "2026_to_2026-09-23": {
+          "final_usdt": 8405.744923166378,
+          "multiple": 1.1227642310769095,
+          "dd_mark_pct": 19.409875403132126,
+          "dd_bound_pct": 22.24058725440091,
+          "trades": 153,
+          "win_pct": 32.6797385620915,
+          "payoff": 2.0308391098204446,
+          "payoff_usdt": 1.9781203327107504,
+          "median_net_pct": -3.1558422700964526
+        },
+        "2026_after_2026-09-23": {
+          "final_usdt": 8747.040336961241,
+          "multiple": 1.0406026374716948,
+          "dd_mark_pct": 5.338466356502902,
+          "dd_bound_pct": 5.7863506120436,
+          "trades": 21,
+          "win_pct": 47.61904761904761,
+          "payoff": 1.94321330886135,
+          "payoff_usdt": 1.9158626438546582,
+          "median_net_pct": -0.1
+        },
+        "all_to_2026-09-23": {
+          "final_usdt": 8405.744923166378,
+          "multiple": 8.405744923166377,
+          "dd_mark_pct": 41.0611832781958,
+          "dd_bound_pct": 45.034183877821285,
+          "trades": 1450,
+          "win_pct": 34.206896551724135,
+          "payoff": 3.2301617806317506,
+          "payoff_usdt": 2.390254091477193,
+          "median_net_pct": -3.220038172966945
+        }
+      },
+      "slippage_per_market_fill": 0.0
+    },
+    "baseline_90d_paired_control": {
+      "opportunities": 10816,
+      "metrics": {
+        "all": {
+          "final_usdt": 4038.9588415046455,
+          "multiple": 4.038958841504646,
+          "dd_mark_pct": 36.64338312431828,
+          "dd_bound_pct": 40.83850252475204,
+          "trades": 1712,
+          "win_pct": 28.91355140186916,
+          "payoff": 3.493901117471285,
+          "payoff_usdt": 2.9764682568829355,
+          "median_net_pct": -2.08194516226026
+        },
+        "dev": {
+          "final_usdt": 3739.2151639504036,
+          "multiple": 3.7392151639504037,
+          "dd_mark_pct": 36.64338312431828,
+          "dd_bound_pct": 37.89496122293764,
+          "trades": 1176,
+          "win_pct": 29.846938775510207,
+          "payoff": 3.5957791386124422,
+          "payoff_usdt": 2.991049154500067,
+          "median_net_pct": -2.2971464370245216
+        },
+        "2025": {
+          "final_usdt": 3818.6042866943717,
+          "multiple": 1.021231493579015,
+          "dd_mark_pct": 33.37225783085614,
+          "dd_bound_pct": 40.83850252475204,
+          "trades": 264,
+          "win_pct": 23.106060606060606,
+          "payoff": 2.7831368691657503,
+          "payoff_usdt": 2.601275764161884,
+          "median_net_pct": -3.108935935841585
+        },
+        "2026": {
+          "final_usdt": 4038.9588415046455,
+          "multiple": 1.057705522297265,
+          "dd_mark_pct": 15.929970317312826,
+          "dd_bound_pct": 17.10724944185522,
+          "trades": 255,
+          "win_pct": 27.84313725490196,
+          "payoff": 3.098742861800151,
+          "payoff_usdt": 3.0752805072015037,
+          "median_net_pct": -1.1556553434173216
+        },
+        "2026_to_2026-09-23": {
+          "final_usdt": 3761.915410831659,
+          "multiple": 0.9851545560611659,
+          "dd_mark_pct": 15.929970317312826,
+          "dd_bound_pct": 17.10724944185522,
+          "trades": 225,
+          "win_pct": 24.444444444444443,
+          "payoff": 2.5176806926329145,
+          "payoff_usdt": 2.4908472058213893,
+          "median_net_pct": -1.4212931179541723
+        },
+        "2026_after_2026-09-23": {
+          "final_usdt": 4038.9588415046455,
+          "multiple": 1.0736442477880543,
+          "dd_mark_pct": 6.822650593759915,
+          "dd_bound_pct": 7.551405269174783,
+          "trades": 22,
+          "win_pct": 36.36363636363637,
+          "payoff": 4.213081984965039,
+          "payoff_usdt": 4.142509786441217,
+          "median_net_pct": -2.169241116295445
+        },
+        "all_to_2026-09-23": {
+          "final_usdt": 3761.915410831659,
+          "multiple": 3.761915410831659,
+          "dd_mark_pct": 36.64338312431828,
+          "dd_bound_pct": 40.83850252475204,
+          "trades": 1682,
+          "win_pct": 28.478002378121285,
+          "payoff": 3.4717420729149246,
+          "payoff_usdt": 2.90852243618653,
+          "median_net_pct": -2.14079899851591
+        }
+      },
+      "slippage_per_market_fill": 0.0
+    },
+    "agreement_4h_actual": {
+      "opportunities": 7039,
+      "metrics": {
+        "all": {
+          "final_usdt": 7466.914252053766,
+          "multiple": 7.466914252053766,
+          "dd_mark_pct": 50.8886643661064,
+          "dd_bound_pct": 51.3983724305086,
+          "trades": 1329,
+          "win_pct": 33.93528969149737,
+          "payoff": 3.202628567965753,
+          "payoff_usdt": 2.4081577260409466,
+          "median_net_pct": -3.377891013981761
+        },
+        "dev": {
+          "final_usdt": 7364.347994453082,
+          "multiple": 7.364347994453082,
+          "dd_mark_pct": 50.8886643661064,
+          "dd_bound_pct": 51.3983724305086,
+          "trades": 899,
+          "win_pct": 35.15016685205784,
+          "payoff": 3.5568551609094463,
+          "payoff_usdt": 2.5289058654261725,
+          "median_net_pct": -3.3702935257334055
+        },
+        "2025": {
+          "final_usdt": 7225.2010239363135,
+          "multiple": 0.9811053238356504,
+          "dd_mark_pct": 32.78102305250088,
+          "dd_bound_pct": 33.48436215535459,
+          "trades": 223,
+          "win_pct": 24.2152466367713,
+          "payoff": 2.2907401053838443,
+          "payoff_usdt": 2.2832858064676502,
+          "median_net_pct": -3.5848657002369597
+        },
+        "2026": {
+          "final_usdt": 7466.914252053766,
+          "multiple": 1.033454187269902,
+          "dd_mark_pct": 15.292083314808258,
+          "dd_bound_pct": 15.601084081618954,
+          "trades": 191,
+          "win_pct": 34.55497382198953,
+          "payoff": 2.1609413509954725,
+          "payoff_usdt": 2.1114290420401565,
+          "median_net_pct": -3.234096385542166
+        },
+        "2026_to_2026-09-23": {
+          "final_usdt": 7728.185860435238,
+          "multiple": 1.0696153414739036,
+          "dd_mark_pct": 12.814391367521416,
+          "dd_bound_pct": 15.48922678336655,
+          "trades": 152,
+          "win_pct": 31.57894736842105,
+          "payoff": 2.145252215150945,
+          "payoff_usdt": 2.079502287123067,
+          "median_net_pct": -3.3539877256890684
+        },
+        "2026_after_2026-09-23": {
+          "final_usdt": 7466.914252053766,
+          "multiple": 0.9661923751447202,
+          "dd_mark_pct": 13.142714208987805,
+          "dd_bound_pct": 13.45900878531311,
+          "trades": 31,
+          "win_pct": 32.25806451612903,
+          "payoff": 2.059953529006407,
+          "payoff_usdt": 1.9991821664066742,
+          "median_net_pct": -3.324667860869579
+        },
+        "all_to_2026-09-23": {
+          "final_usdt": 7728.185860435238,
+          "multiple": 7.7281858604352385,
+          "dd_mark_pct": 50.8886643661064,
+          "dd_bound_pct": 51.3983724305086,
+          "trades": 1290,
+          "win_pct": 33.565891472868216,
+          "payoff": 3.249368911404545,
+          "payoff_usdt": 2.411510912542571,
+          "median_net_pct": -3.3940426525147975
+        }
+      },
+      "slippage_per_market_fill": 0.0
+    },
+    "agreement_4h_paired_actual": {
+      "opportunities": 6695,
+      "metrics": {
+        "all": {
+          "final_usdt": 5295.2513048275805,
+          "multiple": 5.29525130482758,
+          "dd_mark_pct": 52.56255651568998,
+          "dd_bound_pct": 53.05489188897508,
+          "trades": 1272,
+          "win_pct": 34.66981132075472,
+          "payoff": 2.938310176137953,
+          "payoff_usdt": 2.338219359283698,
+          "median_net_pct": -3.4112842862221533
+        },
+        "dev": {
+          "final_usdt": 4684.531651552569,
+          "multiple": 4.684531651552569,
+          "dd_mark_pct": 52.56255651568998,
+          "dd_bound_pct": 53.05489188897508,
+          "trades": 887,
+          "win_pct": 35.28748590755355,
+          "payoff": 3.18270828161856,
+          "payoff_usdt": 2.3992768395406294,
+          "median_net_pct": -3.4091338762769436
+        },
+        "2025": {
+          "final_usdt": 4961.684004350543,
+          "multiple": 1.0591633002855512,
+          "dd_mark_pct": 30.682014568038575,
+          "dd_bound_pct": 31.388275516667953,
+          "trades": 203,
+          "win_pct": 26.60098522167488,
+          "payoff": 2.1500892110740892,
+          "payoff_usdt": 2.138459512544233,
+          "median_net_pct": -3.5909838320067102
+        },
+        "2026": {
+          "final_usdt": 5295.2513048275805,
+          "multiple": 1.0672286466015484,
+          "dd_mark_pct": 15.512457574606287,
+          "dd_bound_pct": 17.909442379307126,
+          "trades": 166,
+          "win_pct": 36.144578313253014,
+          "payoff": 2.129744337327182,
+          "payoff_usdt": 2.1018450967644142,
+          "median_net_pct": -3.35702216520549
+        },
+        "2026_to_2026-09-23": {
+          "final_usdt": 5365.8888520398405,
+          "multiple": 1.0814652540014398,
+          "dd_mark_pct": 15.512457574606287,
+          "dd_bound_pct": 17.909442379307126,
+          "trades": 134,
+          "win_pct": 31.343283582089555,
+          "payoff": 2.070234458263906,
+          "payoff_usdt": 2.0232613604977603,
+          "median_net_pct": -3.5109561838412984
+        },
+        "2026_after_2026-09-23": {
+          "final_usdt": 5295.2513048275805,
+          "multiple": 0.9868358161788224,
+          "dd_mark_pct": 12.960680937329094,
+          "dd_bound_pct": 13.85944340016919,
+          "trades": 23,
+          "win_pct": 39.130434782608695,
+          "payoff": 1.888972792155349,
+          "payoff_usdt": 1.838823397624321,
+          "median_net_pct": -3.324667860869578
+        },
+        "all_to_2026-09-23": {
+          "final_usdt": 5365.8888520398405,
+          "multiple": 5.3658888520398405,
+          "dd_mark_pct": 52.56255651568998,
+          "dd_bound_pct": 53.05489188897508,
+          "trades": 1240,
+          "win_pct": 34.11290322580645,
+          "payoff": 2.970445333150832,
+          "payoff_usdt": 2.3292808867513406,
+          "median_net_pct": -3.4309481896015273
+        }
+      },
+      "slippage_per_market_fill": 0.0
+    },
+    "agreement_4h_paired_control": {
+      "opportunities": 6695,
+      "metrics": {
+        "all": {
+          "final_usdt": 2596.2409165198205,
+          "multiple": 2.5962409165198204,
+          "dd_mark_pct": 37.4329505881631,
+          "dd_bound_pct": 38.16438258788788,
+          "trades": 1377,
+          "win_pct": 32.534495279593315,
+          "payoff": 2.679001227166358,
+          "payoff_usdt": 2.4375638261008032,
+          "median_net_pct": -3.2745444436375046
+        },
+        "dev": {
+          "final_usdt": 2569.716479716246,
+          "multiple": 2.569716479716246,
+          "dd_mark_pct": 36.52357538823182,
+          "dd_bound_pct": 37.69180983897454,
+          "trades": 928,
+          "win_pct": 33.728448275862064,
+          "payoff": 2.7242133883377977,
+          "payoff_usdt": 2.4656798958688486,
+          "median_net_pct": -3.294703086370437
+        },
+        "2025": {
+          "final_usdt": 2322.1777869784655,
+          "multiple": 0.9036708155581762,
+          "dd_mark_pct": 31.740549084313496,
+          "dd_bound_pct": 31.946544336255222,
+          "trades": 226,
+          "win_pct": 23.893805309734514,
+          "payoff": 2.4978465250000292,
+          "payoff_usdt": 2.3991673590581373,
+          "median_net_pct": -3.542916061634967
+        },
+        "2026": {
+          "final_usdt": 2596.2409165198205,
+          "multiple": 1.1180198738779412,
+          "dd_mark_pct": 15.361693858864333,
+          "dd_bound_pct": 17.41348466320587,
+          "trades": 207,
+          "win_pct": 33.33333333333333,
+          "payoff": 2.6053946314978464,
+          "payoff_usdt": 2.550772192037477,
+          "median_net_pct": -1.9176782327345705
+        },
+        "2026_to_2026-09-23": {
+          "final_usdt": 2402.3141468422273,
+          "multiple": 1.034509140649404,
+          "dd_mark_pct": 15.361693858864333,
+          "dd_bound_pct": 17.41348466320587,
+          "trades": 177,
+          "win_pct": 29.943502824858758,
+          "payoff": 2.2507481794183777,
+          "payoff_usdt": 2.195594632925521,
+          "median_net_pct": -2.486668777707405
+        },
+        "2026_after_2026-09-23": {
+          "final_usdt": 2596.2409165198205,
+          "multiple": 1.0807249834217163,
+          "dd_mark_pct": 8.493526436847542,
+          "dd_bound_pct": 9.092914883122349,
+          "trades": 22,
+          "win_pct": 36.36363636363637,
+          "payoff": 4.063442836268091,
+          "payoff_usdt": 4.075428661702371,
+          "median_net_pct": -3.367164733627829
+        },
+        "all_to_2026-09-23": {
+          "final_usdt": 2402.3141468422273,
+          "multiple": 2.4023141468422273,
+          "dd_mark_pct": 37.4329505881631,
+          "dd_bound_pct": 38.16438258788788,
+          "trades": 1347,
+          "win_pct": 32.071269487750556,
+          "payoff": 2.6538069859052156,
+          "payoff_usdt": 2.3853829684574293,
+          "median_net_pct": -3.288839389312064
+        }
+      },
+      "slippage_per_market_fill": 0.0
+    },
+    "baseline_90d_actual_slip5bp": {
+      "opportunities": 11780,
+      "metrics": {
+        "all": {
+          "final_usdt": 13566.33168152924,
+          "multiple": 13.56633168152924,
+          "dd_mark_pct": 38.390643343910114,
+          "dd_bound_pct": 43.855540225173726,
+          "trades": 1569,
+          "win_pct": 33.01465901848311,
+          "payoff": 3.675891039346774,
+          "payoff_usdt": 2.693351094901562,
+          "median_net_pct": -2.9437647511285308
+        },
+        "dev": {
+          "final_usdt": 11347.979866126414,
+          "multiple": 11.347979866126414,
+          "dd_mark_pct": 37.385622901709816,
+          "dd_bound_pct": 39.27437789120274,
+          "trades": 1085,
+          "win_pct": 33.82488479262673,
+          "payoff": 4.076257988236203,
+          "payoff_usdt": 2.861822450781235,
+          "median_net_pct": -2.9437647511285308
+        },
+        "2025": {
+          "final_usdt": 12182.797884128266,
+          "multiple": 1.0735653418361952,
+          "dd_mark_pct": 36.80215337276951,
+          "dd_bound_pct": 43.855540225173726,
+          "trades": 258,
+          "win_pct": 25.1937984496124,
+          "payoff": 2.4979930476245986,
+          "payoff_usdt": 2.3863689937250983,
+          "median_net_pct": -3.381413669121968
+        },
+        "2026": {
+          "final_usdt": 13566.33168152924,
+          "multiple": 1.1135645366983753,
+          "dd_mark_pct": 18.839579177788067,
+          "dd_bound_pct": 19.969466044439542,
+          "trades": 210,
+          "win_pct": 33.80952380952381,
+          "payoff": 2.515839054748688,
+          "payoff_usdt": 2.4783429802574775,
+          "median_net_pct": -1.8247921562002716
+        },
+        "2026_to_2026-09-23": {
+          "final_usdt": 13240.157083782015,
+          "multiple": 1.0867911632213216,
+          "dd_mark_pct": 18.839579177788067,
+          "dd_bound_pct": 19.969466044439542,
+          "trades": 171,
+          "win_pct": 30.409356725146196,
+          "payoff": 2.3636898784426106,
+          "payoff_usdt": 2.2961849696291403,
+          "median_net_pct": -3.0224182073287205
+        },
+        "2026_after_2026-09-23": {
+          "final_usdt": 13566.33168152924,
+          "multiple": 1.0246352513556474,
+          "dd_mark_pct": 5.245009529091593,
+          "dd_bound_pct": 5.748966401768085,
+          "trades": 31,
+          "win_pct": 41.935483870967744,
+          "payoff": 2.2466604338632394,
+          "payoff_usdt": 2.233157447565078,
+          "median_net_pct": -0.19990004997500244
+        },
+        "all_to_2026-09-23": {
+          "final_usdt": 13240.157083782015,
+          "multiple": 13.240157083782014,
+          "dd_mark_pct": 38.390643343910114,
+          "dd_bound_pct": 43.855540225173726,
+          "trades": 1530,
+          "win_pct": 32.61437908496732,
+          "payoff": 3.7034151950169023,
+          "payoff_usdt": 2.6541040572977903,
+          "median_net_pct": -3.109461741957997
+        }
+      },
+      "slippage_per_market_fill": 0.0005
+    },
+    "agreement_4h_actual_slip5bp": {
+      "opportunities": 7039,
+      "metrics": {
+        "all": {
+          "final_usdt": 6530.849053260796,
+          "multiple": 6.530849053260796,
+          "dd_mark_pct": 51.82054325718752,
+          "dd_bound_pct": 52.32067038083312,
+          "trades": 1329,
+          "win_pct": 33.93528969149737,
+          "payoff": 3.121607477294056,
+          "payoff_usdt": 2.364485140392321,
+          "median_net_pct": -3.4812705947861344
+        },
+        "dev": {
+          "final_usdt": 6727.106985997694,
+          "multiple": 6.727106985997694,
+          "dd_mark_pct": 51.82054325718752,
+          "dd_bound_pct": 52.32067038083312,
+          "trades": 899,
+          "win_pct": 35.15016685205784,
+          "payoff": 3.4684194508289696,
+          "payoff_usdt": 2.4804165678170476,
+          "median_net_pct": -3.4730764789414352
+        },
+        "2025": {
+          "final_usdt": 6444.6694414056765,
+          "multiple": 0.9580150062753715,
+          "dd_mark_pct": 33.672499736102026,
+          "dd_bound_pct": 34.367055742557305,
+          "trades": 223,
+          "win_pct": 24.2152466367713,
+          "payoff": 2.229665575659196,
+          "payoff_usdt": 2.2275207277539013,
+          "median_net_pct": -3.6812826260737888
+        },
+        "2026": {
+          "final_usdt": 6530.849053260796,
+          "multiple": 1.0133722315222924,
+          "dd_mark_pct": 15.88178420739732,
+          "dd_bound_pct": 16.468158686281765,
+          "trades": 191,
+          "win_pct": 34.55497382198953,
+          "payoff": 2.100995976331515,
+          "payoff_usdt": 2.053507613413652,
+          "median_net_pct": -3.337332099784815
+        },
+        "2026_to_2026-09-23": {
+          "final_usdt": 6782.782770083805,
+          "multiple": 1.052464029653068,
+          "dd_mark_pct": 13.281192795865538,
+          "dd_bound_pct": 15.943079158561257,
+          "trades": 152,
+          "win_pct": 31.57894736842105,
+          "payoff": 2.084044917285461,
+          "payoff_usdt": 2.0230744189747387,
+          "median_net_pct": -3.454029499000978
+        },
+        "2026_after_2026-09-23": {
+          "final_usdt": 6530.849053260796,
+          "multiple": 0.9628568796373385,
+          "dd_mark_pct": 13.349508743259609,
+          "dd_bound_pct": 13.665329647780567,
+          "trades": 31,
+          "win_pct": 32.25806451612903,
+          "payoff": 2.010464412953276,
+          "payoff_usdt": 1.9485374831635505,
+          "median_net_pct": -3.4279941918959644
+        },
+        "all_to_2026-09-23": {
+          "final_usdt": 6782.782770083805,
+          "multiple": 6.782782770083805,
+          "dd_mark_pct": 51.82054325718752,
+          "dd_bound_pct": 52.32067038083312,
+          "trades": 1290,
+          "win_pct": 33.565891472868216,
+          "payoff": 3.167112852530009,
+          "payoff_usdt": 2.3704884825014405,
+          "median_net_pct": -3.4972611206381288
+        }
+      },
+      "slippage_per_market_fill": 0.0005
+    }
+  },
+  "binance_reference": {
+    "source": "experiments/active/exp-cloud-close-binance-gap-repair-20261109-v1",
+    "policy": "agree4h_0.5",
+    "partial_2r_fraction": 0.5,
+    "all": {
+      "final_usdt": 12445.21635936347,
+      "win_pct": 37.55980861244019,
+      "payoff": 2.9415591542152653,
+      "payoff_usdt": 2.3384236783520747,
+      "dd_mark_pct": 33.313889265407596,
+      "dd_bound_pct": 34.05835242332969,
+      "trades": 1254
+    },
+    "dev": {
+      "final_usdt": 9439.773878187689,
+      "win_pct": 37.368421052631575,
+      "payoff": 3.14054329167098,
+      "payoff_usdt": 2.409408764799387,
+      "dd_mark_pct": 33.313889265407596,
+      "dd_bound_pct": 34.05835242332969,
+      "trades": 950
+    },
+    "historical_local_sources": [
+      "experiments/active/exp-cloud-close-agreement-split-20261109-v1",
+      "experiments/active/exp-cloud-close-lower-agreement-20261109-v1"
+    ],
+    "comparison_note": "Corrected Binance full account is the cross-market reference. Earlier local Binance CSVs are retained as historical methods/results; OKX baseline and filter are independently funded on the same 90d OKX universe. Compare the common through-2026-09-23 interval and report OKX post-cutoff separately."
+  }
+}

@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-okx-agreement-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "088e38c1da"
+    status: "rejected"
+    question: "Does the same-week 4H agreement replicate the Binance results on independent OKX prices?"
+    single_variable: "Add only the first same-week OKX-native 4H confirmation in the same direction before 12H-close entry. Compare the identical 50% 2R partial on both arms."
+    result: "Among 11780 OKX eligible opportunities, 7039 passed 4H. Full funded 1000 to 7466.91U versus 15921.15U without 4H; wins 33.94% versus 33.14%, cash payoff 2.408 versus 2.746, DD upper bounds 51.40% versus 43.73%. Common cutoff Sep 23 gave 7728U versus 15486U. All 12707 signal rows reproduced on archived OKX prices and all eight ledgers reconcile. The corrected Binance 12445U with DD bound 34.06% did not transfer."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-okx-agreement-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af812f9149f97fcf58c589."
+
   - experiment_id: exp-cloud-close-mainwave-confirmation-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "7330342dd6"
