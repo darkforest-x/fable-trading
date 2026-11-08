@@ -545,7 +545,7 @@ class IndependentCloseStrategy(Strategy):
         if self.market_open:
             fill.update(bar_open_time=str(self.frame.index[i]-pd.Timedelta(minutes=self.execution_minutes)),
                         bar_close_time=str(self.frame.index[i]), intrabar_phase=point_phase)
-        elif self.policy.intrabar_path:
+        elif self.policy.wick_failure_next_open:
             fill["intrabar_phase"] = point_phase
         self.fill_rows.append(fill)
         state.fills.append(fill)
