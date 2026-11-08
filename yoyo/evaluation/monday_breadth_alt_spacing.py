@@ -91,7 +91,7 @@ def load_rule_and_raw() -> tuple[pd.DataFrame, np.ndarray, np.ndarray, np.ndarra
 
 def load_member_counts(frame: pd.DataFrame, indices: np.ndarray) -> dict[pd.Timestamp, int]:
     """Count the original equal-weight ALT members, excluding the frozen four."""
-    path = inputs.MEMBERS_PATH
+    path = inputs.OUT / "features/members.csv.gz"
     members = pd.read_csv(path, usecols=["minutes", "known", "symbol"])
     members["known"] = _utc(members.known)
     wanted = set(pd.to_datetime(frame.known.iloc[indices], utc=True))
