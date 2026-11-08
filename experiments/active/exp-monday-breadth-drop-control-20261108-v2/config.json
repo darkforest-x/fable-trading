@@ -1,0 +1,54 @@
+{
+  "experiment_id": "exp-monday-breadth-drop-control-20261108-v2",
+  "owner_request": "2026-11-08: owner approved 'Run a stricter control against similar sharp drops that had no breadth signal?' (Yes, run it) after the 13-case 50-99 zero-follower six-day review.",
+  "question": "Does the breadth signal (one native 5m bar with 50-99 coins first-touching the weekly lower 1.618, then zero new lower touches for 30 minutes) add six-day return beyond a similar sharp drop of the same coin without a breadth crash?",
+  "single_variable": "Versus v1, only the control pool changes: controls must also be within 3 percentage points of the event 30-day trend (trend30). Everything else is identical.",
+  "source_events": "experiments/active/exp-monday-breadth-six-day-excursions-20261108-v1/events.csv.gz",
+  "price_series": "yoyo.evaluation.monday_breadth_excursion_prices.prices (Binance USD-M 5m, same as the six-day study)",
+  "returns": "yoyo.evaluation.monday_breadth_reversal_window.trade_returns (VectorBT from_orders, buy at decision 5m open, sell at the open 1728 bars later, taker 0.05% on both fills, unlevered, no funding or slippage), run once for events and controls",
+  "assets": [
+    "BTC",
+    "ETH",
+    "SOL"
+  ],
+  "primary_population": {
+    "minutes": 5,
+    "initial_min": 50,
+    "initial_max": 99,
+    "new_coins": 0
+  },
+  "secondary_population": {
+    "minutes": 5,
+    "initial_min": 35,
+    "initial_max": 100000,
+    "new_coins": 0,
+    "note": "descriptive robustness only, not decisive"
+  },
+  "features_at_entry_open_T": {
+    "drop24": "min of the 12 closes before T divided by max of the 288 closes before T, minus 1",
+    "bounce1h": "open at T divided by min of the 12 closes before T, minus 1",
+    "trend30": "close before T divided by the close 8640 bars earlier, minus 1",
+    "vol7": "std of 5m log close changes over the 2016 bars before T"
+  },
+  "control_pool": {
+    "same_asset": true,
+    "window_days": 365,
+    "no_breadth_bar_min_coins": 25,
+    "no_breadth_lookback_hours": 24,
+    "exclude_days_around_population_events": 6,
+    "drop24_caliper_relative": 0.25,
+    "spacing_hours": 24,
+    "k": 10,
+    "distance": "Euclidean on the four features standardized by the pool standard deviation; greedy nearest with 24h minimum spacing",
+    "trend30_caliper_abs": 0.03
+  },
+  "sensitivity": "Conservative pool that also drops controls with any >=25-coin lower bar inside their own six-day holding window (uses future information to exclude, so it can only make controls look better).",
+  "decision_rule": "Per asset on the primary 13 events: the breadth signal adds value beyond the drop if the mean paired excess (event net minus the mean net of its matched controls) is positive and its event-bootstrap 95% CI (20000 draws, seed 20261108) excludes zero. Three assets are tested; report all, adopt nothing automatically.",
+  "bootstrap_seed": 20261108,
+  "bootstrap_draws": 20000,
+  "in_sample_note": "The 50-99 zero-follower cell was chosen after seeing results; this control tests a mechanism, not a blind period.",
+  "production_eligible": false,
+  "training_eligible": false,
+  "parent": "exp-monday-breadth-drop-control-20261108-v1",
+  "post_hoc_note": "Added after reading v1: v1 passed its decision rule but the balance check showed events in stronger 30-day trends than controls (BTC +8.0% vs +1.7%, ETH +7.1% vs -2.3%, SOL +1.8% vs -2.7%). This v2 is a post-hoc sensitivity; v1 remains the pre-registered result."
+}

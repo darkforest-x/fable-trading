@@ -48,11 +48,17 @@ def population(ev, spec):
     return pd.DatetimeIndex(sorted(x.decision.unique()))
 
 
-def match(feat, ok, t, k, caliper, spacing):
-    """Greedy nearest controls for one event entry t from candidate mask ok."""
+def match(feat, ok, t, k, caliper, spacing, trend_caliper=None):
+    """Greedy nearest controls for one event entry t from candidate mask ok.
+
+    trend_caliper (v2, added after the v1 balance check showed events in stronger 30-day trends): absolute
+    limit on |trend30 control - trend30 event|. None keeps the v1 behaviour.
+    """
     f = feat[ok]
     e = feat.loc[t]
     near = (f.drop24-e.drop24).abs() <= caliper*abs(e.drop24)
+    if trend_caliper is not None:
+        near &= (f.trend30-e.trend30).abs() <= trend_caliper
     f = f[near]
     if f.empty:
         return []
@@ -102,7 +108,8 @@ def run(config):
                     if d not in feat.index or feat.loc[d].isna().any():
                         continue
                     w = (idx >= d-pd.Timedelta(days=pool_cfg['window_days'])) & (idx <= d+pd.Timedelta(days=pool_cfg['window_days']))
-                    picked = match(feat, ok_all & w, d, pool_cfg['k'], pool_cfg['drop24_caliper_relative'], pool_cfg['spacing_hours'])
+                    picked = match(feat, ok_all & w, d, pool_cfg['k'], pool_cfg['drop24_caliper_relative'], pool_cfg['spacing_hours'],
+                                   pool_cfg.get('trend30_caliper_abs'))
                     rows.append(dict(population=name, arm=arm, asset=asset, event=d, role='event', t=d))
                     rows += [dict(population=name, arm=arm, asset=asset, event=d, role='control', t=c) for c in picked]
             m = pd.DataFrame([r for r in rows if r['asset'] == asset and r['population'] == name])
