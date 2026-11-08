@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-cloud-close-reward-20261109-v1",
+  "question": "Do fixed-R resting take-profit limits improve net independent trade paths for the frozen OKX V1.7 12H confirmations?",
+  "source_contract": {
+    "signal_rows_expected": 12707,
+    "parent_id": "signal-row-{1-based signals.csv data row}",
+    "join_key": [
+      "source_row_number",
+      "symbol",
+      "week",
+      "side",
+      "key_open_bjt",
+      "confirmed_bjt"
+    ],
+    "outcome_labels_used_for_selection": false,
+    "input_cutoff_utc": "2026-11-08T12:00:00Z"
+  },
+  "signals_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/signals.csv",
+  "allmarket_inputs_dir": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs",
+  "top20_inputs_dir": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs",
+  "output_paths_csv_gz": "experiments/active/exp-cloud-close-reward-20261109-v1/paths.csv.gz",
+  "output_audit_json": "experiments/active/exp-cloud-close-reward-20261109-v1/paths_audit.json",
+  "expected_signal_rows": 12707,
+  "entry": {
+    "signal_close": "confirmed_bjt = key_open_bjt + 12h; UTC 12H candle must be complete",
+    "execution": "exact 1H bar whose UTC open equals confirmation_ms, market at that bar open",
+    "if_missing": "retain no-entry status; never move entry to a later hour",
+    "ema_source": "V1.7 close-only EMA20/EMA50 recurrence, 12H only; current unfinished 12H is excluded"
+  },
+  "stop": {
+    "signal": "signals.csv reference_stop, original absolute touched-side 1.618 outside default",
+    "control": "matched parent's actual 1H-entry-to-reference-stop risk fraction applied to control open",
+    "gap": "stop-market exits at observed open when the open is beyond stop; otherwise exact stop price"
+  },
+  "targets_r": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    6,
+    10
+  ],
+  "fees": {
+    "taker_per_fill": 0.0005,
+    "resting_maker_per_fill": 0.0002,
+    "entry_fill_class": "taker",
+    "exit_fill_classes": {
+      "stop": "taker",
+      "ema_flip": "taker",
+      "data_gap_markout": "taker",
+      "stale_12h_markout": "taker",
+      "series_tail_close": "taker",
+      "take_profit": "resting maker"
+    }
+  },
+  "control_matching": {
+    "method": "seeded random non-signal 12H confirmation",
+    "same_symbol": true,
+    "same_ny_week": true,
+    "confirmation_strictly_after_parent_ms": true,
+    "whole_12h_in_week": {
+      "key_open_at_or_after_monday_end": true,
+      "confirmation_at_or_before_next_monday_expiry": true
+    },
+    "same_side": true,
+    "ema20_ema50_aligned_with_side": true,
+    "atr_feature": "previous confirmed 12H Wilder ATR14 / previous close (V1.7 census definition)",
+    "atr_relative_tolerance": 0.25,
+    "one_control_per_parent": 1,
+    "without_replacement_within_symbol_week_side": true,
+    "seed": 20261109,
+    "future_path_completeness_filter": false,
+    "unmatched": "write one explicit unmatched control event across every target setting with a reason"
+  },
+  "execution": {
+    "framework": "VectorBT 1.2.0 Portfolio.from_order_func",
+    "positions": "independent one-base-unit event columns, cash_sharing=false",
+    "event_batch_size": 8,
+    "processing": "sequential by symbol and event batch",
+    "same_bar": {
+      "opening_triggers_before_intrabar": true,
+      "open_take_profit_survives_later_same_bar_adverse_wick": true,
+      "same_direction_adverse_stop_ema_resolution": "nearer EMA/stop level, then adverse exit before opposite-side TP",
+      "opposite_side_stop_take_profit_double_touch": "adverse first; if stop and EMA both touched, choose the nearer adverse level",
+      "ambiguity_flag": "only when no opening trigger occurred and adverse plus opposite-side TP are both touched",
+      "epsilon": "Pine: 8 * float64 epsilon * max(1, abs(EMA20), abs(EMA50)) / (2/21 - 2/51)",
+      "strict_ema_cross": "long low < EMA cross level - epsilon; short high > EMA cross level + epsilon"
+    },
+    "data_gap": "close at first next observed 1H open and mark gap; never backfill previous close",
+    "stale_12h": "terminate at earliest observable 1H open after the first missing 12H bar's expected close",
+    "path_upper_bound": "first post-entry opposite confirmed 12H EMA open, stale 12H observable open, first hourly gap open, or actual 1H series tail",
+    "end_of_file": "last observed 1H close, explicitly flagged series_tail_close",
+    "slippage_funding_contract_multiplier": "not modeled"
+  },
+  "provenance": {
+    "top20_reuse": "exp-cloud-top20-peak10r-20261108-v1/inputs",
+    "allmarket_reuse": "exp-cloud-allmarket-screen-20261108-v1/inputs",
+    "vectorbt_runtime": "/Users/zhangzc/.local/bin/vectorbt-python"
+  }
+}

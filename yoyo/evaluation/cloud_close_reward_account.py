@@ -285,6 +285,7 @@ def main():
     all_rows, metadata, outputs = [], {}, {}
     for r in cfg['tp_r']:
         events = paths[(paths.tp_r==r)&(~paths.is_control)]
+        print(f"Evaluating TP {r}R with {len(events)} actual paths",flush=True)
         m, meta, trades, eq = evaluate(events)
         for period, vals in m.items():
             all_rows.append(dict(tp_r=r,period=period,**vals))

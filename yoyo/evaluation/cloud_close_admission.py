@@ -1,6 +1,5 @@
 """One-at-a-time entry screens using only V1.7 confirmation-time columns."""
 import json
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -79,6 +78,7 @@ def main():
         if name=='all':
             rows.extend(parent[parent.tp_r.eq(chosen)].drop(columns='tp_r').assign(rule=name).to_dict('records'))
             continue
+        print(f"Evaluating {name} with {len(pool)} eligible paths",flush=True)
         m, meta[name], trades, eq = wallet.evaluate(pool)
         samples[name] = (trades, eq)
         rows.extend(dict(rule=name,period=period,**values) for period,values in m.items())
