@@ -98,10 +98,17 @@ class WickFailureNextOpenTests(unittest.TestCase):
                           rows.iloc[0].reclaim_status), (15, 4, "reclaimed"))
 
     def test_opening_gap_stop_has_native_priority(self):
-        bars = [[100, 105, 90, 100], [100, 102, 88, 89], [89, 92, 86, 87],
-                [75, 78, 74, 77], [77, 78, 76, 77]]
-        _, (rows, _, _) = replay(bars, path="OHLC")
-        self.assertEqual((rows.iloc[0].reason, rows.iloc[0].exit_i, rows.iloc[0].exit_price), (1, 3, 75.))
+        cases = [
+            ([[100, 105, 90, 100], [100, 102, 88, 89], [89, 92, 86, 87],
+              [75, 78, 74, 77], [77, 78, 76, 77]], (1, 3, 75.)),
+            ([[100, 105, 90, 100], [100, 102, 88, 89], [89, 92, 86, 87],
+              [145, 147, 143, 144], [144, 146, 142, 145]], (4, 3, 140.)),
+        ]
+        for bars, expected in cases:
+            with self.subTest(expected=expected):
+                _, (rows, _, _) = replay(bars, path="OHLC")
+                row = rows.iloc[0]
+                self.assertEqual((row.reason, row.exit_i, row.exit_price), expected)
 
     def test_original_reclaim_decision_close_remains_authoritative(self):
         bars = [[100, 105, 90, 100], [100, 102, 95, 99], [99, 101, 95, 98],
