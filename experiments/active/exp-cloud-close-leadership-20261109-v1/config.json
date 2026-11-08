@@ -1,0 +1,10 @@
+{
+  "id": "exp-cloud-close-leadership-20261109-v1",
+  "parent": "exp-cloud-close-priority-20261109-v1",
+  "factor": "Require the sign-adjusted trailing 90-day spot-price return rank to lie in the leading fraction among all contemporaneously observable OKX perpetual contracts in the frozen, partially survivorship-biased 291-contract universe. Longs use descending return; shorts ascending. Unavailable assets excluded at that time.",
+  "top_fraction": [1.0, 0.75, 0.5, 0.25, 0.1],
+  "timing": "A 180-step 12h return uses both closes ending before or at the OPEN of the signal key, and requires 181 consecutive observed 12h bars. At least 10 contemporaneous contracts with a calculable rank. Equal-weight midpoint fractional rank (rank - 0.5)/n. No future membership features. Controls use their own current rank and require parent eligibility as well.",
+  "comparators": "Unfiltered frozen priority parent with all history, and coverage-matched 100% ranked arm. Frozen parent has exactly nine slots and a 75% partial at original 2R.",
+  "selection": "Development through 2024 maximum terminal account value with at least 100 closed trades, >=30% net winners, >=2.5 realized net payoff and <=35% hourly DD upper bound. If no eligible arm then frozen parent. Disclose previously analyzed 2025 and 2026, pair and 5bp stress for selected and development maximum when new.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_leadership"
+}
