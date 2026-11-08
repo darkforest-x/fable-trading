@@ -107,6 +107,21 @@ experiments:
     canonical_report: experiments/active/exp-monday-breadth-frequency-20261108-v1/frequency_results.csv
     notes: Select rules through 2025 and evaluate historical 2026. Returns per 1x trade; actual funding separately audited. Same coin/time/volatility random entries use identical fees/exits. Count opportunities from one account without overlap.
 
+  - experiment_id: exp-monday-breadth-alt-spacing-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2479cff66d
+    status: inconclusive
+    question: 'Does reducing the minimum entry spacing of the original freq36_ALT basket from 24h to 12h or 6h add useful trades when signal, members, six-hour holding period, fees and BTC lock stay frozen?'
+    single_variable: 'Only ALT minimum entry spacing changes: 24h baseline versus 12h and 6h. Read every pre-spacing freq36_ALT signal from the frozen feature table, then admit it chronologically at the selected interval. Keep initial>=2, share_5, any, no confirmation, original ALT members, 6h exit, two 5bp taker fees, epoch purges, and frozen below_4h_ema20 plus case BTC events unchanged. 12h/6h are post-hoc assumptions, not preregistered.'
+    result: '24h baseline exactly reproduces 239 entries and all cached 6h VectorBT returns. Full history through the 2026-10-27 UTC entry cutoff: ALT 239/269/300 entries at 24/12/6h; shorter intervals add 34/64 and replace 4/3 baseline entries. Added-event means/wins are -1.502%/32.4% and -0.808%/40.6%. In 2026 the counts are 25/28/28; each shorter interval adds three, no replacements, at -0.698% mean and 33.3% wins. The frozen 50/50 BTC+ALT fee-only portfolio is +43.01% / +41.72% / +41.72% in 2026 with settlement DD 3.54% / 4.65% / 4.65%; full-history growth is +466.60% / +377.43% / +377.67% with settlement DD 24.07% / 27.21% / 27.56%. Independent 2026 synchronized funding and 5m marks: original 24h +42.0277% / 6.5852% DD; both shortened schedules +40.7507% / 7.9279% DD. The 2026 maximum idle time after exit stays 992.4h (41.35 days) in all arms.'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-breadth-alt-spacing-20261108-v1/spacing_summary.csv
+    notes: 'The 2026 fee-only matched-control subset reuses only 13 baseline clocks (mean actual +1.085%, random +0.324%, excess +0.761pp); it does not cover the added events. `spacing_summary.csv` and `portfolio_summary.csv` report fee-only returns and settlement DD. Synchronized 2026 funding and 5m mark coverage are in the sibling `marks_2026.csv`; missing data is not imputed. No paper account, BTC event, or live service changed.'
+
   - experiment_id: exp-monday-breadth-optimization-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: e2bfb16ce495b9049c156c7aa157613c6f0b4ff3

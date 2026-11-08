@@ -1,0 +1,31 @@
+{
+  "experiment_id": "exp-monday-breadth-alt-spacing-20261108-v1",
+  "builder": "yoyo/evaluation/monday_breadth_alt_spacing.py",
+  "builder_commit": "2479cff66dab00cd4e73e5cba685911f6152a224",
+  "source_rule": "freq36_ALT: 5m, zero wait, share_5, any, none, fixed 6h; initial >=2; exclude BTC/ETH/SOL/USTC from ALT constituents",
+  "single_variable": "minimum entry interval 24h to 12h or 6h; all other signal, member, hold, fee and frozen BTC rules unchanged",
+  "hypothesis_status": "post-hoc assumption, not preregistered",
+  "raw_pre_spacing_rule_signals": 538,
+  "baseline_24h_parity": {
+    "selected_events": 239,
+    "matches_frozen_lock": true,
+    "matches_cached_vectorbt_returns": true
+  },
+  "vectorbt_payoff_source": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes5_wait0.csv.gz",
+  "source_entry_cutoff_exclusive_utc": "2026-10-28T00:00:00+00:00",
+  "entry_and_exit_fee": "5bp taker per fill at the existing cached VectorBT event payoff; funding omitted",
+  "btc_lock_source": "experiments/active/exp-monday-breadth-extension-20261108-v1/risk/integrated_btc_events.parquet",
+  "btc_lock_entries": 159,
+  "btc_lock_2026_entries": 23,
+  "control_source": "experiments/active/exp-monday-breadth-extension-20261108-v1/alt/control_paired_events.csv",
+  "control_limit": "Only existing 2026 matched controls for original baseline entry clocks are reused; no controls inferred for new entries.",
+  "risk_limit": "spacing_summary.csv and portfolio_summary.csv contain fee-only returns and settlement drawdown only. The separate mark_2026.py -> marks_2026.csv reports 2026 5m mark-to-market and funding coverage by cadence; missing observations stay explicit. Existing 24h funded/marked reference remains separately identified.",
+  "outputs": [
+    "spacing_summary.csv",
+    "portfolio_summary.csv",
+    "monthly_summary.csv",
+    "events.csv",
+    "manifest.json"
+  ],
+  "generated_at_utc": "2026-11-08T13:24:38.818281+00:00"
+}
