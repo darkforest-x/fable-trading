@@ -1,0 +1,8 @@
+{
+  "id":"exp-cloud-close-binding-risk-target-20261109-v1",
+  "single_variable":"Set only the 2/3 resting profit target to twice the distance from the actual 12H-confirmation entry open to the nearer currently active protective level: the fixed stop or the intrabar EMA20/50 flip trigger already inferable from the just-closed 12H EMAs. The original full runner is untouched. Target reference is fixed once at entry. This changes no protective fill, exposure or order priority.",
+  "immediate_exit":"If the open is already through any protective level retain its frozen native stop/flip. If the flip price is not finite, is not positive or is on the wrong side, retain the existing reference width. Include all opportunities. Never filter an entry using a future flip.",
+  "scope":"11780 OKX first-key signals, 10816 later controls. Reuse all immutable runner paths and target paths whose limit is unchanged. Use the original framework callback to price just the changed target leg. Compare with the corrected nine-slot, cash-sharing two-thirds account on 1000U. Fees market 5bp and resting maker 2bp. Source periods 2020 to 2026-11-08, pre-2025 development; holding funding and impact omitted.",
+  "decision":"Require dev >=100 paid, wins >=30%, cash/return payoffs >=2.5, conservative DD<=35%. If dev pass, run matched signals, later controls and extra 5bp market-fill slippage. Transfer frozen rule to corrected Binance only for a full/early pass with greater final wealth than the unchanged parent. All years have prior research use.",
+  "runner":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_binding_risk_target"
+}
