@@ -1,0 +1,9 @@
+{
+  "source": "exp-cloud-allmarket-screen-20261108-v1",
+  "cohort": "all non-old-Top20 altcoin V1.7 signals in 2025 and 2026 through Nov 8 12:00 UTC",
+  "decision_time": "All three descriptors use prices strictly before the signal 12H bar OPEN, evaluated on both hypothetical sides. Prior alerts may include a prior bar confirmed at that open. The original signal itself is available only after its close.",
+  "first_in_cloud": "Keep the first same-direction weekly signal in the ongoing prior 12H EMA20/50 regime. On a signal bar which itself changes EMA direction the previously established cloud is not aligned; don't count it as previously established first. Missing warmup retained.",
+  "few_cloud_traversals": "Over the preceding 14 completed 12H closes count transitions between above both EMAs and below both EMAs, omitting inside-cloud closes. Keep at most one traversal; insufficient contiguous history retains.",
+  "directional_highs_lows": "Two nonoverlapping blocks of 14 completed 12H candles. Keep if the recent high AND low are higher than both corresponding prior values for longs, lower for shorts; insufficient contiguous history retains.",
+  "comparison": "Each single condition separately vs all opportunities and equal count random within symbol/side/year. Separate chart and confirmation-close 10R, and first-day fixed stop. No tuning or execution simulation."
+}
