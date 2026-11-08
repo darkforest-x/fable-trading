@@ -141,6 +141,14 @@ def study_one(spec):
 def ledger(all_rows):
     frame = pd.concat([pd.read_csv(WORK/(r['symbol']+'.csv.gz'),float_precision='round_trip')
                        for r in all_rows if r['signals']],ignore_index=True)
+    # A gap days later does not censor the first 24 hours. Conversely, a
+    # trailing archive can end well before the global research cutoff.
+    frame['observed_first_24h_bars'] = False
+    for symbol, block in frame.groupby('symbol'):
+        folder = (TOP if symbol in TOP_COINS else EXP)/'inputs'/symbol
+        index = pd.read_csv(folder/'bars12h.csv.gz',usecols=['time']).time.to_numpy(dtype=np.int64)
+        start = pd.to_datetime(block.confirmed_bjt,utc=True).astype('int64').to_numpy()//1_000_000
+        frame.loc[block.index,'observed_first_24h_bars'] = np.isin(start,index) & np.isin(start+STEP,index)
     frame = frame.sort_values(['confirmed_bjt','symbol']).reset_index(drop=True)
     assert not frame.duplicated(['symbol','week']).any()
     assert len(frame.query('was_top20'))==len(OLD)

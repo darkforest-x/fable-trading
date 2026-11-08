@@ -79,8 +79,7 @@ def main():
     delay=(exit_t-t).dt.total_seconds()/3600
     x['early_stop']=x.exit_reason.eq('stop') & delay.ge(0) & delay.lt(24)
     # Unavailable and gap outcomes do not establish 24h exposure in this secondary table.
-    x['early_observed']=x.exit_reason.isin(['stop','cloud_flip']) | (x.exit_reason.eq('open') &
-        (t+pd.Timedelta(hours=24)<=pd.Timestamp('2026-11-08T12:00:00Z')))
+    x['early_observed']=x.exit_reason.isin(['stop','cloud_flip']) | x.observed_first_24h_bars
     strength=[]; breadth=[]; peers=[]
     for ms, row in zip(t.astype('int64')//1_000_000-STEP,x.itertuples()):
         rank=ranks.at[ms,row.symbol]; own=trend.at[ms,row.symbol]

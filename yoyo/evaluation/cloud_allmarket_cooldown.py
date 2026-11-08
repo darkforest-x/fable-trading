@@ -43,8 +43,7 @@ def main():
     ex=pd.to_datetime(a.path_end_bar_bjt,utc=True,format='mixed').dt.tz_convert('Asia/Shanghai')
     a['outcome_known']=ex+pd.Timedelta(hours=12)
     a['early']=a.exit_reason.eq('stop') & ex.ge(a.confirm) & ex.lt(a.confirm+pd.Timedelta(hours=24))
-    a['early_observed']=a.exit_reason.isin(['stop','cloud_flip']) | (a.exit_reason.eq('open') &
-       (a.confirm + pd.Timedelta(hours=24) <= pd.Timestamp('2026-11-08T12:00:00Z')))
+    a['early_observed']=a.exit_reason.isin(['stop','cloud_flip']) | a.observed_first_24h_bars
     a['confirm_status_known']=a.confirmation_basis_lower_r.gt(10) | (a.exit_reason.isin(['stop','cloud_flip']) & a.confirmation_basis_upper_r.le(10))
     a['cooldown_kept']=True
     for _,g in a.groupby(['symbol','side','pre_current_listing']):
