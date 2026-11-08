@@ -425,7 +425,7 @@ def run() -> None:
                 **combo,
                 "original_24h_2026_funded_growth_pct": float(old_reference.growth_pct),
                 "original_24h_2026_marked_drawdown_pct": float(old_reference.max_dd_pct),
-                "original_24h_2026_reference_legs": int(old_reference.legs),
+                "original_24h_2026_reference_legs": int(old_reference.btc_n + old_reference.alt_n),
                 "funding_coverage": "all three cadence arms use fee-only event returns; no new funding applied",
                 "mark_to_market_coverage": "all three cadence arms use settlement DD; no new 5m marks applied",
                 "notes": "50/50 means two independent, unlevered 1x sleeves funded with half the initial capital each; profits remain in sleeve; settlement DD samples exits only. Original 2026 funded/5m marked numbers are shown as a separate frozen 24h reference.",
