@@ -1,0 +1,16 @@
+{
+  "experiment_id": "exp-live-wick-deep-score-20261109-v1",
+  "single_variable": "Append 0.40 <= touch-close score < 0.50 signals only when the close is at least 1.5% beyond the level. Keep every original 0.50+ signal and all E20 management.",
+  "source": "experiments/active/exp-monday-limit-live-october-20261101-v1",
+  "score_archive": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+  "baseline": "experiments/active/exp-monday-limit-close-survivor-paths-20261101-v10/near_monday_edge-2025-ledger.csv.gz",
+  "october_fills": "experiments/active/exp-live-wick-score040-oct-20261109-v1/paired_opportunities.csv.gz",
+  "start": "2026-08-03",
+  "october": "2026-10-01",
+  "end_exclusive": "2026-11-01",
+  "minimum_score": 0.40,
+  "baseline_score": 0.50,
+  "minimum_beyond_pct": 1.5,
+  "seed": 20261103,
+  "evaluation": "The 1.5% cutoff predates this study on higher scores; the new conditional admission idea was selected after looking at October. Check August 3 through September independently of October outcomes, then show October separately. Compare volume, equal-notional payoff, marginal mean net and realized 6x3 drawdown. No financing or extra tuning."
+}

@@ -32,8 +32,10 @@ def fill_symbol(task):
 def metrics(net):
     wins, losses = net[net > 0], net[net < 0]
     return dict(trades=len(net), wins=len(wins), win_pct=100 * len(wins) / len(net),
-                avg_win_bp=float(wins.mean()), avg_loss_bp=float(losses.mean()),
-                payoff=float(-wins.mean() / losses.mean()), profit_factor=float(-wins.sum() / losses.sum()),
+                avg_win_bp=float(wins.mean()) if len(wins) else None,
+                avg_loss_bp=float(losses.mean()) if len(losses) else None,
+                payoff=float(-wins.mean() / losses.mean()) if len(wins) and len(losses) else None,
+                profit_factor=float(-wins.sum() / losses.sum()) if len(losses) else None,
                 mean_net_bp=float(net.mean()))
 
 
