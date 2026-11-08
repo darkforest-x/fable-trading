@@ -1,0 +1,37 @@
+{
+  "experiment_id": "exp-monday-breadth-alt-spacing-20261108-v1",
+  "owner_request": "Controlled frequency increase for the original freq36_ALT basket: change only the 24h minimum entry interval to 12h and 6h.",
+  "hypothesis_status": "post-hoc assumption, not preregistered",
+  "single_variable": "Minimum entry spacing: 24h baseline versus 12h and 6h. Signal rule, initial ALT membership, 6h holding period, fee schedule, evaluation epochs, and frozen BTC branch remain unchanged.",
+  "source_rule": {
+    "candidate_id": "freq36_ALT",
+    "minutes": 5,
+    "wait_min": 0,
+    "breadth": "share_5",
+    "diffusion": "any",
+    "confirmation": "none",
+    "minimum_initial_members": 2,
+    "alt_member_exclusions": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "USTCUSDT"],
+    "holding_hours": 6,
+    "entry_price": "5m open at the locked decision timestamp",
+    "exit_price": "6h time exit from the cached native VectorBT payoff"
+  },
+  "cadences_hours": [24, 12, 6],
+  "source_data": {
+    "pre_spacing_signals": "experiments/active/exp-monday-breadth-optimization-20261108-v1/features/signals.csv.gz",
+    "initial_members": "experiments/active/exp-monday-breadth-optimization-20261108-v1/features/members.csv.gz",
+    "six_hour_vectorbt_payoffs": "experiments/active/exp-monday-breadth-optimization-20261108-v1/payoffs/event_outcomes_minutes5_wait0.csv.gz",
+    "baseline_locked_entries": "experiments/active/exp-monday-breadth-frequency-20261108-v1/fixed/locked_events.parquet",
+    "frozen_btc_branch": "experiments/active/exp-monday-breadth-extension-20261108-v1/risk/integrated_btc_events.parquet"
+  },
+  "data_end_exclusive_utc": "2026-10-28T00:00:00Z",
+  "fees": {
+    "alt_entry_taker": 0.0005,
+    "alt_exit_taker": 0.0005,
+    "funding": "not applied to new cadence events"
+  },
+  "portfolio": "Frozen BTC events plus each ALT cadence arm as separate unlevered 1x sleeves, each funded from 50 percent of independent initial capital; profits remain in sleeve.",
+  "risk": "Compare fee-only event returns and trade-settlement drawdowns across all three arms. Do not describe settlement drawdown as marked drawdown. Existing 2026 funding and 5m marks for the original 24h arm are separate reference evidence.",
+  "matched_controls": "Reuse only existing 2026 baseline 6h random controls for the same original entry clocks retained by each cadence. New events have no reused match.",
+  "production_eligible": false
+}
