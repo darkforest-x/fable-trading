@@ -73,5 +73,7 @@
   },
   "builder": ".venv/bin/python -m yoyo.evaluation.cloud_close_drawdown_quotes --fetch",
   "evaluation": "Revalue only the frozen 2/3 partial funded holdings in the four H1 troughs exceeding the historic 35% bound and their single binding H1 peak. Use synchronous 5m OHLC, retain both frozen fill and holding marks in any stop-crossing 5m bar, keep native H1 extremes for any missing ticker-hour. Leave all other historical bounds and all fills unchanged. Compare with 35% and disclose hourly and 5m conservative bounds.",
-  "evaluation_runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_drawdown_bounds"
+  "evaluation_runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_drawdown_bounds",
+  "minute_check": "After complete 5m evidence narrowed the conservative bound to 35.039366%, value the sole remaining binding trough (November 12 14:00 UTC) and its previous maximum (November 4 21:00 UTC) on exact native one-minute OHLC. Freeze after seeing 5m. Require every held ticker and compare 1m to 5m. Keep all previously nonbinding hours; report achieved bounds and observed close-to-close lower bound. No fills, positions or parameters change.",
+  "minute_runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_drawdown_minute_bounds"
 }

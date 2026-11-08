@@ -26,12 +26,15 @@ def funded_legs():
     return legs
 
 
-def hour_envelope(stamp, old, legs, subbars):
+def hour_envelope(stamp, old, legs, subbars, step_ms=FIVE_MIN):
     hour = stamp.value // 1_000_000
     active = legs[(legs.entry_ms <= hour) & (legs.exit_bar_ms >= hour)]
     after_open = active[~(active.exit_bar_ms.eq(hour) & active.exit_phase.eq('open'))]
-    low = np.full(12, old.open_exit_nav)
+    slices = wallet.HOUR // step_ms
+    low = np.full(slices, old.open_exit_nav)
     high = low.copy()
+    exact_closes = low.copy()
+    known_closes = True
     end_nav = old.open_exit_nav
     observed = set()
     for row in after_open.itertuples():
@@ -43,19 +46,22 @@ def hour_envelope(stamp, old, legs, subbars):
         group = subbars[(subbars.symbol == row.symbol) & subbars.time.between(hour,hour+wallet.HOUR-1)]
         if len(group):
             five = group.sort_values('time')
-            if not np.array_equal(five.time, hour+np.arange(12)*FIVE_MIN):
-                raise ValueError(f'Incomplete five-minute hour for {row.symbol}')
+            if not np.array_equal(five.time, hour+np.arange(slices)*step_ms):
+                raise ValueError(f'Incomplete finer bars in hour for {row.symbol}')
             aggregate = [five.open.iloc[0],five.high.max(),five.low.min(),five.close.iloc[-1]]
             if not np.allclose(aggregate,hourly,rtol=1e-10,atol=1e-13):
                 raise ValueError(f'5m aggregate does not match native hourly source for {row.symbol} at {stamp}')
             bounds = five[['low','high']].to_numpy()
             observed.add(row.symbol)
+            exact_closes += (five.close.to_numpy()-hourly[0])*row.signed_size
         else:
-            # Keep the entire native H1 envelope for all twelve slices when the finer bars are absent.
-            bounds = np.tile(hourly[[2,1]],(12,1))
+            # Keep the entire native H1 envelope for every slice when the finer bars are absent.
+            bounds = np.tile(hourly[[2,1]],(slices,1))
+            known_closes = False
         variations = (bounds-hourly[0]) * row.signed_size
         low_move, high_move = variations.min(axis=1), variations.max(axis=1)
         if row.exit_bar_ms == hour:
+            known_closes = False
             settled = (row.exit_price-hourly[0])*row.signed_size - row.exit_price*abs(row.signed_size)*row.exit_fee_rate
             if len(group) and row.exit_phase == 'intrabar' and row.exit_reason == 'stop':
                 touched = five.low.le(row.stop_price) if row.side == 1 else five.high.ge(row.stop_price)
@@ -83,6 +89,8 @@ def hour_envelope(stamp, old, legs, subbars):
     stages = [old.open_nav,old.open_exit_nav,old.nav]
     return dict(hour_end=stamp+pd.Timedelta(hours=1), refined_lower=min(*stages,low.min()),
                 refined_upper=max(*stages,high.max()), previous_lower=old.lower_nav, previous_upper=old.upper_nav,
+                min_observed_close=float(exact_closes.min()) if known_closes else None,
+                max_observed_close=float(exact_closes.max()) if known_closes else None,
                 observed_symbols='|'.join(sorted(observed)), active_symbols='|'.join(sorted(after_open.symbol.unique())))
 
 
