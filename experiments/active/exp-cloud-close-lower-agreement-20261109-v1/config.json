@@ -1,0 +1,8 @@
+{
+  "id":"exp-cloud-close-lower-agreement-20261109-v1",
+  "factor":"Require an original lower-timeframe V1.7 signal on the same Binance contract, same direction and same NY Monday week, already closed at or before the original 12H key closes. Preset lower timeframe: 4H, 1H, or 15m; never combine the screens. No lower-timeframe order or earlier entry.",
+  "source":"Freeze existing signal-center multi-timeframe first-key history, 632 contracts. No training or rebuilding signals. Native 12H funded Binance account with 90d coverage, nine slots, low prior ATR, 75% at actual 2R, 25% original cloud; existing primary and matched control paths. Clock is ns in signal sources, ms in fill files. Controls use same week from the real parent and must also independently pass at their own clock.",
+  "timeframes":["4H","1H","15m"],
+  "selection":"Compare dev ending 2024 by NAV subject to minimum 100 trades, wins >=30%, percentage and dollar payoff >=2.5 each, conservative hourly drawdown bound <=35%. Show each arm across 2025 and 2026 to Sep23. Paired and adverse 5bp stress on any qualifying new pick. Prior use of all periods. Market 5bp, target maker 2bp, funding and impact omitted.",
+  "runner":"/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_lower_agreement"
+}
