@@ -1,0 +1,9 @@
+{
+  "id": "exp-cloud-close-wick-timing-20261109-v1",
+  "parent": "exp-cloud-close-leadership-20261109-v1 (coverage-only development pick)",
+  "factor": "Hours elapsed from the end of the most recent 1H candle whose wick strictly crossed the signal's touched 1.618 extension to the native 12H confirmation boundary. Computed ONLY inside the confirming closed 12H key, with all twelve H1 observations required; TP/SL outcomes excluded.",
+  "policies": {"all_measured":[0,11],"fresh_0_1":[0,1],"middle_2_5":[2,5],"early_6_11":[6,11]},
+  "controls": "Apply the selected parent's wick timing to its frozen later matched non-signal and require both timestamps to meet prior 90d coverage. Control cannot be required to have the same V1.7 wick; it provides a different entry time within the matched parent's week. Record sample selection, within-bin comparison and costs.",
+  "decision": "Nine fully funded positions, original 75%/25% split, parent low previous ATR priority. Development ranks terminal NAV through 2024 with >=100 trades, >=30% wins, payoff >=2.5 and hourly DD upper bound <=35%, fallback inherited parent. 2025 and 2026 previously viewed. No tuning afterwards.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_wick_timing"
+}
