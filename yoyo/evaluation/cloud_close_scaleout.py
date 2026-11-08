@@ -39,7 +39,7 @@ def simulate(data, fraction, slip=0.):
 
 def main():
     import gc
-    paths = pd.read_csv(w.EXP/'paths.csv.gz',keep_default_na=False,float_precision='round_trip')
+    paths = w.read_paths()
     real = paths[~paths.is_control]
     ctl = paths[paths.is_control]
     base = pd.read_csv(w.EXP/'account_metrics.csv')

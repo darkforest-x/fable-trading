@@ -53,15 +53,16 @@ def main():
     parent_cfg = json.loads((wallet.EXP/'account_summary.json').read_text())
     chosen = int(parent_cfg['pick'])
     src = pd.read_csv(wallet.SOURCE/'signals.csv',float_precision='round_trip')
-    src.index = pd.Index(['signal-v17-row-'+str(i+1) for i in range(len(src))],name='parent_id')
-    paths = pd.read_csv(wallet.EXP/'paths.csv.gz',float_precision='round_trip',keep_default_na=False)
+    src.index = pd.RangeIndex(1,len(src)+1,name='source_row_number')
+    paths = wallet.read_paths()
     paths = paths[paths.tp_r.eq(chosen)]
     real, controls = paths[~paths.is_control], paths[paths.is_control]
     if not real.parent_id.is_unique or not controls.parent_id.is_unique:
         raise ValueError('Nonunique parent within arm')
-    aligned = src.loc[real.parent_id]
+    aligned = src.loc[real.source_row_number]
     if not np.array_equal(aligned.symbol.to_numpy(),real.symbol.to_numpy()):
         raise ValueError('Path source identity mismatch')
+    signals_week = pd.Series(aligned.week.to_numpy(),index=real.parent_id,name='week')
     rules = gates(src)
     if list(rules)!=json.loads((EXP/'config.json').read_text())['eligibility']:
         raise ValueError('Eligibility roster differs from registration')
@@ -72,9 +73,9 @@ def main():
     samples = {}
     for name,mask in rules.items():
         eligible = src.index[mask.fillna(False)]
-        pool = real[real.parent_id.isin(eligible)]
+        pool = real[real.source_row_number.isin(eligible)]
         null = controls[controls.parent_id.isin(pool.parent_id)]
-        checks[name] = comparisons(pool,null,src.week)
+        checks[name] = comparisons(pool,null,signals_week)
         if name=='all':
             rows.extend(parent[parent.tp_r.eq(chosen)].drop(columns='tp_r').assign(rule=name).to_dict('records'))
             continue
@@ -93,7 +94,7 @@ def main():
         trades.to_csv(EXP/f'funded_{name}.csv.gz',index=False)
         eq.to_csv(EXP/f'hourly_{name}.csv.gz',index_label='hour_end_utc')
         ids = src.index[rules[name].fillna(False)]
-        pool = real[real.parent_id.isin(ids)]
+        pool = real[real.source_row_number.isin(ids)]
         null = controls[controls.parent_id.isin(pool.parent_id)]
         tests[name] = {}
         for label,events,slip in [('control',null,0.),('paired_signals',pool[pool.parent_id.isin(null.parent_id)],0.),

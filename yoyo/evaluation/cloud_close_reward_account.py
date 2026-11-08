@@ -252,8 +252,24 @@ def qualifies(m):
     return m['win_pct'] is not None and m['win_pct']>=30 and (m['payoff'] or 0)>=2.5 and m['dd_bound_pct']<=35
 
 
+def read_paths():
+    fields = ['entry_status','symbol','source_row_number','parent_id','event_id','is_control',
+              'tp_r','side','entry_ms','exit_bar_ms','exit_phase','entry_price','exit_price',
+              'stop_price','exit_reason','exit_fee_rate','same_bar_ambiguous','gap_flag']
+    frame = pd.read_csv(EXP/'paths.csv.gz',usecols=fields,float_precision='round_trip',
+                        dtype={'symbol':str},keep_default_na=False,na_values={'entry_ms':[''],
+                        'exit_bar_ms':[''],'entry_price':[''],'exit_price':[''],'exit_fee_rate':['']})
+    frame = frame[frame.entry_status.eq('executed')].copy()
+    for col in ('entry_ms','exit_bar_ms'):
+        if frame[col].isna().any():
+            raise ValueError('Executed trade has no execution timestamp')
+        frame[col] = frame[col].astype('int64')
+    if frame.duplicated(['event_id','tp_r']).any():
+        raise ValueError('Nonunique path identity')
+    return frame
+
 def main():
-    paths = pd.read_csv(EXP/'paths.csv.gz',float_precision='round_trip',keep_default_na=False)
+    paths = read_paths()
     cfg = json.loads((EXP/'account_config.json').read_text())
     all_rows, metadata, outputs = [], {}, {}
     for r in cfg['tp_r']:
