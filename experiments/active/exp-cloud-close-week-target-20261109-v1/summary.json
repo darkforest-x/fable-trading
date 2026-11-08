@@ -1,0 +1,422 @@
+{
+  "experiment_id": "exp-cloud-close-week-target-20261109-v1",
+  "question": "On the frozen 9-slot low-prior-ATR V1.7 account with a 75% resting partial and 25% unchanged cloud runner, does the original opposite weekly 1.618 reference improve on the fixed 2R partial when the 75% target is placed at a preregistered fraction of the remaining confirmation-entry-to-extension distance?",
+  "selection": {
+    "dev_period": "entry and exit before 2025-01-01 UTC; parent wallet selection rules",
+    "constraints": "win_pct >= 30, equal-notional payoff >= 2.5, conservative dd_bound_pct <= 35, trades >= 100",
+    "eligible": [
+      "opposite_1p618_x_1",
+      "fixed_2r",
+      "opposite_1p618_x_0p5"
+    ],
+    "pick": "opposite_1p618_x_1",
+    "best_dev_growth": "opposite_1p618_x_2",
+    "baseline_fixed_2r": "fixed_2r"
+  },
+  "frozen_parent": {
+    "partial_fraction": 0.75,
+    "slots": 9,
+    "priority_policy": "low_prior_atr",
+    "baseline_all": {
+      "period": "all",
+      "final_usdt": 5529.83846302229,
+      "multiple": 5.52983846302229,
+      "dd_mark_pct": 32.00123970414276,
+      "dd_bound_pct": 32.49499852720955,
+      "trades": 1676,
+      "win_pct": 32.517899761336515,
+      "payoff": 2.9619772323629965,
+      "payoff_usdt": 2.548763842526435,
+      "median_net_pct": -3.0882507707826377,
+      "priority_policy": "low_prior_atr",
+      "candidate": "fixed_2r",
+      "target_fraction": null,
+      "partial_fraction": 0.75,
+      "slots": 9,
+      "fallback_events": 0,
+      "no_order_events": 0
+    },
+    "fixed_2r_curves": "experiments/active/exp-cloud-close-priority-20261109-v1/funded_low_prior_atr.csv.gz and hourly_low_prior_atr.csv.gz"
+  },
+  "target_geometry": {
+    "fractions_of_remaining_entry_to_extension": [
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "passed_extension_fallback": "for that event, every candidate uses the frozen fixed 2R level when it is orderable; verified against the original VectorBT 2R path",
+    "unplaceable_limit": "zero or negative projected price means no resting target order; the 75% leg follows the frozen 0R runner, verified against runner fills including controls",
+    "control_transfer": "at control open, scale the parent signal's opposite-reference price by control_entry / parent_actual_confirmation_entry; then apply that event's target fraction",
+    "partial_position": "75% closes at the candidate resting limit when its price is positive; a nonpositive limit leaves that 75% leg on the exact frozen 0R cloud runner, which also carries the remaining 25%",
+    "target_path_tp_r_sentinel": "2.0 solely for the frozen pair/scale-out adapter; target_fraction, target_geometry, target_price, and target_distance contain the actual tested geometry"
+  },
+  "path_audit": {
+    "input_runner_events": 24365,
+    "input_signal_events": 12707,
+    "input_matched_control_events": 11658,
+    "target_path_rows": 97460,
+    "target_fallback_counts": {
+      "opposite_1p618_x_0p5": {
+        "already_passed_extension_2r_fallback": 0,
+        "already_passed_signal": 0,
+        "already_passed_control": 0,
+        "orderable_2r_fallback": 0,
+        "unplaceable_no_order": 0,
+        "unplaceable_extension_target": 0,
+        "unplaceable_extension_signal": 0,
+        "unplaceable_extension_control": 0,
+        "unplaceable_2r_fallback": 0,
+        "no_order_signal": 0,
+        "no_order_control": 0,
+        "events": 24365
+      },
+      "opposite_1p618_x_1": {
+        "already_passed_extension_2r_fallback": 0,
+        "already_passed_signal": 0,
+        "already_passed_control": 0,
+        "orderable_2r_fallback": 0,
+        "unplaceable_no_order": 0,
+        "unplaceable_extension_target": 0,
+        "unplaceable_extension_signal": 0,
+        "unplaceable_extension_control": 0,
+        "unplaceable_2r_fallback": 0,
+        "no_order_signal": 0,
+        "no_order_control": 0,
+        "events": 24365
+      },
+      "opposite_1p618_x_1p5": {
+        "already_passed_extension_2r_fallback": 0,
+        "already_passed_signal": 0,
+        "already_passed_control": 0,
+        "orderable_2r_fallback": 0,
+        "unplaceable_no_order": 3,
+        "unplaceable_extension_target": 3,
+        "unplaceable_extension_signal": 2,
+        "unplaceable_extension_control": 1,
+        "unplaceable_2r_fallback": 0,
+        "no_order_signal": 2,
+        "no_order_control": 1,
+        "events": 24365
+      },
+      "opposite_1p618_x_2": {
+        "already_passed_extension_2r_fallback": 0,
+        "already_passed_signal": 0,
+        "already_passed_control": 0,
+        "orderable_2r_fallback": 0,
+        "unplaceable_no_order": 16,
+        "unplaceable_extension_target": 16,
+        "unplaceable_extension_signal": 10,
+        "unplaceable_extension_control": 6,
+        "unplaceable_2r_fallback": 0,
+        "no_order_signal": 10,
+        "no_order_control": 6,
+        "events": 24365
+      }
+    },
+    "vectorbt_execution_totals": {
+      "columns": 97460,
+      "orders": 194920,
+      "trades": 97460
+    },
+    "fallback_path_parity": "Orderable passed-level events reproduce frozen fixed-2R paths; nonpositive projected prices produce no finite target and reproduce frozen 0R runner paths. Both parity checks include fills, fees, time, PnL, and ambiguity flags."
+  },
+  "checks": {
+    "opposite_1p618_x_1": {
+      "control": {
+        "all": {
+          "final_usdt": 2996.50590777229,
+          "multiple": 2.9965059077722898,
+          "dd_mark_pct": 31.704400460960557,
+          "dd_bound_pct": 32.472038810765156,
+          "trades": 1814,
+          "win_pct": 26.681367144432194,
+          "payoff": 3.5331163511792845,
+          "payoff_usdt": 3.189645724086546,
+          "median_net_pct": -2.5633118844134066
+        },
+        "dev": {
+          "final_usdt": 2809.5443816291317,
+          "multiple": 2.8095443816291317,
+          "dd_mark_pct": 31.704400460960557,
+          "dd_bound_pct": 32.472038810765156,
+          "trades": 1263,
+          "win_pct": 27.23673792557403,
+          "payoff": 3.578992113610937,
+          "payoff_usdt": 3.171959822075919,
+          "median_net_pct": -3.065568138345724
+        },
+        "2025": {
+          "final_usdt": 2973.6638672879476,
+          "multiple": 1.0584149824191957,
+          "dd_mark_pct": 23.56289552821552,
+          "dd_bound_pct": 25.76975509815401,
+          "trades": 284,
+          "win_pct": 21.830985915492956,
+          "payoff": 3.5562412644949446,
+          "payoff_usdt": 3.4030085139884987,
+          "median_net_pct": -2.676254008260394
+        },
+        "2026": {
+          "final_usdt": 2996.50590777229,
+          "multiple": 1.0076814466946376,
+          "dd_mark_pct": 13.385573386094451,
+          "dd_bound_pct": 13.885477061717221,
+          "trades": 250,
+          "win_pct": 27.200000000000003,
+          "payoff": 2.74862626148573,
+          "payoff_usdt": 2.7155080939402687,
+          "median_net_pct": -1.360933409479245
+        }
+      },
+      "paired_signals": {
+        "all": {
+          "final_usdt": 5252.865457530257,
+          "multiple": 5.252865457530257,
+          "dd_mark_pct": 33.66354420447186,
+          "dd_bound_pct": 34.50216744800273,
+          "trades": 1561,
+          "win_pct": 31.133888532991673,
+          "payoff": 3.173616176783911,
+          "payoff_usdt": 2.754599451393797,
+          "median_net_pct": -3.285878049614875
+        },
+        "dev": {
+          "final_usdt": 4328.901666092359,
+          "multiple": 4.328901666092359,
+          "dd_mark_pct": 33.66354420447186,
+          "dd_bound_pct": 34.50216744800273,
+          "trades": 1130,
+          "win_pct": 30.796460176991154,
+          "payoff": 3.378100663881483,
+          "payoff_usdt": 2.836717532048455,
+          "median_net_pct": -3.315030904997529
+        },
+        "2025": {
+          "final_usdt": 4562.869259146903,
+          "multiple": 1.054047795746246,
+          "dd_mark_pct": 24.16242194931939,
+          "dd_bound_pct": 24.770195965206156,
+          "trades": 219,
+          "win_pct": 24.200913242009133,
+          "payoff": 2.983310078680694,
+          "payoff_usdt": 2.850650957296816,
+          "median_net_pct": -3.3165601056062566
+        },
+        "2026": {
+          "final_usdt": 5252.865457530257,
+          "multiple": 1.1512198047314552,
+          "dd_mark_pct": 10.190765884116948,
+          "dd_bound_pct": 10.83690386211863,
+          "trades": 196,
+          "win_pct": 38.265306122448976,
+          "payoff": 2.1805826942993036,
+          "payoff_usdt": 2.152729475396556,
+          "median_net_pct": -1.6791937529937746
+        }
+      },
+      "slippage_5bp": {
+        "all": {
+          "final_usdt": 5778.183710029295,
+          "multiple": 5.778183710029295,
+          "dd_mark_pct": 33.16969718623216,
+          "dd_bound_pct": 33.55010532021146,
+          "trades": 1676,
+          "win_pct": 29.773269689737468,
+          "payoff": 3.411788227272911,
+          "payoff_usdt": 2.8982196456450766,
+          "median_net_pct": -3.2564244341778283
+        },
+        "dev": {
+          "final_usdt": 5642.473104072658,
+          "multiple": 5.642473104072658,
+          "dd_mark_pct": 28.899859577342134,
+          "dd_bound_pct": 29.38719066668829,
+          "trades": 1166,
+          "win_pct": 29.93138936535163,
+          "payoff": 3.7240826714117548,
+          "payoff_usdt": 3.105446412535741,
+          "median_net_pct": -3.27449133538284
+        },
+        "2025": {
+          "final_usdt": 5360.594659576158,
+          "multiple": 0.9500434580196679,
+          "dd_mark_pct": 27.008144191436234,
+          "dd_bound_pct": 28.568866059787435,
+          "trades": 272,
+          "win_pct": 22.426470588235293,
+          "payoff": 3.126848729316916,
+          "payoff_usdt": 3.011588751831381,
+          "median_net_pct": -3.4735951769331184
+        },
+        "2026": {
+          "final_usdt": 5778.183710029295,
+          "multiple": 1.0778997624278785,
+          "dd_mark_pct": 12.44192353657273,
+          "dd_bound_pct": 13.752720463250013,
+          "trades": 223,
+          "win_pct": 35.42600896860987,
+          "payoff": 2.1772989463331203,
+          "payoff_usdt": 2.152307223400123,
+          "median_net_pct": -0.9546887269781404
+        }
+      }
+    },
+    "opposite_1p618_x_2": {
+      "control": {
+        "all": {
+          "final_usdt": 4690.801010811481,
+          "multiple": 4.690801010811481,
+          "dd_mark_pct": 35.97553371931992,
+          "dd_bound_pct": 36.32169621094439,
+          "trades": 1814,
+          "win_pct": 20.61742006615215,
+          "payoff": 5.256150378168239,
+          "payoff_usdt": 4.588675751469596,
+          "median_net_pct": -3.2404925186651043
+        },
+        "dev": {
+          "final_usdt": 3972.706220390674,
+          "multiple": 3.972706220390674,
+          "dd_mark_pct": 35.97553371931992,
+          "dd_bound_pct": 36.32169621094439,
+          "trades": 1263,
+          "win_pct": 20.74425969912906,
+          "payoff": 5.39947019059696,
+          "payoff_usdt": 4.607875327879986,
+          "median_net_pct": -3.3402902169824618
+        },
+        "2025": {
+          "final_usdt": 4660.548781788648,
+          "multiple": 1.1731420656950395,
+          "dd_mark_pct": 30.992784583220654,
+          "dd_bound_pct": 31.319947721994012,
+          "trades": 284,
+          "win_pct": 17.253521126760564,
+          "payoff": 5.164644886242317,
+          "payoff_usdt": 4.689812389174928,
+          "median_net_pct": -3.193297471560985
+        },
+        "2026": {
+          "final_usdt": 4690.801010811481,
+          "multiple": 1.006491130216477,
+          "dd_mark_pct": 18.59195171304806,
+          "dd_bound_pct": 19.391774044072896,
+          "trades": 250,
+          "win_pct": 21.2,
+          "payoff": 3.90988643658221,
+          "payoff_usdt": 3.8512013543375536,
+          "median_net_pct": -2.265114238582527
+        }
+      },
+      "paired_signals": {
+        "all": {
+          "final_usdt": 8114.675491518212,
+          "multiple": 8.114675491518211,
+          "dd_mark_pct": 43.31961166463297,
+          "dd_bound_pct": 43.71177666980083,
+          "trades": 1561,
+          "win_pct": 24.2152466367713,
+          "payoff": 4.725441068857586,
+          "payoff_usdt": 4.025255581905863,
+          "median_net_pct": -3.509678893887616
+        },
+        "dev": {
+          "final_usdt": 5519.931886031205,
+          "multiple": 5.519931886031205,
+          "dd_mark_pct": 43.31961166463297,
+          "dd_bound_pct": 43.71177666980083,
+          "trades": 1130,
+          "win_pct": 23.716814159292035,
+          "payoff": 4.988338051467773,
+          "payoff_usdt": 4.058086161496213,
+          "median_net_pct": -3.6010353383858247
+        },
+        "2025": {
+          "final_usdt": 6836.651373635919,
+          "multiple": 1.2385390825087566,
+          "dd_mark_pct": 26.040765671971478,
+          "dd_bound_pct": 26.645691537747872,
+          "trades": 219,
+          "win_pct": 21.00456621004566,
+          "payoff": 4.132602021540717,
+          "payoff_usdt": 3.7394993318440033,
+          "median_net_pct": -3.469014751120103
+        },
+        "2026": {
+          "final_usdt": 8114.675491518212,
+          "multiple": 1.186937149203003,
+          "dd_mark_pct": 15.073633537869913,
+          "dd_bound_pct": 16.981567930576634,
+          "trades": 196,
+          "win_pct": 27.55102040816326,
+          "payoff": 3.713816620385315,
+          "payoff_usdt": 3.637085699470672,
+          "median_net_pct": -3.338805918311997
+        }
+      },
+      "slippage_5bp": {
+        "all": {
+          "final_usdt": 10596.911451162163,
+          "multiple": 10.596911451162162,
+          "dd_mark_pct": 35.37509273763402,
+          "dd_bound_pct": 35.81934075233087,
+          "trades": 1676,
+          "win_pct": 23.210023866348447,
+          "payoff": 5.090611057794015,
+          "payoff_usdt": 4.291020626798687,
+          "median_net_pct": -3.500548377380724
+        },
+        "dev": {
+          "final_usdt": 7886.105329288022,
+          "multiple": 7.886105329288022,
+          "dd_mark_pct": 33.68598942255561,
+          "dd_bound_pct": 34.1620766589931,
+          "trades": 1166,
+          "win_pct": 22.898799313893655,
+          "payoff": 5.53634463402565,
+          "payoff_usdt": 4.497523373086936,
+          "median_net_pct": -3.5451542983351807
+        },
+        "2025": {
+          "final_usdt": 8802.385170033427,
+          "multiple": 1.116189145653743,
+          "dd_mark_pct": 29.125032228451133,
+          "dd_bound_pct": 30.362632109541977,
+          "trades": 272,
+          "win_pct": 19.11764705882353,
+          "payoff": 4.396657977088139,
+          "payoff_usdt": 4.125175204993374,
+          "median_net_pct": -3.5881943421842437
+        },
+        "2026": {
+          "final_usdt": 10596.911451162163,
+          "multiple": 1.2038681841869368,
+          "dd_mark_pct": 14.120310590234253,
+          "dd_bound_pct": 15.905187399256393,
+          "trades": 223,
+          "win_pct": 26.905829596412556,
+          "payoff": 3.7657212829516613,
+          "payoff_usdt": 3.763868607298221,
+          "median_net_pct": -3.0224182073727115
+        }
+      }
+    }
+  },
+  "costs_and_limits": {
+    "starting_equity_usdt": 1000,
+    "market_entry_and_exit_fee_per_fill": 0.0005,
+    "resting_limit_exit_fee_per_fill": 0.0002,
+    "slippage_stress": "additional 5bp per taker fill; maker limit exits do not receive market slippage",
+    "funding": "not modeled",
+    "capacity": "shared 1000U, nine concurrent position slots, parent same-symbol and same-time ordering; no exchange depth or market-impact model",
+    "fills": "OHLC target touches are treated as resting-limit fills at target price; real queue position and non-fill probability are not modeled",
+    "liquidation": "no exchange-specific maintenance-margin tier/liquidation model; this experiment changes exit geometry only and does not imply leveraged liquidation safety",
+    "ohlc_ordering": "inherits the frozen VectorBT engine's opening-trigger and intrabar priority, ambiguity flags, and exact stop/cloud semantics"
+  },
+  "outputs": {
+    "target_paths_csv_gz": "experiments/active/exp-cloud-close-week-target-20261109-v1/target_paths.csv.gz",
+    "account_metrics_csv": "experiments/active/exp-cloud-close-week-target-20261109-v1/account_metrics.csv",
+    "summary_json": "experiments/active/exp-cloud-close-week-target-20261109-v1/summary.json"
+  }
+}
