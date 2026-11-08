@@ -1,0 +1,126 @@
+{
+  "experiment_id": "exp-cloud-close-reinvest-runner-20261109-v1",
+  "development_pass": false,
+  "original_capacity_event_set_matches_frozen": 1569,
+  "zero_add_baseline_reconciliation": {
+    "events": 1569,
+    "max_abs_cash_pnl_diff": 5.6843418860808015e-12,
+    "max_abs_notional_diff": 5.6843418860808015e-12,
+    "total_cash_pnl_diff": -1.486413769846706e-11,
+    "total_notional_diff": -2.864339876396116e-09,
+    "identity_mismatches": {
+      "symbol": 0,
+      "side": 0,
+      "entry_ms": 0,
+      "exit_bar_ms": 0
+    }
+  },
+  "zero_add_hourly_reconciliation": {
+    "hours": 59532,
+    "max_abs_by_field": {
+      "nav": 3.637978807091713e-11,
+      "open_nav": 3.637978807091713e-11,
+      "open_exit_nav": 3.637978807091713e-11,
+      "lower_nav": 3.637978807091713e-11,
+      "upper_nav": 3.637978807091713e-11
+    },
+    "hours_over_1e_6": 0
+  },
+  "zero_add_account": {
+    "original_selected": 1569,
+    "original_funded": 1569,
+    "original_no_cash": 0,
+    "reinvest_candidates": 0,
+    "reinvest_funded": 0,
+    "reinvest_no_cash": 0,
+    "total_fees": 898.6415300176881,
+    "missing_hour_marks": 0,
+    "cash_from_orders": 8788.773973322894,
+    "cash_from_position_ledger": 8788.773973322895,
+    "final_nav": 8788.773972912808,
+    "candidate_counts": {
+      "opportunities_on_funded_originals": 0
+    },
+    "admission_skips": {
+      "same_contract": 695,
+      "all_slots_busy": 9516
+    }
+  },
+  "account": {
+    "original_selected": 1569,
+    "original_funded": 1569,
+    "original_no_cash": 0,
+    "reinvest_candidates": 381,
+    "reinvest_funded": 376,
+    "reinvest_no_cash": 5,
+    "total_fees": 2134.983339883213,
+    "missing_hour_marks": 0,
+    "cash_from_orders": 21125.83811739237,
+    "cash_from_position_ledger": 21125.838117392374,
+    "final_nav": 21125.838106269774,
+    "candidate_counts": {
+      "opportunities_on_funded_originals": 381,
+      "eligible_reentry": 381,
+      "proven_addon_stop_first_same_bar": 17
+    },
+    "admission_skips": {
+      "same_contract": 695,
+      "all_slots_busy": 9516
+    }
+  },
+  "parent_level_metrics": {
+    "all": {
+      "final_usdt": 21125.838106269774,
+      "multiple": 21.125838106269775,
+      "dd_mark_pct": 49.95235166950942,
+      "dd_bound_pct": 57.81495442938089,
+      "trades": 1569,
+      "win_pct": 24.792861695347355,
+      "payoff": 4.118832447960396,
+      "payoff_usdt": 4.138327081321558,
+      "median_net_pct": -3.057348220516398
+    },
+    "dev": {
+      "final_usdt": 17406.336404026028,
+      "multiple": 17.406336404026028,
+      "dd_mark_pct": 44.69782910253609,
+      "dd_bound_pct": 48.08661474717355,
+      "trades": 1085,
+      "win_pct": 24.792626728110598,
+      "payoff": 4.829647528587819,
+      "payoff_usdt": 4.741365867159188,
+      "median_net_pct": -3.0995083167881914
+    },
+    "2025": {
+      "final_usdt": 20078.4186890515,
+      "multiple": 1.1535120442925273,
+      "dd_mark_pct": 49.95235166950942,
+      "dd_bound_pct": 57.81495442938089,
+      "trades": 258,
+      "win_pct": 19.767441860465116,
+      "payoff": 2.3913006250840225,
+      "payoff_usdt": 3.413780864447262,
+      "median_net_pct": -3.301622722136073
+    },
+    "2026": {
+      "final_usdt": 21125.838106269774,
+      "multiple": 1.0521664297093982,
+      "dd_mark_pct": 31.208241045460603,
+      "dd_bound_pct": 32.75626204788856,
+      "trades": 210,
+      "win_pct": 27.61904761904762,
+      "payoff": 2.289290453901134,
+      "payoff_usdt": 3.240567779932835,
+      "median_net_pct": -1.974252343583084
+    }
+  },
+  "reentry_trade_metrics": {
+    "trades": 376,
+    "total_cash_pnl": 7978.179003079524,
+    "win_pct": 32.4468085106383,
+    "mean_win_usdt": 219.85938549276216,
+    "mean_loss_usdt": -74.19159853164355,
+    "payoff_usdt": 2.9634000324037992
+  },
+  "checks": {}
+}
