@@ -157,7 +157,8 @@ def main():
             for t in f['rank_times']:
                 membership[t]=membership.get(t,0)+1
         if r['fill_columns']:
-            parts.append(pd.read_csv(slot/'fills.csv.gz',float_precision='round_trip',keep_default_na=False))
+            parts.append(pd.read_csv(slot/'fills.csv.gz',dtype={'symbol':str},
+                                     float_precision='round_trip',keep_default_na=False))
     paths=pd.concat(parts,ignore_index=True)
     if paths.duplicated(['event_id','tp_r']).any() or not paths.groupby('event_id').size().eq(2).all():
         raise ValueError('Duplicated or incomplete event paths')
