@@ -4,6 +4,7 @@
   "signal_cutoff_exclusive_utc": "2026-10-28T00:00:00Z",
   "provenance": {
     "experiment_id": "exp-monday-breadth-extension-20261108-v1",
+    "spacing_study": "experiments/active/exp-monday-breadth-alt-spacing-20261108-v1/portfolio_summary.csv",
     "event_sources": {
       "BTC": "experiments/active/exp-monday-breadth-extension-20261108-v1/risk/integrated_btc_events.parquet",
       "ALT": "experiments/active/exp-monday-breadth-extension-20261108-v1/alt/event_results.csv.gz + alt/member_strategy_returns.parquet"
@@ -323,6 +324,138 @@
       "matched_months": 9.0,
       "p_month": 0.38671875,
       "source": "risk/integrated_controls.csv"
+    },
+    "september_case_review": {
+      "without_case_growth_pct": 32.562148698402126,
+      "slipped_funded_points": 9805.55603251294
+    },
+    "frequency_review": {
+      "spacing": [
+        {
+          "minimum_gap_hours": 24,
+          "period": "2026_to_2026-10-27",
+          "alt_legs": 25,
+          "total_legs": 48,
+          "distinct_entry_times": 48,
+          "combo_50_50_fee_only_growth_pct": 43.010718439740806,
+          "combo_50_50_settlement_drawdown_pct": 3.535969241449033,
+          "raw_rule_signals": 42,
+          "new_vs_24h": 0,
+          "replaced_24h": 0,
+          "new_mean_net_pct": null,
+          "new_win_pct": null
+        },
+        {
+          "minimum_gap_hours": 24,
+          "period": "all_history",
+          "alt_legs": 239,
+          "total_legs": 398,
+          "distinct_entry_times": 398,
+          "combo_50_50_fee_only_growth_pct": 466.5972646107158,
+          "combo_50_50_settlement_drawdown_pct": 24.070678351757092,
+          "raw_rule_signals": 538,
+          "new_vs_24h": 0,
+          "replaced_24h": 0,
+          "new_mean_net_pct": null,
+          "new_win_pct": null
+        },
+        {
+          "minimum_gap_hours": 12,
+          "period": "2026_to_2026-10-27",
+          "alt_legs": 28,
+          "total_legs": 51,
+          "distinct_entry_times": 51,
+          "combo_50_50_fee_only_growth_pct": 41.72109601853887,
+          "combo_50_50_settlement_drawdown_pct": 4.651343411047115,
+          "raw_rule_signals": 42,
+          "new_vs_24h": 3,
+          "replaced_24h": 0,
+          "new_mean_net_pct": -0.6983000584769972,
+          "new_win_pct": 33.33333333333333
+        },
+        {
+          "minimum_gap_hours": 12,
+          "period": "all_history",
+          "alt_legs": 269,
+          "total_legs": 428,
+          "distinct_entry_times": 428,
+          "combo_50_50_fee_only_growth_pct": 377.4274134027999,
+          "combo_50_50_settlement_drawdown_pct": 27.21032990825304,
+          "raw_rule_signals": 538,
+          "new_vs_24h": 34,
+          "replaced_24h": 4,
+          "new_mean_net_pct": -1.502164076026462,
+          "new_win_pct": 32.35294117647059
+        },
+        {
+          "minimum_gap_hours": 6,
+          "period": "2026_to_2026-10-27",
+          "alt_legs": 28,
+          "total_legs": 51,
+          "distinct_entry_times": 51,
+          "combo_50_50_fee_only_growth_pct": 41.72109601853887,
+          "combo_50_50_settlement_drawdown_pct": 4.651343411047115,
+          "raw_rule_signals": 42,
+          "new_vs_24h": 3,
+          "replaced_24h": 0,
+          "new_mean_net_pct": -0.6983000584769972,
+          "new_win_pct": 33.33333333333333
+        },
+        {
+          "minimum_gap_hours": 6,
+          "period": "all_history",
+          "alt_legs": 300,
+          "total_legs": 459,
+          "distinct_entry_times": 459,
+          "combo_50_50_fee_only_growth_pct": 377.6680170106355,
+          "combo_50_50_settlement_drawdown_pct": 27.55650106672204,
+          "raw_rule_signals": 538,
+          "new_vs_24h": 64,
+          "replaced_24h": 3,
+          "new_mean_net_pct": -0.8075948498082414,
+          "new_win_pct": 40.625
+        }
+      ],
+      "higher_frequency_2026": [
+        {
+          "candidate_id": "account_36",
+          "n": 71,
+          "funded_mean": -0.198620022146172,
+          "marked_close_dd_before_funding": 41.58112684524065
+        },
+        {
+          "candidate_id": "account_72",
+          "n": 229,
+          "funded_mean": -0.0656869528592681,
+          "marked_close_dd_before_funding": 46.89349129151843
+        }
+      ],
+      "marks_2026": [
+        {
+          "minimum_gap_hours": 24,
+          "events": 25,
+          "fee_marked_dd_pct": 6.575272854868808,
+          "funded_events": 25,
+          "funded_growth_pct": 42.02771557722302,
+          "funded_marked_dd_pct": 6.585153626570717
+        },
+        {
+          "minimum_gap_hours": 12,
+          "events": 28,
+          "fee_marked_dd_pct": 7.887349185007874,
+          "funded_events": 28,
+          "funded_growth_pct": 40.75068447307659,
+          "funded_marked_dd_pct": 7.927874495843512
+        },
+        {
+          "minimum_gap_hours": 6,
+          "events": 28,
+          "fee_marked_dd_pct": 7.887349185007874,
+          "funded_events": 28,
+          "funded_growth_pct": 40.75068447307659,
+          "funded_marked_dd_pct": 7.927874495843512
+        }
+      ]
     }
   },
   "equity_curves": {

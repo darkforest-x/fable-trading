@@ -77,3 +77,35 @@ test('each entry links its own candles, and the September replay labels the two 
   assert.deepEqual(basket.members.map(m=>m.symbol).sort(),alt.members.map(m=>m.symbol).sort());
   for(const m of basket.members)assert.equal(m.chart.symbol,m.symbol);
 });
+
+test('booklet examples open the actual fills and use the displayed cost scope', () => {
+  const year=ui.rulesHTML(data,{scope:'2026_actual_funded'});
+  const all=ui.rulesHTML(data,{scope:'all_history_fee_only'});
+  for(const html of [year,all]){
+    assert.match(html,/data-breadth-case="BTC\|2026-09-15T19:20:00Z"/);
+    assert.match(html,/data-breadth-case="ALT\|2026-10-23T22:55:00Z" data-member="1000LUNCUSDT"/);
+    assert.match(html,/86,325/);
+  }
+  assert.match(year,/10,005\.75/);
+  assert.match(year,/篮子 \+2\.44%/);
+  assert.match(all,/篮子 \+2\.45%/);
+  assert.match(year,/单币 \+2\.80%/);
+  assert.match(all,/单币 \+2\.81%/);
+  assert.match(ui.originHTML(),/13 根/);
+});
+
+test('branch contributions reconcile within each rebased 1,000 USDT account', () => {
+  const year=ui.statsHTML(data,{scope:'2026_actual_funded'});
+  for(const pnl of ['+207.53','+107.30','+105.44'])assert.ok(year.includes(pnl));
+  const all=ui.statsHTML(data,{scope:'all_history_fee_only'});
+  for(const pnl of ['+2,193.33','+914.97','+1,557.67'])assert.ok(all.includes(pnl));
+  assert.ok(all.includes('-22.27%'));
+});
+
+test('cadence comparison keeps settlement risk separate from five-minute marked risk', () => {
+  const year=ui.statsHTML(data,{scope:'2026_actual_funded'});
+  for(const label of ['+43.01%','+41.72%','3.54%','7.89%','7.93%','+40.75%','28 / 28','-0.70%','42 个山寨信号','含资金费盯市回撤'])assert.ok(year.includes(label),label);
+  const all=ui.statsHTML(data,{scope:'all_history_fee_only'});
+  for(const label of ['+377.67%','+377.43%','64 / 3','34 / 4','538 个山寨信号'])assert.ok(all.includes(label),label);
+  assert.ok(!all.includes('含资金费盯市回撤'));
+});

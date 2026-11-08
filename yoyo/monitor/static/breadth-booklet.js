@@ -58,9 +58,12 @@
     const period=funded?'2026_to_2026-10-27':'all_history';
     const rows=review.spacing.filter(r=>r.period===period);
     const tableRows=rows.map(r=>[r.minimum_gap_hours+' 小时',r.alt_legs,r.total_legs,pct(r.combo_50_50_fee_only_growth_pct),pct(r.combo_50_50_settlement_drawdown_pct,false),r.new_vs_24h+' / '+r.replaced_24h,pct(r.new_mean_net_pct),pct(r.new_win_pct,false)]);
-    return note((funded?'2026 年至 10 月 27 日':'2020 年至 2026 年 10 月 27 日')+'。只改山寨两次入场之间的最短间隔，持仓仍为六小时。BTC 的入场、退出和 50% 起始配置沿用现版。三行都从 1,000 USDT 起步，仅扣手续费。')+
+    const markedRows=review.marks_2026.map(r=>[r.minimum_gap_hours+' 小时',pct(r.fee_marked_dd_pct,false),r.funded_events+' / '+r.events,pct(r.funded_growth_pct),pct(r.funded_marked_dd_pct,false)]);
+    return note((funded?'2026 年至 10 月 27 日':'2020 年至 2026 年 10 月 27 日')+'。共有 '+rows[0].raw_rule_signals+' 个山寨信号满足价格和币数条件。只改两次入场之间的最短间隔，持仓仍为六小时。BTC 的入场、退出和 50% 起始配置沿用现版。三行都从 1,000 USDT 起步，仅扣手续费。')+
       table(['最短间隔','山寨笔数','组合笔数','组合净收益','结算回撤','新入选 / 被替换','新增笔均收益','新增胜率'],tableRows)+
-      note('新入选和被替换均与 24 小时原版逐笔比较。收益按每次实际占用资金复利。结算回撤只看平仓时点，持仓期间可能承受更大回撤。新增交易的资金费、5 分钟盯市和匹配随机入场尚未核实。');
+      note('新入选和被替换均与 24 小时原版逐笔比较。收益按每次实际占用资金复利。结算回撤只看平仓时点，持仓期间可能承受更大回撤。新增事件缺少匹配随机对照。')+
+      note(funded?'这一年，缩到 12 小时多出 3 笔。再缩到 6 小时，入选的仍是同样 3 笔。三笔中仅一笔赚钱。':'全历史缩到 6 小时，实际新增 64 笔，同时挤掉原版 3 笔。新增单的胜率为 40.63%，更多的成交降低了组合收益。')+
+      (funded?table(['最短间隔','仅手续费盯市回撤','资金费完整篮子','含资金费组合收益','含资金费盯市回撤'],markedRows)+note('盯市按两边资金的同期 5 分钟收盘净值计算。含资金费结果仅列出每笔均有覆盖的组合。'):'');
   }
 
   function frequencyHTML(data, funded, entries) {
@@ -82,7 +85,7 @@
       '<details class="bb-panel bb-details"><summary>曾试过的高频组合 · 2026 年至 10 月 27 日</summary>'+
       note('将 BTC、ETH、SOL 和山寨篮子四路提醒合到一个账户，空仓时接最早一笔。下表中的 36 和 72 是选规则时设定的年度笔数门槛。')+
       table(['候选','入场数','含资金费笔均收益','5 分钟盯市回撤'],frequent)+
-      note('表中回撤扣双边手续费、未计资金费。两个高频组合的信号对匹配随机入场均未显示显著优势。')+'</details>';
+      note('表中回撤扣双边手续费、未计资金费。加上资金费，两档的笔均收益都是负数。两个账户与匹配随机入场的差异均未达到显著水平。')+'</details>';
   }
 
   function statsHTML(data, {scope='2026_actual_funded',history}={}) {
