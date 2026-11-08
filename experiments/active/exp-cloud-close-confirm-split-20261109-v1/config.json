@@ -1,0 +1,8 @@
+{
+  "id": "exp-cloud-close-confirm-split-20261109-v1",
+  "parent": "exp-cloud-close-flip-confirm-20261109-v1 development winner confirmed_1x12h. Keep the native fixed stop protective intrabar. On first actually confirmed opposite 12H EMA spread exit at the next available same-boundary H1 open. Prior ATR priority, 9 slots, whole native signal cohort. Parent partial 75% increased the win rate but actual money payoff was below 2.5, making a larger remaining position worth testing.",
+  "factor": "Fraction of the initial position paid at original 2R instead of remaining on the once-confirmed EMA runner. Weights [0,0.25,0.5,0.625,0.75,1]. Use the saved 2R and runner fill columns. Slot lifetime is the actual last leg lifetime; the 100% target policy releases after the sole target leg closes.",
+  "fractions": [0,0.25,0.5,0.625,0.75,1],
+  "selection": "Through 2024 choose maximum dev terminal NAV with >=100 trades, >=30% paid winners, both return and funded USDT payoff >=2.5, and <=35% hourly DD upper bound. No selection if all fail. For a new selected rule retain ledger/curve, paired controls and 5bp adverse market slip. Both later years previously explored.",
+  "runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_confirm_split"
+}
