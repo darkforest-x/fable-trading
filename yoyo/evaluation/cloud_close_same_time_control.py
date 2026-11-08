@@ -87,10 +87,10 @@ def new_paths(matches,tops):
     return pd.concat(all_rows,ignore_index=True)
 
 
-def returns(paths):
+def returns(paths, fraction=.75):
     p=paths.copy()
     pnl=p.side*(p.exit_price-p.entry_price)-wallet.TAKER*p.entry_price-p.exit_fee_rate*p.exit_price
-    p['weighted']=pnl/p.entry_price*np.where(p.tp_r.eq(2),.75,.25)
+    p['weighted']=pnl/p.entry_price*np.where(p.tp_r.eq(2),fraction,1.-fraction)
     return p.groupby('parent_id').agg(net=('weighted','sum'),entry=('entry_ms','min'),last=('exit_bar_ms','max'))
 
 
