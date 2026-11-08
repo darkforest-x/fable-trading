@@ -105,7 +105,7 @@ def price(symbol):
     if receipt.exists():
         return json.loads(receipt.read_text())
     bars=input_frame(symbol,work)
-    events=keys.build_inputs(bars,symbol,None,key_timeframes=['12H'],source_minutes=15)[4]
+    events=keys.build_inputs(bars,symbol,None,key_timeframes=['12H'],source_minutes=15)[4].reset_index(drop=True)
     if events.empty:
         events=pd.DataFrame(columns=['tf','close_ns','signal_id','week','side','stop'])
     hours=bars[(bars.index.as_unit('ms').asi8>=venue.START)]
