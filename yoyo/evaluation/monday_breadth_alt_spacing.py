@@ -372,8 +372,8 @@ def run() -> None:
                 "max_idle_after_exit_hours": metrics["max_idle_after_exit_hours"],
                 "active_months": metrics["active_months"],
                 **matched,
-                "funding_coverage": "fee-only; no additional funding was collected",
-                "mark_to_market_coverage": "settlement-only for all three arms; new 5m marks not collected",
+                "funding_coverage": "not applied in this fee-only table; see sibling marks_2026.csv for explicit 2026 funding coverage",
+                "mark_to_market_coverage": "not included in this settlement-only table; see sibling marks_2026.csv for 2026 5m path coverage",
                 "notes": "Entry outcomes are the existing 6h VectorBT payoff cache after 5bp taker on each fill; DD is settlement DD, not marked DD. 12h/6h spacing is post-hoc.",
             })
             scoped_months = all_selected.groupby("year_month", sort=True)
@@ -427,8 +427,8 @@ def run() -> None:
                 "original_24h_2026_funded_growth_pct": float(old_reference.growth_pct),
                 "original_24h_2026_marked_drawdown_pct": float(old_reference.max_dd_pct),
                 "original_24h_2026_reference_legs": int(old_reference.btc_n + old_reference.alt_n),
-                "funding_coverage": "all three cadence arms use fee-only event returns; no new funding applied",
-                "mark_to_market_coverage": "all three cadence arms use settlement DD; no new 5m marks applied",
+                "funding_coverage": "fee-only in this table; sibling marks_2026.csv separately reports 2026 funding coverage",
+                "mark_to_market_coverage": "settlement DD in this table; sibling marks_2026.csv separately reports 2026 5m mark coverage",
                 "notes": "50/50 means two independent, unlevered 1x sleeves funded with half the initial capital each; profits remain in sleeve; settlement DD samples exits only. Original 2026 funded/5m marked numbers are shown as a separate frozen 24h reference.",
             }
             portfolio.append(row)
@@ -455,7 +455,7 @@ def run() -> None:
         "btc_lock_2026_entries": int(btc.decision.ge(OOS_START).sum()),
         "control_source": str(ALT_CONTROL.relative_to(ROOT)),
         "control_limit": "Only existing 2026 matched controls for original baseline entry clocks are reused; no controls inferred for new entries.",
-        "risk_limit": "Fee-only returns and trade-settlement drawdown; no new funding or 5m marks were collected. Existing 24h funded/marked reference remains separately identified.",
+        "risk_limit": "spacing_summary.csv and portfolio_summary.csv contain fee-only returns and settlement drawdown only. The separate mark_2026.py -> marks_2026.csv reports 2026 5m mark-to-market and funding coverage by cadence; missing observations stay explicit. Existing 24h funded/marked reference remains separately identified.",
         "outputs": ["spacing_summary.csv", "portfolio_summary.csv", "monthly_summary.csv", "events.csv", "manifest.json"],
         "generated_at_utc": pd.Timestamp.now(tz="UTC").isoformat(),
     }
