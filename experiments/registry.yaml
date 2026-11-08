@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-top20-peak10r-20261108-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 28698414e0
+    status: inconclusive
+    question: Which OKX frozen Top20 SPIKE V1.7 12H weekly references reached a strict post-confirmation peak above 10R?
+    single_variable: Descriptive census plus fixed pre-2025 feature splits and a same-path confirmation-close risk-basis sensitivity.
+    result: 209 confirmed hits among 1292 references; 1065 definite misses, zero straddling 10R, 18 open below threshold. All 20 symbols have a hit. Just 98 also clear 10R from confirmation close relative to its distance to the original stop. Higher confirmation distance improves chart-threshold frequency in 2025 and 2026, but changes sign in 2026 from the confirmation-price basis.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: [cloud-top20-peak10r-ledger-20261108-v1]
+    canonical_report: experiments/active/exp-cloud-top20-peak10r-20261108-v1/summary.json
+    notes: OKX 2026-10-31 turnover rank is retrospective. Native UTC12H, exact NY civil Monday, first eligible signal/week, chart EMA/stop excursions. 209 signals include overlapping trends; chart MFE is not realized PnL. Chinese ledger, ZIP, raw receipts, patterns and sensitivity in the experiment directory. Notion 4128856479af81aabe42f02ccee95539.
+
   - experiment_id: exp-monday-limit-alarm-episode-diag-20261108-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 3783a72b4a

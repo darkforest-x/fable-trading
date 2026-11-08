@@ -19,6 +19,18 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: cloud-top20-peak10r-ledger-20261108-v1
+    artifact_type: manifest
+    role: chart_reference_excursion_census_and_outcome_controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: f97629bae3
+    source_path: experiments/active/exp-cloud-top20-peak10r-20261108-v1/signals.csv
+    storage_uri: repo://experiments/active/exp-cloud-top20-peak10r-20261108-v1/signals.csv
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Complete 1292-row census, Chinese 209-row definite-hit list and 209 local PNGs in the sibling ZIP. Raw native and archived candle snapshots stay local.
+
   - artifact_id: monday-breadth-extension-20261108-v1
     artifact_type: manifest
     role: breadth_alternative_entry_exit_and_sleeve_comparison
