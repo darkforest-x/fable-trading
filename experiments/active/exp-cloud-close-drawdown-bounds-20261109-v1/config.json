@@ -71,7 +71,7 @@
     ],
     "audit_csv": "data/research/cloud_close_drawdown_bounds_20261109/acquisition_audit.csv"
   },
-  "builder": "python3 -m yoyo.evaluation.cloud_close_drawdown_quotes --fetch",
+  "builder": ".venv/bin/python -m yoyo.evaluation.cloud_close_drawdown_quotes --fetch",
   "evaluation": "Revalue only the frozen 2/3 partial funded holdings in the four H1 troughs exceeding the historic 35% bound and their single binding H1 peak. Use synchronous 5m OHLC, retain both frozen fill and holding marks in any stop-crossing 5m bar, keep native H1 extremes for any missing ticker-hour. Leave all other historical bounds and all fills unchanged. Compare with 35% and disclose hourly and 5m conservative bounds.",
   "evaluation_runner": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_drawdown_bounds"
 }

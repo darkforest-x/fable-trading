@@ -245,9 +245,9 @@ def _same_ohlc(
     left: tuple[float, float, float, float],
     right: tuple[float, float, float, float],
 ) -> bool:
-    return all(
+    return len(left) == len(right) == 4 and all(
         abs(a - b) <= max(1e-12, abs(b) * 1e-10)
-        for a, b in zip(left, right, strict=True)
+        for a, b in zip(left, right)
     )
 
 
