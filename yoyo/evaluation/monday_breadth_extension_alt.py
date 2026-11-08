@@ -983,32 +983,57 @@ def build_oos_trajectory(actual_ledger: pd.DataFrame, oos_paths: dict,
             event_complete = all_prices
             if event_complete:
                 full_event_count += 1
+            n_members = len(valid_members)
+            steps_axis = np.arange(maximum + 1)
+            exit_steps = np.asarray([item[2] for item in valid_members], dtype=int)
+            funded_ok = np.asarray([item[3] for item in valid_members], dtype=bool)
+            net_marks = np.full((n_members, maximum + 1), np.nan, dtype=float)
+            funded_marks = np.full((n_members, maximum + 1), np.nan, dtype=float)
+            for member_i, (row, path, exit_step, fund_ok) in enumerate(valid_members):
+                entry = float(row.entry_open)
+                net_curve = 100 * (np.asarray(path[:maximum + 1], dtype=float) / entry - 1) - 2 * FEE_PER_SIDE_PP
+                net_curve[steps_axis >= exit_step] = float(row.selected_net_pct)
+                net_marks[member_i] = net_curve
+                if not fund_ok:
+                    continue
+                history = histories.get(str(row.symbol), pd.DataFrame())
+                settlements = _actual_settlements(history, row.decision, row.selected_exit_time)
+                if len(settlements) and not (np.isfinite(settlements.realized_rate).all()
+                                             and np.isfinite(settlements.mark_price).all()):
+                    funded_ok[member_i] = False
+                    continue
+                step_costs = np.zeros(maximum + 1, dtype=float)
+                if len(settlements):
+                    cash_cost = (settlements.realized_rate * settlements.mark_price).to_numpy(dtype=float)
+                    if row.decision in settlements.index:
+                        i = settlements.index.get_loc(row.decision)
+                        cash_cost[i] -= min(float(cash_cost[i]), 0.0)
+                    if row.selected_exit_time != row.decision and row.selected_exit_time in settlements.index:
+                        i = settlements.index.get_loc(row.selected_exit_time)
+                        cash_cost[i] -= min(float(cash_cost[i]), 0.0)
+                    settlement_steps = np.rint(
+                        (settlements.index.asi8 - row.decision.value) / (5 * 60 * 1e9)
+                    ).astype(int)
+                    in_range = (settlement_steps >= 0) & (settlement_steps <= exit_step)
+                    np.add.at(step_costs, settlement_steps[in_range], cash_cost[in_range])
+                funding_pct = np.cumsum(step_costs) * 100 / entry
+                funded_curve = net_curve - funding_pct
+                funded_curve[steps_axis >= exit_step] = float(row.selected_funded_net_pct)
+                funded_marks[member_i] = funded_curve
             for basis in ("net", "funded"):
-                complete_basis = event_complete and (basis == "net" or all(x[3] for x in valid_members))
+                complete_basis = event_complete and (basis == "net" or bool(funded_ok.all()))
                 s = state[basis]
                 running_peak = s["peak"]
+                mark_matrix = net_marks if basis == "net" else funded_marks
+                if n_members:
+                    event_marks = mark_matrix.mean(axis=0)
+                    active_counts = (exit_steps[:, None] > steps_axis[None, :]).sum(axis=0)
+                else:
+                    event_marks = np.full(maximum + 1, np.nan)
+                    active_counts = np.zeros(maximum + 1, dtype=int)
                 for step in range(maximum + 1):
                     clock = decision + pd.Timedelta(minutes=5 * step)
-                    member_marks = []
-                    active = 0
-                    for row, path, exit_step, fund_ok in valid_members:
-                        if step >= exit_step:
-                            value = row.selected_net_pct if basis == "net" else row.selected_funded_net_pct
-                        else:
-                            active += 1
-                            mark_price = path[step]
-                            value = 100 * (mark_price / row.entry_open - 1) - 2 * FEE_PER_SIDE_PP
-                            if basis == "funded":
-                                if not fund_ok:
-                                    value = np.nan
-                                else:
-                                    cost = _funding_cost_at(
-                                        histories.get(str(row.symbol), pd.DataFrame()),
-                                        row.decision, clock,
-                                    )
-                                    value -= 100 * cost / row.entry_open if np.isfinite(cost) else np.nan
-                        member_marks.append(value)
-                    mark = float(np.mean(member_marks)) if member_marks and np.isfinite(member_marks).all() else np.nan
+                    mark = float(event_marks[step]) if np.isfinite(event_marks[step]) else np.nan
                     path_is_complete = complete_basis and s["path_valid"] and np.isfinite(mark)
                     account_value = s["cumulative"] + mark if path_is_complete else np.nan
                     if np.isfinite(account_value):
@@ -1026,7 +1051,7 @@ def build_oos_trajectory(actual_ledger: pd.DataFrame, oos_paths: dict,
                         "decision": decision, "clock": clock, "elapsed_hours": step / 12,
                         "expected_members": int(event.expected_members.iloc[0]),
                         "observed_members": int(len(valid_members)), "member_coverage_pct": 100 * coverage,
-                        "event_path_complete": bool(complete_basis), "open_member_positions": active,
+                        "event_path_complete": bool(complete_basis), "open_member_positions": int(active_counts[step]),
                         "event_mark_pct": mark,
                         "fixed_notional_cumulative_pnl_pp": account_value,
                         "drawdown_from_peak_pp": dd_pp,
@@ -1063,6 +1088,28 @@ def build_oos_trajectory(actual_ledger: pd.DataFrame, oos_paths: dict,
                 "equity_method": "fixed_notional_additive_event_average_pct; no compounding",
             })
     return pd.DataFrame(trajectories), pd.DataFrame(summaries)
+
+
+def resume_saved_risk() -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Rebuild only the OOS trajectory from persisted prices and funding proof rows."""
+    ledger = pd.read_parquet(OUT / "member_strategy_returns.parquet")
+    for col in ("decision", "selected_exit_time"):
+        if col in ledger:
+            ledger[col] = pd.to_datetime(ledger[col], utc=True)
+    path_rows = pd.read_parquet(OUT / "actual_oos_path_marks.parquet")
+    paths = {
+        (str(symbol), pd.Timestamp(entry).tz_convert("UTC")): group.sort_values("step_5m").mark_price.to_numpy(dtype=float)
+        for (symbol, entry), group in path_rows.groupby(["symbol", "entry_time"], sort=False)
+    }
+    proof = pd.read_parquet(OUT / "funding_history_used_2026.parquet")
+    histories = {
+        str(symbol): group.set_index("settlement_time").sort_index()
+        for symbol, group in proof.groupby("symbol", sort=False)
+    }
+    trajectory, summary = build_oos_trajectory(ledger, paths, histories)
+    trajectory.to_csv(OUT / "oos_trajectory.csv.gz", index=False, compression="gzip")
+    summary.to_csv(OUT / "oos_drawdown.csv", index=False)
+    return trajectory, summary
 
 
 def run(*, prices_only: bool = False, resume_prices: bool = False,
@@ -1409,7 +1456,13 @@ if __name__ == "__main__":
     parser.add_argument("--prices-only", action="store_true", help="materialize all constituent price outcomes first")
     parser.add_argument("--resume-prices", action="store_true", help="aggregate the persisted price stage without re-reading OHLC")
     parser.add_argument("--resume-audit", action="store_true", help="resume funding/control audit from saved quotes and native fills")
+    parser.add_argument("--resume-risk", action="store_true", help="rebuild OOS risk from saved price/funding paths only")
     args = parser.parse_args()
-    if not (args.run or args.prices_only or args.resume_prices or args.resume_audit):
-        raise SystemExit("Use --prices-only, --resume-prices, --resume-audit, or --run")
-    run(prices_only=args.prices_only, resume_prices=args.resume_prices, resume_audit=args.resume_audit)
+    if args.resume_risk:
+        trajectory, summary = resume_saved_risk()
+        print(json.dumps({"trajectory_rows": len(trajectory), "risk_summary": summary.to_dict("records")},
+                         indent=2, ensure_ascii=False, default=str), flush=True)
+    else:
+        if not (args.run or args.prices_only or args.resume_prices or args.resume_audit):
+            raise SystemExit("Use --prices-only, --resume-prices, --resume-audit, --resume-risk, or --run")
+        run(prices_only=args.prices_only, resume_prices=args.resume_prices, resume_audit=args.resume_audit)
