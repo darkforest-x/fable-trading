@@ -39,7 +39,10 @@ BASE_WEIGHTS = {"BTC": 0.50, "ALT": 0.50}
 
 
 def _git_head() -> str:
-    return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    path = OUT.relative_to(ROOT) / "builder.py"
+    return subprocess.check_output(
+        ["git", "log", "-1", "--format=%H", "--", str(path)], cwd=ROOT, text=True
+    ).strip()
 
 
 def _utc(frame: pd.DataFrame, columns: tuple[str, ...]) -> pd.DataFrame:
@@ -259,7 +262,9 @@ def overlap_metrics(events: pd.DataFrame) -> dict:
                     new_pairs += int(hits.added_vs_baseline.sum())
     repeated = counts[counts.gt(1)]
     repeated_times = set(repeated.index)
-    new_repeat_times = int(events.loc[events.added_vs_baseline].decision.isin(repeated_times).nunique())
+    new_repeat_times = int(events.loc[
+        events.added_vs_baseline & events.decision.isin(repeated_times), "decision"
+    ].nunique())
     return {
         "distinct_entries": int(events.decision.nunique()),
         "repeat_entry_times": int(len(repeated)),
@@ -352,7 +357,7 @@ def build_btc_five_minute_paths(ordinary: pd.DataFrame, case: pd.DataFrame,
     }
 
 
-def _sep16_metrics(case_events: pd.DataFrame) -> dict:
+def _sep16_metrics(case_events: pd.DataFrame, ordinary_events: pd.DataFrame) -> dict:
     local_day = case_events.decision.dt.tz_convert("Asia/Shanghai").dt.date
     sep = case_events.loc[local_day.eq(CASE_BJT_DATE)].copy()
     if len(sep) != 1:
@@ -366,6 +371,9 @@ def _sep16_metrics(case_events: pd.DataFrame) -> dict:
     prior_2026 = prior_all.loc[prior_all.decision.dt.year.eq(2026), "funded_pct"].to_numpy(dtype=float)
     equity_2026 = 250 * np.prod(1 + prior_2026 / 100)
     pnl_2026 = equity_2026 * float(row.funded_pct) / 100
+    overlaps = ordinary_events.loc[
+        ordinary_events.decision.lt(row.decision) & ordinary_events.exit_time.gt(row.decision), "decision"
+    ].sort_values()
     return {
         "sep16_admitted": True,
         "sep16_decision": row.decision,
@@ -374,12 +382,45 @@ def _sep16_metrics(case_events: pd.DataFrame) -> dict:
         "sep16_case_fee_net_pct": float(row.net_pct),
         "sep16_case_funded_pct": float(row.funded_pct),
         "sep16_case_equity_pre_usd_all_history_seed1000": float(full_equity),
-        "sep16_case_contribution_usd_all_history_seed1000": float(full_equity * row.net_pct / 100),
+        "sep16_case_contribution_usd_all_history_seed1000": float(full_equity * row.funded_pct / 100),
         "sep16_case_equity_pre_usd_2026_reset": float(equity_2026),
         "sep16_case_contribution_usd_2026_reset": float(pnl_2026),
         "sep16_case_exit_legs": int(row.exit_legs),
-        "sep16_all_history_basis": "fee-only including the Sep 16 event",
+        "sep16_overlapping_ordinary_count": int(len(overlaps)),
+        "sep16_overlapping_ordinary_decisions": " | ".join(t.isoformat() for t in overlaps),
+        "sep16_all_history_basis": "$250 initial case sleeve compounded fee-only before entry; Sep 16 PnL uses the actual funded return",
         "sep16_2026_basis": "2026-only reset; fee and actual funding included",
+    }
+
+
+def _baseline_sep16_metrics(btc_events: pd.DataFrame) -> dict:
+    local_day = btc_events.decision.dt.tz_convert("Asia/Shanghai").dt.date
+    sep = btc_events.loc[local_day.eq(CASE_BJT_DATE)].copy()
+    if len(sep) != 1 or sep.source.iloc[0] != "case":
+        raise AssertionError("The frozen below-plus-case BTC baseline must include the September 16 case")
+    row = sep.iloc[0]
+    before = btc_events.loc[btc_events.decision.lt(row.decision)].sort_values("decision")
+    all_history_equity = 500 * np.prod(1 + before.net_pct.to_numpy(dtype=float) / 100)
+    prior_2026 = before.loc[before.epoch.eq(3), "funded_pct"].to_numpy(dtype=float)
+    if not np.isfinite(prior_2026).all():
+        raise ValueError("Baseline September 16 balance lacks a funded 2026 prior-event outcome")
+    reset_equity = 500 * np.prod(1 + prior_2026 / 100)
+    return {
+        "sep16_admitted": True,
+        "sep16_decision": row.decision,
+        "sep16_case_net_points": float(row.net_points),
+        "sep16_case_funded_points": float(row.funded_points),
+        "sep16_case_fee_net_pct": float(row.net_pct),
+        "sep16_case_funded_pct": float(row.funded_pct),
+        "sep16_case_equity_pre_usd_all_history_seed1000": float(all_history_equity),
+        "sep16_case_contribution_usd_all_history_seed1000": float(all_history_equity * row.net_pct / 100),
+        "sep16_case_equity_pre_usd_2026_reset": float(reset_equity),
+        "sep16_case_contribution_usd_2026_reset": float(reset_equity * row.funded_pct / 100),
+        "sep16_case_exit_legs": int(row.exit_legs),
+        "sep16_overlapping_ordinary_count": 0,
+        "sep16_overlapping_ordinary_decisions": "",
+        "sep16_all_history_basis": "$500 initial BTC sleeve compounded fee-only before entry; event contribution uses fee-only return",
+        "sep16_2026_basis": "$500 initial BTC sleeve reset in 2026; event contribution uses actual fees and funding",
     }
 
 
@@ -412,7 +453,7 @@ def _summary_row(variant: str, scope: str, events: pd.DataFrame, return_col: str
         "funding_missing_count": int(events.funded_pct.isna().sum()) if scope == "2026" else 0,
         "funding_status": funding_status,
         "risk_basis": ("2026 fees and funding; synchronized 5m marks for marked_dd_pct; settlement_dd_pct samples exits only"
-                       if scope == "2026" else "fee-only event outcomes; settlement_dd_pct samples exits only; no all-history 5m mark claim"),
+                       if scope == "2026" else "fee-only outcomes and synchronized 5m price marks; settlement_dd_pct samples exits only"),
         **overlap,
         **sep16,
     }
@@ -425,7 +466,8 @@ def run() -> None:
     active, baseline = _records(ordinary, case, alt, loaded["baseline_btc"], loaded["baseline_alt"])
     active = _annotate_overlaps(active)
     baseline = _annotate_overlaps(baseline)
-    sep16 = _sep16_metrics(case)
+    sep16 = _sep16_metrics(case, ordinary)
+    baseline_sep16 = _baseline_sep16_metrics(loaded["baseline_btc"])
 
     # Full history deliberately uses the common fee-only basis. Funding is only
     # applied to the explicitly scoped 2026 comparison below.
@@ -544,27 +586,9 @@ def run() -> None:
         _summary_row("reserved_25_25_50", "2026", active26, "funded_pct", full_weights, marked_new,
                      funding_status, sep16),
         _summary_row("frozen_below_plus_case_50_50", "all_history", base_all, "net_pct", baseline_weights,
-                     baseline_all_marked, "fee-only", {"sep16_admitted": False,
-                         "sep16_case_net_points": np.nan, "sep16_case_funded_points": np.nan,
-                         "sep16_case_fee_net_pct": np.nan, "sep16_case_funded_pct": np.nan,
-                         "sep16_case_equity_pre_usd_all_history_seed1000": np.nan,
-                         "sep16_case_contribution_usd_all_history_seed1000": np.nan,
-                         "sep16_case_equity_pre_usd_2026_reset": np.nan,
-                         "sep16_case_contribution_usd_2026_reset": np.nan,
-                         "sep16_case_exit_legs": np.nan,
-                         "sep16_all_history_basis": "not admitted under the original shared BTC allocation",
-                         "sep16_2026_basis": "not admitted under the original shared BTC allocation"}),
+                     baseline_all_marked, "fee-only", baseline_sep16),
         _summary_row("frozen_below_plus_case_50_50", "2026", base26, "funded_pct", baseline_weights,
-                     baseline26_marked, "complete existing funded marks", {"sep16_admitted": False,
-                         "sep16_case_net_points": np.nan, "sep16_case_funded_points": np.nan,
-                         "sep16_case_fee_net_pct": np.nan, "sep16_case_funded_pct": np.nan,
-                         "sep16_case_equity_pre_usd_all_history_seed1000": np.nan,
-                         "sep16_case_contribution_usd_all_history_seed1000": np.nan,
-                         "sep16_case_equity_pre_usd_2026_reset": np.nan,
-                         "sep16_case_contribution_usd_2026_reset": np.nan,
-                         "sep16_case_exit_legs": np.nan,
-                         "sep16_all_history_basis": "not admitted under the original shared BTC allocation",
-                         "sep16_2026_basis": "not admitted under the original shared BTC allocation"}),
+                     baseline26_marked, "complete existing funded marks", baseline_sep16),
     ]
     summary_df = pd.DataFrame(summary)
     if not np.isclose(summary_df.loc[(summary_df.variant == "frozen_below_plus_case_50_50") &
@@ -583,8 +607,9 @@ def run() -> None:
         ledger.stream.eq("BTC_ordinary"), "decision"].map(ordinary26.set_index("decision").funded_pct)
     ledger.loc[ledger.stream.eq("BTC_case"), "funding_points"] = ledger.loc[
         ledger.stream.eq("BTC_case"), "decision"].map(case.funding_points.set_axis(case.decision))
+    case26_funded = case.loc[case.epoch.eq(3)].set_index("decision").funded_pct
     ledger.loc[ledger.stream.eq("BTC_case"), "funded_pct_2026"] = ledger.loc[
-        ledger.stream.eq("BTC_case"), "decision"].map(case.funded_pct.set_axis(case.decision))
+        ledger.stream.eq("BTC_case"), "decision"].map(case26_funded)
     ledger.loc[ledger.stream.eq("ALT"), "funded_pct_2026"] = ledger.loc[
         ledger.stream.eq("ALT"), "decision"].map(alt.set_index("decision").funded_pct)
     ledger["case_equity_pre_usd_all_history_seed1000"] = np.nan
@@ -624,7 +649,7 @@ def run() -> None:
                           for k, v in sep16.items()},
         "portfolio": "unlevered 25% ordinary BTC, 25% original case BTC, 50% ALT24h; independent compounding, no transfers",
         "scope_notes": {
-            "all_history": "fee-only returns and exit-settlement drawdown; no all-history marked DD is claimed",
+            "all_history": "fee-only returns; both five-minute price-marked DD and exit-settlement DD are reported; no funding is applied",
             "2026": "funding-adjusted returns through 2026-10-27 and synchronized five-minute marked DD; missing funding is an error, never zero",
             "counting": "total_legs counts allocated entry events per source stream; distinct_entries de-duplicates exact timestamps; native_exit_legs separately counts partial exit legs",
             "post_hoc": "The 24h 50/50 baseline to 25/25/50 split was formed after inspecting the ordinary EMA prefilter and the blocked 2026-09-16 case event.",

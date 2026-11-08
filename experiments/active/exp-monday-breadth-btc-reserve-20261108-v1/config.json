@@ -28,7 +28,7 @@
     "case_exit": "Frozen native policy_id=4 half take-profit with remaining position held to six days; use cached fills only",
     "alt_source": "Original freq36_ALT basket and 24h cadence, cached 6h VectorBT exits",
     "costs": "5bp taker per side for ordinary and ALT; case policy_id=4 native fee fills; 2026 funding applied only with complete locally cached settlement coverage",
-    "history": "Full-history summary uses fee-only event returns; 2026 summary uses funding-adjusted event returns and synchronized 5m marks",
+    "history": "Full-history return and marked-risk paths use fees only; 2026 return and synchronized 5m marks include funding",
     "cutoff_utc": "2026-10-28T00:00:00Z"
   },
   "comparison": "Also include the frozen original 50/50 below-plus-case BTC and ALT portfolio for context. All comparisons are retrospective; 24h-to-partitioned allocation is a post-hoc hypothesis.",
