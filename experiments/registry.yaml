@@ -15,6 +15,96 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-priority-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 384add9952
+    status: rejected
+    question: "Does a deterministic ranking among simultaneous native 12H confirmations improve the funded account?"
+    single_variable: "Priority among same-time confirmations; all other rules frozen."
+    result: "Development-selected low prior 12H ATR/price priority: 5529.84 USDT, wins 32.52%, payoff 2.96 by return / 2.55 by USDT, hourly drawdown bound 32.49%, 1676 funded trades. 2025 lost 3.64%, 2026 gained 14.78%. 5bp adverse market-fill slippage reduced terminal wealth to 4691.47."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-cloud-close-priority-20261109-v1/summary.json
+    notes: Development ends 2024, later years previously studied. OKX 12h confirmation, next 1h open, 5bp market / 2bp resting TP. No funding or capacity model. Notion 4128856479af81c58b84ed921b73301c.
+
+  - experiment_id: exp-cloud-close-slots-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: c01603c039
+    status: rejected
+    question: "Does changing only the number of fully funded positions deliver 1000x wealth within the drawdown limit?"
+    single_variable: "Maximum count of equal-sized positions."
+    result: "Development selected nine slots: 3661.76 USDT, wins 32.43%, payoff 2.719 by return / 2.392 by USDT, DD conservative bound 34.997%. Three slots ended at 8144.75 USDT with DD upper bound 59.72%."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-cloud-close-slots-20261109-v1/summary.json
+    notes: Development ends 2024, later years previously studied. OKX 12h confirmation, next 1h open, 5bp market / 2bp resting TP. No funding or capacity model. Notion 4128856479af817b9ad7c350ed111a8d.
+
+  - experiment_id: exp-cloud-close-reward-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: c438eb3eaf
+    status: rejected
+    question: "Can first-open execution after the native 12h V1.7 confirmation grow a shared 1000U account past 1000x net profit while keeping drawdown <=35%, net wins >=30% and actual payoff >=2.5?"
+    single_variable: "Distance of a resting TP measured in initial risk units; stop and adverse cloud cross stay live."
+    result: "Seven take-profit policies, no joint pass. Baseline 1000 to 11006.33 USDT, 2289 funded trades, 17.43% net wins, payoff 8.108 equal-notional / 5.768 USDT, observed DD 46.83%, hourly conservative DD upper bound 53.11%."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-cloud-close-reward-20261109-v1/account_summary.json
+    notes: Development ends 2024, later years previously studied. OKX 12h confirmation, next 1h open, 5bp market / 2bp resting TP. No funding or capacity model. Notion 4128856479af814aacd0cc3f8337fda7.
+
+  - experiment_id: exp-cloud-close-admission-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 90ef5564e0
+    status: rejected
+    question: "Does a predeclared confirmation-time admission rule improve the selected cloud exit account?"
+    single_variable: "One independent entry screen versus all eligible V1.7 confirmations, with a common development-selected exit."
+    result: "11 independent screens plus the original runner; zero dev-qualified variants. Dev-growth leader, positive relative strength, ended at 10.58x, 17.50% wins and 52.87% worst-hour DD bound."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-cloud-close-admission-20261109-v1/summary.json
+    notes: Development ends 2024, later years previously studied. OKX 12h confirmation, next 1h open, 5bp market / 2bp resting TP. No funding or capacity model. Notion 4128856479af81f2bd22cef899e65c84.
+
+  - experiment_id: exp-cloud-close-scaleout-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: b03c3c5e4c
+    status: rejected
+    question: "Can a partial exit at 2R improve the win rate and retain the right tail required for the 1000x target?"
+    single_variable: "Fraction banked at 2R, remaining original cloud runner."
+    result: "Development chose 75% at 2R. Full 1000 to 3186.64 USDT, 2289 positions, wins 32.72%, equal-notional payoff 2.610, USDT payoff 2.344, conservative drawdown 32.57%. Only +3.05% in 2025 and +0.28% in 2026 YTD. Adding 5bp per market fill leaves 2692.5 and DD bound 35.73%."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-cloud-close-scaleout-20261109-v1/summary.json
+    notes: Development ends 2024, later years previously studied. OKX 12h confirmation, next 1h open, 5bp market / 2bp resting TP. No funding or capacity model. Notion 4128856479af816f91dadbfdb91b781d.
+
+  - experiment_id: exp-cloud-close-trail-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 905a8d0749
+    status: rejected
+    question: "Can a ratcheting 1H protective exit retain more of each trend in the original 12H close-entry account?"
+    single_variable: "Giveback in original risk units after a fixed two-R favorable excursion at a completed hour."
+    result: "No tested ratchet qualified on development. Full history for 1R to 4R givebacks: 1.27x, 1.93x, 6.00x, 8.23x. Every tested change had conservative drawdown >50%."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-cloud-close-trail-20261109-v1/summary.json
+    notes: Development ends 2024, later years previously studied. OKX 12h confirmation, next 1h open, 5bp market / 2bp resting TP. No funding or capacity model. Notion 4128856479af81aebd50c0b38ee111bc.
+
   - experiment_id: exp-live-wick-two-closes-exit-20261109-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 7ebf62bf64
