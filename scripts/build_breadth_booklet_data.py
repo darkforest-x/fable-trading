@@ -13,6 +13,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENT = ROOT / "experiments/active/exp-monday-breadth-extension-20261108-v1"
 FREQUENCY = ROOT / "experiments/active/exp-monday-breadth-frequency-20261108-v1"
+OPTIMIZATION = ROOT / "experiments/active/exp-monday-breadth-optimization-20261108-v1"
 OUTPUT = ROOT / "yoyo/monitor/static/strategy-booklet/breadth-ema20-data.json"
 BTC_PARTIAL_FILLS = ROOT / "data/research/monday_breadth_optimization_20261108/btc_funded_exit_fills.parquet"
 
@@ -257,6 +258,25 @@ def build_alt_events() -> list[dict[str, Any]]:
     member_rows["decision"] = pd.to_datetime(member_rows.decision, utc=True)
     member_rows["selected_exit_time"] = pd.to_datetime(member_rows.selected_exit_time, utc=True)
 
+    original_signals = pd.read_parquet(FREQUENCY / "fixed/locked_events.parquet")
+    original_signals = original_signals[original_signals.candidate_id.eq("freq36_ALT")].copy()
+    original_signals["decision"] = pd.to_datetime(original_signals.decision, utc=True)
+    original_signals["known"] = pd.to_datetime(original_signals.known, utc=True)
+    if original_signals.decision.duplicated().any():
+        raise ValueError("Duplicate original ALT signal timestamps")
+    original_signal_by_time = original_signals.set_index("decision")
+
+    feature_signals = pd.read_csv(
+        OPTIMIZATION / "features/signals.csv.gz",
+        usecols=["minutes", "wait_min", "known", "initial", "new_coins", "share28_pct", "market_share_status"],
+        parse_dates=["known"],
+    )
+    feature_signals = feature_signals[(feature_signals.minutes == 5) & (feature_signals.wait_min == 0)].copy()
+    feature_signals["known"] = pd.to_datetime(feature_signals.known, utc=True)
+    if feature_signals.known.duplicated().any():
+        raise ValueError("Duplicate original ALT market-share feature timestamps")
+    feature_signal_by_time = feature_signals.set_index("known")
+
     interval_checks = pd.read_csv(
         EXPERIMENT / "risk/alt_6h_official_interval_checks.csv",
         parse_dates=["decision", "exit_time"],
@@ -292,6 +312,18 @@ def build_alt_events() -> list[dict[str, Any]]:
             )
         if source_members.symbol.duplicated().any():
             raise ValueError(f"Duplicate ALT member symbol at {decision}")
+        if decision not in original_signal_by_time.index or decision not in feature_signal_by_time.index:
+            raise ValueError(f"Missing frozen ALT signal features at {decision}")
+        original_signal = original_signal_by_time.loc[decision]
+        feature_signal = feature_signal_by_time.loc[decision]
+        if int(original_signal.initial) < 2:
+            raise ValueError(f"ALT event failed the recorded initial touch-count rule at {decision}")
+        if int(feature_signal.initial) != int(original_signal.initial) or int(feature_signal.new_coins) != int(original_signal.new_coins):
+            raise ValueError(f"ALT frozen signal-feature parity mismatch at {decision}")
+        if int(original_signal.new_coins) != 0:
+            raise ValueError(f"ALT zero-wait signal unexpectedly has new coins at {decision}")
+        if float(feature_signal.share28_pct) < 5.0:
+            raise ValueError(f"ALT event failed the recorded 5% market-share rule at {decision}")
 
         members: list[dict[str, Any]] = []
         corrected_funded_returns: list[float] = []
@@ -383,9 +415,11 @@ def build_alt_events() -> list[dict[str, Any]]:
                 "epoch": epoch,
                 "period": PERIOD_BY_EPOCH[epoch],
                 "signal_snapshot": {
-                    "known_time": iso_utc(source_members.iloc[0].known),
-                    "initial_touch_count": expected,
-                    "new_coins": None,
+                    "known_time": iso_utc(original_signal.known),
+                    "initial_touch_count": number(original_signal.initial),
+                    "new_coins": number(original_signal.new_coins),
+                    "market_share_28d_pct": number(feature_signal.share28_pct),
+                    "market_share_definition": str(feature_signal.market_share_status),
                 },
                 "expected_members": expected,
                 "observed_members": observed,
@@ -601,6 +635,9 @@ def build_payload() -> dict[str, Any]:
                 "BTC": "experiments/active/exp-monday-breadth-extension-20261108-v1/risk/integrated_btc_events.parquet",
                 "ALT": "experiments/active/exp-monday-breadth-extension-20261108-v1/alt/event_results.csv.gz + alt/member_strategy_returns.parquet",
             },
+            "signal_features": {
+                "ALT": "experiments/active/exp-monday-breadth-frequency-20261108-v1/fixed/locked_events.parquet + experiments/active/exp-monday-breadth-optimization-20261108-v1/features/signals.csv.gz",
+            },
             "BTC_fill_prices": {
                 "medium": "experiments/active/exp-monday-breadth-extension-20261108-v1/dual/events.parquet (dual_source_specific, source=medium)",
                 "case": "data/research/monday_breadth_optimization_20261108/btc_funded_exit_fills.parquet (policy_id=4)",
@@ -608,6 +645,7 @@ def build_payload() -> dict[str, Any]:
             "ALT_2026_funding": "experiments/active/exp-monday-breadth-extension-20261108-v1/risk/alt_policy_verified_events_2026.csv + alt_6h_official_interval_checks.csv",
             "comparison": "Retrospective through the 2026-10-27 UTC signal candle; 2026 history had been inspected and is not a blind period.",
             "historical_funding": "All-history account totals and curves use fee-only net_pct; historical funded/proxy values are omitted from event fields and excluded from primary totals.",
+            "time_semantics": "Event and member entry_time values are UTC 5-minute candle open timestamps; corresponding entry prices are that candle's open fills.",
             "costs": {
                 "market_fee_per_fill_pct": 0.05,
                 "BTC_profit_limit_fee_per_fill_pct": 0.02,
