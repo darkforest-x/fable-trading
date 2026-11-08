@@ -1,0 +1,7 @@
+{
+  "experiment_id": "exp-live-wick-two-target-20261109-v1",
+  "single_variable": "Half original notional at the existing near target, half at the Monday midpoint. Both independent legs retain native E20, reclaim and protection. Compare against 100% near at identical entries.",
+  "fills": "experiments/active/exp-monday-limit-close-stop-grid-20261101-v1",
+  "cohort": "experiments/active/exp-live-wick-confirmed-swing-20261107-v1/events.csv.gz",
+  "limits": "Use only common validated pre-extension entry IDs. Linear independent-leg attribution within the same intrabar path before taking the worse of the two. Fee and slippage linear in notional. No combined account, order-book interaction, funding or adjustment after the near leg exits."
+}
