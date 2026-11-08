@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-trend-sequence-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "c241750db8"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Separate the first original weekly key in each observed continuous ready 12H EMA20/50 trend direction from subsequent original keys. Validate EMA against every original key; exclude left censored trend episodes."
+    result: "108 of 11780 opportunities had unknown sequence. Covered account 28042.78U; first-only 17645.26U, 33.35% winners, 2.664 cash payoff, DD bound 56.93%; repeat-only 8479.95U, 32.51%, 2.734, DD bound 62.81%. No qualifying development configuration."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-trend-sequence-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 4128856479af8102b2a4d069305553a9."
+
   - experiment_id: exp-cloud-close-market-direction-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "210af54859"
