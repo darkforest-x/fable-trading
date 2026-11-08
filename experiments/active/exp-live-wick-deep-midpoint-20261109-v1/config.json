@@ -1,0 +1,10 @@
+{
+  "experiment_id": "exp-live-wick-deep-midpoint-20261109-v1",
+  "single_variable": "Use the Monday range midpoint target only on pre-existing far-classified entry closes (at least 1.5 percent past 1.618). Otherwise retain near target. Compare to 100 percent near on the original E20 positions; no early wick exit or score change.",
+  "paired": "experiments/active/exp-live-wick-two-target-20261109-v1/paired.csv.gz",
+  "cohort": "experiments/active/exp-live-wick-confirmed-swing-20261107-v1/events.csv.gz",
+  "accounts": "experiments/active/exp-monday-limit-close-survivor-paths-20261101-v5",
+  "scope": "398 native paired fills through September 2026; no October midpoint archive. Independent event statistics over all periods, and the exact from-2025 funded account on 254 original opportunities with complete saved near and midpoint legs. Six parts, 3x, original fees / slippage, no funding.",
+  "control": "Paired hold-near alternative on the exact same event. Compare to randomized midpoint assignment within entry year and side at identical selected count. Weekly paired bootstrap. Both cutoff and midpoint pre-existed, their conditional use is exploratory. No threshold scan.",
+  "seed": 20261109, "bootstrap_draws": 5000
+}
