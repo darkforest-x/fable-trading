@@ -1,0 +1,41 @@
+{
+  "experiment_id": "exp-monday-breadth-btc-reserve-20261108-v1",
+  "question": "Does an independent 25% sleeve for the already frozen six-day BTC case stream preserve the September 16 case entry while adding EMA-prefiltered BTC ordinary admissions?",
+  "hypothesis_status": "post-hoc assumption after inspecting the EMA-prefiltered ordinary stream and the September 16 missed case entry",
+  "single_variable": "Partition the original BTC 50% allocation into two independent 25% sleeves: the 177-entry EMA-prefiltered ordinary stream and the original BTC case stream. Keep 50% for the original ALT 24h stream. No leverage, transfers, or rebalancing.",
+  "allocation": {
+    "btc_ordinary_initial_capital_fraction": 0.25,
+    "btc_case_initial_capital_fraction": 0.25,
+    "alt_initial_capital_fraction": 0.5,
+    "starting_total_account_usd": 1000,
+    "reinvestment": "each sleeve compounds independently",
+    "transfers": false,
+    "leverage": 1
+  },
+  "sources": {
+    "ema_prefiltered_ordinary_frozen_stream": "experiments/active/exp-monday-breadth-btc-admission-20261108-v1/ordinary_stream.parquet",
+    "original_case_source_with_per_epoch_six_day_reservation": "experiments/active/exp-monday-breadth-frequency-20261108-v1/btc_target/threshold_events.parquet (threshold_pct=5)",
+    "case_source_pre_merge_schedule_audit": "experiments/active/exp-monday-breadth-extension-20261108-v1/dual/admission.csv (source=case; admitted is shared-BTC funding only)",
+    "case_policy4_frozen_native_fills": "monday_breadth_opt_funding.FUNDED_CACHE (policy_id=4)",
+    "alt_24h_events": "experiments/active/exp-monday-breadth-alt-spacing-20261108-v1/events.csv (selected_24h)",
+    "original_below_plus_case_baseline": "experiments/active/exp-monday-breadth-extension-20261108-v1/risk/integrated_btc_events.parquet",
+    "alt_2026_mark_path": "experiments/active/exp-monday-breadth-extension-20261108-v1/sleeves/equity_5m.parquet",
+    "risk_adapter": "yoyo.evaluation.monday_breadth_extension_risk"
+  },
+  "semantics": {
+    "ordinary_source": "EMA20-prefiltered ordinary source, frozen 177 VectorBT 144h time-exit fills; do not rerun entry selection or fills",
+    "case_source": "Preserve all 53 original 5% BTC case admissions. They were already six-day-reserved separately in each original epoch before merging against ordinary BTC funding; do not reserve or suppress them again.",
+    "case_exit": "Frozen native policy_id=4 half take-profit with remaining position held to six days; use cached fills only",
+    "alt_source": "Original freq36_ALT basket and 24h cadence, cached 6h VectorBT exits",
+    "costs": "5bp taker per side for ordinary and ALT; case policy_id=4 native fee fills; 2026 funding applied only with complete locally cached settlement coverage",
+    "history": "Full-history summary uses fee-only event returns; 2026 summary uses funding-adjusted event returns and synchronized 5m marks",
+    "cutoff_utc": "2026-10-28T00:00:00Z"
+  },
+  "comparison": "Also include the frozen original 50/50 below-plus-case BTC and ALT portfolio for context. All comparisons are retrospective; 24h-to-partitioned allocation is a post-hoc hypothesis.",
+  "outputs": [
+    "partition_summary.csv",
+    "event_ledger.csv",
+    "manifest.json"
+  ],
+  "production_eligible": false
+}
