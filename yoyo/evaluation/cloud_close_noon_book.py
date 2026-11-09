@@ -134,9 +134,9 @@ def main():
         valid=[c['stages'][stage] for c in cases if c['status']=='measured']
         bp=[p['sweep']['adverse_bp_from_trade_open'] for p in valid if p['sweep']['all_filled']]
         frac=[p['ioc']['fill_fraction'] for p in valid]
-        stats[stage]=dict(covered=len(valid),complete_sweeps=len(bp),above_5bp=sum(b>5 for b in bp),
-              median_bp=float(np.median(bp)) if bp else None,full_ioc=sum(x>=1-1e-9 for x in frac),
-              zero_ioc=sum(x==0 for x in frac),median_ioc_fraction=float(np.median(frac)) if frac else None)
+        stats[stage]=dict(covered=len(valid),complete_sweeps=len(bp),above_5bp=int(sum(b>5 for b in bp)),
+              median_bp=float(np.median(bp)) if bp else None,full_ioc=int(sum(x>=1-1e-9 for x in frac)),
+              zero_ioc=int(sum(x==0 for x in frac)),median_ioc_fraction=float(np.median(frac)) if frac else None)
     source.repair.archive.prices.safe_json(EXP/'summary.json',dict(eligible=len(f),selected=len(selected),stages=stats,
                         missing={c['event_id']:c['reason'] for c in cases if c['status']!='measured'}))
 
