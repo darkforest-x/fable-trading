@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Spike 1.618 - live-wick6x3mid · 浅穿中点</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-surface-variant": "#414753",
+            "primary-container": "#0071e3",
+            "surface-tint": "#005cbb",
+            "background": "#f9f9ff",
+            "surface-container-highest": "#dde2f1",
+            "surface-container": "#e8eefd",
+            "on-tertiary-fixed-variant": "#92002a",
+            "surface-container-low": "#eff4ff",
+            "on-primary-container": "#fcfbff",
+            "on-secondary-fixed": "#002019",
+            "inverse-on-surface": "#ecf1ff",
+            "gain-emerald-container": "#92f2d7",
+            "surface-variant": "#dde2f1",
+            "outline-variant": "#c1c6d6",
+            "on-secondary-fixed-variant": "#005142",
+            "secondary-fixed": "#9ef3da",
+            "on-background": "#161c26",
+            "error": "#ba1a1a",
+            "surface-container-high": "#e3e8f7",
+            "secondary-fixed-dim": "#83d6bf",
+            "tertiary-fixed-dim": "#ffb2b7",
+            "primary-fixed": "#d7e2ff",
+            "on-secondary": "#ffffff",
+            "inverse-surface": "#2b313c",
+            "primary": "#0059b5",
+            "surface-bright": "#f8f9ff",
+            "surface-dim": "#d4dae9",
+            "tertiary": "#b80538",
+            "error-container": "#ffdad6",
+            "on-error": "#ffffff",
+            "tertiary-container": "#db2c4f",
+            "benchmark-slate": "#717785",
+            "on-surface": "#0b1c30",
+            "outline": "#717785",
+            "secondary-container": "#9ef3da",
+            "on-tertiary-fixed": "#40000d",
+            "tertiary-fixed": "#ffdadb",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "on-secondary-container": "#10715e",
+            "on-error-container": "#93000a",
+            "drawdown-red": "#db2b4e",
+            "secondary": "#006b58",
+            "on-tertiary-container": "#fffbfa",
+            "surface": "#f8f9ff",
+            "on-primary-fixed": "#001b3f",
+            "on-primary-fixed-variant": "#00458f",
+            "inverse-primary": "#abc7ff",
+            "primary-fixed-dim": "#abc7ff",
+            "on-primary": "#ffffff",
+            "gain-emerald": "#006b58"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-lg": "1rem",
+            "space-md": "0.75rem",
+            "gutter": "0.75rem",
+            "space-xs": "0.25rem",
+            "margin-tablet": "1.5rem",
+            "space-sm": "0.5rem",
+            "gutter-tablet": "1rem",
+            "margin": "1rem",
+            "gutter-desktop": "1.5rem",
+            "margin-desktop": "2.5rem",
+            "space-xl": "1.5rem"
+          },
+          "fontFamily": {
+            "body-md": ["Inter"],
+            "headline-md": ["Inter"],
+            "label-numeric-sm": ["JetBrains Mono"],
+            "headline-sm": ["Inter"],
+            "display": ["Inter"],
+            "label-numeric-md": ["JetBrains Mono"],
+            "headline-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "label-caps": ["Inter"],
+            "label-numeric-lg": ["JetBrains Mono"],
+            "headline-lg-mobile": ["Inter"]
+          },
+          "fontSize": {
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "label-numeric-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "headline-sm": ["17px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "label-numeric-md": ["14px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "label-caps": ["10px", { "lineHeight": "12px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+            "label-numeric-lg": ["20px", { "lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .glass-tier-base {
+      background: radial-gradient(ellipse at 50% 0%, #EFF4FF 0%, #DCE9FF 100%);
+    }
+    .apple-glass-panel {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 1px 0 rgba(255, 255, 255, 0.25), 0 20px 48px -8px rgba(0, 113, 227, 0.08), 0 8px 16px -4px rgba(11, 28, 48, 0.04);
+      border-left: 1px solid rgba(255, 255, 255, 0.85);
+    }
+    .specular-border {
+      box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 1px 0 rgba(255, 255, 255, 0.20);
+    }
+    .specular-card {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(20px);
+      box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.9), 0 4px 20px -2px rgba(11, 28, 48, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+  </style>
+</head>
+<body class="h-full bg-background text-on-surface antialiased overflow-hidden font-body-md select-none">
+<!-- =================================================================== -->
+<!-- 1. TOP NAV BAR (Shared Component Anchor)                           -->
+<!-- =================================================================== -->
+<header class="flex justify-between items-center w-full px-6 h-14 fixed top-0 left-0 z-40 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant/40 shadow-sm">
+<!-- Brand Capsule & Strategy Switcher -->
+<div class="flex items-center gap-5">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container shadow-[0_0_8px_rgba(0,113,227,0.6)]"></span>
+<span class="text-headline-sm font-headline-sm tracking-tight text-primary font-semibold">Spike 1.618</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant/50"></div>
+<!-- Strategy Selector Dropdown Pill -->
+<div class="relative group">
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-low/80 hover:bg-surface-container-high/60 transition-colors border border-outline-variant/40 active:scale-[0.98]">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-body-md text-body-md font-medium text-on-surface">live-wick6x3mid · 浅穿中点</span>
+<span class="text-[10px] px-1.5 py-0.5 rounded bg-gain-emerald-container text-on-secondary-container font-label-numeric-sm font-semibold">SANDBOX</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</button>
+<!-- Dropdown Menu -->
+<div class="hidden group-hover:block absolute left-0 top-full mt-1 w-72 rounded-xl bg-surface-container-lowest/95 backdrop-blur-2xl border border-outline-variant/50 shadow-xl p-1.5 z-50">
+<div class="px-2.5 py-1.5 text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider">选择量化策略</div>
+<!-- Option 1: Existing Base -->
+<a class="flex items-center justify-between px-2.5 py-2 rounded-lg hover:bg-surface-container-low transition-colors text-on-surface-variant hover:text-on-surface" href="#">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm font-medium">live-wick6x3</span>
+<span class="font-body-sm text-body-sm text-outline">全市场周一外轨激进模式</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">基线</span>
+</a>
+<!-- Option 2: Active Targeted Variant -->
+<a class="flex items-center justify-between px-2.5 py-2 rounded-lg bg-surface-container-high/90 text-primary border border-primary/20 shadow-sm mt-1" href="#">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm font-semibold flex items-center gap-1.5">
+                live-wick6x3mid · 浅穿中点
+                <span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
+</span>
+<span class="font-body-sm text-body-sm text-primary">浅穿向均值中点回归专项</span>
+</div>
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="check">check</span>
+</a>
+<!-- Option 3: Additional Link -->
+<a class="flex items-center justify-between px-2.5 py-2 rounded-lg hover:bg-surface-container-low transition-colors text-on-surface-variant hover:text-on-surface mt-1" href="#">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm">全市场下轨反弹 (EMA20 反弹)</span>
+<span class="font-body-sm text-body-sm text-outline">均线顺势动量通道</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">v2.1</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Trailing Actions & Diagnostics -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-fixed/50 text-on-secondary-fixed-variant text-label-numeric-sm font-label-numeric-sm border border-secondary-fixed">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>FORWARD PAPER SANDBOX</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant/40 mx-1"></div>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high/60 text-on-surface font-body-sm text-body-sm transition-all border border-outline-variant/40 active:scale-[0.98]">
+<span class="material-symbols-outlined text-[16px]" data-icon="terminal">terminal</span>
+<span>Export Booklet</span>
+</button>
+<button class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary-container text-on-primary font-body-sm text-body-sm font-medium hover:bg-primary transition-all shadow-sm active:scale-[0.98]">
+<span class="material-symbols-outlined text-[16px]" data-icon="play_arrow">play_arrow</span>
+<span>Run Backtest</span>
+</button>
+<div class="flex items-center gap-1 ml-2 text-on-surface-variant">
+<button class="p-1.5 rounded-lg hover:bg-surface-container-high/60 transition-colors" title="Tune Parameters">
+<span class="material-symbols-outlined text-[18px]" data-icon="tune">tune</span>
+</button>
+<button class="p-1.5 rounded-lg hover:bg-surface-container-high/60 transition-colors" title="Notifications">
+<span class="material-symbols-outlined text-[18px]" data-icon="notifications">notifications</span>
+</button>
+<button class="p-1.5 rounded-lg hover:bg-surface-container-high/60 transition-colors" title="Fullscreen View">
+<span class="material-symbols-outlined text-[18px]" data-icon="fullscreen">fullscreen</span>
+</button>
+</div>
+</div>
+</header>
+<!-- =================================================================== -->
+<!-- 2. WORKSPACE CANVAS (100vw x 100vh IMMERSIVE DESK WALLPAPER)         -->
+<!-- =================================================================== -->
+<main class="w-full h-full pt-14 flex relative overflow-hidden glass-tier-base">
+<!-- LEFT 25% / FULL CANVAS VIEWPORT: MONDAY K-LINE & 1.618 FIB REPLAY WORKBENCH -->
+<div class="w-full h-full relative overflow-hidden flex flex-col justify-between p-6">
+<!-- Top Chart Metadata HUD -->
+<div class="z-10 flex items-center justify-between w-1/4">
+<div class="bg-surface-container-lowest/80 backdrop-blur-md rounded-xl p-3.5 border border-outline-variant/40 shadow-sm">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">SOL/USDT</span>
+<span class="text-label-caps font-label-caps px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant">5M TICK</span>
+<span class="text-label-numeric-sm font-label-numeric-sm text-secondary font-medium">SHALLOW SPIKE</span>
+</div>
+<div class="flex items-center gap-4 text-label-numeric-sm font-label-numeric-sm text-on-surface-variant">
+<span>NY Mon High: <strong class="text-on-surface">158.40</strong></span>
+<span>NY Mon Low: <strong class="text-on-surface">145.60</strong></span>
+<span>Mid (0.5): <strong class="text-primary-container">152.00</strong></span>
+</div>
+</div>
+</div>
+<!-- Atmospheric Chart Geometry & Synthetic Monday 1.618 Fib Overlay -->
+<div class="absolute inset-0 pointer-events-none z-0 flex items-center">
+<!-- SVG Interactive Level Grid -->
+<svg class="w-full h-full opacity-90" fill="none" viewbox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg">
+<!-- Horizontal Grid Guides -->
+<line stroke="#717785" stroke-dasharray="4 4" stroke-opacity="0.15" x1="0" x2="1440" y1="180" y2="180"></line>
+<line stroke="#717785" stroke-dasharray="3 3" stroke-opacity="0.25" x1="0" x2="1440" y1="310" y2="310"></line>
+<line stroke="#0071e3" stroke-dasharray="6 3" stroke-opacity="0.4" stroke-width="1.5" x1="0" x2="1440" y1="460" y2="460"></line>
+<line stroke="#717785" stroke-dasharray="3 3" stroke-opacity="0.25" x1="0" x2="1440" y1="610" y2="610"></line>
+<line stroke="#db2b4e" stroke-opacity="0.5" stroke-width="1.5" x1="0" x2="1440" y1="740" y2="740"></line>
+<!-- Level Badges on Canvas Left Axis -->
+<text fill="#717785" font-family="JetBrains Mono" font-size="11" font-weight="500" x="32" y="175">NY Monday High (1.00) : 158.40</text>
+<text fill="#717785" font-family="JetBrains Mono" font-size="11" font-weight="500" x="32" y="305">Mon Range Q3 (0.75) : 155.20</text>
+<text fill="#0071e3" font-family="JetBrains Mono" font-size="12" font-weight="600" x="32" y="454">★ 周一区间中点 0.5 Midpoint : 152.00 (TP Target)</text>
+<text fill="#717785" font-family="JetBrains Mono" font-size="11" font-weight="500" x="32" y="605">NY Monday Low (0.00) : 145.60</text>
+<text fill="#db2b4e" font-family="JetBrains Mono" font-size="12" font-weight="600" x="32" y="734">▶ -1.618 水平定界线 : 142.10 (Entry Trigger Threshold)</text>
+<!-- Monday High-Low Box Projection (Glass Zone) -->
+<rect fill="#0071e3" fill-opacity="0.03" height="430" stroke="#0071e3" stroke-opacity="0.12" width="320" x="180" y="180"></rect>
+<text fill="#0071e3" font-family="JetBrains Mono" font-size="10" opacity="0.6" x="190" y="200">NY MONDAY VALUE AREA</text>
+<!-- Synthetic K-Line Path Traversing Monday Range to -1.618 Shallow Wick -->
+<!-- Candles & Wicks -->
+<g opacity="0.75">
+<!-- Normal fluctuation candles -->
+<line stroke="#006b58" stroke-width="1" x1="220" x2="220" y1="210" y2="340"></line>
+<rect fill="#006b58" height="60" width="8" x="216" y="240"></rect>
+<line stroke="#db2b4e" stroke-width="1" x1="260" x2="260" y1="280" y2="430"></line>
+<rect fill="#db2b4e" height="80" width="8" x="256" y="320"></rect>
+<line stroke="#db2b4e" stroke-width="1" x1="300" x2="300" y1="390" y2="520"></line>
+<rect fill="#db2b4e" height="90" width="8" x="296" y="410"></rect>
+<!-- Wick down through Monday Low towards -1.618 -->
+<line stroke="#db2b4e" stroke-width="1" x1="340" x2="340" y1="480" y2="650"></line>
+<rect fill="#db2b4e" height="90" width="8" x="336" y="520"></rect>
+<!-- The Shallow Spike Candle (Piercing -1.618 by 0.82% < 1.5%) -->
+<line stroke="#db2b4e" stroke-width="1.5" x1="380" x2="380" y1="590" y2="765"></line>
+<rect fill="#db2b4e" height="126" width="10" x="375" y="615"></rect>
+<!-- Shallow Penetration Marker Indicator -->
+<circle cx="380" cy="746" fill="#0071e3" r="4"></circle>
+<circle cx="380" cy="746" r="10" stroke="#0071e3" stroke-opacity="0.5" stroke-width="1.5"></circle>
+<!-- Reversal Recovery Candles Heading toward Midpoint 0.5 -->
+<line stroke="#006b58" stroke-width="1" x1="420" x2="420" y1="580" y2="720"></line>
+<rect fill="#006b58" height="90" width="10" x="415" y="610"></rect>
+<line stroke="#006b58" stroke-width="1" x1="460" x2="460" y1="520" y2="630"></line>
+<rect fill="#006b58" height="70" width="10" x="455" y="540"></rect>
+<line stroke="#006b58" stroke-width="1" x1="500" x2="500" y1="470" y2="570"></line>
+<rect fill="#006b58" height="60" width="10" x="495" y="490"></rect>
+<!-- Current Running Tick -->
+<circle cx="500" cy="495" fill="#006b58" r="5"></circle>
+<text fill="#006b58" font-family="JetBrains Mono" font-size="11" font-weight="600" x="515" y="498">Now 146.80 (+1.12R)</text>
+</g>
+<!-- Trajectory Vector to Target -->
+<path d="M 505 495 Q 600 470 680 460" fill="none" stroke="#0071e3" stroke-dasharray="4 4" stroke-width="2"></path>
+<circle cx="680" cy="460" fill="#0071e3" r="4"></circle>
+<text fill="#0071e3" font-family="JetBrains Mono" font-size="11" font-weight="600" x="690" y="464">TP Target: 152.00</text>
+</svg>
+</div>
+<!-- Bottom Canvas Footer Overlay -->
+<div class="z-10 w-1/4">
+<div class="bg-surface-container-lowest/80 backdrop-blur-md rounded-xl p-3 border border-outline-variant/40 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px]" data-icon="radar">radar</span>
+<span class="text-body-sm font-body-sm text-on-surface">全市场扫描器已挂载</span>
+</div>
+<span class="text-label-numeric-sm font-label-numeric-sm text-outline">Tick 500ms</span>
+</div>
+</div>
+</div>
+<!-- =================================================================== -->
+<!-- 3. STRATEGY BOOKLET DRAWER (75vw APPLE CLEAR LIQUID GLASS PANEL)     -->
+<!-- =================================================================== -->
+<aside class="fixed top-0 right-0 h-full w-[75vw] z-50 apple-glass-panel flex flex-col overflow-hidden">
+<!-- Drawer Top Bar: Tab Switcher & Standard Controls -->
+<div class="px-8 pt-4 pb-3 flex items-center justify-between border-b border-outline-variant/30 bg-surface-container-lowest/40 backdrop-blur-md">
+<!-- 5 Tabs: 01 概览 | 02 历史回测 | 03 执行规则 | 04 前向资金 (Active) | 05 来源 -->
+<nav class="flex items-center gap-1.5 p-1 rounded-xl bg-surface-container/60 backdrop-blur-lg border border-outline-variant/40">
+<button class="px-3.5 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/50 text-body-sm font-body-sm transition-all flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="dashboard">dashboard</span>
+<span>01 概览</span>
+</button>
+<button class="px-3.5 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/50 text-body-sm font-body-sm transition-all flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="query_stats">query_stats</span>
+<span>02 历史回测</span>
+</button>
+<button class="px-3.5 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/50 text-body-sm font-body-sm transition-all flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="rule">rule</span>
+<span>03 执行规则</span>
+</button>
+<!-- Active Tab 04 -->
+<button class="px-3.5 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-medium text-body-sm font-body-sm shadow-[0_2px_8px_rgba(0,113,227,0.12)] border border-primary/20 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="account_balance">account_balance</span>
+<span>04 前向资金</span>
+</button>
+<button class="px-3.5 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/50 text-body-sm font-body-sm transition-all flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="source">source</span>
+<span>05 来源</span>
+</button>
+</nav>
+<!-- Trailing Drawer Toolbar Actions -->
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-lowest/80 text-on-surface hover:bg-surface-container-high/60 transition-colors border border-outline-variant/40 text-body-sm font-body-sm specular-border">
+<span class="material-symbols-outlined text-[16px]" data-icon="ios_share">ios_share</span>
+<span>导出小册</span>
+</button>
+<button class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-on-primary hover:bg-primary-container transition-all shadow-sm text-body-sm font-body-sm font-medium active:scale-[0.98]">
+<span class="material-symbols-outlined text-[16px]" data-icon="rocket_launch">rocket_launch</span>
+<span>Deploy Forward Engine</span>
+</button>
+<div class="h-4 w-[1px] bg-outline-variant/40"></div>
+<!-- Close Action '×' -->
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 transition-colors" title="Close Drawer">
+<span class="material-symbols-outlined text-[20px]" data-icon="close">close</span>
+</button>
+</div>
+</div>
+<!-- Drawer Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+<!-- Section A: Strategy Core Title & Parameter Fact Cards (rs-facts) -->
+<section class="space-y-4">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center gap-2.5 mb-1.5">
+<h1 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">live-wick6x3mid · 浅穿中点 <span class="text-on-surface-variant font-normal">(Forward Paper Sandbox)</span></h1>
+<span class="text-label-caps font-label-caps px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-semibold">VERIFIED SPEC</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant">纽约周一 1.618 扩展位浅穿向均值中点回归专项模拟观察账户</p>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-low/70 border border-outline-variant/40 text-label-numeric-sm font-label-numeric-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-secondary" data-icon="sync">sync</span>
+<span>引擎状态: 实时监听 Tick</span>
+</div>
+</div>
+<!-- Parameter Fact Grid (4 Bento Cells) -->
+<div class="grid grid-cols-4 gap-3.5">
+<!-- Fact 1 -->
+<div class="specular-card rounded-xl p-3.5 flex flex-col justify-between">
+<span class="text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider">入场门槛</span>
+<div class="mt-2 text-headline-sm font-headline-sm text-on-surface">5m 实体收盘穿透</div>
+<div class="mt-1 text-label-numeric-sm font-label-numeric-sm text-outline">Trigger: -1.618 Level</div>
+</div>
+<!-- Fact 2 -->
+<div class="specular-card rounded-xl p-3.5 flex flex-col justify-between border-l-2 border-l-primary">
+<span class="text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider">浅穿判定</span>
+<div class="mt-2 text-headline-sm font-headline-sm text-primary font-bold">&lt; 1.5%</div>
+<div class="mt-1 text-label-numeric-sm font-label-numeric-sm text-outline">Piercing Depth Limit</div>
+</div>
+<!-- Fact 3 -->
+<div class="specular-card rounded-xl p-3.5 flex flex-col justify-between">
+<span class="text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider">止盈逻辑 (Take-Profit)</span>
+<div class="mt-1 font-body-sm text-body-sm text-on-surface leading-snug">
+                浅穿 (&lt;1.5%) 整仓止盈 <strong class="text-primary font-semibold">周一中点 0.5</strong>；达 1.5% 触发近侧边界 (Mon Low/High)
+              </div>
+</div>
+<!-- Fact 4 -->
+<div class="specular-card rounded-xl p-3.5 flex flex-col justify-between">
+<span class="text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider">止损基准 (Risk Base)</span>
+<div class="mt-2 text-headline-sm font-headline-sm text-on-surface font-semibold">1R 初始硬止损</div>
+<div class="mt-1 text-body-sm text-body-sm text-outline">收回区间后保护性保本推进</div>
+</div>
+</div>
+</section>
+<!-- Section B: 04 前向资金 模拟账本模块 (Forward Paper Ledger) -->
+<section class="space-y-5">
+<!-- Status Ribbon -->
+<div class="flex items-center justify-between px-4 py-2.5 rounded-xl bg-surface-container-low/90 border border-outline-variant/40 backdrop-blur-md">
+<div class="flex items-center gap-2.5">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+</span>
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">模拟沙盒 · 独立前向观察账户</span>
+<span class="h-3 w-[1px] bg-outline-variant/50"></span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">严格依据浅穿规则执行前向独立沙盒撮合</span>
+</div>
+<div class="flex items-center gap-3 text-label-numeric-sm font-label-numeric-sm">
+<span class="text-outline">Heartbeat: 48ms</span>
+<span class="px-2 py-0.5 rounded bg-gain-emerald-container text-on-secondary-container font-semibold">心跳正常</span>
+</div>
+</div>
+<!-- Key Metrics KPI Matrix (Tear Sheet Grid) -->
+<div class="grid grid-cols-4 gap-3.5">
+<!-- KPI 1 -->
+<div class="specular-card rounded-xl p-4">
+<div class="text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider">账户模拟权益</div>
+<div class="mt-1.5 flex items-baseline gap-2">
+<span class="text-label-numeric-lg font-label-numeric-lg text-on-surface tracking-tight">1,000.00</span>
+<span class="text-label-numeric-sm font-label-numeric-sm text-on-surface-variant">USDT</span>
+</div>
+<div class="mt-1 text-label-numeric-sm font-label-numeric-sm text-secondary font-medium">
+                净收益 +18.40 USDT (+1.84%)
+              </div>
+</div>
+<!-- KPI 2 -->
+<div class="specular-card rounded-xl p-4">
+<div class="flex items-center justify-between">
+<span class="text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider">前向盈亏比</span>
+<span class="material-symbols-outlined text-[14px] text-outline" data-icon="help_outline" title="已平单平均盈利幅度 ÷ 平均亏损幅度">help_outline</span>
+</div>
+<div class="mt-1.5 flex items-baseline gap-2">
+<span class="text-label-numeric-lg font-label-numeric-lg text-primary tracking-tight">2.14</span>
+</div>
+<div class="mt-1 text-body-sm text-body-sm text-outline">
+                平均盈幅 ÷ 平均亏幅 (新口径)
+              </div>
+</div>
+<!-- KPI 3 -->
+<div class="specular-card rounded-xl p-4">
+<div class="text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider">胜率与样本</div>
+<div class="mt-1.5 flex items-baseline gap-2">
+<span class="text-label-numeric-lg font-label-numeric-lg text-on-surface tracking-tight">71.4%</span>
+<span class="text-label-numeric-sm font-label-numeric-sm text-on-surface-variant font-medium">(5/7 胜)</span>
+</div>
+<div class="mt-1 text-label-numeric-sm font-label-numeric-sm text-outline">
+                已平 7 笔样本结算
+              </div>
+</div>
+<!-- KPI 4 -->
+<div class="specular-card rounded-xl p-4">
+<div class="text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider">当前运行持仓</div>
+<div class="mt-1.5 flex items-baseline gap-2">
+<span class="text-label-numeric-lg font-label-numeric-lg text-secondary tracking-tight">1 笔</span>
+<span class="text-label-numeric-sm font-label-numeric-sm text-on-surface-variant font-medium">活跃观察</span>
+</div>
+<div class="mt-1 text-body-sm text-body-sm text-outline">
+                池策略: 覆盖全市场主流池
+              </div>
+</div>
+</div>
+<!-- Section C: Active Forward Positions Table -->
+<div class="space-y-2.5">
+<div class="flex items-center justify-between px-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface flex items-center gap-2">
+<span>当前模拟持仓 (Active Forward Positions)</span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</h3>
+<span class="text-label-numeric-sm font-label-numeric-sm text-outline">1 单运行中</span>
+</div>
+<div class="specular-card rounded-xl overflow-hidden border border-outline-variant/40">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high/40 border-b border-outline-variant/30 text-label-caps font-label-caps text-on-surface-variant">
+<th class="py-2.5 px-4 font-semibold">标的 / 方向</th>
+<th class="py-2.5 px-3 font-semibold">入场价</th>
+<th class="py-2.5 px-3 font-semibold">当前标价</th>
+<th class="py-2.5 px-3 font-semibold">浅穿幅度</th>
+<th class="py-2.5 px-4 font-semibold">止盈目标位 (TP)</th>
+<th class="py-2.5 px-3 font-semibold text-right">浮动回报</th>
+<th class="py-2.5 px-4 font-semibold text-right">风控状态</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20 text-body-sm font-body-sm">
+<tr class="hover:bg-surface-container-high/30 transition-colors">
+<td class="py-3 px-4">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">SOL/USDT</span>
+<span class="text-label-caps font-label-caps px-1.5 py-0.5 rounded bg-gain-emerald-container text-on-secondary-container font-semibold">LONG</span>
+</div>
+</td>
+<td class="py-3 px-3 font-label-numeric-md font-label-numeric-md text-on-surface">142.30</td>
+<td class="py-3 px-3 font-label-numeric-md font-label-numeric-md text-on-surface font-semibold">146.80</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-1.5 font-label-numeric-sm font-label-numeric-sm">
+<span class="text-primary font-semibold">0.82%</span>
+<span class="text-outline">(&lt;1.5% 浅穿)</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col font-label-numeric-sm font-label-numeric-sm">
+<span class="text-on-surface font-semibold">周一中点 152.00</span>
+<span class="text-outline">0.5 Midpoint TP</span>
+</div>
+</td>
+<td class="py-3 px-3 text-right">
+<span class="font-label-numeric-md font-label-numeric-md text-secondary font-semibold">+1.12 R</span>
+<div class="text-label-numeric-sm font-label-numeric-sm text-secondary">+3.16%</div>
+</td>
+<td class="py-3 px-4 text-right">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container text-on-surface font-label-numeric-sm font-label-numeric-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+                        硬止损锁定 (1R)
+                      </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Section D: Recent Closed Executions Table -->
+<div class="space-y-2.5 pt-2">
+<div class="flex items-center justify-between px-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">最近模拟成交流水 (Recent Closed Executions)</h3>
+<span class="text-label-numeric-sm font-label-numeric-sm text-outline">已平仓账单明细 (最近 3 笔)</span>
+</div>
+<div class="specular-card rounded-xl overflow-hidden border border-outline-variant/40">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high/40 border-b border-outline-variant/30 text-label-caps font-label-caps text-on-surface-variant">
+<th class="py-2.5 px-4 font-semibold">标的 / 方向</th>
+<th class="py-2.5 px-4 font-semibold">开仓 / 平仓时间 (UTC)</th>
+<th class="py-2.5 px-3 font-semibold">浅穿判定</th>
+<th class="py-2.5 px-4 font-semibold">目标达成形态</th>
+<th class="py-2.5 px-3 font-semibold text-right">盈亏幅度比</th>
+<th class="py-2.5 px-4 font-semibold text-right">单笔 R 值</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20 font-body-sm text-body-sm">
+<!-- Row 1: Midpoint hit -->
+<tr class="hover:bg-surface-container-high/20 transition-colors">
+<td class="py-3 px-4">
+<div class="flex items-center gap-2">
+<span class="font-body-md font-body-md font-semibold text-on-surface">ETH/USDT</span>
+<span class="text-label-caps font-label-caps px-1 py-0.5 rounded bg-gain-emerald-container text-on-secondary-container">LONG</span>
+</div>
+</td>
+<td class="py-3 px-4 font-label-numeric-sm font-label-numeric-sm text-on-surface-variant">
+<div>2025-05-12 04:25</div>
+<div class="text-outline">2025-05-12 11:40</div>
+</td>
+<td class="py-3 px-3">
+<span class="font-label-numeric-sm font-label-numeric-sm text-primary font-semibold">0.65%</span>
+<span class="text-label-numeric-sm font-label-numeric-sm text-outline">(&lt;1.5%)</span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-primary-fixed/60 text-primary font-body-sm text-body-sm font-medium">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+                        周一中点达成 (0.5 Mid)
+                      </span>
+</td>
+<td class="py-3 px-3 text-right font-label-numeric-md font-label-numeric-md text-secondary font-medium">
+                      +2.45 : 1
+                    </td>
+<td class="py-3 px-4 text-right">
+<span class="font-label-numeric-md font-label-numeric-md text-secondary font-bold">+1.85 R</span>
+</td>
+</tr>
+<!-- Row 2: Boundary hit -->
+<tr class="hover:bg-surface-container-high/20 transition-colors">
+<td class="py-3 px-4">
+<div class="flex items-center gap-2">
+<span class="font-body-md font-body-md font-semibold text-on-surface">BTC/USDT</span>
+<span class="text-label-caps font-label-caps px-1 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed-variant">SHORT</span>
+</div>
+</td>
+<td class="py-3 px-4 font-label-numeric-sm font-label-numeric-sm text-on-surface-variant">
+<div>2025-05-05 08:15</div>
+<div class="text-outline">2025-05-05 16:30</div>
+</td>
+<td class="py-3 px-3">
+<span class="font-label-numeric-sm font-label-numeric-sm text-on-surface font-semibold">1.50%</span>
+<span class="text-label-numeric-sm font-label-numeric-sm text-outline">(边界触达)</span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[14px] text-outline" data-icon="flag">flag</span>
+                        近侧边界达成 (Mon High)
+                      </span>
+</td>
+<td class="py-3 px-3 text-right font-label-numeric-md font-label-numeric-md text-secondary font-medium">
+                      +1.62 : 1
+                    </td>
+<td class="py-3 px-4 text-right">
+<span class="font-label-numeric-md font-label-numeric-md text-secondary font-bold">+1.15 R</span>
+</td>
+</tr>
+<!-- Row 3: Hard Stop / Protect Exit -->
+<tr class="hover:bg-surface-container-high/20 transition-colors">
+<td class="py-3 px-4">
+<div class="flex items-center gap-2">
+<span class="font-body-md font-body-md font-semibold text-on-surface">AVAX/USDT</span>
+<span class="text-label-caps font-label-caps px-1 py-0.5 rounded bg-gain-emerald-container text-on-secondary-container">LONG</span>
+</div>
+</td>
+<td class="py-3 px-4 font-label-numeric-sm font-label-numeric-sm text-on-surface-variant">
+<div>2025-04-28 02:10</div>
+<div class="text-outline">2025-04-28 05:45</div>
+</td>
+<td class="py-3 px-3">
+<span class="font-label-numeric-sm font-label-numeric-sm text-primary font-semibold">1.12%</span>
+<span class="text-label-numeric-sm font-label-numeric-sm text-outline">(&lt;1.5%)</span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-tertiary-fixed/40 text-tertiary font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[14px]" data-icon="gpp_bad">gpp_bad</span>
+                        1R 保护止损离场
+                      </span>
+</td>
+<td class="py-3 px-3 text-right font-label-numeric-md font-label-numeric-md text-tertiary font-medium">
+                      -1.00 : 1
+                    </td>
+<td class="py-3 px-4 text-right">
+<span class="font-label-numeric-md font-label-numeric-md text-tertiary font-bold">-1.00 R</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</div>
+<!-- Drawer Bottom Status Strip -->
+<div class="px-8 py-2.5 bg-surface-container-lowest/60 border-t border-outline-variant/30 flex items-center justify-between text-label-numeric-sm font-label-numeric-sm text-on-surface-variant">
+<div class="flex items-center gap-4">
+<span>Engine Instance: <strong class="text-on-surface">NY-MID-1618-SANDBOX-09</strong></span>
+<span class="h-3 w-[1px] bg-outline-variant/40"></span>
+<span>Sample Buffer: <strong>7/100 Closed Orders</strong></span>
+</div>
+<div class="flex items-center gap-2 text-outline">
+<span class="material-symbols-outlined text-[14px]" data-icon="lock">lock</span>
+<span>Institutional Read-Only Sandbox Mirror</span>
+</div>
+</div>
+</aside>
+</main>
+</body></html>

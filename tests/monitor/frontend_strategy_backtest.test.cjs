@@ -5,6 +5,15 @@ const chart=require('../../yoyo/monitor/static/reclaim-chart.js');
 const flush=()=>new Promise(r=>setImmediate(r));
 const row=(id,symbol='AAAUSDT')=>({id,symbol,side:1,entry_ms:1700000000000+id*300000,exit_ms:1700000000000+id*300000+900000,pnl:id-3,return_pct:(id-3)/100});
 const page=(q,ids,total=ids.length)=>({schema:1,...q,meta:{track:q.track,trades:total},rows:ids.map(i=>row(i)),ranking:[{symbol:'AAAUSDT',pnl:3,trades:total}],focus:row(2),total,has_more:q.offset+ids.length<total});
+test('midpoint replay labels the actual branch and the entry-close instant',()=>{
+ const r=row(1);r.entry_start_ms=r.entry_ms;
+ r.entry_rules={kind:'touch_close',status:'saved',score:.6,minimum:.5,beyond_pct:1.125,target_rule:'shallow_ny_monday_midpoint'};
+ r.target='range_0.5';assert.doesNotMatch(ui.entryLabel(r),/–/);
+ assert.match(ui.rowHTML(r,1),/穿幅 1.125% · 目标 周一中点/);
+ assert.match(ui.summaryHTML(r),/穿幅 1.125% · 目标 周一中点/);
+ r.target='near_monday_edge';r.entry_rules.target_rule='near_monday_edge';r.entry_rules.beyond_pct=1.5;
+ assert.match(ui.summaryHTML(r),/穿幅 1.5% · 目标 周一近侧/);
+});
 test('trade summary preserves source fill prices and native intervals, including a midnight boundary',()=>{
  const start=Date.parse('2026-09-17T17:25:00Z');
  const r={...row(166,'SIRENUSDT'),side:-1,entry_ms:start+300000,exit_ms:start+300000,pnl:62.84005123804659,return_pct:2.529151912694961,

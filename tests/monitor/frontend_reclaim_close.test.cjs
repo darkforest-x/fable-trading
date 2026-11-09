@@ -3,6 +3,13 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const {estimate,createSubmitter}=require('../../yoyo/monitor/static/reclaim-close.js');
 const {rowHTML,route}=require('../../yoyo/monitor/static/monday-reclaim-paper.js');
 const position=(x={})=>({id:1,track:60,symbol:'SOL-USDT-SWAP',side:1,stage:'pending_confirm',entry:100,mark:110,notional:100,remaining_notional:75,taken:1,close_revision:1,...x});
+test('both six-slot wick accounts allocate a taker entry fee and apply the same manual exit costs',()=>{
+ for(const track of [8060,8260]){
+  const e=estimate(position({track,margin_leverage:3}),50);
+  assert.equal(e.entryFee,e.amount*.0005);assert.equal(e.exitFee,e.entryFee);
+  assert.equal(e.pnl,e.quantity*10-e.amount*.003);
+ }
+});
 test('partial presets apply to remaining quantity, with allocated entry fee and taker exit cost',()=>{
  const e=estimate(position(),50);assert.equal(e.quantity,.375);assert.equal(e.remaining,.375);assert.ok(Math.abs(e.entryFee-.0075)<1e-12);assert.equal(e.exitFee,.01875);assert.equal(e.pnl,3.72375);
  assert.equal(estimate(position({side:-1}),100).pnl,-7.5525);
