@@ -1,0 +1,6 @@
+{
+ "question":"After all prior partial exits and real trims, does leaving when the trade has given back half its previously observed cash profit improve the actual compounded account?",
+ "single_variable":"At the original shadow wallet's first completed 12H cash-retracement signal (earlier executable marked cash peak >=2 original risk amounts, later liquidation value <=half that peak), exit every remaining child at the next actual open. A fixed one-extra-12H delayed response to the same signal is a timing control. Preserve earlier native stops/targets and same-open native exits first. The published original roster reserves slots until the original exit; no substitute signal is admitted after early cash release. Actual entry amount and hourly trims still respond to the changed wallet equity.",
+ "source":"Original shadow marks are causal at their published clock. Fee-only and +5bp scenarios each use their own already specified shadow. Same corrected 360-contract OKX, fee schedule, turnover median budget, ETH/BTC leverage, VIX entry ranking and initial 1000U. Compare directly to original actual 42486U / 39218U. No funding or actual historical exit depth.",
+ "command":"vectorbt-python -m yoyo.evaluation.cloud_close_cash_trail"
+}
