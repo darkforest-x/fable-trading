@@ -1,0 +1,7 @@
+{
+  "question": "Does a native spot/perpetual price dislocation give V1.7 a better entry when the derivative is already discounted for a long or expensive for a short?",
+  "single_variable": "Filter the existing Binance futures V1.7 candidates by side * (perpetual key close / spot key close - 1) <= -0.001. The 10bp width equals two 5bp market fees; chosen before scoring. This is a directional trade, not hedged arbitrage.",
+  "coverage": "Use matched exact BASEUSDT symbols only, no alias or scaled-token mapping; the spot and futures last completed 12H prices use the same UTC close. Require active spot hours throughout the confirming key and the completed NY Monday, all futures hours of that Monday, and prior Monday midpoints within 2% of parity to avoid mixing price units or token lifecycles. These H1 last trades are asynchronous on a subhour scale and do not measure executable spread.",
+  "control": "Existing internally funded 1000U scored nine-slot account with 2/3 2R / one-third runner and 20% hourly single-name cap, 5bp taker/2bp resting. Compare against all observable candidates as well as seeded random admission matched on direction, score availability and exact 12H timestamp. Later years previously seen. No historical funding, order-book depth or market impact.",
+  "additional_settlements": {}
+}

@@ -27,7 +27,7 @@ def sample_placebo(candidates, signal_column):
     return sample,movable
 
 
-def compare_filter(panel, signal_column, directory, settlement_sources):
+def compare_filter(panel, signal_column, directory, settlement_sources, *, reuse_coverage=None):
     if (directory/'summary.json').exists():
         raise FileExistsError(f'Completed filter comparison in {directory}')
     source = pd.read_csv(rank.scores.EXP/'candidate_order.csv.gz',usecols=['event_id','entry_ms','score']).set_index('event_id',verify_integrity=True)
@@ -70,6 +70,15 @@ def compare_filter(panel, signal_column, directory, settlement_sources):
         if absent:
             raise ValueError(f'Official settlement inputs required for {absent}')
         for label,paid in rosters.items():
+            if label=='covered' and reuse_coverage is not None:
+                old = pd.read_csv(reuse_coverage/'observed_candidates.csv.gz',usecols=['event_id'])
+                if set(old.event_id)==set(observed.index):
+                    parents = pd.read_csv(reuse_coverage/'funded_covered.csv.gz',index_col='event_id')
+                    if set(parents.index)!=set(paid.event_id):
+                        raise ValueError('Same covered candidates produced a different actual roster')
+                    results[label] = dict(json.loads((reuse_coverage/'summary.json').read_text())['results'][label],
+                                          reused_directory=str(reuse_coverage.relative_to(admin.archive.native.wallet.ROOT)))
+                    continue
             data = admin.archive.native.prepare(admin.resolve_settlements(paid.copy(),marks,'proxy'))
             metrics,parents,equity,trims = hourly.tested.trim_account(data,admin.archive.native.quotes,.9,.2,review_hours=1)
             if not np.isclose(1000+parents.cash_pnl.sum(),equity.nav.iloc[-1],rtol=1.e-8,atol=.001):
