@@ -41,23 +41,29 @@ def witness_vectors(units,hour,base):
 def audit(label,evidence):
     curve=pd.read_csv(risk.cross.EXP/f'hourly_{label}.csv.gz',index_col=0,parse_dates=True)
     clocks={pd.Timestamp(r['hour_end']):r for r in evidence['hours'] if r.get('complete')}
-    peak=1000.;dd=0.;receipt={}
+    peak=upper_peak=1000.;dd=upper_dd=0.;receipt={}
     for row in curve.itertuples():
         for value in (row.open_nav,row.open_exit_nav):
             peak=max(peak,value);dd=max(dd,1-value/peak)
+            upper_peak=max(upper_peak,value);upper_dd=max(upper_dd,1-value/upper_peak)
         if row.Index in clocks:
             r=clocks[row.Index]
             high,low,close,outer_low,outer_high=witness_vectors(r['signed_units'],r['hour'],row.open_exit_nav)
             if np.any(high>outer_high+.00001) or np.any(low<outer_low-.00001):
                 raise ValueError('A guaranteed extremum lies outside the admissible price interval')
             # A trough may precede the peak in this minute. Only earlier peaks can be used for it.
-            for h,l,c in zip(high,low,close):
+            for h,l,c,potential_low,potential_high in zip(high,low,close,outer_low,outer_high):
+                upper_peak=max(upper_peak,potential_high);upper_dd=max(upper_dd,1-potential_low/upper_peak)
                 dd=max(dd,1-l/peak)
                 peak=max(peak,h)
                 dd=max(dd,1-c/peak)
             receipt[row.Index.isoformat()]=dict(guaranteed_high_usdt=float(high.max()),guaranteed_low_usdt=float(low.min()))
+        else:
+            upper_peak=max(upper_peak,row.upper_nav)
+            upper_dd=max(upper_dd,1-row.lower_nav/upper_peak)
+        upper_peak=max(upper_peak,row.nav);upper_dd=max(upper_dd,1-row.nav/upper_peak)
         peak=max(peak,row.nav);dd=max(dd,1-row.nav/peak)
-    return dict(certified_lower_dd_pct=float(100*dd),previous_minute_observed_pct=evidence['observed_dd_pct'],
+    return dict(certified_lower_dd_pct=float(100*dd),padded_upper_dd_pct=float(100*upper_dd),previous_minute_observed_pct=evidence['observed_dd_pct'],
                 prior_minute_model_upper_dd_pct=evidence['refined_bound_pct'],hours=receipt)
 
 
