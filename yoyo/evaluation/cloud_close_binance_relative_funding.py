@@ -549,7 +549,18 @@ def _run_scenario(data: dict, tape: pd.DataFrame | None, scenario: str | None,
                   native_open: np.ndarray, directions: np.ndarray,
                   no_settlement_windows: dict, *,
                   hourly_cap_fraction: float | None = CAP,
-                  entry_limits: np.ndarray | None = None):
+                  entry_limits: np.ndarray | None = None,
+                  child_weights: np.ndarray | tuple[float, float, float, float] | None = None):
+    """Run the frozen four-child VectorBT account.
+
+    ``child_weights`` is an optional, backward-compatible split of each new
+    parent's initial quantity across the two 2R children and two runners.
+    Omit it to preserve the original 2/3-at-2R allocation.
+    """
+    weights = WEIGHTS.copy() if child_weights is None else np.asarray(child_weights, dtype=np.float64)
+    if (weights.shape != (4,) or not np.isfinite(weights).all() or (weights <= 0.0).any()
+            or not np.isclose(weights.sum(), 1.0, rtol=0.0, atol=1e-12)):
+        raise ValueError("Four positive child weights must sum to one")
     if hourly_cap_fraction is None:
         cap_value = np.inf
     else:
@@ -579,7 +590,7 @@ def _run_scenario(data: dict, tape: pd.DataFrame | None, scenario: str | None,
     max_orders = int(np.count_nonzero(run_data["actions"])) + 4 * int(np.count_nonzero(previous_close)) + 1
     pf = vbt.Portfolio.from_order_func(
         run_data["marks"], _funded_order, run_data["actions"], run_data["prices"], run_data["fees"],
-        WEIGHTS, reservation, slot_weights, trim_fraction, native_open, directions,
+        weights, reservation, slot_weights, trim_fraction, native_open, directions,
         float(slip), scheduled["event_codes"], scheduled["exit_cache_quantity"],
         scheduled["exit_cache_event"], limit_grid,
         pre_segment_func_nb=_funded_segment,
@@ -1116,6 +1127,46 @@ def _mini_check() -> dict:
         raise AssertionError("Mini prior-minute entry capacity did not cap native parent notional")
     if no_hourly_cap[4]["audit"]["trim_order_count"] != 0:
         raise AssertionError("Mini disabled the hourly cap but still emitted a scheduled trim")
+    target_weight_cases = {
+        "target_1_3": np.asarray([1 / 6, 1 / 6, 1 / 3, 1 / 3], dtype=np.float64),
+        "target_5_6": np.asarray([5 / 12, 5 / 12, 1 / 12, 1 / 12], dtype=np.float64),
+    }
+    target_weight_audit = {}
+    for name, weights in target_weight_cases.items():
+        weighted = _run_scenario(
+            data, tape, "include_boundary", 0.0, multipliers, previous, native,
+            directions, no_settlement, entry_limits=entry_limits, child_weights=weights,
+        )
+        mini_children, mini_parents, _equity, mini_flows, result = weighted
+        rows = mini_children.loc[mini_children.event_id.eq("mini-long")].sort_values("child_leg")
+        fractions = rows.entry_notional_usdt.to_numpy(dtype=np.float64, copy=True)
+        fractions /= fractions.sum()
+        unit_fractions = rows.entry_signed_size.abs().to_numpy(dtype=np.float64, copy=True)
+        unit_fractions /= unit_fractions.sum()
+        if (len(rows) != 4 or not np.allclose(fractions, weights, rtol=1e-8, atol=1e-10)
+                or not np.allclose(unit_fractions, weights, rtol=1e-8, atol=1e-10)):
+            raise AssertionError(f"{name} did not allocate actual native child units at the configured weights")
+        if len(mini_parents) != 3 or len(mini_children) != 12:
+            raise AssertionError(f"{name} changed the four-child mini parent roster")
+        if result["audit"]["hourly_single_contract_cap_fraction"] != CAP:
+            raise AssertionError(f"{name} did not retain the 20% hourly single-contract trim")
+        if not np.isclose(1000.0 + mini_parents.cash_pnl.sum(), result["metrics"]["all"]["final_usdt"],
+                          rtol=1e-9, atol=0.02):
+            raise AssertionError(f"{name} child weight replay failed its shared-cash bridge")
+        if not np.isclose(result["audit"]["funding_cashflow_usdt"],
+                          mini_flows.loc[mini_flows.applied, "funding_cashflow_usdt"].sum(),
+                          rtol=1e-9, atol=1e-8):
+            raise AssertionError(f"{name} child funding quantities do not reconcile")
+        target_weight_audit[name] = {
+            "configured_weights": weights.tolist(),
+            "observed_entry_notional_fractions": fractions.tolist(),
+            "observed_native_entry_unit_fractions": unit_fractions.tolist(),
+            "parent_notional_usdt": float(rows.entry_notional_usdt.sum()),
+            "applied_funding_usdt": float(result["audit"]["funding_cashflow_usdt"]),
+            "hourly_trim_orders": int(result["audit"]["trim_order_count"]),
+        }
+        del weighted
+        gc.collect()
     result = {
         "status": "pass", "mini_parents": 3, "mini_children": 12,
         "boundary_rows_include": int(include[4]["audit"]["boundary_rows_applied"]),
@@ -1129,6 +1180,7 @@ def _mini_check() -> dict:
         "mini_capped_parent_notional_usdt": capped_notional,
         "mini_uncapped_parent_notional_usdt": uncapped_notional,
         "mini_hourly_trim_count_when_disabled": int(no_hourly_cap[4]["audit"]["trim_order_count"]),
+        "child_weight_cases": target_weight_audit,
         "five_bp_stress_run": True, "vectorbt_version": vbt.__version__,
     }
     print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False), flush=True)

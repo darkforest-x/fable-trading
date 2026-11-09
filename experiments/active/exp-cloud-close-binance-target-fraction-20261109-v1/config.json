@@ -1,0 +1,90 @@
+{
+  "id": "exp-cloud-close-binance-target-fraction-20261109-v1",
+  "venue": "Binance USD-M",
+  "question": "In the frozen Binance V1.7 12H close-signal capacity/funding account, does changing only the initial quantity assigned to the existing 2R limit improve funded results?",
+  "single_variable": "Change only the share of each original parent position assigned to its existing 2R target: primary f=1/3, opposite control f=5/6, and reuse the frozen f=2/3 account as baseline. Each parent keeps four native child legs with weights [f/2,f/2,(1-f)/2,(1-f)/2]. Preserve the original parent IDs, V1.7 signal clocks, entry order and slots, native prices, stop and EMA exits, 1x/2x exposure map, prior-minute capacity, fees, hourly trims, funding source and funding boundary scenarios.",
+  "arms": {
+    "baseline_2_3_reused": {
+      "target_fraction": 0.6666666666666666,
+      "child_weights": [0.3333333333333333, 0.3333333333333333, 0.16666666666666666, 0.16666666666666666],
+      "run_again": false,
+      "source_experiment": "exp-cloud-close-binance-capacity-funding-20261109-v1"
+    },
+    "primary_1_3": {
+      "target_fraction": 0.3333333333333333,
+      "child_weights": [0.16666666666666666, 0.16666666666666666, 0.3333333333333333, 0.3333333333333333]
+    },
+    "opposite_control_5_6": {
+      "target_fraction": 0.8333333333333334,
+      "child_weights": [0.4166666666666667, 0.4166666666666667, 0.08333333333333333, 0.08333333333333333]
+    }
+  },
+  "account": {
+    "initial_cash_usdt": 1000.0,
+    "original_signal_parent_denominator": 1586,
+    "capacity_eligible_positions": 1583,
+    "capacity_unknown_positions_skipped_without_replacement": 3,
+    "children_per_parent": 4,
+    "expected_child_legs": 6332,
+    "slots": 9,
+    "relative_exposure_levels": [1.0, 2.0],
+    "entry_capacity_fraction": 0.1,
+    "entry_capacity_window": "Median quote turnover of exactly 60 complete Binance USD-M 1m bars in [entry_ms - 60 minutes, entry_ms); entry minute is excluded.",
+    "single_contract_hourly_nav_trim_fraction": 0.2,
+    "signal_execution_clock": "Original V1.7 12H close confirmation at entry_ms; execute at the coincident native Binance H1 open. The original event_id timestamp is the signal close in milliseconds encoded as nanoseconds.",
+    "child_roles_in_order": ["tp2_doubling", "tp2_native", "runner_doubling", "runner_native"],
+    "stops_and_exits": "Keep the frozen original protective stop, 2R limit, runner EMA exit and any archived expiry/forced close unchanged. Do not change prices or admission based on this experiment.",
+    "entry_priority": "Preserve the frozen V1.7 entry order, CRC32 priority and native nine-slot assignments. The three unknown prior-minute capacity opportunities leave their original slots empty.",
+    "period_end_utc": "2026-09-24T00:00:00Z"
+  },
+  "fees": {
+    "taker": 0.0005,
+    "resting_maker": 0.0002,
+    "additional_market_slippage_stress": 0.0005
+  },
+  "funding": {
+    "venue": "Binance USD-M",
+    "boundary_scenarios": ["include_boundary", "exclude_boundary"],
+    "accounting": "Use the existing archived fundingRate and official mark inputs at their source millisecond. Apply actual child-leg signed quantity; funding changes shared cash and subsequent size. Preserve the existing collateral-liability handling.",
+    "source_complete": true,
+    "source_policy": "Reuse the complete frozen funding tape and its source_months/source_coverage receipts; no downloads or substituted prices."
+  },
+  "inputs": {
+    "base_capacity_funding_config": "experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/config.json",
+    "base_capacity_funding_summary": "experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/summary.json",
+    "capacity_panel": "experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/entry_capacity.csv.gz",
+    "capacity_funded_reference": "experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/funded_cap_10pct.csv.gz",
+    "capacity_hourly_reference": "experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/hourly_cap_10pct.csv.gz",
+    "native_original_children": "experiments/active/exp-cloud-close-fvg-priority-funding-20261109-v1/child_windows.csv.gz",
+    "frozen_priority_roster": "experiments/active/exp-cloud-close-fvg-priority-20261109-v1/priority.csv.gz",
+    "raw_signal_archive": "experiments/active/exp-signal-center-score-20261106-v1/results/symbols",
+    "funding_tape": "experiments/active/exp-cloud-close-fvg-priority-funding-20261109-v1/funding_tape.csv.gz",
+    "source_months": "experiments/active/exp-cloud-close-fvg-priority-funding-20261109-v1/source_months.csv.gz",
+    "source_coverage": "experiments/active/exp-cloud-close-fvg-priority-funding-20261109-v1/source_coverage.json"
+  },
+  "scenarios": [
+    "include_boundary",
+    "exclude_boundary",
+    "stress_include_boundary",
+    "stress_exclude_boundary"
+  ],
+  "reporting": {
+    "periods": ["all", "dev", "2020", "2021", "2022", "2023", "2024", "2025", "2026"],
+    "metrics": ["final_usdt", "multiple", "dd_mark_pct", "dd_bound_pct", "trades", "win_pct", "payoff", "payoff_usdt", "median_net_pct"],
+    "cash_bridge": "Initial cash + native VectorBT order cashflows + actually applied funding cashflows = terminal NAV; later order sizes may differ, so funding is not a terminal-only adjustment.",
+    "baseline": "Reuse the committed 2/3 target-fraction capacity/funding account outputs without re-running them."
+  },
+  "execution": {
+    "framework": "Local VectorBT 1.2.0 from_order_func cash-sharing account with the existing native four-stage funding and hourly-trim callback.",
+    "network_policy": "Offline replay only; no funding collection, price download, alternate venue, or new entry generation.",
+    "change_boundary": "Only child_weights at initial parent sizing changes; all four legs remain present and funded in the same account.",
+    "capacity_and_risk": "Keep the 10% prior-minute entry cap and 20% prior-completed-H1 NAV per-contract trim active in every run."
+  },
+  "outputs": {
+    "scope": "experiments/active/exp-cloud-close-binance-target-fraction-20261109-v1/",
+    "per_arm_scenario": ["funded_legs.csv.gz", "funded_positions.csv.gz", "applied_funding.csv.gz", "hourly_equity.csv.gz", "orders.csv.gz", "metrics.json"],
+    "summary": "summary.json",
+    "signal_source_audit": "signal_source_audit.json"
+  },
+  "status": "preregistered_frozen_inputs"
+}
