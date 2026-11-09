@@ -138,6 +138,7 @@ def _settlement_inputs() -> tuple[dict[str, dict[str, Any]], dict[str, dict[str,
         (wallet.vwap.EXP, "additional_settlements"),
         (wallet.timing.EXP, "additional_settlements"),
         (previous.fvg.EXP, "additional_settlements"),
+        (EXP, "additional_settlements"),
     ]
     specs: dict[str, dict[str, Any]] = {}
     marks: dict[str, dict[str, float]] = {}
@@ -295,6 +296,11 @@ def main() -> None:
     for seed in config["randomization"]["seeds"]:
         _check_matched(observed, expected_seed if seed == 1029 else _sample_matched(observed, seed), seed)
 
+    additional = config.get("additional_settlements", {})
+    if additional:
+        # Official Binance one-minute index candles proxy the documented mean of
+        # 1,800 one-second index observations; the source remains explicitly marked.
+        admin.reference_prices(additional, directory=EXP)
     specs, marks, mark_sources = _settlement_inputs()
     extra = set(json.loads((archive.EXP / "summary.json").read_text(encoding="utf-8"))["archived_additions"])
     extra.update(json.loads((admin.study.EXP / "summary.json").read_text(encoding="utf-8"))["new_archive_cohorts"]["priced"])

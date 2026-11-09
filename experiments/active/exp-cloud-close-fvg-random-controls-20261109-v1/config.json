@@ -13,6 +13,24 @@
     "unknown_candidates_excluded": 372,
     "official_contract_lifetime_rule": "Reuse cloud_close_delivery_control.adjusted_legs, frozen Binance contract metadata, and existing official settlement index sources; do not infer expiry from current listing alone."
   },
+  "additional_settlements": {
+    "BADGERUSDT": {
+      "utc": "2025-04-14T09:00:00Z",
+      "minutes": 30,
+      "announcement": "https://www.binance.com/en/support/announcement/detail/fac9c3e401da4cc8b604566fd261d70c",
+      "settlement_method": "https://www.binance.com/en/support/announcement/detail/4bcabddf0e81423ebca242e185bf157d",
+      "settlement_fee": "https://www.binance.com/en/support/faq/detail/dd60dfbf654d4055aa6b217ea6d5ddba",
+      "mark": "Approximate the official mean of 1,800 one-second index prices from 08:30 to 09:00 UTC with the mean of the 30 official Binance one-minute index-price candle closes; validate all expected minute bars and OHLC."
+    },
+    "MILKUSDT": {
+      "utc": "2025-12-05T09:00:00Z",
+      "minutes": 30,
+      "announcement": "https://www.binance.com/en/square/post/33124770181689",
+      "settlement_method": "https://www.binance.com/en/support/announcement/detail/4bcabddf0e81423ebca242e185bf157d",
+      "settlement_fee": "https://www.binance.com/en/support/faq/detail/dd60dfbf654d4055aa6b217ea6d5ddba",
+      "mark": "Approximate the official mean of 1,800 one-second index prices from 08:30 to 09:00 UTC with the mean of the 30 official Binance one-minute index-price candle closes; validate all expected minute bars and OHLC."
+    }
+  },
   "randomization": {
     "rng": "numpy.random.default_rng(seed), PCG64",
     "reused_seed": 1029,
@@ -64,7 +82,8 @@
     "exp-cloud-close-fvg-cap-filter-20261109-v1",
     "exp-cloud-close-key-vwap-20261109-v1",
     "exp-cloud-close-hourly-trim-control-20261109-v1",
-    "exp-cloud-close-fvg-transfer-20261109-v1"
+    "exp-cloud-close-fvg-transfer-20261109-v1",
+    "this experiment: official Binance one-minute indexPriceKlines for selected BADGERUSDT and MILKUSDT expiries"
   ],
   "run": {
     "command": "python3 -m yoyo.evaluation.cloud_close_fvg_random_controls",
@@ -73,6 +92,7 @@
       "sampled_rosters.csv.gz",
       "funded_rosters.csv.gz",
       "selected_deliveries.csv.gz",
+      "settlement_index_1m.csv",
       "seed_metrics.csv",
       "distribution_ranks.csv",
       "settlement_audit.json",
