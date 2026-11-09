@@ -1,0 +1,6 @@
+{
+ "question":"Does an unfinished 12H order benefit from asking for its original price on the second opening window?",
+ "single_variable":"For one remaining-volume attempt at the following 12H close, accept a marketable immediate order only when the scenario's real modeled opening fill is no worse than the price of the original entry, a limit known 12 hours beforehand. No resting orders or later attempts. Preserve both previous minute capacity budgets, the actually unfilled original notional amount, open-child proportions, 20% concentration limit and shared account cash. Compare joint ungated and prior-shadow-PnL split experiments on the same opportunities. Equality is eligible.",
+ "scope":"A first traded open inside the limit does not establish available book depth. Fee-only, per-market-fill adverse 5bp stress. Original 1000U nine-position wallet. The hypothesis follows the complementary PnL gate results.",
+ "command":"vectorbt-python -m yoyo.evaluation.cloud_close_deferred_fill --original-price"
+}
