@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-fvg-random-controls-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "a40d3da610"
+    status: "rejected"
+    question: "Does the same-time gap filter grow more than 39 prespecified equally scarce samples?"
+    single_variable: "39 same-size/time/side/score-availability random portfolios versus frozen outside-gap selection; original ranks, nine slots, fees and hourly cap."
+    result: "FVG wallet 11620.79U ranked 21/40; 20/39 random portfolios exceeded it. Controls mean 11666.03U, median 11689.89U, range 7056.42-16448.59U; empirical upper-tail p=.525. Development controls exceeded FVG in 27/39 draws (p=.70). Outside-gap upper DD 33.63%, random median 33.28%; no distinguishable gap-specific growth advantage in this exercise."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-fvg-random-controls-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-810f-ae2a-e9a459084076."
+
+  - experiment_id: exp-cloud-close-okx-roster-audit-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "91d8256b7d"
+    status: "inconclusive"
+    question: "Which historical swap identities were absent from the original OKX population?"
+    single_variable: "Cross-check independently recorded expired USDT perpetual IDs absent from the frozen 291-name OKX population using one preceding month of native OKX records each."
+    result: "159 candidates. 122 instrument-matched native monthly archives with all candle confirmation flags one, 16 positive-volume native files with at least one unconfirmed candle, and 21 queried monthly files 404. The WAVES-USDT-SWAP delisting is independently documented by OKX. Provider dates describe recording; native evidence for one month does not establish product category or life span. Existing account cannot be treated as a full historical all-market census."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-okx-roster-audit-20261109-v1/summary.json"
+    notes: "Source coverage audit; no trade replay, costs, or funding. Notion 41388564-79af-818a-95d3-f0939fcae7df."
+
   - experiment_id: exp-cloud-close-owner-risk-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "f65a890ac2"
