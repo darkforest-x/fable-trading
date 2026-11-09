@@ -1,0 +1,60 @@
+{
+  "id": "exp-cloud-close-target-leg-attribution-20261109-v1",
+  "question": "For the 1,585 actually funded parents in the aligned median-cap OKX wallet, how were executed child quantities and fee-inclusive cash PnL realized across the original 2R target, absolute 2x-entry target, hourly trims, cloud and stop exits, and administrative tails?",
+  "population": {
+    "funded_parents": 1585,
+    "frozen_funded_ledger": "experiments/active/exp-cloud-close-vix-priority-medians-20261109-v1/aligned/funded_median.csv.gz",
+    "frozen_native_order_log": "experiments/active/exp-cloud-close-cash-giveback-20261109-v1/orders_median.csv.gz",
+    "frozen_candidate_paths": "experiments/active/exp-cloud-close-vix-priority-20261109-v1/aligned/selected_paths.csv.gz",
+    "portfolio": "OKX; aligned VIX-priority queue; prior-60-minute median cap; 9 slots; starting cash 1000 USDT; actual fees; no extra slippage",
+    "saved_route_cross_checks_only": [
+      "experiments/active/exp-cloud-close-double-directory-20261109-v1/doubling_fills.csv",
+      "experiments/active/exp-cloud-close-double-limit-20261109-v1/doublings_OKX.csv"
+    ],
+    "periods": {
+      "through_2024": "entry_ms < 2025-01-01T00:00:00Z",
+      "2025": "2025-01-01T00:00:00Z <= entry_ms < 2026-01-01T00:00:00Z",
+      "2026": "entry_ms >= 2026-01-01T00:00:00Z",
+      "top10_cash_winners": "Top 10 funded parents by frozen cash_pnl descending, event_id ascending for ties"
+    }
+  },
+  "native_child_routing": {
+    "source": "cloud_close_double_limit.assemble via the already used cash-giveback input adapter; the adapter returns actual selected child paths without executing a new portfolio",
+    "child_slot_modulo_4": {
+      "0": "2R-target-origin child routed through the absolute-doubling candidate",
+      "1": "native 2R-target-origin child",
+      "2": "runner-origin child routed through the absolute-doubling candidate",
+      "3": "native runner child"
+    },
+    "vectorbt_order_stage": {
+      "0": "opening child fill",
+      "1": "exit observed at the hour open",
+      "2": "hourly single-symbol-cap trim",
+      "3": "intrabar or close terminal exit"
+    }
+  },
+  "accounting": {
+    "exit_quantity": "absolute value of native net_units on each closing fill",
+    "entry_basis_allocation": "Allocate each child's signed opening underlying_cash, including its opening fee, to every closing fill in proportion to that fill's closed units / the child's initial units",
+    "realized_net_cash_pnl": "closing underlying_cash (already net of its fee) + proportional signed opening underlying_cash; trim fills and terminal exits are reported separately",
+    "absolute_doubling_target": "A routed long child whose actual selected terminal path is a take-profit exactly at 2 * actual entry_price; report target-origin and runner-origin children separately. Determine this from the assembled current native child path plus actual native order fill, not by filtering with a saved route roster",
+    "relative_2R_target": "A target-origin child whose actual selected terminal take-profit is exactly entry_price + side * 2 * abs(entry_price - fixed_stop_price)",
+    "cash_reconciliation": "All child realized net cash must sum to frozen parent cash_pnl; native fill cash must also sum to the frozen parent cash_pnl",
+    "quantity_reconciliation": "For each child and parent, opening units must equal all trim plus terminal exit units, up to floating tolerance"
+  },
+  "outputs": [
+    "summary.json",
+    "order_attribution.csv.gz",
+    "child_attribution.csv.gz",
+    "parent_reconciliation.csv.gz",
+    "category_summary.csv",
+    "child_origin_summary.csv",
+    "top10_cash_winners.csv.gz"
+  ],
+  "limits": [
+    "This is a retrospective accounting attribution of actual frozen fills, not a separate account or a hypothetical cash simulation.",
+    "No funding payments, additional market impact, or unrecorded exit depth are added.",
+    "The 2026 entry cohort is partial year-to-date in this frozen source.",
+    "The original aligned median-cap order log is authoritative. A separate saved doubling-fill roster is not used to decide which target exits occurred."
+  ]
+}
