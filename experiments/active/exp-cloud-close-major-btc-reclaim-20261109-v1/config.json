@@ -1,0 +1,6 @@
+{
+  "question": "The isolated ETH/BTC relative reclaim produced few trades despite high cash payoff. Do nine liquid alt/BTC ratios give one shared-account strategy enough distinct opportunities?",
+  "single_variable": "Expand ETH to the nine non-BTC symbols in the previously frozen liquid-ten roster. Each alt versus BTC uses exactly the same synchronized H1 close ratio, Monday anchors, 12H reclaim with EMA alignment, actual open fills and relative stop/cloud exit. Only one actual pair may be open; deterministic CRC32 of native symbol breaks a simultaneous tie. A free clock may accept a new signal even if an earlier unfunded signal on that asset still has a shadow position.",
+  "checks": "Pair actual equal dollars on its two legs; compare the identical chosen alt leg with half-equity cash in reserve. Charge both legs 5bp taker on both entry and exit; add 5bp for stress. Report any collateral breach and missing native quotes. This is a fixed, survivor-selected liquid sample, not a general listing universe. No funding or depth.",
+  "command":"vectorbt-python -m yoyo.evaluation.cloud_close_major_btc_reclaim"
+}

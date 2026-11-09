@@ -12,14 +12,14 @@ H=wallet.HOUR
 STEP=spread.STEP
 
 
-def observed_ratio():
+def observed_ratio(asset='ETH'):
     """Pair simultaneous native hourly closes; every timestamp denotes the actual end of its hour."""
     series={}
-    for symbol in ['ETH','BTC']:
+    for symbol in [asset,'BTC']:
         stamps,prices=wallet.quotes(symbol)
         series[symbol]=pd.Series(prices[:,3],index=stamps+H)
     prices=pd.DataFrame(series).dropna()
-    return prices.ETH/prices.BTC
+    return prices[asset]/prices.BTC
 
 
 def entries(ratio):
@@ -51,18 +51,18 @@ def entries(ratio):
     return pd.DataFrame(marks),ema
 
 
-def paths(marks,ratio,ema):
+def paths(marks,ratio,ema,*,asset='ETH',overlaps=False):
     """After a confirmed threshold break at hourly close or cloud reversal at 12H close use next common open."""
     prices={}
-    for sym in ['ETH','BTC']:
+    for sym in [asset,'BTC']:
         ts,q=wallet.quotes(sym)
         prices[sym]=pd.DataFrame(q,index=ts,columns=['open','high','low','close'])
-    common=prices['ETH'].index.intersection(prices['BTC'].index)
+    common=prices[asset].index.intersection(prices['BTC'].index)
     common=common[(common>=wallet.START)&(common<wallet.END)].sort_values()
     busy=-1
     rows=[]
     for r in marks.itertuples():
-        if r.clock<=busy or r.clock not in common:
+        if (not overlaps and r.clock<=busy) or r.clock not in common:
             continue
         lo=common.get_loc(r.clock)
         hrs=common[lo+1:]
@@ -82,7 +82,7 @@ def paths(marks,ratio,ema):
             reason='sample_end'
             phase='close'
         busy=end
-        for slot,symbol in enumerate(['ETH','BTC']):
+        for slot,symbol in enumerate([asset,'BTC']):
             frame=prices[symbol]
             sign=r.side if slot==0 else -r.side
             entry=frame.at[r.clock,'open']
@@ -91,17 +91,18 @@ def paths(marks,ratio,ema):
             final_price=frame.at[end,phase]
             worst=max(worst,final_price) if sign==-1 else min(worst,final_price)
             equity_ratio=1+sign*(worst/entry-1)
-            if equity_ratio<=.1*worst/entry+.002:
-                raise ValueError(f'Individual 1x leg crosses conservative collateral threshold {symbol} {r.clock}')
+            margin_buffer=equity_ratio-.1*worst/entry-.002
             rows.append(dict(event_id=str(r.clock),parent_id=str(r.clock),symbol=symbol,side=sign,slot=slot,
                    entry_ms=r.clock,exit_bar_ms=end,entry_price=entry,exit_price=final_price,exit_phase=phase,
-                   exit_reason=reason,exit_fee_rate=wallet.TAKER))
+                   exit_reason=reason,exit_fee_rate=wallet.TAKER,margin_buffer=margin_buffer))
     return pd.DataFrame(rows)
 
 
-def fund(events,paired,slip):
-    roster=events if paired else events[events.symbol.eq('ETH')]
+def fund(events,paired,slip,*,directory=EXP,asset_label='eth_half'):
+    roster=events if paired else events[events.slot.eq(0)]
     slots=2 if paired else 1
+    if roster.margin_buffer.le(0).any():
+        raise ValueError('A funded 1x native leg requires intrahour margin evidence')
     data=wallet.prepare(None,slots,assigned=(roster,{}))
     legs,equity=wallet.account(data,slip=slip,exposure=1. if paired else .5,weights=(.5,.5) if paired else (1.,))
     groups=legs.groupby('event_id',sort=False)
@@ -114,9 +115,9 @@ def fund(events,paired,slip):
     funded=groups.agg(entry_ms=('entry_ms','first'),exit_bar_ms=('exit_bar_ms','first'),cash_pnl=('cash_pnl','sum'),
                       notional=('notional','sum'))
     funded['net_return']=funded.cash_pnl/funded.notional
-    label=('pair' if paired else 'eth_half')+('_stress' if slip else '')
-    legs.to_csv(EXP/f'legs_{label}.csv.gz',index=False)
-    equity.to_csv(EXP/f'hourly_{label}.csv.gz',index_label='hour_end_utc')
+    label=('pair' if paired else asset_label)+('_stress' if slip else '')
+    legs.to_csv(directory/f'legs_{label}.csv.gz',index=False)
+    equity.to_csv(directory/f'hourly_{label}.csv.gz',index_label='hour_end_utc')
     return label,dict(metrics={k:wallet.summarize(funded,equity,*bounds) for k,bounds in spread.periods.PERIODS.items()},
                       gap_marks=data['gap_marks'])
 
