@@ -23,6 +23,7 @@ def read_csv(path):
 
 
 def publish_overview():
+    from markdown_it import MarkdownIt
     cases = json.loads((EXPERIMENT / "summary.json").read_text())["arms"]["opposite"]["cases"]
     metrics = cases["1.5x"]["metrics"]["all"]
     trades = read_csv(SOURCE / "funded_inverse_1.5x.csv.gz")
@@ -57,6 +58,9 @@ def publish_overview():
     shutil.copyfile(SOURCE / "equity-drawdown-1.5x.png", BOOK / "equity.png")
     with gzip.open(SOURCE / "funded_inverse_1.5x.csv.gz", "rb") as src, (BOOK / "funded.csv").open("wb") as dest:
         shutil.copyfileobj(src, dest)
+    handbook = (BOOK / "handbook.md").read_text()
+    body = handbook.split("## 交易规则\n", 1)[1].split("## 账本与图谱", 1)[0]
+    (BOOK / "rules.html").write_text(MarkdownIt("commonmark", {"html": False}).enable("table").render(body))
 
 
 def publish_zip():
