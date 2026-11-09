@@ -105,7 +105,7 @@ def trade(c,nav,actions,prices,fees,reserve,weights,unit_weights,trim,native_ope
     return wallet.account_order(c,nav,actions,prices,fees,0.,1.,weights,reserve,0,unit_weights)
 
 
-def receipts(pf, data, model, multiple):
+def receipts(pf, data, model, multiple, *, fill_sink=None):
     fills = pf.orders.records.copy()
     fills['stage'] = fills.idx.mod(4)
     fills['hour'] = data['start']+fills.idx.floordiv(4)*wallet.HOUR
@@ -132,6 +132,8 @@ def receipts(pf, data, model, multiple):
     fills['underlying_cash'] = np.where(opened,-sign,sign)*real_notional-fills.fees
     fills['share_cash'] = np.where(opened,-1.,1.)*fills['size']*fills.price-fills.fees
     fills['net_units'] = np.where(opened,1.,-1.)*scale
+    if fill_sink is not None:
+        fill_sink(fills)
     balances = fills.groupby(['underlying_event_id','col']).agg(units=('net_units','sum'),volume=('net_units',lambda x:x.abs().sum()))
     if (balances.units.abs()>balances.volume*1.e-9+1.e-10).any() or len(balances)!=len(data['selected']):
         raise ValueError('Some funded underlying native coin units remain unsettled')

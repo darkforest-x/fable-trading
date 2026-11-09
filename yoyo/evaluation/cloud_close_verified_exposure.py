@@ -18,7 +18,7 @@ def account():
     return data,base.underlying(data,quotes),quotes
 
 
-def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=None,snapshot=None,inspect_flag=evidence.inspect,entry_limits=None):
+def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=None,snapshot=None,inspect_flag=evidence.inspect,entry_limits=None,fill_sink=None):
     native,previous,side,runners = market
     if set(multiples.index)!=set(runners.event_id) or not multiples.index.is_unique or multiples.isna().any():
         raise ValueError('Each occupied parent needs exactly one pre-entry multiplier')
@@ -61,7 +61,7 @@ def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=No
         active = data['selected'].event_id.map(entry_limits).gt(0)
         receipt_data = dict(data,selected=data['selected'][active])
     pf = base.build_portfolio(data,model,native*ratio_grid,previous*ratio_grid,side,1.,slip,entry_limits=cap_grid)
-    funds,curve,trims = base.receipts(pf,receipt_data,model,multiples)
+    funds,curve,trims = base.receipts(pf,receipt_data,model,multiples,fill_sink=fill_sink)
     if entry_limits is not None and (funds.notional>entry_limits.reindex(funds.index)+1.e-6).any():
         raise ValueError('Actual aggregate child entry notional exceeds the pre-entry cap')
     funds['exposure'] = multiples
