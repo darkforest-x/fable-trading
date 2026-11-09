@@ -34,7 +34,8 @@ def collateral_model(data,market,multiples,slip):
     return model,ratio_grid
 
 
-def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=None,snapshot=None,inspect_flag=evidence.inspect,entry_limits=None,fill_sink=None,child_weights=base.WEIGHTS):
+def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=None,snapshot=None,inspect_flag=evidence.inspect,entry_limits=None,fill_sink=None,child_weights=base.WEIGHTS,
+             entry_target_fractions=None):
     native,previous,side,runners = market
     if set(multiples.index)!=set(runners.event_id) or not multiples.index.is_unique or multiples.isna().any():
         raise ValueError('Each occupied parent needs exactly one pre-entry multiplier')
@@ -66,8 +67,17 @@ def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=No
         cap_grid[rows,runners.slot//4] = runners.event_id.map(entry_limits)
         active = data['selected'].event_id.map(entry_limits).gt(0)
         receipt_data = dict(data,selected=data['selected'][active])
+    order_options = {}
+    if entry_target_fractions is not None:
+        f = entry_target_fractions.reindex(runners.event_id)
+        if f.isna().any() or not ((f > 0) & (f < 1)).all():
+            raise ValueError('Each scheduled parent needs a valid opening target fraction')
+        grid = np.full_like(native, np.nan)
+        hours = (runners.entry_ms-data['start'])//base.wallet.HOUR
+        grid[hours, runners.slot//4] = f.to_numpy()
+        order_options = dict(order_func=base.trade_entry_fraction, extra_order_args=(grid,))
     pf = base.build_portfolio(data,model,native*ratio_grid,previous*ratio_grid,side,1.,slip,entry_limits=cap_grid,
-                              child_weights=child_weights)
+                              child_weights=child_weights,**order_options)
     funds,curve,trims = base.receipts(pf,receipt_data,model,multiples,fill_sink=fill_sink)
     if entry_limits is not None and (funds.notional>entry_limits.reindex(funds.index)+1.e-6).any():
         raise ValueError('Actual aggregate child entry notional exceeds the pre-entry cap')

@@ -1,0 +1,7 @@
+{
+  "question": "Can the original sealed signal's own V1.7 EMA20/50 position identify which unchanged trades to leave more size running, without throwing away otherwise profitable entries?",
+  "single_variable": "Normally sell two thirds on the original 2R schedule; sell only one third when the original 12H close was beyond both EMAs in the trade direction. Actual fixed stops, trade times, 2R price/lifetime, long price-doubling allocation, hourly trim, exposure, fee and entry notional capacity unchanged. These are contingent targets, not guaranteed fills.",
+  "control": "At each identical confirmation boundary, side, and cap-eligible state, assign the same count of reduced target fractions by deterministic fixed hash of native event ID, seed 1109. All inputs for this within-boundary assignment are available at that boundary, with singleton strata immovable. Include the uniform 2/3 and uniform 1/3 accounts as existing controls; do not choose a threshold or tune after performance. Reconcile funded native order weights and counts.",
+  "selection": "Motivated by the earlier in-sample native cloud-location attribution and prior unconditional fraction comparison. Calendar partitions are descriptive only, not independent prospective validation. Unchanged original median-cap OKX setup with known missing historical funding and exit-depth coverage.",
+  "command": "vectorbt-python -m yoyo.evaluation.cloud_close_cloud_side_target_fraction"
+}

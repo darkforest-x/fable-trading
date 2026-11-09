@@ -105,6 +105,17 @@ def trade(c,nav,actions,prices,fees,reserve,weights,unit_weights,trim,native_ope
     return wallet.account_order(c,nav,actions,prices,fees,0.,1.,weights,reserve,0,unit_weights)
 
 
+@njit(cache=True)
+def trade_entry_fraction(c,nav,actions,prices,fees,reserve,weights,unit_weights,trim,native_open,
+                         directions,multiple,slip,entry_limits,fraction_grid):
+    if c.i%4 == 0 and actions[c.i,c.col] == 1:
+        f = fraction_grid[c.i//4,c.col//4]
+        weights = np.array([f/2, f/2, (1.-f)/2, (1.-f)/2])
+    return trade(c,nav,actions,prices,fees,reserve,weights,unit_weights,trim,native_open,
+                 directions,multiple,slip,entry_limits)
+
+
+
 def receipts(pf, data, model, multiple, *, fill_sink=None):
     fills = pf.orders.records.copy()
     fills['stage'] = fills.idx.mod(4)
