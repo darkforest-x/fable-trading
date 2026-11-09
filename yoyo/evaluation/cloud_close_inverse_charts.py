@@ -135,7 +135,7 @@ def draw(position, path, fills, source):
     fig.text(.976,.881,"本笔净盈亏",ha="right",fontsize=10.5,color=GRAY)
     if use_log:
         ax.text(1.005,1.004,"对数轴",transform=ax.transAxes,fontsize=8.5,color=GRAY,va="bottom")
-    fig.savefig(book.OUT/f"{position.symbol}.png",dpi=165)
+    fig.savefig(book.OUT/f"{position.symbol}-12H.png",dpi=165)
     plt.close(fig)
     print(position.symbol, len(frame), int(visible.hour_ms.nunique()))
 
