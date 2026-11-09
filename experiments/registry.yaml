@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-breakout-cost-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "b05359695a"
+    status: "inconclusive"
+    question: "十币三套云带入场的同成本滑点压力比较"
+    single_variable: "十币固定面板，突破即时、无条件晚一根、旧收复三套已有路径统一加每边5bp市场滑点，保留5bp taker。"
+    result: "额外滑点下突破即时33,117U、回撤上界49.50%；晚一根40,404U、胜率25.10%、现金盈亏比5.25、回撤上界48.78%；同池原收复11,568U。十币样本内延后仍更高。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-breakout-cost-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-8150-8b80-f91cf339f747."
+
+  - experiment_id: exp-cloud-close-inside-compression-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "84d6b75a47"
+    status: "rejected"
+    question: "云带顺势内包K波动压缩后突破"
+    single_variable: "360合约（含补齐WAVES），12H母子内包形态向云带方向突破，对普通内包突破单独增加“内包K为最近7根中最窄”条件，止损放内包另一端，云带反转退出。"
+    result: "波动压缩组10,077机会、1,429笔，1,000→3,253U，胜率16.79%、金额盈亏比5.47、回撤上界63.05%（观测56.36%）。普通内包1,933U、回撤79.86%。压缩组有7笔盘中序列提前终止与5笔跨断档退出，5bp滑点后2,831U。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-inside-compression-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-8149-a032-e05edfd656f4."
+
   - experiment_id: exp-cloud-close-waves-wallet-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "219fc84d2c"
