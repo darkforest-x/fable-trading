@@ -19672,3 +19672,21 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'OKX listing fetched 2026-11-01 (prefix stripping is approximate). Breadth uses patterns3 events to 2026-09, so October live-wick trades have none. No paper account or service changed.'
+  - experiment_id: exp-cloud-close-binance-relative-funding-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: dd595d35b2
+    status: complete
+    question: "How does settling actual Binance USD-M funding through the shared VectorBT account change the frozen contrarian_half 1x/2x wallet?"
+    single_variable: "Settle each real child-leg funding cashflow into available account cash and subsequent order sizing. Keep the 1,586 parent IDs, four legs per parent, 1x/2x exposure map, nine slots, 20 percent per-contract H1 notional cap, native fills, exits, and fees fixed; bracket exact/ambiguous same-time settlement boundaries and add a separate 5bp fill stress."
+    result: "VectorBT 1.2.0 zero-funding parity: 1,586 parents and 58,992 H1 rows; maximum hourly NAV error 8.4e-7U. Include-boundary: 22,207.69U terminal, 45.96 percent conservative DD bound, 33.73 percent win, 2.832 payoff; 506.34U net funding. Exclude-boundary: 22,057.40U, 45.88 percent DD bound, 478.60U net funding. The 5bp stress finishes 17,579.73U / 17,460.78U with DD bounds 46.40 / 46.31 percent. Include cash bridge: order net cash 20,701.35U + funding 506.34U + initial 1,000U = 22,207.69U; against zero funding, changed order cash is -4,302.15U and funding +506.34U, net terminal change -3,795.81U."
+    artifacts:
+      - experiments/active/exp-cloud-close-binance-relative-funding-20261109-v1/summary.json
+      - experiments/active/exp-cloud-close-binance-relative-funding-20261109-v1/include_boundary/funded_positions.csv.gz
+      - experiments/active/exp-cloud-close-binance-relative-funding-20261109-v1/include_boundary/applied_funding.csv.gz
+      - experiments/active/exp-cloud-close-binance-relative-funding-20261109-v1/include_boundary/hourly_equity.csv.gz
+    canonical_report: experiments/active/exp-cloud-close-binance-relative-funding-20261109-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: "The position interval is first entry 2020-05-10 12:00Z through final flat 2026-09-24 00:00Z (last exit bar opens 2026-09-23 23:00Z and closes at 00:00Z). Last applied settlement is 2026-09-23 16:00:00.004Z, with zero rate/cashflow; donor tape ends 2026-09-24 00:00:00.002Z, 2ms after the final flat time, and contains no settlement exactly at the cutoff. Coverage: 2,003 required symbol-months, zero missing or unproven empty windows, 181,393 in-hold settlements. Funding rates have sources; marks are 1,587 exact API marks plus 76,844 official 1h-open proxies. Largest parent entry-notional change: 2x short SIGN 5,363.23U to 4,366.93U (-996.30U / -18.58 percent); its cash change combines smaller later order sizing and -320.76U funding. No production eligibility or account change."
