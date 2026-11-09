@@ -25,7 +25,7 @@ def make_account(rows,quotes):
             raise ValueError('Missing or altered published Binance doubling fill')
         early = x[ix,0]>=r.price
         limits.append(dict(event_id=r.event_id,exit_bar_ms=r.limit_ms,exit_phase='open' if early else 'intrabar',
-                      exit_reason='take_profit_open' if early else 'take_profit',exit_fee_rate=base.wallet.TAKER*.4,
+                      exit_reason='take_profit_open' if early else 'take_profit',exit_fee_rate=base.study.leverage.MAKER,
                       exit_price=r.price,same_bar_ambiguous=False))
     data,actually = bundle.assemble(rows,pd.DataFrame(limits),'Binance',quotes)
     if len(actually)!=len(saved):
@@ -39,7 +39,22 @@ def relative(quotes):
         ts,ohlc = quotes(sym)
         h = pd.DataFrame(ohlc[:,:4],index=pd.Index(ts,name='time'),columns=['open','high','low','close'])
         bars = bundle.price.twelve_hour(h)
-        prices[sym] = bars.close
+        # The execution cache only contains BTC/ETH from its first occupied
+        # tape month. Supplement the feature prefix from earlier exact 15m
+        # exchange archives, without changing any funded price.
+        first_month = pd.Timestamp(ts[0],unit='ms',tz='UTC').strftime('%Y-%m')
+        root = base.wallet.ROOT/'data/kline_preholdout_binance_um15m/downloads'/(sym+'USDT')
+        files = [f for f in sorted(root.glob('*.zip')) if f.stem[-7:]<=first_month]
+        source15 = pd.concat([archive.read_prices(f) for f in files]).sort_index()
+        if not source15.index.is_unique:
+            raise ValueError('Overlapping leading Binance reference months')
+        source15.index = pd.to_datetime(source15.index,unit='ms',utc=True)
+        prefix = archive.aggregate(source15,12)
+        overlap = prefix.index.intersection(bars.index)
+        if len(overlap)<10 or not np.allclose(prefix.loc[overlap,'close'],bars.loc[overlap,'close'],rtol=1.e-10,atol=1.e-9):
+            raise ValueError('Historical feature prefix failed native close overlap')
+        prices[sym] = pd.concat([prefix.loc[prefix.index<bars.index[0],'close'],bars.close])
+        print(sym,'native overlap',len(overlap),'older complete 12H added',len(prices[sym])-len(bars),flush=True)
     ratio = prices['ETH'].div(prices['BTC']).dropna()
     state = np.sign(ratio/ratio.shift(60)-1).where(ratio.index.to_series().diff(60).eq(60*12*base.wallet.HOUR))
     state.index += 12*base.wallet.HOUR
