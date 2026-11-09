@@ -62,24 +62,45 @@ def install(runtime, public):
 def cycle(feed, account):
     """Keep exit monitoring independent of failures reading the external signal table."""
     errors = []
+    synced_at = feed.health().get("clock_synchronized_ms") or 0
+    if now_ms() - synced_at > 300_000:
+        try:
+            feed.synchronize()
+        except Exception as exc:
+            LOG.exception("Public exchange clock unavailable")
+            errors.append(f"交易所公开时钟暂不可用（{type(exc).__name__}）")
     for name, operation in (("读取收盘信号", feed.queue_new_events),
                             ("持仓估值", feed.advance_open_positions)):
         try:
-            operation(account, now_ms())
+            operation(account, feed.clock())
         except Exception as exc:
             LOG.exception("%s failed", name)
             errors.append(f"{name}暂不可用（{type(exc).__name__}）")
     # Admission requires this pass's account marks and complete signal ordering.
     if not errors:
         try:
-            feed.process_queued(account, now_ms())
+            feed.process_queued(account, feed.clock())
         except Exception as exc:
             LOG.exception("Signal admission failed")
             errors.append(f"入场判定暂不可用（{type(exc).__name__}）")
-    health = feed.health()
-    market = dict(feed.market_state)
-    degraded = errors or health.get("degraded") or health.get("ok") is False
-    return account.snapshot(phase="degraded" if degraded else "watching",
+    raw_health = feed.health()
+    health = {k:raw_health[k] for k in (
+        "state","source_db","public_market","public_only","private_or_order_api_used","clock_offset_ms",
+        "clock_synchronized_ms","source_boundary_ms","source_expected","source_completed","rankable_count",
+        "queued_new","source_rows_seen","source_complete","signal_batch_max_delay_ms","ticker_max_age_ms",
+        "last_processed_boundary_ms","last_market_observed_ms","minute_bars_processed","hour_bars_processed",
+    ) if k in raw_health}
+    market = {k:feed.market_state[k] for k in (
+        "boundary_ms","source_boundary_ms","expected_symbols","completed_symbols","rankable_count","source_complete",
+        "rankable_minimum","rankable_threshold_count","observed_at_ms","last_signal_close_ms",
+    ) if k in feed.market_state}
+    late = (market.get("source_complete") is False and feed.clock() - market.get("boundary_ms",0) >
+            (health.get("signal_batch_max_delay_ms") or 900000))
+    if late:
+        errors.append("本轮 12H 收盘扫描未在 15 分钟内完成")
+    degraded = errors or str(raw_health.get("state","")).startswith("degraded") or raw_health.get("state") in ("error","source_stale")
+    phase = "waiting" if raw_health.get("state") == "waiting_source_scan" else "watching"
+    return account.snapshot(phase="degraded" if degraded else phase,
                             health=health, market=market, error="；".join(errors) or None)
 
 

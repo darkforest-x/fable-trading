@@ -39,6 +39,17 @@ const statusText = {
   closed:'已平仓', open:'持仓'
 };
 const stateName = key => statusText[key] || String(key || '尚无状态');
+const reasons = {
+  inverse_regime_direction_gate:'ETH/BTC 30 天方向不符',exact_eth_btc_regime_tie:'ETH/BTC 30 天持平',
+  missing_contiguous_eth_btc_61_close_window:'ETH 或 BTC 的 30 天数据有缺口',missing_preceding_12h_atr14:'缺前一根已收盘 ATR',
+  same_time_rankable_universe_below_10:'同一时钟满足历史覆盖的合约少于 10 个',same_contract_busy:'同币已有持仓',
+  all_slots_busy:'9 个资金槽已满',insufficient_free_cash:'可用保证金不足',entry_beyond_signal_stop:'最新入场价已越过止损',
+  not_first_eligible_signal_for_symbol_week:'该币本周已有更早的合格信号',
+  source_clock_ahead_of_runner:'信号时钟快于本地校准时钟',source_clock_before_confirmed_close:'信号时钟早于收盘',
+  signal_batch_expired:'已错过 15 分钟收集窗口',signal_batch_expired_during_quote_collection:'等待新报价时超时',
+  source_scan_incomplete_at_deadline:'收集窗口结束时仍有合约未扫描',missing_public_ticker_quote:'缺少有效公开买卖报价',
+  missing_or_invalid_public_quote:'公开报价缺失或无效'
+};
 function positions(rows,closed=false) {
   if(!rows.length) return '<p class="muted">'+(closed?'尚无启用后结清的交易。':'当前空仓。')+'</p>';
   return table(['合约 / 方向','开仓（北京）','模拟入场价',closed?'退出价':'止损价',closed?'净盈亏 U':'最新估值价','收盘到入场'],rows.map(r=>[
@@ -58,6 +69,7 @@ async function forward() {
     const decisions=d.recent_decisions || [];
     const closed=(d.recent_trades || []).filter(r=>r.status==='closed');
     const quotes=market.last_signal_close_ms || market.boundary_ms || market.source_boundary_ms;
+    const count=market.rankable_count;
     $('forward-body').innerHTML='<div class="metrics">'+[
       metric('前向净值',amount(a.equity)+' U',amount(a.start_equity,0)+'U 独立起步'),
       metric('已实现盈亏',signed(a.realized_pnl)+' U','含已计手续费'),
@@ -65,13 +77,14 @@ async function forward() {
       metric('已用仓位',a.open_position_count+' / '+a.slot_count,'每币最多一仓')
     ].join('')+'</div><div class="panel"><div class="bar"><h3>运行记录</h3><span>'+esc(status)+'</span></div>' +
     '<div class="facts"><span>账户启用 <b>'+beijing(start)+'</b></span><span>最近心跳 <b>'+beijing(d.heartbeat_ms)+'</b></span>'+
-    (quotes?'<span>行情确认时钟 <b>'+beijing(quotes)+'</b></span>':'')+'</div>'+
+    (quotes?'<span>行情确认时钟 <b>'+beijing(quotes)+'</b></span>':'')+
+    (Number.isFinite(count)?'<span>覆盖 90 天的合约 <b>'+count+'</b></span>':'')+'</div>'+
     (d.error?'<p class="state-error">'+esc(d.error)+'</p>':'')+
     '<p>北京时间 08:00、20:00 收盘后检查信号。前向采用当时可观察的公开买卖报价，买入取卖一、卖出取买一。超时信号记作错过。</p></div>'+
     '<div class="panel"><h3>当前持仓</h3>'+positions(d.positions || [])+'</div>'+
     '<div class="panel"><h3>最近结清</h3>'+positions(closed,true)+'</div>'+
     '<div class="panel"><h3>最近信号判定</h3>'+(decisions.length?table(['合约','确认（北京）','判定','原因'],decisions.map(r=>[
-      esc(r.symbol),beijing(r.confirmed_ms || r.boundary_ms),esc(stateName(r.status)),esc(r.reason || '—')
+      esc(r.symbol),beijing(r.confirmed_ms || r.boundary_ms),esc(stateName(r.status)),esc(reasons[r.reason] || r.reason || '—')
     ])):'<p class="muted">尚无启用后记录的信号判定。</p>')+'</div>';
   } catch(error) {
     if(ticket===forwardSequence) $('forward-body').innerHTML='<p class="panel state-error">暂时无法取得前向账本。可点刷新重试。'+esc(error.message)+'</p>';
