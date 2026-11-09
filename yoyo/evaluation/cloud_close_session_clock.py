@@ -21,9 +21,9 @@ def bars_for(hourly,offset):
     return bar
 
 
-def candidates(symbol,offset,*,anchor_weekday=0):
-    ts,px=spread.wallet.quotes(symbol)
-    valid=ts<spread.wallet.END
+def candidates(symbol,offset,*,anchor_weekday=0,quote_loader=None,start=spread.wallet.START,end=spread.wallet.END):
+    ts,px=(quote_loader or spread.wallet.quotes)(symbol)
+    valid=ts<end
     hourly=pd.DataFrame(px[valid],index=ts[valid],columns=['open','high','low','close']).rename_axis('time')
     if hourly.index.has_duplicates or not hourly.index.is_monotonic_increasing or (hourly.index%H).any():
         raise ValueError('Native H1 series is not an aligned clock')
@@ -35,9 +35,9 @@ def candidates(symbol,offset,*,anchor_weekday=0):
     observed=[]
     seen=set()
     for i,key in enumerate(bars.index):
-        if key+STEP<spread.wallet.START or key+STEP>=spread.wallet.END:
+        if key+STEP<start or key+STEP>=end:
             continue
-        match=branch.reclaim._signal_at(i,symbol,bars,feature,calendar,spread.wallet.END,
+        match=branch.reclaim._signal_at(i,symbol,bars,feature,calendar,end,
                                         utc_offset_ms=offset,anchor_weekday=anchor_weekday)
         if match is None or match['week'] in seen:
             continue
@@ -52,7 +52,7 @@ def candidates(symbol,offset,*,anchor_weekday=0):
         event=dict(event_id=eid,parent_id=eid,symbol=symbol,week=week,side=1,source_row_number=i,is_control=False,
                    key_open_ms=key,confirmation_ms=key+STEP,stop_price=match['signal_reference_stop'],entry_i=None,
                    entry_order=feature['prior_atr_pct'][i])
-        branch._bind_exact_entry(event,q,clocks,spread.wallet.START,spread.wallet.END)
+        branch._bind_exact_entry(event,q,clocks,start,end)
         if event['entry_i'] is None or not np.isfinite(event['entry_order']):
             continue
         event['end_i'],event['path_upper_bound_reason']=branch.engine._safe_path_end(event['entry_i'],1,q,clocks)
