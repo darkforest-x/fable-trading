@@ -1,0 +1,78 @@
+{
+  "experiment_id": "exp-cloud-close-survive-day-20261109-v1",
+  "inputs": {
+    "corrected_original_actual_events": 11780,
+    "corrected_original_paired_controls": 10816,
+    "excluded_original_ineligible_events": 2801,
+    "source_screen": "experiments/active/exp-cloud-close-okx-agreement-20261109-v1/event_screen.csv.gz"
+  },
+  "counts": {
+    "original_eligible_events": 22596,
+    "delayed_entries": 14314,
+    "delayed_actual_entries": 7580,
+    "delayed_control_entries": 6734,
+    "status_counts": {
+      "executed": 14314,
+      "missing_one_or_more_of_24_wait_hours_or_decision_open": 45,
+      "one_or_more_wait_12h_bars_not_native": 184,
+      "original_runner_exited_before_delayed_entry": 8053
+    },
+    "original_actual_funded": 1569,
+    "original_control_funded": 1712,
+    "paired_delayed_parent_candidates": 5281
+  },
+  "path_audit": {
+    "counts": {
+      "original_eligible_events": 22596,
+      "delayed_entries": 14314,
+      "delayed_actual_entries": 7580,
+      "delayed_control_entries": 6734,
+      "status_counts": {
+        "executed": 14314,
+        "missing_one_or_more_of_24_wait_hours_or_decision_open": 45,
+        "one_or_more_wait_12h_bars_not_native": 184,
+        "original_runner_exited_before_delayed_entry": 8053
+      }
+    },
+    "reason_counts": {
+      "eligible": 14314,
+      "original_runner_exited_before_delayed_entry": 8053,
+      "missing_one_or_more_of_24_wait_hours_or_decision_open": 45,
+      "one_or_more_wait_12h_bars_not_native": 184
+    },
+    "first_12h_source_counts": {
+      "OKX_history_12Hutc": 15790,
+      "shared_OKX_cache_12Hutc": 4245,
+      "missing": 45,
+      "native12Hutc": 2332,
+      "complete_1H_aggregation": 182,
+      "complete_1H_archive": 2
+    },
+    "second_12h_source_counts": {
+      "OKX_history_12Hutc": 15782,
+      "shared_OKX_cache_12Hutc": 4253,
+      "missing": 45,
+      "native12Hutc": 2332,
+      "complete_1H_aggregation": 182,
+      "complete_1H_archive": 2
+    }
+  },
+  "frozen_baseline": {
+    "actual": {
+      "funded_positions": 1569,
+      "final_cash_usdt": 48190.545601833255,
+      "final_nav_usdt": 48190.54557344139,
+      "cash_reconciliation_usdt": 2.8391863452270627e-05,
+      "funded_path_source": "experiments/active/exp-cloud-close-exit-rotation-20261109-v1/funded_OKX_actual_shadow_full_runner.csv.gz",
+      "hourly_path_source": "experiments/active/exp-cloud-close-exit-rotation-20261109-v1/hourly_OKX_actual_shadow_full_runner.csv.gz"
+    },
+    "control": {
+      "funded_positions": 1712,
+      "final_cash_usdt": 7659.154387286709,
+      "final_nav_usdt": 7659.154386922137,
+      "cash_reconciliation_usdt": 3.6457186070038006e-07,
+      "funded_path_source": "experiments/active/exp-cloud-close-exit-rotation-20261109-v1/funded_OKX_control_shadow_full_runner.csv.gz",
+      "hourly_path_source": "experiments/active/exp-cloud-close-exit-rotation-20261109-v1/hourly_OKX_control_shadow_full_runner.csv.gz"
+    }
+  }
+}
