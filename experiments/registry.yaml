@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-confirmation-cloud-position-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "8a85e705ec"
+    status: "inconclusive"
+    question: "原版1.618收盘信号的收盘价在自身云带哪一侧"
+    single_variable: "原始12H收盘、止损和资金执行不变，按收盘价相对EMA20/50的位置分组。"
+    result: "1585笔中顺势越过双线406笔，含最大十笔盈利中的6笔，单独重新复利5608U；其余1179笔13928U。全部原信号42486U。顺势越双线不足以单独筛出可复利的千倍策略。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-confirmation-cloud-position-20261109-v1/summary.json"
+    notes: "Fully funded filtered arms leave skipped slots vacant; unchanged paired original signal/1.618 execution, reported realized fee/slip model excludes funding and exit depth. Notion 41388564-79af-81de-b0a8-ce7681cd03da."
+
   - experiment_id: exp-cloud-close-spot-monthly-momentum-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "3c16932181"
