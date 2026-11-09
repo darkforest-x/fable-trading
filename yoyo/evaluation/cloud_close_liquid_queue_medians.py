@@ -98,8 +98,15 @@ def main(*,experiment=EXP,source_dir=queue.EXP,arms=ARMS):
 if __name__=='__main__':
     import argparse
     parser=argparse.ArgumentParser()
-    parser.add_argument('--vix-priority',action='store_true')
-    if parser.parse_args().vix_priority:
+    variants=parser.add_mutually_exclusive_group()
+    variants.add_argument('--vix-priority',action='store_true')
+    variants.add_argument('--macro-controls',action='store_true')
+    args=parser.parse_args()
+    if args.macro_controls:
+        main(experiment=EXP.parent/'exp-cloud-close-macro-control-medians-20261109-v1',
+             source_dir=EXP.parent/'exp-cloud-close-macro-priority-controls-20261109-v1',
+             arms=['long_first','short_first','btc_trend'])
+    elif args.vix_priority:
         main(experiment=EXP.parent/'exp-cloud-close-vix-priority-medians-20261109-v1',
              source_dir=EXP.parent/'exp-cloud-close-vix-priority-20261109-v1',arms=['aligned','lagged'])
     else:
