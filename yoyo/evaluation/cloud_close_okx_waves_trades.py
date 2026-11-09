@@ -36,12 +36,19 @@ def month(args):
     headers = ['instrument_name','trade_id','price','size','created_time']
     names = {col:next((n for n in headers if n in col.lower()),col) for col in x.columns}
     x = x.rename(columns=names)[headers].drop_duplicates()
-    if (not len(x) or set(x.instrument_name)!={INST} or x.trade_id.duplicated().any() or
+    # Legacy archives can contain both buyer and seller receipts for one
+    # execution with millisecond differences. They establish the same H1 OHLC
+    # only when ID, price, size and UTC hour agree.
+    repeated = x[x.trade_id.duplicated(keep=False)].assign(hour=lambda a:a.created_time//HOUR)
+    if len(repeated) and repeated.groupby('trade_id')[['price','size','hour']].nunique().gt(1).any().any():
+        raise ValueError(f'Conflicting duplicate native trade identities in {file}')
+    x = x.sort_values('created_time').drop_duplicates('trade_id',keep='first')
+    if (not len(x) or set(x.instrument_name)!={INST} or
         not np.isfinite(x[['price','size']]).all().all() or not x.price.gt(0).all() or not x['size'].gt(0).all()):
         raise ValueError(f'Malformed trade archive {file}')
-    x = x.sort_values(['created_time','trade_id'])
-    if not x.trade_id.is_monotonic_increasing:
-        raise ValueError(f'Unordered native trade identities across timestamps in {file}')
+    x = x.sort_values('trade_id')
+    if not x.created_time.floordiv(HOUR).is_monotonic_increasing:
+        raise ValueError(f'Native trade ordering crosses UTC hour backwards in {file}')
     h = x.groupby(x.created_time//HOUR*HOUR)
     frame = h.agg(open=('price','first'),high=('price','max'),low=('price','min'),close=('price','last'),
              first_id=('trade_id','first'),last_id=('trade_id','last'),prints=('trade_id','count'))
