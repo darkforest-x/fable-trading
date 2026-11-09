@@ -353,6 +353,41 @@ def collect_current(config_path: Path = CONFIG_PATH) -> dict:
     return result
 
 
+def resolve_missing(config_path: Path = CONFIG_PATH) -> dict:
+    """Request only unresolved held windows, then rebuild the attribution from local data."""
+    _assert_adapter_committed(config_path)
+    ledger._assert_committed()
+    config = _read_json(config_path)
+    _validate_config(config)
+    directory = EXP / 'resolved'
+    if (directory / 'funding_audit.json').exists():
+        raise FileExistsError('Resolved account funding attribution already exists')
+    receipt = _read_json(CURRENT_OUTPUT / 'funding_audit.json')
+    missing = {(r['symbol'],r['month']) for r in receipt['unresolved_months']}
+    if not missing or len(missing) != receipt['unknown_month_windows']:
+        raise ValueError('Original funding receipt has no distinct outstanding windows')
+    months = _read_json(CURRENT_OUTPUT / 'symbol_month_audit.json')
+    client = ledger.FundingClient('binance', ledger.CACHE / 'funding_api')
+    for window in months:
+        ticker,month = window['symbol'],window['month']
+        if (ticker,month) not in missing:
+            continue
+        start,end = window['query_start_ms'],window['query_end_exclusive_ms']
+        _,known = ledger._normalized_sources(ticker.removesuffix('USDT'),month,start,end)
+        if not any(a['manifest_range_covers_query'] for a in known):
+            _,manifest = ledger._api_rows(client,ticker.removesuffix('USDT'),month,start,end)
+            if not manifest.get('api_range_traversed'):
+                raise ValueError(f'Could not obtain complete settlement interval for {ticker} {month}')
+    legs, audit = build_current_legs(config_path)
+    audit['execution_legs_file'] = str((CURRENT_OUTPUT / 'execution_legs.csv.gz').relative_to(ROOT))
+    audit['previous_attribution_receipt'] = str((CURRENT_OUTPUT / 'funding_audit.json').relative_to(ROOT))
+    audit['outstanding_rate_windows_recovered'] = sorted(missing)
+    return ledger._write_scope('resolved',config,legs,audit,experiment_dir=EXP,
+                               source_experiment=config['account']['source_experiment'],
+                               source_strategy='680-contract actual NAV-tenth efficient-trend account',
+                               cache_only=True)
+
+
 def mini_check() -> None:
     """Check 2/3 child sizing, maker/taker charges, and ledger window reuse."""
     cfg = _read_json(CONFIG_PATH)
@@ -398,11 +433,14 @@ def main() -> None:
     group.add_argument("--preflight", action="store_true", help="Build the actual leg join without requests or output files")
     group.add_argument("--mini-check", action="store_true", help="Check child sizing/fee attribution in memory")
     group.add_argument("--collect", action="store_true", help="Explicitly collect funding; requires committed files and owner-scheduled network window")
+    group.add_argument("--resolve-missing", action="store_true", help="Fill only the original receipt's missing settlement windows")
     args = parser.parse_args()
     if args.preflight:
         preflight()
     elif args.mini_check:
         mini_check()
+    elif args.resolve_missing:
+        resolve_missing()
     else:
         collect_current()
 

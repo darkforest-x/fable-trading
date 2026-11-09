@@ -385,6 +385,7 @@ def _window_history(
     *,
     allow_api: bool,
     bulk_archives: bool = False,
+    cache_only: bool = False,
 ) -> tuple[pd.DataFrame, dict]:
     start_ms, end_ms = int(window["start_ms"]), int(window["end_ms"])
     normalized, normalized_audits = _normalized_sources(symbol, month, start_ms, end_ms)
@@ -407,6 +408,25 @@ def _window_history(
     elif archive_complete and not archive_rows.empty:
         selected_base = archive_rows
         base_source = "existing_binance_vision_monthly_fundingRate"
+    elif bulk_archives and normalized_cover and normalized.source_complete.any():
+        # A complete public REST response can exist where the monthly rate
+        # archive does not. Older responses often omit the settlement mark.
+        selected_base = _merge_history([normalized[normalized.source_complete]]).copy()
+        base_source = "complete_cached_funding_api_with_monthly_mark_proxy"
+        mark_file = _mark_archive_path(symbol, month)
+        if mark_file.is_file() and selected_base.mark_price.isna().any():
+            opens = pd.read_csv(mark_file, header=None, usecols=[0,1], names=['time','price'])
+            clocks = pd.to_numeric(opens.time, errors='coerce')
+            opens = opens.loc[clocks.notna()].copy()
+            opens.index = clocks.dropna().astype('int64')
+            prices = pd.to_numeric(opens.price, errors='raise')
+            if not prices.index.is_unique or not (prices > 0).all():
+                raise ValueError(f'Invalid native monthly mark opening prices: {mark_file}')
+            missing = selected_base.mark_price.isna()
+            hour = selected_base.loc[missing, 'funding_time_ms'].floordiv(HOUR_MS) * HOUR_MS
+            selected_base.loc[missing, 'mark_price'] = hour.map(prices)
+            filled = missing & selected_base.mark_price.notna()
+            selected_base.loc[filled, 'mark_source'] = 'binance_vision_mark_1h_open_proxy'
     else:
         selected_base = pd.DataFrame()
         base_source = "none"
@@ -432,7 +452,7 @@ def _window_history(
         # rate/mark month plus daily mark hours missing from that monthly archive.
         current_proxy = monthly_history.mark_price.notna().sum() if not monthly_history.empty else 0
         if current_proxy == 0 or archive_complete:
-            monthly_history = archive_funding.archive_month(symbol + "USDT", month, local_only=False)
+            monthly_history = archive_funding.archive_month(symbol + "USDT", month, local_only=cache_only)
         local_archive_path = _rate_archive_path(symbol, month)
         archive_complete = local_archive_path is not None
         if archive_complete:
@@ -461,7 +481,7 @@ def _window_history(
     missing_rate_rows = int(selected_base.funding_rate.isna().sum()) if not selected_base.empty else 0
     missing_mark_rows = int(selected_base.mark_price.isna().sum()) if not selected_base.empty else 0
     range_complete = bool(
-        exact_local_cover or archive_complete
+        exact_local_cover or archive_complete or (bulk_archives and normalized_cover)
         or (api_request is not None and api_request.get("api_range_traversed", False))
     )
     audit = {
@@ -655,7 +675,7 @@ def _symbol_summary(position_rows: pd.DataFrame) -> pd.DataFrame:
 
 def _write_scope(scope: str, config: dict, legs: pd.DataFrame, source_audit: dict, *,
                  experiment_dir: Path = EXP, source_experiment: str | None = None,
-                 source_strategy: str | None = None) -> dict:
+                 source_strategy: str | None = None, cache_only: bool = False) -> dict:
     output_dir = experiment_dir / scope
     output_dir.mkdir(parents=True, exist_ok=True)
     audit_path = output_dir / "funding_audit.json"
@@ -664,7 +684,7 @@ def _write_scope(scope: str, config: dict, legs: pd.DataFrame, source_audit: dic
     windows = _month_windows(legs)
     client = FundingClient("binance", CACHE / "funding_api")
     bulk_archives = config.get("funding_collection") == "official_monthly_archives"
-    if bulk_archives:
+    if bulk_archives and not cache_only:
         def cache_month(key):
             symbol, month = key
             archive_funding.archive_month(symbol + "USDT", month, local_only=False)
@@ -676,7 +696,8 @@ def _write_scope(scope: str, config: dict, legs: pd.DataFrame, source_audit: dic
     month_audits: dict[tuple[str, str], dict] = {}
     for i, (key, window) in enumerate(sorted(windows.items()), 1):
         symbol, month = key
-        frame, audit = _window_history(symbol, month, window, client, allow_api=not bulk_archives, bulk_archives=bulk_archives)
+        frame, audit = _window_history(symbol, month, window, client, allow_api=not (bulk_archives or cache_only),
+                                       bulk_archives=bulk_archives, cache_only=cache_only)
         histories[key] = frame
         month_audits[key] = audit
         if i % 100 == 0:
