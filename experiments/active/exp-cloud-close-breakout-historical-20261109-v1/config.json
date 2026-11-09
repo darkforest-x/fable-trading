@@ -3,12 +3,19 @@
   "question": "Across the expanded 360-name OKX historical source scope, does following the first EMA-aligned 12H close outside the completed NY Monday 1.618 band improve on the original V1.7 wick-and-close reclaim?",
   "single_variable": "Keep the ten-symbol original run's native path rows frozen and reuse them. For the additional historical source names, replace the V1.7 same-week first wick-through/reclaim close rule with a same-week first strict close beyond the upper/lower 1.618 band in the aligned EMA20/50 direction. Use next exact 1H open for both arms. Keep the fixed stop reference anchor, native EMA exit, nine-slot shared-cash account, and fees consistent.",
   "cache_compatibility": {
-    "previous_cache": {
-      "code_sha256": "1b73016d88b5353c2913fd15cc2d6f40d63156a9d729efdc69e96128e2141289",
-      "config_sha256": "075348c65a1689cd3b902ad2fa5cd6a369a499a14393dd8d338d82ccaed6d2a3"
-    },
-    "invalidate_symbols": ["ICX", "LRC"],
-    "reason": "Only the two original archived delistings gain separate official-delivery and last-observed-source-end contracts. Other cached symbols retain the same input files, signal/path code, indicators, controls, timing, stop, fees, and account parameters; their per-file size/mtime signatures must also match."
+    "previous_caches": [
+      {
+        "code_sha256": "1b73016d88b5353c2913fd15cc2d6f40d63156a9d729efdc69e96128e2141289",
+        "config_sha256": "075348c65a1689cd3b902ad2fa5cd6a369a499a14393dd8d338d82ccaed6d2a3",
+        "invalidate_symbols": ["ICX", "LRC"]
+      },
+      {
+        "code_sha256": "0beb7a1a16d1dab3026194b975377e5b7f165a5a6a4386ddf7f3db45bf609201",
+        "config_sha256": "b953c75faaadea499354ad4ac3a19ba4f77f8143dfc85beab828f632a0b0838a",
+        "invalidate_symbols": []
+      }
+    ],
+    "reason": "The 144 d1 caches are reused except that ICX/LRC are explicitly invalidated; the next 206 caches were priced under the frozen original-delisting contracts. Only CSV numeric parsing and account fee validation changed afterward. Every cache also requires unchanged per-symbol input size/mtime signatures."
   },
   "data": {
     "venue": "OKX USDT perpetual native 12H and 1H OHLC",

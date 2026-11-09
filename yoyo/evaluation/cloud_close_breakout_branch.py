@@ -109,20 +109,23 @@ def _load_symbol_cache(cache_dir: Path, contract: dict,
         return None
     if (manifest.get("config_sha256") != contract["config_sha256"]
             or manifest.get("code_sha256") != contract["code_sha256"]):
-        previous = compatibility.get("previous_cache", {})
-        if (contract["symbol"] in compatibility.get("invalidate_symbols", [])
-                or manifest.get("config_sha256") != previous.get("config_sha256")
-                or manifest.get("code_sha256") != previous.get("code_sha256")):
+        compatible = any(
+            contract["symbol"] not in previous.get("invalidate_symbols", [])
+            and manifest.get("config_sha256") == previous.get("config_sha256")
+            and manifest.get("code_sha256") == previous.get("code_sha256")
+            for previous in compatibility.get("previous_caches", [])
+        )
+        if not compatible:
             return None
     paths_path = symbol_dir / "paths.csv.gz"
     candidates_path = symbol_dir / "candidates.csv.gz"
     audit_path = symbol_dir / "audit.json"
     if not all(path.is_file() for path in (paths_path, candidates_path, audit_path)):
         return None
-    paths = (pd.read_csv(paths_path, dtype={"symbol": str}, float_precision="round_trip",
-                         keep_default_na=False) if manifest["path_count"] else pd.DataFrame())
-    candidates = (pd.read_csv(candidates_path, dtype={"symbol": str}, float_precision="round_trip",
-                              keep_default_na=False) if manifest["candidate_count"] else pd.DataFrame())
+    paths = (pd.read_csv(paths_path, dtype={"symbol": str})
+             if manifest["path_count"] else pd.DataFrame())
+    candidates = (pd.read_csv(candidates_path, dtype={"symbol": str})
+                  if manifest["candidate_count"] else pd.DataFrame())
     if len(paths) != manifest["path_count"] or len(candidates) != manifest["candidate_count"]:
         return None
     if len(paths) and (set(paths.symbol.unique()) != {contract["symbol"]}
@@ -679,10 +682,8 @@ def run(config_path: Path = CONFIG_PATH) -> dict:
         frozen_paths_path = ROOT / reuse["paths_csv_gz"]
         frozen_candidates_path = ROOT / reuse["candidate_audit_csv_gz"]
         frozen_audit_path = ROOT / reuse["audit_json"]
-        frozen_paths = pd.read_csv(frozen_paths_path, dtype={"symbol": str},
-                                   float_precision="round_trip", keep_default_na=False)
-        frozen_candidates = pd.read_csv(frozen_candidates_path, dtype={"symbol": str},
-                                        float_precision="round_trip", keep_default_na=False)
+        frozen_paths = pd.read_csv(frozen_paths_path, dtype={"symbol": str})
+        frozen_candidates = pd.read_csv(frozen_candidates_path, dtype={"symbol": str})
         if set(frozen_paths.symbol.unique()) != set(reused_symbols):
             raise ValueError("Frozen reuse paths do not match the explicitly preregistered ten-symbol panel")
         if set(frozen_paths.arm.unique()) != {"breakout", "reclaim"}:
@@ -742,7 +743,8 @@ def run(config_path: Path = CONFIG_PATH) -> dict:
     metrics_rows = []
     quote_loader = _quote_loader(config)
     executed = paths[paths.status.eq("executed") & paths.tp_r.eq(0.0)].copy()
-    if not np.array_equal(executed.exit_fee_rate.to_numpy(), np.full(len(executed), TAKER)):
+    exit_rates = pd.to_numeric(executed.exit_fee_rate, errors="coerce").to_numpy(dtype=float)
+    if not np.allclose(exit_rates, TAKER, rtol=0.0, atol=1e-12):
         raise ValueError("Only market exits are allowed; native fee rates must all be taker")
     scenario_pools = {}
     for arm in ("breakout", "reclaim"):
