@@ -74,6 +74,15 @@ def source_book():
     return rows,quotes,src
 
 
+def save_execution_tape(tape,directory):
+    """Save the operative native wallet inputs after any amendments to its child exits."""
+    fields = ['event_id','parent_id','source_row_number','symbol','side','tp_r','is_control',
+              'entry_ms','exit_bar_ms','entry_price','exit_price','stop_price','exit_fee_rate',
+              'exit_reason','exit_phase','same_bar_ambiguous','gap_flag','entry_status',
+              'entry_order','key_open_ms']
+    tape[fields].to_csv(directory/'selected_paths.csv.gz',index=False)
+
+
 def run_wallet(plans,quotes,src,directory):
     directory.mkdir(parents=True,exist_ok=True)
     roster,_ = wallet.admit(plans[plans.tp_r.eq(0)],9)
@@ -88,7 +97,7 @@ def run_wallet(plans,quotes,src,directory):
                 delivery['official_price_hour'][r.symbol]['close'],'delisting_settlement',0.]
         else:
             uncertain.append({'event_id':r.event_id,'symbol':r.symbol,'exit_ms':int(r.exit_bar_ms)})
-    tape.to_csv(directory/'selected_paths.csv.gz',index=False)
+    save_execution_tape(tape,directory)
     limits = old.changed_limits(tape,quotes)
     data,trigger = old.parent.assemble(tape,limits,'OKX',quotes)
     native = old.exposure.underlying(data,quotes)
