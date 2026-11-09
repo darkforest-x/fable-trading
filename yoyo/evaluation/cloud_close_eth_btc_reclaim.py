@@ -51,7 +51,7 @@ def entries(ratio):
     return pd.DataFrame(marks),ema
 
 
-def paths(marks,ratio,ema,*,asset='ETH',overlaps=False):
+def paths(marks,ratio,ema,*,asset='ETH',overlaps=False,stop_clock=H):
     """After a confirmed threshold break at hourly close or cloud reversal at 12H close use next common open."""
     prices={}
     for sym in [asset,'BTC']:
@@ -69,6 +69,7 @@ def paths(marks,ratio,ema,*,asset='ETH',overlaps=False):
         if not len(hrs):
             continue
         stop=(ratio.reindex(hrs)-r.stop)*r.side<0
+        stop = stop & (hrs % stop_clock == 0)
         flip=ema.reindex(hrs)*r.side<0
         gaps=np.diff(common[lo:])!=H
         triggered=np.flatnonzero(stop.to_numpy()|flip.to_numpy()|gaps)
