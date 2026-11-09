@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-delivery-control-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "40510fe678"
+    status: "accepted"
+    question: "Do delisted instrument admission and phase-aware delivery settlements materially alter the frozen all-actual and matched control portfolios?"
+    single_variable: "Correct instrument end dates, no-new-entry windows and native forced settlements for the matched 680-contract paired and control portfolios."
+    result: "All 1635 actual parents unchanged at 5602.67U. Matched actual 1493 parents finish at 7134.17U; later controls 1995 at 2280.00U. Three selected boundary legs used exchange index minute-close TWAP proxies; per-minute low/high valuation sensitivity changes the matched or control terminal by less than 0.56U. Cohorts have their own funded rosters. Raw source legs crossing actual delist were not charged to the real full account."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-delivery-control-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-8199-bf5c-c1d4c8f6e4b6."
+
   - experiment_id: exp-cloud-close-direction-history-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "c3e03052ca"

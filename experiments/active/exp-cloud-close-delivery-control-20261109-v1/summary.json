@@ -1,0 +1,118 @@
+{
+  "index_price_scenarios": {
+    "STRAXUSDT": {
+      "low": 1.4538214966666665,
+      "close": 1.456082131,
+      "high": 1.4590635164999997
+    },
+    "OBOLUSDT": {
+      "low": 0.032787555,
+      "close": 0.03291985866666666,
+      "high": 0.03313655733333334
+    },
+    "BTTUSDT": {
+      "low": 0.0025095485,
+      "close": 0.0025128935,
+      "high": 0.002514872333333333
+    }
+  },
+  "original_funded_actual_parents_unchanged": 1635,
+  "paired": {
+    "proxy": {
+      "final_usdt": 7134.170651042982,
+      "multiple": 7.134170651042982,
+      "dd_mark_pct": 30.741646547441405,
+      "dd_bound_pct": 31.69504686827257,
+      "trades": 1493,
+      "win_pct": 35.16409912926993,
+      "payoff": 2.9316292019705763,
+      "payoff_usdt": 2.4058780929400387,
+      "median_net_pct": -3.2156394498815675
+    },
+    "settled_legs": [
+      {
+        "event_id": "12H|BTTUSDT|1641427200000000000|-1",
+        "symbol": "BTT",
+        "side": -1,
+        "tp_r": 0.0,
+        "exit_bar_ms": 1642125600000,
+        "exit_phase": "open"
+      }
+    ],
+    "adverse": {
+      "final_usdt": 7134.005194554677,
+      "multiple": 7.1340051945546765,
+      "dd_mark_pct": 30.74164654744125,
+      "dd_bound_pct": 31.695046868272424,
+      "trades": 1493,
+      "win_pct": 35.16409912926993,
+      "payoff": 2.9316191766584554,
+      "payoff_usdt": 2.4058742618324493,
+      "median_net_pct": -3.2156394498815675
+    },
+    "favorable": {
+      "final_usdt": 7134.450337029726,
+      "multiple": 7.134450337029726,
+      "dd_mark_pct": 30.74164654744124,
+      "dd_bound_pct": 31.695046868272414,
+      "trades": 1493,
+      "win_pct": 35.16409912926993,
+      "payoff": 2.931646148657535,
+      "payoff_usdt": 2.4058845686546584,
+      "median_net_pct": -3.2156394498815675
+    }
+  },
+  "control": {
+    "proxy": {
+      "final_usdt": 2280.002853042108,
+      "multiple": 2.280002853042108,
+      "dd_mark_pct": 40.166141511804284,
+      "dd_bound_pct": 41.08808428585705,
+      "trades": 1995,
+      "win_pct": 27.31829573934837,
+      "payoff": 3.3685331477129896,
+      "payoff_usdt": 2.9185038635052964,
+      "median_net_pct": -1.9623543848994642
+    },
+    "settled_legs": [
+      {
+        "event_id": "12H|OBOLUSDT|1760184000000000000|-1:control",
+        "symbol": "OBOL",
+        "side": -1,
+        "tp_r": 0.0,
+        "exit_bar_ms": 1764925200000,
+        "exit_phase": "close"
+      },
+      {
+        "event_id": "12H|STRAXUSDT|1709164800000000000|1:control",
+        "symbol": "STRAX",
+        "side": 1,
+        "tp_r": 0.0,
+        "exit_bar_ms": 1710493200000,
+        "exit_phase": "open"
+      }
+    ],
+    "adverse": {
+      "final_usdt": 2279.7178487737356,
+      "multiple": 2.2797178487737355,
+      "dd_mark_pct": 40.17362084677066,
+      "dd_bound_pct": 41.09141247924276,
+      "trades": 1995,
+      "win_pct": 27.31829573934837,
+      "payoff": 3.36846416623396,
+      "payoff_usdt": 2.918455923694138,
+      "median_net_pct": -1.9623543848994642
+    },
+    "favorable": {
+      "final_usdt": 2280.2681049733123,
+      "multiple": 2.2802681049733122,
+      "dd_mark_pct": 40.15918053520093,
+      "dd_bound_pct": 41.08369497470018,
+      "trades": 1995,
+      "win_pct": 27.31829573934837,
+      "payoff": 3.3685974771460407,
+      "payoff_usdt": 2.9185468347700425,
+      "median_net_pct": -1.9623543848994642
+    }
+  }
+}
