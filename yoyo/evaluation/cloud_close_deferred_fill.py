@@ -187,9 +187,14 @@ def main(preflight=False):
             aligned=panel.loc[shadow.index]
             if not shadow.second_entry_ms.equals(aligned.second_entry_ms):
                 raise ValueError('Second-window source clock differs from decision')
+            cost='stress_5bp' if slip else 'fee_only'
+            expected=panel['cap_binding_'+cost]&panel[cost+'_position_status'].eq('live_at_decision_close')
+            if (set(panel.index[expected])!=set(shadow.index) or not np.allclose(shadow.previous_net_usdt,
+                    aligned[cost+'_decision_net_pnl_after_costs_usdt'],rtol=1e-8,atol=1e-6)):
+                raise ValueError('Earlier order cash or eligible source roster fails independent decision-close check')
             observed=aligned.capacity_status.eq('observed')
             if not np.allclose(aligned.loc[observed,'second_entry_limit_10pct_usdt'],
-                               .1*aligned.loc[observed,'prior_60m_median_at_second_usdt']):
+                               .1*aligned.loc[observed,'prior_60m_median_usdt']):
                 raise ValueError('Source second opening capacity mismatch')
             shadow['second_entry_limit_10pct_usdt']=aligned.second_entry_limit_10pct_usdt.where(observed,0.)
             for arm in ('profit','nonpositive'):
