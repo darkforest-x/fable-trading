@@ -867,9 +867,9 @@ def finalize_existing() -> dict[str, Any]:
         raise SourceError("Coverage checkpoint period IDs do not match the frozen lifecycle set")
 
     local_audit: list[dict[str, Any]] = []
-    for symbol in sorted(universe["fixed_symbols"]):
-        _local_5m(symbol, local_audit)
-
+    local_presence: dict[tuple[str, str], set[str]] = {}
+    local_observed: dict[tuple[str, str], set[str]] = {}
+    local_conflicts: Counter[str] = Counter()
     request_audit: list[dict[str, Any]] = []
     expected_raw: set[str] = set()
     rebuilt_rows = []
@@ -889,13 +889,18 @@ def finalize_existing() -> dict[str, Any]:
             if int(row["missing_5m"]) != 0 or int(row["incomplete_h1"]) != 0:
                 raise SourceError(f"Checkpoint is not a complete source window: {period_id}")
             for day in days:
+                date = str(day["day"])
+                for source in day.get("source_presence_for_gap", []):
+                    local_presence.setdefault((period["symbol"], str(source)), set()).add(date)
+                for source in day.get("observed_source_mix", []):
+                    if str(source) != "binance_fapi_klines_5m":
+                        local_observed.setdefault((period["symbol"], str(source)), set()).add(date)
                 fetched = bool(day.get("fetched", False))
                 status = str(day.get("fetch_status", ""))
                 if not fetched:
                     if status != "not_needed":
                         raise SourceError(f"Unresolved fetch state in checkpoint: {period_id} {day.get('day')} {status}")
                     continue
-                date = str(day["day"])
                 raw_path = RAW_REST_ROOT / period["symbol"] / f"{date}.json.gz"
                 url = f"{FAPI_URL}?{urllib.parse.urlencode({'symbol': period['symbol'], 'interval': '5m', 'startTime': _date_ms(date), 'endTime': _date_ms(date) + DAY_MS - 1, 'limit': FAPI_LIMIT})}"
                 if status == "validated_raw_cache":
@@ -934,7 +939,34 @@ def finalize_existing() -> dict[str, Any]:
                 raise SourceError(f"Coverage/frozen overlap parity mismatch: {period_id}")
         elif source_path.exists():
             raise SourceError(f"Series exists for a period reported with no complete H1 bars: {period_id}")
+        local_conflicts[str(row["symbol"])] += int(row.get("local_source_conflict_timestamps_in_symbol_window", 0) or 0)
         rebuilt_rows.append(row)
+
+    for symbol in sorted(universe["fixed_symbols"]):
+        specs = _candidate_local_sources(symbol)
+        paths = {source: (str(path), priority) for source, path, priority in specs}
+        source_names = {source for sym, source in local_presence if sym == symbol}
+        source_names |= {source for sym, source in local_observed if sym == symbol}
+        source_names |= set(paths)
+        for source in sorted(source_names):
+            presence_days = sorted(local_presence.get((symbol, source), set()))
+            observed_days = sorted(local_observed.get((symbol, source), set()))
+            path, priority = paths.get(source, ("", None))
+            if path:
+                status = "present_and_used_in_checkpoint" if presence_days or observed_days else "present_no_checkpoint_rows"
+            else:
+                status = "used_in_checkpoint_but_source_path_unavailable_now"
+            local_audit.append({"symbol": symbol, "source": source, "path": path, "priority": priority,
+                                "status": status, "checkpoint_source_presence_days": len(presence_days),
+                                "checkpoint_observed_days": len(observed_days),
+                                "source_presence_first_day": presence_days[0] if presence_days else None,
+                                "source_presence_last_day": presence_days[-1] if presence_days else None,
+                                "observed_first_day": observed_days[0] if observed_days else None,
+                                "observed_last_day": observed_days[-1] if observed_days else None,
+                                "rows_in_range": None})
+        local_audit.append({"symbol": symbol, "source": "local_merge_checkpoint", "path": "",
+                            "status": "reconstructed_from_daily_coverage", "priority": None,
+                            "conflicting_timestamps": int(local_conflicts[symbol])})
 
     actual_raw = {str(p.relative_to(RAW_REST_ROOT)) for p in RAW_REST_ROOT.glob("*/*.json.gz")}
     missing_raw = expected_raw - actual_raw
@@ -969,6 +1001,7 @@ def finalize_existing() -> dict[str, Any]:
         "receipt_recovered_from_checkpoint": str(checkpoint),
         "local_source_rows": local_audit, "fapi_day_requests": request_audit,
         "source_policy": config.get("source_policy", config.get("sources", {})),
+        "local_lineage_reconstruction": "Source paths and per-day presence/use come from the checkpoint day_audit; per-file row counts were not re-read.",
         "raw_cache_files_referenced": len(expected_raw), "raw_cache_files_present": len(actual_raw),
         "raw_cache_files_unreferenced": len(actual_raw - expected_raw),
         "network_requests_during_finalization": 0,
