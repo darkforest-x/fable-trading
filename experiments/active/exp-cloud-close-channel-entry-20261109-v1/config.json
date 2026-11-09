@@ -1,0 +1,6 @@
+{
+  "hypothesis": "A fresh multi-week price discovery close in the direction of the V1.7 EMA cloud can fund a trend runner. Replace the NY Monday anchor with the previous 20-day high/low; no weekday restriction.",
+  "entry": "Require 180 contiguous prior 12H candles for maturity. The close must first exceed all prior 40 highs or fall below all prior 40 lows, with the same directional close not already beyond its contemporaneous 40-bar band on the previous bar. Use the completed native V1.7 EMA20/50 order. Enter the exact first H1 open after the 12H confirmation, only when present.",
+  "execution": "Trade native V1.7 protective fixed distance beyond the crossed 20-day boundary (1.5% BTC/ETH, 3% other), original H1 EMA adverse cross and gap rules. Nine shared 1x slots on the corrected 360 OKX historical roster; deterministic fixed symbol hash among simultaneous orders. Taker 5bp on entry and exit, separate adverse market slip of 5bp per leg. No asset selection from full-history returns, funding or capacity.",
+  "control": "On the same signal, delay exactly one 12H to the observed open and retain its initial percentage stop risk. Run all original signals and both arms on common executable parents, with separate capital competition. Frozen historical panel, source/delivery tail markouts and previous exposure to all data apply."
+}
