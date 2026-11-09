@@ -1,0 +1,420 @@
+{
+  "branch": "dollar_neutral_relative_momentum",
+  "symbols": [
+    "BTC",
+    "ETH",
+    "SOL",
+    "BNB",
+    "XRP",
+    "DOGE",
+    "ADA",
+    "LINK",
+    "LTC",
+    "AVAX"
+  ],
+  "weekly_trigger_clocks": 79,
+  "cases": {
+    "extremes": {
+      "metrics": {
+        "all": {
+          "final_usdt": 1615.0162383709053,
+          "multiple": 1.6150162383709052,
+          "dd_mark_pct": 64.6889627285349,
+          "dd_bound_pct": 66.69561783912286,
+          "trades": 53,
+          "win_pct": 33.9622641509434,
+          "payoff": 3.200059649366596,
+          "payoff_usdt": 2.390116389317891,
+          "median_net_pct": -3.305972174975408
+        },
+        "dev": {
+          "final_usdt": 1413.0720075693134,
+          "multiple": 1.4130720075693135,
+          "dd_mark_pct": 64.6889627285349,
+          "dd_bound_pct": 66.69561783912286,
+          "trades": 43,
+          "win_pct": 30.23255813953488,
+          "payoff": 3.7900669402646083,
+          "payoff_usdt": 2.7363166578733877,
+          "median_net_pct": -3.4784080581180405
+        },
+        "2025": {
+          "final_usdt": 2010.0881645957988,
+          "multiple": 1.422495211729117,
+          "dd_mark_pct": 9.886415490322097,
+          "dd_bound_pct": 31.753843130253657,
+          "trades": 5,
+          "win_pct": 80.0,
+          "payoff": 3.2797633008467484,
+          "payoff_usdt": 2.8704583805022392,
+          "median_net_pct": 8.534169164425366
+        },
+        "2026": {
+          "final_usdt": 1615.0162383709053,
+          "multiple": 0.8034554239045842,
+          "dd_mark_pct": 27.314726914904732,
+          "dd_bound_pct": 33.98110466570768,
+          "trades": 5,
+          "win_pct": 20.0,
+          "payoff": 0.07171543833265229,
+          "payoff_usdt": 0.0725377203588867,
+          "median_net_pct": -4.0465159807973965
+        }
+      },
+      "exit_types": {
+        "ratio_or_ema_close": 35,
+        "28d_timeout": 18
+      },
+      "unquoted_leg_hours": 0,
+      "skips": {
+        "busy": 26,
+        "missing_entry": 0
+      },
+      "changed_pair_clocks": 0
+    },
+    "extremes_5bp": {
+      "metrics": {
+        "all": {
+          "final_usdt": 1530.9499830966104,
+          "multiple": 1.5309499830966105,
+          "dd_mark_pct": 65.18493278438815,
+          "dd_bound_pct": 67.13806336196288,
+          "trades": 53,
+          "win_pct": 33.9622641509434,
+          "payoff": 3.1209250247527502,
+          "payoff_usdt": 2.3313902356916074,
+          "median_net_pct": -3.4040849951552716
+        },
+        "dev": {
+          "final_usdt": 1352.4964540377368,
+          "multiple": 1.3524964540377369,
+          "dd_mark_pct": 65.18493278438815,
+          "dd_bound_pct": 67.13806336196288,
+          "trades": 43,
+          "win_pct": 30.23255813953488,
+          "payoff": 3.700116379945109,
+          "payoff_usdt": 2.6737294561150207,
+          "median_net_pct": -3.5773567246659566
+        },
+        "2025": {
+          "final_usdt": 1915.2334160827868,
+          "multiple": 1.416072781828786,
+          "dd_mark_pct": 9.886413270548244,
+          "dd_bound_pct": 31.753837086966673,
+          "trades": 5,
+          "win_pct": 80.0,
+          "payoff": 3.1506048508105753,
+          "payoff_usdt": 2.757182637014997,
+          "median_net_pct": 8.429604442070767
+        },
+        "2026": {
+          "final_usdt": 1530.9499830966104,
+          "multiple": 0.799354256374584,
+          "dd_mark_pct": 27.596023530462,
+          "dd_bound_pct": 34.23660022877755,
+          "trades": 5,
+          "win_pct": 20.0,
+          "payoff": 0.05439086684495441,
+          "payoff_usdt": 0.055030505389757504,
+          "median_net_pct": -4.149969735825312
+        }
+      },
+      "exit_types": {
+        "ratio_or_ema_close": 35,
+        "28d_timeout": 18
+      },
+      "unquoted_leg_hours": 0
+    },
+    "1029": {
+      "metrics": {
+        "all": {
+          "final_usdt": 495.806696421522,
+          "multiple": 0.49580669642152203,
+          "dd_mark_pct": 65.12856940669501,
+          "dd_bound_pct": 68.33433046868791,
+          "trades": 48,
+          "win_pct": 27.083333333333332,
+          "payoff": 1.8046595261708767,
+          "payoff_usdt": 1.7271999801996272,
+          "median_net_pct": -3.5225982162927356
+        },
+        "dev": {
+          "final_usdt": 654.4068229657387,
+          "multiple": 0.6544068229657387,
+          "dd_mark_pct": 54.05558394748071,
+          "dd_bound_pct": 55.582758688621524,
+          "trades": 38,
+          "win_pct": 26.31578947368421,
+          "payoff": 2.184595523842677,
+          "payoff_usdt": 2.000113688097229,
+          "median_net_pct": -3.6061120944950673
+        },
+        "2025": {
+          "final_usdt": 521.3047528861099,
+          "multiple": 0.7966065367772039,
+          "dd_mark_pct": 33.56736975269953,
+          "dd_bound_pct": 40.45713137533606,
+          "trades": 5,
+          "win_pct": 20.0,
+          "payoff": 0.3639798741946772,
+          "payoff_usdt": 0.304994811759777,
+          "median_net_pct": -3.289205130221949
+        },
+        "2026": {
+          "final_usdt": 495.806696421522,
+          "multiple": 0.951088003085676,
+          "dd_mark_pct": 10.970887330885004,
+          "dd_bound_pct": 14.656391845842155,
+          "trades": 5,
+          "win_pct": 40.0,
+          "payoff": 0.8089751920052807,
+          "payoff_usdt": 0.7740221030667817,
+          "median_net_pct": -1.9769657309895006
+        }
+      },
+      "exit_types": {
+        "ratio_or_ema_close": 35,
+        "28d_timeout": 13
+      },
+      "unquoted_leg_hours": 0,
+      "skips": {
+        "busy": 31,
+        "missing_entry": 0
+      },
+      "changed_pair_clocks": 60
+    },
+    "1030": {
+      "metrics": {
+        "all": {
+          "final_usdt": 543.9625392239794,
+          "multiple": 0.5439625392239794,
+          "dd_mark_pct": 70.91949416090492,
+          "dd_bound_pct": 72.06167088490625,
+          "trades": 47,
+          "win_pct": 34.04255319148936,
+          "payoff": 1.3416600160070722,
+          "payoff_usdt": 1.1737267197438164,
+          "median_net_pct": -3.2892051302219496
+        },
+        "dev": {
+          "final_usdt": 515.0933588445098,
+          "multiple": 0.5150933588445098,
+          "dd_mark_pct": 70.91949416090492,
+          "dd_bound_pct": 72.06167088490625,
+          "trades": 37,
+          "win_pct": 27.027027027027028,
+          "payoff": 1.6682328915866147,
+          "payoff_usdt": 1.4853757840131712,
+          "median_net_pct": -3.4837904897570993
+        },
+        "2025": {
+          "final_usdt": 559.9138118865205,
+          "multiple": 1.0870142320268987,
+          "dd_mark_pct": 19.918051242988188,
+          "dd_bound_pct": 31.552961301167848,
+          "trades": 5,
+          "win_pct": 80.0,
+          "payoff": 0.9189766715644774,
+          "payoff_usdt": 0.851387205146395,
+          "median_net_pct": 0.5985906111260568
+        },
+        "2026": {
+          "final_usdt": 543.9625392239794,
+          "multiple": 0.9715111998955761,
+          "dd_mark_pct": 9.766050765063328,
+          "dd_bound_pct": 13.145814954009616,
+          "trades": 5,
+          "win_pct": 40.0,
+          "payoff": 1.1643232414555067,
+          "payoff_usdt": 1.1033081290244253,
+          "median_net_pct": -1.9769657309894981
+        }
+      },
+      "exit_types": {
+        "ratio_or_ema_close": 30,
+        "28d_timeout": 17
+      },
+      "unquoted_leg_hours": 0,
+      "skips": {
+        "busy": 32,
+        "missing_entry": 0
+      },
+      "changed_pair_clocks": 58
+    },
+    "1031": {
+      "metrics": {
+        "all": {
+          "final_usdt": 7216.229695166461,
+          "multiple": 7.2162296951664615,
+          "dd_mark_pct": 69.14488118340127,
+          "dd_bound_pct": 74.25022862440875,
+          "trades": 48,
+          "win_pct": 37.5,
+          "payoff": 5.285598464927643,
+          "payoff_usdt": 3.875870695460848,
+          "median_net_pct": -3.406221962922368
+        },
+        "dev": {
+          "final_usdt": 8746.949623612625,
+          "multiple": 8.746949623612625,
+          "dd_mark_pct": 69.14488118340127,
+          "dd_bound_pct": 74.25022862440875,
+          "trades": 38,
+          "win_pct": 39.473684210526315,
+          "payoff": 5.8089064001532975,
+          "payoff_usdt": 5.793040043853013,
+          "median_net_pct": -3.406221962922368
+        },
+        "2025": {
+          "final_usdt": 8005.085409191261,
+          "multiple": 0.9151859509492678,
+          "dd_mark_pct": 22.77500011154755,
+          "dd_bound_pct": 31.753843173019035,
+          "trades": 5,
+          "win_pct": 20.0,
+          "payoff": 1.2909248045753938,
+          "payoff_usdt": 1.1878469058565602,
+          "median_net_pct": -3.5872846012878643
+        },
+        "2026": {
+          "final_usdt": 7216.229695166461,
+          "multiple": 0.9014556780219918,
+          "dd_mark_pct": 12.81046663549008,
+          "dd_bound_pct": 15.954178131067199,
+          "trades": 5,
+          "win_pct": 40.0,
+          "payoff": 0.10402427667480577,
+          "payoff_usdt": 0.1010058763746321,
+          "median_net_pct": -1.9769657309895001
+        }
+      },
+      "exit_types": {
+        "ratio_or_ema_close": 30,
+        "28d_timeout": 18
+      },
+      "unquoted_leg_hours": 0,
+      "skips": {
+        "busy": 31,
+        "missing_entry": 0
+      },
+      "changed_pair_clocks": 62
+    },
+    "1032": {
+      "metrics": {
+        "all": {
+          "final_usdt": 5908.434553565183,
+          "multiple": 5.908434553565183,
+          "dd_mark_pct": 61.12322821422852,
+          "dd_bound_pct": 65.09757717803113,
+          "trades": 48,
+          "win_pct": 39.58333333333333,
+          "payoff": 4.223370299511954,
+          "payoff_usdt": 3.2393822516424153,
+          "median_net_pct": -3.1592966795000716
+        },
+        "dev": {
+          "final_usdt": 5943.005534931606,
+          "multiple": 5.943005534931606,
+          "dd_mark_pct": 61.12322821422852,
+          "dd_bound_pct": 65.09757717803113,
+          "trades": 38,
+          "win_pct": 39.473684210526315,
+          "payoff": 4.598117735814065,
+          "payoff_usdt": 3.8464916613185953,
+          "median_net_pct": -3.440946238731382
+        },
+        "2025": {
+          "final_usdt": 6139.662807390197,
+          "multiple": 1.0330905416969047,
+          "dd_mark_pct": 17.220026637105732,
+          "dd_bound_pct": 31.75384315665791,
+          "trades": 5,
+          "win_pct": 40.0,
+          "payoff": 2.330970999265438,
+          "payoff_usdt": 2.2820893285744352,
+          "median_net_pct": -1.1450037593901818
+        },
+        "2026": {
+          "final_usdt": 5908.434553565183,
+          "multiple": 0.962338607008403,
+          "dd_mark_pct": 8.512462992930125,
+          "dd_bound_pct": 11.498251733442233,
+          "trades": 5,
+          "win_pct": 40.0,
+          "payoff": 1.0766488049770229,
+          "payoff_usdt": 1.0179873474381125,
+          "median_net_pct": -3.0126211840247348
+        }
+      },
+      "exit_types": {
+        "ratio_or_ema_close": 29,
+        "28d_timeout": 19
+      },
+      "unquoted_leg_hours": 0,
+      "skips": {
+        "busy": 31,
+        "missing_entry": 0
+      },
+      "changed_pair_clocks": 62
+    },
+    "1033": {
+      "metrics": {
+        "all": {
+          "final_usdt": 1411.7319813935737,
+          "multiple": 1.4117319813935738,
+          "dd_mark_pct": 50.528174783320125,
+          "dd_bound_pct": 58.00728908886455,
+          "trades": 48,
+          "win_pct": 43.75,
+          "payoff": 1.8313718245539583,
+          "payoff_usdt": 1.6128063857388715,
+          "median_net_pct": -2.94487975951614
+        },
+        "dev": {
+          "final_usdt": 1390.4211179601482,
+          "multiple": 1.3904211179601482,
+          "dd_mark_pct": 50.528174783320125,
+          "dd_bound_pct": 58.00728908886455,
+          "trades": 38,
+          "win_pct": 44.73684210526316,
+          "payoff": 1.81198483832243,
+          "payoff_usdt": 1.585300080267048,
+          "median_net_pct": -3.2548878703452764
+        },
+        "2025": {
+          "final_usdt": 1266.0764728459562,
+          "multiple": 0.9105705145671156,
+          "dd_mark_pct": 23.300662190947453,
+          "dd_bound_pct": 31.552961325525498,
+          "trades": 5,
+          "win_pct": 20.0,
+          "payoff": 0.7615940332538036,
+          "payoff_usdt": 0.7066994372028427,
+          "median_net_pct": -2.4585260014012613
+        },
+        "2026": {
+          "final_usdt": 1411.7319813935737,
+          "multiple": 1.1150447952169944,
+          "dd_mark_pct": 9.435021390465103,
+          "dd_bound_pct": 17.709242811872418,
+          "trades": 5,
+          "win_pct": 60.0,
+          "payoff": 1.7453301449418348,
+          "payoff_usdt": 1.752219113811516,
+          "median_net_pct": 3.669613521670344
+        }
+      },
+      "exit_types": {
+        "ratio_or_ema_close": 27,
+        "28d_timeout": 21
+      },
+      "unquoted_leg_hours": 0,
+      "skips": {
+        "busy": 31,
+        "missing_entry": 0
+      },
+      "changed_pair_clocks": 59
+    }
+  },
+  "scope": "Ten surviving majors with observed native OKX histories; costs exclude funding."
+}

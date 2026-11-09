@@ -1,0 +1,65 @@
+{
+  "archive_count": 12370,
+  "archive_status_counts": {
+    "absent_from_official_month_index": 145,
+    "local_archive_unavailable": 9,
+    "read": 12216
+  },
+  "archives_read": 12216,
+  "archives_with_rejected_rows": 425,
+  "candidate_count": 23262,
+  "experiment_id": "exp-cloud-close-spot-repair-20261109-v1",
+  "generated_at_utc": "2026-11-09T04:48:11Z",
+  "limitations": [
+    "Events whose exact required H1 window crosses a rejected source row remain unknown.",
+    "Exact-pair archives missing from local cache or unreadable remain unknown; this builder does not download.",
+    "Non-ASCII pair months without a locally cached exact archive remain unknown; no alias is inferred."
+  ],
+  "network_requests": 0,
+  "original_covered_count": 18891,
+  "original_covered_preserved": 18891,
+  "output_count": 23262,
+  "prior_archive_parse_unknown_recovered_observed": 692,
+  "prior_archive_parse_unknown_transition": {
+    "observed": 692,
+    "unknown_intra_month_h1_gap": 62,
+    "unknown_local_archive_unavailable": 16
+  },
+  "row_quality_count": 425,
+  "row_quality_reasons": {
+    "close_time_not_exact_hour_end": 425
+  },
+  "schema": 1,
+  "source_cache_read_only": true,
+  "source_cache_writes": 0,
+  "source_experiment": "exp-cloud-close-spot-reclaim-20261109-v1",
+  "source_rows_rejected": 425,
+  "source_week_audit": {
+    "side_or_time_mismatches": 0,
+    "signal_files_present": 630,
+    "source_files_missing": 27,
+    "source_rows_missing": 55,
+    "source_week_matches": 22564,
+    "week_mismatches": 0
+  },
+  "status_counts": {
+    "observed": 19560,
+    "observed_zero_trade_hours": 23,
+    "unknown_intra_month_h1_gap": 122,
+    "unknown_local_archive_unavailable": 16,
+    "unknown_no_exact_spot_pair": 3310,
+    "unknown_no_month_archive": 231
+  },
+  "unknown_reason_counts": {
+    "2026-01: official month is indexed but its exact cached ZIP is absent; repair performs no download": 2,
+    "2026-02: official month is indexed but its exact cached ZIP is absent; repair performs no download": 3,
+    "2026-03: official month is indexed but its exact cached ZIP is absent; repair performs no download": 2,
+    "2026-05: official month is indexed but its exact cached ZIP is absent; repair performs no download": 2,
+    "2026-06: official month is indexed but its exact cached ZIP is absent; repair performs no download": 2,
+    "2026-07: official month is indexed but its exact cached ZIP is absent; repair performs no download": 2,
+    "2026-08: official month is indexed but its exact cached ZIP is absent; repair performs no download": 3,
+    "no exact BASEUSDT Spot monthly kline prefix; aliases are not inferred": 3310,
+    "one or more required Spot 1h monthly ZIPs are absent from S3 index": 231,
+    "required UTC H1 opens are absent inside archived month data": 122
+  }
+}

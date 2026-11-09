@@ -15,6 +15,141 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-okx-retired-notices-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "e765ce214a"
+    status: "inconclusive"
+    question: "历史退市合约逐个匹配 OKX 公告"
+    single_variable: "核对全局英文退市目录的实际原生USDT合约、UTC交割时点、第三方记录结束日与交易所行情。"
+    result: "139篇公告、128条USDT永续表格行。159个候选中有68个匹配时间与原生行情，给首批17个带来52个新合约，累计69个。记录结束日距离官方交割均在1日以内。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-okx-retired-notices-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-810b-a027-d310f9341a8b."
+
+  - experiment_id: exp-cloud-close-okx-directory-account-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "f995fb9a6e"
+    status: "inconclusive"
+    question: "扩大云带交易池至 360 个原生 OKX 合约"
+    single_variable: "只将已核实退市合约范围由17个扩大至69个，所有资金规则固定。"
+    result: "新增647个合格机会，原账户144笔被替换、148笔新入，81笔持于退市合约；初步终值54,761.06U，回撤上界47.92%，五个合约触发交割，一笔CVC越过缺失小时。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-okx-directory-account-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-8168-a755-f58e0deed282."
+
+  - experiment_id: exp-cloud-close-okx-directory-delivery-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "70895c0795"
+    status: "inconclusive"
+    question: "360 合约样本的实际交割成本与价格"
+    single_variable: "仅按ARC、CVC、CETUS、CATI、TREE所公告的一小时均值替换交割标记。"
+    result: "终值54,768.24U，胜率22.06%、金额盈亏比5.22、回撤上界47.92%。给三个未明确费用的2025交割额外收5bp，终值54,762.78U。所有市场单滑点5bp，终值46,753.26U、回撤48.37%。一笔CVC缺失小时与历史资金费仍未解决。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-okx-directory-delivery-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81ff-94f8-e937ba60af3a."
+
+  - experiment_id: exp-cloud-close-double-exposure-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "2e382ab03e"
+    status: "inconclusive"
+    question: "价格翻倍先兑付一半的隔离保证金档位"
+    single_variable: "保持九仓与单币20%上限，每个资金仓使用1/1.25/1.5/2倍名义敞口，保留翻倍平一半。"
+    result: "原291币，1倍46,914.73U，1.25倍87,671.92U。开发选1.5倍，全期143,082.25U，胜率22.18%、金额盈亏比5.09、回撤上界48.41%。市场滑点5bp为113,394.91U，回撤上界48.91%。2倍触及两笔保守维保门。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-double-exposure-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81db-b1df-d5aa1c7003ea."
+
+  - experiment_id: exp-cloud-close-double-directory-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "e5ac2de0bd"
+    status: "inconclusive"
+    question: "把 1.5 倍高盈亏比账户转到 360 币"
+    single_variable: "冻结开发所选1.5倍，扩大市场历史，使用五个有退市公告的真实指数。"
+    result: "扩大后116,917.25U，胜率22.31%、金额盈亏比4.91、回撤上界49.86%。5bp压力后92,476.97U、胜率22.06%、实际盈亏比4.85、小时回撤49.61–50.42%；另有一小时缺行情，未计资金费。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-double-directory-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81f6-a5ef-e606c98711b5."
+
+  - experiment_id: exp-cloud-close-double-minute-risk-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "d255602e45"
+    status: "inconclusive"
+    question: "1.5 倍账户 50% 回撤界线的分钟核验"
+    single_variable: "对5bp滑点情景所有可能越过50%的峰谷小时，用原生分钟行情和实际持有数量重算界限。"
+    result: "10个可能峰谷小时全部用同步原生分钟校准，上界从50.4185%缩至49.9115%，已见下界49.8275%。适用已冻结账户（含CVC缺档处理），未计资金费，不代表真实交易所标记路径。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-double-minute-risk-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-8103-9212-e7cf7da7e36c."
+
+  - experiment_id: exp-cloud-close-spot-repair-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "e011ca920f"
+    status: "inconclusive"
+    question: "修复现货原生小时行质量"
+    single_variable: "保留原已知数据，仅剔除损坏月档中精确的不合规行。"
+    result: "23,262个事件。18,891个旧已知事件一条未翻转，新增692个可观测事件。原770个解析未知中其余62个实际缺小时、16个受9个月档本地缺失影响。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-spot-repair-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81f5-8d4e-e807ac429736."
+
+  - experiment_id: exp-cloud-close-spot-repaired-wallet-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "1b1fd9b160"
+    status: "inconclusive"
+    question: "以修复后原生现货观测重算两个假设"
+    single_variable: "原币安现货收回和相对领先各自的覆盖、筛选、等稀缺度组，单独使用修复后的原生现货行情。"
+    result: "收回组15,146.06U，覆盖10,167.58U，随机8,426.51U。现货领先11,557.04U，覆盖10,167.58U，随机4,666.67U；同一随机种子因覆盖变化换了很多成员。金额均已扣费，未计资金费。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-spot-repaired-wallet-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-8100-957d-e44a5e5f8f66."
+
+  - experiment_id: exp-cloud-close-pair-branch-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "e53ef902c7"
+    status: "rejected"
+    question: "独立方向：跨币市场中性强弱配对"
+    single_variable: "十只主流合约每周第一个12H云带强弱充分分化的信号，等名义多最强空最弱，用相对汇率完成退出。"
+    result: "79个周触发、53组实际交易，扣费终值1,615.02U，胜率33.96%、金额盈亏比2.39、回撤上界66.70%。5个同时刻同向随机配对终值495.81–7,216.23U，两个超过原方案，未达到收益及风险目标。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-pair-branch-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-812a-9d0a-f5cd61a397ce."
+
   - experiment_id: exp-cloud-close-okx-retired-prices-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "8568b0f851"
