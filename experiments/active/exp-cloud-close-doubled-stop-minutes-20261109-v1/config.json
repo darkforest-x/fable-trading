@@ -1,0 +1,6 @@
+{
+  "question": "For every actually funded original V1.7 position whose new fixed 12H candle-low protection changed its exit after a confirmed price doubling, did the first observed traded minute cross the stop at its modeled H1 price or gap through it?",
+  "source": "All 31 fixed-stop changes, without ranking by result. Use the original official OKX sixty minute candles reconciling all OHLC fields to the actual H1; retrieve native trade volume and USDT turnover when available. A zero-traded minute cannot trigger a traded-price stop. Use the first positive native volume minute with low at/below the active level; min(minute open, stop) is the frictionless gap-aware trigger price. Missing or conflicting OHLC/volume stays unknown.",
+  "economics": "Price/volume evidence only, not a depth or profit estimate. Use the frozen actual initial notional of that same fixed-stop funded account to calculate a conservative upper bound on exit quantity assuming none of its initial units had already sold. If even the bound fits the whole minute, actual exit quantity would not exceed total minute turnover. No exact inference if the bound exceeds turnover; no order-book price/size certification from volume.",
+  "command": "vectorbt-python -m yoyo.evaluation.cloud_close_doubled_stop_minutes"
+}
