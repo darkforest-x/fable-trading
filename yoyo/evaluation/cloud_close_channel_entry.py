@@ -15,7 +15,7 @@ EXP = source.EXP.parent/'exp-cloud-close-channel-entry-20261109-v1'
 CACHE = wallet.ROOT/'data/research/cloud_close_channel_entry'
 
 
-def signals(bars):
+def signals(bars,*,reclaim=False):
     """Prior 40 contiguous high/low bars exclude the current bar; at least 180 prior contiguous 12H bars."""
     group = bars.index.to_series().diff().ne(STEP).cumsum()
     def channel(values,side):
@@ -25,19 +25,28 @@ def signals(bars):
     upper = channel(bars.high.groupby(group),1)
     lower = channel(bars.low.groupby(group),-1)
     raw = pd.Series(0,index=bars.index)
-    raw[bars.close.gt(upper)] = 1
-    raw[bars.close.lt(lower)] = -1
+    if reclaim:
+        inside = bars.close.gt(lower)&bars.close.lt(upper)
+        tagged_low = bars.low.lt(lower)
+        tagged_high = bars.high.gt(upper)
+        raw[inside & tagged_low & ~tagged_high] = 1
+        raw[inside & tagged_high & ~tagged_low] = -1
+        anchor = lower.where(raw.gt(0),upper)
+    else:
+        raw[bars.close.gt(upper)] = 1
+        raw[bars.close.lt(lower)] = -1
+        anchor = upper.where(raw.gt(0),lower)
     first = raw.ne(raw.groupby(group).shift()) & raw.ne(0) & bars.groupby(group).cumcount().ge(180)
-    return pd.DataFrame(dict(side=raw.loc[first],anchor=upper.where(raw.gt(0),lower).loc[first]))
+    return pd.DataFrame(dict(side=raw.loc[first],anchor=anchor.loc[first]))
 
 
-def price_symbol(sym,src):
+def price_symbol(sym,src,*,reclaim=False):
     h,bars = source.correction.parent.repair.market.frames(src)
     if len(bars)<=180:
         return pd.DataFrame()
     q,clock,_ = engine._prepare_symbol(bars,h)
     events = []
-    for key,signal in signals(bars).iterrows():
+    for key,signal in signals(bars,reclaim=reclaim).iterrows():
         side = int(signal.side)
         entry = key+STEP
         i = int(clock.searchsorted(entry))
@@ -65,16 +74,18 @@ def price_symbol(sym,src):
     return pd.DataFrame(rows)
 
 
-def main():
-    if (EXP/'summary.json').exists():
+def main(*,reclaim=False):
+    directory = EXP.parent/'exp-cloud-close-channel-reclaim-20261109-v1' if reclaim else EXP
+    cache = CACHE.parent/'cloud_close_channel_reclaim' if reclaim else CACHE
+    if (directory/'summary.json').exists():
         raise FileExistsError('Completed full 20-day channel study')
     _,quotes,src = source.inputs()
-    CACHE.mkdir(exist_ok=True,parents=True)
+    cache.mkdir(exist_ok=True,parents=True)
     books = []
     for n,(sym,s) in enumerate(sorted(src.items())):
-        path = CACHE/(sym+'.csv.gz')
+        path = cache/(sym+'.csv.gz')
         if not path.exists() and not path.with_suffix('.empty').exists():
-            rows = price_symbol(sym,s)
+            rows = price_symbol(sym,s,reclaim=reclaim)
             if rows.empty:
                 path.with_suffix('.empty').touch()
             else:
@@ -88,7 +99,7 @@ def main():
         if n%50==0:
             print('priced markets',n,flush=True)
     paths = pd.concat(books,ignore_index=True)
-    paths.to_csv(EXP/'paths.csv.gz',index=False)
+    paths.to_csv(directory/'paths.csv.gz',index=False)
     prime = paths[~paths.is_control]
     late = paths[paths.is_control]
     paired = prime[prime.parent_id.isin(late.parent_id)]
@@ -100,9 +111,9 @@ def main():
             funds,curve = wallet.account(data,slip=slip)
             if not np.isclose(1000+funds.cash_pnl.sum(),curve.nav.iat[-1],atol=.001):
                 raise ValueError('Native 20-day channel cash failed to reconcile')
-            funds.to_csv(EXP/f'funded_{key}.csv.gz',index=False)
+            funds.to_csv(directory/f'funded_{key}.csv.gz',index=False)
             if key in ['full','full_stress']:
-                curve.to_csv(EXP/f'hourly_{key}.csv.gz',index_label='hour_end_utc')
+                curve.to_csv(directory/f'hourly_{key}.csv.gz',index_label='hour_end_utc')
             out[key] = dict(metrics={p:wallet.summarize(funds,curve,*v) for p,v in branch.PERIODS.items()},
                             skips=data['skips'],missing_holding_hours=data['gap_marks'],
                             eligible=len(events),preterminal_tail_exits=int((funds.exit_reason.eq('series_tail_close')&
@@ -110,9 +121,12 @@ def main():
             print(key,out[key]['metrics']['all'],flush=True)
         del data
         gc.collect()
-    source.correction.archive.prices.safe_json(EXP/'summary.json',dict(arms=out,universe=len(src),
+    source.correction.archive.prices.safe_json(directory/'summary.json',dict(arms=out,universe=len(src),
                scope='Frozen historical panel and H1 terminal/gap exit convention; funding, liquidity and historical margins unmodeled.'))
 
 
 if __name__=='__main__':
-    main()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--reclaim',action='store_true')
+    main(reclaim=parser.parse_args().reclaim)
