@@ -1,0 +1,123 @@
+{
+  "id": "exp-cloud-close-november-prices-20261109-v1",
+  "purpose": "Source-only continuation of the frozen Binance V1.7 historical fixed contract pool to the OKX-aligned 2026-11-08 12:00 UTC boundary. No signals, strategy replay, or PnL are produced.",
+  "single_variable": "Extend source OHLCV coverage after the original 2026-09-23 cutoff while preserving the fixed 680-symbol historical pool and each official contract lifecycle.",
+  "fixed_universe": {
+    "symbol_count": 680,
+    "construction": {
+      "original_contract_classification.csv": 632,
+      "contract_lifetime_evidence.csv.gz row_type=extra29_archive_audit": 29,
+      "supplemental_contract_evidence.csv": 19
+    },
+    "membership_rule": "Use the frozen archive-complete files only. Do not replace the pool with the currently active Binance symbol list.",
+    "lifecycle_rule": "For the 632 original contracts, retain archived onboard dates and use current exchangeInfo delivery dates only when the onboard date is unchanged. A changed onboard date is a separate relisted period. For the 19 supplemental contracts use their frozen onboard/delivery evidence. Keep the 29 archive-only historical members in coverage with their observed archive boundary, explicitly labeled as an observed archive boundary and not an official delivery date; do not join them to current same-name tickers without official lifecycle evidence.",
+    "known_relisting": "MDTUSDT has a 2023-06 original onboard and 2024-05 archived delivery, plus a separate 2026-10-21 current onboard. The latter is a separate period and has no claimed September lineage."
+  },
+  "range": {
+    "overlap_start_utc": "2026-09-22T00:00:00Z",
+    "original_continuation_start_utc": "2026-09-23T00:00:00Z",
+    "old_quote_parity_window_end_exclusive_utc": "2026-09-24T00:00:00Z",
+    "end_exclusive_utc": "2026-11-08T12:00:00Z",
+    "bar_time": "UTC candle open time",
+    "last_possible_h1_open_utc": "2026-11-08T11:00:00Z",
+    "clock_unit": "integer epoch milliseconds"
+  },
+  "sources": {
+    "fixed_pool_evidence": [
+      "experiments/active/exp-cloud-close-archive-complete-20261109-v1/original_contract_classification.csv",
+      "experiments/active/exp-cloud-close-archive-complete-20261109-v1/supplemental_contract_evidence.csv",
+      "experiments/active/exp-cloud-close-archive-complete-20261109-v1/contract_lifetime_evidence.csv.gz",
+      "data/research/cloud_close_archive_cohort/symbols/<symbol>/source.json"
+    ],
+    "local_5m_ohlcv_priority": [
+      "data/crypto/market/kline_binance_um5m_forward_20260922/series",
+      "data/crypto/market/research-spike_v128_recent_20260923/series",
+      "experiments/active/exp-monday-limit-live-october-20261101-v1/symbols/<symbol>/new_bars.csv.gz",
+      "data/crypto/market/binance_um5m_20260923_20261031/series",
+      "data/crypto/market/breadth_rebound_targets_20261107/<symbol>-november-through-04.csv.gz",
+      "data/crypto/market/binance_um5m_rest_fallback/series (only if a cache has complete OHLCV columns)"
+    ],
+    "excluded_local_data": "OHLC-only/OHLCV-incomplete cache rows are recorded as excluded and never padded. The huge preholdout series is not scanned for this short continuation; official FAPI fills a missing overlap day instead.",
+    "official_fallback": {
+      "endpoint": "GET https://fapi.binance.com/fapi/v1/klines",
+      "interval": "5m",
+      "request_window": "one UTC day per symbol/lifecycle gap, startTime inclusive, endTime inclusive",
+      "response_fields_used": "[0] open time ms, [1..5] OHLCV",
+      "cache": "data/research/cloud_close_november_prices/raw_fapi/<symbol>/<YYYY-MM-DD>.json.gz"
+    },
+    "old_h1_reference": "experiments/active/exp-cloud-close-binance-transfer-20261109-v1/work/<symbol>/quotes.npz; compare common OHLC opens in the 2026-09-22 through 2026-09-23 overlap window"
+  },
+  "construction": {
+    "period_validity": "Use candle opens in [ceil(onboardDate, 5m), deliveryDate), additionally clipped to the configured collection range. OPEN_MAX means no known delivery. A changed official onboard date creates an independent period id; no price series crosses that boundary.",
+    "h1_aggregation": "Aggregate only 12 exact consecutive 5m UTC opens in [hour_open, hour_open+60m): open=first, high=max, low=min, close=last, volume=sum, close_volume_sum_5m=sum(5m close * 5m base volume). Emit H1 only if the whole hour is within the contract lifecycle. No interpolated or forward-filled candles.",
+    "volume_proxy_definition": "close_volume_sum_5m is a frozen seven-day turnover proxy required by the original signal feature interface; it is not Binance quote-asset volume and must remain separately named.",
+    "gaps": "Keep missing 5m bars and incomplete H1 hours absent, with expected/observed counts, samples, local source presence, REST result, and affected period recorded in coverage and source audit.",
+    "zero_volume": "Retain official zero-volume 5m bars and count them; volume is not inferred from price movement.",
+    "source_conflicts": "Compare duplicate local OHLCV records; choose the documented higher-priority source only after recording duplicate/conflicting timestamps and examples. REST is highest priority for the rows it fills.",
+    "coverage_lifecycle_fields": [
+      "contract_period_id",
+      "onboard_ms",
+      "delivery_ms",
+      "onboard_boundary_kind",
+      "delivery_boundary_kind",
+      "period_source",
+      "period_link_status",
+      "prior_period_id",
+      "same_symbol_relisting"
+    ],
+    "h1_fields": [
+      "symbol",
+      "contract_period_id",
+      "open_time_ms",
+      "open_time_utc",
+      "close_time_ms",
+      "close_time_utc",
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume",
+      "close_volume_sum_5m",
+      "n_5m",
+      "source_mix"
+    ]
+  },
+  "request_policy": {
+    "request_budget_estimate": "About 4,000-6,000 one-day calls after local 5m reuse; --preflight is read-only. The hard cap is 7,000 calls, including retries. If the cap would be exceeded, stop without issuing further requests.",
+    "max_requests": 7000,
+    "minimum_seconds_between_requests": 0.25,
+    "max_concurrency": 1,
+    "limit_per_request": 1000,
+    "expected_rows_per_full_5m_day": 288,
+    "binance_weight_per_request": 2,
+    "retry_attempts": 4,
+    "cache_raw_responses": true,
+    "never_fallback_to": ["current active symbol list", "other venue quotes", "synthesized OHLCV", "proxy volume"]
+  },
+  "outputs": {
+    "data_manifest": "data/research/cloud_close_november_prices/manifest.json",
+    "coverage": "data/research/cloud_close_november_prices/coverage.csv.gz",
+    "source_audit": "data/research/cloud_close_november_prices/source_audit.json",
+    "h1_series": "data/research/cloud_close_november_prices/series/<symbol>__onboard_<ms>.csv.gz",
+    "raw_fapi_cache": "data/research/cloud_close_november_prices/raw_fapi/<symbol>/<YYYY-MM-DD>.json.gz",
+    "experiment_receipt": "experiments/active/exp-cloud-close-november-prices-20261109-v1/manifest.json"
+  },
+  "validation": [
+    "Assert 680 unique fixed-pool symbols with every member present in lifecycle coverage, including archive-only symbols with no November prices.",
+    "Validate all timestamp values as epoch milliseconds, exact UTC 5m alignment, sorted unique opens, positive prices, valid high/low geometry, and nonnegative volume.",
+    "Record effective onboard/delivery evidence, local source lineages, API cache/source, zero-volume bars, real missing 5m opens, incomplete H1 bars, and source conflicts.",
+    "Compare common regenerated H1 OHLC in the 2026-09-22..2026-09-24 overlap against the frozen old Binance H1 arrays; report every mismatch and checked-bar count.",
+    "Smoke one official 5m day against independent Binance native 1h OHLCV aggregation, and separately check the 2026-09-22 overlap clock.",
+    "List local source symbols outside the fixed historical pool in the data manifest; never admit them to the fixed universe."
+  ],
+  "commands": {
+    "offline_mini": "python3 yoyo/evaluation/cloud_close_november_prices.py --mini-check",
+    "official_source_smoke": "python3 yoyo/evaluation/cloud_close_november_prices.py --smoke-network --symbol ADAUSDT --day 2026-10-28 --overlap-day 2026-09-22",
+    "full_source_build_after_builder_commit": "python3 yoyo/evaluation/cloud_close_november_prices.py --collect"
+  },
+  "limitations": [
+    "Source coverage is restricted to the frozen 680-symbol pool. Local active symbols outside it are listed only as a separate limitation and are not fetched into the cohort.",
+    "The 29 archive-only contracts do not have matching records in the frozen current/old exchangeInfo snapshots; their registered historical archive endpoint is not evidence for a new same-name contract lifecycle.",
+    "This builder does not change signal eligibility or pricing, and it does not calculate any trade result."
+  ]
+}

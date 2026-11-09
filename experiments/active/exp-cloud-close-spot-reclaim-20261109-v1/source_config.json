@@ -1,0 +1,39 @@
+{
+  "id": "exp-cloud-close-spot-reclaim-20261109-v1",
+  "purpose": "Geometry/input coverage only: for each frozen Binance 12H candidate, determine whether that event's just-closed UTC 12H Spot bar reclaims the exact same-side 1.618 extension built from that Spot pair's own New York Monday range.",
+  "candidate_file": "experiments/active/exp-cloud-close-score-priority-20261109-v1/candidate_order.csv.gz",
+  "parent_signal_root": "experiments/active/exp-signal-center-score-20261106-v1/results/symbols",
+  "candidate_identity": "Use every frozen candidate_order.csv.gz row (event_id, symbol, entry_ms); require unique event IDs, symbol/USDT identity, event ID close nanoseconds == entry_ms, side in {-1,+1}, and a UTC 12H close grid. No outcome-based filtering.",
+  "parent_week": "Use the frozen 12H source signal's week (NY Monday date) where the matching signal_id is available. Verify it equals the NY Monday assigned from event key open = entry_ms - 12h. When supplemental/delisted candidates lack that source row/file, derive the same key-open NY Monday deterministically from the event_id and mark parent_week_source=event_key_reconstruction.",
+  "data_source": {
+    "venue": "Binance Spot",
+    "market": "spot",
+    "pair_rule": "exact base symbol + USDT only; do not infer multiplier, wrapped, renamed, or other quote-asset aliases",
+    "interval": "1h",
+    "archive_template": "https://data.binance.vision/data/spot/monthly/klines/{spot_symbol}/1h/{spot_symbol}-1h-{YYYY-MM}.zip",
+    "s3_index_endpoint": "https://s3.ap-northeast-1.amazonaws.com/data.binance.vision/",
+    "index_order": "First list official Spot pair prefixes, then exact pair 1h monthly ZIP keys, then fetch only needed existing symbol-month archives. An absent pair/month is reported unknown without an empty ZIP request.",
+    "format": "Official Binance Spot monthly Kline CSV inside ZIP; retain raw ZIP and compressed receipt/index under data/research.",
+    "timestamps": "Detect UTC open/close timestamp unit by magnitude and normalize to epoch ms. Binance public-data documentation notes Spot archive timestamps switch to microseconds from 2025-01-01.",
+    "required_columns": "Original 12-column Spot kline row; panel uses UTC bar-open time, OHLC, base volume, and trade count."
+  },
+  "geometry": {
+    "timezone": "America/New_York",
+    "monday_window": "NY Monday 00:00 inclusive to the immediately following Tuesday 00:00 exclusive (24 UTC-aligned 1h bars; 96 quarter-hour equivalents). Use parent signal NY week.",
+    "required_observation": "Require the frozen 12H key bar to open no earlier than the end of NY Monday and close no later than the original NY week expiry. Require every exact UTC 1h open from NY Monday 00:00 through the frozen 12H key close, including the full 24-hour Monday and all intervening hours. Require the 12 H1 bars [entry_ms-12h, entry_ms) for the signal bar. Any absent hour, listing boundary, missing monthly archive, or serious OHLC/timestamp defect is unknown, never a negative confirmation.",
+    "spot_monday_range": "spot_monday_high=max(high) and spot_monday_low=min(low) over the first 24 complete New York Monday 1h bars.",
+    "spot_levels": "width=spot_monday_high-spot_monday_low; lower=spot_monday_low-0.618*width; upper=spot_monday_high+0.618*width.",
+    "spot_12h_ohlc": "Aggregate the 12 complete UTC H1 bars ending at entry_ms: max high, min low, final close.",
+    "confirmation": "For side=+1: key_low < lower < key_close < upper. For side=-1: key_high > upper > key_close > lower. No Spot EMA and no requirement that this be the Spot pair's first signal of its week.",
+    "zero_trade_hour": "A valid official row with zero base volume/trade count is retained and separately counted in panel fields; missing rows remain gaps/unknown. Any inconsistent volume/trade count or invalid OHLC makes the affected archive/events unknown.",
+    "outputs": "covered=true only for a valid complete week-to-key H1 path. spot_reclaim and spot_confirms are nullable booleans; null means unknown coverage/geometry, not a failed reclaim. Keep positive and negative observed events."
+  },
+  "cache_root": "data/research/cloud_close_spot_reclaim_20261109",
+  "event_panel": "data/research/cloud_close_spot_reclaim_20261109/event_panel.csv.gz",
+  "summary": "data/research/cloud_close_spot_reclaim_20261109/summary.json",
+  "smoke_panel": "data/research/cloud_close_spot_reclaim_20261109/smoke_event_panel.csv.gz",
+  "smoke_summary": "data/research/cloud_close_spot_reclaim_20261109/smoke_summary.json",
+  "workers": 4,
+  "runner": "python3 -m yoyo.evaluation.cloud_close_spot_reclaim_inputs --run",
+  "smoke_runner": "python3 -m yoyo.evaluation.cloud_close_spot_reclaim_inputs --smoke"
+}
