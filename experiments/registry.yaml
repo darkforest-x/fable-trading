@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-large-exit-turnover-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "1d90f278d5"
+    status: "inconclusive"
+    question: "大额退出和主要盈利尾仓能否容纳在实际成交量内"
+    single_variable: "提取实际原生四腿成交，核对最大开盘退出及盈利前十父仓的最后退出与官方分钟及小时实成额。"
+    result: "47个抽查小时全部取到分钟，1个开盘退出时点超过整分钟成交量（YGG 1524U 对 581U）；无一超过整小时。前十笔占总净利77.13%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-large-exit-turnover-20261109-v1/summary.json"
+    notes: "Selected size and winner audit, not a census or price level depth evidence. Notion 41388564-79af-8128-a494-f07f6b8ab432."
+
   - experiment_id: exp-cloud-close-opening-price-limit-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "e16296a162"
