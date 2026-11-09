@@ -12,6 +12,29 @@ wallet = trend.thirds.wallet
 EXP = wallet.EXP.parent/'exp-cloud-close-fvg-exclusion-20261109-v1'
 
 
+def prior_zones(bars):
+    states = {}
+    for _,segment in bars.groupby(bars.index.to_series().diff().ne(pilot.STEP).cumsum()):
+        states.update(pilot.snapshots(segment))
+    return states
+
+
+def touch_tag(row,hours,states):
+    key = pd.Timestamp(row.key_open_bjt).value//1_000_000
+    start = pilot.week_window(key)['end']
+    count = (key+pilot.STEP-start)//pilot.HOUR
+    left,end = np.searchsorted(hours.index,[start,key+pilot.STEP])
+    if end-left!=count or count<=0:
+        return 'missing_hours'
+    window = hours.iloc[left:end]
+    hits = window.low.le(row.reference_entry) if row.side==1 else window.high.ge(row.reference_entry)
+    if not hits.any():
+        return 'no_hourly_touch'
+    if hits[hits].index[0]//pilot.STEP*pilot.STEP not in states:
+        return 'missing_12h'
+    return pilot.first_touch(row,hours,states)['tag']
+
+
 def decisions():
     cols = ['symbol','week','side','key_open_bjt','confirmed_bjt','reference_entry','reference_stop']
     source = pd.read_csv(wallet.SOURCE/'signals.csv',usecols=cols,dtype={'symbol':str},keep_default_na=False)
@@ -19,28 +42,11 @@ def decisions():
     rows = []
     for symbol,part in source.groupby('symbol'):
         bars = trend.market.market_bars('OKX',symbol)
-        states = {}
-        segments = bars.index.to_series().diff().ne(pilot.STEP).cumsum()
-        for _,segment in bars.groupby(segments):
-            states.update(pilot.snapshots(segment))
+        states = prior_zones(bars)
         time,prices = wallet.quotes(symbol)
         hours = pd.DataFrame(prices,index=time,columns=['open','high','low','close'])
         for row in part.itertuples():
-            key = pd.Timestamp(row.key_open_bjt).value//1_000_000
-            start = pilot.week_window(key)['end']
-            count = (key+pilot.STEP-start)//pilot.HOUR
-            left,end = np.searchsorted(time,[start,key+pilot.STEP])
-            tag = 'missing_hours'
-            if end-left==count and count>0:
-                level = row.reference_entry
-                window = hours.iloc[left:end]
-                hits = window.low.le(level) if row.side==1 else window.high.ge(level)
-                if not hits.any():
-                    tag = 'no_hourly_touch'
-                elif hits[hits].index[0]//pilot.STEP*pilot.STEP not in states:
-                    tag = 'missing_12h'
-                else:
-                    tag = pilot.first_touch(row,hours,states)['tag']
+            tag = touch_tag(row,hours,states)
             rows.append(dict(source_row_number=row.Index,symbol=symbol,week=row.week,tag=tag))
     result = pd.DataFrame(rows).set_index('source_row_number',verify_integrity=True)
     sample = pd.read_csv(pilot.EXP/'signals.csv',usecols=['symbol','week','tag'])
