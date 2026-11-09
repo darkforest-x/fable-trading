@@ -1,0 +1,11 @@
+{
+  "single_variable": "Replace last-trade markouts on the four known selected CATI/TREE child legs with the venue's documented no-fee delivery price. Hold the original expanded 17-name portfolio membership, rules, and nine margin slots fixed.",
+  "delivery_utc": "2026-01-24T16:00:00Z",
+  "symbols": ["CATI","TREE"],
+  "minutes": 60,
+  "notice": "https://www.okx.com/en-us/help/okx-to-delist-perpetual-futures",
+  "spot_indices": ["CATI-USDT","TREE-USDT"],
+  "source": "https://www.okx.com/api/v5/market/history-index-candles",
+  "scenarios": "Read 60 distinct consecutive final 1m OHLC candles from each exact native OKX USDT index. The mean of closes approximates the documented prior-hour arithmetic index mean. Apply mean minute highs/lows as price sensitivity if the normal settlement rule was followed. Venue can adjust final settlement in an abnormal market; actual delivery receipts unavailable. No fee and no direct market slippage on delivery.",
+  "other_costs": "Market 5bp, resting target maker 2bp. Additional market slippage 5bp tested separately. Funding excluded."
+}
