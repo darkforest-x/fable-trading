@@ -13,8 +13,8 @@ from yoyo.evaluation import cloud_close_native_book_impact as native
 EXP = native.EXP.parent/'exp-cloud-close-book-sample-20261109-v1'
 
 
-def run():
-    if (EXP/'summary.json').exists():
+def run(*,repair=False):
+    if (EXP/'summary.json').exists() and not repair:
         raise FileExistsError('Completed first-second opening book sample')
     source = native.audit.source
     funds = pd.read_csv(source.EXP/'funded_contrarian_half.csv.gz')
@@ -32,7 +32,9 @@ def run():
     def inspect(row):
         path = EXP/f'case_{row.entry_ms}_{row.symbol}.json'
         if path.exists():
-            return json.loads(path.read_text())
+            saved = json.loads(path.read_text())
+            if not repair or saved['status']=='observed':
+                return saved
         for attempt in range(3):
             try:
                 obs = native.evaluate(row,quotes,EXP)
@@ -77,4 +79,7 @@ def run():
 
 
 if __name__=='__main__':
-    run()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--repair',action='store_true')
+    run(repair=parser.parse_args().repair)

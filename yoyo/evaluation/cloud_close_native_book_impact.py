@@ -14,11 +14,62 @@ API = 'https://www.okx.com/api/v5/public/market-data-history'
 DAY = 86400000
 
 
+def apply_message(book,m):
+    if m['action']=='snapshot':
+        book.clear()
+        book.update(asks={},bids={})
+    elif m['action']!='update':
+        raise ValueError('Unknown archive action')
+    for side in ('asks','bids'):
+        for item in m.get(side,[]):
+            price,size = map(float,item[:2])
+            if price==0 and size==0:
+                continue
+            if price<=0 or size<0:
+                raise ValueError('Invalid book level')
+            if size:
+                book[side][price]=size
+            else:
+                book[side].pop(price,None)
+        if len(book[side])>400:
+            best=sorted(book[side],reverse=side=='bids')[:400]
+            book[side]={p:book[side][p] for p in best}
+    if max(book['bids'])>=min(book['asks']):
+        raise ValueError('Crossed or locked reconstructed book')
+
+
+def previous_snapshot(item,inst,stamp):
+    """Restore the prior daily file from its last genuine snapshot; preserve its last update clock."""
+    book = {}
+    last = None
+    with requests.get(item['url'],stream=True,timeout=(8,45)) as stream:
+        stream.raise_for_status()
+        with tarfile.open(fileobj=stream.raw,mode='r|gz') as archive:
+            for member in archive:
+                if not member.isfile() or not member.name.startswith(inst+'-'):
+                    continue
+                for line in archive.extractfile(member):
+                    msg = json.loads(line)
+                    t = int(msg['ts'])
+                    if msg['instId']!=inst or (last is not None and t<last):
+                        raise ValueError('Previous daily book is not a monotone native tape')
+                    if t>=stamp:
+                        break
+                    if book or msg['action']=='snapshot':
+                        apply_message(book,msg)
+                    last=t
+                break
+    if not book or last is None or not stamp-60000<=last<stamp:
+        raise ValueError('Cannot anchor opening increments to a recent prior-day native book')
+    return dict(instId=inst,action='snapshot',ts=str(last),previous_archive=item['url'],
+                asks=list(book['asks'].items()),bids=list(book['bids'].items()))
+
+
 def native_messages(symbol,stamp,directory=EXP):
     inst = symbol+'-USDT-SWAP'
     date = stamp//DAY*DAY
     res = requests.get(API,params=dict(module=4,instType='SWAP',instFamilyList=symbol+'-USDT',
-                      dateAggrType='daily',begin=date-1,end=date+1),timeout=(8,20))
+                      dateAggrType='daily',begin=date-DAY,end=date+1),timeout=(8,20))
     res.raise_for_status()
     body = res.json()
     items = body['data'][0]['details'][0]['groupDetails']
@@ -45,9 +96,13 @@ def native_messages(symbol,stamp,directory=EXP):
                         if int(msg['ts'])>stamp+1000:
                             break
                     break
-        if (not events or events[0]['action']!='snapshot' or not stamp<=int(events[0]['ts'])<=stamp+100
-                or int(events[-1]['ts'])<=stamp+1000):
-            raise ValueError('Missing native opening snapshot or incomplete next-second evidence')
+        if not events or not stamp<=int(events[0]['ts'])<=stamp+1000 or int(events[-1]['ts'])<=stamp+1000:
+            raise ValueError('No usable opening observation in the first second')
+        if events[0]['action']!='snapshot':
+            previous = [r for r in items if int(r['dateTs'])==date-DAY and r['filename'].startswith(inst+'-L2orderbook-400lv-')]
+            if len(previous)!=1:
+                raise ValueError('Missing preceding native archive for opening incremental tape')
+            events.insert(0,previous_snapshot(previous[0],inst,stamp))
         with gzip.open(file,'wt') as out:
             for msg in events:
                 out.write(json.dumps(msg,separators=(',',':'))+'\n')
@@ -96,7 +151,7 @@ def evaluate(row,quotes,directory=EXP):
     face = float(face.median())
     qty = row.notional/row.entry_price
     result = {}
-    prev = stamp
+    prev = int(events[0]['ts'])
     last_time = None
     book = {}
     for i,m in enumerate(events):
@@ -105,25 +160,11 @@ def evaluate(row,quotes,directory=EXP):
             raise ValueError('Nonchronological native book')
         if t>stamp+1000:
             break
-        if m['action']=='snapshot':
-            book={'asks':{},'bids':{}}
-        elif m['action']!='update':
-            raise ValueError('Unknown archive action')
-        for side in ('asks','bids'):
-            for item in m.get(side,[]):
-                price,size = map(float,item[:2])
-                if price<=0 or size<0:
-                    raise ValueError('Invalid book level')
-                if size:
-                    book[side][price]=size
-                else:
-                    book[side].pop(price,None)
-            if len(book[side])>400:
-                best=sorted(book[side],reverse=side=='bids')[:400]
-                book[side]={p:book[side][p] for p in best}
-        if max(book['bids'])>=min(book['asks']):
-            raise ValueError('Crossed or locked reconstructed book')
-        if i==0:
+        apply_message(book,m)
+        if t<stamp:
+            prev=t
+            continue
+        if 'first' not in result:
             result['first'] = dict(ms_after_close=t-stamp,**walk(book,row.side,qty,face,row.entry_price))
         prev=last_time=t
     result['one_second'] = dict(last_update_ms_after_close=last_time-stamp,**walk(book,row.side,qty,face,row.entry_price))
