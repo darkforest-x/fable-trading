@@ -1,0 +1,33 @@
+{
+  "question": "Can official native OKX trades recover the one missing CVC-USDT-SWAP H1 bar at 2022-10-26 03:00 UTC?",
+  "single_variable": "Source only: recover the target H1 from the official monthly trade archive only if execution IDs are consecutive within the target and both immediately adjacent hours and across their hour boundaries. Validate both adjacent OHLC bars against the frozen CVC H1 series, and validate target compatibility against the 59 confirmed native minute candles. No strategy, account, interpolation, or price substitution.",
+  "instrument": "CVC-USDT-SWAP",
+  "month": "2022-10",
+  "target_hour_utc": "2022-10-26T03:00:00Z",
+  "expected_missing_minute_utc": "2022-10-26T03:11:00Z",
+  "official_trade_archive_base": "https://static.okx.com/cdn/okex/traderecords/trades/monthly",
+  "source_h1_series": "data/research/cloud_close_okx_retired_prices/series/CVC-USDT-SWAP/bars1h.csv.gz",
+  "source_native_minute_archive": "data/research/cloud_close_okx_roster_audit/raw/CVC-USDT-SWAP/CVC-USDT-SWAP-candlesticks-2022-10.zip",
+  "source_receipt": "data/research/cloud_close_okx_retired_prices/series/CVC-USDT-SWAP/source.json",
+  "month_receipt": "data/research/cloud_close_okx_retired_prices/series/CVC-USDT-SWAP/months.json",
+  "output_series": "data/research/cloud_close_cvc_trade_hour/series/CVC-USDT-SWAP/bars1h.csv.gz",
+  "output_hour_checks": "experiments/active/exp-cloud-close-cvc-trade-hour-20261109-v1/hour_checks.csv.gz",
+  "admission_boolean": "eligible_for_admission",
+  "acceptance": {
+    "target_and_adjacent_hours_have_native_trades": true,
+    "trade_ids_consecutive_inside_each_hour": true,
+    "trade_ids_consecutive_across_both_hour_boundaries": true,
+    "both_adjacent_trade_ohlc_match_frozen_official_h1": true,
+    "target_trade_ohlc_compatible_with_available_confirmed_minutes": true,
+    "target_is_absent_from_original_series": true,
+    "no_interpolation": true
+  },
+  "reader": {
+    "format": "CSV gzip",
+    "index_col": "time",
+    "index_unit": "UTC Unix milliseconds at H1 open",
+    "price_columns": ["open", "high", "low", "close"],
+    "read_example": "pd.read_csv(path, index_col='time', float_precision='round_trip')"
+  },
+  "runner": "python3 -m yoyo.evaluation.cloud_close_cvc_trade_hour"
+}
