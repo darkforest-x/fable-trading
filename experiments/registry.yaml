@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-vix-priority-medians-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "1e3da16d42"
+    status: "rejected"
+    question: "美股VIX优先的收益能否承受分钟成交额中位数限仓"
+    single_variable: "固定两组实际名册，对比同覆盖的前60分钟成交额均值与中位数限仓。"
+    result: "VIX优先中位限仓42486U、1585笔、胜21.64%、实际盈亏比6.66、回撤上界42.11%，额外5bp为39218U。滞后组22221U，未用VIX的等权组33108U。1581笔有入场分钟实际成交量，其中12笔名义额超过整分钟。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-vix-priority-medians-20261109-v1/summary.json"
+    notes: "OKX 360-source pool. Same-event source checks and fixed cash slots. No funding or modeled exit depth. Notion 41388564-79af-8135-92bb-cd4ee9492651."
+
+  - experiment_id: exp-cloud-close-binance-vix-priority-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "7f55d71662"
+    status: "rejected"
+    question: "VIX优先能否迁移到币安完整历史候选池"
+    single_variable: "直接迁移同一VIX优先级和20日滞后对照；币安本地账户策略、收盘、费率、排序候选均冻结。"
+    result: "23262次候选，全期原账户10512U、VIX优先8287U、20交易日滞后6278U。VIX优先1598笔、回撤上界37.89%，两组持仓原生H1缺口均0，未优于币安原账户。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-binance-vix-priority-20261109-v1/summary.json"
+    notes: "Binance nine-slot unleveraged two-leg NAV/10 model through September, fee schedule per project. Settlement index proxy; no funding or capacity. Notion 41388564-79af-811e-b40b-d1818f6ced3c."
+
   - experiment_id: exp-cloud-close-capital-restarts-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "743921a76d"
