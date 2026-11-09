@@ -31,6 +31,15 @@ def source_book():
     src['WAVES'] = (repair.WAVES,None,src['WAVES'][2])
     original,returns = archive.frozen_data()
     base_symbols = set(returns)
+    registry = pd.read_csv(wallet.SOURCE/'signals.csv',usecols=['key_open_bjt','confirmed_bjt'])
+    registry.index += 1
+    keys_ms = pd.to_datetime(registry.key_open_bjt,utc=True).astype('datetime64[ms, UTC]').astype('int64')
+    confirms = pd.to_datetime(registry.confirmed_bjt,utc=True).astype('datetime64[ms, UTC]').astype('int64')
+    if not (keys_ms+12*wallet.HOUR).eq(confirms).all():
+        raise ValueError('Original logged keys do not match their 12H confirmations')
+    original['key_open_ms'] = original.source_row_number.map(keys_ms)
+    if original.key_open_ms.isna().any():
+        raise ValueError('Original 291-name key clock absent')
     retired = pd.read_csv(old.BASE/'retired_paths.csv.gz',dtype={'symbol':str},float_precision='round_trip')
     waves = pd.read_csv(repair.EXP/'waves_paths.csv.gz',dtype={'symbol':str},float_precision='round_trip')
     all_paths = pd.concat([original,retired[retired.symbol.ne('WAVES')],waves],ignore_index=True)
@@ -48,6 +57,8 @@ def source_book():
     pool = archive.screen(all_paths,returns)
     rows,_ = archive.risk.hourly.tested.expiry.time_in_force(pool)
     rows['prior_daily_direction'] = rows.event_id.map(states)
+    if rows.prior_daily_direction.isna().any():
+        raise ValueError('A 90-day price-qualified event lacks its prior completed daily cloud')
     expected = pd.read_csv(repair.EXP/'funded_1.5x.csv.gz',usecols=['event_id'])
     admitted,_ = wallet.admit(rows[rows.tp_r.eq(0)],9)
     if len(rows)!=2*12437 or set(admitted.event_id)!=set(expected.event_id):
