@@ -29,7 +29,7 @@ def account():
     return data,market,quotes,parents,caps,ratios
 
 
-def parent_marks(orders,meta,fund,quotes,slip):
+def parent_marks(orders,meta,fund,quotes,slip,*,live_sink=None):
     """Actual fills by H1, native H1 close, and remaining inventory only; previous peaks at finished 12H."""
     ts,prices=quotes(meta.symbol)
     start,end=int(orders.hour.min()),int(orders.hour.max())
@@ -49,6 +49,8 @@ def parent_marks(orders,meta,fund,quotes,slip):
     still_open=units>max(orders.net_units.max()*1e-9,1e-12)
     decision=(hours+H)%STEP==0
     sample=pd.Series(liquid[decision&still_open],index=(hours+H)[decision&still_open])
+    if live_sink is not None and len(sample):
+        live_sink(meta,sample)
     peak=float(sample.max()) if len(sample) else 0.
     risk=fund.notional*abs(meta.stop_price-meta.entry_price)/meta.entry_price
     if not risk>0:

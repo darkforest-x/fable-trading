@@ -1,0 +1,7 @@
+{
+ "question":"Can profits on other open 12H cloud trades reveal whether fresh long or short signals should get scarce positions first?",
+ "single_variable":"At each 12H close, each other still-open contract in the frozen actual VIX-ranked median-volume shadow account votes long if a long is net profitable or a short is net losing, short in the opposite cases. Net values include actual partial exits/trims and immediate taker-cost liquidation of remaining units. Exclude the candidate's own symbol. At least two distinct other assets required, otherwise neutral. Equal votes regardless of account size. Prioritize applicants of the majority direction, also test the opposite preference and following votes from 30 days earlier. Never exclude a coin, keep the original equal-ranked low prior ATR/volume tie-break and fee/5bp arms.",
+ "clock":"Votes use the finished 12H boundary before new orders, only for positions that entered strictly earlier and still have quantity; original immutable shadow accounting continues independently. No future peak, closed-trade outcome, future listing or final realized result is used for the score.",
+ "baseline":"Completed same-clock nine-slot equal-ranked account in exp-cloud-close-liquid-queue-20261109-v1/balanced, 10% of prior-hour mean minute turnover. Compare to fixed-long/short controls. Historical research with no OKX funding or exit depth.",
+ "command":"vectorbt-python -m yoyo.evaluation.cloud_close_live_cash_breadth"
+}
