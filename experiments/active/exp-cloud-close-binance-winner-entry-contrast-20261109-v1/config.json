@@ -1,0 +1,19 @@
+{
+  "question": "Which properties measurable at the original 12H signal close distinguish the ten largest funded Binance long winners in USDT from the losing longs in their actual account?",
+  "source": "exp-cloud-close-binance-matched-target-clock-20261109-v1/hold_doubling_include_boundary/parents.csv.gz; alternate funding boundary for ranking sensitivity. Keep all funded longs, all other winning longs and zero-PnL events as explicit denominators. No new trades or wallet replay.",
+  "timing": "Original confirmed UTC 12H bar and earlier observations only. Boundaries equal to the next open use the just-completed candle, never its successor. Offline realized funding strictly prior to entry; future funding, realized notional PnL, future holding length, exits and price excursions never enter a screen.",
+  "labels": "Primary fixed list is the top ten original net cash winners; contrast all net losing longs. Other positives contribute to true precision/overall admission. Sensitivity rerank by net return on entry notional, trade cash excluding funding at the actual historical quantities, and the second settlement convention.",
+  "univariate_rules": [
+    ["bull_body","body_atr",">",0], ["upper_quarter_close","bar_close_location",">=",0.75],
+    ["lower_wick_third","wick_ratio",">=",0.3333333333333333], ["reclaim_half_atr","reclaim_atr",">=",0.5],
+    ["shallow_penetration","pen_atr","<=",0.25], ["range_expansion","range_atr",">=",1.5],
+    ["positive_ema20","close_ema20_atr",">=",0], ["rising_ema20","ema20_slope_atr",">",0],
+    ["strong_cloud","ema_spread_atr",">=",1], ["double_volume","log_vol_ratio",">=",0.6931471805599453],
+    ["positive_week","ret_7d",">",0], ["high_atr","atr_pct",">=",0.05],
+    ["narrow_monday","monday_width_pct","<=",0.1], ["initial_touch","prior_touches","==",0],
+    ["negative_prior_funding","recent_24h_rate_sum","<",0], ["negative_week","ret_7d","<",0]
+  ],
+  "inference": "For each fixed rule report actual retained names, losers, all funded longs, other winners and missingness. Compare top10/losers within entry-quarter via exact convolution of hypergeometric counts; adjust the one-sided enrichment p-values across all specified rules with Holm. Matched-time rates are descriptive. Bar-close-location for longs = wick_ratio + max(body_atr/range_atr,0).",
+  "chronological_check": "Freeze cutoff at 2025-01-01 UTC. Only longs fully settled before cutoff train selection. Define training tail by the top ceil(1.5% of mature longs) on training net USDT; require >=50% of these and >=20 training admissions and select largest tail retention minus loser retention (config order breaks ties). Apply that single unaltered rule to all later funded longs and report recall of the global top10 trades entered then, precision, loss pass rate and same-period base rates. No tuning on the later period. Retrospective split on previously researched history.",
+  "outputs": "Keep causal features with provenance, frozen label IDs, rule counts, descriptive distributions, chronological screen result, and explicit coverage. This is a diagnostic on already-admitted positions; no compounding of the subset or claimed forward verification."
+}
