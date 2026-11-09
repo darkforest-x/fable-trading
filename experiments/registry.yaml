@@ -15,6 +15,66 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-target-expiry-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "f333840e5b"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Cancel the two-thirds resting 2R limit if unfilled at the next 12H close, leaving the remainder on its original stop and EMA."
+    result: "OKX 49959.47U, 21.86% wins, monetary payoff 5.183 and observed 49.82% drawdown. Expanded 661-contract Binance 16585.77U, 21.47%, payoff 4.612 and observed 44.69% drawdown. Both exceed risk limit and fall short of the required win floor. Same roster as same-venue baseline."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-target-expiry-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81b2-9927-f545f0427057."
+
+  - experiment_id: exp-cloud-close-deferred-target-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "3631e11440"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Do not place the original 2R target during the first 12h. If reached within that window carry full size to native runner exit; otherwise place the original resting two-thirds order at the next confirmed boundary."
+    result: "OKX 8315.77U, win 30.72%, monetary payoff 2.913, full hourly DD upper 35.51%. Expanded Binance 4720.41U, win 30.52%, monetary payoff 2.728, observed DD 35.62%. No two-venue qualifying configuration."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-deferred-target-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-818d-936a-da038cb433fd."
+
+  - experiment_id: exp-cloud-close-tenth-sizing-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "ab30f9d85a"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Size each new position in the existing nine-slot efficient-trend account at no more than NAV / 10 rather than NAV / 9, maintaining native fees, exits, cash availability and the identical funded roster."
+    result: "OKX 8850.52U, 1569 trades, win 32.82%, cash payoff 2.716, fee-conservative H1 drawdown 31.584–32.935%. Expanded 661-contract Binance 5623.44U, 1635 trades, 32.17%, 2.599, drawdown 32.409–33.021%. Both pass dev/full risk, win and payoff criteria; net 7.851x/4.623x below 1000x. Revert just the 2020-11-26 ADA full-runner exit: 7436.65/4285.13U. Extra 5bp adverse market slippage: 7688.56/4856.33U. Post hoc sizing adaptation to enlarged-universe drawdown."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-tenth-sizing-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81ad-9ef5-fd660a49e4ba."
+
+  - experiment_id: exp-cloud-close-target-lifetime-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fee5a3f545"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Intermediate 24,48,96,192 hour resting 2R order lifetimes with unchanged native full-position protection."
+    result: "No eligible OKX development arm. Across 24 to 192h OKX full terminal 26282/19841/17161/13382U; every observed DD exceeds 45%. Expanded Binance 13471/9809/7197/6867U; minimum observed DD 39.58%. 192h lifts wins above 30% both venues but fails risk."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-target-lifetime-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81ec-aab9-f094266dfdf4."
+
   - experiment_id: exp-cloud-close-archive-cohort-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "f86452cf3f"
