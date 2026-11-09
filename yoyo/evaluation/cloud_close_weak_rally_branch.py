@@ -46,16 +46,22 @@ def momentum(close):
     return close.div(close.shift(60)).sub(1).where(ok)
 
 
-def candidates(symbol,bars,btc):
+def candidates(symbol,bars,btc,side):
     group = bars.index.to_series().diff().ne(STEP).cumsum()
     fast = bars.close.groupby(group).transform(lambda c:c.ewm(span=20,adjust=False,min_periods=50).mean())
     slow = bars.close.groupby(group).transform(lambda c:c.ewm(span=50,adjust=False,min_periods=50).mean())
     relative = momentum(bars.close).sub(btc.reindex(bars.index))
-    bearish = fast.lt(slow)
-    retest = bearish & bars.high.ge(fast)&bars.close.lt(fast)
-    confirmed = retest.shift(1,fill_value=False)&bearish&relative.lt(0)&bars.close.lt(bars.low.shift(1)) & bars.index.to_series().diff().eq(STEP)
+    aligned = (fast-slow).mul(side).gt(0)
+    strong = relative.mul(side).gt(0)
+    if side<0:
+        retest = aligned&bars.high.ge(fast)&bars.close.lt(fast)
+        breaks = bars.close.lt(bars.low.shift(1))
+    else:
+        retest = aligned&bars.low.le(fast)&bars.close.gt(fast)
+        breaks = bars.close.gt(bars.high.shift(1))
+    confirmed = retest.shift(1,fill_value=False)&aligned&strong&breaks&bars.index.to_series().diff().eq(STEP)
     opportunity = {}
-    for key in bars.index[bearish&relative.lt(0)]:
+    for key in bars.index[aligned&strong]:
         w = breadth.ny(key)
         if w['monday_end']<=key and key+STEP<=w['expires'] and wallet.START<=key+STEP<wallet.END:
             opportunity.setdefault(w['week'],[]).append(int(key))
@@ -66,14 +72,14 @@ def candidates(symbol,bars,btc):
             continue
         key = actual[0]
         later = next((t for t in options if t>key and not confirmed.at[t]),None)
-        stop = max(bars.high.at[key],bars.high.at[key-STEP])
+        stop = (max(bars.high.at[key],bars.high.at[key-STEP]) if side<0 else min(bars.low.at[key],bars.low.at[key-STEP]))
         pairs.append((week,key,float(stop),later))
     return pairs,relative
 
 
-def path_book(symbol,source,btc):
+def path_book(symbol,source,btc,side):
     h,bars = frames(source)
-    plans,relative = candidates(symbol,bars,btc)
+    plans,relative = candidates(symbol,bars,btc,side)
     if not plans:
         return None
     q,clock,_ = engine._prepare_symbol(bars,h)
@@ -91,17 +97,17 @@ def path_book(symbol,source,btc):
                 break
             open_px = float(q[i,0])
             if not is_control:
-                risk_pct = stop/open_px-1
+                risk_pct = side*(1-stop/open_px)
                 if risk_pct<=0:
                     break
-            barrier = open_px*(1+risk_pct) if is_control else stop
-            idx,reason = engine._safe_path_end(i,-1,q,clock)
+            barrier = open_px*(1-side*risk_pct) if is_control else stop
+            idx,reason = engine._safe_path_end(i,side,q,clock)
             event = parent+('|later' if is_control else '|confirmed')
-            parents.append(dict(event_id=event,parent_id=parent,symbol=symbol,week=week,side=-1,
+            parents.append(dict(event_id=event,parent_id=parent,symbol=symbol,week=week,side=side,
                 is_control=is_control,source_row_number=0,entry_i=i,entry_ms=stamp,confirmation_ms=stamp,
-                key_open_ms=key,entry_price=open_px,stop_price=barrier,risk_distance=barrier-open_px,
+                key_open_ms=key,entry_price=open_px,stop_price=barrier,risk_distance=side*(open_px-barrier),
                 risk_fraction=risk_pct,end_i=idx,path_upper_bound_reason=reason))
-            ranks[event] = relative.at[key]
+            ranks[event] = -side*relative.at[key]
     rows,_ = engine._simulate_symbol(parents,q,clock,(0.,),96)
     frame = pd.DataFrame(rows)
     if frame.empty:
@@ -112,21 +118,24 @@ def path_book(symbol,source,btc):
     return frame
 
 
-def main():
-    if (EXP/'summary.json').exists():
+def main(*,long=False):
+    directory = EXP.parent/'exp-cloud-close-strong-pullback-branch-20261109-v1' if long else EXP
+    cache = CACHE.parent/'cloud_close_strong_pullback_branch' if long else CACHE
+    side = 1 if long else -1
+    if (directory/'summary.json').exists():
         raise FileExistsError('Completed weak-rally short study')
     src = sources()
     _,btc = frames(src['BTC'])
     ret = momentum(btc.close)
-    CACHE.mkdir(parents=True,exist_ok=True)
+    cache.mkdir(parents=True,exist_ok=True)
     books = []
     for number,(s,f) in enumerate(sorted(src.items())):
         if s=='BTC':
             continue
-        dest = CACHE/(s+'.csv.gz')
-        absent = CACHE/(s+'.empty')
+        dest = cache/(s+'.csv.gz')
+        absent = cache/(s+'.empty')
         if not dest.exists() and not absent.exists():
-            x = path_book(s,f,ret)
+            x = path_book(s,f,ret,side)
             if x is None:
                 absent.touch()
             else:
@@ -138,7 +147,7 @@ def main():
         if number%50==0:
             print('priced native markets',number,flush=True)
     book = pd.concat(books,ignore_index=True)
-    book.to_csv(EXP/'native_paths.csv.gz',index=False)
+    book.to_csv(directory/'native_paths.csv.gz',index=False)
     orig = book[~book.is_control]
     ctrl = book[book.is_control]
     paired = orig[orig.parent_id.isin(ctrl.parent_id)]
@@ -157,9 +166,9 @@ def main():
             table,eq = wallet.account(data,slip=slip)
             if not np.isclose(1000+table.cash_pnl.sum(),eq.nav.iat[-1],atol=.005):
                 raise ValueError('Native weak-rally wallet did not conserve cash')
-            table.to_csv(EXP/f'funded_{name}.csv.gz',index=False)
+            table.to_csv(directory/f'funded_{name}.csv.gz',index=False)
             if label=='full':
-                eq.to_csv(EXP/f'hourly_{name}.csv.gz',index_label='hour_end_utc')
+                eq.to_csv(directory/f'hourly_{name}.csv.gz',index_label='hour_end_utc')
             warnings = table[table.exit_reason.isin(breadth.archive.GAP_REASONS)].copy()
             out[name] = dict(metrics={p:wallet.summarize(table,eq,*dates) for p,dates in breadth.pair.periods.PERIODS.items()},
                        data_exits=warnings.exit_reason.value_counts().to_dict(),unquoted_holding_hours=data['gap_marks'],
@@ -168,10 +177,13 @@ def main():
             print(name,out[name]['metrics']['all'],flush=True)
         del data
         gc.collect()
-    (EXP/'summary.json').write_text(json.dumps(dict(real_opportunities=len(orig),matched=len(paired),
+    (directory/'summary.json').write_text(json.dumps(dict(side=side,real_opportunities=len(orig),matched=len(paired),
         results=out,scope='360-name historical OKX source with original data-gap and end-of-series prices; incomplete funding and any relevant administrative settlement must be examined before interpreting a promotion.'),
         indent=2,allow_nan=False)+'\n')
 
 
 if __name__=='__main__':
-    main()
+    import argparse
+    cli = argparse.ArgumentParser()
+    cli.add_argument('--long',action='store_true')
+    main(long=cli.parse_args().long)
