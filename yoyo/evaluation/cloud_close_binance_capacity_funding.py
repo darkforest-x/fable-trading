@@ -316,6 +316,54 @@ def _cash_bridge(parents: pd.DataFrame, flows: pd.DataFrame, equity: pd.DataFram
     }
 
 
+def _resume_zero_funding(zero_dir: Path, reference: pd.DataFrame,
+                         reference_equity: pd.DataFrame):
+    required = ["funded_legs.csv.gz", "funded_positions.csv.gz", "hourly_equity.csv.gz",
+                "orders.csv.gz", "metrics.json"]
+    if not all((zero_dir / name).is_file() for name in required):
+        return None
+    parents = relative._read_parent_reference(zero_dir / "funded_positions.csv.gz")
+    equity = relative._read_equity_reference(zero_dir / "hourly_equity.csv.gz")
+    saved = _json(zero_dir / "metrics.json")
+    parity = relative._reference_parity(parents, equity, reference.set_index("event_id", drop=True),
+                                        reference_equity)
+    if (not saved.get("cap10_reference_parity", {}).get("reproduced_frozen_native_four_child_zero_funding_account")
+            or saved.get("audit", {}).get("hourly_single_contract_cap_fraction") != HOURLY_CAP
+            or not saved.get("audit", {}).get("entry_capacity_limit_active")):
+        raise ValueError("Saved zero-funding checkpoint does not prove both cap10 constraints and exact parity")
+    if len(parents) != 1583 or len(pd.read_csv(zero_dir / "funded_legs.csv.gz")) != 6332:
+        raise ValueError("Saved zero-funding checkpoint parent/child count changed")
+    return parents, equity, {"metrics": saved["metrics"], "audit": saved["audit"]}, parity
+
+
+def _resume_scenario(folder: Path) -> dict | None:
+    required = ["funded_legs.csv.gz", "funded_positions.csv.gz", "applied_funding.csv.gz",
+                "hourly_equity.csv.gz", "orders.csv.gz", "metrics.json"]
+    if not all((folder / name).is_file() for name in required):
+        return None
+    saved = _json(folder / "metrics.json")
+    parents = relative._read_parent_reference(folder / "funded_positions.csv.gz")
+    flows = pd.read_csv(folder / "applied_funding.csv.gz")
+    equity = relative._read_equity_reference(folder / "hourly_equity.csv.gz")
+    if "applied" in flows:
+        flows["applied"] = relative._bool_column(flows.applied, "saved_funding.applied")
+    if len(parents) != 1583 or len(pd.read_csv(folder / "funded_legs.csv.gz")) != 6332:
+        raise ValueError("Saved funding scenario parent/child count changed")
+    if len(equity) != 58992 or set(saved.get("metrics", {})) - {"all", "dev", "2020", "2021", "2022", "2023", "2024", "2025", "2026"}:
+        raise ValueError("Saved funding scenario hourly clock or metrics periods changed")
+    audit = saved.get("audit", {})
+    if audit.get("hourly_single_contract_cap_fraction") != HOURLY_CAP or not audit.get("entry_capacity_limit_active"):
+        raise ValueError("Saved funding scenario did not preserve both capacity constraints")
+    bridge = _cash_bridge(parents, flows, equity)
+    saved_bridge = audit.get("cash_bridge", {})
+    if (abs(bridge["account_bridge_error_usdt"]) > 0.02
+            or not np.isclose(bridge["applied_funding_cashflow_usdt"],
+                              float(saved_bridge.get("applied_funding_cashflow_usdt", np.nan)),
+                              rtol=1e-9, atol=1e-7)):
+        raise ValueError("Saved funding scenario cash bridge no longer matches its native files")
+    return saved
+
+
 def _write_json(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
@@ -349,7 +397,6 @@ def _run() -> dict:
     data = prepared["data"]
     multipliers = prepared["multipliers"]
     account_audit = prepared["account_audit"]
-    selected = prepared["selected"]
     no_settlement = prepared["no_settlement"]
     coverage_audit = prepared["coverage_audit"]
     native_open = prepared["native_open"]
@@ -358,48 +405,67 @@ def _run() -> dict:
     entry_matrix = prepared["entry_matrix"]
     entry_matrix_audit = prepared["entry_matrix_audit"]
 
-    zero = relative._run_scenario(
-        data, None, None, 0.0, multipliers, previous_close, native_open, directions,
-        no_settlement, hourly_cap_fraction=HOURLY_CAP, entry_limits=entry_matrix,
-    )
-    children0, parents0, equity0, flows0, result0 = zero
-    if len(parents0) != 1583 or len(children0) != 6332:
-        raise ValueError("Zero-funding capacity replay did not fund the exact observed 1,583 parent set")
-    parity = relative._reference_parity(
-        parents0, equity0, reference.set_index("event_id", drop=True), reference_equity,
-    )
-    _assert_capacity_metadata(parents0.reset_index(names="event_id"), panel)
-    if (parents0.notional > parents0.index.map(capacity_audit["entry_limits"]) + 1e-6).any():
-        raise ValueError("Zero-funding VectorBT parent notional exceeds its prior-minute cap")
-    if result0["audit"]["hourly_single_contract_cap_fraction"] != HOURLY_CAP:
-        raise ValueError("Zero-funding parity run did not preserve the 20% hourly single-contract trim")
-
     EXP.mkdir(parents=True, exist_ok=True)
     zero_dir = EXP / "zero_funding_cap10_parity"
-    _write_frame(zero_dir / "funded_legs.csv.gz", children0)
-    _write_frame(zero_dir / "funded_positions.csv.gz", parents0.reset_index(names="event_id"))
-    _write_frame(zero_dir / "hourly_equity.csv.gz", equity0, index=True, index_label="hour_end_utc")
-    _write_frame(zero_dir / "orders.csv.gz", result0["orders"])
-    _write_json(zero_dir / "metrics.json", {
-        "metrics": result0["metrics"], "audit": result0["audit"],
-        "cash_bridge": _cash_bridge(parents0, flows0, equity0), "cap10_reference_parity": parity,
-    })
+    resumed_zero = _resume_zero_funding(zero_dir, reference, reference_equity)
+    if resumed_zero is None:
+        children0, parents0, equity0, flows0, result0 = relative._run_scenario(
+            data, None, None, 0.0, multipliers, previous_close, native_open, directions,
+            no_settlement, hourly_cap_fraction=HOURLY_CAP, entry_limits=entry_matrix,
+        )
+        if len(parents0) != 1583 or len(children0) != 6332:
+            raise ValueError("Zero-funding capacity replay did not fund the exact observed 1,583 parent set")
+        parity = relative._reference_parity(
+            parents0, equity0, reference.set_index("event_id", drop=True), reference_equity,
+        )
+        _assert_capacity_metadata(parents0.reset_index(names="event_id"), panel)
+        if (parents0.notional > parents0.index.map(capacity_audit["entry_limits"]) + 1e-6).any():
+            raise ValueError("Zero-funding VectorBT parent notional exceeds its prior-minute cap")
+        if result0["audit"]["hourly_single_contract_cap_fraction"] != HOURLY_CAP:
+            raise ValueError("Zero-funding parity run did not preserve the 20% hourly single-contract trim")
+        _write_frame(zero_dir / "funded_legs.csv.gz", children0)
+        _write_frame(zero_dir / "funded_positions.csv.gz", parents0.reset_index(names="event_id"))
+        _write_frame(zero_dir / "hourly_equity.csv.gz", equity0, index=True, index_label="hour_end_utc")
+        _write_frame(zero_dir / "orders.csv.gz", result0["orders"])
+        _write_json(zero_dir / "metrics.json", {
+            "metrics": result0["metrics"], "audit": result0["audit"],
+            "cash_bridge": _cash_bridge(parents0, flows0, equity0), "cap10_reference_parity": parity,
+        })
+        zero_metrics, zero_audit = result0["metrics"], result0["audit"]
+        del children0, flows0
+    else:
+        parents0, equity0, result0, parity = resumed_zero
+        zero_metrics, zero_audit = result0["metrics"], result0["audit"]
     print("zero-funding cap10 parity", json.dumps(parity, ensure_ascii=False), flush=True)
     baseline_stress = capacity_audit["stress_funded"].set_index("event_id", drop=True)
     baseline_stress_equity = capacity_audit["stress_hourly"]
+    if "post_trim_pre_funding_nav" not in baseline_stress_equity:
+        baseline_stress_equity = baseline_stress_equity.copy()
+        baseline_stress_equity["post_trim_pre_funding_nav"] = baseline_stress_equity["post_trim_nav"]
     baseline_metrics = {
-        "zero_funding_cap10": result0["metrics"],
+        "zero_funding_cap10": zero_metrics,
         "zero_funding_cap10_stress_reference": relative.hourly_funding._period_summary(
             baseline_stress, baseline_stress_equity,
         ),
     }
-    del children0, parents0, equity0, flows0, zero
+    del parents0, equity0, result0
     gc.collect()
 
     scenarios = {}
     for slip, boundary in ((0.0, "include_boundary"), (0.0, "exclude_boundary"),
                            (0.0005, "include_boundary"), (0.0005, "exclude_boundary")):
         name = ("stress_" if slip else "") + boundary
+        folder = EXP / name
+        resumed = _resume_scenario(folder)
+        if resumed is not None:
+            scenarios[name] = resumed
+            print(name, "reused verified completed checkpoint", json.dumps({
+                "funding_usdt": resumed["audit"]["cash_bridge"]["applied_funding_cashflow_usdt"],
+                "final_usdt": resumed["metrics"]["all"]["final_usdt"],
+                "dd_bound_pct": resumed["metrics"]["all"]["dd_bound_pct"],
+                "positions": resumed["metrics"]["all"]["trades"],
+            }, ensure_ascii=False), flush=True)
+            continue
         children, parents, equity, flows, result = relative._run_scenario(
             data, tape, boundary, slip, multipliers, previous_close, native_open, directions,
             no_settlement, hourly_cap_fraction=HOURLY_CAP, entry_limits=entry_matrix,
@@ -436,7 +502,6 @@ def _run() -> dict:
             ),
             "unknown_capacity_events_skipped_without_replacement": sorted(EXPECTED_CAPACITY_UNKNOWN),
         }
-        folder = EXP / name
         _write_frame(folder / "funded_legs.csv.gz", children)
         _write_frame(folder / "funded_positions.csv.gz", parents.reset_index(names="event_id"))
         _write_frame(folder / "applied_funding.csv.gz", flows)
@@ -467,8 +532,8 @@ def _run() -> dict:
         "funding_window_audit": coverage_audit,
         "zero_funding_cap10_reference_parity": parity,
         "frozen_zero_funding_baselines": baseline_metrics,
-        "zero_funding_metrics": result0["metrics"],
-        "zero_funding_audit": result0["audit"],
+        "zero_funding_metrics": zero_metrics,
+        "zero_funding_audit": zero_audit,
         "scenarios": scenarios,
         "limits": {
             "entry_turnover_fraction": ENTRY_FRACTION,
