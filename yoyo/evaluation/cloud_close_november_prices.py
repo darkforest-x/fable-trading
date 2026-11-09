@@ -14,6 +14,7 @@ import gzip
 import json
 import os
 import time
+import subprocess
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -396,6 +397,7 @@ _last_request_start = 0.0
 def _http_json(url: str, min_interval_seconds: float, attempt_budget: int = MAX_ATTEMPTS) -> tuple[bytes, int]:
     global _last_request_start
     errors: list[str] = []
+    tls_failed = False
     allowed_attempts = min(MAX_ATTEMPTS, int(attempt_budget))
     if allowed_attempts < 1:
         raise SourceError("FAPI request budget is exhausted before starting a request")
@@ -406,6 +408,19 @@ def _http_json(url: str, min_interval_seconds: float, attempt_budget: int = MAX_
         request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
         _last_request_start = time.monotonic()
         try:
+            if tls_failed:
+                # The host's system TLS client can recover after Python's older
+                # SSL transport closes early. This consumes one existing retry.
+                run = subprocess.run(['curl','--silent','--show-error','--max-time',str(HTTP_TIMEOUT_SECONDS),
+                                      '--user-agent',USER_AGENT,'--write-out','\n%{http_code}',url],
+                                     capture_output=True,check=False)
+                if run.returncode:
+                    raise OSError(run.stderr.decode(errors='replace').strip())
+                payload,code = run.stdout.rsplit(b'\n',1)
+                status = int(code)
+                if status==200:
+                    return payload,attempt+1
+                raise urllib.error.HTTPError(url,status,'Public kline transport fallback',{},None)
             with urllib.request.urlopen(request, timeout=HTTP_TIMEOUT_SECONDS) as response:
                 payload = response.read()
                 return payload, attempt + 1
@@ -417,6 +432,8 @@ def _http_json(url: str, min_interval_seconds: float, attempt_budget: int = MAX_
                 raise OfficialKlineUnavailable(f"Binance public kline request failed: {errors[-1]} {url}") from exc
         except (urllib.error.URLError, TimeoutError, OSError) as exc:
             errors.append(f"{type(exc).__name__}: {exc}")
+            if "ssl" in str(exc).lower() or "tls" in str(exc).lower() or "eof" in str(exc).lower():
+                tls_failed = True
         if attempt + 1 < allowed_attempts:
             time.sleep(RETRY_DELAYS_SECONDS[min(attempt, len(RETRY_DELAYS_SECONDS) - 1)])
     raise SourceError(f"Binance public kline request exhausted retries: {'; '.join(errors)} {url}")
