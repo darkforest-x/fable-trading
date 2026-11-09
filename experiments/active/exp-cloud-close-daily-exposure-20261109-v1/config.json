@@ -1,0 +1,4 @@
+{
+  "single_variable": "Change only isolated exposure for the existing funded trades whose direction opposes the previously closed UTC daily EMA20/50 at the original 12H key open. Compare 1x and 2x opposed exposure to 1.5x; aligned trades always use 1.5x; preserve every original slot occupancy and partial exit. This follows the previously examined daily-filter result and is exploratory.",
+  "costs": "Same fixed taker 5bp and maker 2bp as the corrected source account; separate adverse 5bp stress on every market order. No funding or capacity model."
+}

@@ -1,0 +1,5 @@
+{
+  "single_variable": "Uniform isolated exposure of each of the cash-funded nine equal slots, testing 1.75x and 2x against a native 1.5x reconciliation on the corrected ICX/LRC/WAVES source. Same 20% native-notional trim, same admission and four child exits.",
+  "costs": "Taker 5bp per fill and resting maker 2bp, plus a separate 5bp adverse market-order stress. No historical funding.",
+  "boundary": "When H1 flags an adverse maintenance price, require the original stop trigger to precede both native mark and traded-price crossings at least one full minute without a gap across the fill. Stop any variant with unresolved events. H1s without a traded-price flag have not been fully audited on historic marks."
+}
