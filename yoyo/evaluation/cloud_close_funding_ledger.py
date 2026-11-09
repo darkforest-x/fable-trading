@@ -65,6 +65,65 @@ def _source_legs() -> tuple[pd.DataFrame, dict]:
     return legs.copy(), audit
 
 
+def _validate_config(config: dict) -> None:
+    if config["venue"] != "Binance" or int(config["funding_source"]["limit"]) != FUNDING_RATE_LIMIT:
+        raise ValueError("Funding-ledger configuration differs from its frozen Binance source contract")
+    if int(config["cashflow"]["entry_exit_boundary_tolerance_ms"]) != ENTRY_BOUNDARY_TOLERANCE_MS:
+        raise ValueError("Funding boundary tolerance differs from the frozen attribution logic")
+    if set(config["scopes"]) != {"ada", "all"}:
+        raise ValueError("Funding-ledger config must register the ADA and original-account scopes")
+
+
+def preflight(scope: str = "ada", config_path: Path = CONFIG_PATH) -> dict:
+    """Read-only actual-entry preflight for frozen funded and decision tables."""
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    _validate_config(config)
+    funded = pd.read_csv(efficient.FUNDED, dtype={"event_id": str, "parent_id": str, "symbol": str})
+    decisions = pd.read_csv(efficient.DECISIONS, dtype={"event_id": str, "parent_id": str, "symbol": str})
+    if funded.event_id.duplicated().any() or decisions.event_id.duplicated().any():
+        raise ValueError("Frozen source account files contain duplicate event IDs")
+    if len(funded) != int(config["source_account"]["positions"]):
+        raise ValueError("Frozen funded position count differs from preregistered source account")
+    actual_decisions = decisions.loc[~decisions.is_control.astype(bool)]
+    funded_decisions = actual_decisions.loc[actual_decisions.event_id.astype(str).isin(funded.event_id.astype(str))]
+    if set(funded_decisions.event_id.astype(str)) != set(funded.event_id.astype(str)):
+        raise ValueError("Every frozen funded ID must join exactly one actual decision")
+    if scope == "ada":
+        focal = config["scopes"]["ada"]
+        funded_row = funded.loc[funded.event_id.astype(str).eq(focal["event_id"])]
+        decision_row = funded_decisions.loc[funded_decisions.event_id.astype(str).eq(focal["event_id"])]
+        if len(funded_row) != 1 or len(decision_row) != 1:
+            raise ValueError("ADA focal event did not join one-to-one across frozen funded/decision files")
+        row, decision = funded_row.iloc[0], decision_row.iloc[0]
+        checks = {
+            "parent_id": str(row.parent_id) == focal["event_id"],
+            "symbol": row.symbol == focal["symbol"],
+            "side": int(row.side) == 1,
+            "entry_ms": int(row.entry_ms) == _epoch_ms(focal["entry_utc"]),
+            "exit_bar_ms": int(row.exit_bar_ms) == _epoch_ms(focal["exit_bar_utc"]),
+            "decision_actual": not bool(decision.is_control),
+            "full_runner_selection": decision.choice == "full_runner",
+            "notional": bool(np.isclose(float(row.notional), float(focal["expected_funded_notional_usdt"]), atol=1e-6)),
+        }
+        if not all(checks.values()):
+            raise ValueError(f"ADA frozen-entry preflight mismatch: {checks}")
+        output = {"scope": scope, "positions": 1, "actual_child_decision": str(decision.choice),
+                  "event_id": focal["event_id"], "entry_utc": focal["entry_utc"],
+                  "exit_bar_utc": focal["exit_bar_utc"], "funded_notional_usdt": float(row.notional),
+                  "symbol_month_windows": len(pd.period_range(
+                      pd.Timestamp(focal["entry_utc"]).strftime("%Y-%m"),
+                      pd.Timestamp(focal["exit_bar_utc"]).strftime("%Y-%m"), freq="M")),
+                  "checks": checks, "api_requests_started": False}
+    elif scope == "all":
+        output = {"scope": scope, "positions": int(len(funded)),
+                  "child_decisions": int(len(actual_decisions)),
+                  "symbols": int(funded.symbol.nunique()), "api_requests_started": False}
+    else:
+        raise ValueError(f"Unsupported funding-ledger scope: {scope}")
+    print(json.dumps(output, ensure_ascii=False, indent=2, allow_nan=False), flush=True)
+    return output
+
+
 def _select_scope(legs: pd.DataFrame, scope: str, config: dict) -> pd.DataFrame:
     if scope == "all":
         return legs.copy()
@@ -694,8 +753,7 @@ def mini_check() -> None:
 
 def run(scope: str, config_path: Path = CONFIG_PATH) -> dict:
     config = json.loads(config_path.read_text(encoding="utf-8"))
-    if config["venue"] != "Binance" or config["funding_rate_limit"] != FUNDING_RATE_LIMIT:
-        raise ValueError("Funding-ledger configuration differs from its frozen Binance source contract")
+    _validate_config(config)
     _assert_committed()
     full_legs, source_audit = _source_legs()
     legs = _select_scope(full_legs, scope, config)
@@ -707,9 +765,13 @@ def main() -> None:
     parser.add_argument("--scope", choices=("ada", "all"), default="all")
     parser.add_argument("--config", type=Path, default=CONFIG_PATH)
     parser.add_argument("--mini-check", action="store_true")
+    parser.add_argument("--preflight", action="store_true", help="Read frozen funded/decision files without API requests")
     args = parser.parse_args()
     if args.mini_check:
         mini_check()
+        return
+    if args.preflight:
+        preflight(args.scope, args.config.resolve())
         return
     run(args.scope, args.config.resolve())
 
