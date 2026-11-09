@@ -71,11 +71,13 @@ def load_tagged_paths() -> tuple[pd.DataFrame, pd.DataFrame, dict]:
 
     tag_by_source = decisions.set_index("source_row_number").tag
     symbol_by_source = decisions.set_index("source_row_number").symbol
+    week_by_source = decisions.set_index("source_row_number").week
     paths = paths.copy()
     paths["source_row_number"] = paths.source_row_number.astype("int64")
     paths["fvg_tag"] = paths.source_row_number.map(tag_by_source)
     paths["fvg_source_symbol"] = paths.source_row_number.map(symbol_by_source)
-    if paths.fvg_tag.isna().any():
+    paths["week"] = paths.source_row_number.map(week_by_source)
+    if paths[["fvg_tag", "week"]].isna().any().any():
         raise ValueError("A real or matched-control path lacks a frozen FVG label")
     if (paths.symbol.astype(str) != paths.fvg_source_symbol.astype(str)).any():
         raise ValueError("Path symbol differs from the FVG source row")
