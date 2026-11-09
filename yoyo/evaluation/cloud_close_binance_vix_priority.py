@@ -11,6 +11,24 @@ from yoyo.evaluation import cloud_close_vix_regime as regime
 EXP = wallet.EXP.parent/'exp-cloud-close-binance-vix-priority-20261109-v1'
 
 
+
+def holding_coverage(parents,quote_loader):
+    """Count absent native H1 timestamps while funded; separate the final possible delivery hour."""
+    earlier=final=0
+    symbols=set()
+    for symbol,group in parents.groupby('symbol'):
+        times,_=quote_loader(symbol)
+        for row in group.itertuples():
+            first,last=times.searchsorted([row.entry_ms,row.exit_bar_ms])
+            missing=int((row.exit_bar_ms-row.entry_ms)//3_600_000)-(last-first)
+            if missing:
+                earlier+=missing
+                symbols.add(symbol)
+            final+=int(last==len(times) or times[last]!=row.exit_bar_ms)
+    return dict(missing_native_hours_before_final_hour=int(earlier),missing_native_final_hour=final,
+                symbols_with_missing_preterminal_quotes=sorted(symbols))
+
+
 def main():
     if (EXP/'summary.json').exists():
         raise FileExistsError('Completed independent venue VIX ranking')
@@ -62,7 +80,8 @@ def main():
             parents.to_csv(EXP/f'funded_{label}.csv.gz')
             equity.to_csv(EXP/f'hourly_{label}.csv.gz',index_label='hour_end_utc')
             results[label]=dict(metrics=metrics,common_funded=len(set(prev.index)&set(parents.index)),
-                                selected_deliveries=len(forced),trim_fills=len(trims))
+                                selected_deliveries=len(forced),trim_fills=len(trims),
+                                **holding_coverage(parents,admin.archive.native.quotes))
     original=json.loads((wallet.hourly.EXP/'summary.json').read_text())['Binance']
     (EXP/'summary.json').write_text(json.dumps(dict(eligible=len(source),baseline=original,arms=results),indent=2,allow_nan=False)+'\n')
 
