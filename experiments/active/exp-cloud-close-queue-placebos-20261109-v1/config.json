@@ -1,0 +1,6 @@
+{
+  "question": "Did prioritizing genuinely liquid simultaneous applicants add more than arbitrary same-clock reorderings?",
+  "observed": "Use the already recorded 51957.21U fee-only balanced nine-slot account as the observed rank outcome. Single factor is which coin receives the volume preference. Keep ATR rank, actual budget cap and underlying volume with each actual event.",
+  "randomization": "Independently shuffle the volume rank within each confirmed entry clock. Take equal weights of the original ATR rank and the shuffled volume rank; break ties on the original ATR. Deterministic sorted event IDs; numpy default_rng seeds 20261109 through 20261127 inclusive. Full native readmission and cash path for 19 controls. No historical future returns in the assignments. Descriptive one-sided empirical tail probability (1+controls at least as high as observed)/20; the observed formula was itself selected on this history.",
+  "account": "Identical 1000U funded account, real scenarios and costs as the balanced fee-only arm, no added stressed controls. Matched prior-hour-mean liquidity cap per parent; history of funding and actual exit depth remain unmodeled. Retain per-seed funded rows and paths and summary metrics."
+}

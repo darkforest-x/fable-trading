@@ -12,7 +12,8 @@ engine = rank.reference.engine
 EXP = history.EXP.parent/'exp-cloud-close-liquid-queue-20261109-v1'
 
 
-def main(*,experiment=EXP,slots=9,policies=None,eligible_by_arm=None):
+def main(*,experiment=EXP,slots=9,policies=None,eligible_by_arm=None,
+         score_builder=None,fill_cases=None,compact=False):
     if policies is None:
         policies = [('original_atr','entry_order'),('liquid_first','liquid'),('balanced','balanced')]
     if (experiment/'summary.json').exists():
@@ -29,6 +30,8 @@ def main(*,experiment=EXP,slots=9,policies=None,eligible_by_arm=None):
     pool['liquid'] = pool.groupby('entry_ms').volume.rank(ascending=False,method='average')
     pool['quiet'] = pool.groupby('entry_ms').entry_order.rank(ascending=True,method='average')
     pool['balanced'] = (pool.quiet+pool.liquid)/2
+    if score_builder is not None:
+        pool = score_builder(pool)
     outcomes = {}
     regime = rank.reference.study.season.direction(src)
     baseline = None
@@ -54,9 +57,12 @@ def main(*,experiment=EXP,slots=9,policies=None,eligible_by_arm=None):
         if baseline is None:
             baseline=set(parents.index)
         cases={}
-        for key,slip in [('fees',0.),('stress',.0005)]:
+        for key,slip in (fill_cases or [('fees',0.),('stress',.0005)]):
             cases[key]=engine.simulate(data,market,quotes,ratios,slip,directory,key,entry_limits=cap)
             print(name,key,cases[key].get('metrics',{}).get('all'),flush=True)
+            if compact and 'metrics' in cases[key]:
+                # Each placebo retains its funded rows, native path IDs and full period/drawdown metrics.
+                (directory/f'hourly_{key}.csv.gz').unlink()
             gc.collect()
         outcomes[name]=dict(cases=cases,eligible_count=len(eligible),signals=len(roster),overlap=len(set(parents.index)&baseline),
                    symbols=parents.symbol.nunique(),skips=skips,settlement=settlement,
