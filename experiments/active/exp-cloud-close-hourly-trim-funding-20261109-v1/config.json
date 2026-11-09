@@ -10,7 +10,10 @@
     "positions": 1536,
     "child_legs": 3072,
     "parent_join_key": "event_id",
-    "child_join_key": ["event_id", "tp_r"]
+    "child_join_key": [
+      "event_id",
+      "tp_r"
+    ]
   },
   "inputs": {
     "child_windows": "experiments/active/exp-cloud-close-hourly-trim-funding-20261109-v1/child_windows.csv.gz",
@@ -122,7 +125,10 @@
       "orders.csv.gz",
       "account_metrics.csv"
     ],
-    "scenarios": ["include_boundary", "exclude_boundary"],
+    "scenarios": [
+      "include_boundary",
+      "exclude_boundary"
+    ],
     "preserve_original_hourly_trim_account": true,
     "network_requests_started": false
   },
@@ -136,5 +142,7 @@
     "The account is a historical simulation of frozen native paths and does not rescreen signals or change the original 1H management rule.",
     "Mark-source proxies remain explicit and are not relabeled as exact funding settlement marks.",
     "No strategy defaults, registry entries, deployment settings, or exchange orders are changed."
-  ]
+  ],
+  "additional_market_slippage": 0.0005,
+  "slippage_test": "Report separately both boundaries with an additional adverse 5bp on each executed market order, including intrabar stops, EMA exits and hourly size trims. Resting maker fills and exchange-administered delisting settlements retain the original native price. Dynamic cash, funding and sizes recomputed. Original zero-extra-slip results remain frozen."
 }

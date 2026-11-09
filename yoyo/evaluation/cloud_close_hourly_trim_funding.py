@@ -542,18 +542,19 @@ def _post_segment(c, post_ptr, post_ids, flow_col, flow_code, flow_rate, flow_ma
 
 @njit(cache=True)
 def _order(c, nav, actions, prices, fees, exposure, weights, reservation, slot_weights,
-           fraction, nlegs, trim_fee, event_codes, exit_cache_quantity, exit_cache_event):
+           fraction, nlegs, trim_fee, market_slip, settlement, event_codes, exit_cache_quantity, exit_cache_event):
     if c.i % 4 == 2:
         ratio = fraction[c.col // nlegs]
         if c.position_now == 0.0 or ratio <= 1.0e-10:
             return NoOrder
         return nb.order_nb(size=-c.position_now * ratio, price=c.close[c.i, c.col],
-                           fees=trim_fee, lock_cash=True, allow_partial=False, raise_reject=True)
+                           fees=trim_fee, slippage=market_slip, lock_cash=True, allow_partial=False, raise_reject=True)
     action = actions[c.i, c.col]
     if action == 2:
         exit_cache_quantity[c.col] = c.position_now
         exit_cache_event[c.col] = event_codes[c.i, c.col]
-    return wallet.account_order(c, nav, actions, prices, fees, 0.0, exposure, weights,
+    slip = 0.0 if settlement[c.i, c.col] else market_slip
+    return wallet.account_order(c, nav, actions, prices, fees, slip, exposure, weights,
                                 reservation, 0, slot_weights)
 
 
@@ -565,11 +566,15 @@ def _run_scenario(data: dict, flows: pd.DataFrame, config: dict, scenario: str):
     max_orders = int(np.count_nonzero(data["actions"])) + int(
         data["nlegs"] * data["eligible"].sum()
     ) + 1
+    settlement = np.zeros(data["actions"].shape, dtype=np.bool_)
+    for row in data["selected"].loc[data["selected"].exit_reason.eq("delisting_settlement")].itertuples():
+        stage = 4 * ((row.exit_bar_ms - data["start"]) // HOUR) + (1 if row.exit_phase == "open" else 3)
+        settlement[stage, row.slot] = True
     pf = vbt.Portfolio.from_order_func(
         data["marks"], _order, data["actions"], data["prices"], data["fees"],
         float(config["account"]["new_order_exposure_fraction"]), weights, reservation,
         slot_weights, data["trim_fraction"], int(data["nlegs"]), float(scheduled["trim_fee"]),
-        scheduled["event_codes"], scheduled["exit_cache_quantity"], scheduled["exit_cache_event"],
+        float(config.get("market_slip", 0.0)), settlement, scheduled["event_codes"], scheduled["exit_cache_quantity"], scheduled["exit_cache_event"],
         pre_segment_func_nb=_segment,
         pre_segment_args=(
             data["eligible"], float(data["trim_cap"]), data["review_target"],
@@ -728,8 +733,8 @@ def _position_records(pf, data: dict, scheduled: dict):
         funding_cashflow_usdt=("funding_cashflow_usdt", "sum"),
         cash_pnl=("cash_pnl_usdt", "sum"), notional=("notional_usdt", "sum"),
         trim_turnover_usdt=("trim_turnover_usdt", "sum"),
-        trim_order_count=("trim_size", lambda x: int((x > 1e-12).sum())),
     )
+    parent["trim_order_count"] = trim_rows.groupby("event_id").size().reindex(parent.index, fill_value=0)
     parent["net_return"] = parent.cash_pnl / parent.notional
     order_audit = {
         "order_count": int(len(fills)),
@@ -848,7 +853,17 @@ def _period_summary(parents: pd.DataFrame, equity: pd.DataFrame) -> dict:
     for name, (lo, hi) in bounds.items():
         start = equity.index[0] - pd.Timedelta(hours=1) if lo is None else pd.Timestamp(lo)
         end = equity.index[-1] if hi is None else pd.Timestamp(hi)
-        result[name] = wallet.summarize(parents, equity, lo, hi) if ((equity.index > start) & (equity.index <= end)).any() else None
+        sample = equity[(equity.index > start) & (equity.index <= end)]
+        if sample.empty:
+            result[name] = None
+            continue
+        metrics = wallet.summarize(parents, equity, lo, hi)
+        earlier = equity.loc[equity.index <= start, "nav"]
+        initial = INITIAL_CASH if earlier.empty else earlier.iloc[-1]
+        stages = ["open_nav", "open_exit_nav", "post_trim_pre_funding_nav", "post_trim_nav", "nav"]
+        points = np.r_[initial, sample[stages].to_numpy().ravel()]
+        metrics["dd_mark_pct"] = 100.0 * float(1.0 - (points / np.maximum.accumulate(points)).min())
+        result[name] = metrics
     return result
 
 
@@ -1066,11 +1081,14 @@ def _mini_check() -> dict:
     return result
 
 
-def run(config_path: Path = CONFIG_PATH) -> dict:
+def run(config_path: Path = CONFIG_PATH, *, stress=False) -> dict:
     _assert_committed()
     config = _read_json(config_path)
     _validate_config(config)
     output_dir = ROOT / config["outputs"]["scope"].rstrip("/")
+    if stress:
+        config['market_slip'] = config['additional_market_slippage']
+        output_dir = output_dir / 'market_slip_5bp'
     receipt = output_dir / "funding_account_audit.json"
     if receipt.exists():
         raise FileExistsError(f"Hourly funding account output already exists: {receipt}")
@@ -1099,6 +1117,7 @@ def run(config_path: Path = CONFIG_PATH) -> dict:
         gc.collect()
     final = {
         "id": config["id"], "status": "complete", "vectorbt_version": vbt.__version__,
+        "additional_market_slippage": float(config.get("market_slip", 0.0)),
         "source_coverage": source_audit, "account_input_audit": data["funding_input_audit"],
         "native_hourly_review": {"review_hours": 1, "cap": 0.2, "entry_exposure": 0.9,
                                  "positions": int(len(frozen)), "child_legs": int(len(children))},
@@ -1120,15 +1139,16 @@ def main() -> None:
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--mini-check", action="store_true")
     parser.add_argument("--run", action="store_true")
+    parser.add_argument("--stress", action="store_true")
     args = parser.parse_args()
-    if sum((args.preflight, args.mini_check, args.run)) != 1:
-        parser.error("choose exactly one of --preflight, --mini-check, or --run")
+    if sum((args.preflight, args.mini_check, args.run, args.stress)) != 1:
+        parser.error("choose exactly one of --preflight, --mini-check, --run, or --stress")
     if args.preflight:
         preflight(args.config)
     elif args.mini_check:
         _mini_check()
     else:
-        run(args.config)
+        run(args.config, stress=args.stress)
 
 
 if __name__ == "__main__":
