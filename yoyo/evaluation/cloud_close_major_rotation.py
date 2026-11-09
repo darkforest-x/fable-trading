@@ -28,7 +28,7 @@ def targets(loaded):
     return states
 
 
-def run(loaded,states,name,slip):
+def run(loaded,states,name,slip,*,symbols=SYMBOLS,directory=EXP):
     clock=loaded['BTC']['bars1'].index
     series=states[name].reindex(clock,method='ffill').fillna(-1).astype(int)
     current=series.to_numpy()
@@ -37,17 +37,23 @@ def run(loaded,states,name,slip):
     if not np.all(clock[changed]%source.STEP_12H==0):
         raise ValueError('An ordinary rotation is outside a 12H decision')
     def prices(field):
-        return np.column_stack([loaded[s]['bars1'][field] for s in SYMBOLS])
+        values=np.column_stack([loaded[s]['bars1'][field].reindex(clock) for s in symbols])
+        held=current[:,None]==np.arange(len(symbols))[None,:]
+        if field=='open':
+            held|=prior[:,None]==np.arange(len(symbols))[None,:]
+        if not (np.isfinite(values[held]) & (values[held]>0)).all():
+            raise ValueError(f'Missing genuine native {field} at a held or traded hour')
+        return np.where(np.isfinite(values),values,1.)
     opening,high,low,closing=map(prices,['open','high','low','close'])
-    marks=np.empty((2*len(clock),2))
+    marks=np.empty((2*len(clock),len(symbols)))
     marks[::2],marks[1::2]=opening,closing
     size=np.full_like(marks,np.nan)
-    call_seq=np.tile([0,1],(len(size),1))
+    call_seq=np.tile(np.arange(len(symbols)),(len(size),1))
     for i in np.flatnonzero(changed):
         old,new=prior[i],current[i]
         if old>=0:
             size[2*i,old]=-np.inf
-            call_seq[2*i]=[old,1-old]
+            call_seq[2*i,0],call_seq[2*i,old]=old,0
         if new>=0:
             size[2*i,new]=np.inf
     if current[-1]>=0:
@@ -65,13 +71,13 @@ def run(loaded,states,name,slip):
     trades=pf.trades.records.copy()
     if not trades.status.eq(1).all() or np.asarray(pf.assets())[-1].max()>1e-9:
         raise ValueError('Terminal native long is unsettled')
-    funds=pd.DataFrame(dict(symbol=np.asarray(SYMBOLS)[trades.col],entry_ms=clock.to_numpy()[trades.entry_idx//2],
+    funds=pd.DataFrame(dict(symbol=np.asarray(symbols)[trades.col],entry_ms=clock.to_numpy()[trades.entry_idx//2],
         exit_bar_ms=clock.to_numpy()[trades.exit_idx//2],entry_price=trades.entry_price,exit_price=trades.exit_price,
         notional=trades['size']*trades.entry_price,cash_pnl=trades.pnl,fees=trades.entry_fees+trades.exit_fees))
     funds['net_return']=funds.cash_pnl/funds.notional
     values=np.asarray(pf.value()).reshape(-1,2)
     after_open=values[:,0]
-    previous_units=np.vstack([np.zeros(2),positions[:-1]])
+    previous_units=np.vstack([np.zeros(len(symbols)),positions[:-1]])
     cash_open=np.asarray(pf.cash()).reshape(-1,2)[:,0]
     prior_cash=np.r_[1000.,cash_open[:-1]]
     before_open=prior_cash+(previous_units*opening).sum(axis=1)
@@ -94,11 +100,12 @@ def run(loaded,states,name,slip):
     if not metrics['all']['dd_mark_pct']-1e-8<=confirmed<=metrics['all']['dd_bound_pct']+1e-8:
         raise ValueError('Verified chronological wick drawdown outside its bounds')
     key=name+('_stress' if slip else '')
-    funds.to_csv(EXP/f'funded_{key}.csv.gz',index=False)
-    curve.to_csv(EXP/f'hourly_{key}.csv.gz',index_label='hour_end_utc')
+    funds.to_csv(directory/f'funded_{key}.csv.gz',index=False)
+    curve.to_csv(directory/f'hourly_{key}.csv.gz',index_label='hour_end_utc')
     return dict(metrics=metrics,confirmed_wick_dd_pct=float(confirmed),orders=len(orders),
-                fees_usdt=float(orders.fees.sum()),hours_btc=int((current==0).sum()),
-                hours_eth=int((current==1).sum()),hours_cash=int((current==-1).sum()))
+                fees_usdt=float(orders.fees.sum()),hours_btc=int((current==symbols.index('BTC')).sum()),
+                hours_eth=int((current==symbols.index('ETH')).sum()),hours_cash=int((current==-1).sum()),
+                hours_by_symbol={s:int((current==i).sum()) for i,s in enumerate(symbols)})
 
 
 def main():
