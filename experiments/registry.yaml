@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-breakout-liquid-ten-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "d25322f2d2"
+    status: "inconclusive"
+    question: "用每个历史时点的成交额前十替代事后主流币名单"
+    single_variable: "在360币共同顺势突破机会中，用入场K开始前30日已收盘真实成交额选当时前十。需有90日连续价格，缺成交额的同资格币作为潜在排在前方计算排名上界。"
+    result: "946个可证明前十的机会，实际交易63币583笔，终值8,159U、胜率24.36%、金额盈亏比4.95、回撤上界47.51%；加5bp滑点7,697U及48.81%。已能确定排名的全组9,668U（回撤66.83%）。原先指定十币35,753U。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-breakout-liquid-ten-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-8188-b454-c11dd4c26dd4."
+
+  - experiment_id: exp-cloud-close-breakout-historical-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "b44623a974"
+    status: "rejected"
+    question: "主流币顺势突破扩到360个含退市合约的共享账户"
+    single_variable: "将十币顺势突破和原始刺破收复两条无杠杆入场规则、九仓资金及费用原样移至360个已登记的现役和退市合约；十币冻结路径直接复用。"
+    result: "18,890个可执行突破机会，实际1,319笔，1,000→9,837.52U，胜率19.79%、金额盈亏比4.64、回撤观测64.07%/上界66.16%。同池刺破收复14,720U、回撤58.67%；十币上突破领先的次序翻转。突破组部分持仓路径存在4,043个无报价仓位小时，属于首轮历史扩样。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-breakout-historical-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-813a-97b1-d03995f4e51a."
+
   - experiment_id: exp-cloud-close-slower-breaks-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "3ff3e816e6"
