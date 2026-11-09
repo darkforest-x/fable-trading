@@ -1,0 +1,7 @@
+{
+  "id": "exp-cloud-close-breakout-expiry-20261109-v1",
+  "hypothesis": "After observing the low win rate of unconditional 12H cancellation, cancel the existing 2R partial limit only if the first full 12H close after entry has broken the signal candle's high (long) or low (short). A weak first close keeps its resting order.",
+  "single_variable": "Only the condition for cancelling the open 2R limit changes relative to the previously examined expiry policy. Check at one 12H close only. Keep existing 2/3 at 2R, native stop/EMA, nine slots, original position sizing, fee classes, priorities and 1000U. Missing either exact native bar retains the limit. A target already hit during the first 12H stays filled. No search over thresholds or elapsed clocks.",
+  "sources": "Previously examined OKX 291-contract and Binance 680-contract archives; compare to the original normal partial on each matching universe. Candidate is exploratory. Chronological development before 2025; 2025 and 2026 displayed separately.",
+  "evaluation": "Report cash payoff, win rate, funded wealth and observed/conservative H1 drawdown. Check paired controls and extra 5bp per market fill if development meets earlier metrics. No holding funding, capacity/lot rounding or impact included."
+}
