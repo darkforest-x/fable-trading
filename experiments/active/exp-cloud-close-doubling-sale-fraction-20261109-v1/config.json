@@ -1,0 +1,7 @@
+{
+  "question": "For unusually large long winners from the unchanged V1.7 12H original wick entry, is the existing sale at twice the actual entry price throwing away valuable upside or protecting accumulated gains?",
+  "single_variable": "Share of the then-surviving long quantity offered at exactly 2x the actual entry price: compare zero, the frozen one half, and all. Retain the existing initial two-thirds 2R target template and one-third cloud runner, all initial stops, all target/stop ordering, nine reserved positions, true entry budget, dynamic leverage, prior-minute 10% volume cap and hourly 20% notional trim. Shorts have no doubling target. No additional entry, no change to original trade risk/sizing policy. All exits on unchanged native VectorBT templates, doubling event can only sell after the genuine doubling trigger.",
+  "risk": "The original seat reservation remains until its frozen runner exit in all variants. Earlier exits can change shared cash; absolute size of later positions is recomputed. Actual cash can exceed frozen caps only by tolerance of one micro-USDT. Reuse the already-verified full half-sale baseline and its adverse 5bp stress. All arms share entry ids, not exact later units.",
+  "cost": "Real OKX recorded maker/taker 2/5 bp each fill; market slippage stress +5bp. No historical swap funding or exit-depth model. Original hourly drawdown bounds.",
+  "command": "vectorbt-python -m yoyo.evaluation.cloud_close_doubling_sale_fraction"
+}
