@@ -1,0 +1,5 @@
+{
+  "question": "For the existing higher-leverage historical V1.7 candidate, did a protective exit precede the H1 maintenance-boundary excursion?",
+  "single_variable": "Inspect the order of the original stop and conservative 10% maintenance scenario in every raw H1 which flags a boundary on the 1,574 funded parents at 2x and 3x. Use actual trade 1m OHLC matching the native hourly source and 60 verified OKX mark-price 1m bars. Only a trade-stop trigger in a strictly earlier minute than both trade and mark boundary excursions clears an ambiguous exit hour. A same-minute race, missing data, prior-hour hit, open gap through protective fill, or unsupported exit stays unresolved.",
+  "scope": "Diagnostic on last-trade H1 flagged hours, separately using fee-only and 5bp extra market slippage thresholds, not proof of historical maintenance tiers or mark-only excursions on other hours. No fabricated liquidation or rewrite of frozen account."
+}
