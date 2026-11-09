@@ -18,9 +18,10 @@ FIELDS = ['open','high','low','close']
 STAGES = ['open_nav','open_exit_nav','post_trim_nav','nav']
 
 
-def targets(curve):
-    troughs = curve.loc[curve.lower_nav/curve.upper_nav.cummax().clip(lower=1000)<=.5].index
-    peaks = {p for t in troughs for p in curve.loc[:t].index[curve.loc[:t,'upper_nav']>=2*curve.at[t,'lower_nav']]}
+def targets(curve,threshold=50.):
+    fraction = 1.-threshold/100.
+    troughs = curve.loc[curve.lower_nav/curve.upper_nav.cummax().clip(lower=1000)<=fraction].index
+    peaks = {p for t in troughs for p in curve.loc[:t].index[curve.loc[:t,'upper_nav']>=curve.at[t,'lower_nav']/fraction]}
     return sorted(peaks|set(troughs))
 
 
@@ -77,10 +78,10 @@ def minute_quote(symbol,hour,quotes):
     return bars,url
 
 
-def snapshots(quotes,folder,account_dir=experiment.EXP,*,label='1.5x_stress'):
+def snapshots(quotes,folder,account_dir=experiment.EXP,*,label='1.5x_stress',threshold=50.):
     base = pd.read_csv(account_dir/f'hourly_{label}.csv.gz',index_col=0,parse_dates=[0])
     old_positions = pd.read_csv(account_dir/f'funded_{label}.csv.gz',index_col='event_id')
-    times = targets(base)
+    times = targets(base,threshold)
 
     def capture(pf,data,positions,equity,multiple,slip):
         if (not np.allclose(equity[base.columns],base,atol=.005,rtol=1.e-8) or
@@ -175,14 +176,14 @@ def main(directory=EXP,account_dir=experiment.EXP,input_loader=experiment.inputs
     refine(directory,equity,quotes,old)
 
 
-def refine(directory,equity,quotes,old,*,scope=None,market_slip=.0005):
+def refine(directory,equity,quotes,old,*,scope=None,market_slip=.0005,threshold=50.):
     """Bound the supplied native account from its conserved post-trim quantities."""
     held = pd.read_csv(directory/'post_trim_units.csv.gz',dtype={'symbol':str},float_precision='round_trip')
     upper,lower = equity.upper_nav.copy(),equity.lower_nav.copy()
     attained_hi = equity[STAGES].max(axis=1)
     attained_lo = equity[STAGES].min(axis=1)
     notes,used,observations = [],[],[]
-    for end in targets(equity):
+    for end in targets(equity,threshold):
         hour = end.value//1_000_000-HOUR
         bounded,meta = ranges(held[held.hour.eq(hour)],equity.loc[end],hour,quotes,market_slip=market_slip)
         notes.extend(meta)
@@ -207,7 +208,7 @@ def refine(directory,equity,quotes,old,*,scope=None,market_slip=.0005):
     pd.DataFrame(notes).to_csv(directory/'source_receipts.csv',index=False)
     obj = dict(original_upper_pct=old['dd_bound_pct'],original_observed_pct=old['dd_mark_pct'],
         refined_lower_pct=witness,refined_upper_pct=result.max(),fully_refined=used,
-        targeted_hours=len(targets(equity)),remaining_potential_breach_hours=int(result.ge(50).sum()),
+        targeted_hours=len(targets(equity,threshold)),refinement_threshold_pct=threshold,remaining_potential_breach_hours=int(result.ge(50).sum()),
         scope=scope or 'This bounds traded-price drawdown for the frozen 5bp-slippage 360-name account, including its published CVC gap exit. Historical funding and unobserved margin marks remain unresolved.')
     (directory/'summary.json').write_text(json.dumps(obj,indent=2,allow_nan=False)+'\n')
     print(obj,flush=True)
