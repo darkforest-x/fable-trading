@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-protected-pyramid-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "e250c159b2"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Add to already-profitable 12H positions only as their existing trailing stop ratchets, capped by fee-adjusted protected profit and remaining account cash."
+    result: "OKX 1000U grows to 11612.22U with 1573 additions on 508 of 2160 original parents, versus 16048.09U without additions. Actual realized monetary payoff 2.452, win 33.75%, observed drawdown 46.50%. The added quantities generate -2251.49U when individually marked to their actual common exits. Lot minima are not modeled."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-protected-pyramid-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81c7-8caa-f32750aeeb81."
+
   - experiment_id: exp-cloud-close-breakout-pullback-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "0fcd1cc9fe"
