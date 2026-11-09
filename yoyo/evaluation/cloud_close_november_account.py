@@ -1,4 +1,5 @@
 """Continue the scored nine-slot Binance cloud account on contract-specific native prices."""
+import argparse
 import json
 from collections import Counter
 from functools import lru_cache
@@ -50,6 +51,52 @@ def quote_loader(symbol):
 def prepare(legs):
     return admin.study.tenth.split.pair_data(legs[legs.tp_r.eq(0)],legs[legs.tp_r.eq(2)],9,
                 start=path.venue.START,end=path.END,quote_loader=quote_loader)
+
+
+def assign_parent_slots(legs,data):
+    """Persist the nine native admission slots from the VectorBT paired child columns."""
+    selected = data['selected']
+    if len(selected)!=len(legs) or selected.duplicated(['event_id','tp_r']).any():
+        raise ValueError('Native pair preparation changed the funded parent child roster')
+    child_slots = selected.set_index(['event_id','tp_r']).slot.astype('int64')
+    keys = pd.MultiIndex.from_frame(legs[['event_id','tp_r']])
+    assigned = child_slots.reindex(keys)
+    if assigned.isna().any():
+        raise ValueError('Native VectorBT child slot assignment is incomplete')
+    parent_slots = assigned.to_numpy(dtype='int64')//2
+    result = legs.copy()
+    if 'slot' in result and not np.array_equal(pd.to_numeric(result.slot,errors='raise').to_numpy(dtype='int64'),parent_slots):
+        raise ValueError('Saved parent slot disagrees with native VectorBT column assignment')
+    result['slot'] = parent_slots
+    if not result.slot.between(0,8).all() or not result.groupby('event_id').slot.nunique().eq(1).all():
+        raise ValueError('Native parent slots do not map to one of nine frozen slots')
+    return result
+
+
+def repair_existing_slot_metadata():
+    """Recover omitted parent-slot metadata without replaying account orders or NAV."""
+    legs_path = EXP/'funded_legs.csv.gz'
+    summary_path = EXP/'summary.json'
+    if not legs_path.is_file() or not summary_path.is_file():
+        raise FileNotFoundError('Completed November account files are required for slot metadata recovery')
+    legs = pd.read_csv(legs_path,dtype={'event_id':str,'parent_id':str,'symbol':str},float_precision='round_trip')
+    if 'slot' in legs:
+        raise ValueError('Funded legs already contain slot metadata; refusing to rewrite')
+    data = prepare(legs)
+    annotated = assign_parent_slots(legs,data)
+    positions = pd.read_csv(EXP/'funded.csv.gz',usecols=['event_id'])
+    if set(positions.event_id.astype(str)) != set(annotated.event_id.astype(str)):
+        raise ValueError('Existing funded positions do not match the slot recovery roster')
+    temporary = legs_path.with_suffix('.tmp.gz')
+    annotated.to_csv(temporary,index=False,compression='gzip')
+    temporary.replace(legs_path)
+    summary = json.loads(summary_path.read_text())
+    summary['native_slot_metadata'] = dict(source='VectorBT pair_data selected child slot // 2',
+        parent_slots=9,parents=int(annotated.event_id.nunique()),child_rows=int(len(annotated)),
+        slot_range=[int(annotated.slot.min()),int(annotated.slot.max())],
+        historical_nav_or_cash_replayed=False)
+    summary_path.write_text(json.dumps(summary,indent=2,allow_nan=False)+'\n')
+    return summary['native_slot_metadata']
 
 
 def market_inputs():
@@ -194,8 +241,10 @@ def main():
     settlement.rename(columns={'exit_bar_ms':'time','exit_price':'price'}).to_csv(EXP/'settlement_hours.csv',index=False)
     quote_loader.cache_clear()
     settlement_marks.cache_clear()
+    account_data = prepare(paid)
+    paid = assign_parent_slots(paid,account_data)
     paid.to_csv(EXP/'funded_legs.csv.gz',index=False)
-    metrics,pos,eq,trims = spot.hourly.tested.trim_account(prepare(paid),quote_loader,.9,.2,review_hours=1)
+    metrics,pos,eq,trims = spot.hourly.tested.trim_account(account_data,quote_loader,.9,.2,review_hours=1)
     original = pd.read_csv(spot.hourly.EXP/'hourly_Binance.csv.gz',index_col=0,parse_dates=True)
     same = original[original.index<=pd.Timestamp(CUTOFF,unit='ms',tz='UTC')]
     divergence = (eq.loc[same.index,same.columns]-same).abs().max().max()
@@ -235,10 +284,20 @@ def main():
                    new_frozen_scores=int(order.loc[new,'score'].count()),previously_open_eligible=len(carries),
                    previously_open_funded=len(carries&set(pos.index)),prefix_equity_max_abs=float(divergence),
                    new_funded=len(set(pos.index)-set(native.index)),supplemental_8=supplemental_audit,
-                   supplemental_unscored=True,fee_only=True)
+                   supplemental_unscored=True,
+                   native_slot_metadata=dict(source='VectorBT pair_data selected child slot // 2',
+                       parent_slots=9,parents=int(paid.event_id.nunique()),child_rows=int(len(paid)),
+                       slot_range=[int(paid.slot.min()),int(paid.slot.max())],historical_nav_or_cash_replayed=True),
+                   fee_only=True)
     (EXP/'summary.json').write_text(json.dumps(summary,indent=2,allow_nan=False)+'\n')
     print(json.dumps(summary,indent=2),flush=True)
 
 
 if __name__=='__main__':
-    main()
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--repair-slot-metadata',action='store_true')
+    args=parser.parse_args()
+    if args.repair_slot_metadata:
+        print(json.dumps(repair_existing_slot_metadata(),indent=2),flush=True)
+    else:
+        main()
