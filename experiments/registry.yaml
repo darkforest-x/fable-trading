@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-native-target-fraction-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "270b93b270"
+    status: "rejected"
+    question: "同批原始云带单在2R减半止盈能否显著提高复利"
+    single_variable: "只改初始买入中配给原2R限价的份额，2/3改1/3或5/6，保留原止损、翻倍止盈和小时集中度、成交量约束。"
+    result: "原42486U/21.64%/6.66/回撤42.11%，卖1/3为42535U/19.43%/7.63/43.37%，卖5/6为42455U/21.64%/6.66/41.46%。相同1585笔，卖少仅多49U且胜率低于20%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-native-target-fraction-20261109-v1/summary.json"
+    notes: "All four entry quantities reconciled for every parent. Missing historical OKX funding and executable exit depth. Notion 41388564-79af-8130-8b07-c6ccb8d53582."
+
+  - experiment_id: exp-cloud-close-cloud-side-target-fraction-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fa8d058ae7"
+    status: "rejected"
+    question: "只对收盘顺势超双均线的原信号少卖2R是否有效"
+    single_variable: "确认时顺势越过两均线才把2R份额从2/3降至1/3；匹配相同入场时点、方向和开仓容量状态的预定哈希对照。其他原信号照常开仓。"
+    result: "条件账户42075U、胜21.14%、实际比6.84、回撤41.98%；同数对照42146U、全量固定42486U。收盘位置未改善复利。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-cloud-side-target-fraction-20261109-v1/summary.json"
+    notes: "In-sample motivation. Exact original entries and per-parent opening weights verified; identical settled count, no historical funding or exit book. Notion 41388564-79af-81a9-a735-ce5dbb5df6b0."
+
   - experiment_id: exp-cloud-close-inside-or-better-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "6fbbce51fc"
