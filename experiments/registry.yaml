@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-fvg-priority-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "3e12447c3e"
+    status: "inconclusive"
+    question: "Can first-touch confluence rank scarce slots while preserving the full original population and risk budget?"
+    single_variable: "Prioritize first 1.618 touches outside confirmed same-side 12H FVG when concurrent V1.7 signals compete; keep unknown rank positions, full roster and within-group original frozen score ranks."
+    result: "23,262 opportunities; reranked 13,554. Added 351 and displaced 301 funded parents, ending 12,230.27U vs 10,512.33U. Wins 33.80%, cash payoff 2.798, hourly stage DD 31.88%, OHLC upper bound 40.54% crosses 35%. Development 5,316.87U vs 4,799.73U. Fees included; actual funding and higher-frequency peak valuation require additional evidence. Misses wealth target."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-fvg-priority-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-8144-9f52-ed88085ceae2."
+
   - experiment_id: exp-cloud-close-fvg-transfer-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "2d0a2877b2"
