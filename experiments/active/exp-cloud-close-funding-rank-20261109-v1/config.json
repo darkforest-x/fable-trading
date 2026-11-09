@@ -2,5 +2,27 @@
   "id": "exp-cloud-close-funding-rank-20261109-v1",
   "single_variable": "For simultaneous real 12H confirmed keys, give higher priority to the more negative side-adjusted change in funding paid during the previous 24 hours relative to the daily mean of the preceding seven days. Use only previously settled rates, excluding all settlements in the current nominal minute. Ungraded candidates retain their exact original rank; ties retain native priority. No threshold, new signals, or size change.",
   "account": "Original Binance 680-contract 1000U NAV/10 account, 9 shared slots, conditional 2R bank or V1.7 runner, native coincident H1 opening, maker 2bp / taker 5bp. Funding payments themselves are a separate dynamic-wallet calculation; these first-pass results measure the original fee-only strategy with a change in admission order. Development through 2024; later years explored. A qualifying and improved development portfolio gets 5bp additional market-price stress, with funding-aware and matched-candidate confirmation separate before any promotion.",
-  "additional_settlements": {}
+  "additional_settlements": {
+    "DARUSDT": {
+      "utc": "2024-12-26T09:00:00Z",
+      "minutes": 30,
+      "announcement": "https://www.binance.com/en/support/announcement/detail/21551cde98784f64b374f8d50ff2a438"
+    },
+    "FXSUSDT": {
+      "utc": "2026-01-06T09:00:00Z",
+      "minutes": 30,
+      "announcement": "https://www.binance.com/en/support/announcement/detail/a17352ba70414c96882cd881591dd36d"
+    },
+    "IRUSDT": {
+      "utc": "2026-04-29T09:00:00Z",
+      "minutes": 30,
+      "announcement": "https://www.binance.com/en/support/announcement/detail/1d2b6970facd470dbba6a674e1595bd4"
+    },
+    "OXTUSDT": {
+      "utc": "2026-04-15T09:00:00Z",
+      "minutes": 30,
+      "announcement": "https://www.binance.com/en/support/announcement/detail/d26a627649ee44fca27e07672add9ac2"
+    }
+  },
+  "settlement_valuation": "Exact announced automatic settlement clock. For these post-November 2024 dates, use the average of the preceding thirty official one-minute index closes as the proxy for the every-second index mean."
 }
