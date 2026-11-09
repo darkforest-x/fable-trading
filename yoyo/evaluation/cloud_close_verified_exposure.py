@@ -80,7 +80,7 @@ def run(directory,policies,*,account_loader=account,reference_dir=source.BASE):
             print(label,out[label].get('metrics',{}).get('all'),flush=True)
             gc.collect()
     source.correction.archive.prices.safe_json(directory/'summary.json',dict(arms=out,
-            limitations='Price-based margin approximation with 10% MMR, original CVC gap, omitted funding and capacity.'))
+            limitations='Price-based margin approximation with 10% MMR, omitted funding and capacity. See the configured account source for historical price coverage.'))
 
 
 def fixed(parents):
