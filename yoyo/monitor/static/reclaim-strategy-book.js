@@ -57,7 +57,7 @@
     const sign=value>0?'+':value<0?'−':'',amount=Math.abs(value);
     return {text:sign+(amount>0&&amount<.005?'<0.01':amount.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})),tone:value>0?'rp-positive':value<0?'rp-negative':'',title:'已实现净盈亏 · USDT · 不含浮盈亏和补充本金'};
   }
-  function pickerHTML(tracks){return tracks.map(t=>`<div class="rs-account-row" data-account-row="${esc(t)}"><button type="button" data-account-drag="${esc(t)}" aria-label="拖动调整 ${esc(label(t))} 顺序" aria-description="拖动排序或移入移出常用；Alt 加上下键排序，Alt 加左键移入常用、右键收入更多" title="拖动排序或移入移出常用 · Alt + ↑/↓ 排序 · Alt + ←/→ 分组"><svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" aria-hidden="true"><circle cx="4" cy="5" r="1.2"/><circle cx="10" cy="5" r="1.2"/><circle cx="4" cy="10" r="1.2"/><circle cx="10" cy="10" r="1.2"/><circle cx="4" cy="15" r="1.2"/><circle cx="10" cy="15" r="1.2"/></svg></button><button type="button" data-strategy-select="${esc(t)}" aria-pressed="false"><span>${esc(label(t))}${t===LIVE_BREADTH?'<em class="rs-account-tag">宽度·SOL</em>':t==='live-wick6x3mid'?'<em class="rs-account-tag">浅穿中点</em>':''}</span>${(t===BREADTH||t===CLOUD)?'<small title="查看前向模拟账户">模拟</small>':`<strong data-account-pnl="${esc(t)}">—</strong>`}<i aria-hidden="true">✓</i></button><button type="button" data-strategy-book="${esc(t)}" aria-label="查看 ${esc(label(t))} 策略小册" title="策略小册">${BOOK}</button><button type="button" data-strategy-backtest="${esc(t)}" aria-label="查看 ${esc(label(t))} 回测交易" title="回测交易">${BACKTEST}</button></div>`).join('');}
+  function pickerHTML(tracks){return tracks.map(t=>`<div class="rs-account-row" data-account-row="${esc(t)}"><button type="button" data-account-drag="${esc(t)}" aria-label="拖动调整 ${esc(label(t))} 顺序" aria-description="拖动排序或移入移出常用；Alt 加上下键排序，Alt 加左键移入常用、右键收入更多" title="拖动排序或移入移出常用 · Alt + ↑/↓ 排序 · Alt + ←/→ 分组"><svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" aria-hidden="true"><circle cx="4" cy="5" r="1.2"/><circle cx="10" cy="5" r="1.2"/><circle cx="4" cy="10" r="1.2"/><circle cx="10" cy="10" r="1.2"/><circle cx="4" cy="15" r="1.2"/><circle cx="10" cy="15" r="1.2"/></svg></button><button type="button" data-strategy-select="${esc(t)}" aria-pressed="false"><span>${esc(label(t))}${t===LIVE_BREADTH?'<em class="rs-account-tag">宽度·SOL</em>':t==='live-wick6x3mid'?'<em class="rs-account-tag">浅穿中点</em>':''}</span>${t===CLOUD?'<strong data-cloud-pnl title="读取模拟账户已实现盈亏">—</strong>':t===BREADTH?'<small title="查看前向模拟账户">模拟</small>':`<strong data-account-pnl="${esc(t)}">—</strong>`}<i aria-hidden="true">✓</i></button><button type="button" data-strategy-book="${esc(t)}" aria-label="查看 ${esc(label(t))} 策略小册" title="策略小册">${BOOK}</button><button type="button" data-strategy-backtest="${esc(t)}" aria-label="查看 ${esc(label(t))} 回测交易" title="回测交易">${BACKTEST}</button></div>`).join('');}
   function tableHTML(headers,rows){return `<div class="rs-table-wrap"><table><thead><tr>${headers.map(h=>`<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map((v,i)=>i?`<td>${typeof v==='number'?num(v):esc(v??'—')}</td>`:`<th scope="row">${esc(v)}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;}
   const historyDate=ms=>new Date(ms).toISOString().slice(0,10);
   function validateHistory(h,track){
@@ -372,10 +372,25 @@
     // Follow its anchor instead of dismissing the just-opened calendar.
     el('.rs-reading').addEventListener('scroll',()=>positionCalendar(),{passive:true});
     function positionPicker(){const r=trigger.getBoundingClientRect();picker.style.left=Math.max(8,Math.min(r.left,innerWidth-picker.offsetWidth-8))+'px';picker.style.top=Math.max(8,Math.min(r.bottom+6,innerHeight-picker.offsetHeight-8))+'px';}
+    let cloudReadAt=0;
+    async function syncCloudPnl(){
+      if(Date.now()-cloudReadAt<30000)return;
+      cloudReadAt=Date.now();
+      const node=picker.querySelector('[data-cloud-pnl]');
+      try {
+        const res=await fetch('/static/strategy-booklet/live-cloud-v17-forward.json',{cache:'no-store'});
+        if(!res.ok)throw Error();
+        const data=await res.json();
+        if(data.strategy_id!==CLOUD||data.mode!=='paper'||!Number.isFinite(data.heartbeat_ms)||Date.now()-data.heartbeat_ms>150000)throw Error();
+        const value=pnlView(data.account?.realized_pnl);
+        node.textContent=value.text;node.title=value.title;node.className=value.tone;
+      }catch{node.textContent='—';node.title='账户快照待更新';node.className='';}
+    }
     function sync(opening=false){
       const track=getTrack(),name=label(track),labelNode=trigger.querySelector('b');
       if(labelNode.textContent!==name)labelNode.textContent=name;
       if(!opening&&!picker.matches(':popover-open'))return;
+      void syncCloudPnl();
       picker.querySelector('[data-more-current]').textContent=layout.more.includes(track)?'当前：'+name:'';
       for(const button of picker.querySelectorAll('[data-strategy-select]')){
         const selected=String(button.dataset.strategySelect===track);
