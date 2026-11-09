@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-score-priority-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "cdf7d124bc"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Contemporaneous rank of frozen chronological 12H LightGBM scores, fixed unscored positions and original ATR tie order."
+    result: "Binance 680: 9858.64U vs 5602.67U, 1536 vs 1635, 33.72% wins, cash payoff 2.661, marked drawdown 40.41% (bound 59.87%). Both scored calendar slices improved but risk and wealth targets missed. Pre-2025 unchanged. One ALPACA delisting index proxy."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-score-priority-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81a1-b673-e5dd5ce41875."
+
   - experiment_id: exp-cloud-close-survive-day-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "8daa4b2a45"
