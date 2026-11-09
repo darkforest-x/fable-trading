@@ -5,13 +5,28 @@
   "month": "2022-10",
   "target_hour_utc": "2022-10-26T03:00:00Z",
   "expected_missing_minute_utc": "2022-10-26T03:11:00Z",
+  "expected_missing_trade_id": 13541499,
   "official_trade_archive_base": "https://static.okx.com/cdn/okex/traderecords/trades/monthly",
+  "official_daily_archive_base": "https://static.okx.com/cdn/okex/traderecords",
+  "official_zero_trade_candle_rule": {
+    "source": "https://www.okx.com/docs-v5/en/#rest-api-market-data-get-candlesticks",
+    "rule": "For a cycle with no transaction, OKX candlestick OHLC fields use the previous cycle close.",
+    "scope": "Used only to bound the missing 03:11 price from the confirmed 03:12 zero-volume candle; no trade quantity is inferred."
+  },
+  "direct_rest_checks": [
+    "GET https://www.okx.com/api/v5/market/history-candles?instId=CVC-USDT-SWAP&bar=1m&after=<03:11-open-ms+1>&limit=5",
+    "GET https://www.okx.com/api/v5/market/history-candles?instId=CVC-USDT-SWAP&bar=1H&after=<03:00-open-ms+1>&limit=5"
+  ],
   "source_h1_series": "data/research/cloud_close_okx_retired_prices/series/CVC-USDT-SWAP/bars1h.csv.gz",
   "source_native_minute_archive": "data/research/cloud_close_okx_roster_audit/raw/CVC-USDT-SWAP/CVC-USDT-SWAP-candlesticks-2022-10.zip",
   "source_receipt": "data/research/cloud_close_okx_retired_prices/series/CVC-USDT-SWAP/source.json",
   "month_receipt": "data/research/cloud_close_okx_retired_prices/series/CVC-USDT-SWAP/months.json",
   "output_series": "data/research/cloud_close_cvc_trade_hour/series/CVC-USDT-SWAP/bars1h.csv.gz",
+  "output_series_v2": "data/research/cloud_close_cvc_trade_hour/series/CVC-USDT-SWAP/bars1h_v2.csv.gz",
+  "source_check_v2": "experiments/active/exp-cloud-close-cvc-trade-hour-20261109-v1/source_check_v2.json",
   "output_hour_checks": "experiments/active/exp-cloud-close-cvc-trade-hour-20261109-v1/hour_checks.csv.gz",
+  "output_hour_checks_v2": "experiments/active/exp-cloud-close-cvc-trade-hour-20261109-v1/hour_checks_v2.csv.gz",
+  "output_minute_price_evidence_v2": "experiments/active/exp-cloud-close-cvc-trade-hour-20261109-v1/minute_price_evidence_v2.csv.gz",
   "admission_boolean": "eligible_for_admission",
   "acceptance": {
     "target_and_adjacent_hours_have_native_trades": true,
@@ -29,5 +44,6 @@
     "price_columns": ["open", "high", "low", "close"],
     "read_example": "pd.read_csv(path, index_col='time', float_precision='round_trip')"
   },
-  "runner": "python3 -m yoyo.evaluation.cloud_close_cvc_trade_hour"
+  "runner": "python3 -m yoyo.evaluation.cloud_close_cvc_trade_hour",
+  "runner_v2": "python3 -m yoyo.evaluation.cloud_close_cvc_trade_hour --v2"
 }

@@ -179,6 +179,384 @@ def _close_enough(left: pd.Series, right: pd.Series) -> bool:
                            rtol=1e-9, atol=1e-13).all())
 
 
+def _read_candle_zip(path: Path, instrument: str) -> pd.DataFrame:
+    with zipfile.ZipFile(path) as archive:
+        members = [name for name in archive.namelist() if name.lower().endswith(".csv")]
+        if len(members) != 1:
+            raise ValueError(f"Expected one candle CSV in {path}: {members}")
+        with archive.open(members[0]) as stream:
+            raw = pd.read_csv(stream, usecols=["instrument_name", "open_time", *OHLC, "vol", "confirm"],
+                              float_precision="round_trip")
+    if set(raw.instrument_name.dropna().unique()) != {instrument}:
+        raise ValueError(f"Native candle archive instrument mismatch: {path}")
+    raw["open_time"] = pd.to_numeric(raw.open_time, errors="raise").astype("int64")
+    raw["vol"] = pd.to_numeric(raw.vol, errors="raise").astype("float64")
+    raw["confirm"] = pd.to_numeric(raw.confirm, errors="raise").astype("int64")
+    for col in OHLC:
+        raw[col] = pd.to_numeric(raw[col], errors="raise").astype("float64")
+    if raw.open_time.duplicated().any() or (raw.open_time % MINUTE_MS).any():
+        raise ValueError(f"Duplicate or off-grid native minutes in {path}")
+    if not raw.confirm.isin([0, 1]).all():
+        raise ValueError(f"Unknown candle confirmation in {path}")
+    if (not np.isfinite(raw[OHLC + ["vol"]]).all().all()
+            or not raw.low.gt(0).all() or not raw.vol.ge(0).all()
+            or not raw.low.le(raw[["open", "close"]].min(axis=1)).all()
+            or not raw.high.ge(raw[["open", "close"]].max(axis=1)).all()):
+        raise ValueError(f"Invalid native candle OHLCV in {path}")
+    return raw.set_index("open_time").sort_index()
+
+
+def _direct_history_check(instrument: str, bar: str, timestamp_ms: int, label: str) -> dict:
+    cache = CACHE / "direct_api" / f"{label}.json"
+    if cache.is_file():
+        receipt = json.loads(cache.read_text())
+        payload = receipt["response"]
+        url = receipt["url"]
+        http_status = receipt["http_status"]
+    else:
+        url = "https://www.okx.com/api/v5/market/history-candles"
+        response = requests.get(url, params={
+            "instId": instrument, "bar": bar, "after": str(timestamp_ms + 1), "limit": "5",
+        }, timeout=(10, 30))
+        http_status = int(response.status_code)
+        response.raise_for_status()
+        payload = response.json()
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        _atomic_json(cache, {"url": response.url, "http_status": http_status,
+                             "headers": dict(response.headers), "response": payload})
+        url = response.url
+    exact = []
+    for row in payload.get("data", []):
+        if int(row[0]) == timestamp_ms:
+            exact.append(row)
+    return {
+        "api": "/api/v5/market/history-candles",
+        "url": url,
+        "cache_path": str(cache.relative_to(ROOT)),
+        "http_status": http_status,
+        "api_code": payload.get("code"),
+        "api_message": payload.get("msg"),
+        "requested_bar": bar,
+        "requested_open_ms": int(timestamp_ms),
+        "exact_timestamp_rows": exact,
+        "confirmed_exact_row": bool(len(exact) == 1 and str(exact[0][8]) == "1"),
+    }
+
+
+def build_v2() -> dict:
+    """Use a second official daily source and exact price bounds; preserve v1's rejection."""
+    cfg = json.loads(CFG.read_text())
+    inst = cfg["instrument"]
+    target_ms = int(pd.Timestamp(cfg["target_hour_utc"]).value // 1_000_000)
+    missing_minute_ms = int(pd.Timestamp(cfg["expected_missing_minute_utc"]).value // 1_000_000)
+    focus_start, focus_end = target_ms - HOUR_MS, target_ms + 2 * HOUR_MS
+    direct_checks = [
+        _direct_history_check(inst, "1m", missing_minute_ms, "history_1m_cvc_20221026T0311"),
+        _direct_history_check(inst, "1H", target_ms, "history_1H_cvc_20221026T0300"),
+    ]
+    day = pd.Timestamp(cfg["target_hour_utc"]).strftime("%Y-%m-%d")
+    day_compact = pd.Timestamp(cfg["target_hour_utc"]).strftime("%Y%m%d")
+    daily_base = cfg["official_daily_archive_base"]
+    daily_cache = CACHE / "daily" / inst
+    trade_name = f"{inst}-trades-{day}.zip"
+    candle_name = f"{inst}-candlesticks-{day}.zip"
+    daily_trade_receipt = _download_trade_archive(
+        f"{daily_base}/trades/daily/{day_compact}/{trade_name}", daily_cache / trade_name)
+    daily_candle_receipt = _download_trade_archive(
+        f"{daily_base}/candlesticks/daily/{day_compact}/{candle_name}", daily_cache / candle_name)
+
+    daily_trades = _read_trade_rows(daily_cache / trade_name, daily_trade_receipt["zip_member"], inst)
+    daily_candles = _read_candle_zip(daily_cache / candle_name, inst)
+    monthly_trade_path = CACHE / "raw" / inst / f"{inst}-trades-2022-10.zip"
+    with zipfile.ZipFile(monthly_trade_path) as archive:
+        monthly_member = next(name for name in archive.namelist() if name.lower().endswith(".csv"))
+    monthly_trades = _read_trade_rows(monthly_trade_path, monthly_member, inst)
+    minute_zip = ROOT / cfg["source_native_minute_archive"]
+    monthly_candles = _read_candle_zip(minute_zip, inst)
+
+    # Repeated official daily/monthly exports must agree on all records that exist
+    # in both before either is used to close the single missing-minute interval.
+    common_minutes = daily_candles.index.intersection(monthly_candles.index)
+    minute_columns = OHLC + ["vol", "confirm"]
+    common_same = np.isclose(
+        daily_candles.loc[common_minutes, minute_columns].to_numpy(dtype=float),
+        monthly_candles.loc[common_minutes, minute_columns].to_numpy(dtype=float),
+        rtol=1e-10, atol=1e-13,
+    ).all(axis=1)
+    same_daily_monthly = bool(len(common_minutes) and common_same.all())
+    daily_missing = sorted(set(range(target_ms, target_ms + HOUR_MS, MINUTE_MS)) -
+                           set(daily_candles.index.intersection(range(target_ms, target_ms + HOUR_MS, MINUTE_MS))))
+    monthly_missing = sorted(set(range(target_ms, target_ms + HOUR_MS, MINUTE_MS)) -
+                             set(monthly_candles.index.intersection(range(target_ms, target_ms + HOUR_MS, MINUTE_MS))))
+
+    trade_bars = _trade_hour_bars(daily_trades, focus_start, focus_end)
+    checks = []
+    frozen = pd.read_csv(ROOT / cfg["source_h1_series"], index_col="time", float_precision="round_trip")
+    if target_ms in frozen.index:
+        raise ValueError("Target bar is already present in the frozen source")
+    if target_ms - HOUR_MS not in frozen.index or target_ms + HOUR_MS not in frozen.index:
+        raise ValueError("Both adjacent frozen H1 reference bars are required")
+    for hour_ms in [target_ms - HOUR_MS, target_ms, target_ms + HOUR_MS]:
+        has_trade = hour_ms in trade_bars.index
+        bar = trade_bars.loc[hour_ms] if has_trade else None
+        known_minute_rows = daily_candles.loc[
+            (daily_candles.index >= hour_ms) & (daily_candles.index < hour_ms + HOUR_MS)
+        ]
+        frozen_match = bool(has_trade and hour_ms != target_ms and _close_enough(bar, frozen.loc[hour_ms]))
+        checks.append({
+            "time": int(hour_ms),
+            "hour_utc": pd.to_datetime(hour_ms, unit="ms", utc=True).isoformat(),
+            "trade_prints": int(bar.prints) if has_trade else 0,
+            "trade_first_id": int(bar.first_id) if has_trade else None,
+            "trade_last_id": int(bar.last_id) if has_trade else None,
+            "trade_ids_contiguous_within_hour": bool(bar.ids_contiguous) if has_trade else False,
+            "trade_id_span_matches_print_count": bool(bar.id_count_matches) if has_trade else False,
+            "confirmed_daily_minutes": int(known_minute_rows.confirm.sum()) if len(known_minute_rows) else 0,
+            "daily_minute_rows": int(len(known_minute_rows)),
+            "trade_matches_frozen_h1": frozen_match,
+            **{col: float(bar[col]) if has_trade else None for col in OHLC},
+        })
+    bridges = [{
+        "from_time": int(left["time"]), "to_time": int(right["time"]),
+        "consecutive_ids": bool(right["trade_first_id"] == left["trade_last_id"] + 1),
+    } for left, right in zip(checks[:-1], checks[1:])]
+
+    day_by_id = daily_trades.set_index("trade_id", drop=False)
+    month_by_id = monthly_trades.set_index("trade_id", drop=False)
+    gap_before_id = int(cfg["expected_missing_trade_id"])
+    before = daily_trades.loc[daily_trades.trade_id.eq(gap_before_id - 1)]
+    after = daily_trades.loc[daily_trades.trade_id.eq(gap_before_id + 1)]
+    month_before = monthly_trades.loc[monthly_trades.trade_id.eq(gap_before_id - 1)]
+    month_after = monthly_trades.loc[monthly_trades.trade_id.eq(gap_before_id + 1)]
+    if any(len(frame) != 1 for frame in [before, after, month_before, month_after]):
+        raise ValueError("The unique trade-ID gap is not bracketed in both official trade archives")
+    before_row, after_row = before.iloc[0], after.iloc[0]
+    day_neighbor_match = bool(
+        np.isclose([before_row.price, before_row.size, before_row.created_time],
+                   [month_before.iloc[0].price, month_before.iloc[0].size, month_before.iloc[0].created_time],
+                   rtol=0, atol=0).all()
+        and np.isclose([after_row.price, after_row.size, after_row.created_time],
+                       [month_after.iloc[0].price, month_after.iloc[0].size, month_after.iloc[0].created_time],
+                       rtol=0, atol=0).all()
+    )
+    minute_at = lambda stamp: daily_candles.loc[int(stamp)] if int(stamp) in daily_candles.index else None
+    minute_before = minute_at(missing_minute_ms - MINUTE_MS)
+    minute_after = minute_at(missing_minute_ms + MINUTE_MS)
+    minute_after2 = minute_at(missing_minute_ms + 2 * MINUTE_MS)
+    if any(row is None for row in [minute_before, minute_after, minute_after2]):
+        raise ValueError("Daily candle evidence around missing 03:11 minute is incomplete")
+
+    target_window = daily_trades.loc[daily_trades.created_time.ge(target_ms)
+                                     & daily_trades.created_time.lt(target_ms + HOUR_MS)]
+    known_0311 = daily_trades.loc[daily_trades.created_time.ge(missing_minute_ms)
+                                  & daily_trades.created_time.lt(missing_minute_ms + MINUTE_MS)]
+    known_0312 = daily_trades.loc[daily_trades.created_time.ge(missing_minute_ms + MINUTE_MS)
+                                  & daily_trades.created_time.lt(missing_minute_ms + 2 * MINUTE_MS)]
+    known_0313 = daily_trades.loc[daily_trades.created_time.ge(missing_minute_ms + 2 * MINUTE_MS)
+                                  & daily_trades.created_time.lt(missing_minute_ms + 3 * MINUTE_MS)]
+    candle_0312_zero = bool(float(minute_after.vol) == 0.0 and np.isclose(
+        minute_after[OHLC].to_numpy(float), np.repeat(float(minute_after.close), 4), rtol=0, atol=1e-13).all()
+        and int(minute_after.confirm) == 1)
+    candle_0313_volume_matches = bool(
+        len(known_0313) == 1 and int(known_0313.trade_id.iloc[0]) == gap_before_id + 1
+        and float(known_0313["size"].sum()) == float(minute_after2.vol) == 14.0
+        and int(minute_after2.confirm) == 1
+        and np.isclose(minute_after2[OHLC].to_numpy(float), np.repeat(float(minute_after2.close), 4),
+                       rtol=0, atol=1e-13).all()
+    )
+    no_trades_0312 = bool(known_0312.empty)
+    trade_id_time_monotonic = bool(daily_trades.sort_values("trade_id").created_time.is_monotonic_increasing)
+    only_target_hour_gap = sorted({
+        missing for left, right in zip(sorted(target_window.trade_id), sorted(target_window.trade_id)[1:])
+        for missing in range(int(left + 1), int(right))
+    })
+    one_missing_id = only_target_hour_gap == [gap_before_id]
+    gap_bracket_ms = [int(before_row.created_time), int(after_row.created_time)]
+    before_in_missing_minute = bool(
+        missing_minute_ms <= int(before_row.created_time) < missing_minute_ms + MINUTE_MS
+    )
+    known_0311_is_single_bracketed_trade = bool(
+        len(known_0311) == 1 and int(known_0311.trade_id.iloc[0]) == gap_before_id - 1
+    )
+    target_id_bracketed_in_daily_and_monthly = bool(
+        len(day_by_id.loc[[gap_before_id - 1, gap_before_id + 1]]) == 2
+        and len(month_by_id.loc[[gap_before_id - 1, gap_before_id + 1]]) == 2
+    )
+    zero_trade_carry_rule = cfg["official_zero_trade_candle_rule"]
+    missing_minute_price = float(minute_after.close)
+    known_missing_hour_trades_match_month = bool(
+        np.allclose(
+            target_window.sort_values("trade_id")[["price", "size", "created_time"]].to_numpy(float),
+            monthly_trades.loc[monthly_trades.created_time.ge(target_ms)
+                               & monthly_trades.created_time.lt(target_ms + HOUR_MS)]
+            .sort_values("trade_id")[["price", "size", "created_time"]].to_numpy(float),
+            rtol=0, atol=0,
+        )
+    )
+
+    minute_rows = daily_candles.loc[
+        (daily_candles.index >= target_ms) & (daily_candles.index < target_ms + HOUR_MS)
+    ].copy()
+    minute_rows["price_source"] = "official_daily_confirmed_1m"
+    minute_rows["price_exact"] = True
+    minute_rows["volume_known"] = True
+    minute_rows["confirm"] = minute_rows.confirm.astype("float64")
+    if missing_minute_ms in minute_rows.index:
+        raise ValueError("The expected missing minute unexpectedly exists in daily archive")
+    minute_rows.loc[missing_minute_ms, OHLC] = missing_minute_price
+    minute_rows.loc[missing_minute_ms, "vol"] = np.nan
+    minute_rows.loc[missing_minute_ms, "confirm"] = np.nan
+    minute_rows.loc[missing_minute_ms, "price_source"] = "exact_price_bounded_by_trade_id_and_zero_volume_candle"
+    minute_rows.loc[missing_minute_ms, "price_exact"] = True
+    minute_rows.loc[missing_minute_ms, "volume_known"] = False
+    minute_rows.index.name = "open_time"
+    minute_rows = minute_rows.sort_index()
+    expected_clock = pd.Index(range(target_ms, target_ms + HOUR_MS, MINUTE_MS), name="open_time")
+    complete_minute_clock = minute_rows.index.equals(expected_clock)
+    reconstructed = pd.Series({
+        "open": float(minute_rows.open.iloc[0]),
+        "high": float(minute_rows.high.max()),
+        "low": float(minute_rows.low.min()),
+        "close": float(minute_rows.close.iloc[-1]),
+    })
+    daily_source_supports_minute = bool(
+        same_daily_monthly and daily_missing == monthly_missing == [missing_minute_ms]
+        and complete_minute_clock and len(minute_rows) == 60
+    )
+    target_trade_bar = trade_bars.loc[target_ms] if target_ms in trade_bars.index else None
+    trade_ohlc_crosscheck = bool(target_trade_bar is not None and _close_enough(reconstructed, target_trade_bar))
+    adjacent_supported = bool(
+        checks[0]["trade_ids_contiguous_within_hour"]
+        and checks[0]["trade_matches_frozen_h1"]
+        and checks[2]["trade_ids_contiguous_within_hour"]
+        and checks[2]["trade_matches_frozen_h1"]
+        and all(bridge["consecutive_ids"] for bridge in bridges)
+    )
+    source_dir = (ROOT / cfg["source_h1_series"]).parent
+    month_receipt = next(row for row in json.loads((source_dir / "months.json").read_text())
+                         if row["month"] == cfg["month"])
+    source_receipt = json.loads((source_dir / "source.json").read_text())
+    price_proven = bool(
+        source_receipt.get("instrument") == inst
+        and month_receipt.get("status") == "native_archive"
+        and month_receipt.get("incomplete_hours") == 1
+        and one_missing_id and target_id_bracketed_in_daily_and_monthly
+        and day_neighbor_match and known_missing_hour_trades_match_month
+        and trade_id_time_monotonic and before_in_missing_minute
+        and known_0311_is_single_bracketed_trade
+        and no_trades_0312 and candle_0312_zero and candle_0313_volume_matches
+        and float(before_row.price) == missing_minute_price
+        and float(minute_after.close) == missing_minute_price
+        and daily_source_supports_minute and trade_ohlc_crosscheck and adjacent_supported
+        and target_ms not in frozen.index
+    )
+
+    direct_checks_consistent = True
+    for check in direct_checks:
+        if not check["confirmed_exact_row"]:
+            continue
+        direct_row = check["exact_timestamp_rows"][0]
+        direct_ohlc = np.asarray(list(map(float, direct_row[1:5])))
+        expected_ohlc = (reconstructed[OHLC].to_numpy(float)
+                         if check["requested_bar"] == "1H"
+                         else np.repeat(missing_minute_price, 4))
+        direct_checks_consistent &= bool(np.isclose(direct_ohlc, expected_ohlc, rtol=1e-9, atol=1e-13).all())
+    price_proven &= direct_checks_consistent
+
+    output_series = CACHE / "series" / inst / "bars1h_v2.csv.gz"
+    output_series.parent.mkdir(parents=True, exist_ok=True)
+    if price_proven:
+        augmented = pd.concat([frozen, reconstructed.to_frame().T]).sort_index()
+    else:
+        augmented = frozen.copy()
+    augmented.index = augmented.index.astype("int64")
+    augmented.index.name = "time"
+    temp_series = output_series.with_suffix(output_series.suffix + ".part")
+    augmented.to_csv(temp_series, float_format="%.15g", compression="gzip")
+    temp_series.replace(output_series)
+    minute_evidence_path = EXP / "minute_price_evidence_v2.csv.gz"
+    minute_temp = minute_evidence_path.with_suffix(minute_evidence_path.suffix + ".part")
+    minute_rows.reset_index().to_csv(minute_temp, index=False, float_format="%.15g", compression="gzip")
+    minute_temp.replace(minute_evidence_path)
+
+    for check in checks:
+        check["price_ohlc_proven_by_candle_id_bounds"] = bool(check["time"] == target_ms and price_proven)
+        check["eligible_for_admission"] = bool(check["time"] == target_ms and price_proven)
+        check["price_evidence_type"] = (
+            "exact_price_bounded_missing_trade_id" if check["time"] == target_ms and price_proven
+            else "native_trade_id_contiguous" if check["trade_ids_contiguous_within_hour"]
+            else "unverified"
+        )
+    checks_path = EXP / "hour_checks_v2.csv.gz"
+    checks_temp = checks_path.with_suffix(checks_path.suffix + ".part")
+    pd.DataFrame(checks).to_csv(checks_temp, index=False, float_format="%.15g", compression="gzip")
+    checks_temp.replace(checks_path)
+
+    result = {
+        "version": 2,
+        "instrument": inst,
+        "target_hour_utc": cfg["target_hour_utc"],
+        "target_hour_ms": target_ms,
+        "verified": price_proven,
+        "eligible_for_admission": price_proven,
+        "price_ohlc_proven": price_proven,
+        "volume_proven": False,
+        "missing_trade_id": gap_before_id,
+        "missing_trade_size": None,
+        "target_trade_hour_had_missing_id": True,
+        "new_h1_row": ({"time": target_ms, **{key: float(reconstructed[key]) for key in OHLC}}
+                        if price_proven else None),
+        "missing_minute_exact_price_ohlc": ({key: missing_minute_price for key in OHLC}
+                                              if price_proven else None),
+        "missing_minute_open_ms": missing_minute_ms,
+        "missing_minute_trade_id_neighbors": {
+            "previous_id": int(before_row.trade_id),
+            "previous_time_ms": int(before_row.created_time),
+            "previous_price": float(before_row.price),
+            "next_id": int(after_row.trade_id),
+            "next_time_ms": int(after_row.created_time),
+            "next_price": float(after_row.price),
+            "inclusive_time_bounds_ms": gap_bracket_ms,
+            "possible_minutes_after_constraints": ["2022-10-26T03:11:00Z"],
+        },
+        "price_reconstruction_logic": {
+            "daily_and_monthly_trade_archives_both_omit_one_id": one_missing_id,
+            "native_trade_ids_and_timestamps_monotonic": trade_id_time_monotonic,
+            "03_12_confirmed_zero_volume": candle_0312_zero,
+            "03_13_volume_equals_known_next_trade_size": candle_0313_volume_matches,
+            "official_no_trade_candle_carries_previous_close": zero_trade_carry_rule,
+            "deduced_missing_03_11_ohlc": {key: missing_minute_price for key in OHLC},
+            "known_03_11_trade_price": float(before_row.price),
+            "remaining_unknowns": ["missing trade record size", "minute and hourly total volume"],
+        },
+        "official_direct_rest_checks": direct_checks,
+        "daily_trade_archive": daily_trade_receipt,
+        "daily_candle_archive": daily_candle_receipt,
+        "daily_monthly_candle_overlap": {
+            "common_confirmed_minutes": int(len(common_minutes)),
+            "all_common_ohlcv_and_confirm_equal": same_daily_monthly,
+            "daily_missing_target_hour_minutes_ms": daily_missing,
+            "monthly_missing_target_hour_minutes_ms": monthly_missing,
+        },
+        "hour_checks": checks,
+        "trade_id_boundary_checks": bridges,
+        "minute_price_evidence_path": str(minute_evidence_path.relative_to(ROOT)),
+        "output_series_path": str(output_series.relative_to(ROOT)),
+        "reader": {
+            "pandas": "pd.read_csv(path, index_col='time', float_precision='round_trip')",
+            "time_index": "UTC Unix milliseconds at H1 open",
+            "price_columns": OHLC,
+            "admission_column": "eligible_for_admission",
+        },
+        "cvc_source_receipt": source_receipt,
+        "cvc_month_receipt": month_receipt,
+        "no_interpolation": True,
+        "scope_limit": "Price OHLC is proved; the one missing trade's quantity and volume are not reconstructed.",
+    }
+    _atomic_json(EXP / "source_check_v2.json", result)
+    return result
+
+
 def build() -> dict:
     cfg = json.loads(CFG.read_text())
     inst = cfg["instrument"]
@@ -344,17 +722,20 @@ def build() -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--summary-only", action="store_true", help="Print the existing source check without fetching")
+    parser.add_argument("--v2", action="store_true", help="Run exact-price-bound reconstruction and preserve v1")
     args = parser.parse_args()
     EXP.mkdir(parents=True, exist_ok=True)
+    receipt_name = "source_check_v2.json" if args.v2 else "source_check.json"
     if args.summary_only:
-        receipt = EXP / "source_check.json"
+        receipt = EXP / receipt_name
         if not receipt.exists():
             raise FileNotFoundError(receipt)
         result = json.loads(receipt.read_text())
     else:
-        result = build()
+        result = build_v2() if args.v2 else build()
     print(json.dumps({
         "verified": result["verified"],
+        "eligible_for_admission": result.get("eligible_for_admission", result["verified"]),
         "target_hour_utc": result["target_hour_utc"],
         "new_h1_row": result["new_h1_row"],
         "target_missing_minute_trade_prints": result["target_minute_archive_has_prints_in_missing_minute"],
