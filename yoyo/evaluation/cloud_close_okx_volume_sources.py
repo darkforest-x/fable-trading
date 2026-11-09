@@ -211,17 +211,25 @@ def _native_window_status(times: Sequence[int], bars: Mapping[int, dict]) -> Tup
 
 
 def _month_strings(start_ms: int, end_ms_exclusive: int) -> List[str]:
-    first = datetime.fromtimestamp(start_ms / 1000, tz=timezone.utc)
-    last = datetime.fromtimestamp((end_ms_exclusive - 1) / 1000, tz=timezone.utc)
-    result: List[str] = []
-    year, month = first.year, first.month
-    while (year, month) <= (last.year, last.month):
-        result.append("%04d-%02d" % (year, month))
-        month += 1
-        if month == 13:
-            year += 1
-            month = 1
-    return result
+    """Return UTC and UTC+8 archive-month labels intersecting the interval.
+
+    OKX's public candle archives partition trading dates at UTC+8. Around a
+    month boundary, UTC timestamps from the prior month can therefore live in
+    the next month's ZIP; considering both month clocks avoids a false gap.
+    """
+    def clock_months(offset_ms: int) -> Set[str]:
+        first = datetime.fromtimestamp((start_ms + offset_ms) / 1000, tz=timezone.utc)
+        last = datetime.fromtimestamp((end_ms_exclusive - 1 + offset_ms) / 1000, tz=timezone.utc)
+        result: Set[str] = set()
+        year, month = first.year, first.month
+        while (year, month) <= (last.year, last.month):
+            result.add("%04d-%02d" % (year, month))
+            month += 1
+            if month == 13:
+                year += 1
+                month = 1
+        return result
+    return sorted(clock_months(0) | clock_months(8 * 60 * 60 * 1000))
 
 
 def _merge_intervals(times: Iterable[int]) -> List[Tuple[int, int]]:
@@ -369,11 +377,14 @@ def volume_features(
     native API pages and the read-only shared candle cache are preferred. A
     missing event may be completed only from an already-present OKX official
     minute ZIP, with a complete 720-confirmed-minute requirement per 12H bar.
+    ``source_map`` is accepted from the price builder for universe alignment;
+    price paths are not used as volume substitutes.
     ``cache_dir`` optionally points at frozen extra API pages under a caller's
     experiment input directory; the function itself does not make network calls.
     """
     frame = _required_key_rows(parents)
     symbols = sorted(frame.symbol.unique().tolist())
+    source_map_symbols = set(map(str, source_map)) if source_map is not None else None
     extra_cache = Path(cache_dir) if cache_dir is not None else None
     native = _load_native(symbols, extra_cache)
     event_windows: Dict[str, List[int]] = {
@@ -400,8 +411,11 @@ def volume_features(
                     existing["source_paths"].extend(archived.get("source_paths", []))
 
     receipts_by_symbol = archive_receipts
+    receipts_by_symbol_month = {
+        symbol: {str(receipt.get("month")): receipt for receipt in receipts}
+        for symbol, receipts in archive_receipts.items()
+    }
     records: List[dict] = []
-    used_bar_rows: Dict[Tuple[str, int], dict] = {}
     for row in frame.itertuples(index=False):
         event_id, symbol, key = str(row.event_id), str(row.symbol), int(row.key_open_ms)
         times = event_windows[event_id]
@@ -419,19 +433,6 @@ def volume_features(
             else:
                 volumes[stamp] = float(item["base_volume"])
                 sources.add(str(item.get("source", "unknown")))
-            item = item or {}
-            used_bar_rows[(symbol, stamp)] = {
-                "symbol": symbol,
-                "time": stamp,
-                "base_volume": item.get("base_volume") if item.get("confirmed") and not item.get("conflict") else np.nan,
-                "confirmed": bool(item.get("confirmed", False)),
-                "conflict": bool(item.get("conflict", False)),
-                "source": item.get("source", ""),
-                "source_paths": "|".join(sorted(set(item.get("source_paths", [])))),
-                "source_months": "|".join(item.get("source_months", [])),
-                "minute_count": item.get("minute_count", np.nan),
-                "unconfirmed_minutes": item.get("unconfirmed_minutes", np.nan),
-            }
         reason = ""
         current = volumes.get(key, np.nan)
         prior_values = [volumes.get(stamp, np.nan) for stamp in times[:-1]]
@@ -441,12 +442,20 @@ def volume_features(
         if conflicts:
             reason = "conflicting_native_or_archive_volume"
         elif invalid:
-            receipts = receipts_by_symbol.get(symbol, [])
-            states = {r.get("status") for r in receipts}
-            if "official_404" in states:
+            month_receipts = receipts_by_symbol_month.get(symbol, {})
+            relevant = [
+                month_receipts.get(month, {}).get("status")
+                for stamp in invalid
+                for month in _month_strings(stamp, stamp + STEP_12H_MS)
+            ]
+            if "official_404" in relevant:
                 reason = "official_archive_404_or_delisted_gap"
-            elif "not_cached" in states:
+            elif "not_cached" in relevant:
                 reason = "required_official_archive_month_not_cached"
+            elif "volume_fields_missing" in relevant:
+                reason = "archive_base_volume_field_missing"
+            elif "archive_read_error" in relevant or "invalid_archive_values" in relevant:
+                reason = "archive_read_or_value_error"
             elif any(bars.get(t, {}).get("minute_count", 0) not in (0, 720) for t in invalid):
                 reason = "incomplete_or_unconfirmed_12h_archive_bar"
             else:
@@ -472,18 +481,10 @@ def volume_features(
             "volume_missing_reason": reason,
             "volume_source": source,
             "volume_unit": "base_asset",
+            "source_map_present": None if source_map_symbols is None else symbol in source_map_symbols,
         })
     result = pd.DataFrame.from_records(records).set_index("event_id")
     result.index.name = "event_id"
     if not result.index.is_unique:
         raise ValueError("OKX volume adapter output must have unique event_id index")
-    if extra_cache is not None:
-        _read_extra_cache(extra_cache, native)
     return result
-
-
-def _read_extra_cache(cache_dir: Path, observations: Dict[str, Dict[int, dict]]) -> None:
-    """Compatibility hook for source-page caches supplied by the caller."""
-    # Pages are loaded before feature calculation by ``_load_native``. This
-    # small function remains intentionally side-effect-free for callers.
-    return None
