@@ -17,31 +17,31 @@ EXP = scores.EXP.parent / 'exp-cloud-close-weight-trim-20261109-v1'
 
 
 @njit(cache=True)
-def segment(c, eligible, limit, target, fraction):
+def segment(c, eligible, limit, target, fraction, nlegs):
     phase = c.i % 4
     if phase == 0:
         # State and marks here still belong to the prior completed H1 close.
         previous_nav = nb.get_group_value_ctx_nb(c)
-        for col in range(c.from_col, c.to_col, 2):
-            target[col//2] = -1.
-            if c.i > 0 and eligible[c.i//4, col//2]:
-                previous_price = c.close[c.i-1, col+1]
-                quantity = abs(c.last_position[col]) + abs(c.last_position[col+1])
+        for col in range(c.from_col, c.to_col, nlegs):
+            target[col//nlegs] = -1.
+            if c.i > 0 and eligible[c.i//4, col//nlegs]:
+                previous_price = c.close[c.i-1, col+nlegs-1]
+                quantity = np.abs(c.last_position[col:col+nlegs]).sum()
                 if quantity * previous_price > previous_nav * limit:
-                    target[col//2] = previous_nav * limit / previous_price
+                    target[col//nlegs] = previous_nav * limit / previous_price
     if phase == 2:
         # Native exits at the open have already occurred; trim only actual remaining units.
-        for col in range(c.from_col, c.to_col, 2):
-            goal = target[col//2]
-            quantity = abs(c.last_position[col]) + abs(c.last_position[col+1])
-            fraction[col//2] = 1. - goal / quantity if 0. <= goal < quantity else 0.
+        for col in range(c.from_col, c.to_col, nlegs):
+            goal = target[col//nlegs]
+            quantity = np.abs(c.last_position[col:col+nlegs]).sum()
+            fraction[col//nlegs] = 1. - goal / quantity if 0. <= goal < quantity else 0.
     return w.pre_segment(c)
 
 
 @njit(cache=True)
 def order(c, nav, actions, prices, fees, exposure, weights, reserve, slot_weights, fraction):
     if c.i % 4 == 2:
-        ratio = fraction[c.col//2]
+        ratio = fraction[c.col//len(weights)]
         if c.position_now == 0. or ratio <= 1.e-10:
             return NoOrder
         return nb.order_nb(size=-c.position_now*ratio, price=c.close[c.i,c.col], fees=w.TAKER,
@@ -49,29 +49,34 @@ def order(c, nav, actions, prices, fees, exposure, weights, reserve, slot_weight
     return w.account_order(c, nav, actions, prices, fees, 0., exposure, weights, reserve, 0, slot_weights)
 
 
-def trim_account(data, quote_loader, exposure, limit):
+def trim_account(data, quote_loader, exposure, limit, leg_weights=(2/3,1/3)):
     """Require twelve consecutive prior H1 observations and the exact next open for each trim."""
     base = data['actions']
     hours, columns = base.shape[0]//3, base.shape[1]
-    eligible = np.zeros((hours, columns//2), dtype=bool)
-    runners = data['selected'].loc[data['selected'].slot.mod(2).eq(1)]
+    nlegs = len(leg_weights)
+    if min(leg_weights)<=0 or not np.isclose(sum(leg_weights),1.) or columns % nlegs:
+        raise ValueError('Invalid funded child reservations')
+    eligible = np.zeros((hours, columns//nlegs), dtype=bool)
+    runners = data['selected'].loc[data['selected'].slot.mod(nlegs).eq(nlegs-1)]
+    if not runners.tp_r.eq(0).all() or runners.event_id.duplicated().any():
+        raise ValueError('Last child must be the original cloud runner')
     for r in runners.itertuples():
         clock = quote_loader(r.symbol)[0]
         i,j = clock.searchsorted([r.entry_ms, r.exit_bar_ms+w.HOUR])
         times = clock[i:j]
         present = times[12:][(times[12:]-times[:-12] == 12*w.HOUR) & (times[12:] % (12*w.HOUR) == 0)]
-        eligible[(present-data['start'])//w.HOUR,r.slot//2] = True
+        eligible[(present-data['start'])//w.HOUR,r.slot//nlegs] = True
     def expand(field):
         return data[field].reshape(hours,3,columns)[:,[0,1,1,2],:].reshape(-1,columns).copy()
     marks, prices, fees = [expand(field) for field in ('marks','prices','fees')]
     actions = expand('actions')
     actions[2::4] = 0
-    fraction = np.zeros(columns//2)
+    fraction = np.zeros(columns//nlegs)
     pf = w.vbt.Portfolio.from_order_func(marks, order, actions, prices, fees, exposure,
-        np.array([2/3,1/3]), np.zeros(1), np.ones((1,1)), fraction,
-        pre_segment_func_nb=segment, pre_segment_args=(eligible,limit,np.full(columns//2,-1.),fraction),
+        np.asarray(leg_weights), np.zeros(1), np.ones((1,1)), fraction,
+        pre_segment_func_nb=segment, pre_segment_args=(eligible,limit,np.full(columns//nlegs,-1.),fraction,nlegs),
         cash_sharing=True, group_by=True, init_cash=1000., fill_pos_record=False,
-        max_orders=int(np.count_nonzero(actions)+2*eligible.sum()+1))
+        max_orders=int(np.count_nonzero(actions)+nlegs*eligible.sum()+1))
     fills = pf.orders.records.copy()
     fills['action'] = np.where(fills.idx.mod(4).eq(2), 3, actions[fills.idx, fills.col])
     fills['hour'] = data['start'] + fills.idx.floordiv(4)*w.HOUR
