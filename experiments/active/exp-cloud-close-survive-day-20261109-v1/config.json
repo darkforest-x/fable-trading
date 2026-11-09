@@ -1,0 +1,92 @@
+{
+  "id": "exp-cloud-close-survive-day-20261109-v1",
+  "parent": "Frozen OKX V1.7 12H full-runner paths with corrected point-in-time 90d admission",
+  "hypothesis": "Winning positions in the later selected strategy were held much longer than losing positions. As a retrospective hypothesis only, test whether the original V1.7 runner improves when entry waits a complete 24 hours and the source position is still open.",
+  "factor": "Single variable: replace original V1.7 confirmation-time entry with an entry exactly 24 hours later, conditional on the original runner surviving to that decision time.",
+  "inputs": {
+    "parent_paths": "experiments/active/exp-cloud-close-reward-20261109-v1/paths.csv.gz",
+    "corrected_90d_event_screen": "experiments/active/exp-cloud-close-okx-agreement-20261109-v1/event_screen.csv.gz",
+    "signals": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/signals.csv",
+    "frozen_full_runner_dir": "experiments/active/exp-cloud-close-exit-rotation-20261109-v1",
+    "frozen_full_runner_actual_funded_events": 1569,
+    "frozen_full_runner_control_funded_events": 1712
+  },
+  "wait": {
+    "hours": 24,
+    "anchor": "Each event's own original V1.7 12H confirmation and coincident original H1 open; for a control use its own matched control confirmation.",
+    "required_h1_open_timestamps": 25,
+    "meaning": "Require exact H1 opens at anchor + 0..24 hours: 24 contiguous complete hourly waiting bars and the exact delayed-entry H1 open.",
+    "required_native_12h_bars": 2,
+    "native_12h_closes": "Require bars opening at anchor and anchor + 12h; their close times are anchor + 12h and the delayed decision at anchor + 24h.",
+    "delayed_fill": "At the delayed decision timestamp, use the true archived H1 open, coincident with the second completed native 12H close."
+  },
+  "eligibility": {
+    "corrected_original_cohort": "Only the independently corrected event_screen rows with eligible_90d=true; controls are retained only when their parent signal is also originally eligible.",
+    "expected_original_eligible_actual_events": 11780,
+    "expected_original_eligible_paired_controls": 10816,
+    "delayed_90d": "Recheck the existing value-based 90d leadership at the delayed entry timestamp, requiring a numeric rank and at least 10 eligible cross-sectional members. Do not substitute the original entry-time rank.",
+    "native_12h_sources": [
+      "native12Hutc",
+      "OKX_history_12Hutc",
+      "shared_OKX_cache_12Hutc"
+    ],
+    "survival": "Use the frozen original tp_r=0 VectorBT runner exit timestamp and phase. Any original exit before the delayed entry rejects. At an equal timestamp, only an open-phase exit precedes the delayed H1 open; intrabar and close exits occur after the open and remain eligible for a delayed entry.",
+    "stop_safety": "The delayed H1 open must remain strictly on the safe side of the original absolute fixed stop.",
+    "minimum_rank_keys": 1000
+  },
+  "execution": {
+    "native_exit_path": "Reuse the exact original V1.7 tp_r=0 path exit timestamp, price, fee rate, reason, and phase. Do not replay the same fixed-stop/EMA exit path.",
+    "runner": "Original fixed touched-extension stop and confirmed 12H EMA exit; one full position, no target, no partial close.",
+    "same_bar_order": "Retain the frozen V1.7 stop/EMA callback, including decision-open precedence, intrabar stop/cloud ordering, and source-gap handling.",
+    "delayed_entry_account": "Recompute fills, fees, cash and hourly marks with the existing VectorBT shared wallet after replacing only the entry clock and open price."
+  },
+  "account": {
+    "wallet": "Existing cash-sharing VectorBT wallet in yoyo.evaluation.cloud_close_reward_account.evaluate.",
+    "starting_usdt": 1000,
+    "slots": 9,
+    "notional_cap": "Each admitted entry is capped at current account NAV / 9 and additionally at its equal share of available segregated collateral across flat slots, fees included.",
+    "one_position_per_symbol": true,
+    "entry_priority": "Low original prior ATR: use the event's source_row_number prior_atr_pct from signals.csv; its matched control inherits the same priority, preserving the existing V1.7 ordering rule.",
+    "slot_release": "Use the existing wallet semantics; a slot released by a position is available only after its exit bar.",
+    "outputs": "Run separate actual, original baseline, and (only after the delayed actual dev gate passes) paired signal/control and 5bp stress accounts."
+  },
+  "fees": {
+    "market_per_fill": 0.0005,
+    "base_slippage": 0,
+    "stress_adverse_slippage_per_market_fill": 0.0005,
+    "funding": "Not modeled; disclose as a limitation."
+  },
+  "selection": {
+    "development_period": "dev",
+    "development_cutoff_exclusive_utc": "2025-01-01T00:00:00Z",
+    "selection_rule": "No parameter selection; report whether the single delayed-entry arm passes the preregistered development gates. Run matched signal/control and 5bp market-fill stress checks only if it passes.",
+    "gates": {
+      "minimum_trades": 100,
+      "minimum_win_pct": 30,
+      "minimum_equal_notional_payoff": 2.5,
+      "minimum_funded_usdt_payoff": 2.5,
+      "maximum_conservative_dd_pct": 35
+    },
+    "metrics": ["final_usdt", "win_pct", "payoff_usdt", "dd_mark_pct", "dd_bound_pct"],
+    "periods": ["all", "dev", "2025", "2026"]
+  },
+  "outputs": {
+    "paths": "experiments/active/exp-cloud-close-survive-day-20261109-v1/paths.csv.gz",
+    "audit": "experiments/active/exp-cloud-close-survive-day-20261109-v1/audit.json",
+    "summary": "experiments/active/exp-cloud-close-survive-day-20261109-v1/summary.json",
+    "account_metrics": "experiments/active/exp-cloud-close-survive-day-20261109-v1/account_metrics.csv",
+    "funded": "experiments/active/exp-cloud-close-survive-day-20261109-v1/funded_survive_24h_actual.csv.gz",
+    "hourly": "experiments/active/exp-cloud-close-survive-day-20261109-v1/hourly_survive_24h_actual.csv.gz",
+    "funded_paired_actual": "experiments/active/exp-cloud-close-survive-day-20261109-v1/funded_paired_actual.csv.gz",
+    "hourly_paired_actual": "experiments/active/exp-cloud-close-survive-day-20261109-v1/hourly_paired_actual.csv.gz",
+    "funded_paired_control": "experiments/active/exp-cloud-close-survive-day-20261109-v1/funded_paired_control.csv.gz",
+    "hourly_paired_control": "experiments/active/exp-cloud-close-survive-day-20261109-v1/hourly_paired_control.csv.gz",
+    "funded_stress_5bp_actual": "experiments/active/exp-cloud-close-survive-day-20261109-v1/funded_stress_5bp_actual.csv.gz",
+    "hourly_stress_5bp_actual": "experiments/active/exp-cloud-close-survive-day-20261109-v1/hourly_stress_5bp_actual.csv.gz"
+  },
+  "commands": {
+    "self_check": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_survive_day --self-check",
+    "small_real_smoke_no_outputs": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_survive_day --smoke",
+    "formal_after_builder_commit": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_survive_day --run"
+  }
+}
