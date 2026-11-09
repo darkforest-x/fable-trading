@@ -1,0 +1,5 @@
+{
+  "question":"At the actual V1.7 decision, how much of the original intended USDT order can a 5bp immediate-or-cancel limit fill on the real visible book versus the 10% past-turnover ceiling?",
+  "single_variable":"Limit buy price to 1.0005 times the last observable previous H1/12H key close, or sell price to 0.9995 times this close. Send the original target-size quantity expressed at that known close. Consume opposing 400-level native quantities by best price to the limit; discard unfilled balance. Compare to a participation cap of 10% of previous-hour median per-minute turnover on the same intended orders, not on their compounded alternative account. No later minute volume enters either order.",
+  "population":"Reuse all previously preselected 24 ordinary 00 UTC events, showing the full observation denominator, plus the three separately labeled extreme trades. Keep missing or absent liquidity visible. First known native update and an alternative one second latency are separate executions. No simulated PnL from this sample; fees, historical queues, hidden liquidity, message latency distribution and full-history coverage are not inferred."
+}
