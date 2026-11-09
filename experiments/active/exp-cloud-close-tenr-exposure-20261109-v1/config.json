@@ -1,0 +1,7 @@
+{
+  "question": "Can the fixed 75% 10R, 25% cloud runner use its original 34.61% drawdown headroom to achieve the revised growth objective?",
+  "single_variable": "Change only the notional multiple of each funded isolated margin reservation, 1 (frozen comparison), 1.25, 1.5 or 2. Each of nine positions reserves at most one ninth of marked equity and its share of free cash. Both executions have the same leverage. Neither signal admission nor exits change.",
+  "cash": "1,000 USDT initial. Single shared cash account. Actual native 12H confirmation entry/stop/EMA exit and resting 10R target. VectorBT holds positive collateral shares whose price changes exactly reproduce signed linear-perpetual PnL. Charge taker 5bp and maker 2bp on actual underlying notional. Charge 5bp adverse slippage separately on market orders in stress run. Historical funding and mark-based margin tiers are not yet certified.",
+  "risk": "Reject a multiple if any observed original holding crosses a conservative 10% isolated maintenance buffer plus close fee. Compare the 1x adapter to the original full trade roster, cash profits, and hourly upper/lower NAV. Any rates or missing holding hours left unresolved preclude labeling the result fully verified.",
+  "selection": "Highest through-2024 ending NAV among development arms with win >=20%, money payoff >=2.5 and hourly upper drawdown <=50%. All later calendar windows were previously explored. Apply additional 5bp market slippage to selected multiple."
+}
