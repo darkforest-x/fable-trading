@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-major-rotation-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "f3dc1d2d1c"
+    status: "rejected"
+    question: "BTC、ETH 与现金三者轮动能否提高云带收益"
+    single_variable: "两币美元云带都向上时用已完成ETH/BTC云带择强，比较反向、BTC优先、ETH优先。"
+    result: "择强37066U；固定ETH优先36220U；反向11361U。79笔，胜50.63%，现金盈亏比1.83，已确定回撤63.54%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-major-rotation-20261109-v1/summary.json"
+    notes: "Both native prices and realized fees reconciled; full-window maximum drawdown witnessed across ordered hours. Funding excluded. Notion 41388564-79af-811f-9c73-c9980579c1ca."
+
+  - experiment_id: exp-cloud-close-option-vol-budget-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "56c20a958f"
+    status: "inconclusive"
+    question: "用期权隐含波动率判断何时减仓能否提高复利"
+    single_variable: "比较过去30天BTC实际波动和Deribit期权隐含波动，只把原本2倍的新仓降至1倍；另作反向及30天滞后对照。"
+    result: "实际高于隐含时减仓40991U、现金盈亏比6.60、胜21.64%、回撤上界38.44%；原42486U/42.11%，滞后33916U，反向28125U。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-option-vol-budget-20261109-v1/summary.json"
+    notes: "Common-window risk gate only. Original 1x on unobserved signals or original 2x fall back unchanged. Notion 41388564-79af-8161-8866-d690ae91ec1b."
+
   - experiment_id: exp-cloud-close-cash-giveback-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "cbb40710ca"
