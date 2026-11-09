@@ -1,0 +1,552 @@
+{
+  "arms": {
+    "uniform": {
+      "metrics": {
+        "all": {
+          "final_usdt": 13930.847043751442,
+          "multiple": 13.930847043751443,
+          "dd_mark_pct": 39.633512755545844,
+          "dd_bound_pct": 44.525696869621086,
+          "trades": 1586,
+          "win_pct": 33.79571248423707,
+          "payoff": 2.9068428031350013,
+          "payoff_usdt": 2.5739771198293306,
+          "median_net_pct": -3.2200768751759297
+        },
+        "dev": {
+          "final_usdt": 6451.552186043436,
+          "multiple": 6.451552186043436,
+          "dd_mark_pct": 39.633512755545844,
+          "dd_bound_pct": 40.17265248821524,
+          "trades": 1218,
+          "win_pct": 32.758620689655174,
+          "payoff": 3.0170402085411347,
+          "payoff_usdt": 2.528789105382878,
+          "median_net_pct": -3.1566869851997525
+        },
+        "2025": {
+          "final_usdt": 8322.508405276118,
+          "multiple": 1.29000094322729,
+          "dd_mark_pct": 29.70393190671128,
+          "dd_bound_pct": 42.77605342014349,
+          "trades": 207,
+          "win_pct": 32.850241545893724,
+          "payoff": 2.3264412878429934,
+          "payoff_usdt": 2.114395316108742,
+          "median_net_pct": -3.690469524900834
+        },
+        "2026": {
+          "final_usdt": 13930.847043751442,
+          "multiple": 1.6738759957178146,
+          "dd_mark_pct": 30.860119754387316,
+          "dd_bound_pct": 31.84789433556048,
+          "trades": 143,
+          "win_pct": 38.46153846153847,
+          "payoff": 2.7913530111968603,
+          "payoff_usdt": 2.5093171356512523,
+          "median_net_pct": -4.020585489208645
+        }
+      },
+      "margin": {
+        "1.25": {
+          "positions_audited": 1586,
+          "maintenance_boundary_hits": 1,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -0.1473167865044248,
+          "worst_remaining_equity_per_margin": 0.0704652931415929,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "12H|ZEREBROUSDT|1760011200000000000|-1",
+              "symbol": "ZEREBRO",
+              "side": -1,
+              "multiple": 1.25,
+              "market_slip": 0.0,
+              "entry_price": 0.01808,
+              "exit_price": 0.020071363000000002,
+              "threshold": 0.029563798273512035,
+              "hour": 1760191200000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://data.binance.vision/data/futures/um/daily/klines/ZEREBROUSDT/1m/ZEREBROUSDT-1m-2025-10-11.zip",
+              "stop_minute": 15,
+              "trade_boundary_minute": 47,
+              "mark_boundary_minute": 50,
+              "preceding_trade_close": 0.01979,
+              "stop_minute_open": 0.01979,
+              "stop_minute_trade_low": 0.01842,
+              "stop_minute_mark_low": 0.01855539,
+              "stop_minute_trade_high": 0.02031,
+              "stop_minute_mark_high": 0.02014013,
+              "full_hour_mark_low": 0.01747304,
+              "full_hour_mark_high": 0.03105323
+            }
+          ],
+          "all_flags_resolved": true
+        }
+      },
+      "trim_fills": 188
+    },
+    "uniform_stress": {
+      "metrics": {
+        "all": {
+          "final_usdt": 11443.18921591978,
+          "multiple": 11.44318921591978,
+          "dd_mark_pct": 41.40819420627113,
+          "dd_bound_pct": 44.92457510345784,
+          "trades": 1586,
+          "win_pct": 33.669609079445145,
+          "payoff": 2.8508508234950445,
+          "payoff_usdt": 2.5316458362632996,
+          "median_net_pct": -3.320077149642898
+        },
+        "dev": {
+          "final_usdt": 5542.411555713823,
+          "multiple": 5.542411555713823,
+          "dd_mark_pct": 41.40819420627113,
+          "dd_bound_pct": 41.93165118634551,
+          "trades": 1218,
+          "win_pct": 32.67651888341543,
+          "payoff": 2.944192897069606,
+          "payoff_usdt": 2.4842636188097256,
+          "median_net_pct": -3.2598452513179983
+        },
+        "2025": {
+          "final_usdt": 6958.555828378381,
+          "multiple": 1.2555104864424254,
+          "dd_mark_pct": 30.508826032738632,
+          "dd_bound_pct": 43.00594543281979,
+          "trades": 207,
+          "win_pct": 32.367149758454104,
+          "payoff": 2.3323960069605176,
+          "payoff_usdt": 2.129355016596795,
+          "median_net_pct": -3.786960055556581
+        },
+        "2026": {
+          "final_usdt": 11443.18921591978,
+          "multiple": 1.644477603995382,
+          "dd_mark_pct": 31.29349528709662,
+          "dd_bound_pct": 32.2752957578735,
+          "trades": 143,
+          "win_pct": 38.46153846153847,
+          "payoff": 2.745425311774181,
+          "payoff_usdt": 2.46825897373955,
+          "median_net_pct": -4.116566913007522
+        }
+      },
+      "margin": {
+        "1.25": {
+          "positions_audited": 1586,
+          "maintenance_boundary_hits": 1,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -0.1490309288578539,
+          "worst_remaining_equity_per_margin": 0.0687511507881638,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "12H|ZEREBROUSDT|1760011200000000000|-1",
+              "symbol": "ZEREBRO",
+              "side": -1,
+              "multiple": 1.25,
+              "market_slip": 0.0005,
+              "entry_price": 0.01808,
+              "exit_price": 0.020071363000000002,
+              "threshold": 0.029540817523995844,
+              "hour": 1760191200000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://data.binance.vision/data/futures/um/daily/klines/ZEREBROUSDT/1m/ZEREBROUSDT-1m-2025-10-11.zip",
+              "stop_minute": 15,
+              "trade_boundary_minute": 47,
+              "mark_boundary_minute": 50,
+              "preceding_trade_close": 0.01979,
+              "stop_minute_open": 0.01979,
+              "stop_minute_trade_low": 0.01842,
+              "stop_minute_mark_low": 0.01855539,
+              "stop_minute_trade_high": 0.02031,
+              "stop_minute_mark_high": 0.02014013,
+              "full_hour_mark_low": 0.01747304,
+              "full_hour_mark_high": 0.03105323
+            }
+          ],
+          "all_flags_resolved": true
+        }
+      },
+      "trim_fills": 188
+    },
+    "contrarian": {
+      "metrics": {
+        "all": {
+          "final_usdt": 18641.767656661417,
+          "multiple": 18.64176765666142,
+          "dd_mark_pct": 38.54938407885107,
+          "dd_bound_pct": 45.263041593827644,
+          "trades": 1586,
+          "win_pct": 33.79571248423707,
+          "payoff": 2.934598314211982,
+          "payoff_usdt": 2.58512134364668,
+          "median_net_pct": -3.2200768751759266
+        },
+        "dev": {
+          "final_usdt": 9604.388174371681,
+          "multiple": 9.604388174371682,
+          "dd_mark_pct": 38.54938407885107,
+          "dd_bound_pct": 39.11907152144263,
+          "trades": 1218,
+          "win_pct": 32.758620689655174,
+          "payoff": 3.0508934111292976,
+          "payoff_usdt": 2.666716359757657,
+          "median_net_pct": -3.1566869851997486
+        },
+        "2025": {
+          "final_usdt": 11990.885813236015,
+          "multiple": 1.248479923503348,
+          "dd_mark_pct": 29.63985337788284,
+          "dd_bound_pct": 41.71549185318347,
+          "trades": 207,
+          "win_pct": 32.850241545893724,
+          "payoff": 2.341283974784581,
+          "payoff_usdt": 2.1082753449199676,
+          "median_net_pct": -3.6904695249008594
+        },
+        "2026": {
+          "final_usdt": 18641.767656661417,
+          "multiple": 1.554661427605615,
+          "dd_mark_pct": 31.087689209301907,
+          "dd_bound_pct": 32.09430803385301,
+          "trades": 143,
+          "win_pct": 38.46153846153847,
+          "payoff": 2.8088838200818587,
+          "payoff_usdt": 2.3611511736156943,
+          "median_net_pct": -4.020585489208633
+        }
+      },
+      "margin": {
+        "1.0": {
+          "positions_audited": 832,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.08214657079646018,
+          "worst_remaining_equity_per_margin": 0.25637223451327434,
+          "valid": true,
+          "checked_hours": [],
+          "all_flags_resolved": true
+        },
+        "1.5": {
+          "positions_audited": 754,
+          "maintenance_boundary_hits": 1,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -0.11168476203353153,
+          "worst_remaining_equity_per_margin": 0.1255651027582478,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "12H|MOVRUSDT|1787400000000000000|-1",
+              "symbol": "MOVR",
+              "side": -1,
+              "multiple": 1.5,
+              "market_slip": 0.0,
+              "entry_price": 0.7396,
+              "exit_price": 0.8696805,
+              "threshold": 1.1197608965621688,
+              "hour": 1787803200000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://data.binance.vision/data/futures/um/daily/klines/MOVRUSDT/1m/MOVRUSDT-1m-2026-08-27.zip",
+              "stop_minute": 3,
+              "trade_boundary_minute": 17,
+              "mark_boundary_minute": 17,
+              "preceding_trade_close": 0.8626,
+              "stop_minute_open": 0.8624,
+              "stop_minute_trade_low": 0.8488,
+              "stop_minute_mark_low": 0.85696955,
+              "stop_minute_trade_high": 0.881,
+              "stop_minute_mark_high": 0.8775,
+              "full_hour_mark_low": 0.8066,
+              "full_hour_mark_high": 1.1663
+            }
+          ],
+          "all_flags_resolved": true
+        }
+      },
+      "trim_fills": 222
+    },
+    "contrarian_stress": {
+      "metrics": {
+        "all": {
+          "final_usdt": 15356.086485590098,
+          "multiple": 15.356086485590097,
+          "dd_mark_pct": 40.34801239069127,
+          "dd_bound_pct": 45.636745802836444,
+          "trades": 1586,
+          "win_pct": 33.669609079445145,
+          "payoff": 2.8781543339368576,
+          "payoff_usdt": 2.54769655161383,
+          "median_net_pct": -3.3200771496429082
+        },
+        "dev": {
+          "final_usdt": 8266.450870180353,
+          "multiple": 8.266450870180353,
+          "dd_mark_pct": 40.34801239069127,
+          "dd_bound_pct": 40.90128966325236,
+          "trades": 1218,
+          "win_pct": 32.67651888341543,
+          "payoff": 2.977308420956132,
+          "payoff_usdt": 2.617163977916682,
+          "median_net_pct": -3.259845251317989
+        },
+        "2025": {
+          "final_usdt": 10054.017968612277,
+          "multiple": 1.2162436003678716,
+          "dd_mark_pct": 30.42270490701916,
+          "dd_bound_pct": 41.91909016614963,
+          "trades": 207,
+          "win_pct": 32.367149758454104,
+          "payoff": 2.3475596074767737,
+          "payoff_usdt": 2.1226616244690373,
+          "median_net_pct": -3.786960055556573
+        },
+        "2026": {
+          "final_usdt": 15356.086485590098,
+          "multiple": 1.5273581699903853,
+          "dd_mark_pct": 31.52666337689429,
+          "dd_bound_pct": 32.52537779612178,
+          "trades": 143,
+          "win_pct": 38.46153846153847,
+          "payoff": 2.7626148311782024,
+          "payoff_usdt": 2.3232383845718374,
+          "median_net_pct": -4.116566913007525
+        }
+      },
+      "margin": {
+        "1.0": {
+          "positions_audited": 832,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.08077525691371687,
+          "worst_remaining_equity_per_margin": 0.25500092063053104,
+          "valid": true,
+          "checked_hours": [],
+          "all_flags_resolved": true
+        },
+        "1.5": {
+          "positions_audited": 754,
+          "maintenance_boundary_hits": 1,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -0.11362122948215216,
+          "worst_remaining_equity_per_margin": 0.12362863530962719,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "12H|MOVRUSDT|1787400000000000000|-1",
+              "symbol": "MOVR",
+              "side": -1,
+              "multiple": 1.5,
+              "market_slip": 0.0005,
+              "entry_price": 0.7396,
+              "exit_price": 0.8696805,
+              "threshold": 1.1188656026976667,
+              "hour": 1787803200000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://data.binance.vision/data/futures/um/daily/klines/MOVRUSDT/1m/MOVRUSDT-1m-2026-08-27.zip",
+              "stop_minute": 3,
+              "trade_boundary_minute": 15,
+              "mark_boundary_minute": 17,
+              "preceding_trade_close": 0.8626,
+              "stop_minute_open": 0.8624,
+              "stop_minute_trade_low": 0.8488,
+              "stop_minute_mark_low": 0.85696955,
+              "stop_minute_trade_high": 0.881,
+              "stop_minute_mark_high": 0.8775,
+              "full_hour_mark_low": 0.8066,
+              "full_hour_mark_high": 1.1663
+            }
+          ],
+          "all_flags_resolved": true
+        }
+      },
+      "trim_fills": 222
+    },
+    "momentum": {
+      "margin": {
+        "1.0": {
+          "positions_audited": 754,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.258876825310979,
+          "worst_remaining_equity_per_margin": 0.4170434018388319,
+          "valid": true,
+          "checked_hours": [],
+          "all_flags_resolved": true
+        },
+        "1.5": {
+          "positions_audited": 832,
+          "maintenance_boundary_hits": 2,
+          "negative_equity_positions": 1,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -0.3767801438053098,
+          "worst_remaining_equity_per_margin": -0.11544164823008853,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "12H|AIOTUSDT|1756900800000000000|1",
+              "symbol": "AIOT",
+              "side": 1,
+              "multiple": 1.5,
+              "market_slip": 0.0,
+              "entry_price": 1.6432,
+              "exit_price": 1.358732156,
+              "threshold": 0.6098442838614045,
+              "hour": 1757332800000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "same_or_earlier_boundary_minute",
+              "trade_source": "https://data.binance.vision/data/futures/um/daily/klines/AIOTUSDT/1m/AIOTUSDT-1m-2025-09-08.zip",
+              "stop_minute": 11,
+              "trade_boundary_minute": 11,
+              "mark_boundary_minute": 11,
+              "preceding_trade_close": 1.5199,
+              "stop_minute_open": 1.5198,
+              "stop_minute_trade_low": 0.5698,
+              "stop_minute_mark_low": 0.49755273,
+              "stop_minute_trade_high": 1.5227,
+              "stop_minute_mark_high": 1.5202,
+              "full_hour_mark_low": 0.49755273,
+              "full_hour_mark_high": 1.52084342
+            },
+            {
+              "event_id": "12H|ZEREBROUSDT|1760011200000000000|-1",
+              "symbol": "ZEREBRO",
+              "side": -1,
+              "multiple": 1.5,
+              "market_slip": 0.0,
+              "entry_price": 0.01808,
+              "exit_price": 0.020071363000000002,
+              "threshold": 0.02737327881266091,
+              "hour": 1760191200000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://data.binance.vision/data/futures/um/daily/klines/ZEREBROUSDT/1m/ZEREBROUSDT-1m-2025-10-11.zip",
+              "stop_minute": 15,
+              "trade_boundary_minute": 41,
+              "mark_boundary_minute": 45,
+              "preceding_trade_close": 0.01979,
+              "stop_minute_open": 0.01979,
+              "stop_minute_trade_low": 0.01842,
+              "stop_minute_mark_low": 0.01855539,
+              "stop_minute_trade_high": 0.02031,
+              "stop_minute_mark_high": 0.02014013,
+              "full_hour_mark_low": 0.01747304,
+              "full_hour_mark_high": 0.03105323
+            }
+          ],
+          "all_flags_resolved": false
+        }
+      },
+      "unresolved": true
+    },
+    "momentum_stress": {
+      "margin": {
+        "1.0": {
+          "positions_audited": 754,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.25758584701189857,
+          "worst_remaining_equity_per_margin": 0.41575242353975145,
+          "valid": true,
+          "checked_hours": [],
+          "all_flags_resolved": true
+        },
+        "1.5": {
+          "positions_audited": 832,
+          "maintenance_boundary_hits": 2,
+          "negative_equity_positions": 1,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -0.3788371146294247,
+          "worst_remaining_equity_per_margin": -0.11749861905420345,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "12H|AIOTUSDT|1756900800000000000|1",
+              "symbol": "AIOT",
+              "side": 1,
+              "multiple": 1.5,
+              "market_slip": 0.0005,
+              "entry_price": 1.6432,
+              "exit_price": 1.358732156,
+              "threshold": 0.6110636687252279,
+              "hour": 1757332800000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "same_or_earlier_boundary_minute",
+              "trade_source": "https://data.binance.vision/data/futures/um/daily/klines/AIOTUSDT/1m/AIOTUSDT-1m-2025-09-08.zip",
+              "stop_minute": 11,
+              "trade_boundary_minute": 11,
+              "mark_boundary_minute": 11,
+              "preceding_trade_close": 1.5199,
+              "stop_minute_open": 1.5198,
+              "stop_minute_trade_low": 0.5698,
+              "stop_minute_mark_low": 0.49755273,
+              "stop_minute_trade_high": 1.5227,
+              "stop_minute_mark_high": 1.5202,
+              "full_hour_mark_low": 0.49755273,
+              "full_hour_mark_high": 1.52084342
+            },
+            {
+              "event_id": "12H|ZEREBROUSDT|1760011200000000000|-1",
+              "symbol": "ZEREBRO",
+              "side": -1,
+              "multiple": 1.5,
+              "market_slip": 0.0005,
+              "entry_price": 0.01808,
+              "exit_price": 0.020071363000000002,
+              "threshold": 0.027351392775518943,
+              "hour": 1760191200000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://data.binance.vision/data/futures/um/daily/klines/ZEREBROUSDT/1m/ZEREBROUSDT-1m-2025-10-11.zip",
+              "stop_minute": 15,
+              "trade_boundary_minute": 41,
+              "mark_boundary_minute": 45,
+              "preceding_trade_close": 0.01979,
+              "stop_minute_open": 0.01979,
+              "stop_minute_trade_low": 0.01842,
+              "stop_minute_mark_low": 0.01855539,
+              "stop_minute_trade_high": 0.02031,
+              "stop_minute_mark_high": 0.02014013,
+              "full_hour_mark_low": 0.01747304,
+              "full_hour_mark_high": 0.03105323
+            }
+          ],
+          "all_flags_resolved": false
+        }
+      },
+      "unresolved": true
+    }
+  },
+  "native_funded": 1586,
+  "caveat": "Original Binance scored, retired-inclusive portfolio through September 2026, different history and admission from OKX. H1 risk flags require Binance-specific evidence. Funding not included."
+}

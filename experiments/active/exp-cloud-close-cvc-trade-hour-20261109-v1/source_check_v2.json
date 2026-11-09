@@ -1,0 +1,237 @@
+{
+  "cvc_month_receipt": {
+    "archive": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202210/CVC-USDT-SWAP-candlesticks-2022-10.zip",
+    "complete_h1": 743,
+    "incomplete_hours": 1,
+    "month": "2022-10",
+    "raw_rows": 44639,
+    "status": "native_archive",
+    "unconfirmed_rows": 0
+  },
+  "cvc_source_receipt": {
+    "different_first_utc_hours": [],
+    "first_ms": 1630425600000,
+    "from_complete_native_minutes": 30648,
+    "hours": 30648,
+    "instrument": "CVC-USDT-SWAP",
+    "last_ms": 1763103600000,
+    "native_months": 51,
+    "overlap_disagreements": 0,
+    "overlap_hours": 0,
+    "preexisting_local_source": {
+      "complete_15m_aggregated_hours": 0,
+      "fifteen_minute_files": [],
+      "h1_archive_files": [],
+      "h1_archive_rows": 0,
+      "overlap_differences_vs_15m": 0,
+      "shared_cache_rows": 0
+    },
+    "supplemental_local_h1": 0,
+    "unconfirmed_minute_rows": 372185
+  },
+  "daily_candle_archive": {
+    "bytes": 12375,
+    "local_path": "data/research/cloud_close_cvc_trade_hour/daily/CVC-USDT-SWAP/CVC-USDT-SWAP-candlesticks-2022-10-26.zip",
+    "response_headers": {
+      "cache": "reused local official archive"
+    },
+    "sha256": "64b3db3095d778adebb155bf6ba1b07e5d163227e21c435d96252e3a70d22a97",
+    "url": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20221026/CVC-USDT-SWAP-candlesticks-2022-10-26.zip",
+    "zip_member": "CVC-USDT-SWAP-candlesticks-2022-10-26.csv"
+  },
+  "daily_monthly_candle_overlap": {
+    "all_common_ohlcv_and_confirm_equal": true,
+    "common_confirmed_minutes": 1439,
+    "daily_missing_target_hour_minutes_ms": [
+      1666753860000
+    ],
+    "monthly_missing_target_hour_minutes_ms": [
+      1666753860000
+    ]
+  },
+  "daily_trade_archive": {
+    "bytes": 34661,
+    "local_path": "data/research/cloud_close_cvc_trade_hour/daily/CVC-USDT-SWAP/CVC-USDT-SWAP-trades-2022-10-26.zip",
+    "response_headers": {
+      "cache": "reused local official archive"
+    },
+    "sha256": "7bf9abb02f27248bf979c8e28bbdd6a8955e871121aac83c3f5c404b6655e596",
+    "url": "https://static.okx.com/cdn/okex/traderecords/trades/daily/20221026/CVC-USDT-SWAP-trades-2022-10-26.zip",
+    "zip_member": "CVC-USDT-SWAP-trades-2022-10-26.csv"
+  },
+  "eligible_for_admission": true,
+  "hour_checks": [
+    {
+      "close": 0.1225,
+      "confirmed_daily_minutes": 60,
+      "daily_minute_rows": 60,
+      "eligible_for_admission": false,
+      "high": 0.1225,
+      "hour_utc": "2022-10-26T02:00:00+00:00",
+      "low": 0.1219,
+      "open": 0.1222,
+      "price_evidence_type": "native_trade_id_contiguous",
+      "price_ohlc_proven_by_candle_id_bounds": false,
+      "time": 1666749600000,
+      "trade_first_id": 13541354,
+      "trade_id_span_matches_print_count": true,
+      "trade_ids_contiguous_within_hour": true,
+      "trade_last_id": 13541483,
+      "trade_matches_frozen_h1": true,
+      "trade_prints": 130
+    },
+    {
+      "close": 0.1229,
+      "confirmed_daily_minutes": 59,
+      "daily_minute_rows": 59,
+      "eligible_for_admission": true,
+      "high": 0.1231,
+      "hour_utc": "2022-10-26T03:00:00+00:00",
+      "low": 0.1223,
+      "open": 0.1224,
+      "price_evidence_type": "exact_price_bounded_missing_trade_id",
+      "price_ohlc_proven_by_candle_id_bounds": true,
+      "time": 1666753200000,
+      "trade_first_id": 13541484,
+      "trade_id_span_matches_print_count": false,
+      "trade_ids_contiguous_within_hour": false,
+      "trade_last_id": 13541583,
+      "trade_matches_frozen_h1": false,
+      "trade_prints": 99
+    },
+    {
+      "close": 0.1229,
+      "confirmed_daily_minutes": 60,
+      "daily_minute_rows": 60,
+      "eligible_for_admission": false,
+      "high": 0.1236,
+      "hour_utc": "2022-10-26T04:00:00+00:00",
+      "low": 0.1228,
+      "open": 0.1228,
+      "price_evidence_type": "native_trade_id_contiguous",
+      "price_ohlc_proven_by_candle_id_bounds": false,
+      "time": 1666756800000,
+      "trade_first_id": 13541584,
+      "trade_id_span_matches_print_count": true,
+      "trade_ids_contiguous_within_hour": true,
+      "trade_last_id": 13541712,
+      "trade_matches_frozen_h1": true,
+      "trade_prints": 129
+    }
+  ],
+  "instrument": "CVC-USDT-SWAP",
+  "minute_price_evidence_path": "experiments/active/exp-cloud-close-cvc-trade-hour-20261109-v1/minute_price_evidence_v2.csv.gz",
+  "missing_minute_exact_price_ohlc": {
+    "close": 0.1224,
+    "high": 0.1224,
+    "low": 0.1224,
+    "open": 0.1224
+  },
+  "missing_minute_open_ms": 1666753860000,
+  "missing_minute_trade_id_neighbors": {
+    "inclusive_time_bounds_ms": [
+      1666753897145,
+      1666754021655
+    ],
+    "next_id": 13541500,
+    "next_price": 0.1224,
+    "next_time_ms": 1666754021655,
+    "possible_minutes_after_constraints": [
+      "2022-10-26T03:11:00Z"
+    ],
+    "previous_id": 13541498,
+    "previous_price": 0.1224,
+    "previous_time_ms": 1666753897145
+  },
+  "missing_trade_id": 13541499,
+  "missing_trade_size": null,
+  "new_h1_row": {
+    "close": 0.1229,
+    "high": 0.1231,
+    "low": 0.1223,
+    "open": 0.1224,
+    "time": 1666753200000
+  },
+  "no_interpolation": true,
+  "official_direct_rest_checks": [
+    {
+      "api": "/api/v5/market/history-candles",
+      "api_code": "51001",
+      "api_message": "Instrument ID, Instrument ID code, or Spread ID doesn't exist.",
+      "cache_path": "data/research/cloud_close_cvc_trade_hour/direct_api/history_1m_cvc_20221026T0311.json",
+      "confirmed_exact_row": false,
+      "exact_timestamp_rows": [],
+      "http_status": 200,
+      "requested_bar": "1m",
+      "requested_open_ms": 1666753860000,
+      "url": "https://www.okx.com/api/v5/market/history-candles?instId=CVC-USDT-SWAP&bar=1m&after=1666753860001&limit=5"
+    },
+    {
+      "api": "/api/v5/market/history-candles",
+      "api_code": "51001",
+      "api_message": "Instrument ID, Instrument ID code, or Spread ID doesn't exist.",
+      "cache_path": "data/research/cloud_close_cvc_trade_hour/direct_api/history_1H_cvc_20221026T0300.json",
+      "confirmed_exact_row": false,
+      "exact_timestamp_rows": [],
+      "http_status": 200,
+      "requested_bar": "1H",
+      "requested_open_ms": 1666753200000,
+      "url": "https://www.okx.com/api/v5/market/history-candles?instId=CVC-USDT-SWAP&bar=1H&after=1666753200001&limit=5"
+    }
+  ],
+  "output_series_path": "data/research/cloud_close_cvc_trade_hour/series/CVC-USDT-SWAP/bars1h_v2.csv.gz",
+  "price_ohlc_proven": true,
+  "price_reconstruction_logic": {
+    "03_12_confirmed_zero_volume": true,
+    "03_13_volume_equals_known_next_trade_size": true,
+    "daily_and_monthly_trade_archives_both_omit_one_id": true,
+    "deduced_missing_03_11_ohlc": {
+      "close": 0.1224,
+      "high": 0.1224,
+      "low": 0.1224,
+      "open": 0.1224
+    },
+    "known_03_11_trade_price": 0.1224,
+    "native_trade_ids_and_timestamps_monotonic": true,
+    "official_no_trade_candle_carries_previous_close": {
+      "rule": "For a cycle with no transaction, OKX candlestick OHLC fields use the previous cycle close.",
+      "scope": "Used only to bound the missing 03:11 price from the confirmed 03:12 zero-volume candle; no trade quantity is inferred.",
+      "source": "https://www.okx.com/docs-v5/en/#rest-api-market-data-get-candlesticks"
+    },
+    "remaining_unknowns": [
+      "missing trade record size",
+      "minute and hourly total volume"
+    ]
+  },
+  "reader": {
+    "admission_column": "eligible_for_admission",
+    "pandas": "pd.read_csv(path, index_col='time', float_precision='round_trip')",
+    "price_columns": [
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "time_index": "UTC Unix milliseconds at H1 open"
+  },
+  "scope_limit": "Price OHLC is proved; the one missing trade's quantity and volume are not reconstructed.",
+  "target_hour_ms": 1666753200000,
+  "target_hour_utc": "2022-10-26T03:00:00Z",
+  "target_minute_archive_has_prints_in_missing_minute": 1,
+  "target_trade_hour_had_missing_id": true,
+  "trade_id_boundary_checks": [
+    {
+      "consecutive_ids": true,
+      "from_time": 1666749600000,
+      "to_time": 1666753200000
+    },
+    {
+      "consecutive_ids": true,
+      "from_time": 1666753200000,
+      "to_time": 1666756800000
+    }
+  ],
+  "verified": true,
+  "version": 2,
+  "volume_proven": false
+}

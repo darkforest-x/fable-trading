@@ -1,0 +1,665 @@
+{
+  "arms": {
+    "lag_30d": {
+      "metrics": {
+        "all": {
+          "final_usdt": 76078.4730732116,
+          "multiple": 76.0784730732116,
+          "dd_mark_pct": 52.79634324496188,
+          "dd_bound_pct": 53.48076467963227,
+          "trades": 1570,
+          "win_pct": 22.229299363057326,
+          "payoff": 6.608986465860466,
+          "payoff_usdt": 4.808783044176142,
+          "median_net_pct": -3.187667322467822
+        },
+        "dev": {
+          "final_usdt": 46776.50178811093,
+          "multiple": 46.77650178811093,
+          "dd_mark_pct": 49.809789967800796,
+          "dd_bound_pct": 51.024017886210004,
+          "trades": 1094,
+          "win_pct": 23.03473491773309,
+          "payoff": 7.1758291607271865,
+          "payoff_usdt": 5.126544325961567,
+          "median_net_pct": -3.1923154404820644
+        },
+        "2025": {
+          "final_usdt": 57743.08894814651,
+          "multiple": 1.2344465007176517,
+          "dd_mark_pct": 39.249655954538255,
+          "dd_bound_pct": 40.13630381665233,
+          "trades": 244,
+          "win_pct": 15.983606557377051,
+          "payoff": 5.238418735767564,
+          "payoff_usdt": 4.896438034254752,
+          "median_net_pct": -3.331524550172925
+        },
+        "2026": {
+          "final_usdt": 76078.4730732116,
+          "multiple": 1.3175338288800296,
+          "dd_mark_pct": 25.207872126411424,
+          "dd_bound_pct": 29.48065444638973,
+          "trades": 214,
+          "win_pct": 22.429906542056074,
+          "payoff": 4.237204099831637,
+          "payoff_usdt": 4.804210643447919,
+          "median_net_pct": -2.9691664551394763
+        }
+      },
+      "margin": {
+        "1.0": {
+          "positions_audited": 679,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.4974351458302799,
+          "worst_remaining_equity_per_margin": 0.5527920269676095,
+          "valid": true,
+          "checked_hours": [],
+          "all_flags_resolved": true
+        },
+        "2.0": {
+          "positions_audited": 891,
+          "maintenance_boundary_hits": 1,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -0.019896837739761503,
+          "worst_remaining_equity_per_margin": 0.08917522032141009,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "signal-row-00305:signal",
+              "symbol": "SUSHI",
+              "side": 1,
+              "multiple": 2.0,
+              "market_slip": 0.0,
+              "entry_price": 1.929,
+              "exit_price": 1.85925332,
+              "threshold": 1.0733346303501945,
+              "hour": 1608760800000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://www.okx.com/api/v5/market/history-candles",
+              "stop_minute": 20,
+              "trade_boundary_minute": 23,
+              "mark_boundary_minute": 23,
+              "preceding_trade_close": 1.902,
+              "stop_minute_open": 1.903,
+              "stop_minute_trade_low": 1.712,
+              "stop_minute_mark_low": 1.719,
+              "stop_minute_trade_high": 1.906,
+              "stop_minute_mark_high": 1.906,
+              "full_hour_mark_low": 1.056,
+              "full_hour_mark_high": 2.334
+            }
+          ],
+          "all_flags_resolved": true
+        }
+      },
+      "trim_fills": 23152
+    },
+    "lag_30d_stress": {
+      "metrics": {
+        "all": {
+          "final_usdt": 59135.97558524023,
+          "multiple": 59.13597558524023,
+          "dd_mark_pct": 53.37569707572069,
+          "dd_bound_pct": 54.05479387187284,
+          "trades": 1570,
+          "win_pct": 22.038216560509554,
+          "payoff": 6.486927483275702,
+          "payoff_usdt": 4.725990635021163,
+          "median_net_pct": -3.2902394827322095
+        },
+        "dev": {
+          "final_usdt": 39240.16605074333,
+          "multiple": 39.24016605074333,
+          "dd_mark_pct": 52.51485569621015,
+          "dd_bound_pct": 53.642838141002805,
+          "trades": 1094,
+          "win_pct": 22.760511882998173,
+          "payoff": 7.0773975708573005,
+          "payoff_usdt": 5.049111714067556,
+          "median_net_pct": -3.295255399687745
+        },
+        "2025": {
+          "final_usdt": 46446.843148287,
+          "multiple": 1.1836556218499272,
+          "dd_mark_pct": 40.47981671521958,
+          "dd_bound_pct": 41.35279708771512,
+          "trades": 244,
+          "win_pct": 15.983606557377051,
+          "payoff": 5.092560166467054,
+          "payoff_usdt": 4.753078343945383,
+          "median_net_pct": -3.4348577413186643
+        },
+        "2026": {
+          "final_usdt": 59135.97558524023,
+          "multiple": 1.2731968757584167,
+          "dd_mark_pct": 26.308469913047393,
+          "dd_bound_pct": 30.520136903104135,
+          "trades": 214,
+          "win_pct": 22.429906542056074,
+          "payoff": 4.089637453005612,
+          "payoff_usdt": 4.630645385993273,
+          "median_net_pct": -3.0752854495485593
+        }
+      },
+      "margin": {
+        "1.0": {
+          "positions_audited": 679,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.4966582498167963,
+          "worst_remaining_equity_per_margin": 0.5520151309541259,
+          "valid": true,
+          "checked_hours": [],
+          "all_flags_resolved": true
+        },
+        "2.0": {
+          "positions_audited": 891,
+          "maintenance_boundary_hits": 1,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -0.021442425349922065,
+          "worst_remaining_equity_per_margin": 0.08762963271124953,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "signal-row-00305:signal",
+              "symbol": "SUSHI",
+              "side": 1,
+              "multiple": 2.0,
+              "market_slip": 0.0005,
+              "entry_price": 1.929,
+              "exit_price": 1.85925332,
+              "threshold": 1.0749449013000105,
+              "hour": 1608760800000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://www.okx.com/api/v5/market/history-candles",
+              "stop_minute": 20,
+              "trade_boundary_minute": 23,
+              "mark_boundary_minute": 23,
+              "preceding_trade_close": 1.902,
+              "stop_minute_open": 1.903,
+              "stop_minute_trade_low": 1.712,
+              "stop_minute_mark_low": 1.719,
+              "stop_minute_trade_high": 1.906,
+              "stop_minute_mark_high": 1.906,
+              "full_hour_mark_low": 1.056,
+              "full_hour_mark_high": 2.334
+            }
+          ],
+          "all_flags_resolved": true
+        }
+      },
+      "trim_fills": 23232
+    },
+    "lag_60d": {
+      "metrics": {
+        "all": {
+          "final_usdt": 67911.96969617021,
+          "multiple": 67.91196969617022,
+          "dd_mark_pct": 54.04866714613896,
+          "dd_bound_pct": 55.666405891652616,
+          "trades": 1570,
+          "win_pct": 22.29299363057325,
+          "payoff": 6.645299539439379,
+          "payoff_usdt": 4.883784840359691,
+          "median_net_pct": -3.268365557733792
+        },
+        "dev": {
+          "final_usdt": 42200.13772898289,
+          "multiple": 42.20013772898289,
+          "dd_mark_pct": 54.04866714613896,
+          "dd_bound_pct": 55.666405891652616,
+          "trades": 1094,
+          "win_pct": 23.03473491773309,
+          "payoff": 7.219108612442207,
+          "payoff_usdt": 5.146874677406811,
+          "median_net_pct": -3.2846090651579716
+        },
+        "2025": {
+          "final_usdt": 52313.18254338175,
+          "multiple": 1.239644829581996,
+          "dd_mark_pct": 35.05863577510784,
+          "dd_bound_pct": 35.65278169114191,
+          "trades": 244,
+          "win_pct": 15.983606557377051,
+          "payoff": 5.436930020136662,
+          "payoff_usdt": 4.6337665927980645,
+          "median_net_pct": -3.440431552529507
+        },
+        "2026": {
+          "final_usdt": 67911.96969617021,
+          "multiple": 1.2981808101591383,
+          "dd_mark_pct": 18.08530449967406,
+          "dd_bound_pct": 21.496703508400937,
+          "trades": 214,
+          "win_pct": 22.897196261682243,
+          "payoff": 4.174883223742026,
+          "payoff_usdt": 4.92242813825356,
+          "median_net_pct": -3.034279353825798
+        }
+      },
+      "margin": {
+        "1.0": {
+          "positions_audited": 820,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.5179023601065856,
+          "worst_remaining_equity_per_margin": 0.5755346402740771,
+          "valid": true,
+          "checked_hours": [],
+          "all_flags_resolved": true
+        },
+        "2.0": {
+          "positions_audited": 750,
+          "maintenance_boundary_hits": 2,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -0.019896837739761503,
+          "worst_remaining_equity_per_margin": 0.08917522032141009,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "signal-row-00305:signal",
+              "symbol": "SUSHI",
+              "side": 1,
+              "multiple": 2.0,
+              "market_slip": 0.0,
+              "entry_price": 1.929,
+              "exit_price": 1.85925332,
+              "threshold": 1.0733346303501945,
+              "hour": 1608760800000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://www.okx.com/api/v5/market/history-candles",
+              "stop_minute": 20,
+              "trade_boundary_minute": 23,
+              "mark_boundary_minute": 23,
+              "preceding_trade_close": 1.902,
+              "stop_minute_open": 1.903,
+              "stop_minute_trade_low": 1.712,
+              "stop_minute_mark_low": 1.719,
+              "stop_minute_trade_high": 1.906,
+              "stop_minute_mark_high": 1.906,
+              "full_hour_mark_low": 1.056,
+              "full_hour_mark_high": 2.334
+            },
+            {
+              "event_id": "signal-row-00555:signal",
+              "symbol": "CRV",
+              "side": 1,
+              "multiple": 2.0,
+              "market_slip": 0.0,
+              "entry_price": 2.7292,
+              "exit_price": 2.515365588,
+              "threshold": 1.518582101167315,
+              "hour": 1621425600000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://www.okx.com/api/v5/market/history-candles",
+              "stop_minute": 34,
+              "trade_boundary_minute": 55,
+              "mark_boundary_minute": 55,
+              "preceding_trade_close": 2.5489,
+              "stop_minute_open": 2.5502,
+              "stop_minute_trade_low": 2.499,
+              "stop_minute_mark_low": 2.5007,
+              "stop_minute_trade_high": 2.5692,
+              "stop_minute_mark_high": 2.5691,
+              "full_hour_mark_low": 1.5127,
+              "full_hour_mark_high": 2.7717
+            }
+          ],
+          "all_flags_resolved": true
+        }
+      },
+      "trim_fills": 17960
+    },
+    "lag_60d_stress": {
+      "metrics": {
+        "all": {
+          "final_usdt": 53701.23169518152,
+          "multiple": 53.70123169518152,
+          "dd_mark_pct": 56.252007116341105,
+          "dd_bound_pct": 57.77079261863132,
+          "trades": 1570,
+          "win_pct": 22.1656050955414,
+          "payoff": 6.502447499729209,
+          "payoff_usdt": 4.783335893957203,
+          "median_net_pct": -3.368038885079326
+        },
+        "dev": {
+          "final_usdt": 35603.42340891252,
+          "multiple": 35.60342340891252,
+          "dd_mark_pct": 56.252007116341105,
+          "dd_bound_pct": 57.77079261863132,
+          "trades": 1094,
+          "win_pct": 22.851919561243143,
+          "payoff": 7.086974517264451,
+          "payoff_usdt": 5.0439699097996895,
+          "median_net_pct": -3.3890185172930716
+        },
+        "2025": {
+          "final_usdt": 42604.886248482275,
+          "multiple": 1.1966513938605436,
+          "dd_mark_pct": 36.23872074147143,
+          "dd_bound_pct": 36.824549693631745,
+          "trades": 244,
+          "win_pct": 15.983606557377051,
+          "payoff": 5.287073335123379,
+          "payoff_usdt": 4.508365404543732,
+          "median_net_pct": -3.5404317129099834
+        },
+        "2026": {
+          "final_usdt": 53701.23169518152,
+          "multiple": 1.2604477191180046,
+          "dd_mark_pct": 18.404028762265877,
+          "dd_bound_pct": 22.069329875357766,
+          "trades": 214,
+          "win_pct": 22.897196261682243,
+          "payoff": 4.030832590126642,
+          "payoff_usdt": 4.74474124889955,
+          "median_net_pct": -3.1371755304208078
+        }
+      },
+      "margin": {
+        "1.0": {
+          "positions_audited": 820,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.5171140927864486,
+          "worst_remaining_equity_per_margin": 0.57474637295394,
+          "valid": true,
+          "checked_hours": [],
+          "all_flags_resolved": true
+        },
+        "2.0": {
+          "positions_audited": 750,
+          "maintenance_boundary_hits": 2,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -0.021442425349922065,
+          "worst_remaining_equity_per_margin": 0.08762963271124953,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "signal-row-00305:signal",
+              "symbol": "SUSHI",
+              "side": 1,
+              "multiple": 2.0,
+              "market_slip": 0.0005,
+              "entry_price": 1.929,
+              "exit_price": 1.85925332,
+              "threshold": 1.0749449013000105,
+              "hour": 1608760800000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://www.okx.com/api/v5/market/history-candles",
+              "stop_minute": 20,
+              "trade_boundary_minute": 23,
+              "mark_boundary_minute": 23,
+              "preceding_trade_close": 1.902,
+              "stop_minute_open": 1.903,
+              "stop_minute_trade_low": 1.712,
+              "stop_minute_mark_low": 1.719,
+              "stop_minute_trade_high": 1.906,
+              "stop_minute_mark_high": 1.906,
+              "full_hour_mark_low": 1.056,
+              "full_hour_mark_high": 2.334
+            },
+            {
+              "event_id": "signal-row-00555:signal",
+              "symbol": "CRV",
+              "side": 1,
+              "multiple": 2.0,
+              "market_slip": 0.0005,
+              "entry_price": 2.7292,
+              "exit_price": 2.515365588,
+              "threshold": 1.5208603549134208,
+              "hour": 1621425600000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://www.okx.com/api/v5/market/history-candles",
+              "stop_minute": 34,
+              "trade_boundary_minute": 55,
+              "mark_boundary_minute": 55,
+              "preceding_trade_close": 2.5489,
+              "stop_minute_open": 2.5502,
+              "stop_minute_trade_low": 2.499,
+              "stop_minute_mark_low": 2.5007,
+              "stop_minute_trade_high": 2.5692,
+              "stop_minute_mark_high": 2.5691,
+              "full_hour_mark_low": 1.5127,
+              "full_hour_mark_high": 2.7717
+            }
+          ],
+          "all_flags_resolved": true
+        }
+      },
+      "trim_fills": 17972
+    },
+    "lag_90d": {
+      "metrics": {
+        "all": {
+          "final_usdt": 73820.13378270675,
+          "multiple": 73.82013378270675,
+          "dd_mark_pct": 50.61718497296237,
+          "dd_bound_pct": 51.80792507902714,
+          "trades": 1570,
+          "win_pct": 22.29299363057325,
+          "payoff": 6.88181131934646,
+          "payoff_usdt": 4.789330670826564,
+          "median_net_pct": -3.2365365311263306
+        },
+        "dev": {
+          "final_usdt": 49081.03224657744,
+          "multiple": 49.081032246577436,
+          "dd_mark_pct": 50.61718497296237,
+          "dd_bound_pct": 51.80792507902714,
+          "trades": 1094,
+          "win_pct": 23.03473491773309,
+          "payoff": 7.510052822516019,
+          "payoff_usdt": 5.158343822735556,
+          "median_net_pct": -3.26877955116687
+        },
+        "2025": {
+          "final_usdt": 60869.656087832605,
+          "multiple": 1.2401869582129097,
+          "dd_mark_pct": 35.680137958486455,
+          "dd_bound_pct": 36.31976759995279,
+          "trades": 244,
+          "win_pct": 15.983606557377051,
+          "payoff": 5.488117866873509,
+          "payoff_usdt": 4.456724288136219,
+          "median_net_pct": -3.3922227369972595
+        },
+        "2026": {
+          "final_usdt": 73820.13378270675,
+          "multiple": 1.2127575302247,
+          "dd_mark_pct": 26.380233959961284,
+          "dd_bound_pct": 28.407191183751635,
+          "trades": 214,
+          "win_pct": 22.897196261682243,
+          "payoff": 4.2735341966623315,
+          "payoff_usdt": 4.479191627700498,
+          "median_net_pct": -2.965092662727282
+        }
+      },
+      "margin": {
+        "1.0": {
+          "positions_audited": 772,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.4900515811301193,
+          "worst_remaining_equity_per_margin": 0.5445876101607051,
+          "valid": true,
+          "checked_hours": [],
+          "all_flags_resolved": true
+        },
+        "2.0": {
+          "positions_audited": 798,
+          "maintenance_boundary_hits": 1,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -0.005129708339440195,
+          "worst_remaining_equity_per_margin": 0.10558405393521904,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "signal-row-00555:signal",
+              "symbol": "CRV",
+              "side": 1,
+              "multiple": 2.0,
+              "market_slip": 0.0,
+              "entry_price": 2.7292,
+              "exit_price": 2.515365588,
+              "threshold": 1.518582101167315,
+              "hour": 1621425600000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://www.okx.com/api/v5/market/history-candles",
+              "stop_minute": 34,
+              "trade_boundary_minute": 55,
+              "mark_boundary_minute": 55,
+              "preceding_trade_close": 2.5489,
+              "stop_minute_open": 2.5502,
+              "stop_minute_trade_low": 2.499,
+              "stop_minute_mark_low": 2.5007,
+              "stop_minute_trade_high": 2.5692,
+              "stop_minute_mark_high": 2.5691,
+              "full_hour_mark_low": 1.5127,
+              "full_hour_mark_high": 2.7717
+            }
+          ],
+          "all_flags_resolved": true
+        }
+      },
+      "trim_fills": 19764
+    },
+    "lag_90d_stress": {
+      "metrics": {
+        "all": {
+          "final_usdt": 58234.46633888429,
+          "multiple": 58.23446633888429,
+          "dd_mark_pct": 53.01578827137914,
+          "dd_bound_pct": 54.15300663842304,
+          "trades": 1570,
+          "win_pct": 22.101910828025478,
+          "payoff": 6.761479919695146,
+          "payoff_usdt": 4.713713398307548,
+          "median_net_pct": -3.3372536456429382
+        },
+        "dev": {
+          "final_usdt": 41458.4062040732,
+          "multiple": 41.4584062040732,
+          "dd_mark_pct": 53.01578827137914,
+          "dd_bound_pct": 54.15300663842304,
+          "trades": 1094,
+          "win_pct": 22.760511882998173,
+          "payoff": 7.415119933263941,
+          "payoff_usdt": 5.087570665301544,
+          "median_net_pct": -3.3676944231360264
+        },
+        "2025": {
+          "final_usdt": 49566.105078079556,
+          "multiple": 1.195562242168629,
+          "dd_mark_pct": 36.91017857653215,
+          "dd_bound_pct": 37.53788830412953,
+          "trades": 244,
+          "win_pct": 15.983606557377051,
+          "payoff": 5.337491047089698,
+          "payoff_usdt": 4.330474807609398,
+          "median_net_pct": -3.492204312133506
+        },
+        "2026": {
+          "final_usdt": 58234.46633888429,
+          "multiple": 1.1748848582544422,
+          "dd_mark_pct": 26.736581174769324,
+          "dd_bound_pct": 28.760941372947357,
+          "trades": 214,
+          "win_pct": 22.897196261682243,
+          "payoff": 4.1260496626444025,
+          "payoff_usdt": 4.314970046186949,
+          "median_net_pct": -3.0636022651732575
+        }
+      },
+      "margin": {
+        "1.0": {
+          "positions_audited": 772,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.489278787325039,
+          "worst_remaining_equity_per_margin": 0.5438148163556248,
+          "valid": true,
+          "checked_hours": [],
+          "all_flags_resolved": true
+        },
+        "2.0": {
+          "positions_audited": 798,
+          "maintenance_boundary_hits": 1,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -0.006683500366407538,
+          "worst_remaining_equity_per_margin": 0.1040302619082517,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "signal-row-00555:signal",
+              "symbol": "CRV",
+              "side": 1,
+              "multiple": 2.0,
+              "market_slip": 0.0005,
+              "entry_price": 2.7292,
+              "exit_price": 2.515365588,
+              "threshold": 1.5208603549134208,
+              "hour": 1621425600000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://www.okx.com/api/v5/market/history-candles",
+              "stop_minute": 34,
+              "trade_boundary_minute": 55,
+              "mark_boundary_minute": 55,
+              "preceding_trade_close": 2.5489,
+              "stop_minute_open": 2.5502,
+              "stop_minute_trade_low": 2.499,
+              "stop_minute_mark_low": 2.5007,
+              "stop_minute_trade_high": 2.5692,
+              "stop_minute_mark_high": 2.5691,
+              "full_hour_mark_low": 1.5127,
+              "full_hour_mark_high": 2.7717
+            }
+          ],
+          "all_flags_resolved": true
+        }
+      },
+      "trim_fills": 19856
+    }
+  },
+  "limitations": "Price-based margin approximation with 10% MMR, original CVC gap, omitted funding and capacity."
+}

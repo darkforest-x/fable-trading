@@ -1,0 +1,32 @@
+{
+  "admission_column": "eligible_for_admission",
+  "instrument": "CVC-USDT-SWAP",
+  "output_series_path": "data/research/cloud_close_cvc_trade_hour/series/CVC-USDT-SWAP/bars1h_v2.csv.gz",
+  "remaining_unknowns": [
+    "missing trade record size",
+    "minute and hourly total volume"
+  ],
+  "series_validation": {
+    "added_rows": 1,
+    "added_times_ms": [
+      1666753200000
+    ],
+    "existing_rows_unchanged": true,
+    "frozen_h1_rows": 30648,
+    "output_h1_rows": 30649
+  },
+  "source_check_v1": "experiments/active/exp-cloud-close-cvc-trade-hour-20261109-v1/source_check.json",
+  "source_check_v2": "experiments/active/exp-cloud-close-cvc-trade-hour-20261109-v1/source_check_v2.json",
+  "target_h1_ohlc": {
+    "close": 0.1229,
+    "high": 0.1231,
+    "low": 0.1223,
+    "open": 0.1224,
+    "time": 1666753200000
+  },
+  "target_hour_ms": 1666753200000,
+  "target_hour_utc": "2022-10-26T03:00:00Z",
+  "v1_full_trade_id_admission": false,
+  "v2_price_only_admission": true,
+  "volume_proven": false
+}
