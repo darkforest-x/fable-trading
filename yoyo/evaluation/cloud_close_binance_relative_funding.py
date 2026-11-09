@@ -837,7 +837,7 @@ def _run() -> dict:
     tape, months, source_coverage, reference, reference_equity = _load_funding_inputs(config)
     data, market, _quotes, multipliers, account_audit = _prepare_account(reference)
     selected = data["selected"].copy()
-    if set(selected.event_id) != set(reference.index):
+    if set(selected.event_id) != set(reference.event_id):
         raise ValueError("Four-child native paths do not match the frozen relative-account parent IDs")
     no_settlement, coverage_audit = _check_covered_windows(selected, tape, months)
     data["funding_no_settlement_windows"] = no_settlement
@@ -864,7 +864,7 @@ def _run() -> dict:
 
     reference_stress = _read_parent_reference(REFERENCE / "funded_contrarian_half_stress.csv.gz")
     reference_stress_equity = _read_equity_reference(REFERENCE / "hourly_contrarian_half_stress.csv.gz")
-    if set(reference_stress.index) != set(reference.index) or not reference_stress_equity.index.equals(reference_equity.index):
+    if set(reference_stress.index) != set(reference.event_id) or not reference_stress_equity.index.equals(reference_equity.index):
         raise ValueError("Frozen 5bp source account is not the same parent/H1 series")
     baselines = {
         "zero_funding": result0["metrics"],
