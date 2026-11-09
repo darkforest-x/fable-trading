@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "generated_at_utc": "2026-11-09T04:25:38Z",
+  "candidate_file": "experiments/active/exp-cloud-close-score-priority-20261109-v1/candidate_order.csv.gz",
+  "parent_signal_root": "experiments/active/exp-signal-center-score-20261106-v1/results/symbols",
+  "spot_source": "official Binance Spot monthly 1h klines",
+  "smoke": false,
+  "events": 23262,
+  "symbols": 657,
+  "exact_spot_pair_symbols": 464,
+  "event_month_index_complete": 19721,
+  "source_week_checks": {
+    "signal_files_present": 630,
+    "source_week_matches": 22564,
+    "source_rows_missing": 55,
+    "source_files_missing": 27,
+    "week_mismatches": 0,
+    "side_or_time_mismatches": 0
+  },
+  "status_counts": {
+    "observed": 18868,
+    "unknown_no_exact_spot_pair": 3310,
+    "unknown_archive_download_or_parse": 770,
+    "unknown_intra_month_h1_gap": 60,
+    "observed_zero_trade_hours": 23,
+    "unknown_no_month_archive": 231
+  },
+  "required_archive_symbol_months": 12225,
+  "archives_downloaded": 12213,
+  "archives_reused": 3,
+  "archive_errors": 434,
+  "panel_file": "/Users/zhangzc/fable-trading/data/research/cloud_close_spot_reclaim_20261109/event_panel.csv.gz",
+  "cache_root": "/Users/zhangzc/fable-trading/data/research/cloud_close_spot_reclaim_20261109",
+  "decision_definition": {
+    "timezone": "America/New_York",
+    "monday_window": "NY Monday 00:00 inclusive to the immediately following Tuesday 00:00 exclusive (24 UTC-aligned 1h bars; 96 quarter-hour equivalents). Use parent signal NY week.",
+    "required_observation": "Require the frozen 12H key bar to open no earlier than the end of NY Monday and close no later than the original NY week expiry. Require every exact UTC 1h open from NY Monday 00:00 through the frozen 12H key close, including the full 24-hour Monday and all intervening hours. Require the 12 H1 bars [entry_ms-12h, entry_ms) for the signal bar. Any absent hour, listing boundary, missing monthly archive, or serious OHLC/timestamp defect is unknown, never a negative confirmation.",
+    "spot_monday_range": "spot_monday_high=max(high) and spot_monday_low=min(low) over the first 24 complete New York Monday 1h bars.",
+    "spot_levels": "width=spot_monday_high-spot_monday_low; lower=spot_monday_low-0.618*width; upper=spot_monday_high+0.618*width.",
+    "spot_12h_ohlc": "Aggregate the 12 complete UTC H1 bars ending at entry_ms: max high, min low, final close.",
+    "confirmation": "For side=+1: key_low < lower < key_close < upper. For side=-1: key_high > upper > key_close > lower. No Spot EMA and no requirement that this be the Spot pair's first signal of its week.",
+    "zero_trade_hour": "A valid official row with zero base volume/trade count is retained and separately counted in panel fields; missing rows remain gaps/unknown. Any inconsistent volume/trade count or invalid OHLC makes the affected archive/events unknown.",
+    "outputs": "covered=true only for a valid complete week-to-key H1 path. spot_reclaim and spot_confirms are nullable booleans; null means unknown coverage/geometry, not a failed reclaim. Keep positive and negative observed events."
+  }
+}

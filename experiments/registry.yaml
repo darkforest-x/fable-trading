@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-spot-reclaim-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "368918039d"
+    status: "inconclusive"
+    question: "币安同币现货周一锚点确认"
+    single_variable: "在可观测的同币现货样本上，仅改变是否要求现货同步完成本周云带收回。"
+    result: "18,891 个可观测信号内，通过 17,076 个。确认组终值 10,501U，覆盖组 9,134U，同稀缺度随机对照 8,423U。确认组胜率约35.3%、实际盈亏比2.62，低于覆盖组2.77。已扣手续费，未计资金费。月档解析损失正在独立修复。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-spot-reclaim-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-819b-a213-d59dfabac9e8."
+
+  - experiment_id: exp-cloud-close-spot-lead-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "368918039d"
+    status: "inconclusive"
+    question: "币安现货相对永续的方向领先"
+    single_variable: "用现货和永续各自的同期周一区间中心标度，要求现货有同向领先。"
+    result: "18,879 个可观测信号通过 11,455 个。领先组终值 10,665U、胜率35.4%、盈亏比2.85、回撤上界34.47%；覆盖组9,134U，等稀缺度时点对照13,478U。开发段未超过覆盖组。已扣手续费，未计资金费。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-spot-lead-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81d2-bf70-cdba471bc5e9."
+
   - experiment_id: exp-cloud-close-fvg-random-controls-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "a40d3da610"
