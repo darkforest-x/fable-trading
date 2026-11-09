@@ -1,0 +1,99 @@
+{
+  "id": "exp-cloud-close-funding-ledger-20261109-v1",
+  "status": "preregistered_builder_pending_owner_commit",
+  "venue": "Binance",
+  "question": "What realized funding cashflow would have applied to the frozen efficient-trend Binance positions at their already-fixed quantities and holding clocks?",
+  "source_account": {
+    "experiment": "exp-cloud-close-efficient-trend-20261109-v1",
+    "policy": "trend_efficiency",
+    "scenario": "actual",
+    "positions": 1629,
+    "native_child_legs": 3258,
+    "source_positions_file": "experiments/active/exp-cloud-close-efficient-trend-20261109-v1/funded_Binance.csv.gz",
+    "source_decisions_file": "experiments/active/exp-cloud-close-efficient-trend-20261109-v1/decisions_Binance.csv.gz",
+    "source_paths": "yoyo.evaluation.cloud_close_efficiency_binance_bounds._accounting_legs; exact selected native VectorBT leg prices, quantities, phases and clocks",
+    "original_exit_accounting_reconciliation_required": true
+  },
+  "scopes": {
+    "ada": {
+      "description": "One focal large ADA position, both frozen child legs, for validating the oldest high-impact held interval before broad extension.",
+      "event_id": "12H|ADAUSDT|1606392000000000000|1",
+      "symbol": "ADA",
+      "entry_utc": "2020-11-26T12:00:00Z",
+      "exit_bar_utc": "2021-04-23T01:00:00Z",
+      "expected_total_abs_quantity": 931.238492,
+      "expected_funded_notional_usdt": 127.533111
+    },
+    "all": {
+      "description": "All 1,629 originally defined funded Binance positions only; no newly added historical tickers or replacement account.",
+      "expected_positions": 1629,
+      "expected_child_legs": 3258
+    }
+  },
+  "local_inventory_preflight": {
+    "required_symbol_month_windows": 2015,
+    "symbols": 331,
+    "calendar_months": 77,
+    "position_window": "2020-05 through 2026-09 UTC",
+    "local_monthly_funding_archive_keys": 197,
+    "shared_flow_funding_archive_keys": 183,
+    "local_normalized_funding_keys": 49,
+    "local_mark_1h_archive_keys": 209,
+    "local_rate_and_price_keys": 250,
+    "local_exact_mark_keys": 41,
+    "estimated_public_funding_api_calls_if_41_exact_keys_are_complete": 1974,
+    "public_funding_api_call_upper_bound": 2015,
+    "estimated_api_wall_seconds_at_budget_if_41_exact_keys_are_complete": 1579.2,
+    "estimated_api_wall_minutes_at_budget_if_41_exact_keys_are_complete": 26.32,
+    "conditional_mark_archive_keys_missing_locally": 1806
+  },
+  "funding_source": {
+    "api_base": "https://fapi.binance.com",
+    "endpoint": "/fapi/v1/fundingRate",
+    "request_fields": ["symbol", "startTime", "endTime", "limit"],
+    "response_fields": ["fundingTime", "fundingRate", "markPrice"],
+    "limit": 1000,
+    "query_unit": "one bounded actual-held window per symbol-month; paginate by observed fundingTime until the API returns an empty page",
+    "minimum_seconds_between_requests": 0.8,
+    "api_cache_root": "data/research/cloud_close_funding_ledger_20261109/funding_api/",
+    "exact_source_priority": [
+      "Existing Binance normalized history only when its manifest covers the full query and rate/mark fields are complete",
+      "Binance public fundingRate response with exact fundingTime, fundingRate and markPrice",
+      "Official monthly Binance fundingRate archive joined to the official mark-price hourly open as an explicitly tagged proxy"
+    ],
+    "fallback": "Reuse local funding and mark archives first. If a needed funding or mark file is missing, call monday_breadth_opt_funding.archive_month for that exact symbol-month; it fetches the official monthly mark-price 1h archive and daily mark hours missing from that month archive.",
+    "missing_policy": "Do not fill missing rates or prices with zero. Preserve unknown settlement rows and incomplete position totals; successful API empty ranges are separately labeled as no settlement rows returned."
+  },
+  "cashflow": {
+    "formula_usdt": "-signed_quantity * funding_rate * settlement_mark_price",
+    "positive_rate_effect": "Longs pay; shorts receive.",
+    "entry_exit_boundary_tolerance_ms": 1000,
+    "boundary_rule": "When fundingTime is within one second of entry_ms or exit_bar_ms, report an include/exclude cashflow interval ordered by sign. Interior settlement rows are deterministic. Preserve actual exit_phase on every child leg.",
+    "mark_proxy": "Official Binance USD-M markPriceKlines 1h open at the fundingTime hour; set mark_source=binance_vision_mark_1h_open_proxy.",
+    "schedule": "Use observed fundingTime timestamps and report 1h/4h/8h/other interval counts per symbol-month. Never assume a fixed cadence.",
+    "unknowns": "If any required symbol-month lacks a complete rate range or any observed settlement lacks rate/mark, report known subtotal but null complete lower/upper totals."
+  },
+  "outputs": {
+    "scope_directories": {
+      "ada": "experiments/active/exp-cloud-close-funding-ledger-20261109-v1/ada/",
+      "all": "experiments/active/exp-cloud-close-funding-ledger-20261109-v1/all/"
+    },
+    "per_scope_receipt": "funding_audit.json",
+    "settlement_level": "settlement_flows.csv.gz",
+    "per_leg": "leg_funding.csv.gz",
+    "per_position": "position_funding.csv.gz",
+    "per_symbol": "symbol_funding.csv",
+    "schedule_diagnostics": "funding_schedule.csv",
+    "source_month_receipts": "symbol_month_audit.json"
+  },
+  "commands": {
+    "mini": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_funding_ledger --mini-check",
+    "ada_after_builder_commit": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_funding_ledger --scope ada",
+    "original_account_after_ada_review": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_funding_ledger --scope all"
+  },
+  "limits": [
+    "This is a funding cashflow sensitivity on frozen position sizes and clocks, not a new strategy backtest.",
+    "No account replay, reinvestment, NAV compounding, or new funded-position selection is performed.",
+    "The all scope is restricted to the original 1,629 funded Binance positions; later historical-contract repairs are excluded."
+  ]
+}
