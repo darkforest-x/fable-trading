@@ -75,6 +75,21 @@ experiments:
     canonical_report: "experiments/active/exp-cloud-close-doubling-sale-fraction-20261109-v1/summary.json"
     notes: "Identical original V1.7 signal pool, modeled native costs and prior-turnover cap. Historical OKX funding and full exit depth unobserved. Notion 41388564-79af-814c-b5a5-e1f2b334ad69."
 
+  - experiment_id: exp-cloud-close-target-leg-attribution-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "273eb3b718"
+    status: "inconclusive"
+    question: "原云带 median-cap 账户实际现金收益由哪些目标腿、trim、cloud/stop退出实现？"
+    single_variable: "无策略变量；对已冻结的1,585个 funded parent，使用真实 native child 路由与 VectorBT order log 做分成交现金归因。"
+    result: "净现金+41,486.14U，期末NAV 42,486.14U；绝对2x入场价目标46个funded parent/90个child exits，净+15,077.90U；原固定+2R为67 parent/134 exits、净+2,802.85U；7,096个trim exits净+9,117.40U。Top10 parent winners贡献+31,997.31U，占全体净现金77.1%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-target-leg-attribution-20261109-v1/summary.json"
+    notes: "使用cash-giveback adapter实际selected child paths并和native order填单价格对账；double-directory旧表与funded roster交集35，当前真实路径46，旧表不作资格筛选。跨币类别比例是parent数量分数等权均值/按初始USDT notional加权均值，底层units仅留逐笔。按账户现金核对误差<3e-12U；不含资金费或额外滑点，不是新钱包。Notion 41388564-79af-81dd-9636-d18cd5a165a4。"
+
   - experiment_id: exp-cloud-close-doubled-candle-low-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "7ddb02cf9a"

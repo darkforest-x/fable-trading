@@ -1,0 +1,556 @@
+{
+  "frozen_source": {
+    "funded_ledger": "experiments/active/exp-cloud-close-vix-priority-medians-20261109-v1/aligned/funded_median.csv.gz",
+    "native_order_log": "experiments/active/exp-cloud-close-cash-giveback-20261109-v1/orders_median.csv.gz",
+    "candidate_paths": "experiments/active/exp-cloud-close-vix-priority-20261109-v1/aligned/selected_paths.csv.gz",
+    "cash_giveback_source": "yoyo/evaluation/cloud_close_cash_giveback.py"
+  },
+  "input_counts": {
+    "funded_parents": 1585,
+    "candidate_parents_after_native_assembly": 1618,
+    "unfunded_candidate_parents": 33,
+    "funded_native_child_paths": 6340,
+    "native_order_rows": 19776,
+    "opening_fills": 6340,
+    "stage1_open_exit_fills": 1447,
+    "stage2_trim_fills": 7096,
+    "stage3_intrabar_or_close_exit_fills": 4893,
+    "terminal_child_fills": 6340,
+    "absolute_2x_child_templates_all_candidates": 92,
+    "absolute_2x_candidate_parent_events_all_candidates": 47,
+    "absolute_2x_child_exits_funded": 90,
+    "absolute_2x_parent_events_funded": 46,
+    "absolute_2x_exits_by_child_origin": {
+      "runner_double_candidate": 46,
+      "target_2R_double_candidate": 44
+    },
+    "relative_2R_target_exits_funded": 134,
+    "relative_2R_parent_events_funded": 67
+  },
+  "double_route_roster_crosscheck": {
+    "double_directory_fills": {
+      "path": "experiments/active/exp-cloud-close-double-directory-20261109-v1/doubling_fills.csv",
+      "available": true,
+      "rows": 85,
+      "unique_events": 44,
+      "funded_roster_intersection": 35,
+      "intersection_with_actual_funded_absolute_2x_paths": 35,
+      "used_to_filter_attribution": false
+    },
+    "double_limit_saved_routes": {
+      "path": "experiments/active/exp-cloud-close-double-limit-20261109-v1/doublings_OKX.csv",
+      "available": true,
+      "rows": 89,
+      "unique_events": 46,
+      "funded_roster_intersection": 37,
+      "intersection_with_actual_funded_absolute_2x_paths": 37,
+      "used_to_filter_attribution": false
+    },
+    "actual_current_native_selected_paths": {
+      "all_candidate_parent_events": 47,
+      "funded_parent_events": 46,
+      "actual_funded_child_exits": 90,
+      "selection_source": "cash-giveback account adapter selected paths joined to actual native VectorBT fills"
+    }
+  },
+  "reconciliation": {
+    "maximum_parent_native_order_cash_error_usdt": 2.7284841053187847e-12,
+    "maximum_parent_allocated_realized_cash_error_usdt": 1.9895196601282805e-12,
+    "maximum_parent_remaining_units_abs": 7.152557373046875e-07,
+    "maximum_parent_remaining_units_fraction": 5.305743373613853e-16,
+    "maximum_parent_initial_notional_error_usdt": 0.0,
+    "orders_match_frozen_cash_pnl": true,
+    "allocated_exit_cash_matches_frozen_cash_pnl": true,
+    "1000u_plus_frozen_cash_pnl_usdt": 42486.13769098665,
+    "frozen_hourly_terminal_nav_usdt": 42486.137690920455,
+    "hourly_terminal_nav_error_usdt": 6.619666237384081e-08,
+    "sum_of_all_cohort_category_realized_net_pnl_usdt": 41486.13769098669,
+    "sum_of_frozen_parent_cash_pnl_usdt": 41486.13769098665,
+    "exit_quantity_fraction_sums_by_cohort": {
+      "2025": {
+        "mean_parent_fraction_of_initial_units": 1.0,
+        "entry_notional_weighted_parent_fraction_of_initial_units": 0.9999999999999997
+      },
+      "2025_plus": {
+        "mean_parent_fraction_of_initial_units": 1.0,
+        "entry_notional_weighted_parent_fraction_of_initial_units": 0.9999999999999999
+      },
+      "2026": {
+        "mean_parent_fraction_of_initial_units": 1.0,
+        "entry_notional_weighted_parent_fraction_of_initial_units": 0.9999999999999999
+      },
+      "all": {
+        "mean_parent_fraction_of_initial_units": 1.0,
+        "entry_notional_weighted_parent_fraction_of_initial_units": 1.0
+      },
+      "through_2024": {
+        "mean_parent_fraction_of_initial_units": 1.0,
+        "entry_notional_weighted_parent_fraction_of_initial_units": 0.9999999999999999
+      },
+      "top10_cash_winners": {
+        "mean_parent_fraction_of_initial_units": 1.0,
+        "entry_notional_weighted_parent_fraction_of_initial_units": 0.9999999999999999
+      }
+    }
+  },
+  "periods": {
+    "all": {
+      "funded_parents": 1585,
+      "frozen_parent_cash_pnl_usdt": 41486.13769098665,
+      "allocated_realized_net_pnl_usdt": 41486.13769098668,
+      "initial_notional_usdt": 1576293.843736844,
+      "exit_types": {
+        "absolute_2x_entry_target": {
+          "parents": 46,
+          "fills": 90,
+          "mean_parent_fraction_of_initial_units": 0.012889766276216208,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.009574028733975226,
+          "realized_net_pnl_usdt": 15077.900218826991,
+          "realized_gross_pnl_usdt": 15091.482553124803,
+          "allocated_entry_fees_usdt": 7.5457412765624,
+          "exit_fees_usdt": 6.036593021249921
+        },
+        "cloud_exit": {
+          "parents": 617,
+          "fills": 2325,
+          "mean_parent_fraction_of_initial_units": 0.35575705541031943,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.3587195058815749,
+          "realized_net_pnl_usdt": 55949.57542344203,
+          "realized_gross_pnl_usdt": 56511.29811652588,
+          "allocated_entry_fees_usdt": 282.72367437472457,
+          "exit_fees_usdt": 278.999018709133
+        },
+        "delisting_settlement": {
+          "parents": 6,
+          "fills": 24,
+          "mean_parent_fraction_of_initial_units": 0.0037854889589905363,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.004040768584912655,
+          "realized_net_pnl_usdt": 1065.20837534456,
+          "realized_gross_pnl_usdt": 1068.3930946667415,
+          "allocated_entry_fees_usdt": 3.1847193221815275,
+          "exit_fees_usdt": 0.0
+        },
+        "hourly_single_symbol_trim": {
+          "parents": 183,
+          "fills": 7096,
+          "mean_parent_fraction_of_initial_units": 0.01765872713562423,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.044619717042853904,
+          "realized_net_pnl_usdt": 9117.396616405587,
+          "realized_gross_pnl_usdt": 9192.536022481107,
+          "allocated_entry_fees_usdt": 35.16689264196527,
+          "exit_fees_usdt": 39.97251343355436
+        },
+        "protective_stop": {
+          "parents": 954,
+          "fills": 3737,
+          "mean_parent_fraction_of_initial_units": 0.5772556981367835,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.5495036526408865,
+          "realized_net_pnl_usdt": -44466.24553079539,
+          "realized_gross_pnl_usdt": -43603.672623498656,
+          "allocated_entry_fees_usdt": 433.0896123843693,
+          "exit_fees_usdt": 429.48329491236905
+        },
+        "relative_plus_2R_target": {
+          "parents": 67,
+          "fills": 134,
+          "mean_parent_fraction_of_initial_units": 0.02802655535441102,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.021773775208721976,
+          "realized_net_pnl_usdt": 2802.84753956822,
+          "realized_gross_pnl_usdt": 2826.981281575799,
+          "allocated_entry_fees_usdt": 17.16093390820918,
+          "exit_fees_usdt": 6.9728080993704475
+        },
+        "series_tail_close": {
+          "parents": 8,
+          "fills": 30,
+          "mean_parent_fraction_of_initial_units": 0.0046267087276551,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.011768551907074884,
+          "realized_net_pnl_usdt": 1939.4550481946844,
+          "realized_gross_pnl_usdt": 1957.027230500254,
+          "allocated_entry_fees_usdt": 9.27534796040982,
+          "exit_fees_usdt": 8.296834345159692
+        }
+      }
+    },
+    "through_2024": {
+      "funded_parents": 1066,
+      "frozen_parent_cash_pnl_usdt": 28085.605776304204,
+      "allocated_realized_net_pnl_usdt": 28085.605776304208,
+      "initial_notional_usdt": 843811.5162705348,
+      "exit_types": {
+        "absolute_2x_entry_target": {
+          "parents": 44,
+          "fills": 86,
+          "mean_parent_fraction_of_initial_units": 0.01844442456362129,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.015635852795011593,
+          "realized_net_pnl_usdt": 13181.838313751989,
+          "realized_gross_pnl_usdt": 13193.712655141615,
+          "allocated_entry_fees_usdt": 6.596856327570808,
+          "exit_fees_usdt": 5.277485062056646
+        },
+        "cloud_exit": {
+          "parents": 432,
+          "fills": 1603,
+          "mean_parent_fraction_of_initial_units": 0.36251489261127245,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.3516366197958981,
+          "realized_net_pnl_usdt": 31930.396664436274,
+          "realized_gross_pnl_usdt": 32229.785554272246,
+          "allocated_entry_fees_usdt": 148.3575146631112,
+          "exit_fees_usdt": 151.03137517285785
+        },
+        "hourly_single_symbol_trim": {
+          "parents": 162,
+          "fills": 6036,
+          "mean_parent_fraction_of_initial_units": 0.02318222051649437,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.05524874368905744,
+          "realized_net_pnl_usdt": 5421.856088476268,
+          "realized_gross_pnl_usdt": 5471.379870769268,
+          "allocated_entry_fees_usdt": 23.30976309215285,
+          "exit_fees_usdt": 26.214019200846934
+        },
+        "protective_stop": {
+          "parents": 634,
+          "fills": 2479,
+          "mean_parent_fraction_of_initial_units": 0.5660691343817125,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.55218112463311,
+          "realized_net_pnl_usdt": -24171.824558666147,
+          "realized_gross_pnl_usdt": -23707.76146554218,
+          "allocated_entry_fees_usdt": 232.9683960163168,
+          "exit_fees_usdt": 231.09469710765154
+        },
+        "relative_plus_2R_target": {
+          "parents": 48,
+          "fills": 96,
+          "mean_parent_fraction_of_initial_units": 0.029789327926899433,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.02529765908692276,
+          "realized_net_pnl_usdt": 1723.339268305826,
+          "realized_gross_pnl_usdt": 1738.2508073638483,
+          "allocated_entry_fees_usdt": 10.673228036115685,
+          "exit_fees_usdt": 4.238311021906744
+        }
+      }
+    },
+    "2025": {
+      "funded_parents": 285,
+      "frozen_parent_cash_pnl_usdt": 9691.866715199936,
+      "allocated_realized_net_pnl_usdt": 9691.866715199938,
+      "initial_notional_usdt": 500246.79371371464,
+      "exit_types": {
+        "absolute_2x_entry_target": {
+          "parents": 2,
+          "fills": 4,
+          "mean_parent_fraction_of_initial_units": 0.002696571799938222,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.0037936672894884308,
+          "realized_net_pnl_usdt": 1896.0619050750013,
+          "realized_gross_pnl_usdt": 1897.7698979831866,
+          "allocated_entry_fees_usdt": 0.9488849489915928,
+          "exit_fees_usdt": 0.7591079591932746
+        },
+        "cloud_exit": {
+          "parents": 93,
+          "fills": 358,
+          "mean_parent_fraction_of_initial_units": 0.30478808685038855,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.35344968316640085,
+          "realized_net_pnl_usdt": 17850.96352313528,
+          "realized_gross_pnl_usdt": 18024.553019412037,
+          "allocated_entry_fees_usdt": 88.40603537156017,
+          "exit_fees_usdt": 85.18346090519523
+        },
+        "delisting_settlement": {
+          "parents": 5,
+          "fills": 20,
+          "mean_parent_fraction_of_initial_units": 0.017543859649122806,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.010250150553531996,
+          "realized_net_pnl_usdt": 980.0527637681122,
+          "realized_gross_pnl_usdt": 982.6165662428562,
+          "allocated_entry_fees_usdt": 2.563802474743619,
+          "exit_fees_usdt": 0.0
+        },
+        "hourly_single_symbol_trim": {
+          "parents": 18,
+          "fills": 992,
+          "mean_parent_fraction_of_initial_units": 0.010353061296420472,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.04159954042919332,
+          "realized_net_pnl_usdt": 3692.768739322181,
+          "realized_gross_pnl_usdt": 3715.4787257944945,
+          "allocated_entry_fees_usdt": 10.405018359834001,
+          "exit_fees_usdt": 12.304968112479509
+        },
+        "protective_stop": {
+          "parents": 187,
+          "fills": 738,
+          "mean_parent_fraction_of_initial_units": 0.6412266075386329,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.5792281597998207,
+          "realized_net_pnl_usdt": -15222.208554691008,
+          "realized_gross_pnl_usdt": -14934.184653305321,
+          "allocated_entry_fees_usdt": 144.87851488427773,
+          "exit_fees_usdt": 143.1453865014072
+        },
+        "relative_plus_2R_target": {
+          "parents": 10,
+          "fills": 20,
+          "mean_parent_fraction_of_initial_units": 0.023391812865497075,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.01167879876156443,
+          "realized_net_pnl_usdt": 494.2283385903705,
+          "realized_gross_pnl_usdt": 498.3674252898657,
+          "allocated_entry_fees_usdt": 2.921140817450154,
+          "exit_fees_usdt": 1.2179458820450317
+        }
+      }
+    },
+    "2026": {
+      "funded_parents": 234,
+      "frozen_parent_cash_pnl_usdt": 3708.6651994825197,
+      "allocated_realized_net_pnl_usdt": 3708.66519948252,
+      "initial_notional_usdt": 232235.53375259475,
+      "exit_types": {
+        "cloud_exit": {
+          "parents": 92,
+          "fills": 364,
+          "mean_parent_fraction_of_initial_units": 0.3870489425187142,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.3958061335180125,
+          "realized_net_pnl_usdt": 6168.2152358704725,
+          "realized_gross_pnl_usdt": 6256.959542841606,
+          "allocated_entry_fees_usdt": 45.96012434005321,
+          "exit_fees_usdt": 42.78418263107994
+        },
+        "delisting_settlement": {
+          "parents": 1,
+          "fills": 4,
+          "mean_parent_fraction_of_initial_units": 0.004273504273504274,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.005347302692269167,
+          "realized_net_pnl_usdt": 85.15561157644765,
+          "realized_gross_pnl_usdt": 85.77652842388557,
+          "allocated_entry_fees_usdt": 0.6209168474379084,
+          "exit_fees_usdt": 0.0
+        },
+        "hourly_single_symbol_trim": {
+          "parents": 3,
+          "fills": 68,
+          "mean_parent_fraction_of_initial_units": 0.0013940725209468788,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.012505503929690425,
+          "realized_net_pnl_usdt": 2.77178860713763,
+          "realized_gross_pnl_usdt": 5.677425917343965,
+          "allocated_entry_fees_usdt": 1.4521111899784136,
+          "exit_fees_usdt": 1.453526120227922
+        },
+        "protective_stop": {
+          "parents": 133,
+          "fills": 520,
+          "mean_parent_fraction_of_initial_units": 0.5503034237067777,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.47574719157857936,
+          "realized_net_pnl_usdt": -5072.212417438244,
+          "realized_gross_pnl_usdt": -4961.726504651159,
+          "allocated_entry_fees_usdt": 55.24270148377467,
+          "exit_fees_usdt": 55.24321130331036
+        },
+        "relative_plus_2R_target": {
+          "parents": 9,
+          "fills": 18,
+          "mean_parent_fraction_of_initial_units": 0.02564102564102564,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.03071506756104669,
+          "realized_net_pnl_usdt": 585.2799326720233,
+          "realized_gross_pnl_usdt": 590.3630489220852,
+          "allocated_entry_fees_usdt": 3.566565054643343,
+          "exit_fees_usdt": 1.5165511954186714
+        },
+        "series_tail_close": {
+          "parents": 8,
+          "fills": 30,
+          "mean_parent_fraction_of_initial_units": 0.03133903133903134,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.0798788007204017,
+          "realized_net_pnl_usdt": 1939.4550481946844,
+          "realized_gross_pnl_usdt": 1957.027230500254,
+          "allocated_entry_fees_usdt": 9.27534796040982,
+          "exit_fees_usdt": 8.296834345159692
+        }
+      }
+    },
+    "2025_plus": {
+      "funded_parents": 519,
+      "frozen_parent_cash_pnl_usdt": 13400.531914682455,
+      "allocated_realized_net_pnl_usdt": 13400.531914682459,
+      "initial_notional_usdt": 732482.3274663093,
+      "exit_types": {
+        "absolute_2x_entry_target": {
+          "parents": 2,
+          "fills": 4,
+          "mean_parent_fraction_of_initial_units": 0.0014807764219313937,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.0025908746557035183,
+          "realized_net_pnl_usdt": 1896.0619050750013,
+          "realized_gross_pnl_usdt": 1897.7698979831866,
+          "allocated_entry_fees_usdt": 0.9488849489915928,
+          "exit_fees_usdt": 0.7591079591932746
+        },
+        "cloud_exit": {
+          "parents": 185,
+          "fills": 722,
+          "mean_parent_fraction_of_initial_units": 0.34187679634246604,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.36687891208622664,
+          "realized_net_pnl_usdt": 24019.17875900575,
+          "realized_gross_pnl_usdt": 24281.512562253636,
+          "allocated_entry_fees_usdt": 134.36615971161336,
+          "exit_fees_usdt": 127.96764353627519
+        },
+        "delisting_settlement": {
+          "parents": 6,
+          "fills": 24,
+          "mean_parent_fraction_of_initial_units": 0.011560693641618497,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.008695689173000586,
+          "realized_net_pnl_usdt": 1065.20837534456,
+          "realized_gross_pnl_usdt": 1068.3930946667415,
+          "allocated_entry_fees_usdt": 3.1847193221815275,
+          "exit_fees_usdt": 0.0
+        },
+        "hourly_single_symbol_trim": {
+          "parents": 21,
+          "fills": 1060,
+          "mean_parent_fraction_of_initial_units": 0.006313748438114459,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.03237519624760581,
+          "realized_net_pnl_usdt": 3695.5405279293186,
+          "realized_gross_pnl_usdt": 3721.156151711839,
+          "allocated_entry_fees_usdt": 11.857129549812417,
+          "exit_fees_usdt": 13.75849423270743
+        },
+        "protective_stop": {
+          "parents": 320,
+          "fills": 1258,
+          "mean_parent_fraction_of_initial_units": 0.600232339683808,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.5464192346053756,
+          "realized_net_pnl_usdt": -20294.42097212925,
+          "realized_gross_pnl_usdt": -19895.91115795648,
+          "allocated_entry_fees_usdt": 200.1212163680524,
+          "exit_fees_usdt": 198.38859780471753
+        },
+        "relative_plus_2R_target": {
+          "parents": 19,
+          "fills": 38,
+          "mean_parent_fraction_of_initial_units": 0.024405908798972385,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.017714300069285698,
+          "realized_net_pnl_usdt": 1079.508271262394,
+          "realized_gross_pnl_usdt": 1088.7304742119513,
+          "allocated_entry_fees_usdt": 6.487705872093497,
+          "exit_fees_usdt": 2.7344970774637023
+        },
+        "series_tail_close": {
+          "parents": 8,
+          "fills": 30,
+          "mean_parent_fraction_of_initial_units": 0.014129736673089274,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.025325793162802118,
+          "realized_net_pnl_usdt": 1939.4550481946844,
+          "realized_gross_pnl_usdt": 1957.027230500254,
+          "allocated_entry_fees_usdt": 9.27534796040982,
+          "exit_fees_usdt": 8.296834345159692
+        }
+      }
+    },
+    "top10_cash_winners": {
+      "funded_parents": 10,
+      "frozen_parent_cash_pnl_usdt": 31997.31063708208,
+      "allocated_realized_net_pnl_usdt": 31997.310637082075,
+      "initial_notional_usdt": 45273.18991163615,
+      "exit_types": {
+        "absolute_2x_entry_target": {
+          "parents": 5,
+          "fills": 10,
+          "mean_parent_fraction_of_initial_units": 0.17573287319951145,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.14444124622802731,
+          "realized_net_pnl_usdt": 6533.430587180482,
+          "realized_gross_pnl_usdt": 6539.315971554881,
+          "allocated_entry_fees_usdt": 3.2696579857774397,
+          "exit_fees_usdt": 2.615726388621952
+        },
+        "cloud_exit": {
+          "parents": 10,
+          "fills": 30,
+          "mean_parent_fraction_of_initial_units": 0.5710837125346291,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.5587053947119901,
+          "realized_net_pnl_usdt": 18769.685415952663,
+          "realized_gross_pnl_usdt": 18797.676552684843,
+          "allocated_entry_fees_usdt": 12.647187719725782,
+          "exit_fees_usdt": 15.34394901246274
+        },
+        "hourly_single_symbol_trim": {
+          "parents": 8,
+          "fills": 1008,
+          "mean_parent_fraction_of_initial_units": 0.25318341426585944,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.29685335905998245,
+          "realized_net_pnl_usdt": 6694.194633948937,
+          "realized_gross_pnl_usdt": 6710.988819473306,
+          "allocated_entry_fees_usdt": 6.719749250314852,
+          "exit_fees_usdt": 10.074436274054666
+        }
+      }
+    }
+  },
+  "top10_cash_winners": {
+    "selection": "Frozen funded cash_pnl descending; event_id ascending for ties",
+    "event_ids": [
+      "signal-row-07858:signal",
+      "signal-row-05597:signal",
+      "signal-row-04147:signal",
+      "signal-row-05512:signal",
+      "signal-row-05601:signal",
+      "signal-row-04665:signal",
+      "ema20-50-12h-monday-wick-v1:GOAT-USDT-SWAP:1737633600000:-1",
+      "signal-row-06658:signal",
+      "signal-row-07871:signal",
+      "signal-row-06675:signal"
+    ],
+    "frozen_cash_pnl_usdt": 31997.310637082075,
+    "share_of_all_parent_net_cash_pnl": 0.7712771643245513,
+    "attribution": {
+      "funded_parents": 10,
+      "frozen_parent_cash_pnl_usdt": 31997.31063708208,
+      "allocated_realized_net_pnl_usdt": 31997.310637082075,
+      "initial_notional_usdt": 45273.18991163615,
+      "exit_types": {
+        "absolute_2x_entry_target": {
+          "parents": 5,
+          "fills": 10,
+          "mean_parent_fraction_of_initial_units": 0.17573287319951145,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.14444124622802731,
+          "realized_net_pnl_usdt": 6533.430587180482,
+          "realized_gross_pnl_usdt": 6539.315971554881,
+          "allocated_entry_fees_usdt": 3.2696579857774397,
+          "exit_fees_usdt": 2.615726388621952
+        },
+        "cloud_exit": {
+          "parents": 10,
+          "fills": 30,
+          "mean_parent_fraction_of_initial_units": 0.5710837125346291,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.5587053947119901,
+          "realized_net_pnl_usdt": 18769.685415952663,
+          "realized_gross_pnl_usdt": 18797.676552684843,
+          "allocated_entry_fees_usdt": 12.647187719725782,
+          "exit_fees_usdt": 15.34394901246274
+        },
+        "hourly_single_symbol_trim": {
+          "parents": 8,
+          "fills": 1008,
+          "mean_parent_fraction_of_initial_units": 0.25318341426585944,
+          "entry_notional_weighted_parent_fraction_of_initial_units": 0.29685335905998245,
+          "realized_net_pnl_usdt": 6694.194633948937,
+          "realized_gross_pnl_usdt": 6710.988819473306,
+          "allocated_entry_fees_usdt": 6.719749250314852,
+          "exit_fees_usdt": 10.074436274054666
+        }
+      }
+    }
+  },
+  "fee_and_exit_checks": {
+    "terminal_fills_match_selected_path_price": true,
+    "classified_take_profit_other": 0,
+    "absolute_2x_vs_2R_coincident_child_exits": 0
+  },
+  "runtime": {
+    "git_head": "273eb3b71871b046a7d7969cb0c3b2f76f09fde6"
+  },
+  "limitations": [
+    "Retrospective realized accounting attribution only; no independent wallet or hypothetical cash simulation.",
+    "The 2026 entry cohort is partial year-to-date in the frozen source.",
+    "No historical funding payments or additional market impact are added.",
+    "Actual child exit path and fill price are read from cash-giveback's reassembled native four-child paths and the frozen native order log; separate saved doubling-fill rosters are cross-checks only, not parent eligibility filters. Their event universes differ, so their intersections do not replace current-path attribution.",
+    "Entry fees are allocated to closing quantities proportionally within the same child; fees and cash are USDT."
+  ]
+}
