@@ -88,7 +88,7 @@ def main():
                fontsize=9.5,color="#7c4952",bbox=dict(fc="white",ec="none",alpha=.87,pad=1))
     label(under,trough_time,dd[trough],f"{dd[trough]:.2f}%",(-22,-2),RED)
     under.set_ylim(-66,3)
-    under.set_yticks([0,-20,-40,-60],["0%","−20%","−40%","−60%"])
+    under.set_yticks([0,-20,-40,-60],["0%","-20%","-40%","-60%"])
     first_january = equity.index[0].normalize().replace(month=1, day=1)
     years = pd.date_range(first_january,end_time.normalize(),freq="YS")
     under.set_xticks(years,[t.strftime("%Y") for t in years])
