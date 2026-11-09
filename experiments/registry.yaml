@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-fvg-exclusion-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "b774d8b91d"
+    status: "inconclusive"
+    question: "Does avoiding active 12H gap overlap at the first 1.618 touch improve the funded original confirmation outside the pilot names?"
+    single_variable: "Skip entries whose first weekly 1.618 contact was inside an existing same-side ChartPrime 12H fair value gap; retain original 12H confirmation and funded rules."
+    result: "All 245 prior six-coin pilot tags reproduced. Covered OKX baseline 9,053.18U vs 11,070.55U excluding overlap (32.30% wins, monetary payoff 2.928, upper DD 32.46%); after dropping every pilot name 8,496.50 vs 10,535.38. Later entrants 1,738.20 vs paired confirmation 8,121.21; 5bp extra per market fill 9,667.75. Development and 2025 improved, 2026 return multiple marginally lower than coverage. No funding included; far below target."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-fvg-exclusion-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-815e-bff2-d66d1eb7e21c."
+
   - experiment_id: exp-cloud-close-hourly-trim-control-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "4f3bddcf6e"
