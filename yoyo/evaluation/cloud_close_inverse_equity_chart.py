@@ -4,7 +4,6 @@ from pathlib import Path
 
 import matplotlib as mpl
 mpl.use("Agg")
-import matplotlib.dates as mdates
 from matplotlib import font_manager
 import matplotlib.pyplot as plt
 import numpy as np
@@ -90,7 +89,8 @@ def main():
     label(under,trough_time,dd[trough],f"{dd[trough]:.2f}%",(-22,-2),RED)
     under.set_ylim(-66,3)
     under.set_yticks([0,-20,-40,-60],["0%","−20%","−40%","−60%"])
-    years = pd.date_range("2020-01-01",end_time.normalize(),freq="YS",tz=curve.index.tz)
+    first_january = equity.index[0].normalize().replace(month=1, day=1)
+    years = pd.date_range(first_january,end_time.normalize(),freq="YS")
     under.set_xticks(years,[t.strftime("%Y") for t in years])
     ax.set_xlim(min(equity.index[0],years[0]),end_time+pd.Timedelta(days=22))
     fig.savefig(BASE/"equity-drawdown-1.5x.png",dpi=165,facecolor="white")
