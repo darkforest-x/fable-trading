@@ -15,6 +15,36 @@ EXP = source.EXP.parent/'exp-cloud-close-entry-turnover-20261109-v1'
 CACHE = minute.CACHE.parent/'cloud_close_entry_turnover_checks'
 
 
+def volume_hour(symbol,hour,bars,url):
+    """Read native base and USDT turnover; repair older price-only ZIPs with same-timestamp API data."""
+    inst = symbol+'-USDT-SWAP'
+    folder = minute.CACHE/inst
+    archive = None
+    if 'api/v5' not in url:
+        file = folder/url.rsplit('/',1)[1]
+        raw = pd.read_csv(file,usecols=['instrument_name','open_time','vol','vol_quote','vol_ccy','confirm'])
+        archive = raw[(raw.instrument_name==inst)&(raw['confirm']==1)].set_index('open_time').reindex(bars.index)
+        if archive[['vol_ccy','vol_quote']].notna().all().all():
+            return archive[['vol','vol_ccy','vol_quote']].rename(columns={'vol_ccy':'base','vol_quote':'quote'}),url
+    cache = folder/f'api-{hour}.json'
+    if not cache.exists():
+        endpoint = 'https://www.okx.com/api/v5/market/history-candles'
+        res = requests.get(endpoint,params=dict(instId=inst,bar='1m',after=hour+minute.HOUR,limit=60),timeout=(8,22))
+        res.raise_for_status()
+        body = res.json()
+        if body.get('code') not in ('0','51001'):
+            raise ValueError(f'Unexpected OKX turnover code {body.get("code")} for {inst}')
+        minute.write_cache(cache,json.dumps(body).encode())
+    raw = json.loads(cache.read_text())['data']
+    columns = ['time','open','high','low','close','vol','base','quote','confirm']
+    api = pd.DataFrame(raw,columns=columns).apply(pd.to_numeric)
+    api = api[api['confirm'].eq(1)].set_index('time').reindex(bars.index)
+    if (not np.allclose(api[minute.FIELDS],bars[minute.FIELDS],rtol=1e-9,atol=1e-15) or
+            (archive is not None and not np.allclose(api.vol,archive.vol,rtol=1e-9,atol=1e-8))):
+        return None,'native_volume_api_unavailable_or_not_same_trades'
+    return api[['vol','base','quote']],'https://www.okx.com/api/v5/market/history-candles'
+
+
 def observation(row,quotes):
     """Read opening 1m quote volume from the exact source whose 60 candles reproduce this H1."""
     symbol,clock = row.symbol,int(row.entry_ms)
@@ -26,31 +56,18 @@ def observation(row,quotes):
     if bars is None:
         record['status'] = url
     else:
-        inst = symbol+'-USDT-SWAP'
-        folder = minute.CACHE/inst
-        if 'api/v5' in url:
-            raw = json.loads((folder/f'api-{clock}.json').read_text())['data']
-            hits = [r for r in raw if int(r[0])==clock and str(r[8])=='1']
-            if len(hits)!=1:
-                raise ValueError(f'Missing unique entry minute {inst} {clock}')
-            amount = float(hits[0][7])
-            base_volume = float(hits[0][6])
-        else:
-            file = folder/url.rsplit('/',1)[1]
-            raw = pd.read_csv(file, usecols=['instrument_name','open_time','vol_quote','vol_ccy','confirm'],float_precision='round_trip')
-            hit = raw[(raw.instrument_name==inst) & (raw.open_time==clock) & (raw['confirm']==1)]
-            if len(hit)!=1:
-                raise ValueError(f'Missing unique archive entry minute {inst} {clock}')
-            amount = float(hit.vol_quote.iat[0])
-            base_volume = float(hit.vol_ccy.iat[0])
+        amounts,vol_url = volume_hour(symbol,clock,bars,url)
         first = bars.iloc[0]
-        # Quote/base is native traded VWAP, subject to the archive's volume rounding.
-        if not np.isfinite([amount,base_volume]).all() or min(amount,base_volume)<0:
-            raise ValueError(f'Invalid minute turnover for {inst} {clock}')
         if not np.isclose(first.open,row.entry_price,rtol=1e-8,atol=1e-14):
-            raise ValueError(f'Actual first minute price does not match the strategy entry for {inst} {clock}')
-        record.update(status='observed',entry_open=float(first.open),minute_low=float(first.low),
-                      minute_high=float(first.high),quote_usdt=amount,base_volume=base_volume)
+            raise ValueError(f'First minute price differs from strategy entry {symbol} {clock}')
+        if amounts is None:
+            record['status'] = vol_url
+        else:
+            amount,base = float(amounts.quote.iat[0]),float(amounts.base.iat[0])
+            if not np.isfinite([amount,base]).all() or min(amount,base)<0:
+                raise ValueError(f'Invalid native minute turnover {symbol} {clock}')
+            record.update(status='observed',entry_open=float(first.open),minute_low=float(first.low),
+                          minute_high=float(first.high),quote_usdt=amount,base_volume=base,volume_source=vol_url)
     tmp = path.with_suffix('.tmp')
     tmp.write_text(json.dumps(record,allow_nan=False))
     tmp.replace(path)

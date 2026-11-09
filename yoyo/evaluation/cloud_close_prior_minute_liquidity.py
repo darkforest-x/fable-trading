@@ -26,24 +26,18 @@ def prior(row,quotes):
     if bars is None:
         rec['status'] = url
     else:
-        folder = minute.CACHE/inst
-        if 'api/v5' in url:
-            body = json.loads((folder/f'api-{hour}.json').read_text())
-            vols = pd.DataFrame([(int(v[0]),float(v[6]),float(v[7])) for v in body['data'] if str(v[8])=='1'],
-                                columns=['time','base','quote']).set_index('time')
+        vols,vol_url = audit.volume_hour(row.symbol,hour,bars,url)
+        if vols is None:
+            rec['status'] = vol_url
         else:
-            raw = pd.read_csv(folder/url.rsplit('/',1)[1],usecols=['instrument_name','open_time','vol_quote','vol_ccy','confirm'])
-            vols = raw[(raw.instrument_name==inst) & (raw['confirm']==1)].set_index('open_time').rename(
-                columns={'vol_quote':'quote','vol_ccy':'base'})
-        vols = vols.reindex(bars.index)
-        if not np.isfinite(vols[['quote','base']]).all().all() or (vols[['quote','base']]<0).any().any():
-            raise ValueError(f'Missing or negative prior native volumes {inst} {hour}')
-        ratio = vols.quote/vols.base
-        inconsistent = ((ratio<bars.low*(1-1e-5)) | (ratio>bars.high*(1+1e-5))) & vols.base.gt(0)
-        rec['status'] = 'turnover_price_mismatch' if inconsistent.any() else 'observed'
-        if rec['status']=='observed':
-            rec.update(median_usdt=float(vols.quote.median()),mean_usdt=float(vols.quote.mean()),
-                       zero_minutes=int(vols.quote.eq(0).sum()),last_minute_open_ms=int(bars.index[-1]))
+            if not np.isfinite(vols[['quote','base']]).all().all() or (vols[['quote','base']]<0).any().any():
+                raise ValueError(f'Missing or negative prior native volumes {inst} {hour}')
+            ratio = vols.quote/vols.base
+            inconsistent = ((ratio<bars.low*(1-1e-5)) | (ratio>bars.high*(1+1e-5))) & vols.base.gt(0)
+            rec['status'] = 'turnover_price_mismatch' if inconsistent.any() else 'observed'
+            if rec['status']=='observed':
+                rec.update(median_usdt=float(vols.quote.median()),mean_usdt=float(vols.quote.mean()),
+                           zero_minutes=int(vols.quote.eq(0).sum()),last_minute_open_ms=int(bars.index[-1]),volume_source=vol_url)
     tmp = path.with_suffix('.tmp')
     tmp.write_text(json.dumps(rec,allow_nan=False))
     tmp.replace(path)
