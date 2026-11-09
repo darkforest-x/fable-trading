@@ -1,167 +1,156 @@
-"""Plot the causal entry snapshot and the actual native fills of four frozen OKX positions."""
-from datetime import timezone
-
+"""Single-panel 12H candlestick charts using the frozen market data and sample fill ledger."""
 import matplotlib as mpl
 mpl.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib import font_manager
-from matplotlib.lines import Line2D
-from matplotlib.patches import Rectangle
-from matplotlib.ticker import FuncFormatter, MaxNLocator
+from matplotlib.collections import LineCollection, PolyCollection
+from matplotlib.ticker import FuncFormatter, MaxNLocator, NullLocator
 import numpy as np
 import pandas as pd
 
 from yoyo.evaluation import cloud_close_inverse_examples as book
+from yoyo.evaluation.cloud_close_reward_paths import _ema_points_12h
 from yoyo.monitor.cloud_signal_plans import stop_pct_for
 from yoyo.monitor.monday_fib import week_window
 
-HOUR = 3600000
+HOUR = 3_600_000
 STEP = HOUR * 12
-INK, GRAY, GRID = "#182a36", "#4c626d", "#dce5e8"
-BLUE, ORANGE, VIOLET, TEAL, RED = "#2164a8", "#9e601d", "#7056a1", "#047d71", "#ad4050"
+BEFORE, AFTER = 64, 16
+INK, GRAY = "#223343", "#5e6c79"
+UP, DOWN = "#00877c", "#cf555a"
+FAST, SLOW, RAIL = "#397cb2", "#ba801f", "#70578c"
 
 
 def bjt(ms, fmt):
-    return pd.Timestamp(int(ms), unit="ms", tz=timezone.utc).tz_convert("Asia/Shanghai").strftime(fmt)
+    return pd.Timestamp(int(ms), unit="ms", tz="UTC").tz_convert("Asia/Shanghai").strftime(fmt)
 
 
-def px(value):
-    return f"{value:.6g}"
+def candles(ax, frame, x):
+    """One wick and one real open/close body per 12H bar; horizontal strokes for dojis."""
+    colors = np.where(frame.close >= frame.open, UP, DOWN)
+    ax.vlines(x, frame.low, frame.high, colors=colors, lw=.78, zorder=3)
+    left, right = x - .32, x + .32
+    body = np.stack([np.column_stack((left, frame.open)), np.column_stack((right, frame.open)),
+                     np.column_stack((right, frame.close)), np.column_stack((left, frame.close))], axis=1)
+    ax.add_collection(PolyCollection(body, facecolors=colors, edgecolors=colors, linewidths=.45, zorder=4))
 
 
-def axes_style(ax):
-    ax.spines[["left", "top", "right"]].set_visible(False)
-    ax.spines["bottom"].set_color(GRID)
-    ax.tick_params(colors=GRAY, length=0, pad=6, labelsize=9)
-    ax.grid(axis="y", color=GRID, lw=.7)
-    ax.set_axisbelow(True)
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda n, _: f"{n:.5g}"))
+def mark(ax, x, price, label, offset, color):
+    dx, dy = offset
+    ax.annotate(f"{label}  {price:.5g}", (x, price), xytext=(dx, dy), textcoords="offset points",
+                size=10.5, color=color, ha="left" if dx > 0 else "right", va="center", zorder=7,
+                arrowprops=dict(arrowstyle="-", color=color, lw=1, shrinkA=2, shrinkB=3),
+                bbox=dict(boxstyle="round,pad=.28", facecolor="white", edgecolor="none", alpha=.96))
+    ax.scatter(x, price, s=27, facecolor=color, edgecolor="white", lw=.8, zorder=8)
 
 
-def draw(position, path, fills, source, eth_btc_ret):
+def draw(position, path, fills, source):
     entry, end = int(position.entry_ms), int(position.exit_bar_ms)
+    last_bar = end // STEP * STEP
+    start, last = entry - BEFORE * STEP, last_bar + AFTER * STEP
+    hours, bars = book.original.parent.repair.market.frames(source)
+    frame = bars.loc[start:last].copy()
+    np.testing.assert_array_equal(frame.index, np.arange(start, last + STEP, STEP))
+    ema = _ema_points_12h(bars.loc[:last, ["close"]].reset_index().to_dict("records")).set_index("time")
+    frame = frame.join(ema[["ema20", "ema50"]])
+
     key = entry - STEP
-    hourly, bars = book.original.parent.repair.market.frames(source)
-    wk = week_window(key)
-    mon = hourly.loc[wk["start"]:wk["end"]-1]
-    assert len(mon) == 24 and wk["end"] <= key
-    lo, hi = mon.low.min(), mon.high.max()
-    lower, upper = lo - .618*(hi-lo), hi + .618*(hi-lo)
+    week = week_window(key)
+    monday = hours.loc[week["start"]:week["end"]-1]
+    assert len(monday) == 24 and week["end"] <= key < week["expires"]
+    low, high = monday.low.min(), monday.high.max()
+    lower, upper = low - .618*(high-low), high + .618*(high-low)
     is_long = position.side == 1
-    boundary = lower if is_long else upper
-    assert np.isclose(boundary*(1-position.side*stop_pct_for(position.symbol)), path.stop_price)
-    past = bars.loc[:key].copy()
-    segment = past.index.to_series().diff().ne(STEP).cumsum()
-    for span in [20, 50]:
-        past[f"ema{span}"] = past.close.groupby(segment).transform(
-            lambda close: close.ewm(span=span, adjust=False, min_periods=50).mean())
-    hist = past.tail(17)
-    current = hist.iloc[-1]
-    assert current.low < lower if is_long else current.high > upper
-    assert lower < current.close < upper and (current.ema20-current.ema50)*position.side > 0
-    assert eth_btc_ret*position.side < 0 and np.isclose(hourly.at[entry, "open"], path.entry_price)
-    grouped = (fills.assign(price=fills.fill_price.round(10))
-               .groupby(["hour_ms", "action", "price"], as_index=False).net_units.sum())
-    entries = grouped[grouped.action.eq("entry")]
-    assert len(entries) == 1 and np.isclose(entries.price.iat[0], path.entry_price)
-    final = grouped[grouped.hour_ms.eq(end) & grouped.action.str.startswith(("ema_flip", "stop"))].iloc[-1]
-    ending = "硬止损" if final.action.startswith("stop") else "云带反转"
-    level_name = "下轨" if is_long else "上轨"
-    side_name = "多单" if is_long else "空单"
-    pnl = position.cash_pnl
-    status = "盈利" if pnl > 0 else "亏损"
-    fig = plt.figure(figsize=(12.8, 6.2), facecolor="white")
-    left, right = fig.subplots(1, 2, gridspec_kw={"width_ratios":[1, 1.13]})
-    fig.subplots_adjust(left=.074, right=.975, bottom=.224, top=.689, wspace=.19)
-    fig.text(.055, .924, f"{position.symbol}   /   {status}{side_name}", fontsize=24, color=INK, weight="bold")
-    fig.text(.055, .859, f"OKX 永续   ·   {bjt(entry, '%Y-%m-%d %H:%M')} 北京时间进场   ·   ETH/BTC 近 30 天 {eth_btc_ret:+.2%}", fontsize=11, color=GRAY)
-    fig.text(.972, .923, f"{pnl:+,.2f} U", fontsize=23, color=TEAL if pnl>0 else RED, ha="right", weight="bold")
-    fig.text(.972, .859, "本笔净盈亏（含交易手续费）", fontsize=10, color=GRAY, ha="right")
-    fig.add_artist(Line2D([.055,.975],[.815,.815],transform=fig.transFigure,color=GRID,lw=1))
-    for ax,title in [(left, "进场时可见的 12H K 线"), (right, "进场后的价格与实际成交")]:
-        axes_style(ax)
-        ax.set_title(title, loc="left", fontsize=13, color=INK, weight="bold", pad=28)
-    n=len(hist)
-    x=np.arange(n)
-    for i,r in enumerate(hist.itertuples()):
-        color=TEAL if r.close>=r.open else RED
-        left.vlines(i, r.low, r.high, color=color, lw=1.05)
-        left.add_patch(Rectangle((i-.27,min(r.open,r.close)),.54,abs(r.close-r.open),fc=color,ec=color,lw=.7))
-    left.plot(x,hist.ema20,c=BLUE,lw=1.2,label="EMA20")
-    left.plot(x,hist.ema50,c=ORANGE,lw=1.2,label="EMA50")
-    left.fill_between(x,hist.ema20,hist.ema50,color="#73899a",alpha=.12)
-    left.axvspan(n-1-.47,n-1+.47,color="#e5daae",alpha=.5,zorder=0)
-    left.scatter(n-1,current.close,marker="o",s=32,fc="white",ec=INK,zorder=6,label="信号收盘")
-    # Candle centres represent the close; draw weekly levels only after their inputs closed.
-    anchor_x = n-1-(entry-wk["end"])/STEP
-    for lev in [lower,upper]:
-        left.hlines(lev,max(-.5,anchor_x),n-1+.4,color=VIOLET,linestyles="--",lw=1.1)
-    left.set_xlim(-.8,n-1+.9)
-    left.autoscale_view(scalex=False)
-    left.set_xticks([0,4,8,12,16], [bjt(hist.index[i]+STEP,"%m/%d") for i in [0,4,8,12,16]])
-    left.set_xlabel("按每根收盘日标记（北京时间）",color=GRAY,fontsize=9,labelpad=7)
-    left.set_ylabel("价格（USDT）",color=GRAY,fontsize=9)
-    handles,labels=left.get_legend_handles_labels()
-    left.legend(handles+[Line2D([],[],c=VIOLET,ls="--")],labels+["周一双轨"],loc="lower left",bbox_to_anchor=(0,1.001),ncol=4,fontsize=8,frameon=False,handlelength=1.25,columnspacing=1,borderaxespad=0)
-    # The exit hour's post-exit OHLC is excluded; plot the actually filled price as the endpoint.
-    observed=hourly[(hourly.index>=entry)&(hourly.index<end)]
-    long_view=(end-entry)/HOUR>120
-    unit=24*HOUR if long_view else HOUR
-    xc=(observed.index+HOUR-entry)/unit
-    last_x=(end-entry)/unit
-    right.fill_between(xc,observed.low,observed.high,color="#c2d4db",alpha=.48,lw=0)
-    right.plot(np.r_[0,xc,last_x],np.r_[path.entry_price,observed.close,final.price],c="#64808d",lw=1.05,zorder=2)
-    right.axhline(path.stop_price,color=RED,ls=":",lw=1.1,alpha=.9)
-    trim=grouped[grouped.action.eq("trim")]
-    target=grouped[grouped.action.str.startswith("take_profit")]
-    if len(trim):
-        right.scatter((trim.hour_ms-entry)/unit,trim.price,s=14,marker="o",fc="white",ec=VIOLET,lw=.7,zorder=3,label="仓位超限减仓")
-    right.scatter([0],[path.entry_price],marker="^",s=65,color=BLUE,edgecolors="white",lw=.7,zorder=5,label="开仓")
-    if len(target):
-        right.scatter((target.hour_ms-entry)/unit,target.price,marker="D",s=42,color=ORANGE,edgecolors="white",lw=.7,zorder=5,label="翻倍止盈" if is_long else "2R 止盈")
-    right.scatter([last_x],[final.price],marker="X",s=67,color=INK,edgecolors="white",lw=.7,zorder=6,label=ending)
-    if observed.high.max()/observed.low.min()>8:
-        right.set_yscale("log")
-        right.yaxis.set_major_formatter(FuncFormatter(lambda n,_:f"{n:g}"))
-        right.set_yticks([.5,1,2,5,10])
-        right.set_ylabel("价格（USDT，对数轴）",color=GRAY,fontsize=9)
+    rail = lower if is_long else upper
+    assert np.isclose(rail*(1-position.side*stop_pct_for(position.symbol)), path.stop_price)
+    signal = frame.loc[key]
+    assert (signal.low < lower if is_long else signal.high > upper) and lower < signal.close < upper
+    assert (signal.ema20 - signal.ema50) * position.side > 0
+
+    fig, ax = plt.subplots(figsize=(12.2, 5.4), facecolor="white")
+    fig.subplots_adjust(left=.029, right=.934, top=.815, bottom=.100)
+    x = (frame.index.to_numpy()-start)/STEP
+    candles(ax, frame, x)
+    ax.plot(x, frame.ema20, color=FAST, lw=1.05, zorder=2, label="EMA20")
+    ax.plot(x, frame.ema50, color=SLOW, lw=1.05, zorder=2, label="EMA50")
+    ax.fill_between(x, frame.ema20, frame.ema50, color=FAST, alpha=.062, zorder=1)
+    # The extension is visible only during the signal week's actual validity period.
+    ax.hlines(rail, (week["end"]-start)/STEP, (week["expires"]-start)/STEP,
+              lw=1.3, color=RAIL, ls="--", label=("当周 1.618 下轨" if is_long else "当周 1.618 上轨"))
+
+    # Place fills in their native 12H candle. The order ledger resolves intrabar exits to H1.
+    visible = fills[fills.action.ne("trim")].drop_duplicates(["hour_ms", "action", "fill_price"]).sort_values("hour_ms")
+    assert np.isclose(fills.underlying_cash.sum(), position.cash_pnl)
+    assert np.isclose(visible[visible.action.eq("entry")].fill_price.item(), path.entry_price)
+    for r in visible.itertuples():
+        stamp = int(r.hour_ms) // STEP * STEP
+        price = float(r.fill_price)
+        assert frame.at[stamp, "low"]*(1-1e-9) <= price <= frame.at[stamp, "high"]*(1+1e-9)
+        if r.action == "entry":
+            label, color, offset = ("开多" if is_long else "开空"), "#185a8b", (-18, -28 if is_long else 30)
+        elif r.action.startswith("take_profit"):
+            label = "翻倍止盈" if np.isclose(price, 2*path.entry_price) and is_long else "2R 止盈"
+            color, offset = "#986311", (12, 28 if is_long else -30)
+        elif r.action.startswith("stop"):
+            label, color, offset = "止损", "#a23742", (14, -26 if is_long else 28)
+        elif r.action.startswith("ema_flip"):
+            label, color, offset = "余仓平仓", INK, (10, 28)
+        else:
+            raise ValueError(f"Unexpected fill action: {r.action}")
+        mark(ax, (stamp-start)/STEP, price, label, offset, color)
+
+    y_min = frame[["low","ema20","ema50"]].min().min()
+    y_max = frame[["high","ema20","ema50"]].max().max()
+    use_log = y_max / y_min > 8
+    if use_log:
+        ax.set_yscale("log")
+        ticks = [v*10.**k for k in range(-6, 6) for v in (1, 2, 5) if y_min*.88 < v*10.**k < y_max*1.14]
+        ax.set_yticks(ticks)
+        ax.yaxis.set_minor_locator(NullLocator())
+        ax.set_ylim(y_min/(y_max/y_min)**.10, y_max*(y_max/y_min)**.10)
     else:
-        right.yaxis.set_major_locator(MaxNLocator(nbins=6))
-    right.set_xlim(-.045*max(last_x,1),last_x+max(last_x,1)*.04)
-    right.xaxis.set_major_locator(MaxNLocator(nbins=6, integer=True))
-    right.set_xlabel("进场后的天数" if long_view else "进场后的小时数",fontsize=9,color=GRAY,labelpad=7)
-    right.legend(loc="lower left",bbox_to_anchor=(0,1.001),ncol=4,fontsize=8,frameon=False,handlelength=1.1,columnspacing=.8,borderaxespad=0)
-    fig.text(.055,.115,f"信号{level_name} {px(boundary)}    ·    信号收盘 {px(current.close)}    ·    实际开仓 {px(path.entry_price)}    ·    初始止损 {px(path.stop_price)}",color=INK,fontsize=11)
-    text=f"{ending}退出余仓 {px(final.price)}" if len(target) or len(trim) else f"{ending}退出 {px(final.price)}"
-    if len(trim):
-        text=f"{trim.hour_ms.nunique()} 个小时发生超限减仓    ·    "+text
-    if len(target):
-        text=("翻倍" if is_long else "2R")+f" 止盈 {px(target.price.iat[0])}    ·    "+text
-    fig.text(.055,.052,text+"    ·    出场标在成交所属小时",color=GRAY,fontsize=10)
-    fig.savefig(book.OUT/f"{position.symbol}.png",dpi=155,facecolor="white")
+        pad = (y_max-y_min)*.115
+        ax.set_ylim(y_min-pad,y_max+pad)
+        ax.yaxis.set_major_locator(MaxNLocator(nbins=6))
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda y,_: f"{y:.4g}"))
+    ax.yaxis.tick_right()
+    ax.tick_params(length=0, colors=GRAY, labelsize=9.5, pad=6)
+    ax.set_xlim(-1, len(frame))
+    ticks = np.linspace(0, len(frame)-1, 7, dtype=int)
+    ax.set_xticks(ticks, [bjt(frame.index[i], "%m/%d") for i in ticks])
+    ax.spines[:].set_visible(False)
+    ax.grid(axis="y", color="#e9edef", lw=.65)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower left", bbox_to_anchor=(0,1.005), borderaxespad=0, frameon=False, ncol=3,
+              labelcolor=GRAY, fontsize=9.8, handlelength=1.6, columnspacing=1.4)
+
+    direction = "多单" if is_long else "空单"
+    fig.text(.030,.93,f"{position.symbol} / USDT", fontsize=20, color=INK, fontfamily="DejaVu Sans", weight="semibold")
+    fig.text(.030,.881,f"OKX 永续   ·   12H   ·   {direction}   ·   {bjt(entry,'%Y')} 年",fontsize=11,color=GRAY)
+    fig.text(.976,.929,f"{position.cash_pnl:+,.2f} U",ha="right",fontsize=18,color=UP if position.cash_pnl>0 else DOWN,
+             fontfamily="DejaVu Sans",weight="medium")
+    fig.text(.976,.881,"本笔净盈亏",ha="right",fontsize=10.5,color=GRAY)
+    if use_log:
+        ax.text(1.005,1.004,"对数轴",transform=ax.transAxes,fontsize=8.5,color=GRAY,va="bottom")
+    fig.savefig(book.OUT/f"{position.symbol}.png",dpi=165)
     plt.close(fig)
+    print(position.symbol, len(frame), int(visible.hour_ms.nunique()))
 
 
 def main():
-    for file in ["/System/Library/Fonts/STHeiti Light.ttc", "/System/Library/Fonts/STHeiti Medium.ttc"]:
-        font_manager.fontManager.addfont(file)
-    mpl.rcParams.update({"font.family":font_manager.FontProperties(fname="/System/Library/Fonts/STHeiti Medium.ttc").get_name(),
-                         "axes.unicode_minus":False,"savefig.bbox":None})
-    funded=pd.read_csv(book.BASE/"funded_inverse_1.5x.csv.gz",index_col="event_id")
-    tape=pd.read_csv(book.BASE/"selected_paths.csv.gz")
-    fills=pd.read_csv(book.OUT/"sample_fills.csv")
-    _,_,src=book.original.source.inputs()
-    closes=[book.original.parent.repair.market.frames(src[s])[1].close for s in ["ETH","BTC"]]
-    ratio=closes[0]/closes[1]
-    original=book.original.season.direction(src)
+    font = "/System/Library/Fonts/Hiragino Sans GB.ttc"
+    font_manager.fontManager.addfont(font)
+    mpl.rcParams.update({"font.family": font_manager.FontProperties(fname=font).get_name(),
+                         "axes.unicode_minus": False})
+    funded = pd.read_csv(book.BASE/"funded_inverse_1.5x.csv.gz",index_col="event_id")
+    tape = pd.read_csv(book.BASE/"selected_paths.csv.gz")
+    fills = pd.read_csv(book.OUT/"sample_fills.csv")
+    _,_,src = book.original.source.inputs()
     for event in book.samples(funded,tape):
-        position=funded.loc[event]
-        key=position.entry_ms-STEP
-        change=ratio.at[key]/ratio.at[key-60*STEP]-1
-        assert np.sign(change)==original.at[position.entry_ms]
-        path=tape[tape.event_id.eq(event)&tape.tp_r.eq(0)].iloc[0]
-        draw(position,path,fills[fills.event_id.eq(event)],src[position.symbol],change)
+        position = funded.loc[event]
+        path = tape[tape.event_id.eq(event) & tape.tp_r.eq(0)].iloc[0]
+        draw(position, path, fills[fills.event_id.eq(event)], src[position.symbol])
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
