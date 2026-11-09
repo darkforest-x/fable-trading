@@ -1,0 +1,35 @@
+{
+  "id": "exp-cloud-close-funding-account-20261109-v1",
+  "status": "account_replay_failed",
+  "vectorbt_version": "1.2.0",
+  "inputs": {
+    "execution_file": "experiments/active/exp-cloud-close-current-funding-20261109-v1/current/execution_legs.csv.gz",
+    "settlement_file": "experiments/active/exp-cloud-close-current-funding-20261109-v1/resolved/settlement_flows.csv.gz",
+    "execution_rows": 3270,
+    "positions": 1635,
+    "symbols": 347,
+    "settlement_rows": 88408,
+    "symbol_month_coverage_file": "experiments/active/exp-cloud-close-current-funding-20261109-v1/resolved/symbol_month_audit.json",
+    "symbol_month_windows": 2040,
+    "incomplete_symbol_month_windows": 0,
+    "month_coverage_complete": true,
+    "settlement_rows_outside_symbol_month_coverage": 0
+  },
+  "coverage": {
+    "complete_for_account_replay": true,
+    "incomplete_position_legs": 0,
+    "unknown_month_windows": 0,
+    "api_query_errors": 0,
+    "unknown_settlement_rows": 0,
+    "missing_rate_rows": 0,
+    "missing_or_nonpositive_mark_rows": 0,
+    "proxy_mark_rows": 85496,
+    "exact_mark_rows": 2912,
+    "resolved_month_windows": 2040,
+    "resolved_month_coverage_complete": true
+  },
+  "account_replay_started": true,
+  "failure_type": "ValueError",
+  "failure": "Funding debit exceeds account cash; full account path is insolvent",
+  "full_nav_metrics": null
+}
