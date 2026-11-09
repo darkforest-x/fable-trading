@@ -1,0 +1,7 @@
+{
+  "question": "Does allocating half the initial 1000U to the V1.7 wick-reclaim and half to the new 12H breakout reduce their combined observed historical drawdown?",
+  "single_variable": "Allocate 500 USDT once to each independently funded sleeve. No transfers or rebalancing, collateral sharing, netting, or cross-guarantees. Both are linear-sized native VectorBT accounts with percentage costs and no exchange lot rounding.",
+  "sleeves": ["Repaired 360-contract 1.5x isolated doubling-limit account", "Ten-major no-leverage breakout uniformly delayed one 12H"],
+  "risk": "Sum the two synchronized conservative hourly OHLC bounds, and separately compute witnessed synchronized mark drawdown. Do not add separate sleeve peak drawdowns. Apply fee-only and 5bp extra market slippage consistently to both; no historical funding.",
+  "method": "Aggregate existing actual currency order receipts and NAV at 0.5 scale per sleeve over identical hourly clocks, with 1000 USDT total. Check closed PnL equals terminal minus initial capital, and no mismatched clocks."
+}
