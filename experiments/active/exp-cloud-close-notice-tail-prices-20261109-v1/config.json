@@ -1,0 +1,6 @@
+{
+  "question": "Can the gaps between the frozen source end and official OKX delivery in ICX and LRC be recovered from actual exchange data?",
+  "single_variable": "Append complete native H1 OHLC only after each historical source tail, up to the official delivery clock. Preserve original inputs and 12H warmup exactly, construct new 12H bars only from 12 consecutive observed H1 records. Compare overlaps and record any remaining missing hours.",
+  "symbols": {"ICX": {"end": "2026-09-17T08:00Z", "notice": "https://www.okx.com/en-us/help/okx-to-delist-perpetual-futures-for-icxusdt"}, "LRC": {"end": "2026-07-20T08:00Z", "notice": "https://www.okx.com/en-us/help/okx-to-delist-perpetual-futures-for-lrcusdt"}},
+  "date_basis": "Official trading termination, not publication date. A source repair only; account holdings are re-evaluated separately."
+}
