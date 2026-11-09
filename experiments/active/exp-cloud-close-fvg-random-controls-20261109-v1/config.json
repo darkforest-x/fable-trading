@@ -1,0 +1,82 @@
+{
+  "experiment_id": "exp-cloud-close-fvg-random-controls-20261109-v1",
+  "question": "Is the frozen outside-gap account result of 11,620.7863 USDT unusually high relative to 39 equal-sized, exactly matched random controls?",
+  "single_variable": "Replace the outside-gap event identities with an equal-sized random sample of known FVG candidates, matched within exact 12H entry_ms, side, and original score availability. Rerank each sample with the same frozen original score, then use the unchanged Binance VectorBT hourly-cap account.",
+  "source": {
+    "frozen_filter_experiment": "experiments/active/exp-cloud-close-fvg-cap-filter-20261109-v1",
+    "known_decisions": "observed_candidates.csv.gz",
+    "native_candidates": "exp-cloud-close-archive-complete-20261109-v1 plus its frozen repaired and priced cohorts",
+    "score_source": "exp-cloud-close-score-priority-20261109-v1/candidate_order.csv.gz",
+    "event_join_key": "event_id",
+    "known_candidates": 22890,
+    "outside_gap_candidates": 19176,
+    "unknown_candidates_excluded": 372,
+    "official_contract_lifetime_rule": "Reuse cloud_close_delivery_control.adjusted_legs, frozen Binance contract metadata, and existing official settlement index sources; do not infer expiry from current listing alone."
+  },
+  "randomization": {
+    "rng": "numpy.random.default_rng(seed), PCG64",
+    "reused_seed": 1029,
+    "new_seeds": [
+      1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039,
+      1040, 1041, 1042, 1043, 1044, 1045, 1046, 1047, 1048, 1049,
+      1050, 1051, 1052, 1053, 1054, 1055, 1056, 1057, 1058, 1059,
+      1060, 1061, 1062, 1063, 1064, 1065, 1066, 1067
+    ],
+    "seeds": [
+      1029, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038,
+      1039, 1040, 1041, 1042, 1043, 1044, 1045, 1046, 1047, 1048,
+      1049, 1050, 1051, 1052, 1053, 1054, 1055, 1056, 1057, 1058,
+      1059, 1060, 1061, 1062, 1063, 1064, 1065, 1066, 1067
+    ],
+    "matching_keys": ["entry_ms", "side", "has_score"],
+    "sample_size_per_stratum": "Equal the frozen outside_gap count in each exact entry_ms × side × has_score stratum.",
+    "selection": "No seed may be selected, dropped, or rerun based on its return. Seed 1029 reuses the already completed placebo roster and account metrics."
+  },
+  "wallet": {
+    "venue": "Binance USD-M USDT perpetual",
+    "initial_nav_usdt": 1000,
+    "slots": 9,
+    "allocation": "The original NAV/10 sizing and exposure=0.9 wallet adapter.",
+    "hourly_single_name_weight_cap": 0.2,
+    "management": "Frozen original 2/3 at 2R plus the original efficiency override; keep existing native entry, stops, targets, exits, maker/taker classes, and delivery handling.",
+    "maker_fee_rate": 0.0002,
+    "taker_fee_rate": 0.0005,
+    "funding": "Excluded, matching the completed cap-filter baseline.",
+    "execution_engine": "Existing VectorBT from_order_func hourly-cap adapter; one seed at a time."
+  },
+  "comparison": {
+    "outside_gap_reference_all_final_usdt": 11620.786336040052,
+    "primary_metric": "final_usdt",
+    "risk_metric": "dd_bound_pct",
+    "periods": {
+      "dev": "Through 2024, using the existing wallet metric boundary.",
+      "2025": "Existing 2025 account period.",
+      "2026": "Existing 2026 account period through the frozen data end.",
+      "all": "Full frozen account history."
+    },
+    "distribution": "For each period and metric, report all 39 control values, empirical distribution summaries, and the outside-gap reference rank/tail fraction; do not introduce a seed-selection gate."
+  },
+  "settlement_sources": [
+    "exp-cloud-close-delivery-control-20261109-v1",
+    "exp-cloud-close-open-interest-20261109-v1",
+    "exp-cloud-close-score-priority-20261109-v1",
+    "exp-cloud-close-funding-rank-20261109-v1",
+    "exp-cloud-close-fvg-cap-filter-20261109-v1",
+    "exp-cloud-close-key-vwap-20261109-v1",
+    "exp-cloud-close-hourly-trim-control-20261109-v1",
+    "exp-cloud-close-fvg-transfer-20261109-v1"
+  ],
+  "run": {
+    "command": "python3 -m yoyo.evaluation.cloud_close_fvg_random_controls",
+    "mode": "Run only after source and config are committed; seed 1029 is reused, not backtested again.",
+    "outputs": [
+      "sampled_rosters.csv.gz",
+      "funded_rosters.csv.gz",
+      "selected_deliveries.csv.gz",
+      "seed_metrics.csv",
+      "distribution_ranks.csv",
+      "settlement_audit.json",
+      "summary.json"
+    ]
+  }
+}
