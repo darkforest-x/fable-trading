@@ -1,0 +1,46 @@
+{
+  "experiment_id": "exp-cloud-close-binance-entry-capacity-20261109-v1",
+  "question": "How does a causal Binance-native prior-minute-turnover cap change funding and account performance in the frozen September 1x/2x Binance parent account?",
+  "single_variable": "Limit actual underlying entry notional to either 10% of the median USDT quote volume in the 60 complete Binance USD-M 1m bars immediately before the entry, or 1% as the sensitivity arm. Preserve each parent’s frozen 1x/2x multiple, native entry/exit, 9-slot ordering, and original shared-cash account. No replacement entries.",
+  "frozen_scope": {
+    "baseline_funded": "experiments/active/exp-cloud-close-binance-relative-minutes-20261109-v1/funded_contrarian_half.csv.gz",
+    "baseline_hourly": "experiments/active/exp-cloud-close-binance-relative-minutes-20261109-v1/hourly_contrarian_half.csv.gz",
+    "venue": "Binance USD-M perpetuals",
+    "funded_parents": 1586,
+    "exposure_multiples": [1.0, 2.0],
+    "period_end_utc": "2026-09-23T23:00:00Z",
+    "capacity_data": "Official Binance USD-M daily 1m kline archives; CSV column 7 quote volume is USDT turnover.",
+    "data_cache": "data/research/cloud_close_binance_entry_capacity"
+  },
+  "causal_window": {
+    "prior_window": "[entry_ms - 60 minutes, entry_ms), exactly 60 one-minute bars whose opens are strictly before entry.",
+    "entry_minute": "Must exist and open at the frozen native H1 entry price; its quote volume is descriptive only.",
+    "entry_h1_validation": "Reaggregate the 60 1m bars in the entry H1 and compare OHLC to the frozen Binance H1. These bars validate source and timing only and do not enter the cap calculation.",
+    "missing_or_invalid": "Missing archive, incomplete prior window, zero prior median, malformed volume, or failed H1/open parity receives zero entry cap in constrained arms and remains separately counted."
+  },
+  "arms": [
+    "Unrestricted frozen native account, replayed once to verify per-parent cash and hourly-NAV parity; reuse its already-frozen +5bp stress receipt.",
+    "Same-coverage unrestricted control: unrestricted size only for complete, valid, positive-median prior-volume observations; all other parents get zero cap, without replacement.",
+    "10% median prior 60-minute quote-volume cap, plus 5bp adverse market-fill stress.",
+    "1% median prior 60-minute quote-volume cap sensitivity, plus 5bp adverse market-fill stress."
+  ],
+  "execution": {
+    "framework": "Existing VectorBT cash-sharing account adapter with native Binance price and entry_limits.",
+    "capacity_unit": "USDT underlying notional at entry, aggregated across the funded parent’s children.",
+    "slot_order": "Use original funded parent ordering and 9 slots; do not refill or reorder a zero-cap parent.",
+    "maker_fee": 0.0002,
+    "taker_fee": 0.0005,
+    "extra_market_slippage_stress": 0.0005,
+    "funding": "Excluded."
+  },
+  "reporting": {
+    "periods": ["all", "development through 2024-12-31", "2025", "2026 through frozen account end"],
+    "metrics": ["final_usdt", "multiple", "marked_drawdown_pct", "conservative_hourly_drawdown_bound_pct", "trades", "win_pct", "cash_payoff_ratio", "cash_payoff_usdt"],
+    "coverage_denominator": "All 1,586 original funded parents, with source statuses and entry years reported."
+  },
+  "limitations": [
+    "Prior realized turnover is a liquidity proxy, not order-book depth or a guaranteed executable fill amount.",
+    "No minimum quantity/lot size, queue position, spread, nonlinear impact, or funding is modeled.",
+    "Frozen 2bp maker and 5bp taker rates are the inherited account assumptions, not a claimed Binance historical VIP tier."
+  ]
+}
