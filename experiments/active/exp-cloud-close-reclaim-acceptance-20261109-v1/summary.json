@@ -1,0 +1,4150 @@
+{
+  "experiment_id": "exp-cloud-close-reclaim-acceptance-20261109-v1",
+  "builder": "yoyo/evaluation/cloud_close_reclaim_acceptance.py",
+  "policy_counts": {
+    "stable_3": 10320,
+    "two_consecutive": 919,
+    "last_only_1": 735,
+    "other_observed": 468
+  },
+  "positive_turnover_counts": {
+    "last_only_1": 728,
+    "other_observed": 461,
+    "stable_3": 10186,
+    "two_consecutive": 909
+  },
+  "missing_and_unmatched": {
+    "incomplete_last3": 0,
+    "missing_monday_range": 0,
+    "missing_candidate_audit_reference": 13,
+    "nonpositive_or_missing_turnover": 158
+  },
+  "audit": {
+    "event_rows": 12442,
+    "actual_events": 12442,
+    "control_rows": 0,
+    "symbols_with_events": 331,
+    "historical_source_symbols": 360,
+    "positive_turnover_events": 12284,
+    "nonpositive_or_missing_turnover_events": 158,
+    "acceptance_states": {
+      "stable_3": 10320,
+      "two_consecutive": 919,
+      "last_only_1": 735,
+      "other_observed": 468
+    },
+    "observable_states": {
+      "eligible": 12442
+    },
+    "all_last3_h1_windows_complete": true,
+    "all_next_h1_open_matches_frozen_path": true,
+    "all_final_h1_closes_reconstruct_original_v17_close": true,
+    "candidate_anchor_matches": 12429,
+    "candidate_anchor_fallbacks": 13,
+    "all_monday_ranges_match_frozen_reference": true,
+    "all_monday_range_checks": 12442,
+    "repair_source_metadata": {
+      "cvc_source": {
+        "symbol": "CVC",
+        "hours": 30649,
+        "complete_12h": 2549,
+        "raw_signals": 57,
+        "observed_90d_clocks": 1745,
+        "unpriced_entries": 0
+      },
+      "former_cvc_eligible": 39,
+      "corrected_cvc_eligible": 43,
+      "added_cvc_eligible": [
+        "ema20-50-12h-monday-wick-v1:CVC-USDT-SWAP:1667908800000:1",
+        "ema20-50-12h-monday-wick-v1:CVC-USDT-SWAP:1668556800000:-1",
+        "ema20-50-12h-monday-wick-v1:CVC-USDT-SWAP:1669334400000:-1",
+        "ema20-50-12h-monday-wick-v1:CVC-USDT-SWAP:1671062400000:-1"
+      ],
+      "removed_cvc_eligible": [],
+      "changed_90d_clocks": 106
+    },
+    "candidate_source_metadata": {
+      "source": "experiments/active/exp-cloud-close-breakout-historical-20261109-v1/candidate_audit_full_360.csv.gz",
+      "reclaim_actual_candidates": 13619,
+      "symbols": 355,
+      "unique_clock_keys": 13619
+    },
+    "signal_anchor_source_metadata": {
+      "source": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/signals.csv",
+      "rows": 12707,
+      "available": true
+    },
+    "turnover_source_metadata": {
+      "source": "experiments/active/exp-cloud-close-liquid-priority-history-20261109-v1/opportunities.csv.gz",
+      "events": 12442,
+      "positive_turnover_events": 12284,
+      "missing_or_zero_events": 158,
+      "cap_rule": "prior native H1 quote turnover / 60 minutes; must be >= 1e-6 USDT per minute"
+    },
+    "source_by_symbol": [
+      {
+        "symbol": "0G",
+        "events": 19,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/0G/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/0G/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 19
+        }
+      },
+      {
+        "symbol": "1INCH",
+        "events": 92,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/1INCH/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/1INCH/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 92
+        }
+      },
+      {
+        "symbol": "2Z",
+        "events": 13,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/2Z/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/2Z/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 13
+        }
+      },
+      {
+        "symbol": "A",
+        "events": 16,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/A/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/A/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 16
+        }
+      },
+      {
+        "symbol": "AAVE",
+        "events": 95,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AAVE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AAVE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 95
+        }
+      },
+      {
+        "symbol": "ACE",
+        "events": 22,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/ACE-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1772179200000,
+        "acceptance_states": {
+          "eligible": 22
+        }
+      },
+      {
+        "symbol": "ACH",
+        "events": 47,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ACH/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ACH/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 47
+        }
+      },
+      {
+        "symbol": "ACT",
+        "events": 37,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ACT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ACT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 37
+        }
+      },
+      {
+        "symbol": "ACU",
+        "events": 12,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ACU/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ACU/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 12
+        }
+      },
+      {
+        "symbol": "ADA",
+        "events": 97,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ADA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ADA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 97
+        }
+      },
+      {
+        "symbol": "AERO",
+        "events": 20,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AERO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AERO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 20
+        }
+      },
+      {
+        "symbol": "AEVO",
+        "events": 42,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AEVO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AEVO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 42
+        }
+      },
+      {
+        "symbol": "AGLD",
+        "events": 90,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AGLD/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AGLD/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 90
+        }
+      },
+      {
+        "symbol": "AI",
+        "events": 6,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AI/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AI/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 6
+        }
+      },
+      {
+        "symbol": "AIXBT",
+        "events": 32,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AIXBT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AIXBT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 32
+        }
+      },
+      {
+        "symbol": "ALCH",
+        "events": 4,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/ALCH-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1757664000000,
+        "acceptance_states": {
+          "eligible": 4
+        }
+      },
+      {
+        "symbol": "ALGO",
+        "events": 106,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ALGO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ALGO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 106
+        }
+      },
+      {
+        "symbol": "ALLO",
+        "events": 9,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ALLO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ALLO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 9
+        }
+      },
+      {
+        "symbol": "ALPHA",
+        "events": 10,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/ALPHA-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1751616000000,
+        "acceptance_states": {
+          "eligible": 10
+        }
+      },
+      {
+        "symbol": "ANIME",
+        "events": 23,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ANIME/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ANIME/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 23
+        }
+      },
+      {
+        "symbol": "APE",
+        "events": 80,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/APE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/APE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 80
+        }
+      },
+      {
+        "symbol": "API3",
+        "events": 90,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/API3/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/API3/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 90
+        }
+      },
+      {
+        "symbol": "APR",
+        "events": 13,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/APR/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/APR/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 13
+        }
+      },
+      {
+        "symbol": "APT",
+        "events": 59,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/APT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/APT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 59
+        }
+      },
+      {
+        "symbol": "AR",
+        "events": 62,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AR/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AR/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 62
+        }
+      },
+      {
+        "symbol": "ARB",
+        "events": 54,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ARB/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ARB/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 54
+        }
+      },
+      {
+        "symbol": "ARC",
+        "events": 5,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/ARC-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1758873600000,
+        "acceptance_states": {
+          "eligible": 5
+        }
+      },
+      {
+        "symbol": "ARKM",
+        "events": 25,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ARKM/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ARKM/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 25
+        }
+      },
+      {
+        "symbol": "ARX",
+        "events": 1,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ARX/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ARX/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 1
+        }
+      },
+      {
+        "symbol": "ASTER",
+        "events": 21,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ASTER/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ASTER/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 21
+        }
+      },
+      {
+        "symbol": "AT",
+        "events": 13,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 13
+        }
+      },
+      {
+        "symbol": "ATH",
+        "events": 43,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ATH/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ATH/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 43
+        }
+      },
+      {
+        "symbol": "ATOM",
+        "events": 95,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ATOM/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ATOM/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 95
+        }
+      },
+      {
+        "symbol": "AUCTION",
+        "events": 49,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AUCTION/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AUCTION/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 49
+        }
+      },
+      {
+        "symbol": "AVAAI",
+        "events": 7,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/AVAAI-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1761292800000,
+        "acceptance_states": {
+          "eligible": 7
+        }
+      },
+      {
+        "symbol": "AVAX",
+        "events": 101,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AVAX/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AVAX/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 101
+        }
+      },
+      {
+        "symbol": "AVNT",
+        "events": 24,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AVNT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AVNT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 24
+        }
+      },
+      {
+        "symbol": "AXS",
+        "events": 91,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AXS/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AXS/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 91
+        }
+      },
+      {
+        "symbol": "AZTEC",
+        "events": 9,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AZTEC/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AZTEC/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 9
+        }
+      },
+      {
+        "symbol": "BABY",
+        "events": 20,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BABY/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BABY/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 20
+        }
+      },
+      {
+        "symbol": "BADGER",
+        "events": 9,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/BADGER-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1753430400000,
+        "acceptance_states": {
+          "eligible": 9
+        }
+      },
+      {
+        "symbol": "BAL",
+        "events": 10,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/BAL-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1753430400000,
+        "acceptance_states": {
+          "eligible": 10
+        }
+      },
+      {
+        "symbol": "BAND",
+        "events": 120,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BAND/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BAND/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 120
+        }
+      },
+      {
+        "symbol": "BARD",
+        "events": 15,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BARD/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BARD/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 15
+        }
+      },
+      {
+        "symbol": "BASED",
+        "events": 7,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BASED/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BASED/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 7
+        }
+      },
+      {
+        "symbol": "BAT",
+        "events": 110,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BAT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BAT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 110
+        }
+      },
+      {
+        "symbol": "BCH",
+        "events": 99,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BCH/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BCH/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 99
+        }
+      },
+      {
+        "symbol": "BEAT",
+        "events": 16,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BEAT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BEAT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 16
+        }
+      },
+      {
+        "symbol": "BERA",
+        "events": 18,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BERA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BERA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 18
+        }
+      },
+      {
+        "symbol": "BICO",
+        "events": 88,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BICO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BICO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 88
+        }
+      },
+      {
+        "symbol": "BIGTIME",
+        "events": 50,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BIGTIME/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BIGTIME/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 50
+        }
+      },
+      {
+        "symbol": "BILL",
+        "events": 4,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BILL/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BILL/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 4
+        }
+      },
+      {
+        "symbol": "BIO",
+        "events": 28,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BIO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BIO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 28
+        }
+      },
+      {
+        "symbol": "BLEND",
+        "events": 9,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BLEND/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BLEND/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 9
+        }
+      },
+      {
+        "symbol": "BLUR",
+        "events": 65,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BLUR/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BLUR/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 65
+        }
+      },
+      {
+        "symbol": "BNB",
+        "events": 60,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BNB/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BNB/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 60
+        }
+      },
+      {
+        "symbol": "BNT",
+        "events": 40,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/BNT-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1763107200000,
+        "acceptance_states": {
+          "eligible": 40
+        }
+      },
+      {
+        "symbol": "BOME",
+        "events": 36,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BOME/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BOME/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 36
+        }
+      },
+      {
+        "symbol": "BONK",
+        "events": 37,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BONK/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BONK/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 37
+        }
+      },
+      {
+        "symbol": "BRETT",
+        "events": 27,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BRETT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BRETT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 27
+        }
+      },
+      {
+        "symbol": "BREV",
+        "events": 10,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BREV/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BREV/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 10
+        }
+      },
+      {
+        "symbol": "BSB",
+        "events": 7,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BSB/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/BSB/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 7
+        }
+      },
+      {
+        "symbol": "BSV",
+        "events": 9,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/BSV-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1749715200000,
+        "acceptance_states": {
+          "eligible": 9
+        }
+      },
+      {
+        "symbol": "BTC",
+        "events": 96,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BTC/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BTC/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 96
+        }
+      },
+      {
+        "symbol": "CAP",
+        "events": 1,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CAP/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CAP/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 1
+        }
+      },
+      {
+        "symbol": "CATI",
+        "events": 24,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/CATI-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1769270400000,
+        "acceptance_states": {
+          "eligible": 24
+        }
+      },
+      {
+        "symbol": "CC",
+        "events": 14,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CC/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CC/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 14
+        }
+      },
+      {
+        "symbol": "CELO",
+        "events": 84,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CELO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CELO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 84
+        }
+      },
+      {
+        "symbol": "CETUS",
+        "events": 21,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/CETUS-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1766736000000,
+        "acceptance_states": {
+          "eligible": 21
+        }
+      },
+      {
+        "symbol": "CFX",
+        "events": 108,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CFX/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CFX/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 108
+        }
+      },
+      {
+        "symbol": "CHIP",
+        "events": 6,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CHIP/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CHIP/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 6
+        }
+      },
+      {
+        "symbol": "CHZ",
+        "events": 89,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CHZ/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CHZ/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 89
+        }
+      },
+      {
+        "symbol": "COAI",
+        "events": 15,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/COAI/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/COAI/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 15
+        }
+      },
+      {
+        "symbol": "COMP",
+        "events": 97,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/COMP/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/COMP/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 97
+        }
+      },
+      {
+        "symbol": "COOKIE",
+        "events": 12,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/COOKIE-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1769270400000,
+        "acceptance_states": {
+          "eligible": 12
+        }
+      },
+      {
+        "symbol": "CORE",
+        "events": 55,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CORE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CORE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 55
+        }
+      },
+      {
+        "symbol": "CRO",
+        "events": 76,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CRO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CRO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 76
+        }
+      },
+      {
+        "symbol": "CRV",
+        "events": 91,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CRV/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CRV/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 91
+        }
+      },
+      {
+        "symbol": "CVC",
+        "events": 43,
+        "source_h1_path": "data/research/cloud_close_cvc_trade_hour/series/CVC-USDT-SWAP/bars1h_v2.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1763107200000,
+        "acceptance_states": {
+          "eligible": 43
+        }
+      },
+      {
+        "symbol": "CVX",
+        "events": 31,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CVX/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/CVX/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 31
+        }
+      },
+      {
+        "symbol": "DASH",
+        "events": 14,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/DASH/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/DASH/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 14
+        }
+      },
+      {
+        "symbol": "DATA",
+        "events": 2,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/DATA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/DATA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 2
+        }
+      },
+      {
+        "symbol": "DEGEN",
+        "events": 12,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/DEGEN-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1766736000000,
+        "acceptance_states": {
+          "eligible": 12
+        }
+      },
+      {
+        "symbol": "DGB",
+        "events": 12,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/DGB-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1757664000000,
+        "acceptance_states": {
+          "eligible": 12
+        }
+      },
+      {
+        "symbol": "DOGE",
+        "events": 100,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/DOGE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/DOGE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 100
+        }
+      },
+      {
+        "symbol": "DOGS",
+        "events": 14,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/DOGS-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1761292800000,
+        "acceptance_states": {
+          "eligible": 14
+        }
+      },
+      {
+        "symbol": "DOOD",
+        "events": 19,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/DOOD/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/DOOD/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 19
+        }
+      },
+      {
+        "symbol": "DOT",
+        "events": 91,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/DOT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/DOT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 91
+        }
+      },
+      {
+        "symbol": "DYDX",
+        "events": 87,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/DYDX/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/DYDX/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 87
+        }
+      },
+      {
+        "symbol": "EDEN",
+        "events": 20,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/EDEN/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/EDEN/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 20
+        }
+      },
+      {
+        "symbol": "EDGE",
+        "events": 6,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/EDGE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/EDGE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 6
+        }
+      },
+      {
+        "symbol": "EGLD",
+        "events": 95,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/EGLD/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/EGLD/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 95
+        }
+      },
+      {
+        "symbol": "EIGEN",
+        "events": 31,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/EIGEN/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/EIGEN/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 31
+        }
+      },
+      {
+        "symbol": "ENA",
+        "events": 20,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ENA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ENA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 20
+        }
+      },
+      {
+        "symbol": "ENJ",
+        "events": 37,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ENJ/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ENJ/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 37
+        }
+      },
+      {
+        "symbol": "ENS",
+        "events": 88,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ENS/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ENS/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 88
+        }
+      },
+      {
+        "symbol": "ENSO",
+        "events": 15,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ENSO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ENSO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 15
+        }
+      },
+      {
+        "symbol": "ESP",
+        "events": 11,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ESP/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ESP/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 11
+        }
+      },
+      {
+        "symbol": "ETC",
+        "events": 97,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ETC/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ETC/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 97
+        }
+      },
+      {
+        "symbol": "ETH",
+        "events": 92,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ETH/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ETH/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 92
+        }
+      },
+      {
+        "symbol": "ETHFI",
+        "events": 42,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ETHFI/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ETHFI/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 42
+        }
+      },
+      {
+        "symbol": "ETHW",
+        "events": 72,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ETHW/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ETHW/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 72
+        }
+      },
+      {
+        "symbol": "F",
+        "events": 16,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/F/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/F/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 16
+        }
+      },
+      {
+        "symbol": "FARTCOIN",
+        "events": 30,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/FARTCOIN/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/FARTCOIN/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 30
+        }
+      },
+      {
+        "symbol": "FIL",
+        "events": 111,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/FIL/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/FIL/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 111
+        }
+      },
+      {
+        "symbol": "FLM",
+        "events": 17,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/FLM-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1761292800000,
+        "acceptance_states": {
+          "eligible": 17
+        }
+      },
+      {
+        "symbol": "FLOKI",
+        "events": 59,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/FLOKI/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/FLOKI/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 59
+        }
+      },
+      {
+        "symbol": "FLOW",
+        "events": 49,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/FLOW/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/FLOW/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 49
+        }
+      },
+      {
+        "symbol": "FOGO",
+        "events": 12,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/FOGO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/FOGO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 12
+        }
+      },
+      {
+        "symbol": "FOXY",
+        "events": 9,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/FOXY-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1747814400000,
+        "acceptance_states": {
+          "eligible": 9
+        }
+      },
+      {
+        "symbol": "GALA",
+        "events": 74,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GALA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GALA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 74
+        }
+      },
+      {
+        "symbol": "GAS",
+        "events": 46,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GAS/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GAS/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 46
+        }
+      },
+      {
+        "symbol": "GIGGLE",
+        "events": 20,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GIGGLE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GIGGLE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 20
+        }
+      },
+      {
+        "symbol": "GLM",
+        "events": 42,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GLM/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GLM/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 42
+        }
+      },
+      {
+        "symbol": "GMT",
+        "events": 76,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GMT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GMT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 76
+        }
+      },
+      {
+        "symbol": "GMX",
+        "events": 66,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GMX/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GMX/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 66
+        }
+      },
+      {
+        "symbol": "GOAT",
+        "events": 15,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/GOAT-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1765958400000,
+        "acceptance_states": {
+          "eligible": 15
+        }
+      },
+      {
+        "symbol": "GPS",
+        "events": 23,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GPS/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GPS/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 23
+        }
+      },
+      {
+        "symbol": "GRAM",
+        "events": 2,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GRAM/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GRAM/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 2
+        }
+      },
+      {
+        "symbol": "GRASS",
+        "events": 27,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GRASS/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GRASS/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 27
+        }
+      },
+      {
+        "symbol": "GRIFFAIN",
+        "events": 3,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/GRIFFAIN-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1758873600000,
+        "acceptance_states": {
+          "eligible": 3
+        }
+      },
+      {
+        "symbol": "GRT",
+        "events": 94,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GRT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/GRT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 94
+        }
+      },
+      {
+        "symbol": "H",
+        "events": 21,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/H/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/H/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 21
+        }
+      },
+      {
+        "symbol": "HBAR",
+        "events": 41,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/HBAR/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/HBAR/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 41
+        }
+      },
+      {
+        "symbol": "HMSTR",
+        "events": 32,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/HMSTR/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/HMSTR/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 32
+        }
+      },
+      {
+        "symbol": "HOME",
+        "events": 17,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/HOME/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/HOME/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 17
+        }
+      },
+      {
+        "symbol": "HUMA",
+        "events": 26,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/HUMA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/HUMA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 26
+        }
+      },
+      {
+        "symbol": "HYPE",
+        "events": 23,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/HYPE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/HYPE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 23
+        }
+      },
+      {
+        "symbol": "ICP",
+        "events": 91,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ICP/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ICP/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 91
+        }
+      },
+      {
+        "symbol": "ICX",
+        "events": 40,
+        "source_h1_path": "experiments/active/exp-cloud-close-notice-tail-prices-20261109-v1/ICX/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-close-notice-tail-prices-20261109-v1/ICX/bars12h.csv.gz",
+        "source_available_end_ms": 1789632000000,
+        "acceptance_states": {
+          "eligible": 40
+        }
+      },
+      {
+        "symbol": "ID",
+        "events": 15,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/ID-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1754035200000,
+        "acceptance_states": {
+          "eligible": 15
+        }
+      },
+      {
+        "symbol": "IMX",
+        "events": 72,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/IMX/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/IMX/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 72
+        }
+      },
+      {
+        "symbol": "INIT",
+        "events": 30,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/INIT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/INIT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 30
+        }
+      },
+      {
+        "symbol": "INJ",
+        "events": 45,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/INJ/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/INJ/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 45
+        }
+      },
+      {
+        "symbol": "IOST",
+        "events": 103,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/IOST/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/IOST/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 103
+        }
+      },
+      {
+        "symbol": "IOTA",
+        "events": 101,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/IOTA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/IOTA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 101
+        }
+      },
+      {
+        "symbol": "IRYS",
+        "events": 1,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/IRYS/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/IRYS/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 1
+        }
+      },
+      {
+        "symbol": "JELLYJELLY",
+        "events": 23,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/JELLYJELLY/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/JELLYJELLY/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 23
+        }
+      },
+      {
+        "symbol": "JOE",
+        "events": 16,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/JOE-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1763107200000,
+        "acceptance_states": {
+          "eligible": 16
+        }
+      },
+      {
+        "symbol": "JST",
+        "events": 19,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/JST-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1756454400000,
+        "acceptance_states": {
+          "eligible": 19
+        }
+      },
+      {
+        "symbol": "JTO",
+        "events": 51,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/JTO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/JTO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 51
+        }
+      },
+      {
+        "symbol": "JUP",
+        "events": 46,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/JUP/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/JUP/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 46
+        }
+      },
+      {
+        "symbol": "KAITO",
+        "events": 26,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/KAITO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/KAITO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 26
+        }
+      },
+      {
+        "symbol": "KAT",
+        "events": 8,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/KAT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/KAT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 8
+        }
+      },
+      {
+        "symbol": "KGEN",
+        "events": 18,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/KGEN/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/KGEN/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 18
+        }
+      },
+      {
+        "symbol": "KITE",
+        "events": 6,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/KITE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/KITE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 6
+        }
+      },
+      {
+        "symbol": "KMNO",
+        "events": 19,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/KMNO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/KMNO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 19
+        }
+      },
+      {
+        "symbol": "KNC",
+        "events": 7,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/KNC-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1751616000000,
+        "acceptance_states": {
+          "eligible": 7
+        }
+      },
+      {
+        "symbol": "KSM",
+        "events": 87,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/KSM/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/KSM/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 87
+        }
+      },
+      {
+        "symbol": "LA",
+        "events": 20,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 20
+        }
+      },
+      {
+        "symbol": "LAB",
+        "events": 18,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LAB/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LAB/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 18
+        }
+      },
+      {
+        "symbol": "LAYER",
+        "events": 26,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LAYER/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LAYER/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 26
+        }
+      },
+      {
+        "symbol": "LDO",
+        "events": 59,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LDO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LDO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 59
+        }
+      },
+      {
+        "symbol": "LIGHT",
+        "events": 11,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LIGHT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LIGHT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 11
+        }
+      },
+      {
+        "symbol": "LINEA",
+        "events": 17,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LINEA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LINEA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 17
+        }
+      },
+      {
+        "symbol": "LINK",
+        "events": 100,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LINK/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LINK/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 100
+        }
+      },
+      {
+        "symbol": "LIT",
+        "events": 14,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LIT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LIT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 14
+        }
+      },
+      {
+        "symbol": "LPT",
+        "events": 91,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LPT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LPT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 91
+        }
+      },
+      {
+        "symbol": "LQTY",
+        "events": 44,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LQTY/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LQTY/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 44
+        }
+      },
+      {
+        "symbol": "LRC",
+        "events": 55,
+        "source_h1_path": "experiments/active/exp-cloud-close-notice-tail-prices-20261109-v1/LRC/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-close-notice-tail-prices-20261109-v1/LRC/bars12h.csv.gz",
+        "source_available_end_ms": 1784534400000,
+        "acceptance_states": {
+          "eligible": 55
+        }
+      },
+      {
+        "symbol": "LSK",
+        "events": 5,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/LSK-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1752825600000,
+        "acceptance_states": {
+          "eligible": 5
+        }
+      },
+      {
+        "symbol": "LTC",
+        "events": 107,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LTC/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LTC/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 107
+        }
+      },
+      {
+        "symbol": "LUNA",
+        "events": 79,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LUNA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LUNA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 79
+        }
+      },
+      {
+        "symbol": "MAGIC",
+        "events": 58,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MAGIC/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MAGIC/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 58
+        }
+      },
+      {
+        "symbol": "MANA",
+        "events": 89,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MANA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MANA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 89
+        }
+      },
+      {
+        "symbol": "MASK",
+        "events": 95,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MASK/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MASK/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 95
+        }
+      },
+      {
+        "symbol": "ME",
+        "events": 31,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ME/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ME/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 31
+        }
+      },
+      {
+        "symbol": "MEGA",
+        "events": 3,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MEGA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MEGA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 3
+        }
+      },
+      {
+        "symbol": "MEME",
+        "events": 44,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MEME/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MEME/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 44
+        }
+      },
+      {
+        "symbol": "MEMEFI",
+        "events": 4,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/MEMEFI-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1747094400000,
+        "acceptance_states": {
+          "eligible": 4
+        }
+      },
+      {
+        "symbol": "MERL",
+        "events": 37,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MERL/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MERL/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 37
+        }
+      },
+      {
+        "symbol": "MET",
+        "events": 16,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MET/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MET/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 16
+        }
+      },
+      {
+        "symbol": "METIS",
+        "events": 47,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/METIS/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/METIS/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 47
+        }
+      },
+      {
+        "symbol": "MEW",
+        "events": 39,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MEW/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MEW/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 39
+        }
+      },
+      {
+        "symbol": "MINA",
+        "events": 81,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MINA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MINA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 81
+        }
+      },
+      {
+        "symbol": "MMT",
+        "events": 13,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MMT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MMT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 13
+        }
+      },
+      {
+        "symbol": "MON",
+        "events": 11,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MON/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MON/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 11
+        }
+      },
+      {
+        "symbol": "MOODENG",
+        "events": 35,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MOODENG/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MOODENG/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 35
+        }
+      },
+      {
+        "symbol": "MORPHO",
+        "events": 28,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MORPHO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MORPHO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 28
+        }
+      },
+      {
+        "symbol": "MOVE",
+        "events": 22,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MOVE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MOVE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 22
+        }
+      },
+      {
+        "symbol": "MOVR",
+        "events": 9,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/MOVR-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1749110400000,
+        "acceptance_states": {
+          "eligible": 9
+        }
+      },
+      {
+        "symbol": "MUBARAK",
+        "events": 21,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MUBARAK/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/MUBARAK/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 21
+        }
+      },
+      {
+        "symbol": "NEAR",
+        "events": 102,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/NEAR/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/NEAR/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 102
+        }
+      },
+      {
+        "symbol": "NEIRO",
+        "events": 32,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/NEIRO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/NEIRO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 32
+        }
+      },
+      {
+        "symbol": "NEIROETH",
+        "events": 17,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/NEIROETH-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1757664000000,
+        "acceptance_states": {
+          "eligible": 17
+        }
+      },
+      {
+        "symbol": "NEO",
+        "events": 110,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/NEO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/NEO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 110
+        }
+      },
+      {
+        "symbol": "NES",
+        "events": 4,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/NES/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/NES/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 4
+        }
+      },
+      {
+        "symbol": "NEWT",
+        "events": 4,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/NEWT-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1765958400000,
+        "acceptance_states": {
+          "eligible": 4
+        }
+      },
+      {
+        "symbol": "NFT",
+        "events": 11,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/NFT-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1747382400000,
+        "acceptance_states": {
+          "eligible": 11
+        }
+      },
+      {
+        "symbol": "NIGHT",
+        "events": 5,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/NIGHT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/NIGHT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 5
+        }
+      },
+      {
+        "symbol": "NMR",
+        "events": 38,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/NMR/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/NMR/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 38
+        }
+      },
+      {
+        "symbol": "NOT",
+        "events": 42,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/NOT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/NOT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 42
+        }
+      },
+      {
+        "symbol": "NXPC",
+        "events": 1,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/NXPC-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1761811200000,
+        "acceptance_states": {
+          "eligible": 1
+        }
+      },
+      {
+        "symbol": "O",
+        "events": 3,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/O/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/O/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 3
+        }
+      },
+      {
+        "symbol": "OFC",
+        "events": 5,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/OFC/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/OFC/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 5
+        }
+      },
+      {
+        "symbol": "OKB",
+        "events": 22,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/OKB/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/OKB/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 22
+        }
+      },
+      {
+        "symbol": "OL",
+        "events": 20,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/OL/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/OL/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 20
+        }
+      },
+      {
+        "symbol": "ONDO",
+        "events": 41,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ONDO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ONDO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 41
+        }
+      },
+      {
+        "symbol": "ONE",
+        "events": 38,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ONE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ONE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 38
+        }
+      },
+      {
+        "symbol": "ONT",
+        "events": 117,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ONT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ONT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 117
+        }
+      },
+      {
+        "symbol": "OP",
+        "events": 66,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/OP/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/OP/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 66
+        }
+      },
+      {
+        "symbol": "OPG",
+        "events": 9,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/OPG/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/OPG/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 9
+        }
+      },
+      {
+        "symbol": "OPN",
+        "events": 7,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/OPN/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/OPN/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 7
+        }
+      },
+      {
+        "symbol": "ORBS",
+        "events": 11,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/ORBS-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1758873600000,
+        "acceptance_states": {
+          "eligible": 11
+        }
+      },
+      {
+        "symbol": "ORDER",
+        "events": 22,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ORDER/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ORDER/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 22
+        }
+      },
+      {
+        "symbol": "ORDI",
+        "events": 52,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ORDI/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ORDI/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 52
+        }
+      },
+      {
+        "symbol": "PARTI",
+        "events": 21,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PARTI/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PARTI/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 21
+        }
+      },
+      {
+        "symbol": "PENDLE",
+        "events": 11,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PENDLE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PENDLE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 11
+        }
+      },
+      {
+        "symbol": "PENGU",
+        "events": 25,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PENGU/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PENGU/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 25
+        }
+      },
+      {
+        "symbol": "PEOPLE",
+        "events": 85,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PEOPLE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PEOPLE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 85
+        }
+      },
+      {
+        "symbol": "PEPE",
+        "events": 53,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/PEPE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/PEPE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 53
+        }
+      },
+      {
+        "symbol": "PERP",
+        "events": 15,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/PERP-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1761292800000,
+        "acceptance_states": {
+          "eligible": 15
+        }
+      },
+      {
+        "symbol": "PI",
+        "events": 23,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PI/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PI/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 23
+        }
+      },
+      {
+        "symbol": "PIEVERSE",
+        "events": 11,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PIEVERSE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PIEVERSE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 11
+        }
+      },
+      {
+        "symbol": "PIPPIN",
+        "events": 11,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PIPPIN/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PIPPIN/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 11
+        }
+      },
+      {
+        "symbol": "PLUME",
+        "events": 21,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PLUME/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PLUME/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 21
+        }
+      },
+      {
+        "symbol": "PNUT",
+        "events": 30,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PNUT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PNUT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 30
+        }
+      },
+      {
+        "symbol": "POL",
+        "events": 33,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/POL/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/POL/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 33
+        }
+      },
+      {
+        "symbol": "POPCAT",
+        "events": 35,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/POPCAT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/POPCAT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 35
+        }
+      },
+      {
+        "symbol": "PROMPT",
+        "events": 11,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/PROMPT-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1772179200000,
+        "acceptance_states": {
+          "eligible": 11
+        }
+      },
+      {
+        "symbol": "PROS",
+        "events": 5,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PROS/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PROS/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 5
+        }
+      },
+      {
+        "symbol": "PROVE",
+        "events": 14,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PROVE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PROVE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 14
+        }
+      },
+      {
+        "symbol": "PUFFER",
+        "events": 6,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/PUFFER-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1749110400000,
+        "acceptance_states": {
+          "eligible": 6
+        }
+      },
+      {
+        "symbol": "PUMP",
+        "events": 18,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/PUMP/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/PUMP/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 18
+        }
+      },
+      {
+        "symbol": "PYTH",
+        "events": 51,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PYTH/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/PYTH/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 51
+        }
+      },
+      {
+        "symbol": "QTUM",
+        "events": 107,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/QTUM/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/QTUM/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 107
+        }
+      },
+      {
+        "symbol": "RAVE",
+        "events": 12,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RAVE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RAVE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 12
+        }
+      },
+      {
+        "symbol": "RAY",
+        "events": 33,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RAY/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RAY/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 33
+        }
+      },
+      {
+        "symbol": "RDNT",
+        "events": 11,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/RDNT-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1754035200000,
+        "acceptance_states": {
+          "eligible": 11
+        }
+      },
+      {
+        "symbol": "RE",
+        "events": 2,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 2
+        }
+      },
+      {
+        "symbol": "RECALL",
+        "events": 14,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RECALL/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RECALL/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 14
+        }
+      },
+      {
+        "symbol": "RENDER",
+        "events": 32,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RENDER/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RENDER/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 32
+        }
+      },
+      {
+        "symbol": "RESOLV",
+        "events": 22,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RESOLV/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RESOLV/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 22
+        }
+      },
+      {
+        "symbol": "RIVER",
+        "events": 13,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RIVER/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RIVER/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 13
+        }
+      },
+      {
+        "symbol": "RLS",
+        "events": 14,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RLS/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RLS/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 14
+        }
+      },
+      {
+        "symbol": "ROBO",
+        "events": 7,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ROBO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ROBO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 7
+        }
+      },
+      {
+        "symbol": "RON",
+        "events": 9,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/RON-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1747814400000,
+        "acceptance_states": {
+          "eligible": 9
+        }
+      },
+      {
+        "symbol": "RSR",
+        "events": 97,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RSR/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RSR/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 97
+        }
+      },
+      {
+        "symbol": "RVN",
+        "events": 85,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RVN/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/RVN/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 85
+        }
+      },
+      {
+        "symbol": "S",
+        "events": 29,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/S/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/S/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 29
+        }
+      },
+      {
+        "symbol": "SAHARA",
+        "events": 22,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SAHARA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SAHARA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 22
+        }
+      },
+      {
+        "symbol": "SAND",
+        "events": 85,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SAND/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SAND/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 85
+        }
+      },
+      {
+        "symbol": "SAPIEN",
+        "events": 16,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SAPIEN/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SAPIEN/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 16
+        }
+      },
+      {
+        "symbol": "SATS",
+        "events": 43,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SATS/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SATS/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 43
+        }
+      },
+      {
+        "symbol": "SCR",
+        "events": 11,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/SCR-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1761811200000,
+        "acceptance_states": {
+          "eligible": 11
+        }
+      },
+      {
+        "symbol": "SEI",
+        "events": 11,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SEI/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SEI/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 11
+        }
+      },
+      {
+        "symbol": "SENT",
+        "events": 17,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SENT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SENT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 17
+        }
+      },
+      {
+        "symbol": "SHELL",
+        "events": 29,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SHELL/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SHELL/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 29
+        }
+      },
+      {
+        "symbol": "SHIB",
+        "events": 78,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SHIB/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SHIB/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 78
+        }
+      },
+      {
+        "symbol": "SIGN",
+        "events": 24,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SIGN/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SIGN/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 24
+        }
+      },
+      {
+        "symbol": "SKY",
+        "events": 13,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SKY/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SKY/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 13
+        }
+      },
+      {
+        "symbol": "SLERF",
+        "events": 5,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/SLERF-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1751616000000,
+        "acceptance_states": {
+          "eligible": 5
+        }
+      },
+      {
+        "symbol": "SLP",
+        "events": 17,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/SLP-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1761292800000,
+        "acceptance_states": {
+          "eligible": 17
+        }
+      },
+      {
+        "symbol": "SLX",
+        "events": 3,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SLX/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SLX/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 3
+        }
+      },
+      {
+        "symbol": "SNX",
+        "events": 90,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SNX/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SNX/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 90
+        }
+      },
+      {
+        "symbol": "SOL",
+        "events": 88,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/SOL/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/SOL/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 88
+        }
+      },
+      {
+        "symbol": "SOLV",
+        "events": 11,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/SOLV-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1769270400000,
+        "acceptance_states": {
+          "eligible": 11
+        }
+      },
+      {
+        "symbol": "SONIC",
+        "events": 12,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/SONIC-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1765958400000,
+        "acceptance_states": {
+          "eligible": 12
+        }
+      },
+      {
+        "symbol": "SOON",
+        "events": 18,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SOON/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SOON/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 18
+        }
+      },
+      {
+        "symbol": "SOPH",
+        "events": 21,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/SOPH/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/SOPH/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 21
+        }
+      },
+      {
+        "symbol": "SPACE",
+        "events": 9,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SPACE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SPACE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 9
+        }
+      },
+      {
+        "symbol": "SPK",
+        "events": 17,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SPK/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SPK/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 17
+        }
+      },
+      {
+        "symbol": "SPX",
+        "events": 19,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SPX/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SPX/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 19
+        }
+      },
+      {
+        "symbol": "SSV",
+        "events": 42,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SSV/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SSV/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 42
+        }
+      },
+      {
+        "symbol": "STABLE",
+        "events": 10,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/STABLE/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/STABLE/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 10
+        }
+      },
+      {
+        "symbol": "STORJ",
+        "events": 17,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/STORJ-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1761811200000,
+        "acceptance_states": {
+          "eligible": 17
+        }
+      },
+      {
+        "symbol": "STRK",
+        "events": 39,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/STRK/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/STRK/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 39
+        }
+      },
+      {
+        "symbol": "STX",
+        "events": 64,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/STX/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/STX/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 64
+        }
+      },
+      {
+        "symbol": "SUI",
+        "events": 55,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SUI/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SUI/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 55
+        }
+      },
+      {
+        "symbol": "SUSHI",
+        "events": 102,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SUSHI/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SUSHI/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 102
+        }
+      },
+      {
+        "symbol": "SWARMS",
+        "events": 6,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/SWARMS-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1758873600000,
+        "acceptance_states": {
+          "eligible": 6
+        }
+      },
+      {
+        "symbol": "SWELL",
+        "events": 4,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/SWELL-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1749715200000,
+        "acceptance_states": {
+          "eligible": 4
+        }
+      },
+      {
+        "symbol": "SYRUP",
+        "events": 22,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SYRUP/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/SYRUP/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 22
+        }
+      },
+      {
+        "symbol": "T",
+        "events": 18,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/T-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1761292800000,
+        "acceptance_states": {
+          "eligible": 18
+        }
+      },
+      {
+        "symbol": "TAO",
+        "events": 31,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/TAO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/TAO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 31
+        }
+      },
+      {
+        "symbol": "THETA",
+        "events": 105,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/THETA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/THETA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 105
+        }
+      },
+      {
+        "symbol": "TIA",
+        "events": 53,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/TIA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/TIA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 53
+        }
+      },
+      {
+        "symbol": "TNSR",
+        "events": 18,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/TNSR-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1761811200000,
+        "acceptance_states": {
+          "eligible": 18
+        }
+      },
+      {
+        "symbol": "TRB",
+        "events": 124,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/TRB/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/TRB/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 124
+        }
+      },
+      {
+        "symbol": "TREE",
+        "events": 8,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/TREE-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1769270400000,
+        "acceptance_states": {
+          "eligible": 8
+        }
+      },
+      {
+        "symbol": "TRIA",
+        "events": 11,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/TRIA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/TRIA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 11
+        }
+      },
+      {
+        "symbol": "TRUMP",
+        "events": 29,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/TRUMP/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/TRUMP/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 29
+        }
+      },
+      {
+        "symbol": "TRUST",
+        "events": 15,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/TRUST/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/TRUST/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 15
+        }
+      },
+      {
+        "symbol": "TRUTH",
+        "events": 13,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/TRUTH/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/TRUTH/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 13
+        }
+      },
+      {
+        "symbol": "TRX",
+        "events": 106,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/TRX/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/TRX/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 106
+        }
+      },
+      {
+        "symbol": "TURBO",
+        "events": 47,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/TURBO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/TURBO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 47
+        }
+      },
+      {
+        "symbol": "TURTLE",
+        "events": 1,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/TURTLE-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1769270400000,
+        "acceptance_states": {
+          "eligible": 1
+        }
+      },
+      {
+        "symbol": "UB",
+        "events": 7,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/UB/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/UB/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 7
+        }
+      },
+      {
+        "symbol": "ULTI",
+        "events": 9,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/ULTI-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1747814400000,
+        "acceptance_states": {
+          "eligible": 9
+        }
+      },
+      {
+        "symbol": "UMA",
+        "events": 117,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/UMA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/UMA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 117
+        }
+      },
+      {
+        "symbol": "UNI",
+        "events": 98,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/UNI/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/UNI/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 98
+        }
+      },
+      {
+        "symbol": "UP",
+        "events": 5,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/UP/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/UP/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 5
+        }
+      },
+      {
+        "symbol": "USDC",
+        "events": 58,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/USDC/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/USDC/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 58
+        }
+      },
+      {
+        "symbol": "USELESS",
+        "events": 15,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/USELESS/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/USELESS/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 15
+        }
+      },
+      {
+        "symbol": "UXLINK",
+        "events": 12,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/UXLINK-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1758636000000,
+        "acceptance_states": {
+          "eligible": 12
+        }
+      },
+      {
+        "symbol": "VANA",
+        "events": 29,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/VANA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/VANA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 29
+        }
+      },
+      {
+        "symbol": "VELO",
+        "events": 7,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/VELO-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1747814400000,
+        "acceptance_states": {
+          "eligible": 7
+        }
+      },
+      {
+        "symbol": "VINE",
+        "events": 6,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/VINE-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1758873600000,
+        "acceptance_states": {
+          "eligible": 6
+        }
+      },
+      {
+        "symbol": "VIRTUAL",
+        "events": 30,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/VIRTUAL/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/VIRTUAL/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 30
+        }
+      },
+      {
+        "symbol": "VVV",
+        "events": 3,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/VVV/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/VVV/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 3
+        }
+      },
+      {
+        "symbol": "W",
+        "events": 44,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/W/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/W/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 44
+        }
+      },
+      {
+        "symbol": "WAL",
+        "events": 24,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/WAL/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/WAL/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 24
+        }
+      },
+      {
+        "symbol": "WAVES",
+        "events": 10,
+        "source_h1_path": "experiments/active/exp-cloud-close-okx-waves-trades-20261109-v1/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1706774400000,
+        "acceptance_states": {
+          "eligible": 10
+        }
+      },
+      {
+        "symbol": "WAXP",
+        "events": 12,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/WAXP-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1757664000000,
+        "acceptance_states": {
+          "eligible": 12
+        }
+      },
+      {
+        "symbol": "WCT",
+        "events": 27,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/WCT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/WCT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 27
+        }
+      },
+      {
+        "symbol": "WET",
+        "events": 11,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/WET/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/WET/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 11
+        }
+      },
+      {
+        "symbol": "WIF",
+        "events": 35,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/WIF/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/WIF/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 35
+        }
+      },
+      {
+        "symbol": "WLD",
+        "events": 46,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/WLD/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/WLD/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 46
+        }
+      },
+      {
+        "symbol": "WLFI",
+        "events": 19,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/WLFI/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/WLFI/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 19
+        }
+      },
+      {
+        "symbol": "WOO",
+        "events": 55,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/WOO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/WOO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 55
+        }
+      },
+      {
+        "symbol": "XAN",
+        "events": 2,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/XAN-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1772179200000,
+        "acceptance_states": {
+          "eligible": 2
+        }
+      },
+      {
+        "symbol": "XLM",
+        "events": 106,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/XLM/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/XLM/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 106
+        }
+      },
+      {
+        "symbol": "XPL",
+        "events": 21,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/XPL/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/XPL/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 21
+        }
+      },
+      {
+        "symbol": "XRP",
+        "events": 104,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/XRP/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/XRP/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 104
+        }
+      },
+      {
+        "symbol": "XTZ",
+        "events": 97,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/XTZ/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/XTZ/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 97
+        }
+      },
+      {
+        "symbol": "YB",
+        "events": 13,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/YB/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/YB/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 13
+        }
+      },
+      {
+        "symbol": "YFI",
+        "events": 80,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/YFI/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/YFI/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 80
+        }
+      },
+      {
+        "symbol": "YGG",
+        "events": 96,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/YGG/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/YGG/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 96
+        }
+      },
+      {
+        "symbol": "ZAMA",
+        "events": 11,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZAMA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZAMA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 11
+        }
+      },
+      {
+        "symbol": "ZBT",
+        "events": 16,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZBT/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZBT/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 16
+        }
+      },
+      {
+        "symbol": "ZEC",
+        "events": 13,
+        "source_h1_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ZEC/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ZEC/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 13
+        }
+      },
+      {
+        "symbol": "ZEN",
+        "events": 22,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZEN/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZEN/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 22
+        }
+      },
+      {
+        "symbol": "ZEREBRO",
+        "events": 5,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/ZEREBRO-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1757664000000,
+        "acceptance_states": {
+          "eligible": 5
+        }
+      },
+      {
+        "symbol": "ZETA",
+        "events": 50,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZETA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZETA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 50
+        }
+      },
+      {
+        "symbol": "ZIL",
+        "events": 101,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZIL/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZIL/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 101
+        }
+      },
+      {
+        "symbol": "ZK",
+        "events": 38,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZK/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZK/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 38
+        }
+      },
+      {
+        "symbol": "ZKJ",
+        "events": 1,
+        "source_h1_path": "data/research/cloud_close_okx_retired_prices/series/ZKJ-USDT-SWAP/bars1h.csv.gz",
+        "source_h12_path": null,
+        "source_available_end_ms": 1746000000000,
+        "acceptance_states": {
+          "eligible": 1
+        }
+      },
+      {
+        "symbol": "ZKP",
+        "events": 9,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZKP/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZKP/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 9
+        }
+      },
+      {
+        "symbol": "ZORA",
+        "events": 17,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZORA/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZORA/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 17
+        }
+      },
+      {
+        "symbol": "ZRO",
+        "events": 34,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZRO/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZRO/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 34
+        }
+      },
+      {
+        "symbol": "ZRX",
+        "events": 111,
+        "source_h1_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZRX/bars1h.csv.gz",
+        "source_h12_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ZRX/bars12h.csv.gz",
+        "source_available_end_ms": 1794139200000,
+        "acceptance_states": {
+          "eligible": 111
+        }
+      }
+    ],
+    "causality": {
+      "decision_ms": "entry_ms == confirmed native UTC 12H close; original V1.7 signal is already finalized at this boundary",
+      "feature_h1_open_ms": "entry_ms - 3h, entry_ms - 2h, entry_ms - 1h exactly; each close occurs no later than entry_ms",
+      "entry_price_clock": "H1 open at entry_ms, cross-checked against frozen path entry_price; this row is excluded from H1 close features",
+      "no_future_data": true
+    }
+  },
+  "accounts": {
+    "all_observable": {
+      "status": "reused_frozen_no_change_control",
+      "eligible_event_ids": 12284,
+      "input_opportunities": 12442,
+      "baseline": {
+        "source_summary": "experiments/active/exp-cloud-close-liquid-queue-20261109-v1/summary.json",
+        "source_arm": "balanced",
+        "metrics": {
+          "fees": {
+            "metrics": {
+              "all": {
+                "final_usdt": 51957.209636755935,
+                "multiple": 51.957209636755934,
+                "dd_mark_pct": 40.901713064931066,
+                "dd_bound_pct": 42.36000101948575,
+                "trades": 1593,
+                "win_pct": 21.40615191462649,
+                "payoff": 6.989828319557846,
+                "payoff_usdt": 6.363862459157285,
+                "median_net_pct": -3.4275635208110176
+              },
+              "dev": {
+                "final_usdt": 36587.82694575576,
+                "multiple": 36.587826945755765,
+                "dd_mark_pct": 40.901713064931066,
+                "dd_bound_pct": 42.36000101948575,
+                "trades": 1094,
+                "win_pct": 21.937842778793417,
+                "payoff": 7.721302960397587,
+                "payoff_usdt": 6.062076544150207,
+                "median_net_pct": -3.431877391622323
+              },
+              "2025": {
+                "final_usdt": 49704.99295621701,
+                "multiple": 1.3585117539204623,
+                "dd_mark_pct": 29.925353221974582,
+                "dd_bound_pct": 30.605549038004433,
+                "trades": 267,
+                "win_pct": 15.730337078651685,
+                "payoff": 5.352357736924388,
+                "payoff_usdt": 6.4378397231084685,
+                "median_net_pct": -3.5140687446940557
+              },
+              "2026": {
+                "final_usdt": 51957.209636755935,
+                "multiple": 1.0453116788995989,
+                "dd_mark_pct": 12.029009831483561,
+                "dd_bound_pct": 12.454121920809557,
+                "trades": 214,
+                "win_pct": 21.962616822429908,
+                "payoff": 4.280736018454933,
+                "payoff_usdt": 6.7483509628022444,
+                "median_net_pct": -3.1717017973543613
+              }
+            },
+            "margin": {
+              "1.0": {
+                "positions_audited": 859,
+                "maintenance_boundary_hits": 0,
+                "negative_equity_positions": 0,
+                "unquoted_position_hours": 0,
+                "worst_margin_buffer_per_margin": 0.4900515811301193,
+                "worst_remaining_equity_per_margin": 0.5445876101607051,
+                "valid": true,
+                "checked_hours": [],
+                "all_flags_resolved": true
+              },
+              "2.0": {
+                "positions_audited": 734,
+                "maintenance_boundary_hits": 2,
+                "negative_equity_positions": 2,
+                "unquoted_position_hours": 0,
+                "worst_margin_buffer_per_margin": -1.730458712780108,
+                "worst_remaining_equity_per_margin": -1.3007032640949552,
+                "valid": false,
+                "checked_hours": [
+                  {
+                    "event_id": "signal-row-07824:signal",
+                    "symbol": "LTC",
+                    "side": 1,
+                    "multiple": 2.0,
+                    "market_slip": 0.0,
+                    "entry_price": 116.83,
+                    "exit_price": 111.813452,
+                    "threshold": 65.00657587548638,
+                    "hour": 1760130000000,
+                    "exit_hour": true,
+                    "exit_reason": "stop",
+                    "phase": "intrabar",
+                    "status": "stop_strictly_earlier",
+                    "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251011/LTC-USDT-SWAP-candlesticks-2025-10-11.zip",
+                    "stop_minute": 14,
+                    "trade_boundary_minute": 20,
+                    "mark_boundary_minute": 20,
+                    "preceding_trade_close": 118.06,
+                    "stop_minute_open": 118.05,
+                    "stop_minute_trade_low": 110.38,
+                    "stop_minute_mark_low": 110.67,
+                    "stop_minute_trade_high": 118.47,
+                    "stop_minute_mark_high": 118.36,
+                    "full_hour_mark_low": 51.44,
+                    "full_hour_mark_high": 123.31
+                  },
+                  {
+                    "event_id": "signal-row-08041:signal",
+                    "symbol": "MOODENG",
+                    "side": -1,
+                    "multiple": 2.0,
+                    "market_slip": 0.0,
+                    "entry_price": 0.09773,
+                    "exit_price": 0.1069422838,
+                    "threshold": 0.13316323034984098,
+                    "hour": 1765054800000,
+                    "exit_hour": true,
+                    "exit_reason": "stop",
+                    "phase": "intrabar",
+                    "status": "stop_strictly_earlier",
+                    "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251207/MOODENG-USDT-SWAP-candlesticks-2025-12-07.zip",
+                    "stop_minute": 4,
+                    "trade_boundary_minute": 5,
+                    "mark_boundary_minute": 5,
+                    "preceding_trade_close": 0.09283,
+                    "stop_minute_open": 0.09296,
+                    "stop_minute_trade_low": 0.09199,
+                    "stop_minute_mark_low": 0.09223,
+                    "stop_minute_trade_high": 0.10998,
+                    "stop_minute_mark_high": 0.10964,
+                    "full_hour_mark_low": 0.07259,
+                    "full_hour_mark_high": 0.20693
+                  }
+                ],
+                "all_flags_resolved": true
+              }
+            },
+            "trim_fills": 8120
+          },
+          "stress": {
+            "metrics": {
+              "all": {
+                "final_usdt": 45904.17888711962,
+                "multiple": 45.90417888711962,
+                "dd_mark_pct": 41.20938620180308,
+                "dd_bound_pct": 42.664350288159,
+                "trades": 1593,
+                "win_pct": 21.155053358443187,
+                "payoff": 6.877831607514425,
+                "payoff_usdt": 6.17829788000376,
+                "median_net_pct": -3.53099279897089
+              },
+              "dev": {
+                "final_usdt": 33536.22603482079,
+                "multiple": 33.53622603482079,
+                "dd_mark_pct": 41.20938620180308,
+                "dd_bound_pct": 42.664350288159,
+                "trades": 1094,
+                "win_pct": 21.572212065813527,
+                "payoff": 7.652408548349779,
+                "payoff_usdt": 5.99638388614452,
+                "median_net_pct": -3.5323377465779515
+              },
+              "2025": {
+                "final_usdt": 44264.88486379043,
+                "multiple": 1.3199125273616068,
+                "dd_mark_pct": 31.29841902045457,
+                "dd_bound_pct": 32.00273776198198,
+                "trades": 267,
+                "win_pct": 15.730337078651685,
+                "payoff": 5.156067183490457,
+                "payoff_usdt": 6.092173998449891,
+                "median_net_pct": -3.612458498710369
+              },
+              "2026": {
+                "final_usdt": 45904.17888711962,
+                "multiple": 1.037033735168939,
+                "dd_mark_pct": 12.836807240110348,
+                "dd_bound_pct": 13.26376281636662,
+                "trades": 214,
+                "win_pct": 21.962616822429908,
+                "payoff": 4.141909894589186,
+                "payoff_usdt": 6.3602950686324,
+                "median_net_pct": -3.2729163006769273
+              }
+            },
+            "margin": {
+              "1.0": {
+                "positions_audited": 859,
+                "maintenance_boundary_hits": 0,
+                "negative_equity_positions": 0,
+                "unquoted_position_hours": 0,
+                "worst_margin_buffer_per_margin": 0.489278787325039,
+                "worst_remaining_equity_per_margin": 0.5438148163556248,
+                "valid": true,
+                "checked_hours": [],
+                "all_flags_resolved": true
+              },
+              "2.0": {
+                "positions_audited": 734,
+                "maintenance_boundary_hits": 2,
+                "negative_equity_positions": 2,
+                "unquoted_position_hours": 0,
+                "worst_margin_buffer_per_margin": -1.7336080644121552,
+                "worst_remaining_equity_per_margin": -1.3038526157270023,
+                "valid": false,
+                "checked_hours": [
+                  {
+                    "event_id": "signal-row-07824:signal",
+                    "symbol": "LTC",
+                    "side": 1,
+                    "multiple": 2.0,
+                    "market_slip": 0.0005,
+                    "entry_price": 116.83,
+                    "exit_price": 111.813452,
+                    "threshold": 65.10410203156052,
+                    "hour": 1760130000000,
+                    "exit_hour": true,
+                    "exit_reason": "stop",
+                    "phase": "intrabar",
+                    "status": "stop_strictly_earlier",
+                    "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251011/LTC-USDT-SWAP-candlesticks-2025-10-11.zip",
+                    "stop_minute": 14,
+                    "trade_boundary_minute": 20,
+                    "mark_boundary_minute": 20,
+                    "preceding_trade_close": 118.06,
+                    "stop_minute_open": 118.05,
+                    "stop_minute_trade_low": 110.38,
+                    "stop_minute_mark_low": 110.67,
+                    "stop_minute_trade_high": 118.47,
+                    "stop_minute_mark_high": 118.36,
+                    "full_hour_mark_low": 51.44,
+                    "full_hour_mark_high": 123.31
+                  },
+                  {
+                    "event_id": "signal-row-08041:signal",
+                    "symbol": "MOODENG",
+                    "side": -1,
+                    "multiple": 2.0,
+                    "market_slip": 0.0005,
+                    "entry_price": 0.09773,
+                    "exit_price": 0.1069422838,
+                    "threshold": 0.13305232384489266,
+                    "hour": 1765054800000,
+                    "exit_hour": true,
+                    "exit_reason": "stop",
+                    "phase": "intrabar",
+                    "status": "stop_strictly_earlier",
+                    "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251207/MOODENG-USDT-SWAP-candlesticks-2025-12-07.zip",
+                    "stop_minute": 4,
+                    "trade_boundary_minute": 5,
+                    "mark_boundary_minute": 5,
+                    "preceding_trade_close": 0.09283,
+                    "stop_minute_open": 0.09296,
+                    "stop_minute_trade_low": 0.09199,
+                    "stop_minute_mark_low": 0.09223,
+                    "stop_minute_trade_high": 0.10998,
+                    "stop_minute_mark_high": 0.10964,
+                    "full_hour_mark_low": 0.07259,
+                    "full_hour_mark_high": 0.20693
+                  }
+                ],
+                "all_flags_resolved": true
+              }
+            },
+            "trim_fills": 8340
+          }
+        },
+        "eligible_count": 12442,
+        "liquid_eligible": 12284,
+        "funded_positions": 1593,
+        "funded_paths": "experiments/active/exp-cloud-close-liquid-queue-20261109-v1/balanced/selected_paths.csv.gz",
+        "hourly_nav": "experiments/active/exp-cloud-close-liquid-queue-20261109-v1/balanced/hourly_fees.csv.gz"
+      }
+    },
+    "stable_3": {
+      "status": "completed",
+      "eligible_event_ids": 10186,
+      "account_summary": "experiments/active/exp-cloud-close-reclaim-acceptance-20261109-v1/stable_3/summary.json",
+      "arm": {
+        "cases": {
+          "fees": {
+            "metrics": {
+              "all": {
+                "final_usdt": 51309.144452449866,
+                "multiple": 51.309144452449864,
+                "dd_mark_pct": 43.487286982841525,
+                "dd_bound_pct": 44.30461341651362,
+                "trades": 1500,
+                "win_pct": 22.066666666666666,
+                "payoff": 7.106232440840167,
+                "payoff_usdt": 6.012741215149494,
+                "median_net_pct": -3.468635044774019
+              },
+              "dev": {
+                "final_usdt": 36760.147419916735,
+                "multiple": 36.760147419916734,
+                "dd_mark_pct": 43.487286982841525,
+                "dd_bound_pct": 44.30461341651362,
+                "trades": 1032,
+                "win_pct": 22.189922480620154,
+                "payoff": 7.820762982411517,
+                "payoff_usdt": 5.75685365132291,
+                "median_net_pct": -3.5468782839748205
+              },
+              "2025": {
+                "final_usdt": 43166.78243524239,
+                "multiple": 1.1742820816832342,
+                "dd_mark_pct": 30.617396024048116,
+                "dd_bound_pct": 31.288064266076443,
+                "trades": 237,
+                "win_pct": 18.143459915611814,
+                "payoff": 4.206466974290349,
+                "payoff_usdt": 3.9793210595915225,
+                "median_net_pct": -3.53502534673368
+              },
+              "2026": {
+                "final_usdt": 51309.144452449866,
+                "multiple": 1.1886256412421383,
+                "dd_mark_pct": 19.690556911142675,
+                "dd_bound_pct": 20.92748519785491,
+                "trades": 213,
+                "win_pct": 22.535211267605636,
+                "payoff": 6.126776334841339,
+                "payoff_usdt": 8.895542657730894,
+                "median_net_pct": -3.1545890837158126
+              }
+            },
+            "margin": {
+              "1.0": {
+                "positions_audited": 794,
+                "maintenance_boundary_hits": 0,
+                "negative_equity_positions": 0,
+                "unquoted_position_hours": 0,
+                "worst_margin_buffer_per_margin": 0.4900515811301193,
+                "worst_remaining_equity_per_margin": 0.5445876101607051,
+                "valid": true,
+                "checked_hours": [],
+                "all_flags_resolved": true
+              },
+              "2.0": {
+                "positions_audited": 706,
+                "maintenance_boundary_hits": 2,
+                "negative_equity_positions": 2,
+                "unquoted_position_hours": 0,
+                "worst_margin_buffer_per_margin": -1.730458712780108,
+                "worst_remaining_equity_per_margin": -1.3007032640949552,
+                "valid": false,
+                "checked_hours": [
+                  {
+                    "event_id": "signal-row-07824:signal",
+                    "symbol": "LTC",
+                    "side": 1,
+                    "multiple": 2.0,
+                    "market_slip": 0.0,
+                    "entry_price": 116.83,
+                    "exit_price": 111.813452,
+                    "threshold": 65.00657587548638,
+                    "hour": 1760130000000,
+                    "exit_hour": true,
+                    "exit_reason": "stop",
+                    "phase": "intrabar",
+                    "status": "stop_strictly_earlier",
+                    "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251011/LTC-USDT-SWAP-candlesticks-2025-10-11.zip",
+                    "stop_minute": 14,
+                    "trade_boundary_minute": 20,
+                    "mark_boundary_minute": 20,
+                    "preceding_trade_close": 118.06,
+                    "stop_minute_open": 118.05,
+                    "stop_minute_trade_low": 110.38,
+                    "stop_minute_mark_low": 110.67,
+                    "stop_minute_trade_high": 118.47,
+                    "stop_minute_mark_high": 118.36,
+                    "full_hour_mark_low": 51.44,
+                    "full_hour_mark_high": 123.31
+                  },
+                  {
+                    "event_id": "signal-row-08041:signal",
+                    "symbol": "MOODENG",
+                    "side": -1,
+                    "multiple": 2.0,
+                    "market_slip": 0.0,
+                    "entry_price": 0.09773,
+                    "exit_price": 0.1069422838,
+                    "threshold": 0.13316323034984098,
+                    "hour": 1765054800000,
+                    "exit_hour": true,
+                    "exit_reason": "stop",
+                    "phase": "intrabar",
+                    "status": "stop_strictly_earlier",
+                    "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251207/MOODENG-USDT-SWAP-candlesticks-2025-12-07.zip",
+                    "stop_minute": 4,
+                    "trade_boundary_minute": 5,
+                    "mark_boundary_minute": 5,
+                    "preceding_trade_close": 0.09283,
+                    "stop_minute_open": 0.09296,
+                    "stop_minute_trade_low": 0.09199,
+                    "stop_minute_mark_low": 0.09223,
+                    "stop_minute_trade_high": 0.10998,
+                    "stop_minute_mark_high": 0.10964,
+                    "full_hour_mark_low": 0.07259,
+                    "full_hour_mark_high": 0.20693
+                  }
+                ],
+                "all_flags_resolved": true
+              }
+            },
+            "trim_fills": 7510
+          },
+          "stress": {
+            "metrics": {
+              "all": {
+                "final_usdt": 47168.88073323004,
+                "multiple": 47.16888073323004,
+                "dd_mark_pct": 43.91316500657153,
+                "dd_bound_pct": 44.721596835713115,
+                "trades": 1500,
+                "win_pct": 21.8,
+                "payoff": 7.038769416102631,
+                "payoff_usdt": 5.928500108014307,
+                "median_net_pct": -3.565552532034703
+              },
+              "dev": {
+                "final_usdt": 33983.691866022615,
+                "multiple": 33.98369186602262,
+                "dd_mark_pct": 43.91316500657153,
+                "dd_bound_pct": 44.721596835713115,
+                "trades": 1032,
+                "win_pct": 21.899224806201552,
+                "payoff": 7.735364054890224,
+                "payoff_usdt": 5.686309640437733,
+                "median_net_pct": -3.6446367656888987
+              },
+              "2025": {
+                "final_usdt": 39013.56041112114,
+                "multiple": 1.1480083024801513,
+                "dd_mark_pct": 31.714572802235164,
+                "dd_bound_pct": 32.37864024964142,
+                "trades": 237,
+                "win_pct": 17.72151898734177,
+                "payoff": 4.221871473140144,
+                "payoff_usdt": 3.948379257502166,
+                "median_net_pct": -3.631492088016298
+              },
+              "2026": {
+                "final_usdt": 47168.88073323004,
+                "multiple": 1.2090380943489627,
+                "dd_mark_pct": 19.930667056117635,
+                "dd_bound_pct": 21.186273170339852,
+                "trades": 213,
+                "win_pct": 22.535211267605636,
+                "payoff": 6.082512692525985,
+                "payoff_usdt": 8.865150694338492,
+                "median_net_pct": -3.251436071138377
+              }
+            },
+            "margin": {
+              "1.0": {
+                "positions_audited": 794,
+                "maintenance_boundary_hits": 0,
+                "negative_equity_positions": 0,
+                "unquoted_position_hours": 0,
+                "worst_margin_buffer_per_margin": 0.489278787325039,
+                "worst_remaining_equity_per_margin": 0.5438148163556248,
+                "valid": true,
+                "checked_hours": [],
+                "all_flags_resolved": true
+              },
+              "2.0": {
+                "positions_audited": 706,
+                "maintenance_boundary_hits": 2,
+                "negative_equity_positions": 2,
+                "unquoted_position_hours": 0,
+                "worst_margin_buffer_per_margin": -1.7336080644121552,
+                "worst_remaining_equity_per_margin": -1.3038526157270023,
+                "valid": false,
+                "checked_hours": [
+                  {
+                    "event_id": "signal-row-07824:signal",
+                    "symbol": "LTC",
+                    "side": 1,
+                    "multiple": 2.0,
+                    "market_slip": 0.0005,
+                    "entry_price": 116.83,
+                    "exit_price": 111.813452,
+                    "threshold": 65.10410203156052,
+                    "hour": 1760130000000,
+                    "exit_hour": true,
+                    "exit_reason": "stop",
+                    "phase": "intrabar",
+                    "status": "stop_strictly_earlier",
+                    "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251011/LTC-USDT-SWAP-candlesticks-2025-10-11.zip",
+                    "stop_minute": 14,
+                    "trade_boundary_minute": 20,
+                    "mark_boundary_minute": 20,
+                    "preceding_trade_close": 118.06,
+                    "stop_minute_open": 118.05,
+                    "stop_minute_trade_low": 110.38,
+                    "stop_minute_mark_low": 110.67,
+                    "stop_minute_trade_high": 118.47,
+                    "stop_minute_mark_high": 118.36,
+                    "full_hour_mark_low": 51.44,
+                    "full_hour_mark_high": 123.31
+                  },
+                  {
+                    "event_id": "signal-row-08041:signal",
+                    "symbol": "MOODENG",
+                    "side": -1,
+                    "multiple": 2.0,
+                    "market_slip": 0.0005,
+                    "entry_price": 0.09773,
+                    "exit_price": 0.1069422838,
+                    "threshold": 0.13305232384489266,
+                    "hour": 1765054800000,
+                    "exit_hour": true,
+                    "exit_reason": "stop",
+                    "phase": "intrabar",
+                    "status": "stop_strictly_earlier",
+                    "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251207/MOODENG-USDT-SWAP-candlesticks-2025-12-07.zip",
+                    "stop_minute": 4,
+                    "trade_boundary_minute": 5,
+                    "mark_boundary_minute": 5,
+                    "preceding_trade_close": 0.09283,
+                    "stop_minute_open": 0.09296,
+                    "stop_minute_trade_low": 0.09199,
+                    "stop_minute_mark_low": 0.09223,
+                    "stop_minute_trade_high": 0.10998,
+                    "stop_minute_mark_high": 0.10964,
+                    "full_hour_mark_low": 0.07259,
+                    "full_hour_mark_high": 0.20693
+                  }
+                ],
+                "all_flags_resolved": true
+              }
+            },
+            "trim_fills": 7734
+          }
+        },
+        "eligible_count": 10186,
+        "signals": 1500,
+        "overlap": 1500,
+        "symbols": 229,
+        "skips": {
+          "same_contract": 570,
+          "all_slots_busy": 8116
+        },
+        "settlement": {
+          "ARC": {
+            "mean_index": 0.019757000000000004,
+            "legs": 2
+          },
+          "CATI": {
+            "mean_index": 0.05919699999999999,
+            "legs": 2
+          },
+          "CETUS": {
+            "mean_index": 0.023350499999999996,
+            "legs": 2
+          },
+          "TREE": {
+            "mean_index": 0.10789450000000002,
+            "legs": 2
+          }
+        },
+        "missing_holding_hours": 0,
+        "gap_events": 0
+      }
+    },
+    "last_only_1": {
+      "status": "completed",
+      "eligible_event_ids": 728,
+      "account_summary": "experiments/active/exp-cloud-close-reclaim-acceptance-20261109-v1/last_only_1/summary.json",
+      "arm": {
+        "cases": {
+          "fees": {
+            "metrics": {
+              "all": {
+                "final_usdt": 2329.3262947689354,
+                "multiple": 2.3293262947689355,
+                "dd_mark_pct": 27.391299651473446,
+                "dd_bound_pct": 27.822003900301308,
+                "trades": 580,
+                "win_pct": 18.620689655172416,
+                "payoff": 6.028469186384342,
+                "payoff_usdt": 6.634016472828218,
+                "median_net_pct": -3.1943021593222873
+              },
+              "dev": {
+                "final_usdt": 1316.1218811386136,
+                "multiple": 1.3161218811386137,
+                "dd_mark_pct": 23.942265996733703,
+                "dd_bound_pct": 24.675963697702652,
+                "trades": 286,
+                "win_pct": 17.832167832167833,
+                "payoff": 5.169081547741831,
+                "payoff_usdt": 5.690846581702325,
+                "median_net_pct": -3.164170610594556
+              },
+              "2025": {
+                "final_usdt": 2046.6476205299666,
+                "multiple": 1.5550593374827526,
+                "dd_mark_pct": 26.867510848930298,
+                "dd_bound_pct": 27.2936984700195,
+                "trades": 137,
+                "win_pct": 13.138686131386862,
+                "payoff": 6.484884418986036,
+                "payoff_usdt": 8.631244099993873,
+                "median_net_pct": -3.339524459637052
+              },
+              "2026": {
+                "final_usdt": 2329.3262947689354,
+                "multiple": 1.138117901393192,
+                "dd_mark_pct": 18.248915636091688,
+                "dd_bound_pct": 20.21223894981454,
+                "trades": 149,
+                "win_pct": 22.14765100671141,
+                "payoff": 6.817729391356979,
+                "payoff_usdt": 6.572945904986341,
+                "median_net_pct": -3.1844966336862344
+              }
+            },
+            "margin": {
+              "1.0": {
+                "positions_audited": 354,
+                "maintenance_boundary_hits": 0,
+                "negative_equity_positions": 0,
+                "unquoted_position_hours": 0,
+                "worst_margin_buffer_per_margin": 0.5524959170854273,
+                "worst_remaining_equity_per_margin": 0.6839819764143299,
+                "valid": true,
+                "checked_hours": [],
+                "all_flags_resolved": true
+              },
+              "2.0": {
+                "positions_audited": 226,
+                "maintenance_boundary_hits": 0,
+                "negative_equity_positions": 0,
+                "unquoted_position_hours": 0,
+                "worst_margin_buffer_per_margin": 0.02525667396061264,
+                "worst_remaining_equity_per_margin": 0.1393485776805251,
+                "valid": true,
+                "checked_hours": [],
+                "all_flags_resolved": true
+              }
+            },
+            "trim_fills": 2828
+          },
+          "stress": {
+            "metrics": {
+              "all": {
+                "final_usdt": 2175.569086639973,
+                "multiple": 2.1755690866399733,
+                "dd_mark_pct": 31.132981015643768,
+                "dd_bound_pct": 31.536483874722997,
+                "trades": 580,
+                "win_pct": 18.448275862068968,
+                "payoff": 5.878329468979637,
+                "payoff_usdt": 6.4401524349077635,
+                "median_net_pct": -3.2919229795544327
+              },
+              "dev": {
+                "final_usdt": 1264.5895591949313,
+                "multiple": 1.2645895591949314,
+                "dd_mark_pct": 26.693202405483497,
+                "dd_bound_pct": 27.40173567044133,
+                "trades": 286,
+                "win_pct": 17.482517482517483,
+                "payoff": 5.099086414675793,
+                "payoff_usdt": 5.636363708133037,
+                "median_net_pct": -3.2654257273121226
+              },
+              "2025": {
+                "final_usdt": 1937.01325694447,
+                "multiple": 1.531732760926494,
+                "dd_mark_pct": 27.485354547945285,
+                "dd_bound_pct": 27.90263218616059,
+                "trades": 137,
+                "win_pct": 13.138686131386862,
+                "payoff": 6.269709337716291,
+                "payoff_usdt": 8.234532242342652,
+                "median_net_pct": -3.442532576015902
+              },
+              "2026": {
+                "final_usdt": 2175.569086639973,
+                "multiple": 1.1231565291771992,
+                "dd_mark_pct": 18.915910333550258,
+                "dd_bound_pct": 20.914204061916287,
+                "trades": 149,
+                "win_pct": 22.14765100671141,
+                "payoff": 6.575506704628551,
+                "payoff_usdt": 6.289857950306943,
+                "median_net_pct": -3.2821797164852895
+              }
+            },
+            "margin": {
+              "1.0": {
+                "positions_audited": 354,
+                "maintenance_boundary_hits": 0,
+                "negative_equity_positions": 0,
+                "unquoted_position_hours": 0,
+                "worst_margin_buffer_per_margin": 0.5513384080736345,
+                "worst_remaining_equity_per_margin": 0.6828244674025371,
+                "valid": true,
+                "checked_hours": [],
+                "all_flags_resolved": true
+              },
+              "2.0": {
+                "positions_audited": 226,
+                "maintenance_boundary_hits": 0,
+                "negative_equity_positions": 0,
+                "unquoted_position_hours": 0,
+                "worst_margin_buffer_per_margin": 0.023685999671772498,
+                "worst_remaining_equity_per_margin": 0.13777790339168497,
+                "valid": true,
+                "checked_hours": [],
+                "all_flags_resolved": true
+              }
+            },
+            "trim_fills": 2892
+          }
+        },
+        "eligible_count": 728,
+        "signals": 580,
+        "overlap": 580,
+        "symbols": 209,
+        "skips": {
+          "same_contract": 10,
+          "all_slots_busy": 138
+        },
+        "settlement": {
+          "CETUS": {
+            "mean_index": 0.023350499999999996,
+            "legs": 2
+          },
+          "NXPC": {
+            "mean_index": 0.3833866666666666,
+            "legs": 2
+          }
+        },
+        "missing_holding_hours": 0,
+        "gap_events": 0
+      }
+    }
+  },
+  "control_definition": "all_observable is the no-gate baseline/control; the queue source has actual V1.7 entries only, not separate matched non-signal rows.",
+  "native_vectorbt": "Conditional cohorts use cloud_close_liquid_queue.main -> actual shared-cash VectorBT portfolio; this builder contains no fill/PnL engine.",
+  "limitations": [
+    "No funding or exit-depth model; the source account uses the preregistered 10% prior-hour average-volume cap."
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "builder_config": "experiments/active/exp-cloud-close-reclaim-acceptance-20261109-v1/config.json",
+  "feature_audit": "experiments/active/exp-cloud-close-reclaim-acceptance-20261109-v1/feature_audit.json",
+  "feature_rows": "experiments/active/exp-cloud-close-reclaim-acceptance-20261109-v1/confirmation_features.csv.gz",
+  "source_coverage": "experiments/active/exp-cloud-close-reclaim-acceptance-20261109-v1/source_coverage.csv",
+  "account_metrics": "experiments/active/exp-cloud-close-reclaim-acceptance-20261109-v1/account_metrics.csv",
+  "groups": {
+    "all_observable": {
+      "status": "reused_frozen_no_change_control",
+      "eligible_event_ids": 12284
+    },
+    "stable_3": {
+      "status": "completed",
+      "eligible_event_ids": 10186
+    },
+    "last_only_1": {
+      "status": "completed",
+      "eligible_event_ids": 728
+    }
+  },
+  "source_lineage": {
+    "actual_signal_events": "cloud_close_liquid_queue.repair.pool() at tp_r=0",
+    "H1_prices": "same corrected quotes loader returned by repair.pool()",
+    "reference_anchor": "frozen original signal reference (or exact inversion of frozen stop), checked against full NY Monday H1 1.618 range"
+  }
+}
