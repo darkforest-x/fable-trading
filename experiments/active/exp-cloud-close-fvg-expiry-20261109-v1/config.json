@@ -1,0 +1,22 @@
+{
+  "id": "exp-cloud-close-fvg-expiry-20261109-v1",
+  "question": "Can the frozen same-side 12H FVG tag condition whether the unfilled two-thirds 2R limit expires after 12 hours, while preserving the high-growth OKX hourly 20% single-name-cap account?",
+  "single_variable": "Only the cancellation rule for the unfilled 2R partial changes. Primary: FVG `outside` keeps the fixed 12h expiry; FVG `overlap` leaves the original resting 2R order active until the native runner exits. Reciprocal mapping is also preregistered as a non-selecting diagnostic.",
+  "candidate_paths": "Use native OKX V1.7 runner/two-thirds-2R paths from cloud_close_thirds.okx_paths(). At admission, the primary target policy chooses the existing native 2R path if filled before its 12h expiry; otherwise it chooses the already-frozen full-runner path. Persistent arms retain the native 2R path through its actual target fill or native runner exit.",
+  "fvg_source": "experiments/active/exp-cloud-close-fvg-exclusion-20261109-v1/decisions.csv.gz. Join by the original 1-based source_row_number; verify symbol/week against the frozen signal input. Never recompute or retag the FVG observations.",
+  "coverage": "All arms use the same known V1.7 opportunity set classified `outside` or `overlap`; unknown labels (including warmup/opened-beyond-line and any missing coverage) are excluded from every arm before VectorBT admission. Matched later controls inherit the parent source_row_number and its frozen FVG label, matching the existing FVG exclusion semantics.",
+  "policies": [
+    "always_expire_12h: fixed existing 12h cancellation on the known subset",
+    "always_persist_2r: keep the original 2R limit through the native runner exit on the known subset",
+    "outside_expire_overlap_persist: primary FVG-conditioned mapping",
+    "outside_persist_overlap_expire: reciprocal non-selecting control"
+  ],
+  "account": "OKX only; initial cash 1000 USDT; 9 cash-sharing slots at NAV/9; original 2/3 resting 2R partial and 1/3 cloud runner; the prior frozen hourly VectorBT manager caps marked single-symbol notional at 20% of prior-close NAV at each completed UTC H1 close. Preserve original order priority, exits, fee class and 5bp taker/2bp resting maker costs.",
+  "evaluation": "Report funded count, terminal account value, equal-notional and realized-cash win/payoff, marked and conservative hourly drawdown, and all/dev (through 2024)/2025/2026 metrics. Always-expire and always-persist are rerun on the identical known candidate set; the unfiltered 68115U hourly account is context only, not an equal-coverage control.",
+  "sensitivity_gate": "Run paired matched-later-control and +5bp per taker fill sensitivity only if the primary arm meets the existing win/payoff/dd/trade gates in development and full history and its development and full terminal wealth both exceed both fixed known-coverage controls. Never lower the gate or select the reciprocal arm.",
+  "execution": "VectorBT cash-sharing account; reuse cloud_close_hourly_trim's 1h 20% cap callback for zero-slippage arms. A local callback wrapper applies +5bp slippage to every taker fill, including hourly cap trims, only for the gated stress arm.",
+  "costs_and_limits": "Maker 2bp per resting fill, taker 5bp per market/stop fill, optional additional 5bp market impact for the gated stress. No funding, exchange lot/tick rounding, queue position, or order-book capacity. Research only.",
+  "builder": "yoyo/evaluation/cloud_close_fvg_expiry.py",
+  "runner": "python3 -m yoyo.evaluation.cloud_close_fvg_expiry --run",
+  "smoke_runner": "python3 -m yoyo.evaluation.cloud_close_fvg_expiry --smoke"
+}
