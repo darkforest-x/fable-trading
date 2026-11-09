@@ -3,7 +3,7 @@ import matplotlib as mpl
 mpl.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib import font_manager
-from matplotlib.collections import LineCollection, PolyCollection
+from matplotlib.collections import PolyCollection
 from matplotlib.ticker import FuncFormatter, MaxNLocator, NullLocator
 import numpy as np
 import pandas as pd
@@ -51,7 +51,8 @@ def draw(position, path, fills, source):
     hours, bars = book.original.parent.repair.market.frames(source)
     frame = bars.loc[start:last].copy()
     np.testing.assert_array_equal(frame.index, np.arange(start, last + STEP, STEP))
-    ema = _ema_points_12h(bars.loc[:last, ["close"]].reset_index().to_dict("records")).set_index("time")
+    history = bars.loc[:last, ["close"]]
+    ema = _ema_points_12h(history.reset_index().to_dict("records")).set_axis(history.index)
     frame = frame.join(ema[["ema20", "ema50"]])
 
     key = entry - STEP
@@ -79,7 +80,9 @@ def draw(position, path, fills, source):
               lw=1.3, color=RAIL, ls="--", label=("当周 1.618 下轨" if is_long else "当周 1.618 上轨"))
 
     # Place fills in their native 12H candle. The order ledger resolves intrabar exits to H1.
-    visible = fills[fills.action.ne("trim")].drop_duplicates(["hour_ms", "action", "fill_price"]).sort_values("hour_ms")
+    actions = fills[fills.action.ne("trim")].groupby(["hour_ms", "action"]).fill_price
+    np.testing.assert_allclose(actions.min(), actions.max(), rtol=1e-9, atol=1e-12)
+    visible = actions.first().reset_index().sort_values("hour_ms")
     assert np.isclose(fills.underlying_cash.sum(), position.cash_pnl)
     assert np.isclose(visible[visible.action.eq("entry")].fill_price.item(), path.entry_price)
     for r in visible.itertuples():
