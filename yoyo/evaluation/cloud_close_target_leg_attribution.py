@@ -245,7 +245,7 @@ def _attribute(funded, fills, *, sample_ids=None):
         if not np.isclose(realized_net, order_cash, rtol=1e-10, atol=1e-8):
             raise ValueError(f"Allocated child cash differs for {event_id}/{slot}: {realized_net} vs {order_cash}")
         meta = group.iloc[0]
-        terminal = group[group.fill_role.eq("terminal_exit")]
+        terminal = group[group.stage.isin([1, 3])]
         if len(terminal) != 1:
             raise ValueError(f"Expected one terminal fill per child: {event_id}/{slot}")
         terminal = terminal.iloc[0]
@@ -281,7 +281,7 @@ def _attribute(funded, fills, *, sample_ids=None):
             "terminal_exit_phase": terminal.exit_phase,
             "terminal_exit_reason": terminal.exit_reason,
             "terminal_exit_price": float(terminal.actual_fill_price),
-            "terminal_exit_type": terminal.exit_type,
+            "terminal_exit_type": _exit_type(terminal),
             "realized_net_pnl_usdt": realized_net,
             "realized_gross_pnl_usdt": realized_gross,
             "order_cash_usdt": order_cash,
@@ -473,12 +473,17 @@ def analyze(*, smoke=False):
     cash_abs = float(parent.cash_error_usdt.abs().max())
     pnl_abs = float(parent.allocation_error_usdt.abs().max())
     units_abs = float(parent.remaining_units.abs().max())
-    if cash_abs > 1e-6 or pnl_abs > 1e-6 or units_abs > 1e-7:
-        raise ValueError(f"Parent reconciliation failed: cash={cash_abs}, pnl={pnl_abs}, units={units_abs}")
+    units_rel = float((parent.remaining_units.abs() / parent.initial_units).max())
+    if cash_abs > 1e-6 or pnl_abs > 1e-6 or units_rel > 1e-8:
+        raise ValueError(
+            f"Parent reconciliation failed: cash={cash_abs}, pnl={pnl_abs}, "
+            f"units_abs={units_abs}, units_rel={units_rel}"
+        )
     actual_log_final = 1000.0 + float(parent.funded_cash_pnl_usdt.sum())
     if not np.isclose(actual_log_final, float(hourly.nav.iloc[-1]), rtol=1e-9, atol=0.001):
         raise ValueError("Frozen parent cash does not reconcile to the frozen hourly account terminal NAV")
-    if not np.isclose(float(category.realized_net_pnl_usdt.sum()), float(parent.funded_cash_pnl_usdt.sum()),
+    all_category_pnl = float(category.loc[category.cohort.eq("all"), "realized_net_pnl_usdt"].sum())
+    if not np.isclose(all_category_pnl, float(parent.funded_cash_pnl_usdt.sum()),
                       rtol=1e-10, atol=1e-6):
         raise ValueError("Mutually exclusive category realized PnL does not sum to parent cash")
     if len(open_rows) != 4 * len(funded) or len(terminal_rows) != 4 * len(funded):
@@ -517,12 +522,13 @@ def analyze(*, smoke=False):
             "maximum_parent_native_order_cash_error_usdt": cash_abs,
             "maximum_parent_allocated_realized_cash_error_usdt": pnl_abs,
             "maximum_parent_remaining_units_abs": units_abs,
+            "maximum_parent_remaining_units_fraction": units_rel,
             "orders_match_frozen_cash_pnl": bool(cash_abs <= 1e-6),
             "allocated_exit_cash_matches_frozen_cash_pnl": bool(pnl_abs <= 1e-6),
             "1000u_plus_frozen_cash_pnl_usdt": actual_log_final,
             "frozen_hourly_terminal_nav_usdt": float(hourly.nav.iloc[-1]),
             "hourly_terminal_nav_error_usdt": actual_log_final - float(hourly.nav.iloc[-1]),
-            "sum_of_category_realized_net_pnl_usdt": float(category.realized_net_pnl_usdt.sum()),
+            "sum_of_all_cohort_category_realized_net_pnl_usdt": all_category_pnl,
             "sum_of_frozen_parent_cash_pnl_usdt": float(parent.funded_cash_pnl_usdt.sum()),
         },
         "periods": totals,
@@ -555,6 +561,9 @@ def analyze(*, smoke=False):
             "sample_reconciliation_max_error_usdt": float(parent.iloc[:min(10, len(parent))].cash_error_usdt.abs().max()),
             "sample_child_rows": int(child_attr[child_attr.event_id.isin(funded.index[:10])].shape[0]),
         }
+    # Fail before writing outputs if an unexpected pandas scalar or NaN leaks
+    # into the frozen JSON summary.
+    json.dumps(stats, ensure_ascii=False, allow_nan=False)
     return stats, attr, child_attr, parent, category, origin, winners
 
 
