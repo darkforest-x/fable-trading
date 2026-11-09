@@ -1,0 +1,9 @@
+{
+  "question": "Will an independently observed US equity volatility regime select better crypto cloud reclaims?",
+  "single_variable": "Condition V1.7 entries on the sign of five Cboe trading sessions of VIX close change. Risk-aligned means long when VIX fell, short when VIX rose. Compare inverse and fixed 20-session-delayed aligned placebo. Use the same window coverage for all four arms, with ties passing neither side. No fitted thresholds or regime weights.",
+  "time": "A close dated D is eligible at D+2 UTC midnight. Use the most recent eligible close with that availability timestamp no more than four calendar days old. If the native file ends early, restrict all accounts to valid signal coverage; retain the full portfolio accounting clock and disclose the last available observation.",
+  "account": "Same funded native OKX low ATR/volume nine-slot account with the previous-hour mean volume cap. Four actual children and unchanged ETH/BTC size rule, market 5bp/maker 2bp plus 5bp stress. History already studied. No exit depth or funding in this account.",
+  "source": "https://www.cboe.com/tradable-products/vix/vix-historical-data",
+  "download": "https://cdn-api.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv",
+  "command": "vectorbt-python -m yoyo.evaluation.cloud_close_vix_regime"
+}
