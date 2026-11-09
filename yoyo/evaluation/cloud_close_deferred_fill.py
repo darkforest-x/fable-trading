@@ -105,7 +105,7 @@ def run(context,label,slip,arm,model,levered,limits,signals,*,directory=EXP):
     allowed=signals
     if arm!='disabled':
         positive=allowed.previous_net_usdt>0
-        if arm in ('profit','nonpositive'):
+        if arm in ('profit','nonpositive','continuous_nonpositive'):
             allowed=allowed.loc[positive if arm=='profit' else ~positive]
         elif arm=='original_price':
             # Same scenario's market slippage applies to both real buys or both real sells.
@@ -113,8 +113,10 @@ def run(context,label,slip,arm,model,levered,limits,signals,*,directory=EXP):
             first=candidates.entry_price*(1.+candidates.side*slip)
             later=allowed.second_native_open*(1.+candidates.side*slip)
             allowed=allowed.loc[(later-first)*candidates.side<=first*1e-12]
-        elif arm!='all':
+        elif arm not in ('all','continuous_all'):
             raise ValueError('Unknown deferred fill gate')
+        if arm.startswith('continuous_'):
+            allowed=allowed.loc[allowed.prior_zero_minutes.eq(0)]
         allowed=allowed.loc[allowed.second_entry_limit_10pct_usdt.gt(0)]
         times=(allowed.second_entry_ms-data['start'])//cash.H
         selected_slots=parents.loc[allowed.index,'slot']//4
@@ -207,6 +209,7 @@ def main(preflight=False,*,directory=EXP,arms=('profit','nonpositive')):
                 raise ValueError('Source second opening capacity mismatch')
             shadow['second_entry_limit_10pct_usdt']=aligned.second_entry_limit_10pct_usdt.where(observed,0.)
             shadow['second_native_open']=aligned.second_open_price_usdt
+            shadow['prior_zero_minutes']=aligned.capacity_zero_minutes
             for arm in arms:
                 outcome=run(context,label,slip,arm,model,levered,limits,shadow,directory=directory)
                 results[label+'_'+arm]=outcome
@@ -223,10 +226,14 @@ if __name__=='__main__':
     tests=parser.add_mutually_exclusive_group()
     tests.add_argument('--all-cap-bound',action='store_true')
     tests.add_argument('--original-price',action='store_true')
+    tests.add_argument('--continuous',action='store_true')
     args=parser.parse_args()
     if args.all_cap_bound:
         main(args.preflight,directory=cash.ROOT/'exp-cloud-close-complete-order-20261109-v1',arms=('all',))
     elif args.original_price:
         main(args.preflight,directory=cash.ROOT/'exp-cloud-close-deferred-price-limit-20261109-v1',arms=('original_price',))
+    elif args.continuous:
+        main(args.preflight,directory=cash.ROOT/'exp-cloud-close-continuous-volume-20261109-v1',
+             arms=('continuous_nonpositive','continuous_all'))
     else:
         main(args.preflight)

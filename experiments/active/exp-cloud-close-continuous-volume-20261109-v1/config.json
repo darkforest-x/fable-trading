@@ -1,0 +1,7 @@
+{
+ "question":"If any of the previous 60 closed minutes had no trades, should the remaining order be cancelled at its second opportunity?",
+ "single_variable":"The prior-minute median-cap rule remains the size limit. Require recorded nonzero trade turnover in every one of the 60 already completed minutes before any second-window fill. Apply separately to the earlier nonpositive-only and the all-candidate wallets. No filter on the still-future next minute. Recompute the entire funded VectorBT account, including cash-dependent subsequent fills. Compare base and extra 5bp cost scenarios, and independently check actual order size against the subsequently reported minute turnover as an outcome. No additional gate on first entries.",
+ "motivation":"Post-result investigation after observing that 9 of 296 original nonpositive additions demanded more than the full opening minute or encountered a zero-turnover minute. No threshold fitting.",
+ "limits":"The prior hour never guarantees opening liquidity. Earlier original fills still have known size violations. Historical OKX funding and exit depth unavailable.",
+ "command":"vectorbt-python -m yoyo.evaluation.cloud_close_deferred_fill --continuous"
+}
