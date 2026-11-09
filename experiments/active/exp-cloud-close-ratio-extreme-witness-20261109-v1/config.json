@@ -1,0 +1,6 @@
+{
+ "question":"Do the known individual minute highs and lows prove an actual 50% drawdown without needing the order of simultaneous cross-contract ticks?",
+ "single_variable":"Within the four January 2021 peak/trough hours already matched to native minute tapes, when one asset reaches its observed favorable extreme, assign every other observed asset its least favorable possible price in that minute. Conversely use their most favorable prices when one reaches its own adverse extreme. Include the last preceding quote in every other asset's interval. Retain simultaneous USD-equivalent BTC quantities netted across all legs. Combine only guaranteed highs from strictly earlier minutes with later guaranteed lows or a subsequent minute-end close. No asset's extremes are presumed simultaneous.",
+ "source_limit":"The official OKX historical download site documents tick-level trades from September 2021 onward; these two dates are January 29 and 30 2021. January monthly files for BTC, DOGE, LINK, XRP and corresponding probed daily URLs returned 404. https://www.okx.com/historical-data",
+ "command":"vectorbt-python -m yoyo.evaluation.cloud_close_ratio_extreme_witness"
+}
