@@ -72,7 +72,7 @@ def replay(label, allowed, plans, src, quotes, original_tape, original_ids):
                 additional_delivery=extra, missing_holding_hours=data['gap_marks'])
 
 
-def main():
+def main(*, features_only=False, reuse_features=False):
     if (EXP / 'summary.json').exists():
         raise FileExistsError('Completed three-condition transfer')
     pool, src, _, _ = season.source.correction.pool()
@@ -91,14 +91,24 @@ def main():
     longs = parents[parents.side.eq(1)][['symbol', 'side', 'entry_ms', 'key_open_ms', 'stop_price']]
     shorts = parents.index[parents.side.eq(-1)]
     print('Eligible inverse parents', len(longs), 'long', len(shorts), 'short', flush=True)
-    frame = features.build_features(longs.reset_index(), src)
+    feature_file = EXP / 'long_features.csv.gz'
+    if reuse_features:
+        frame = pd.read_csv(feature_file, index_col='event_id', dtype={'symbol': str}, float_precision='round_trip')
+        if not frame.symbol.eq(longs.symbol.reindex(frame.index)).all() or not frame.key_open_ms.eq(longs.key_open_ms.reindex(frame.index)).all():
+            raise ValueError('Frozen feature identity or signal timestamps differ')
+    else:
+        frame = features.build_features(longs.reset_index(), src)
     if set(frame.index) != set(longs.index) or not frame.index.is_unique:
         raise ValueError('Entry factors must preserve the exact eligible OKX long event IDs')
     if frame.prior_touches.isna().all() or frame.range_atr.isna().all():
         raise ValueError('Cannot reconstruct causal long-entry features')
     frame['primary'] = gate(frame, False)
     frame['strict'] = gate(frame, True)
-    frame.to_csv(EXP / 'long_features.csv.gz')
+    if not reuse_features:
+        frame.to_csv(feature_file)
+    if features_only:
+        print('Unknown decisions', frame[['primary', 'strict']].isna().sum().to_dict(), flush=True)
+        return
     result = {}
     counts = {}
     base_longs = actual[actual.side.eq(1)]
@@ -122,4 +132,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    import argparse
+    parser = argparse.ArgumentParser()
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument('--features-only', action='store_true')
+    modes.add_argument('--reuse-features', action='store_true')
+    main(**vars(parser.parse_args()))
