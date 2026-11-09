@@ -102,10 +102,10 @@ def screen(events,history):
     return events[pd.MultiIndex.from_frame(events[['entry_ms','symbol']]).isin(key)].copy()
 
 
-def main():
-    if (EXP/'summary.json').is_file():
-        raise FileExistsError('Completed 17-name retired-market sensitivity')
-    cfg = json.loads((EXP/'config.json').read_text())
+def main(directory=EXP, *, reuse_first=False):
+    if (directory/'summary.json').is_file():
+        raise FileExistsError(f'Completed retired-market sensitivity in {directory}')
+    cfg = json.loads((directory/'config.json').read_text())
     ends = {s:pd.Timestamp(n['delivery_from_utc']).value//1_000_000 for n in cfg['notices'] for s in n['symbols']}
     original,history = frozen_data()
     before = screen(original,history)
@@ -114,18 +114,32 @@ def main():
             'not is_control and eligible_90d').event_id):
         raise ValueError('Original 90-day eligible pool changed')
     records,coverage = [],[]
+    if reuse_first:
+        cached = pd.read_csv(EXP/'retired_paths.csv.gz',dtype={'symbol':str},float_precision='round_trip')
+        cached_summary = pd.read_csv(EXP/'source_coverage.csv').set_index('symbol',drop=False)
+        first_cfg = json.loads((EXP/'config.json').read_text())
+        limits = {s:pd.Timestamp(n['delivery_from_utc']).value//1_000_000 for n in first_cfg['notices'] for s in n['symbols']}
+        if any(ends.get(s)!=t for s,t in limits.items()):
+            raise ValueError('An archived contract delivery changed in the expanded notice roster')
     for symbol,end in sorted(ends.items()):
         if symbol in history:
             raise ValueError(f'{symbol} already in original roster')
-        rank,rows,meta = retired_symbol(symbol,end)
+        if reuse_first and symbol in cached_summary.index:
+            f = prices.CACHE/'series'/(symbol+'-USDT-SWAP')/'bars1h.csv.gz'
+            hours = pd.read_csv(f,index_col='time',float_precision='round_trip')
+            rank = leadership.trailing_return(native.twelve_hour(hours[hours.index<end]).reset_index())
+            rows = cached[cached.symbol.eq(symbol)].to_dict('records')
+            meta = cached_summary.loc[symbol].to_dict()
+        else:
+            rank,rows,meta = retired_symbol(symbol,end)
         history[symbol] = rank
         records.extend(rows)
         coverage.append(meta)
     added = pd.DataFrame(records)
     expanded = screen(pd.concat([original,added],ignore_index=True),history)
     rows,_ = risk.hourly.tested.expiry.time_in_force(expanded)
-    pd.DataFrame(coverage).to_csv(EXP/'source_coverage.csv',index=False)
-    added.to_csv(EXP/'retired_paths.csv.gz',index=False)
+    pd.DataFrame(coverage).to_csv(directory/'source_coverage.csv',index=False)
+    added.to_csv(directory/'retired_paths.csv.gz',index=False)
 
     @lru_cache(maxsize=None)
     def quotes(symbol):
@@ -138,7 +152,7 @@ def main():
     data = risk.split.pair_data(rows[rows.tp_r.eq(0)],rows[rows.tp_r.eq(2)],9,quote_loader=quotes)
     selected = data['selected']
     archived = selected[selected.symbol.isin(ends)].copy()
-    archived.to_csv(EXP/'funded_retired_legs.csv.gz',index=False)
+    archived.to_csv(directory/'funded_retired_legs.csv.gz',index=False)
     unresolved = archived[archived.exit_reason.isin(GAP_REASONS)|archived.gap_flag]
     original_ids = set(pd.read_csv(risk.hourly.EXP/'funded_OKX.csv.gz').event_id)
     held = set(selected.event_id)
@@ -150,8 +164,8 @@ def main():
             m,pos,eq,_ = risk.hourly.tested.trim_account(data,quotes,1.,.2,review_hours=1)
         if not np.isclose(1000+pos.cash_pnl.sum(),eq.nav.iat[-1],rtol=1.e-8,atol=.001):
             raise ValueError('Historical wallet cash/closed positions mismatch')
-        pos.to_csv(EXP/f'funded_{name}.csv.gz')
-        eq.to_csv(EXP/f'hourly_{name}.csv.gz',index_label='hour_end_utc')
+        pos.to_csv(directory/f'funded_{name}.csv.gz')
+        eq.to_csv(directory/f'hourly_{name}.csv.gz',index_label='hour_end_utc')
         cases[name] = m
     summary = dict(added_names=sorted(ends),eligible_before=len(before)//2,eligible_after=len(rows)//2,
             eligible_new_contracts=rows.loc[rows.symbol.isin(ends),'event_id'].nunique(),
@@ -160,10 +174,16 @@ def main():
             funded_entries_displaced=len(original_ids-held),retired_funded=archived.event_id.nunique(),
             retired_selected_source_boundary_legs=len(unresolved),retired_selected_source_boundary_events=
             sorted(unresolved.event_id.unique()),metrics=cases,
-            scope='17 documented delistings added with the confirmed native H1 sources available. This is a roster sensitivity; earlier months and other retired instruments remain incomplete. Fees included, funding pending.')
-    prices.safe_json(EXP/'summary.json',summary)
+            scope=f'{len(ends)} documented delistings added with the confirmed native H1 sources available. This is a roster sensitivity; earlier months and other retired instruments remain incomplete. Fees included, funding pending.')
+    prices.safe_json(directory/'summary.json',summary)
     print(json.dumps({k:v for k,v in summary.items() if k!='metrics'},indent=2),flush=True)
 
 
 if __name__=='__main__':
-    main()
+    import argparse
+    cli = argparse.ArgumentParser()
+    cli.add_argument('--directory-census',action='store_true')
+    if cli.parse_args().directory_census:
+        main(EXP.parent/'exp-cloud-close-okx-directory-account-20261109-v1',reuse_first=True)
+    else:
+        main()
