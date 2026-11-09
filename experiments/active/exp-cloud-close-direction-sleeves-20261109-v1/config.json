@@ -1,0 +1,57 @@
+{
+  "id": "exp-cloud-close-direction-sleeves-20261109-v1",
+  "parent": "Frozen OKX V1.7 12H 2R target-expiry full-funded account",
+  "hypothesis": "Separating long and short capital removes cross-direction competition for collateral and slots; compare the two balanced integer allocations of the original nine equal slots.",
+  "factor": "Single factor: replace the shared nine-slot 1000U account with independent long and short cash-sharing accounts, testing 4 long/5 short and 5 long/4 short slots.",
+  "inputs": {
+    "frozen_target_expiry_dir": "experiments/active/exp-cloud-close-target-expiry-20261109-v1",
+    "source_path_file": "experiments/active/exp-cloud-close-reward-20261109-v1/paths.csv.gz",
+    "source_path_function": "cloud_close_thirds.okx_paths() followed by cloud_close_target_expiry.time_in_force(..., defer=False, hours=12)",
+    "expected_frozen_actual_positions": 1569,
+    "expected_frozen_final_usdt": 49959.47120010835,
+    "frozen_final_tolerance_usdt": 0.01,
+    "frozen_timeframe": "OKX all-history through the frozen target-expiry account boundary"
+  },
+  "execution": {
+    "target_expiry_hours": 12,
+    "native_paths": "Use each original V1.7 2/3 2R target child only if its native fill is before the next 12H expiry; otherwise use the original full runner stop/EMA path for both child legs.",
+    "capital_split": "For n slots, initialize that direction with 1000*n/9 USDT, so a 4/5 allocation starts at 444.444.../555.555... USDT and a 5/4 allocation at 555.555.../444.444... USDT. No capital transfers.",
+    "linear_wallet_adapter": "Run each side with the existing VectorBT cash-sharing wallet at normalized 1000 USDT and that side's fixed slot count, then scale positions, fees, cash PnL, and synchronous hourly marks by n/9. This preserves the 1000/9 initial notional budget per original slot.",
+    "fees": "Original market exits and entries pay 5bp per fill; native 2R limit exits retain their 2bp maker fee. No extra slip in the primary account.",
+    "market_stress_slippage_per_fill": 0.0005,
+    "funding": "Not modeled"
+  },
+  "account": {
+    "starting_usdt": 1000,
+    "total_slots": 9,
+    "arms": {
+      "long4_short5": {"long": 4, "short": 5},
+      "long5_short4": {"long": 5, "short": 4}
+    },
+    "slot_priority": "Existing low-prior-ATR entry_order from cloud_close_thirds.okx_paths() in each independent direction account.",
+    "no_transfer": true,
+    "no_cross_direction_collateral": true
+  },
+  "selection": {
+    "no_parameter_selection": true,
+    "run_paired_control_and_5bp_stress_only_if_that_arm_passes_dev": true,
+    "development_period": "dev",
+    "gates": {
+      "minimum_trades": 100,
+      "minimum_win_pct": 30,
+      "minimum_equal_notional_payoff": 2.5,
+      "minimum_funded_usdt_payoff": 2.5,
+      "maximum_conservative_dd_pct": 35
+    },
+    "periods": ["all", "dev", "2025", "2026"],
+    "reported_metrics": ["final_usdt", "multiple", "trades", "win_pct", "payoff", "payoff_usdt", "dd_mark_pct", "dd_bound_pct"]
+  },
+  "outputs": {
+    "directory": "experiments/active/exp-cloud-close-direction-sleeves-20261109-v1"
+  },
+  "commands": {
+    "self_check": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_direction_sleeves --self-check",
+    "small_real_smoke_no_outputs": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_direction_sleeves --smoke",
+    "formal_after_builder_commit": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_direction_sleeves --run"
+  }
+}
