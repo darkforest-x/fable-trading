@@ -1,0 +1,457 @@
+{
+  "experiment_id": "exp-cloud-close-major-cross-20261109-v1",
+  "source": {
+    "venue": "OKX USDT perpetual",
+    "source_scope": "BTC and ETH only; native 1H frozen top20 histories, native12Hutc plus complete_1H_archive 12H rows",
+    "start_ms": 1577232000000,
+    "start_utc": "2019-12-25T00:00:00+00:00",
+    "cutoff_ms_exclusive": 1794139200000,
+    "cutoff_utc_exclusive": "2026-11-08T12:00:00+00:00",
+    "common_12h_rows_per_symbol": 5021,
+    "common_1h_rows_per_symbol": 60252,
+    "input_audit": {
+      "BTC": {
+        "native_1h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BTC/bars1h.csv.gz",
+        "source_receipt": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BTC/receipt.json",
+        "native_1h_rows": 60252,
+        "native_1h_first_open_ms": 1577232000000,
+        "native_1h_last_open_ms": 1794135600000,
+        "12h_source_counts": {
+          "native12Hutc": 5007,
+          "complete_1H_archive": 14
+        },
+        "12h_source_receipt_counts": {
+          "cached": 3925,
+          "rest_pages": 5,
+          "rest_rows": 1082,
+          "rest_frozen_overlap": 0,
+          "rest_frozen_differences": 0
+        },
+        "1h_source_receipt_counts": {
+          "cached": 1692,
+          "rest_pages": 51,
+          "rest_rows": 14986,
+          "rest_frozen_overlap": 0,
+          "rest_frozen_differences": 0
+        },
+        "archive_12h_rows_outside_common_scope": 17,
+        "hourly_gaps": 0,
+        "native_12h_gaps": 0,
+        "12h_ohlc_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BTC/bars12h.csv.gz",
+        "common_12h_rows": 5021,
+        "common_12h_first_open_ms": 1577232000000,
+        "common_12h_last_open_ms": 1794096000000
+      },
+      "ETH": {
+        "native_1h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ETH/bars1h.csv.gz",
+        "source_receipt": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ETH/receipt.json",
+        "native_1h_rows": 60252,
+        "native_1h_first_open_ms": 1577232000000,
+        "native_1h_last_open_ms": 1794135600000,
+        "12h_source_counts": {
+          "native12Hutc": 5007,
+          "complete_1H_archive": 14
+        },
+        "12h_source_receipt_counts": {
+          "cached": 1476,
+          "rest_pages": 13,
+          "rest_rows": 3531,
+          "rest_frozen_overlap": 0,
+          "rest_frozen_differences": 0
+        },
+        "1h_source_receipt_counts": {
+          "cached": 3190,
+          "rest_pages": 51,
+          "rest_rows": 14776,
+          "rest_frozen_overlap": 0,
+          "rest_frozen_differences": 0
+        },
+        "archive_12h_rows_outside_common_scope": 0,
+        "hourly_gaps": 0,
+        "native_12h_gaps": 0,
+        "12h_ohlc_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ETH/bars12h.csv.gz",
+        "common_12h_rows": 5021,
+        "common_12h_first_open_ms": 1577232000000,
+        "common_12h_last_open_ms": 1794096000000
+      }
+    },
+    "indicator_path_audit": {
+      "BTC": {
+        "ema_ready_12h": 4972,
+        "hourly_gap_count": 0,
+        "stale_12h_trigger_count": 0,
+        "stale_12h_trigger_times_ms": [],
+        "missing_12h_period_count": 1,
+        "missing_12h_with_complete_contiguous_1h_count": 0,
+        "assertion_missing_12h_with_contiguous_1h_is_zero": true,
+        "bar12h_sources": {
+          "native12Hutc": 5007,
+          "complete_1H_archive": 14
+        },
+        "row12h_count": 5021,
+        "row1h_count": 60252
+      },
+      "ETH": {
+        "ema_ready_12h": 4972,
+        "hourly_gap_count": 0,
+        "stale_12h_trigger_count": 0,
+        "stale_12h_trigger_times_ms": [],
+        "missing_12h_period_count": 1,
+        "missing_12h_with_complete_contiguous_1h_count": 0,
+        "assertion_missing_12h_with_contiguous_1h_is_zero": true,
+        "bar12h_sources": {
+          "native12Hutc": 5007,
+          "complete_1H_archive": 14
+        },
+        "row12h_count": 5021,
+        "row1h_count": 60252
+      }
+    }
+  },
+  "signal_rule": {
+    "ema": "Reuse cloud_close_reward_paths._ema_points_12h: alpha=2/(period+1), first completed close seed, 50 consecutive 12H bars required, reset after any 12H gap.",
+    "direction_flip": "A nonzero EMA20-EMA50 sign change from the last nonzero direction; equality is neutral and does not create a flip. The initial ready direction is not an entry because no prior direction exists.",
+    "entry_filter": "At that exact flip's completed 12H close: long requires close>EMA20 and close>EMA50; short requires close<EMA20 and close<EMA50. Strict inequalities. If it fails, skip that flip and wait for a later opposite direction reversal.",
+    "entry_execution": "Market at the exact H1 open timestamp equal to the completed 12H confirmation time. If no exact open exists, mark no entry; do not shift later.",
+    "stop": "Use fixed_stop('BTC' or 'ETH', side, confirmed_signal_EMA50); this retains the original BTC/ETH 1.5% fixed distance from the completed slow EMA. Reject and count an entry if the stop is not adverse relative to the executable H1 open.",
+    "weekly_filter": "None. The native New York-week calendar is retained only as a descriptive label."
+  },
+  "exit_rule": {
+    "engine": "Reuse cloud_close_reward_paths._simulate_symbol / VectorBT callback with tp_r=0; use the V1.7 intrabar EMA20/50 cross, open-gap, stale-data, and true source-tail semantics.",
+    "protection": "The signal EMA50-anchored fixed_stop remains unchanged for the entire position.",
+    "same_open_reverse": "Keep the existing wallet.admit rule: an old position with exit_bar_ms equal to a new same-symbol entry_ms still occupies that symbol slot. Do not use lookahead to close then re-enter within one open; count and label such missed reversals.",
+    "funding": "Not included."
+  },
+  "account": {
+    "starting_usdt": 1000.0,
+    "slots": 2,
+    "fees": {
+      "source": "Owner-confirmed OKX Lv1 fee schedule read 2026-10-23; 5bp taker per market/stop/cloud/tail fill.",
+      "taker_per_fill": 0.0005,
+      "resting_maker_per_fill": 0.0002,
+      "all_entries_and_exits": "taker"
+    },
+    "signal_counts": {
+      "total_direction_flips": 167,
+      "pre_warmup_flips_skipped": 3,
+      "ready_flips_not_closed_outside_both": 0,
+      "ready_flips_closed_outside": 164,
+      "outside_flips_without_exact_entry": 0,
+      "outside_flips_with_invalid_stop": 0,
+      "long_entries_candidate": 81,
+      "short_entries_candidate": 83,
+      "short_entry_candidates_disabled_by_long_only_variant": 83
+    },
+    "price_path_audit": {
+      "BTC": {
+        "columns": 83,
+        "orders": 166,
+        "trades": 83
+      },
+      "ETH": {
+        "columns": 81,
+        "orders": 162,
+        "trades": 81
+      }
+    },
+    "scenarios": {
+      "ema_cross_long_short_fee_only": {
+        "metrics": {
+          "final_usdt": 12083.92971006027,
+          "multiple": 12.083929710060271,
+          "dd_mark_pct": 52.86761939308119,
+          "dd_bound_pct": 53.22491581617768,
+          "trades": 164,
+          "win_pct": 30.48780487804878,
+          "payoff": 5.212105288591309,
+          "payoff_usdt": 4.033715643947679,
+          "median_net_pct": -3.3709733334826018
+        },
+        "account": {
+          "input_path_events": 164,
+          "admitted": 164,
+          "funded": 164,
+          "missed_entries": 0,
+          "missed_reason_counts": {},
+          "admission_rejections": {
+            "same_contract": 0,
+            "all_slots_busy": 0
+          },
+          "unquoted_position_hours": 0,
+          "positions_equal_weighted": true,
+          "slots": 2,
+          "fee_per_fill": 0.0005,
+          "slippage_per_market_fill": 0.0,
+          "actual_fill_ledger": {
+            "positions": 164,
+            "entry_fee_usdt": 188.37370480435857,
+            "exit_fee_usdt": 192.67083075835933,
+            "total_fee_usdt": 381.0445355627179,
+            "gross_pnl_usdt": 11464.974264855273,
+            "cash_pnl_usdt": 11083.929729292555,
+            "max_cash_pnl_residual_usdt": 0.0,
+            "slippage_per_market_fill": 0.0,
+            "fill_price_rule": "entry=path_open*(1+side*slip); exit=path_exit*(1-side*slip), exactly reconciled to VectorBT cash_pnl"
+          }
+        },
+        "exit_reasons": {
+          "stop": 78,
+          "ema_flip_open": 45,
+          "ema_flip": 39,
+          "series_tail_close": 2
+        }
+      },
+      "ema_cross_long_short_stress_5bp_each_market_fill": {
+        "metrics": {
+          "final_usdt": 11157.910930132952,
+          "multiple": 11.157910930132951,
+          "dd_mark_pct": 53.5253864139661,
+          "dd_bound_pct": 53.87772741814776,
+          "trades": 164,
+          "win_pct": 29.878048780487802,
+          "payoff": 5.254523055768391,
+          "payoff_usdt": 4.042407357461067,
+          "median_net_pct": -3.470942222560706
+        },
+        "account": {
+          "input_path_events": 164,
+          "admitted": 164,
+          "funded": 164,
+          "missed_entries": 0,
+          "missed_reason_counts": {},
+          "admission_rejections": {
+            "same_contract": 0,
+            "all_slots_busy": 0
+          },
+          "unquoted_position_hours": 0,
+          "positions_equal_weighted": true,
+          "slots": 2,
+          "fee_per_fill": 0.0005,
+          "slippage_per_market_fill": 0.0005,
+          "actual_fill_ledger": {
+            "positions": 164,
+            "entry_fee_usdt": 179.29432516535397,
+            "exit_fee_usdt": 183.47596279768266,
+            "total_fee_usdt": 362.7702879630366,
+            "gross_pnl_usdt": 10520.681227870997,
+            "cash_pnl_usdt": 10157.910939907963,
+            "max_cash_pnl_residual_usdt": 0.0,
+            "slippage_per_market_fill": 0.0005,
+            "fill_price_rule": "entry=path_open*(1+side*slip); exit=path_exit*(1-side*slip), exactly reconciled to VectorBT cash_pnl"
+          }
+        },
+        "exit_reasons": {
+          "stop": 78,
+          "ema_flip_open": 45,
+          "ema_flip": 39,
+          "series_tail_close": 2
+        }
+      },
+      "ema_cross_long_only_fee_only": {
+        "metrics": {
+          "final_usdt": 13369.30202200417,
+          "multiple": 13.36930202200417,
+          "dd_mark_pct": 45.93138759474397,
+          "dd_bound_pct": 46.42840291633736,
+          "trades": 81,
+          "win_pct": 37.03703703703704,
+          "payoff": 6.3850602796141365,
+          "payoff_usdt": 3.9927442523650662,
+          "median_net_pct": -3.1916289513129232
+        },
+        "account": {
+          "input_path_events": 81,
+          "admitted": 81,
+          "funded": 81,
+          "missed_entries": 0,
+          "missed_reason_counts": {},
+          "admission_rejections": {
+            "same_contract": 0,
+            "all_slots_busy": 0
+          },
+          "unquoted_position_hours": 0,
+          "positions_equal_weighted": true,
+          "slots": 2,
+          "fee_per_fill": 0.0005,
+          "slippage_per_market_fill": 0.0,
+          "actual_fill_ledger": {
+            "positions": 81,
+            "entry_fee_usdt": 127.31658072560867,
+            "exit_fee_usdt": 133.63170588534246,
+            "total_fee_usdt": 260.94828661095113,
+            "gross_pnl_usdt": 12630.250319467572,
+            "cash_pnl_usdt": 12369.302032856622,
+            "max_cash_pnl_residual_usdt": 0.0,
+            "slippage_per_market_fill": 0.0,
+            "fill_price_rule": "entry=path_open*(1+side*slip); exit=path_exit*(1-side*slip), exactly reconciled to VectorBT cash_pnl"
+          }
+        },
+        "exit_reasons": {
+          "stop": 41,
+          "ema_flip_open": 20,
+          "ema_flip": 20
+        }
+      },
+      "ema_cross_long_only_stress_5bp_each_market_fill": {
+        "metrics": {
+          "final_usdt": 12849.663248065091,
+          "multiple": 12.849663248065092,
+          "dd_mark_pct": 46.3714715126596,
+          "dd_bound_pct": 46.86441992885988,
+          "trades": 81,
+          "win_pct": 35.80246913580247,
+          "payoff": 6.60512388991877,
+          "payoff_usdt": 4.122092617256451,
+          "median_net_pct": -3.288438917378573
+        },
+        "account": {
+          "input_path_events": 81,
+          "admitted": 81,
+          "funded": 81,
+          "missed_entries": 0,
+          "missed_reason_counts": {},
+          "admission_rejections": {
+            "same_contract": 0,
+            "all_slots_busy": 0
+          },
+          "unquoted_position_hours": 0,
+          "positions_equal_weighted": true,
+          "slots": 2,
+          "fee_per_fill": 0.0005,
+          "slippage_per_market_fill": 0.0005,
+          "actual_fill_ledger": {
+            "positions": 81,
+            "entry_fee_usdt": 124.18758800199447,
+            "exit_fee_usdt": 130.2396332419361,
+            "total_fee_usdt": 254.42722124393057,
+            "gross_pnl_usdt": 12104.090479883283,
+            "cash_pnl_usdt": 11849.663258639355,
+            "max_cash_pnl_residual_usdt": 0.0,
+            "slippage_per_market_fill": 0.0005,
+            "fill_price_rule": "entry=path_open*(1+side*slip); exit=path_exit*(1-side*slip), exactly reconciled to VectorBT cash_pnl"
+          }
+        },
+        "exit_reasons": {
+          "stop": 41,
+          "ema_flip_open": 20,
+          "ema_flip": 20
+        }
+      },
+      "buy_hold_btc_eth_50_50_fee_only": {
+        "metrics": {
+          "final_usdt": 13992.704677556707,
+          "multiple": 13.992704677556707,
+          "dd_mark_pct": 79.89098221875255,
+          "dd_bound_pct": 80.50626634421064,
+          "trades": 2,
+          "win_pct": 100.0,
+          "payoff": null,
+          "payoff_usdt": null,
+          "median_net_pct": 1299.9201031295452
+        },
+        "account": {
+          "input_path_events": 2,
+          "admitted": 2,
+          "funded": 2,
+          "missed_entries": 0,
+          "missed_reason_counts": {},
+          "admission_rejections": {
+            "same_contract": 0,
+            "all_slots_busy": 0
+          },
+          "unquoted_position_hours": 0,
+          "positions_equal_weighted": true,
+          "slots": 2,
+          "fee_per_fill": 0.0005,
+          "slippage_per_market_fill": 0.0,
+          "actual_fill_ledger": {
+            "positions": 2,
+            "entry_fee_usdt": 0.49975012488755627,
+            "exit_fee_usdt": 6.999852264910809,
+            "total_fee_usdt": 7.499602389798365,
+            "gross_pnl_usdt": 13000.204280046502,
+            "cash_pnl_usdt": 12992.704677656706,
+            "max_cash_pnl_residual_usdt": 0.0,
+            "slippage_per_market_fill": 0.0,
+            "fill_price_rule": "entry=path_open*(1+side*slip); exit=path_exit*(1-side*slip), exactly reconciled to VectorBT cash_pnl"
+          }
+        },
+        "exit_reasons": {
+          "series_tail_close": 2
+        }
+      },
+      "buy_hold_btc_eth_50_50_stress_5bp_each_market_fill": {
+        "metrics": {
+          "final_usdt": 13978.718965735063,
+          "multiple": 13.978718965735062,
+          "dd_mark_pct": 79.89098221875255,
+          "dd_bound_pct": 80.50626634421064,
+          "trades": 2,
+          "win_pct": 100.0,
+          "payoff": null,
+          "payoff_usdt": null,
+          "median_net_pct": 1298.5208326616498
+        },
+        "account": {
+          "input_path_events": 2,
+          "admitted": 2,
+          "funded": 2,
+          "missed_entries": 0,
+          "missed_reason_counts": {},
+          "admission_rejections": {
+            "same_contract": 0,
+            "all_slots_busy": 0
+          },
+          "unquoted_position_hours": 0,
+          "positions_equal_weighted": true,
+          "slots": 2,
+          "fee_per_fill": 0.0005,
+          "slippage_per_market_fill": 0.0005,
+          "actual_fill_ledger": {
+            "positions": 2,
+            "entry_fee_usdt": 0.4997501248875563,
+            "exit_fee_usdt": 6.992855910822943,
+            "total_fee_usdt": 7.492606035710499,
+            "gross_pnl_usdt": 12986.211571870772,
+            "cash_pnl_usdt": 12978.718965835062,
+            "max_cash_pnl_residual_usdt": 0.0,
+            "slippage_per_market_fill": 0.0005,
+            "fill_price_rule": "entry=path_open*(1+side*slip); exit=path_exit*(1-side*slip), exactly reconciled to VectorBT cash_pnl"
+          }
+        },
+        "exit_reasons": {
+          "series_tail_close": 2
+        }
+      }
+    }
+  },
+  "interpretation_limit": "The 50/50 BTC/ETH hold is a market benchmark, not a matched random-entry control. Funding is not included.",
+  "outputs": {
+    "signal_candidates_csv_gz": "signal_candidates.csv.gz",
+    "native_paths_csv_gz": "native_paths_tp0.csv.gz",
+    "account_metrics_csv": "account_metrics.csv",
+    "summary_json": "summary.json",
+    "funded_files": {
+      "ema_cross_long_short_fee_only": "funded_ema_cross_long_short_fee_only.csv.gz",
+      "ema_cross_long_short_stress_5bp_each_market_fill": "funded_ema_cross_long_short_stress_5bp.csv.gz",
+      "ema_cross_long_only_fee_only": "funded_ema_cross_long_only_fee_only.csv.gz",
+      "ema_cross_long_only_stress_5bp_each_market_fill": "funded_ema_cross_long_only_stress_5bp.csv.gz",
+      "buy_hold_btc_eth_50_50_fee_only": "funded_buy_hold_fee_only.csv.gz",
+      "buy_hold_btc_eth_50_50_stress_5bp_each_market_fill": "funded_buy_hold_stress_5bp.csv.gz"
+    },
+    "hourly_files": {
+      "ema_cross_long_short_fee_only": "hourly_ema_cross_long_short_fee_only.csv.gz",
+      "ema_cross_long_short_stress_5bp_each_market_fill": "hourly_ema_cross_long_short_stress_5bp.csv.gz",
+      "ema_cross_long_only_fee_only": "hourly_ema_cross_long_only_fee_only.csv.gz",
+      "ema_cross_long_only_stress_5bp_each_market_fill": "hourly_ema_cross_long_only_stress_5bp.csv.gz",
+      "buy_hold_btc_eth_50_50_fee_only": "hourly_buy_hold_fee_only.csv.gz",
+      "buy_hold_btc_eth_50_50_stress_5bp_each_market_fill": "hourly_buy_hold_stress_5bp.csv.gz"
+    },
+    "missed_files": {
+      "ema_cross_long_short_fee_only": "missed_ema_cross_long_short_fee_only.csv.gz",
+      "ema_cross_long_short_stress_5bp_each_market_fill": "missed_ema_cross_long_short_stress_5bp.csv.gz",
+      "ema_cross_long_only_fee_only": "missed_ema_cross_long_only_fee_only.csv.gz",
+      "ema_cross_long_only_stress_5bp_each_market_fill": "missed_ema_cross_long_only_stress_5bp.csv.gz"
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "cases": {
+    "2x": {
+      "h1_flagged": 2,
+      "minute_resolved": 2,
+      "unresolved_ids": [],
+      "status_counts": {
+        "stop_strictly_earlier": 2
+      }
+    },
+    "2x_stress": {
+      "h1_flagged": 2,
+      "minute_resolved": 2,
+      "unresolved_ids": [],
+      "status_counts": {
+        "stop_strictly_earlier": 2
+      }
+    },
+    "3x": {
+      "h1_flagged": 20,
+      "minute_resolved": 14,
+      "unresolved_ids": [
+        "ema20-50-12h-monday-wick-v1:BAL-USDT-SWAP:1745668800000:-1",
+        "signal-row-00517:signal",
+        "signal-row-00548:signal",
+        "signal-row-07857:signal",
+        "signal-row-08068:signal",
+        "signal-row-11422:signal"
+      ],
+      "status_counts": {
+        "boundary_while_held_or_non_stop_exit": 27,
+        "stop_strictly_earlier": 14,
+        "same_or_earlier_boundary_minute": 2,
+        "missing_trade_or_mark_minutes": 1
+      }
+    },
+    "3x_stress": {
+      "h1_flagged": 20,
+      "minute_resolved": 14,
+      "unresolved_ids": [
+        "ema20-50-12h-monday-wick-v1:BAL-USDT-SWAP:1745668800000:-1",
+        "signal-row-00517:signal",
+        "signal-row-00548:signal",
+        "signal-row-07857:signal",
+        "signal-row-08068:signal",
+        "signal-row-11422:signal"
+      ],
+      "status_counts": {
+        "boundary_while_held_or_non_stop_exit": 27,
+        "stop_strictly_earlier": 14,
+        "same_or_earlier_boundary_minute": 2,
+        "missing_trade_or_mark_minutes": 1
+      }
+    }
+  },
+  "scope": "Native traded-price H1 flags checked against native minute marks; historical account-tier and previous unflagged-hour mark risk remain open."
+}
