@@ -97,7 +97,7 @@ def shadow_decisions(label,slip,parents,caps,quotes):
     return pd.DataFrame(rows,columns=['event_id','second_entry_ms','previous_net_usdt']).set_index('event_id')
 
 
-def run(context,label,slip,arm,model,levered,limits,signals):
+def run(context,label,slip,arm,model,levered,limits,signals,*,directory=EXP):
     data,market,_,parents,caps,ratios=context
     native,previous,side,_=market
     slots=native.shape[1]
@@ -105,7 +105,10 @@ def run(context,label,slip,arm,model,levered,limits,signals):
     allowed=signals
     if arm!='disabled':
         positive=allowed.previous_net_usdt>0
-        allowed=allowed.loc[positive if arm=='profit' else ~positive]
+        if arm in ('profit','nonpositive'):
+            allowed=allowed.loc[positive if arm=='profit' else ~positive]
+        elif arm!='all':
+            raise ValueError('Unknown deferred fill gate')
         allowed=allowed.loc[allowed.second_entry_limit_10pct_usdt.gt(0)]
         times=(allowed.second_entry_ms-data['start'])//cash.H
         selected_slots=parents.loc[allowed.index,'slot']//4
@@ -154,17 +157,17 @@ def run(context,label,slip,arm,model,levered,limits,signals):
             or not np.allclose(checks.original_filled_usdt,checks.original_cap_usdt,rtol=1e-8,atol=1e-6)
             or not (checks.actual_notional<=constraints.min(axis=1)+1e-6).all()):
         raise ValueError('Second fill fails original cap hit, clock, budget or capacity reconciliation')
-    checks.to_csv(EXP/f'additions_{name}.csv.gz',index=False)
-    funds.to_csv(EXP/f'funded_{name}.csv.gz')
-    curve.to_csv(EXP/f'hourly_{name}.csv.gz',index_label='hour_end_utc')
+    checks.to_csv(directory/f'additions_{name}.csv.gz',index=False)
+    funds.to_csv(directory/f'funded_{name}.csv.gz')
+    curve.to_csv(directory/f'hourly_{name}.csv.gz',index_label='hour_end_utc')
     metrics=base.parent.spot.hourly.tested.summarize(funds,curve)
     return dict(metrics=metrics,positive_capacity_eligible=len(allowed),changed_parents=len(checks),
                 total_second_notional=float(adds.notional.sum()),second_fees_usdt=float(adds.fees.sum()),
                 trim_fills=int((fills.stage.eq(2)&fills.side.eq(1)).sum()),opening_fills=len(initial))
 
 
-def main(preflight=False):
-    if (EXP/'summary.json').exists():
+def main(preflight=False,*,directory=EXP,arms=('profit','nonpositive')):
+    if (directory/'summary.json').exists():
         raise FileExistsError('Completed deferred entry study')
     context=cash.account()
     data,market,quotes,parents,caps,ratios=context
@@ -197,17 +200,22 @@ def main(preflight=False):
                                .1*aligned.loc[observed,'prior_60m_median_usdt']):
                 raise ValueError('Source second opening capacity mismatch')
             shadow['second_entry_limit_10pct_usdt']=aligned.second_entry_limit_10pct_usdt.where(observed,0.)
-            for arm in ('profit','nonpositive'):
-                outcome=run(context,label,slip,arm,model,levered,limits,shadow)
+            for arm in arms:
+                outcome=run(context,label,slip,arm,model,levered,limits,shadow,directory=directory)
                 results[label+'_'+arm]=outcome
                 print(label,arm,outcome['metrics']['all'],flush=True)
         del model
         gc.collect()
     if not preflight:
-        cash.queue.repair.archive.prices.safe_json(EXP/'summary.json',results)
+        cash.queue.repair.archive.prices.safe_json(directory/'summary.json',results)
 
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--preflight',action='store_true')
-    main(parser.parse_args().preflight)
+    parser.add_argument('--all-cap-bound',action='store_true')
+    args=parser.parse_args()
+    if args.all_cap_bound:
+        main(args.preflight,directory=cash.ROOT/'exp-cloud-close-complete-order-20261109-v1',arms=('all',))
+    else:
+        main(args.preflight)
