@@ -14,7 +14,7 @@ API = 'https://www.okx.com/api/v5/public/market-data-history'
 DAY = 86400000
 
 
-def native_messages(symbol,stamp):
+def native_messages(symbol,stamp,directory=EXP):
     inst = symbol+'-USDT-SWAP'
     date = stamp//DAY*DAY
     res = requests.get(API,params=dict(module=4,instType='SWAP',instFamilyList=symbol+'-USDT',
@@ -25,7 +25,7 @@ def native_messages(symbol,stamp):
     rows = [r for r in items if int(r['dateTs'])==date and r['filename'].startswith(inst+'-L2orderbook-400lv-')]
     if len(rows)!=1 or stamp!=date:
         raise ValueError('This probe requires a unique native UTC session-open snapshot')
-    file = EXP/f'{symbol}_events.jsonl.gz'
+    file = directory/(f'{symbol}_events.jsonl.gz' if directory==EXP else f'{symbol}_{stamp}_events.jsonl.gz')
     events = []
     if file.exists():
         with gzip.open(file,'rt') as pipe:
@@ -78,7 +78,7 @@ def walk(book,side,qty,face,reference):
                 adverse_bp_from_best=float(side*(vwap/best-1)*10000))
 
 
-def evaluate(row,quotes):
+def evaluate(row,quotes,directory=EXP):
     inst,stamp = row.symbol,int(row.entry_ms)
     for lag in range(1,25):
         hour = stamp-lag*audit.minute.HOUR
@@ -92,7 +92,7 @@ def evaluate(row,quotes):
     face = (amounts.base / amounts.vol)[amounts.vol.gt(0)].dropna()
     if len(face)<3 or not np.allclose(face,face.median(),rtol=1e-8,atol=1e-12):
         raise ValueError('Changing or unsupported contract face')
-    file,events = native_messages(inst,stamp)
+    file,events = native_messages(inst,stamp,directory)
     face = float(face.median())
     qty = row.notional/row.entry_price
     result = {}
