@@ -1,0 +1,128 @@
+{
+  "longs": 701,
+  "winners": 162,
+  "losses": 539,
+  "other_winners": 152,
+  "scratch": 0,
+  "ten": [
+    "12H|LABUSDT|1779883200000000000|1",
+    "12H|ALPACAUSDT|1745971200000000000|1",
+    "12H|DOGEUSDT|1729900800000000000|1",
+    "12H|1000SHIBUSDT|1708473600000000000|1",
+    "12H|MANAUSDT|1635336000000000000|1",
+    "12H|ONGUSDT|1713052800000000000|1",
+    "12H|AAVEUSDT|1746576000000000000|1",
+    "12H|SOLUSDT|1700611200000000000|1",
+    "12H|BNBUSDT|1708473600000000000|1",
+    "12H|IPUSDT|1755086400000000000|1"
+  ],
+  "alternate_ten": {
+    "alternative_boundary": [
+      "12H|LABUSDT|1779883200000000000|1",
+      "12H|ALPACAUSDT|1745971200000000000|1",
+      "12H|DOGEUSDT|1729900800000000000|1",
+      "12H|1000SHIBUSDT|1708473600000000000|1",
+      "12H|MANAUSDT|1635336000000000000|1",
+      "12H|ONGUSDT|1713052800000000000|1",
+      "12H|AAVEUSDT|1746576000000000000|1",
+      "12H|SOLUSDT|1700611200000000000|1",
+      "12H|BNBUSDT|1708473600000000000|1",
+      "12H|IPUSDT|1755086400000000000|1"
+    ],
+    "trade_cash_only": [
+      "12H|ALPACAUSDT|1745971200000000000|1",
+      "12H|LABUSDT|1779883200000000000|1",
+      "12H|DOGEUSDT|1729900800000000000|1",
+      "12H|1000SHIBUSDT|1708473600000000000|1",
+      "12H|MANAUSDT|1635336000000000000|1",
+      "12H|SOLUSDT|1700611200000000000|1",
+      "12H|AAVEUSDT|1746576000000000000|1",
+      "12H|ONGUSDT|1713052800000000000|1",
+      "12H|BNBUSDT|1708473600000000000|1",
+      "12H|BTCUSDT|1697068800000000000|1"
+    ],
+    "return_on_entry_notional": [
+      "12H|LABUSDT|1779883200000000000|1",
+      "12H|USUSDT|1778760000000000000|1",
+      "12H|STORJUSDT|1611316800000000000|1",
+      "12H|ADAUSDT|1606392000000000000|1",
+      "12H|CELRUSDT|1628035200000000000|1",
+      "12H|VETUSDT|1590105600000000000|1",
+      "12H|OMGUSDT|1628035200000000000|1",
+      "12H|IOTAUSDT|1611792000000000000|1",
+      "12H|AVAXUSDT|1628035200000000000|1",
+      "12H|ONEUSDT|1628035200000000000|1"
+    ]
+  },
+  "overlap": {
+    "alternative_boundary": 10,
+    "trade_cash_only": 9,
+    "return_on_entry_notional": 1
+  },
+  "timestamp_match_cases": 6,
+  "causal_source_counts": {
+    "frozen_signal_center_table": 667,
+    "reconstructed_missing_row_with_original_15m_archive_builder": 34
+  },
+  "tests": 16,
+  "holm_significant": 0,
+  "chronology": {
+    "cutoff_utc": "2025-01-01",
+    "maturing_train_longs": 568,
+    "later_longs": 132,
+    "purged_open_earlier_positions": 1,
+    "training_tail": 9,
+    "training_ids": [
+      "12H|DOGEUSDT|1729900800000000000|1",
+      "12H|1000SHIBUSDT|1708473600000000000|1",
+      "12H|MANAUSDT|1635336000000000000|1",
+      "12H|ONGUSDT|1713052800000000000|1",
+      "12H|SOLUSDT|1700611200000000000|1",
+      "12H|BNBUSDT|1708473600000000000|1",
+      "12H|BTCUSDT|1697068800000000000|1",
+      "12H|ATOMUSDT|1731499200000000000|1",
+      "12H|OMGUSDT|1628035200000000000|1"
+    ],
+    "selected": "rising_ema20",
+    "rows": [
+      {
+        "rule": "rising_ema20",
+        "period": "early_mature",
+        "tails": 9,
+        "losses": 442,
+        "longs": 568,
+        "passed": 311,
+        "kept_top": 8,
+        "kept_losses": 231,
+        "actual_winners": 80,
+        "missing_top": 0,
+        "missing_losses": 0,
+        "missing_longs": 0,
+        "relevant_base_rate": 0.0158450704,
+        "precision": 0.0257234727,
+        "tickers_kept": "DOGE,1000SHIB,MANA,ONG,SOL,BNB,ATOM,OMG",
+        "top_share": 0.8888888889,
+        "loss_share": 0.5226244344
+      },
+      {
+        "rule": "rising_ema20",
+        "period": "later",
+        "tails": 4,
+        "losses": 97,
+        "longs": 132,
+        "passed": 77,
+        "kept_top": 2,
+        "kept_losses": 58,
+        "actual_winners": 19,
+        "missing_top": 0,
+        "missing_losses": 0,
+        "missing_longs": 0,
+        "relevant_base_rate": 0.0303030303,
+        "precision": 0.025974026,
+        "tickers_kept": "ALPACA,AAVE",
+        "top_share": 0.5,
+        "loss_share": 0.5979381443
+      }
+    ]
+  }
+}

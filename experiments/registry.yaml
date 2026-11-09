@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-binance-winner-entry-contrast-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "30086b7631"
+    status: "inconclusive"
+    question: "币安云带12H收盘时，哪些特征能区分实际金额前十盈利多单与同一账户的亏损多单？"
+    single_variable: "固定实际已成交多单；分别对16个预列单条件比较，在2025年前选择一项后按时间复查。看到前十后提出的首刺、振幅和放量组合单独计数。"
+    result: "701笔多单、539笔亏损；首刺、振幅大于1 ATR与放量同时保留10/10大赢家、259/539亏单，筛后10/346。相同入场时刻的13笔亏单也有11笔通过。预列最有区分的1.5 ATR保留8/10及198/539，按季度分层和16项Holm校正p=0.137。旧段选出的EMA20上升在后段只留2/4赢家，放行58/97亏单。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-binance-winner-entry-contrast-20261109-v1/summary.json"
+    notes: "667 direct canonical signal rows and 34 native 15m archived reconstructions. Original fee/funding-inclusive parent cash ranks; only LAB also in top-ten return per notional. Retrospective diagnostic; no filtered equity curve. Notion 41388564-79af-816a-a0ba-c4abae23bf56."
+
   - experiment_id: exp-cloud-close-binance-matched-target-clock-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "5e8214ccae"
