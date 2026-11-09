@@ -179,6 +179,30 @@ def _decorate_positions(positions: pd.DataFrame, paths: pd.DataFrame) -> pd.Data
     return result
 
 
+def _target_path_counts(targets: pd.DataFrame, choices: pd.DataFrame,
+                        funded_actual_ids: set[str]) -> dict[str, int]:
+    indexed = targets.set_index("event_id")
+    choice = choices.set_index("event_id").choice.reindex(indexed.index)
+    if choice.isna().any():
+        raise ValueError("Target path count input lacks a policy decision")
+    choice = choice.astype(str)
+    full_runner = choice.eq("full_runner")
+    actual = ~indexed.is_control.astype(bool)
+    funded_actual = indexed.index.astype(str).isin(funded_actual_ids) & actual
+    late_fill = (indexed.exit_reason.astype(str).str.startswith("take_profit")
+                 & indexed.exit_bar_ms.ge(indexed.entry_ms + 12 * hourly.tested.w.HOUR))
+    cancelled_late_fill = full_runner & late_fill
+    return {
+        "known_target_paths_as_full_runner": int(full_runner.sum()),
+        "actual_target_paths_as_full_runner": int((full_runner & actual).sum()),
+        "control_target_paths_as_full_runner": int((full_runner & ~actual).sum()),
+        "funded_actual_target_paths_as_full_runner": int((full_runner & funded_actual).sum()),
+        "known_late_target_fills_cancelled": int(cancelled_late_fill.sum()),
+        "actual_late_target_fills_cancelled": int((cancelled_late_fill & actual).sum()),
+        "funded_actual_late_target_fills_cancelled": int((cancelled_late_fill & funded_actual).sum()),
+    }
+
+
 def _account(paths: pd.DataFrame, *, slip: float = 0.0, use_vectorized_manager: bool = True,
              include_controls: bool = False) -> tuple[dict, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     funded_pool = paths if include_controls else paths.loc[~paths.is_control]
@@ -412,16 +436,12 @@ def run() -> dict:
             metric_rows.append(dict(policy=policy, scenario="actual", period=period, **values))
         positions.to_csv(EXP / f"funded_OKX_{policy}.csv.gz")
         equity.to_csv(EXP / f"hourly_OKX_{policy}.csv.gz", index_label="hour_end_utc")
-        late_choices = choices.set_index("event_id").choice
+        target_paths = known.loc[known.tp_r.eq(2)]
+        path_counts = _target_path_counts(target_paths, choices, set(positions.index.astype(str)))
         policy_results[policy] = {
             "label": POLICY_LABEL[policy],
             "funded": len(positions),
-            "late_funded_targets_as_full_runner": int(late_choices.eq("full_runner").sum()),
-            "target_fill_at_or_after_12h_cancelled": int((
-                known.loc[known.tp_r.eq(2)].set_index("event_id").exit_bar_ms.ge(
-                    known.loc[known.tp_r.eq(2)].set_index("event_id").entry_ms + 12 * hourly.tested.w.HOUR)
-                & late_choices.eq("full_runner")
-            ).sum()),
+            **path_counts,
             "metrics": metrics,
             "cash_reconciles": bool(np.isclose(1000 + positions.cash_pnl.sum(), equity.nav.iloc[-1], rtol=1e-8, atol=.005)),
         }
@@ -499,8 +519,13 @@ def resume_existing(account_run_commit: str) -> dict:
     This is for a run that wrote all policy ledgers but stopped during final
     metadata assembly. It never reruns VectorBT accounts.
     """
-    if (EXP / "summary.json").exists() or (EXP / "account_metrics.csv").exists():
-        raise FileExistsError("Summary artifacts already exist")
+    required = [EXP / "policy_decisions.csv.gz"] + [
+        EXP / f"{prefix}_OKX_{policy}.csv.gz"
+        for prefix in ("funded", "hourly") for policy in POLICIES
+    ]
+    missing = [str(path) for path in required if not path.is_file()]
+    if missing:
+        raise FileNotFoundError(f"Cannot rebuild from incomplete saved run; missing {missing}")
     paths, known, meta = load_tagged_paths()
     decisions = pd.read_csv(EXP / "policy_decisions.csv.gz", dtype={"event_id": str})
     expected = set(known.loc[known.tp_r.eq(2), "event_id"].astype(str))
@@ -533,14 +558,12 @@ def resume_existing(account_run_commit: str) -> dict:
         funded_rosters[policy] = set(positions.index)
         for period, values in metrics.items():
             metric_rows.append(dict(policy=policy, scenario="actual", period=period, **values))
-        choices = decisions[policy].astype(str)
-        cancelled = (is_native_tp & decisions.exit_bar_ms.ge(decisions.expiry_ms)
-                     & choices.eq("full_runner"))
+        choices = decisions[["event_id", policy]].rename(columns={policy: "choice"})
+        path_counts = _target_path_counts(decisions, choices, set(positions.index))
         policy_results[policy] = {
             "label": POLICY_LABEL[policy],
             "funded": int(len(positions)),
-            "late_funded_targets_as_full_runner": int(choices.eq("full_runner").sum()),
-            "target_fill_at_or_after_12h_cancelled": int(cancelled.sum()),
+            **path_counts,
             "metrics": metrics,
             "cash_reconciles": reconciles,
         }
