@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-fvg-expiry-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "828eb59fc9"
+    status: "rejected"
+    question: "Does changing the resting target lifetime with a frozen gap tag help the high-payoff account meet profit and drawdown targets?"
+    single_variable: "Condition only whether the existing 2R limit expires after 12h on the frozen first Monday 1.618 touch FVG tag, on identical real OKX opportunities using the original hourly 20% cap."
+    result: "11627 known eligible, 1554 funded each. Primary outside-expire/overlap-persist ended 59516.05U, 24.58% wins, cash payoff 4.431, witnessed DD 48.20% (upper 48.89%). All-expire 62649.13U/22.07% wins/49.42% upper; all-persist 9797.11U/33.59% wins/33.77% upper; reciprocal 11181.75U/31.08%/38.09% upper. Fixed gate failed, no further stress or matched replay. Fees before funding; ledger recovered with 9213507cba."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-fvg-expiry-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-814a-acf3-ce08077df552."
+
   - experiment_id: exp-cloud-close-fvg-cap-filter-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "b454683890"

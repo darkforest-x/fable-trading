@@ -1,0 +1,304 @@
+{
+  "schema": 1,
+  "generated_at_utc": "2026-11-09T03:59:26.417365+00:00",
+  "source_commit": "828eb59fc9df7aefddb6ea60e826ef60cb18ab88",
+  "summary_rebuilt_from_cached_ledgers": true,
+  "summary_rebuild_commit": "9213507cba44804167f62798502e059e2b2c692e",
+  "vectorbt_version": "1.2.0",
+  "tag_source": "experiments/active/exp-cloud-close-fvg-exclusion-20261109-v1/decisions.csv.gz",
+  "frozen_full_account_reference": {
+    "all": {
+      "final_usdt": 68115.33863048394,
+      "multiple": 68.11533863048393,
+      "dd_mark_pct": 46.86529060751023,
+      "dd_bound_pct": 47.5409602713717,
+      "trades": 1569,
+      "win_pct": 21.861057998725304,
+      "payoff": 8.390416024162114,
+      "payoff_usdt": 5.514700237839248,
+      "median_net_pct": -3.4275635208110127
+    },
+    "dev": {
+      "final_usdt": 37519.25266800972,
+      "multiple": 37.51925266800972,
+      "dd_mark_pct": 43.23806682293332,
+      "dd_bound_pct": 45.17013465456545,
+      "trades": 1085,
+      "win_pct": 22.857142857142858,
+      "payoff": 9.157338608045588,
+      "payoff_usdt": 5.6919339921475265,
+      "median_net_pct": -3.4361912624336473
+    },
+    "2025": {
+      "final_usdt": 59038.257627679595,
+      "multiple": 1.5735456713405638,
+      "dd_mark_pct": 31.038891837659087,
+      "dd_bound_pct": 33.12613245006213,
+      "trades": 258,
+      "win_pct": 15.11627906976744,
+      "payoff": 7.190975390743585,
+      "payoff_usdt": 6.6802834092825165,
+      "median_net_pct": -3.5127559503625063
+    },
+    "2026": {
+      "final_usdt": 68115.33863048394,
+      "multiple": 1.1537491343333381,
+      "dd_mark_pct": 16.684806962669274,
+      "dd_bound_pct": 17.29030910259769,
+      "trades": 210,
+      "win_pct": 21.904761904761905,
+      "payoff": 4.914646856175333,
+      "payoff_usdt": 4.836338479324165,
+      "median_net_pct": -3.1692550378104194
+    }
+  },
+  "frozen_fvg_coverage": {
+    "source_signal_rows": 12707,
+    "fvg_source_tag_counts": {
+      "outside": 9638,
+      "overlap": 2008,
+      "warmup": 1051,
+      "opened_beyond_line": 10
+    },
+    "known_actual_events_by_tag": {
+      "outside": 9623,
+      "overlap": 2004
+    },
+    "known_actual_events": 11627,
+    "known_matched_control_events": 10678,
+    "known_parent_pairs": 10678,
+    "excluded_unknown_actual_events": 153
+  },
+  "known_coverage_used_by_all_policies": {
+    "tags": [
+      "outside",
+      "overlap"
+    ],
+    "actual_events": 11627,
+    "matched_control_events": 10678,
+    "same_event_slot_roster_across_policies": true
+  },
+  "policy_results": {
+    "always_expire_12h": {
+      "label": "Always expire unfilled 2R order at 12h",
+      "funded": 1554,
+      "late_funded_targets_as_full_runner": 6217,
+      "target_fill_at_or_after_12h_cancelled": 6217,
+      "metrics": {
+        "all": {
+          "final_usdt": 62649.13174382038,
+          "multiple": 62.64913174382038,
+          "dd_mark_pct": 48.78017816956246,
+          "dd_bound_pct": 49.42130839979768,
+          "trades": 1554,
+          "win_pct": 22.07207207207207,
+          "payoff": 8.292329110610027,
+          "payoff_usdt": 5.284819649457555,
+          "median_net_pct": -3.4135419648756535
+        },
+        "dev": {
+          "final_usdt": 41578.32088466492,
+          "multiple": 41.57832088466492,
+          "dd_mark_pct": 40.91210264998143,
+          "dd_bound_pct": 42.9233420628341,
+          "trades": 1072,
+          "win_pct": 22.94776119402985,
+          "payoff": 9.3744446062904,
+          "payoff_usdt": 5.8262537265816645,
+          "median_net_pct": -3.411695446716963
+        },
+        "2025": {
+          "final_usdt": 52115.21395211824,
+          "multiple": 1.2534227655965677,
+          "dd_mark_pct": 26.61033379403266,
+          "dd_bound_pct": 30.36280725873176,
+          "trades": 255,
+          "win_pct": 14.901960784313726,
+          "payoff": 5.919260597074446,
+          "payoff_usdt": 5.591007212417969,
+          "median_net_pct": -3.5168364419087945
+        },
+        "2026": {
+          "final_usdt": 62649.13174382038,
+          "multiple": 1.202127497766398,
+          "dd_mark_pct": 17.736752203391525,
+          "dd_bound_pct": 19.84869003717289,
+          "trades": 212,
+          "win_pct": 23.58490566037736,
+          "payoff": 4.532933714908208,
+          "payoff_usdt": 4.618413452208922,
+          "median_net_pct": -3.137507658027168
+        }
+      },
+      "cash_reconciles": true
+    },
+    "always_persist_2r": {
+      "label": "Keep original 2R order through native runner exit",
+      "funded": 1554,
+      "late_funded_targets_as_full_runner": 0,
+      "target_fill_at_or_after_12h_cancelled": 0,
+      "metrics": {
+        "all": {
+          "final_usdt": 9797.10641304612,
+          "multiple": 9.79710641304612,
+          "dd_mark_pct": 33.23843458377006,
+          "dd_bound_pct": 33.772968340239395,
+          "trades": 1554,
+          "win_pct": 33.59073359073359,
+          "payoff": 3.2849951287275623,
+          "payoff_usdt": 2.6429203217060206,
+          "median_net_pct": -2.6220763569893824
+        },
+        "dev": {
+          "final_usdt": 7979.982000521262,
+          "multiple": 7.979982000521263,
+          "dd_mark_pct": 29.538899844065426,
+          "dd_bound_pct": 30.686565797939956,
+          "trades": 1072,
+          "win_pct": 34.048507462686565,
+          "payoff": 3.6001015579208064,
+          "payoff_usdt": 2.8082254377060325,
+          "median_net_pct": -2.5977683153210767
+        },
+        "2025": {
+          "final_usdt": 8166.588540271611,
+          "multiple": 1.0233843309092878,
+          "dd_mark_pct": 21.576201057030666,
+          "dd_bound_pct": 27.468772145847108,
+          "trades": 255,
+          "win_pct": 25.882352941176475,
+          "payoff": 2.4166318554292334,
+          "payoff_usdt": 2.334799307122547,
+          "median_net_pct": -3.2704971315305364
+        },
+        "2026": {
+          "final_usdt": 9797.10641304612,
+          "multiple": 1.1996571597471812,
+          "dd_mark_pct": 13.252013104214743,
+          "dd_bound_pct": 14.223198827385398,
+          "trades": 212,
+          "win_pct": 36.32075471698113,
+          "payoff": 2.473185994776286,
+          "payoff_usdt": 2.4548711407552517,
+          "median_net_pct": -0.7953782603344575
+        }
+      },
+      "cash_reconciles": true
+    },
+    "outside_expire_overlap_persist": {
+      "label": "Outside expires; overlap persists",
+      "funded": 1554,
+      "late_funded_targets_as_full_runner": 5162,
+      "target_fill_at_or_after_12h_cancelled": 5162,
+      "metrics": {
+        "all": {
+          "final_usdt": 59516.04788678463,
+          "multiple": 59.516047886784634,
+          "dd_mark_pct": 48.19830234200248,
+          "dd_bound_pct": 48.88615579496963,
+          "trades": 1554,
+          "win_pct": 24.581724581724583,
+          "payoff": 7.159584372014257,
+          "payoff_usdt": 4.430961959249266,
+          "median_net_pct": -3.338874974112656
+        },
+        "dev": {
+          "final_usdt": 44565.16309366413,
+          "multiple": 44.56516309366413,
+          "dd_mark_pct": 36.434838337287324,
+          "dd_bound_pct": 37.119955836764795,
+          "trades": 1072,
+          "win_pct": 25.37313432835821,
+          "payoff": 8.248409672652459,
+          "payoff_usdt": 5.0827357400296895,
+          "median_net_pct": -3.3398348144879986
+        },
+        "2025": {
+          "final_usdt": 49728.64603685016,
+          "multiple": 1.1158636608674304,
+          "dd_mark_pct": 25.05032597923469,
+          "dd_bound_pct": 29.439599582760888,
+          "trades": 255,
+          "win_pct": 18.03921568627451,
+          "payoff": 4.182605506240408,
+          "payoff_usdt": 3.9215013007829316,
+          "median_net_pct": -3.5044161559633045
+        },
+        "2026": {
+          "final_usdt": 59516.04788678463,
+          "multiple": 1.196816173975092,
+          "dd_mark_pct": 16.949564408887262,
+          "dd_bound_pct": 17.841667051203537,
+          "trades": 212,
+          "win_pct": 25.471698113207548,
+          "payoff": 4.15885958583694,
+          "payoff_usdt": 4.096080518007086,
+          "median_net_pct": -3.121752944133033
+        }
+      },
+      "cash_reconciles": true
+    },
+    "outside_persist_overlap_expire": {
+      "label": "Reciprocal non-selecting map",
+      "funded": 1554,
+      "late_funded_targets_as_full_runner": 1055,
+      "target_fill_at_or_after_12h_cancelled": 1055,
+      "metrics": {
+        "all": {
+          "final_usdt": 11181.754117061795,
+          "multiple": 11.181754117061795,
+          "dd_mark_pct": 37.52638693214699,
+          "dd_bound_pct": 38.09254437235303,
+          "trades": 1554,
+          "win_pct": 31.08108108108108,
+          "payoff": 3.764605837149975,
+          "payoff_usdt": 3.016563720079252,
+          "median_net_pct": -3.115122784237733
+        },
+        "dev": {
+          "final_usdt": 8341.563845220768,
+          "multiple": 8.341563845220767,
+          "dd_mark_pct": 32.251393424795594,
+          "dd_bound_pct": 33.822352181563616,
+          "trades": 1072,
+          "win_pct": 31.62313432835821,
+          "payoff": 4.057075993764555,
+          "payoff_usdt": 3.1309233009474102,
+          "median_net_pct": -3.1240099716104472
+        },
+        "2025": {
+          "final_usdt": 9584.28651467011,
+          "multiple": 1.1489795789504567,
+          "dd_mark_pct": 23.72224148510834,
+          "dd_bound_pct": 29.290166635845516,
+          "trades": 255,
+          "win_pct": 22.745098039215687,
+          "payoff": 3.2609528586684986,
+          "payoff_usdt": 3.0615336468239347,
+          "median_net_pct": -3.32602268365017
+        },
+        "2026": {
+          "final_usdt": 11181.754117061795,
+          "multiple": 1.166675693589349,
+          "dd_mark_pct": 13.798625409081433,
+          "dd_bound_pct": 14.794835385936423,
+          "trades": 212,
+          "win_pct": 34.43396226415094,
+          "payoff": 2.6363174003004413,
+          "payoff_usdt": 2.613465011898625,
+          "median_net_pct": -1.7248174928234636
+        }
+      },
+      "cash_reconciles": true
+    }
+  },
+  "primary_risk_payoff_gate_dev_and_all": false,
+  "primary_beats_both_fixed_controls_dev_and_all": false,
+  "run_paired_and_5bp_sensitivity": false,
+  "sensitivity": {},
+  "control_semantics": "Later matched controls inherit the frozen parent source_row_number and its FVG tag, as in the registered FVG exclusion study.",
+  "limitations": [
+    "No funding payments, market impact, or exchange minimum quantity/tick rounding.",
+    "The FVG tag is a historical frozen event label; this is a retrospective strategy comparison, not forward validation."
+  ]
+}
