@@ -161,15 +161,20 @@ def prepare_supplemental_history():
         same = np.allclose(history.loc[overlap,OHLC], extension.loc[overlap,OHLC], rtol=2e-11, atol=1e-13) if len(overlap) else True
         if not same:
             raise ValueError(f'{ticker}: monthly official H1 and November source disagree on {len(overlap)} overlap bars')
-        if len(overlap) != len(extension[(extension.index >= history.index[0]) & (extension.index < history.index[-1] + HOUR)]):
-            raise ValueError(f'{ticker}: H1 source overlap is incomplete against the monthly archive')
         monthly_missing = expected.difference(history.index)
         repairable = monthly_missing.intersection(extension.index)
+        expected_overlap = extension.index[(extension.index >= history.index[0]) &
+                                            (extension.index < history.index[-1] + HOUR)]
+        if len(overlap) + len(repairable) != len(expected_overlap):
+            raise ValueError(f'{ticker}: H1 extension cannot account for the full monthly overlap window')
         if len(repairable):
             history = pd.concat([history,extension.loc[repairable]]).sort_index()
         missing = expected.difference(history.index)
         if len(missing):
             raise ValueError(f'{ticker}: {len(missing)} historical H1 clocks remain unavailable after official FAPI repair')
+        overlap_after_repair = history.index.intersection(extension.index)
+        if len(overlap_after_repair) != len(expected_overlap):
+            raise ValueError(f'{ticker}: extension overlap remains incomplete after repairing available hours')
         slot.mkdir(parents=True, exist_ok=True)
         if (slot/'quotes.npz').is_file() or (slot/'fills.csv.gz').is_file():
             raise FileExistsError(f'Refusing to overwrite supplemental history paths for {ticker}')
@@ -191,7 +196,8 @@ def prepare_supplemental_history():
                        repair_clock_utc=[str(x) for x in pd.to_datetime(repairable,unit='ms',utc=True)],
                        monthly_archive_bars=int(sum(x['rows'] for x in month_receipts)),source_months=month_receipts,
                        source_period_id=str(row.contract_period_id),extension_source_period=str(extension_path.relative_to(ROOT)),
-                       extension_overlap_bars=len(overlap),
+                       extension_overlap_bars_before_repair=len(overlap),
+                       extension_overlap_bars=len(overlap_after_repair),
                        extension_overlap_ohlc_equal=bool(same),raw_keys=int(len(raw)),path_keys=int(len(signals)),
                        source_signals=int(priced.get('source_signals',0)),price_decimals=decimals,
                        mature_at_ms=onboard+90*24*HOUR,state='complete')
