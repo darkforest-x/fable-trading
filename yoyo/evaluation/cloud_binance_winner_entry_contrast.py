@@ -180,7 +180,7 @@ def main():
     rules = config["univariate_rules"]
     screens, windows, temporal = evaluate(panel,rules)
     columns = list(dict.fromkeys([r[1] for r in rules] + [k for k in (
-        "pen_pct","close_pos","stop_dist_pct","rr_close","ret_24h","age_days","log_qv_7d","btc_ret_24h") if k in panel]))
+        "pen_pct","close_pos","stop_dist_pct","rr_close","ret_24h","age_days","log_qv_7d","btc_ret_24h","hours_since_monday","notional","exposure") if k in panel]))
     desc, matched = describe(panel,columns)
     shared_observations(panel).to_csv(EXP/"posthoc_common_traits.csv",index=False)
     ten = panel[panel.winner10].sort_values("cash_pnl",ascending=False)
