@@ -1,0 +1,121 @@
+{
+  "id": "exp-cloud-close-november-funding-20261109-v1",
+  "status": "preregistered_builder_pending_owner_commit",
+  "venue": "Binance USD-M",
+  "question": "How do observed Binance funding settlements after the September source boundary affect the extended nine-slot cloud account through 2026-11-08 12:00 UTC?",
+  "source_account": {
+    "experiment": "exp-cloud-close-november-account-20261109-v1",
+    "source_builder": "yoyo.evaluation.cloud_close_november_account",
+    "selection": "Use the parent account's frozen funded_legs.csv.gz and native event priority unchanged; do not reselect or readmit events.",
+    "minimum_positions": 1536,
+    "children_per_position": 2,
+    "parent_join_key": "event_id",
+    "child_join_key": ["event_id", "tp_r"],
+    "native_parent_leg_schema": ["event_id", "parent_id", "symbol", "side", "slot", "entry_ms", "entry_order", "entry_price", "tp_r", "exit_bar_ms", "exit_phase", "exit_price", "exit_reason", "exit_fee_rate"]
+  },
+  "inputs": {
+    "funded_legs": "experiments/active/exp-cloud-close-november-account-20261109-v1/funded_legs.csv.gz",
+    "extension_root": "data/research/cloud_close_november_paths",
+    "old_funding_tape": "experiments/active/exp-cloud-close-hourly-trim-funding-20261109-v1/funding_tape.csv.gz",
+    "old_source_months": "experiments/active/exp-cloud-close-hourly-trim-funding-20261109-v1/source_months.csv.gz",
+    "old_source_coverage": "experiments/active/exp-cloud-close-hourly-trim-funding-20261109-v1/source_coverage.json",
+    "input_end_exclusive_utc": "2026-11-08T12:00:00Z",
+    "contract_identity": "Use cloud_close_november_account.quote_loader(symbol), which joins each extension.npz to the frozen contract_period_id path; never join a relisted same-name contract by ticker alone."
+  },
+  "account": {
+    "initial_cash_usdt": 1000.0,
+    "slots": 9,
+    "new_order_exposure_fraction": 0.9,
+    "minimum_parent_count": 1536,
+    "expected_positions": "Derive from the frozen parent funded_legs event_id set.",
+    "leg_fraction_by_tp_r": {
+      "2.0": 0.6666666666666666,
+      "0.0": 0.3333333333333333
+    },
+    "child_position_sizing": "Recalculate quantities and subsequent entries from each funding-adjusted VectorBT account; retain parent entry_order and slot priority.",
+    "same_contract_overlap": "Use only the parent account's frozen nine-slot admission and overlap decisions."
+  },
+  "hourly_management": {
+    "review_hours": 1,
+    "single_contract_weight_cap": 0.2,
+    "execution": "Reuse the accepted cloud_close_hourly_trim_funding 4-stage VectorBT order callback and native H1 open reduction; do not add hourly bars or recalculate fills outside VectorBT."
+  },
+  "execution": {
+    "engine": "VectorBT 1.2.0 Portfolio.from_order_func with the existing cloud_close_hourly_trim_funding order/funding callbacks.",
+    "stages_per_h1": [
+      "Calculate the manager target from the previous completed H1 close, post exact-open funding, and submit native entries.",
+      "Process native open exits and then exact open-exit boundary funding from the cached pre-exit quantity.",
+      "Execute the existing 20% cap reduction; post later-ms settlements at reduced live quantity before native intrabar/close exits.",
+      "Process native intrabar/close exits and exact close-boundary funding with the cached pre-exit quantity."
+    ],
+    "entry_fee_rate": 0.0005,
+    "entry_fee_class": "taker",
+    "native_exit_fee_source": "Parent funded_legs.exit_fee_rate; native maker target fills remain 0.0002 and market/stop/cloud exits remain 0.0005.",
+    "hourly_reduction_fee_rate": 0.0005,
+    "funding_cashflow_formula": "-signed live child quantity * observed funding_rate * settlement mark_price",
+    "slippage_base": 0.0,
+    "market_slippage_stress": 0.0005,
+    "stress_scope": "Reprice and replay both funding-boundary scenarios with adverse 5bp on executed market entries, exits, and hourly reductions. Native resting-maker targets and exchange delisting settlement prices retain their original path price.",
+    "no_fill_policy": "Every frozen parent and both native child legs must receive their original VectorBT entry and exit orders; any missing fill invalidates the replay."
+  },
+  "funding_source": {
+    "old_source_experiment": "exp-cloud-close-hourly-trim-funding-20261109-v1",
+    "reuse_rule": "Reuse the old exact symbol-month source intervals through their recorded query_end_exclusive_ms. Collect only uncovered portions of held windows; do not recollect earlier fully covered 2020-2026 intervals.",
+    "new_source_priority": [
+      "Existing normalized Binance fundingRate API cache with complete range and exact markPrice when present.",
+      "Official Binance Vision monthly fundingRate archive joined to official markPrice 1h open as an explicitly labeled proxy.",
+      "Official Binance USD-M public fundingRate history for uncovered/incomplete ranges; use returned markPrice when present and the same official 1h mark-open proxy only for absent marks."
+    ],
+    "rate_source": "Use actual observed fundingTime/fundingRate events; do not assume fixed 1h, 4h, or 8h schedules.",
+    "mark_source": "Keep binance_fundingRate_markPrice and binance_vision_mark_1h_open_proxy distinct. Missing rate or mark remains an error, never a zero fee.",
+    "coverage_gate": "Every held symbol-month window must be covered by complete old source receipts or fully traversed official new source ranges, with no missing rates or settlement marks.",
+    "old_source_latest_query_end_utc": "2026-09-24T00:00:02Z (recorded end including source alignment overfetch)",
+    "offline_source_smoke": {
+      "symbol": "1000LUNCUSDT",
+      "month": "2026-10",
+      "source": "Existing normalized Binance fundingRate history and its exact markPrice values; 93 settlement rows, no network request."
+    },
+    "required_extension_end_utc": "2026-11-08T12:00:00Z"
+  },
+  "boundary_policy": {
+    "timestamp_resolution": "Exact source milliseconds; no timestamp tolerance",
+    "scenarios": {
+      "include_boundary": "Charge exact entry/open-exit/close-exit coincidences and settlements strictly inside an intrabar-exit H1 hour. Use cached pre-exit quantity for an exact open or close boundary; strictly in-hour ambiguous settlements use the live post-reduction quantity.",
+      "exclude_boundary": "Exclude those boundary-sensitive settlements; charge every observed settlement known inside the native held interval."
+    },
+    "intrabar_exit_hour": "A settlement exactly at exit_bar_ms is known held before the intrabar event; a settlement exactly at exit_bar_ms+1h is after the exit. Only a timestamp strictly inside that H1 interval has unknown order.",
+    "close_exit": "The actual close exit occurs at exit_bar_ms+1h; an exact settlement there is bounded by include/exclude.",
+    "delisted_contract": "Use the parent's contract-period-specific official settlement exit as the native exit; do not continue same-name contract funding across listing periods."
+  },
+  "risk": {
+    "periods": {
+      "all": "Full parent account through its frozen 2026-11-08 12:00 UTC end.",
+      "dev": "Through 2024-12-31 UTC.",
+      "2025": "2025 UTC.",
+      "2026": "2026 through the frozen extension end."
+    },
+    "equity": "Retain the existing adapter's open, post-open-exit, post-reduction, and post-exit NAV plus conservative H1 OHLC/funding-sign bounds.",
+    "drawdown_interpretation": "The H1 OHLC and funding-sign envelope is a conservative scenario bound, not proof of the unobserved intrabar event sequence."
+  },
+  "outputs": {
+    "scope": "experiments/active/exp-cloud-close-november-funding-20261109-v1/account/",
+    "source_files": ["funding_tape.csv.gz", "source_months.csv.gz", "source_coverage.json"],
+    "completion_receipt": "account/funding_account_audit.json",
+    "per_scenario": ["funded_legs.csv.gz", "funded_positions.csv.gz", "hourly_equity.csv.gz", "applied_funding.csv.gz", "orders.csv.gz", "account_metrics.csv"],
+    "scenarios": ["include_boundary", "exclude_boundary", "market_slip_5bp/include_boundary", "market_slip_5bp/exclude_boundary"],
+    "preserve_parent_account_and_earlier_funding_sources": true
+  },
+  "network_policy": "Only official Binance USD-M funding and mark archives or public fundingRate history for uncovered held windows; no market-price collection in this adapter",
+  "commands": {
+    "preflight": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_november_funding --preflight",
+    "mini_check": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_november_funding --mini-check",
+    "full_account_after_owner_commit_and_inputs_ready": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_november_funding --run"
+  },
+  "limits": [
+    "Funding adjustments are cash events inside the existing VectorBT account; no bespoke trade-by-trade execution simulator is introduced.",
+    "Old pre-September funding windows are reused from the frozen source receipt; continued holdings after September are explicitly covered from official sources.",
+    "The include/exclude boundary runs and 5bp stress are separate compounded accounts because funding and costs change later position sizes.",
+    "A mark-price hourly-open proxy is kept distinct from an exact fundingRate settlement mark.",
+    "No market-price source, strategy default, registry, deployment, or exchange order is changed."
+  ]
+}
