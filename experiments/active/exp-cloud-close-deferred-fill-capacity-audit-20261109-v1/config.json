@@ -1,0 +1,32 @@
+{
+  "experiment_id": "exp-cloud-close-deferred-fill-capacity-audit-20261109-v1",
+  "purpose": "After-the-fact source audit of actual deferred-add order notional against the complete native OKX 1m quote turnover at each actual add entry hour.",
+  "builder": "yoyo.evaluation.cloud_close_deferred_fill_capacity_audit",
+  "inputs": {
+    "deferred_fill": [
+      "experiments/active/exp-cloud-close-deferred-fill-20261109-v1/additions_median_profit.csv.gz",
+      "experiments/active/exp-cloud-close-deferred-fill-20261109-v1/additions_median_nonpositive.csv.gz",
+      "experiments/active/exp-cloud-close-deferred-fill-20261109-v1/additions_median_stress_profit.csv.gz",
+      "experiments/active/exp-cloud-close-deferred-fill-20261109-v1/additions_median_stress_nonpositive.csv.gz"
+    ],
+    "complete_order": [
+      "experiments/active/exp-cloud-close-complete-order-20261109-v1/additions_median_all.csv.gz",
+      "experiments/active/exp-cloud-close-complete-order-20261109-v1/additions_median_stress_all.csv.gz"
+    ],
+    "deferred_original_price": [
+      "experiments/active/exp-cloud-close-deferred-price-limit-20261109-v1/additions_median_original_price.csv.gz",
+      "experiments/active/exp-cloud-close-deferred-price-limit-20261109-v1/additions_median_stress_original_price.csv.gz"
+    ]
+  },
+  "single_variable": "Observed historical quote turnover in the 60-second bar opened at each actual added-order hour, after the order event, compared with that arm's actual_notional.",
+  "unique_source_key": ["symbol", "hour"],
+  "source_method": {
+    "price_bars": "Existing OKX-native 1m archive/API helper, requiring 60 contiguous confirmed minute bars whose aggregate OHLC exactly matches the frozen H1.",
+    "volume_bars": "Native USDT-SWAP quote/base volume from the same daily archive where available; official OKX history-candles API fallback must reproduce minute OHLC and archive volume where present.",
+    "workers_max": 4
+  },
+  "outputs": ["minute_windows.csv.gz", "order_minute_turnover.csv.gz", "summary.json"],
+  "interpretation": "Ex-post diagnostic only. Full-minute quote turnover includes trades after the modeled entry and is not order-book depth or a guaranteed execution capacity. No source volume is used to select, size, or reject orders. Account arms are separate hypotheticals and are not summed as simultaneous flow.",
+  "actual_order_units": "Input ledgers retain actual_notional but not raw native units or individual subslot prices. Reported notional/turnover is an exact USDT comparison; open-implied base units are explicitly an approximation.",
+  "fees_or_funding": "No new fee, funding, or order simulation; source audit only."
+}
