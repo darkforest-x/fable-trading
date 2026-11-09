@@ -466,7 +466,9 @@ def build_v2() -> dict:
     output_series = CACHE / "series" / inst / "bars1h_v2.csv.gz"
     output_series.parent.mkdir(parents=True, exist_ok=True)
     if price_proven:
-        augmented = pd.concat([frozen, reconstructed.to_frame().T]).sort_index()
+        target_frame = reconstructed[OHLC].to_frame().T
+        target_frame.index = pd.Index([target_ms], name="time", dtype="int64")
+        augmented = pd.concat([frozen, target_frame]).sort_index()
     else:
         augmented = frozen.copy()
     augmented.index = augmented.index.astype("int64")
@@ -474,6 +476,19 @@ def build_v2() -> dict:
     temp_series = output_series.with_suffix(output_series.suffix + ".part")
     augmented.to_csv(temp_series, float_format="%.15g", compression="gzip")
     temp_series.replace(output_series)
+    persisted = pd.read_csv(output_series, index_col="time", float_precision="round_trip")
+    if price_proven:
+        expected_index = frozen.index.union(pd.Index([target_ms], dtype="int64")).sort_values()
+        if not persisted.index.equals(expected_index):
+            raise AssertionError("Repaired H1 output index differs from the frozen source by more than target hour")
+        if not np.array_equal(persisted.loc[frozen.index, OHLC].to_numpy(float),
+                              frozen.loc[:, OHLC].to_numpy(float)):
+            raise AssertionError("An existing CVC H1 row changed during target-hour insertion")
+        if not np.allclose(persisted.loc[target_ms, OHLC].to_numpy(float), reconstructed[OHLC].to_numpy(float),
+                           rtol=1e-12, atol=1e-15):
+            raise AssertionError("Persisted target H1 OHLC does not match the verified reconstruction")
+    elif not persisted.index.equals(frozen.index):
+        raise AssertionError("Unverified target hour must not change the frozen series")
     minute_evidence_path = EXP / "minute_price_evidence_v2.csv.gz"
     minute_temp = minute_evidence_path.with_suffix(minute_evidence_path.suffix + ".part")
     minute_rows.reset_index().to_csv(minute_temp, index=False, float_format="%.15g", compression="gzip")
@@ -504,6 +519,7 @@ def build_v2() -> dict:
         "missing_trade_id": gap_before_id,
         "missing_trade_size": None,
         "target_trade_hour_had_missing_id": True,
+        "target_minute_archive_has_prints_in_missing_minute": int(len(known_0311)),
         "new_h1_row": ({"time": target_ms, **{key: float(reconstructed[key]) for key in OHLC}}
                         if price_proven else None),
         "missing_minute_exact_price_ohlc": ({key: missing_minute_price for key in OHLC}
@@ -554,6 +570,31 @@ def build_v2() -> dict:
         "scope_limit": "Price OHLC is proved; the one missing trade's quantity and volume are not reconstructed.",
     }
     _atomic_json(EXP / "source_check_v2.json", result)
+    v1_receipt = json.loads((EXP / "source_check.json").read_text())
+    summary = {
+        "instrument": inst,
+        "target_hour_utc": cfg["target_hour_utc"],
+        "target_hour_ms": target_ms,
+        "v1_full_trade_id_admission": bool(v1_receipt.get("verified", False)),
+        "v2_price_only_admission": bool(price_proven),
+        "target_h1_ohlc": result["new_h1_row"],
+        "volume_proven": False,
+        "output_series_path": str(output_series.relative_to(ROOT)),
+        "source_check_v1": str((EXP / "source_check.json").relative_to(ROOT)),
+        "source_check_v2": str((EXP / "source_check_v2.json").relative_to(ROOT)),
+        "admission_column": "eligible_for_admission",
+        "series_validation": {
+            "frozen_h1_rows": int(len(frozen)),
+            "output_h1_rows": int(len(persisted)),
+            "added_rows": int(len(persisted) - len(frozen)),
+            "added_times_ms": sorted(map(int, persisted.index.difference(frozen.index))),
+            "existing_rows_unchanged": bool(np.array_equal(
+                persisted.loc[frozen.index, OHLC].to_numpy(float), frozen.loc[:, OHLC].to_numpy(float)
+            )),
+        },
+        "remaining_unknowns": ["missing trade record size", "minute and hourly total volume"],
+    }
+    _atomic_json(EXP / "summary.json", summary)
     return result
 
 
@@ -738,7 +779,10 @@ def main() -> None:
         "eligible_for_admission": result.get("eligible_for_admission", result["verified"]),
         "target_hour_utc": result["target_hour_utc"],
         "new_h1_row": result["new_h1_row"],
-        "target_missing_minute_trade_prints": result["target_minute_archive_has_prints_in_missing_minute"],
+        "target_missing_minute_trade_prints": result.get(
+            "target_minute_archive_has_prints_in_missing_minute",
+            result.get("price_reconstruction_logic", {}).get("known_03_11_trade_count", 0),
+        ),
         "output_series_path": result["output_series_path"],
     }, indent=2), flush=True)
 
