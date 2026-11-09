@@ -42,7 +42,7 @@ def first_touch(bars,side,level):
     return np.flatnonzero((bars.low.to_numpy()<=level) if side>0 else (bars.high.to_numpy()>=level))
 
 
-def inspect(r,ratio,slip,quotes):
+def inspect(r,ratio,slip,quotes,*,trade_loader=minute.minute_quote,mark_loader=mark_bars):
     clock,ohlc = quotes(r.symbol)
     first,last = clock.searchsorted([r.entry_ms,r.exit_bar_ms])
     sample = ohlc[first:last+1]
@@ -62,8 +62,8 @@ def inspect(r,ratio,slip,quotes):
         if not (hour==r.exit_bar_ms and r.exit_reason=='stop' and r.exit_phase=='intrabar'):
             records.append(dict(item,status='boundary_while_held_or_non_stop_exit'))
             continue
-        trades,url = minute.minute_quote(r.symbol,hour,quotes)
-        marks = mark_bars(r.symbol,hour)
+        trades,url = trade_loader(r.symbol,hour,quotes)
+        marks = mark_loader(r.symbol,hour)
         if trades is None or marks is None:
             records.append(dict(item,status='missing_trade_or_mark_minutes',trade_source=url))
             continue

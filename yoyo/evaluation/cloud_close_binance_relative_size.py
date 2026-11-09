@@ -61,8 +61,8 @@ def relative(quotes):
     return state
 
 
-def main():
-    if (EXP/'summary.json').exists():
+def main(*,directory=EXP,inspect_flag=None):
+    if (directory/'summary.json').exists():
         raise FileExistsError('Completed matched Binance relative-size transfer')
     extra = set(json.loads((archive.EXP/'summary.json').read_text())['archived_additions'])
     extra.update(json.loads((bundle.admin.study.EXP/'summary.json').read_text())['new_archive_cohorts']['priced'])
@@ -80,10 +80,10 @@ def main():
             weights = 1.5-k*sign
             for slip in [0.,.0005]:
                 key = name+('_stress' if slip else '')
-                result[key] = engine.simulate(data,market,quotes,weights,slip,EXP,key,inspect_flag=None)
+                result[key] = engine.simulate(data,market,quotes,weights,slip,directory,key,inspect_flag=inspect_flag)
                 print(key,result[key].get('metrics',{}).get('all'),flush=True)
                 gc.collect()
-    engine.source.correction.archive.prices.safe_json(EXP/'summary.json',dict(arms=result,native_funded=len(parents),
+    engine.source.correction.archive.prices.safe_json(directory/'summary.json',dict(arms=result,native_funded=len(parents),
             caveat='Original Binance scored, retired-inclusive portfolio through September 2026, different history and admission from OKX. H1 risk flags require Binance-specific evidence. Funding not included.'))
 
 
