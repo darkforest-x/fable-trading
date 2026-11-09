@@ -15,6 +15,66 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-alt-season-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "9c998f42ab"
+    status: "inconclusive"
+    question: "ETH相对BTC方向筛选原云带机会"
+    single_variable: "连续30天ETH/BTC涨跌决定12H收盘原云带信号能否入场，顺与逆方向独立占用9个现金仓。"
+    result: "顺相对走势的情景1,479U，回撤上界87.88%；3个新退市价格类及逆向MOODENG小时维持线待独立核对，逆向暂不报终值。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-alt-season-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81f1-8235-c01dede72edb."
+
+  - experiment_id: exp-cloud-close-alt-season-delivery-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "1811899d67"
+    status: "rejected"
+    question: "完整交割和保证金核查后的相对趋势"
+    single_variable: "按新准入账本逐一核对SLP、SONIC、GOAT、WAXP、ICX退市指数价和MOODENG止损/标记分钟。"
+    result: "逆向的1.5倍暴露147,590U、胜21.01%、金额盈亏比5.35、回撤58.54%；1倍53,222U、胜21.01%、金额盈亏比5.80、回撤47.09%；顺向1.5倍1,479U。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-alt-season-delivery-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81d2-b289-cc95c681fa84."
+
+  - experiment_id: exp-cloud-close-alt-season-sizing-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "76fd6a0a20"
+    status: "inconclusive"
+    question: "相对强弱条件下调节多空仓位"
+    single_variable: "原1,571笔一笔不剔除，按ETH/BTC最近30天强弱，在信号侧与其一致时减杠杆、相反时加杠杆，另做相反倾斜对照。"
+    result: "1/2倍逆向倾斜118,114U、胜22.02%、金额盈亏比4.85、回撤上界49.02%；压力93,482U、上界49.988%；反向倾斜37,481U、回撤57.25%。1/4倍倾斜125,909U，另按真实分钟查临界回撤。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-alt-season-sizing-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81f7-af2e-c286841e5b0a."
+
+  - experiment_id: exp-cloud-close-alt-season-minutes-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "e795decc13"
+    status: "inconclusive"
+    question: "微调仓位后50%临界线的真实分钟定界"
+    single_variable: "对1.25/1.75倍相对趋势仓位的常规和滑点压力分别验证全部可能突破50%的峰谷小时，使用每笔实际杠杆和成交量。"
+    result: "常规四小时核对后最大回撤49.6766–49.8491%；额外5bp压力17个小时核对后50.1762–50.2585%，确证触及上限，不能算压力过关。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-alt-season-minutes-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81e7-9f14-d42a4cb57f48."
+
   - experiment_id: exp-cloud-close-doubled-cap-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "a90c040078"
