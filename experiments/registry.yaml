@@ -15,6 +15,51 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-doubled-cap-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "a90c040078"
+    status: "inconclusive"
+    question: "仅降低翻倍盈利余仓的集中度"
+    single_variable: "仅对已达翻倍收盘并改为日线跟随的盈利余仓，把单币占账户权益的名义敞口上限由20%降到10%或5%，原始风险和其余仓位不动。"
+    result: "原20%为124,373U、回撤上界55.30%；10%为97,679U、胜22.62%、金额盈亏比4.80、回撤上界48.28%，压力79,038U。5%为72,700U、回撤上界46.75%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-doubled-cap-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81cf-accf-cf050c306a75."
+
+  - experiment_id: exp-cloud-close-doubled-cap-minutes-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "b3fb5064e4"
+    status: "inconclusive"
+    question: "翻倍余仓降集中度的分钟风险核对"
+    single_variable: "对10%单币上限及额外5bp每市价腿的日线余仓账户，核对全部可能令回撤超50%的峰谷小时及真实净头寸。"
+    result: "3个风险小时的原生分钟全部核实，小时上界50.2676%收窄为全段48.9607%–49.5445%，零剩余可超限小时。资金费和历史标记价缺口仍在。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-doubled-cap-minutes-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81e2-adab-db7042ddf994."
+
+  - experiment_id: exp-cloud-close-btc-short-sleeve-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "0cb2ea34b2"
+    status: "rejected"
+    question: "主账户加入BTC独立空头趋势"
+    single_variable: "BTC出现独立12H云带下穿时在相同现金账户新增空仓，原收复信号优先且同币不重叠。"
+    result: "42次空头机会实际22笔，净损2,023U；51个原已成交父信号被挤出、22个其他原信号新获资金。全账户98,822U，胜22.06%、金额盈亏比4.83、回撤上界49.94%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-btc-short-sleeve-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-8146-a838-dcf28c755368."
+
   - experiment_id: exp-cloud-close-notice-tail-prices-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "e1b9045c81"
