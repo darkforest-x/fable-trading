@@ -1,0 +1,6 @@
+{
+  "parent": "exp-cloud-close-hourly-trim-20261109-v1 / Binance",
+  "scope": "From the actual 1536 funded entries recover the two native stop/target child holding intervals. Collect a unique Binance USD-M funding market tape for just the required symbols and months. It contains any native rates between each month's earliest entry and latest exit; dynamic filtering to the actual active holding interval and quantity is part of the account replay. These source rows have no estimated account cashflows.",
+  "source_precedence": "Reuse neighboring certified monthly and REST caches, including original compressed Binance monthly ZIP files from the all-candidate funding-pressure archive. For absent monthly rates traverse the exact bounded official REST history. Prefer verified existing complete exact REST marks where available, otherwise the explicitly tagged official H1 mark opening at the settlement hour. No missing funding replaced by zero.",
+  "consumer": "The funding-aware hourly-capped wallet must handle ordinary exits, actual hourly partial reductions and subsequent compounding. Two boundary scenarios for simultaneous or intrabar-ambiguous events, with underlying native millisecond clocks retained."
+}
