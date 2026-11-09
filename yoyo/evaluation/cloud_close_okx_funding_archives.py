@@ -23,7 +23,7 @@ def local_month(ms):
     return pd.Timestamp(ms, unit='ms', tz='UTC').tz_convert(ZONE).strftime('%Y-%m')
 
 
-def held_windows():
+def funded_legs():
     paths = tenth.trend.thirds.okx_paths()
     reference = pd.read_csv(tenth.EXP / 'funded_OKX.csv.gz', usecols=['event_id'])
     if len(reference) != 1569 or not reference.event_id.is_unique:
@@ -37,6 +37,11 @@ def held_windows():
     legs['instrument'] = legs.symbol.map(instruments)
     if legs.instrument.isna().any() or not legs.exit_phase.isin(['open','intrabar','close']).all():
         raise ValueError('Missing contract identity or unknown native execution phase')
+    return legs
+
+
+def held_windows():
+    legs = funded_legs()
     records = []
     for row in legs.itertuples(index=False):
         start = int(row.entry_ms) - 60_000
