@@ -299,15 +299,17 @@ def _volume_features(events: pd.DataFrame, src) -> pd.DataFrame:
     if "relative_volume_missing" not in result:
         result = result.copy()
         result["relative_volume_missing"] = result.relative_volume.isna()
-    missing_waves = result.symbol.eq("WAVES") & result.relative_volume.isna()
+    missing_waves = expected.symbol.eq("WAVES") & result.relative_volume.isna()
     if missing_waves.any():
         from yoyo.evaluation.cloud_close_okx_waves_entry_volume import waves_volume
 
-        keys = result.loc[missing_waves, "key_open_ms"]
+        keys = expected.loc[missing_waves, "key_open_ms"]
         recovered = waves_volume(keys.to_list())
         complete = keys[keys.isin(recovered.dropna(subset=["relative_volume"]).index)]
         for column in ["current_base_volume", "prior20_median_base_volume", "relative_volume"]:
             result.loc[complete.index, column] = complete.map(recovered[column])
+        result.loc[complete.index, "current_volume"] = complete.map(recovered.current_base_volume)
+        result.loc[complete.index, "prior20_median_volume"] = complete.map(recovered.prior20_median_base_volume)
         result.loc[complete.index, ["prior_complete_bars", "missing_bar_count", "relative_volume_missing",
                                     "volume_missing_reason", "volume_source"]] = [
             20, 0, False, "", "OKX_official_monthly_trade_records",
