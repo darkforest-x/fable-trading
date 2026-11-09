@@ -33,6 +33,17 @@ def cross_margin(legs,equity):
                 worst_hour_gross_upper_usdt=float(gross[worst]),worst_hour_requirement_usdt=float(required[worst]))
 
 
+
+def exits_first(data,roster):
+    """Simultaneous exits sell held longs before a short cover uses the released cash."""
+    actions=data['actions']
+    priority=np.ones(actions.shape,dtype=np.int8)
+    for r in roster.itertuples():
+        at=(r.exit_bar_ms-data['start'])//pair.H*3+(1 if r.exit_phase=='open' else 2)
+        priority[at,r.slot]=0 if r.side==1 else 2
+    return np.argsort(priority,axis=1,kind='stable')
+
+
 def main():
     if (EXP/'summary.json').exists():
         raise FileExistsError('Completed shared margin scenario')
@@ -41,7 +52,7 @@ def main():
     if paths.event_id.nunique()!=398 or paths.slot.nunique()!=6:
         raise ValueError('Prior three-pair native leg roster changed')
     cases=dict(pair.fund(paths,paired,slip,directory=EXP,asset_label='asset_half',
-                         pair_slots=3,margin_audit=cross_margin)
+                         pair_slots=3,margin_audit=cross_margin,order_sequence=exits_first)
                for paired in [True,False] for slip in [0.,.0005])
     (EXP/'summary.json').write_text(json.dumps(dict(funded_pairs=398,cases=cases,
         caveat='Shared cross-margin scenario on native trade-price H1 bounds. Actual venue mark history, tier changes, funding and exit depth not included.'),indent=2,allow_nan=False)+'\n')

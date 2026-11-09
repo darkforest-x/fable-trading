@@ -205,7 +205,7 @@ def account_order(c, nav, actions, prices, fees, market_slip, exposure, weights,
 
 
 def account(data, slip=0., exposure=1., weights=(1.,), full_slots=0, slot_weights=None,
-            drawdown_power=0.):
+            drawdown_power=0., call_seq=None):
     actions = data['actions']
     weights = np.asarray(weights, dtype=float)
     if np.any(weights<=0) or not np.isclose(weights.sum(), 1) or actions.shape[1]%len(weights):
@@ -222,7 +222,7 @@ def account(data, slip=0., exposure=1., weights=(1.,), full_slots=0, slot_weight
     pf = vbt.Portfolio.from_order_func(data['marks'], account_order, actions, data['prices'],
         data['fees'], slip, exposure, weights, np.zeros(1), full_slots, slot_weights,
         pre_segment_func_nb=segment, pre_segment_args=segment_args, cash_sharing=True,
-        group_by=True, init_cash=1000., max_orders=int(np.count_nonzero(actions))+1,
+        group_by=True, init_cash=1000., call_seq=call_seq, max_orders=int(np.count_nonzero(actions))+1,
         fill_pos_record=False)
     orders = pf.orders.records
     roster = data['selected'].copy()
