@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-breakout-blend-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "db01e7ae2f"
+    status: "inconclusive"
+    question: "资金各半的两种云带方向组合"
+    single_variable: "1000U起步，两路各500U：修复后360币刺破收复1.5倍账户与十币延后一根的无杠杆突破，保持两边抵押独立，不转移利润。"
+    result: "合计2,323笔，手续费后79,821U，胜率23.29%、金额盈亏比4.85、同步小时回撤上界44.81%。额外5bp市场滑点后66,092U、回撤上界46.11%；两套日收益相关约0.575。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-breakout-blend-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81e8-8958-deb11b4277c4."
+
+  - experiment_id: exp-cloud-close-leader-rotation-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "a9c7f52b9b"
+    status: "rejected"
+    question: "每周追涨幅最强三币的云带趋势轮动"
+    single_variable: "360币同钟每周三00 UTC收盘，限定多头EMA并突破周一1.618，按完整30日涨幅选前三，每边实际费率、三仓共享账户，五个同时点随机三币账户对照。"
+    result: "186个有资格的周时点、395次选中，240笔得到资金，终值587.71U、胜率15.00%、金额盈亏比5.22、回撤上界80.69%。五个对照终值601至3,090U，中位1,017U，均高于涨幅前三；入资交易无跨源缺口与退市结算。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-leader-rotation-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81f6-8f46-da7b02d642f2."
+
   - experiment_id: exp-cloud-close-breakout-cost-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "b05359695a"

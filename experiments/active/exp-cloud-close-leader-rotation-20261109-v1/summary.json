@@ -1,0 +1,476 @@
+{
+  "engine": "VectorBT native hourly event paths + shared cash-sharing account",
+  "vectorbt_version": "1.2.0",
+  "contracts": 360,
+  "retired_contracts": 69,
+  "candidate_dates": 186,
+  "eligible_candidate_rows": 761,
+  "actual_top3_events": 395,
+  "selected_but_unfilled_at_reference_stop": 0,
+  "control_events_per_seed": {
+    "20261109": 395,
+    "20261110": 395,
+    "20261111": 395,
+    "20261112": 395,
+    "20261113": 395
+  },
+  "source_coverage_summary": {
+    "h1_gaps": 58,
+    "h12_gaps": 56,
+    "retired_contracts_with_delivery_time": 69
+  },
+  "results": {
+    "actual": {
+      "metrics": {
+        "all": {
+          "final_usdt": 587.7071163491385,
+          "multiple": 0.5877071163491384,
+          "dd_mark_pct": 79.68056316692505,
+          "dd_bound_pct": 80.6929504335254,
+          "trades": 240,
+          "win_pct": 15.0,
+          "payoff": 5.907968402017426,
+          "payoff_usdt": 5.215353020947502,
+          "median_net_pct": -4.9058367115228885
+        },
+        "dev": {
+          "final_usdt": 1600.1180877171632,
+          "multiple": 1.6001180877171632,
+          "dd_mark_pct": 77.9536771348433,
+          "dd_bound_pct": 79.08429037923904,
+          "trades": 154,
+          "win_pct": 14.935064935064934,
+          "payoff": 7.04172275237804,
+          "payoff_usdt": 6.134097270981477,
+          "median_net_pct": -5.187155645473837
+        },
+        "2025": {
+          "final_usdt": 849.1073770285825,
+          "multiple": 0.5306529458959973,
+          "dd_mark_pct": 64.11467949299417,
+          "dd_bound_pct": 64.99651386957018,
+          "trades": 42,
+          "win_pct": 9.523809523809524,
+          "payoff": 3.8438000092075426,
+          "payoff_usdt": 3.194884161319166,
+          "median_net_pct": -5.071551751373721
+        },
+        "2026": {
+          "final_usdt": 587.7071163491385,
+          "multiple": 0.6921469913567305,
+          "dd_mark_pct": 52.535088837290566,
+          "dd_bound_pct": 53.79666603656699,
+          "trades": 41,
+          "win_pct": 17.073170731707318,
+          "payoff": 3.677805651585982,
+          "payoff_usdt": 2.97628652884216,
+          "median_net_pct": -4.5595989901107705
+        }
+      },
+      "account": {
+        "candidate_opportunities": 395,
+        "admitted": 240,
+        "funded": 240,
+        "unquoted_holding_hours": 0,
+        "same_contract": 11,
+        "all_slots_busy": 144,
+        "data_exit_reasons": {
+          "stop": 200,
+          "ema_flip_open": 23,
+          "ema_flip": 17
+        },
+        "administrative_delivery_tail_closes": 0,
+        "cash_pnl_usdt": -412.29288010533753,
+        "reconciled_final_usdt": 587.7071198946625,
+        "hourly_final_usdt": 587.7071163491385
+      }
+    },
+    "control_seed20261109": {
+      "metrics": {
+        "all": {
+          "final_usdt": 1029.8939631675134,
+          "multiple": 1.0298939631675135,
+          "dd_mark_pct": 71.400842343905,
+          "dd_bound_pct": 73.0249789766144,
+          "trades": 239,
+          "win_pct": 15.062761506276152,
+          "payoff": 6.583702025638884,
+          "payoff_usdt": 5.665838877904265,
+          "median_net_pct": -4.566196553846162
+        },
+        "dev": {
+          "final_usdt": 1854.3983560478478,
+          "multiple": 1.8543983560478479,
+          "dd_mark_pct": 71.400842343905,
+          "dd_bound_pct": 73.0249789766144,
+          "trades": 154,
+          "win_pct": 14.935064935064934,
+          "payoff": 7.517325744200457,
+          "payoff_usdt": 6.183499059646056,
+          "median_net_pct": -4.652505593322137
+        },
+        "2025": {
+          "final_usdt": 1213.5486573863466,
+          "multiple": 0.6544163789989006,
+          "dd_mark_pct": 58.46908439082015,
+          "dd_bound_pct": 59.3832961186707,
+          "trades": 44,
+          "win_pct": 9.090909090909092,
+          "payoff": 5.162280219600964,
+          "payoff_usdt": 4.849750046141666,
+          "median_net_pct": -4.684975775323415
+        },
+        "2026": {
+          "final_usdt": 1029.8939631675134,
+          "multiple": 0.8486630980134119,
+          "dd_mark_pct": 39.13324175917965,
+          "dd_bound_pct": 48.237354573098976,
+          "trades": 38,
+          "win_pct": 18.421052631578945,
+          "payoff": 4.006170429071503,
+          "payoff_usdt": 3.3825364875952713,
+          "median_net_pct": -4.392007267494156
+        }
+      },
+      "account": {
+        "candidate_opportunities": 395,
+        "admitted": 239,
+        "funded": 239,
+        "unquoted_holding_hours": 4043,
+        "same_contract": 9,
+        "all_slots_busy": 147,
+        "data_exit_reasons": {
+          "stop": 200,
+          "ema_flip_open": 20,
+          "ema_flip": 18,
+          "data_gap_markout": 1
+        },
+        "administrative_delivery_tail_closes": 0,
+        "cash_pnl_usdt": 29.893967864143974,
+        "reconciled_final_usdt": 1029.893967864144,
+        "hourly_final_usdt": 1029.8939631675134
+      }
+    },
+    "control_seed20261110": {
+      "metrics": {
+        "all": {
+          "final_usdt": 3089.9579454429663,
+          "multiple": 3.089957945442966,
+          "dd_mark_pct": 70.2314250610603,
+          "dd_bound_pct": 72.734691514522,
+          "trades": 222,
+          "win_pct": 17.117117117117118,
+          "payoff": 7.516687480608437,
+          "payoff_usdt": 5.812221689108019,
+          "median_net_pct": -4.667469503489235
+        },
+        "dev": {
+          "final_usdt": 4153.99460962378,
+          "multiple": 4.15399460962378,
+          "dd_mark_pct": 70.2314250610603,
+          "dd_bound_pct": 72.734691514522,
+          "trades": 141,
+          "win_pct": 16.312056737588655,
+          "payoff": 9.519182333627406,
+          "payoff_usdt": 7.197501395316299,
+          "median_net_pct": -4.874804408051548
+        },
+        "2025": {
+          "final_usdt": 3072.5971333053462,
+          "multiple": 0.7396728744391957,
+          "dd_mark_pct": 49.50865862290682,
+          "dd_bound_pct": 50.79640101587859,
+          "trades": 42,
+          "win_pct": 11.904761904761903,
+          "payoff": 4.349633779956445,
+          "payoff_usdt": 4.394921650453766,
+          "median_net_pct": -5.583268490973487
+        },
+        "2026": {
+          "final_usdt": 3089.9579454429663,
+          "multiple": 1.005650207750778,
+          "dd_mark_pct": 66.79267902806272,
+          "dd_bound_pct": 68.08266467624694,
+          "trades": 36,
+          "win_pct": 22.22222222222222,
+          "payoff": 4.065862842235085,
+          "payoff_usdt": 3.4947762786217,
+          "median_net_pct": -4.096804141013025
+        }
+      },
+      "account": {
+        "candidate_opportunities": 395,
+        "admitted": 222,
+        "funded": 222,
+        "unquoted_holding_hours": 4043,
+        "same_contract": 10,
+        "all_slots_busy": 163,
+        "data_exit_reasons": {
+          "stop": 179,
+          "ema_flip_open": 25,
+          "ema_flip": 17,
+          "data_gap_markout": 1
+        },
+        "administrative_delivery_tail_closes": 0,
+        "cash_pnl_usdt": 2089.957953270333,
+        "reconciled_final_usdt": 3089.957953270333,
+        "hourly_final_usdt": 3089.9579454429663
+      }
+    },
+    "control_seed20261111": {
+      "metrics": {
+        "all": {
+          "final_usdt": 1016.6611662969697,
+          "multiple": 1.0166611662969696,
+          "dd_mark_pct": 77.91613418451706,
+          "dd_bound_pct": 78.41336961212251,
+          "trades": 243,
+          "win_pct": 14.40329218106996,
+          "payoff": 6.9502560658883015,
+          "payoff_usdt": 5.9593498828752205,
+          "median_net_pct": -4.616465724285349
+        },
+        "dev": {
+          "final_usdt": 2241.143298250038,
+          "multiple": 2.2411432982500377,
+          "dd_mark_pct": 77.91613418451706,
+          "dd_bound_pct": 78.41336961212251,
+          "trades": 157,
+          "win_pct": 14.012738853503185,
+          "payoff": 8.583085034498186,
+          "payoff_usdt": 7.367400198394814,
+          "median_net_pct": -4.784802494382011
+        },
+        "2025": {
+          "final_usdt": 1357.7538679858,
+          "multiple": 0.6058309029351141,
+          "dd_mark_pct": 59.607023526620395,
+          "dd_bound_pct": 60.4956774761064,
+          "trades": 46,
+          "win_pct": 8.695652173913043,
+          "payoff": 4.781533833701406,
+          "payoff_usdt": 4.264444923442852,
+          "median_net_pct": -5.099841238605444
+        },
+        "2026": {
+          "final_usdt": 1016.6611662969697,
+          "multiple": 0.7487816387554583,
+          "dd_mark_pct": 42.187356081848485,
+          "dd_bound_pct": 43.10281348493486,
+          "trades": 37,
+          "win_pct": 18.91891891891892,
+          "payoff": 3.101825790093282,
+          "payoff_usdt": 2.628055138652898,
+          "median_net_pct": -4.1838673004733575
+        }
+      },
+      "account": {
+        "candidate_opportunities": 395,
+        "admitted": 243,
+        "funded": 243,
+        "unquoted_holding_hours": 0,
+        "same_contract": 11,
+        "all_slots_busy": 141,
+        "data_exit_reasons": {
+          "stop": 204,
+          "ema_flip_open": 23,
+          "ema_flip": 16
+        },
+        "administrative_delivery_tail_closes": 0,
+        "cash_pnl_usdt": 16.661170752953637,
+        "reconciled_final_usdt": 1016.6611707529537,
+        "hourly_final_usdt": 1016.6611662969697
+      }
+    },
+    "control_seed20261112": {
+      "metrics": {
+        "all": {
+          "final_usdt": 641.1843068484611,
+          "multiple": 0.6411843068484612,
+          "dd_mark_pct": 75.410329546109,
+          "dd_bound_pct": 76.59209342207355,
+          "trades": 246,
+          "win_pct": 14.634146341463413,
+          "payoff": 5.985852728854709,
+          "payoff_usdt": 5.367204333532651,
+          "median_net_pct": -4.724445538615648
+        },
+        "dev": {
+          "final_usdt": 1386.8325338292207,
+          "multiple": 1.3868325338292207,
+          "dd_mark_pct": 75.410329546109,
+          "dd_bound_pct": 76.59209342207355,
+          "trades": 161,
+          "win_pct": 13.043478260869565,
+          "payoff": 7.636095807018208,
+          "payoff_usdt": 6.83466536422154,
+          "median_net_pct": -4.888596933595482
+        },
+        "2025": {
+          "final_usdt": 826.8477160034686,
+          "multiple": 0.5962130941076477,
+          "dd_mark_pct": 63.07247217629117,
+          "dd_bound_pct": 63.97739558033931,
+          "trades": 41,
+          "win_pct": 9.75609756097561,
+          "payoff": 4.323123641419115,
+          "payoff_usdt": 3.5269610835503484,
+          "median_net_pct": -5.83367713370398
+        },
+        "2026": {
+          "final_usdt": 641.1843068484611,
+          "multiple": 0.7754563439415383,
+          "dd_mark_pct": 42.70190253130307,
+          "dd_bound_pct": 50.92944006314802,
+          "trades": 41,
+          "win_pct": 21.951219512195124,
+          "payoff": 2.68418926067069,
+          "payoff_usdt": 2.369964268724134,
+          "median_net_pct": -4.271365350638982
+        }
+      },
+      "account": {
+        "candidate_opportunities": 395,
+        "admitted": 246,
+        "funded": 246,
+        "unquoted_holding_hours": 0,
+        "same_contract": 6,
+        "all_slots_busy": 143,
+        "data_exit_reasons": {
+          "stop": 206,
+          "ema_flip_open": 23,
+          "ema_flip": 17
+        },
+        "administrative_delivery_tail_closes": 0,
+        "cash_pnl_usdt": -358.8156896372651,
+        "reconciled_final_usdt": 641.1843103627349,
+        "hourly_final_usdt": 641.1843068484611
+      }
+    },
+    "control_seed20261113": {
+      "metrics": {
+        "all": {
+          "final_usdt": 600.7127763915415,
+          "multiple": 0.6007127763915415,
+          "dd_mark_pct": 79.57101818603391,
+          "dd_bound_pct": 80.75868529025017,
+          "trades": 246,
+          "win_pct": 14.227642276422763,
+          "payoff": 6.272103259305065,
+          "payoff_usdt": 5.4865848230331276,
+          "median_net_pct": -4.8908543655716255
+        },
+        "dev": {
+          "final_usdt": 1315.310500859467,
+          "multiple": 1.315310500859467,
+          "dd_mark_pct": 74.90362714789502,
+          "dd_bound_pct": 76.40924002278501,
+          "trades": 160,
+          "win_pct": 13.125,
+          "payoff": 7.994749736407089,
+          "payoff_usdt": 6.667987328328708,
+          "median_net_pct": -5.013333448944261
+        },
+        "2025": {
+          "final_usdt": 722.6445459687177,
+          "multiple": 0.5494098507512242,
+          "dd_mark_pct": 62.21978632413347,
+          "dd_bound_pct": 63.1833412909662,
+          "trades": 43,
+          "win_pct": 9.30232558139535,
+          "payoff": 4.08009472996,
+          "payoff_usdt": 3.5811067981552833,
+          "median_net_pct": -5.6398992034848785
+        },
+        "2026": {
+          "final_usdt": 600.7127763915415,
+          "multiple": 0.8312700618064937,
+          "dd_mark_pct": 44.630270041732814,
+          "dd_bound_pct": 45.47298678606534,
+          "trades": 40,
+          "win_pct": 20.0,
+          "payoff": 3.1287457223244823,
+          "payoff_usdt": 2.9239006962341487,
+          "median_net_pct": -4.25235723578202
+        }
+      },
+      "account": {
+        "candidate_opportunities": 395,
+        "admitted": 246,
+        "funded": 246,
+        "unquoted_holding_hours": 0,
+        "same_contract": 7,
+        "all_slots_busy": 142,
+        "data_exit_reasons": {
+          "stop": 205,
+          "ema_flip_open": 22,
+          "ema_flip": 19
+        },
+        "administrative_delivery_tail_closes": 0,
+        "cash_pnl_usdt": -399.28722055173426,
+        "reconciled_final_usdt": 600.7127794482658,
+        "hourly_final_usdt": 600.7127763915415
+      }
+    }
+  },
+  "random_control_summary": {
+    "2025": {
+      "mean_final_usdt": 1438.6783841299357,
+      "median_final_usdt": 1213.5486573863466,
+      "min_final_usdt": 722.6445459687177,
+      "max_final_usdt": 3072.5971333053462,
+      "seed_values": {
+        "20261109": 1213.5486573863466,
+        "20261110": 3072.5971333053462,
+        "20261111": 1357.7538679858,
+        "20261112": 826.8477160034686,
+        "20261113": 722.6445459687177
+      }
+    },
+    "2026": {
+      "mean_final_usdt": 1275.6820316294904,
+      "median_final_usdt": 1016.6611662969697,
+      "min_final_usdt": 600.7127763915415,
+      "max_final_usdt": 3089.9579454429663,
+      "seed_values": {
+        "20261109": 1029.8939631675134,
+        "20261110": 3089.9579454429663,
+        "20261111": 1016.6611662969697,
+        "20261112": 641.1843068484611,
+        "20261113": 600.7127763915415
+      }
+    },
+    "all": {
+      "mean_final_usdt": 1275.6820316294904,
+      "median_final_usdt": 1016.6611662969697,
+      "min_final_usdt": 600.7127763915415,
+      "max_final_usdt": 3089.9579454429663,
+      "seed_values": {
+        "20261109": 1029.8939631675134,
+        "20261110": 3089.9579454429663,
+        "20261111": 1016.6611662969697,
+        "20261112": 641.1843068484611,
+        "20261113": 600.7127763915415
+      }
+    },
+    "dev": {
+      "mean_final_usdt": 2190.3358597220704,
+      "median_final_usdt": 1854.3983560478478,
+      "min_final_usdt": 1315.310500859467,
+      "max_final_usdt": 4153.99460962378,
+      "seed_values": {
+        "20261109": 1854.3983560478478,
+        "20261110": 4153.99460962378,
+        "20261111": 2241.143298250038,
+        "20261112": 1386.8325338292207,
+        "20261113": 1315.310500859467
+      }
+    }
+  },
+  "limitations": [
+    "The study is a historical 360-contract cross-section with selective availability determined by the frozen original archive and 69 lifecycle notices.",
+    "Funding rates, market impact, contract maintenance tiers and live execution latency are not modeled.",
+    "H1 OHLC cannot reveal stop-versus-cloud intrabar order; the existing VectorBT native path callback defines the same priority for all arms.",
+    "Retired contracts are cut off at their official delivery timestamps; tail closes at those deadlines are administrative source exits, not ordinary cloud reversals."
+  ]
+}
