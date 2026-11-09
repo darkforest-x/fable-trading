@@ -1,4 +1,5 @@
 """Reconcile actual NAV-tenth fills, fee mark envelopes, and the single-ADA sensitivity."""
+import argparse
 import json
 from contextlib import nullcontext
 
@@ -9,15 +10,19 @@ from yoyo.evaluation import cloud_close_efficiency_binance_bounds as risk
 from yoyo.evaluation import cloud_close_tenth_sizing as study
 
 
-def main():
-    target=study.EXP/'risk_and_ada.json'
+def main(expanded=False):
+    source=study.archive.EXP.parent/'exp-cloud-close-archive-complete-20261109-v1' if expanded else study.EXP
+    target=source/'risk_and_ada.json'
     if target.exists():
         raise FileExistsError('NAV-tenth risk check already exists')
     extra=set(json.loads((study.archive.EXP/'summary.json').read_text())['archived_additions'])
+    if expanded:
+        extra.update(json.loads((source/'summary.json').read_text())['new_archive_cohorts']['priced'])
     results={}
-    for venue in ['OKX','Binance']:
-        positions=pd.read_csv(study.EXP/f'funded_{venue}.csv.gz').set_index('event_id')
-        eq=pd.read_csv(study.EXP/f'hourly_{venue}.csv.gz',index_col='hour_end_utc',parse_dates=True)
+    for venue in (['Binance'] if expanded else ['OKX','Binance']):
+        label='tenth' if expanded else venue
+        positions=pd.read_csv(source/f'funded_{label}.csv.gz').set_index('event_id')
+        eq=pd.read_csv(source/f'hourly_{label}.csv.gz',index_col='hour_end_utc',parse_dates=True)
         paths=study.trend.thirds.okx_paths() if venue=='OKX' else study.archive.pool(extra)
         paths=paths[~paths.is_control]
         with (study.archive.market_quotes(extra) if venue=='Binance' else nullcontext()):
@@ -52,4 +57,6 @@ def main():
 
 
 if __name__=='__main__':
-    main()
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--expanded',action='store_true')
+    main(parser.parse_args().expanded)
