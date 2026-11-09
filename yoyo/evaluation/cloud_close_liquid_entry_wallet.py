@@ -25,8 +25,10 @@ def main():
         raise ValueError('Invalid prior turnover')
     actual = pd.read_csv(liquidity.audit.EXP/'entries.csv.gz',index_col='event_id').quote_usdt
     result = {}
-    for label,fraction in [('unrestricted',None),('ten_pct',.1),('one_pct',.01)]:
+    for label,fraction in [('unrestricted',None),('positive_volume_control',None),('ten_pct',.1),('one_pct',.01)]:
         cap = pd.Series(np.inf,index=parents.index) if fraction is None else previous.mul(fraction)
+        if label=='positive_volume_control':
+            cap = cap.where(previous.reindex(cap.index).mul(.1).ge(1e-6),0.)
         cap = cap.where(cap.ge(1e-6),0.)
         for slip in ([0.] if fraction is None else [0.,.0005]):
             case = label+('_stress' if slip else '')
@@ -39,10 +41,10 @@ def main():
                 if not np.allclose(curve[hourly.columns],hourly,atol=.0001,rtol=1e-9):
                     raise ValueError('Unrestricted historical hour/stage mismatch')
             out = source.engine.simulate(data,market,quotes,ratios,slip,EXP,case,entry_limits=cap,
-                                         snapshot=verify if fraction is None else None)
+                                         snapshot=verify if label=='unrestricted' else None)
             if out.get('unresolved'):
                 raise ValueError('Original roster unexpectedly failed its verified margin screen')
-            if fraction is not None:
+            if label!='unrestricted':
                 f = pd.read_csv(EXP/f'funded_{case}.csv.gz',index_col='event_id')
                 f['cap'] = cap.reindex(f.index)
                 if set(f.index)!=set(cap[cap.gt(0)].index):
