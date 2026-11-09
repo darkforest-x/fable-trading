@@ -47,8 +47,16 @@
     "slippage": 0.0,
     "cash_sharing": true,
     "funding_cashflow_formula": "-signed live child quantity * observed funding_rate * settlement mark_price",
-    "cash_apply_hook": "Apply cash-only event in the VectorBT pre/post-segment callbacks; adjust shared last_cash and last_free_cash before the next order sizing; no synthetic market orders.",
+    "cash_apply_hook": "Apply funding within VectorBT pre/post-segment callbacks. Debit available/free balance first; any shortfall is charged against held position margin as an explicit account liability, never as spendable cash. At later funding credits or released collateral, repay that liability before sizing the next entry; no synthetic market orders.",
     "no_fill_policy": "Any planned entry or exit without a matching filled VectorBT order invalidates the account replay; do not silently drop a frozen event or claim complete NAV."
+  },
+  "collateral_accounting": {
+    "exchange_rule_source": "https://www.binance.com/en/support/faq/detail/360033525031",
+    "debit_order": "Available balance first, then position margin.",
+    "margin_shortfall_representation": "Track the amount not covered by free balance as a tracked position-margin funding liability; subtract it from economic NAV and never add it to available/free cash.",
+    "liability_repayment": "Funding credits offset the liability first; after orders close and collateral becomes available, repay from positive cash/free balance before any later entry sizing.",
+    "insolvency_gate": "Fail only when marked NAV after the funding liability is deducted is nonpositive; zero cash or zero free collateral alone is not bankruptcy.",
+    "model_limit": "Frozen paths do not contain account leverage settings or maintenance-margin/liquidation tiers, so positive NAV is not proof that an exchange liquidation threshold was never reached."
   },
   "boundary_policy": {
     "timestamp_resolution": "Use exact source milliseconds; no ±1s timing inference",
@@ -65,13 +73,13 @@
       "non_boundary": "Apply only if the exact fundingTime falls within the child's known held interval; ledger rows included solely by the older ±1s collection tolerance are classified before-entry or after-exit and excluded."
     },
     "event_stage_order": "Three H1 stages: entry/open, open-phase exits, then intrabar/close exits. Exact entry settlements post after the entry stage when included; exact open-exit settlements post after that exit using the cached pre-exit quantity; close/intrabar boundary settlements post after the exit stage using the cached quantity.",
-    "accounting": "Reconstruct every stage cash and NAV from VectorBT order records plus explicit funding event records; raw Portfolio.value omits these external flows and must not be reported as the funded NAV."
+    "accounting": "Reconstruct stage cash from VectorBT order records plus explicit available-cash adjustments; economic NAV equals marked VectorBT NAV less outstanding margin funding liability. Raw Portfolio.value omits funding and the liability and must not be reported as the funded NAV."
   },
   "coverage_policy": {
     "complete_gate": "Require complete symbol-month windows and known rate/mark for every observed settlement before producing dynamic full NAV scenarios.",
     "incomplete_behavior": "If any funding range, rate, or mark is unknown, list only known settlement cashflow scenarios on the frozen quantities; set full NAV metrics null and do not run or report a complete account replay.",
     "mark_proxy": "Keep Binance official markPriceKlines 1h-open proxy rows separately counted; never treat a proxy as exact fundingRate markPrice.",
-    "insufficient_cash": "If a funding debit makes shared cash or free collateral negative, fail the path closed. Do not cap the payment, top up cash, permit negative cash, or silently omit later trades."
+    "insufficient_cash": "Funding debits consume positive available/free cash first. Any remainder is charged to position margin as a tracked liability, never as spendable balance; repay it from later funding credits or released collateral. Fail closed only if marked NAV after the liability is nonpositive. Do not top up cash or omit fees/trades."
   },
   "risk": {
     "periods": {
@@ -84,8 +92,9 @@
     "drawdown_interpretation": "H1 OHLC envelope is a conservative scenario bound, not proof of intrabar trade/funding order."
   },
   "outputs": {
-    "scope": "experiments/active/exp-cloud-close-funding-account-20261109-v1/current/",
+    "scope": "experiments/active/exp-cloud-close-funding-account-20261109-v1/collateral/",
     "complete_receipt": "account_funding_audit.json",
+    "preserve_previous_failure_receipt": "experiments/active/exp-cloud-close-funding-account-20261109-v1/current/account_funding_audit.json",
     "per_scenario": [
       "funded_legs.csv.gz",
       "funded_positions.csv.gz",
@@ -107,6 +116,7 @@
     "This adapter replays the already-frozen current actual event roster and native orders; it does not reselect signals or controls.",
     "Boundary inclusion and exclusion are separate complete cash account scenarios because funding changes subsequent position size.",
     "Any incomplete rate/mark/month coverage prevents reporting full NAV; frozen-quantity known-fee totals remain a cashflow sensitivity only.",
+    "Leverage and maintenance-margin/liquidation tiers are unavailable; positive NAV accounting does not establish liquidation safety.",
     "No account is promoted, registered for execution, or connected to a live order system."
   ]
 }

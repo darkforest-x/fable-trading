@@ -68,6 +68,19 @@ def _validate_config(config: dict) -> None:
         "preserve the existing wallet admission order entry_ms, entry_order, symbol CRC32, symbol, event_id."
     ):
         raise ValueError("The frozen event admission priority changed")
+    collateral = config.get("collateral_accounting", {})
+    if collateral.get("exchange_rule_source") != "https://www.binance.com/en/support/faq/detail/360033525031":
+        raise ValueError("Collateral accounting must cite the frozen Binance funding rule source")
+    if collateral.get("debit_order") != "Available balance first, then position margin.":
+        raise ValueError("Funding debits must use available balance before position margin")
+    if "tracked position-margin funding liability" not in collateral.get("margin_shortfall_representation", ""):
+        raise ValueError("Position-margin shortfall must remain a tracked liability")
+    if "nonpositive" not in collateral.get("insolvency_gate", ""):
+        raise ValueError("Insolvency is determined by nonpositive marked economic NAV")
+    scope = config.get("outputs", {}).get("scope")
+    expected_scope = f"experiments/active/{EXP.name}/collateral/"
+    if scope != expected_scope:
+        raise ValueError("Corrected collateral replay must write to the separate collateral/ scope")
 
 
 def _assert_committed() -> None:
@@ -369,6 +382,8 @@ def _schedule_flows(data: dict, legs: pd.DataFrame, flows: pd.DataFrame, scenari
         ptr[n_steps] = len(ids)
         return ptr, np.asarray(ids, dtype=np.int64)
 
+    for bucket in pre_buckets + post_buckets:
+        bucket.sort(key=lambda idx: int(flow_frame.at[idx, "funding_time_ms"]))
     pre_ptr, pre_ids = pack(pre_buckets)
     post_ptr, post_ids = pack(post_buckets)
     cols = data["actions"].shape[1]
@@ -388,9 +403,17 @@ def _schedule_flows(data: dict, legs: pd.DataFrame, flows: pd.DataFrame, scenari
         "flow_code": flow_frame.event_code.to_numpy(dtype=np.int32),
         "flow_rate": flow_frame.funding_rate.to_numpy(dtype=np.float64),
         "flow_mark": flow_frame.mark_price.to_numpy(dtype=np.float64),
+        "flow_time": flow_frame.funding_time_ms.to_numpy(dtype=np.int64),
         "flow_cache": flow_frame.use_exit_cache.to_numpy(dtype=np.bool_),
         "event_codes": event_codes,
         "pre_cashflow": np.zeros((2, n_steps), dtype=np.float64),
+        "cash_adjustment": np.zeros((2, n_steps), dtype=np.float64),
+        "funding_cash_adjustment": np.zeros((2, n_steps), dtype=np.float64),
+        "margin_funding_added": np.zeros((2, n_steps), dtype=np.float64),
+        "margin_liability_repaid_by_funding": np.zeros((2, n_steps), dtype=np.float64),
+        "margin_liability_repaid_by_release": np.zeros(n_steps, dtype=np.float64),
+        "margin_liability": np.zeros(1, dtype=np.float64),
+        "liability_stage": np.zeros((2, n_steps), dtype=np.float64),
         "flow_cashflow": np.zeros(len(flow_frame), dtype=np.float64),
         "flow_quantity": np.full(len(flow_frame), np.nan, dtype=np.float64),
         "flow_applied": np.zeros(len(flow_frame), dtype=np.bool_),
@@ -400,66 +423,157 @@ def _schedule_flows(data: dict, legs: pd.DataFrame, flows: pd.DataFrame, scenari
         "nav_post": np.full(n_steps, np.nan, dtype=np.float64),
         "cash_pre": np.full(n_steps, np.nan, dtype=np.float64),
         "cash_post": np.full(n_steps, np.nan, dtype=np.float64),
+        "free_pre": np.full(n_steps, np.nan, dtype=np.float64),
+        "free_post": np.full(n_steps, np.nan, dtype=np.float64),
         "pos_pre": np.full((n_steps, cols), np.nan, dtype=np.float64),
         "pos_post": np.full((n_steps, cols), np.nan, dtype=np.float64),
+        "first_underflow": np.zeros(14, dtype=np.float64),
+        "first_underflow_positions": np.zeros((cols, 2), dtype=np.float64),
     }
 
 
 @njit(cache=True)
 def _apply_flows(c, begin, end, hook, flow_col, flow_code, flow_rate, flow_mark,
-                 flow_ids, flow_cache, flow_cashflow, flow_quantity, flow_applied,
-                 exit_cache_quantity, exit_cache_event, stage_cashflow):
-    total = 0.0
-    for j in range(begin, end):
+                 flow_ids, flow_time, flow_cache, flow_cashflow, flow_quantity, flow_applied,
+                 exit_cache_quantity, exit_cache_event, stage_funding_flow,
+                 cash_adjustment, funding_cash_adjustment, margin_funding_added,
+                 margin_liability_repaid_by_funding, margin_liability,
+                 first_underflow, first_underflow_positions):
+    j = begin
+    stage_total = 0.0
+    while j < end:
         idx = int(flow_ids[j])
-        col = int(flow_col[idx])
-        if flow_applied[idx]:
-            raise ValueError("Funding settlement applied more than once")
-        quantity = c.last_position[col]
-        if abs(quantity) <= 1e-15 and flow_cache[idx]:
-            if exit_cache_event[col] == flow_code[idx] and abs(exit_cache_quantity[col]) > 1e-15:
-                quantity = exit_cache_quantity[col]
-        if abs(quantity) <= 1e-15:
-            raise ValueError("Funding row has no live or just-exited cached child quantity")
-        rate = flow_rate[idx]
-        mark = flow_mark[idx]
-        if not np.isfinite(rate) or not np.isfinite(mark) or mark <= 0.0:
-            raise ValueError("Funding row lacks a finite rate or positive mark")
-        cashflow = -quantity * rate * mark
-        flow_cashflow[idx] = cashflow
-        flow_quantity[idx] = quantity
-        flow_applied[idx] = True
-        total += cashflow
+        timestamp = flow_time[idx]
+        batch_total = 0.0
+        debits = 0.0
+        credits = 0.0
+        while j < end and flow_time[int(flow_ids[j])] == timestamp:
+            idx = int(flow_ids[j])
+            col = int(flow_col[idx])
+            if flow_applied[idx]:
+                raise ValueError("Funding settlement applied more than once")
+            quantity = c.last_position[col]
+            if abs(quantity) <= 1e-15 and flow_cache[idx]:
+                if exit_cache_event[col] == flow_code[idx] and abs(exit_cache_quantity[col]) > 1e-15:
+                    quantity = exit_cache_quantity[col]
+            if abs(quantity) <= 1e-15:
+                raise ValueError("Funding row has no live or just-exited cached child quantity")
+            rate = flow_rate[idx]
+            mark = flow_mark[idx]
+            if not np.isfinite(rate) or not np.isfinite(mark) or mark <= 0.0:
+                raise ValueError("Funding row lacks a finite rate or positive mark")
+            cashflow = -quantity * rate * mark
+            flow_cashflow[idx] = cashflow
+            flow_quantity[idx] = quantity
+            flow_applied[idx] = True
+            batch_total += cashflow
+            if cashflow < 0.0:
+                debits -= cashflow
+            else:
+                credits += cashflow
+            j += 1
+
+        cash_now = c.last_cash[c.group]
+        free_now = c.last_free_cash[c.group]
+        liability = margin_liability[c.group]
+        nav_before = nb.get_group_value_ctx_nb(c) - liability
+        cash_delta = 0.0
+        if batch_total < 0.0:
+            available = min(max(0.0, cash_now), max(0.0, free_now))
+            cash_paid = min(-batch_total, available)
+            margin_paid = -batch_total - cash_paid
+            cash_delta = -cash_paid
+            new_cash = cash_now - cash_paid
+            new_free = free_now - cash_paid
+            liability += margin_paid
+            margin_funding_added[hook, c.i] += margin_paid
+        elif batch_total > 0.0:
+            liability_paid = min(batch_total, liability)
+            liability -= liability_paid
+            margin_liability_repaid_by_funding[hook, c.i] += liability_paid
+            cash_credit = batch_total - liability_paid
+            cash_delta = cash_credit
+            new_cash = cash_now + cash_credit
+            new_free = free_now + cash_credit
+        else:
+            new_cash = cash_now
+            new_free = free_now
+        if (not np.isfinite(new_cash) or not np.isfinite(new_free) or not np.isfinite(liability)
+                or new_cash < -CASH_TOL or new_free < -CASH_TOL or liability < -CASH_TOL):
+            raise ValueError("Funding cash/collateral accounting became invalid")
+        c.last_cash[c.group] = max(0.0, new_cash)
+        c.last_free_cash[c.group] = max(0.0, new_free)
+        margin_liability[c.group] = max(0.0, liability)
+        stage_total += batch_total
+        stage_funding_flow[hook, c.i] += batch_total
+        cash_adjustment[hook, c.i] += cash_delta
+        funding_cash_adjustment[hook, c.i] += cash_delta
+        nav_after = nb.get_group_value_ctx_nb(c) - margin_liability[c.group]
+        if nav_after <= 0.0:
+            if first_underflow[0] == 0.0:
+                first_underflow[0] = 1.0
+                first_underflow[1] = float(c.i)
+                first_underflow[2] = cash_now
+                first_underflow[3] = free_now
+                first_underflow[4] = batch_total
+                first_underflow[5] = debits
+                first_underflow[6] = credits
+                first_underflow[7] = nav_before
+                first_underflow[8] = float(hook)
+                first_underflow[9] = float(timestamp)
+                first_underflow[10] = c.last_cash[c.group]
+                first_underflow[11] = c.last_free_cash[c.group]
+                first_underflow[12] = margin_liability[c.group]
+                first_underflow[13] = nav_after
+                for col in range(c.from_col, c.to_col):
+                    first_underflow_positions[col, 0] = c.last_position[col]
+                    first_underflow_positions[col, 1] = c.last_val_price[col]
+            raise ValueError("Marked economic NAV is nonpositive after funding; modelled account insolvent")
+    return stage_total
+
+
+@njit(cache=True)
+def _settle_margin_liability(c, margin_liability, cash_adjustment, margin_liability_repaid_by_release):
+    liability = margin_liability[c.group]
     cash_now = c.last_cash[c.group]
     free_now = c.last_free_cash[c.group]
-    new_cash = cash_now + total
-    new_free = free_now + total
-    if not np.isfinite(new_cash) or not np.isfinite(new_free) or new_cash < -CASH_TOL:
-        raise ValueError("Funding debit exceeds account cash; full account path is insolvent")
-    if new_free < -CASH_TOL:
-        raise ValueError("Funding debit exceeds free collateral; full account path is under-margined")
-    c.last_cash[c.group] = max(0.0, new_cash)
-    c.last_free_cash[c.group] = max(0.0, new_free)
-    stage_cashflow[hook, c.i] += total
-    return total
+    if liability <= CASH_TOL or cash_now <= 0.0 or free_now <= 0.0:
+        return 0.0
+    payment = min(liability, min(cash_now, free_now))
+    c.last_cash[c.group] = max(0.0, cash_now - payment)
+    c.last_free_cash[c.group] = max(0.0, free_now - payment)
+    margin_liability[c.group] = max(0.0, liability - payment)
+    cash_adjustment[1, c.i] -= payment
+    margin_liability_repaid_by_release[c.i] += payment
+    return payment
 
 
 @njit(cache=True)
 def _pre_segment(c, pre_ptr, pre_ids, flow_col, flow_code, flow_rate, flow_mark,
-                 flow_cache, flow_cashflow, flow_quantity, flow_applied,
-                 exit_cache_quantity, exit_cache_event, stage_cashflow,
-                 nav_pre, cash_pre, pos_pre):
+                 flow_time, flow_cache, flow_cashflow, flow_quantity, flow_applied,
+                 exit_cache_quantity, exit_cache_event, stage_funding_flow,
+                 cash_adjustment, funding_cash_adjustment, margin_funding_added,
+                 margin_liability_repaid_by_funding, margin_liability,
+                 liability_stage,
+                 nav_pre, cash_pre, free_pre, pos_pre, first_underflow, first_underflow_positions):
     for col in range(c.from_col, c.to_col):
         c.last_val_price[col] = c.close[c.i, col]
     _apply_flows(
         c, pre_ptr[c.i], pre_ptr[c.i + 1], 0,
-        flow_col, flow_code, flow_rate, flow_mark, pre_ids, flow_cache,
+        flow_col, flow_code, flow_rate, flow_mark, pre_ids, flow_time, flow_cache,
         flow_cashflow, flow_quantity, flow_applied,
-        exit_cache_quantity, exit_cache_event, stage_cashflow,
+        exit_cache_quantity, exit_cache_event, stage_funding_flow,
+        cash_adjustment, funding_cash_adjustment, margin_funding_added,
+        margin_liability_repaid_by_funding, margin_liability,
+        first_underflow, first_underflow_positions,
     )
-    nav = nb.get_group_value_ctx_nb(c)
+    liability_stage[0, c.i] = margin_liability[c.group]
+    nav = nb.get_group_value_ctx_nb(c) - margin_liability[c.group]
+    if nav <= 0.0:
+        raise ValueError("Marked economic NAV is nonpositive before order stage; modelled account insolvent")
     nav_pre[c.i] = nav
     cash_pre[c.i] = c.last_cash[c.group]
+    free_pre[c.i] = c.last_free_cash[c.group]
     for col in range(c.from_col, c.to_col):
         pos_pre[c.i, col] = c.last_position[col]
     return (nav,)
@@ -467,17 +581,28 @@ def _pre_segment(c, pre_ptr, pre_ids, flow_col, flow_code, flow_rate, flow_mark,
 
 @njit(cache=True)
 def _post_segment(c, post_ptr, post_ids, flow_col, flow_code, flow_rate, flow_mark,
-                  flow_cache, flow_cashflow, flow_quantity, flow_applied,
-                  exit_cache_quantity, exit_cache_event, stage_cashflow,
-                  nav_post, cash_post, pos_post):
+                  flow_time, flow_cache, flow_cashflow, flow_quantity, flow_applied,
+                  exit_cache_quantity, exit_cache_event, stage_funding_flow,
+                  cash_adjustment, funding_cash_adjustment, margin_funding_added,
+                  margin_liability_repaid_by_funding, margin_liability,
+                  margin_liability_repaid_by_release, liability_stage,
+                  nav_post, cash_post, free_post, pos_post, first_underflow, first_underflow_positions):
     _apply_flows(
         c, post_ptr[c.i], post_ptr[c.i + 1], 1,
-        flow_col, flow_code, flow_rate, flow_mark, post_ids, flow_cache,
+        flow_col, flow_code, flow_rate, flow_mark, post_ids, flow_time, flow_cache,
         flow_cashflow, flow_quantity, flow_applied,
-        exit_cache_quantity, exit_cache_event, stage_cashflow,
+        exit_cache_quantity, exit_cache_event, stage_funding_flow,
+        cash_adjustment, funding_cash_adjustment, margin_funding_added,
+        margin_liability_repaid_by_funding, margin_liability,
+        first_underflow, first_underflow_positions,
     )
-    nav_post[c.i] = nb.get_group_value_ctx_nb(c)
+    _settle_margin_liability(c, margin_liability, cash_adjustment, margin_liability_repaid_by_release)
+    liability_stage[1, c.i] = margin_liability[c.group]
+    nav_post[c.i] = nb.get_group_value_ctx_nb(c) - margin_liability[c.group]
+    if nav_post[c.i] <= 0.0:
+        raise ValueError("Marked economic NAV is nonpositive after order stage; modelled account insolvent")
     cash_post[c.i] = c.last_cash[c.group]
+    free_post[c.i] = c.last_free_cash[c.group]
     for col in range(c.from_col, c.to_col):
         pos_post[c.i, col] = c.last_position[col]
 
@@ -571,6 +696,68 @@ def _position_and_order_records(pf, data: dict, scheduled: dict, config: dict) -
     }
 
 
+def _first_underflow_receipt(data: dict, scheduled: dict) -> dict | None:
+    values = scheduled["first_underflow"]
+    if values[0] == 0.0:
+        return None
+    stage = int(values[1])
+    hook = int(values[8])
+    stage_name = ("open", "after_open_exits", "after_close_exits")[stage % 3]
+    active = []
+    gross_notional = 0.0
+    for row in data["selected"].itertuples(index=False):
+        col = int(row.slot)
+        entry_stage = (int(row.entry_ms) - int(data["start"])) // HOUR * 3
+        exit_stage = ((int(row.exit_bar_ms) - int(data["start"])) // HOUR * 3
+                      + (1 if str(row.exit_phase) == "open" else 2))
+        in_position = (
+            entry_stage < stage <= exit_stage if hook == 0
+            else entry_stage <= stage < exit_stage
+        )
+        if not in_position:
+            continue
+        quantity, mark = map(float, scheduled["first_underflow_positions"][col])
+        if abs(quantity) <= 1e-15:
+            continue
+        notional = abs(quantity * mark)
+        gross_notional += notional
+        active.append({
+            "event_id": str(row.event_id), "parent_id": str(row.parent_id),
+            "symbol": str(row.symbol), "tp_r": float(row.tp_r), "side": int(row.side),
+            "column": col, "signed_quantity": quantity, "mark_price": mark,
+            "position_value_usdt": quantity * mark,
+            "gross_notional_usdt": notional,
+        })
+    funding_rows = scheduled["flows"].loc[
+        scheduled["flow_applied"]
+        & scheduled["flows"].scheduled_stage.eq(stage)
+        & scheduled["flows"].funding_time_ms.eq(int(values[9])),
+        ["event_id", "symbol", "tp_r", "funding_time_ms", "funding_rate", "mark_price",
+         "relation", "mark_source"],
+    ].copy()
+    indices = funding_rows.index.to_numpy(dtype=np.int64)
+    funding_rows["actual_quantity"] = scheduled["flow_quantity"][indices]
+    funding_rows["actual_cashflow_usdt"] = scheduled["flow_cashflow"][indices]
+    return {
+        "timestamp_utc": str(pd.Timestamp(int(values[9]), unit="ms", tz="UTC")),
+        "stage_index": stage,
+        "stage": stage_name,
+        "cash_before_usdt": float(values[2]),
+        "free_cash_before_usdt": float(values[3]),
+        "funding_net_cashflow_usdt": float(values[4]),
+        "funding_gross_debit_usdt": float(values[5]),
+        "funding_gross_credit_usdt": float(values[6]),
+        "marked_nav_before_funding_usdt": float(values[7]),
+        "cash_after_usdt": float(values[10]),
+        "free_cash_after_usdt": float(values[11]),
+        "margin_funding_liability_after_usdt": float(values[12]),
+        "marked_nav_after_funding_usdt": float(values[13]),
+        "gross_open_notional_usdt": float(gross_notional),
+        "occupied_child_positions": active,
+        "funding_rows": funding_rows.to_dict("records"),
+    }
+
+
 def _build_equity(pf, data: dict, scheduled: dict, config: dict) -> tuple[pd.DataFrame, dict]:
     actions = data["actions"]
     n_steps, n_cols = actions.shape
@@ -578,31 +765,39 @@ def _build_equity(pf, data: dict, scheduled: dict, config: dict) -> tuple[pd.Dat
         raise ValueError("Expected exactly three account stages per H1 bar")
     if (np.isnan(scheduled["nav_pre"]).any() or np.isnan(scheduled["nav_post"]).any()
             or np.isnan(scheduled["cash_pre"]).any() or np.isnan(scheduled["cash_post"]).any()
+            or np.isnan(scheduled["free_pre"]).any() or np.isnan(scheduled["free_post"]).any()
+            or np.isnan(scheduled["liability_stage"]).any()
             or np.isnan(scheduled["pos_pre"]).any() or np.isnan(scheduled["pos_post"]).any()):
         raise ValueError("VectorBT did not execute every stage callback")
     order_flow_by_stage = pf.cash_flow(group_by=False).to_numpy(dtype=np.float64).sum(axis=1)
-    preflow = scheduled["pre_cashflow"][0]
-    postflow = scheduled["pre_cashflow"][1]
+    pre_adjustment = scheduled["cash_adjustment"][0]
+    post_adjustment = scheduled["cash_adjustment"][1]
     cash_rebuilt = np.zeros(n_steps, dtype=np.float64)
     cash_nav = INITIAL_CASH
     for i in range(n_steps):
-        cash_pre = cash_nav + preflow[i]
+        cash_pre = cash_nav + pre_adjustment[i]
         if not np.isclose(cash_pre, scheduled["cash_pre"][i], rtol=1e-9, atol=0.01):
             raise ValueError(f"Pre-order cash mismatch at stage {i}: {cash_pre} vs {scheduled['cash_pre'][i]}")
-        cash_nav = cash_pre + order_flow_by_stage[i] + postflow[i]
+        cash_nav = cash_pre + order_flow_by_stage[i] + post_adjustment[i]
         cash_rebuilt[i] = cash_nav
         if not np.isclose(cash_nav, scheduled["cash_post"][i], rtol=1e-9, atol=0.01):
             raise ValueError(f"Post-order cash mismatch at stage {i}: {cash_nav} vs {scheduled['cash_post'][i]}")
         marks = data["marks"][i]
-        nav_pre = cash_pre + float(np.dot(scheduled["pos_pre"][i], marks))
-        nav_post = cash_nav + float(np.dot(scheduled["pos_post"][i], marks))
+        nav_pre = (
+            cash_pre + float(np.dot(scheduled["pos_pre"][i], marks))
+            - scheduled["liability_stage"][0, i]
+        )
+        nav_post = (
+            cash_nav + float(np.dot(scheduled["pos_post"][i], marks))
+            - scheduled["liability_stage"][1, i]
+        )
         if not np.isclose(nav_pre, scheduled["nav_pre"][i], rtol=1e-9, atol=0.02):
             raise ValueError(f"Pre-order NAV mismatch at stage {i}: {nav_pre} vs {scheduled['nav_pre'][i]}")
         if not np.isclose(nav_post, scheduled["nav_post"][i], rtol=1e-9, atol=0.02):
             raise ValueError(f"Post-order NAV mismatch at stage {i}: {nav_post} vs {scheduled['nav_post'][i]}")
     assets = pf.assets().to_numpy(dtype=np.float64)
     marks = data["marks"].astype(np.float64)
-    nav_from_records = cash_rebuilt + (assets * marks).sum(axis=1)
+    nav_from_records = cash_rebuilt + (assets * marks).sum(axis=1) - scheduled["liability_stage"][1]
     nav_from_callbacks = scheduled["nav_post"]
     if not np.allclose(nav_from_records, nav_from_callbacks, rtol=1e-9, atol=0.03):
         raise ValueError("Stage NAV reconstructed from VectorBT orders and funding differs from callbacks")
@@ -637,7 +832,10 @@ def _build_equity(pf, data: dict, scheduled: dict, config: dict) -> tuple[pd.Dat
             scheduled["cash_pre"][stage] + order_flow_by_stage[stage]
         )
         open_asset = float(np.dot(q, marks[stage]))
-        anchor_before = cash_after_orders_before_postfund + open_asset
+        anchor_before = (
+            cash_after_orders_before_postfund + open_asset
+            - scheduled["liability_stage"][0, stage]
+        )
         anchor_after = scheduled["nav_post"][stage]
         lower[h] = min(lower[h], anchor_before + price_adv, anchor_after + price_adv)
         upper[h] = max(upper[h], anchor_before + price_fav, anchor_after + price_fav)
@@ -659,6 +857,12 @@ def _build_equity(pf, data: dict, scheduled: dict, config: dict) -> tuple[pd.Dat
             "lower_nav": lower,
             "upper_nav": upper,
             "accounting_funding_usdt": scheduled["pre_cashflow"].sum(axis=0).reshape(hours, 3).sum(axis=1),
+            "cash_close_usdt": scheduled["cash_post"].reshape(hours, 3)[:, 2],
+            "free_cash_close_usdt": scheduled["free_post"].reshape(hours, 3)[:, 2],
+            "margin_liability_close_usdt": scheduled["liability_stage"][1].reshape(hours, 3)[:, 2],
+            "margin_funding_added_usdt": scheduled["margin_funding_added"].sum(axis=0).reshape(hours, 3).sum(axis=1),
+            "margin_liability_repaid_by_funding_usdt": scheduled["margin_liability_repaid_by_funding"].sum(axis=0).reshape(hours, 3).sum(axis=1),
+            "margin_liability_repaid_by_release_usdt": scheduled["margin_liability_repaid_by_release"].reshape(hours, 3).sum(axis=1),
         },
         index=idx,
     )
@@ -672,12 +876,25 @@ def _build_equity(pf, data: dict, scheduled: dict, config: dict) -> tuple[pd.Dat
             np.max(np.abs(nav_from_records - nav_from_callbacks))
         ),
         "raw_vectorbt_value_excludes_external_funding": True,
-        "raw_value_difference_matches_cumulative_funding": True,
+        "raw_value_difference_matches_cumulative_funding_and_margin_liability": True,
+        "terminal_margin_funding_liability_usdt": float(scheduled["margin_liability"][0]),
+        "peak_margin_funding_liability_usdt": float(scheduled["liability_stage"].max()),
+        "total_margin_funding_added_usdt": float(scheduled["margin_funding_added"].sum()),
+        "total_margin_liability_repaid_by_funding_usdt": float(scheduled["margin_liability_repaid_by_funding"].sum()),
+        "total_margin_liability_repaid_by_release_usdt": float(scheduled["margin_liability_repaid_by_release"].sum()),
+        "funding_cash_adjustment_usdt": float(scheduled["cash_adjustment"].sum()),
+        "funding_direct_cash_adjustment_usdt": float(scheduled["funding_cash_adjustment"].sum()),
+        "minimum_cash_usdt": float(min(scheduled["cash_pre"].min(), scheduled["cash_post"].min())),
+        "minimum_free_cash_usdt": float(min(scheduled["free_pre"].min(), scheduled["free_post"].min())),
+        "ending_cash_usdt": float(scheduled["cash_post"][-1]),
+        "ending_free_cash_usdt": float(scheduled["free_post"][-1]),
         "hourly_ohlc_envelope_combines_post_open_funding_sign_extremes": True,
         "all_exit_positions_closed": bool(np.isclose(np.max(np.abs(assets[-1])), 0.0, atol=1e-12)),
     }
     if not audit["all_exit_positions_closed"]:
         raise ValueError("The frozen account ends with an open VectorBT position")
+    if audit["terminal_margin_funding_liability_usdt"] > CASH_TOL:
+        raise ValueError("Closed account retains unpaid position-margin funding liability")
     return equity, audit
 
 
@@ -686,34 +903,59 @@ def _run_scenario(legs: pd.DataFrame, flows: pd.DataFrame, data: dict,
     scheduled = _schedule_flows(data, legs, flows, scenario)
     weights = np.asarray([2.0 / 3.0, 1.0 / 3.0], dtype=np.float64)
     reservation = np.zeros(1, dtype=np.float64)
-    pf = vbt.Portfolio.from_order_func(
-        data["marks"], _account_order, data["actions"], data["prices"], data["fees"],
-        0.0, float(config["account"]["new_order_exposure_fraction"]), weights,
-        reservation, 0, np.ones((1, 1), dtype=np.float64), scheduled["event_codes"],
-        scheduled["exit_cache_quantity"], scheduled["exit_cache_event"],
-        pre_segment_func_nb=_pre_segment,
-        pre_segment_args=(
-            scheduled["pre_ptr"], scheduled["pre_ids"], scheduled["flow_col"],
-            scheduled["flow_code"], scheduled["flow_rate"], scheduled["flow_mark"],
-            scheduled["flow_cache"], scheduled["flow_cashflow"], scheduled["flow_quantity"],
-            scheduled["flow_applied"], scheduled["exit_cache_quantity"],
-            scheduled["exit_cache_event"], scheduled["pre_cashflow"],
-            scheduled["nav_pre"], scheduled["cash_pre"], scheduled["pos_pre"],
-        ),
-        post_segment_func_nb=_post_segment,
-        post_segment_args=(
-            scheduled["post_ptr"], scheduled["post_ids"], scheduled["flow_col"],
-            scheduled["flow_code"], scheduled["flow_rate"], scheduled["flow_mark"],
-            scheduled["flow_cache"], scheduled["flow_cashflow"], scheduled["flow_quantity"],
-            scheduled["flow_applied"], scheduled["exit_cache_quantity"],
-            scheduled["exit_cache_event"], scheduled["pre_cashflow"],
-            scheduled["nav_post"], scheduled["cash_post"], scheduled["pos_post"],
-        ),
-        call_pre_segment=True, call_post_segment=True, cash_sharing=True, group_by=True,
-        init_cash=float(config["account"]["initial_cash_usdt"]),
-        max_orders=int(np.count_nonzero(data["actions"])) + 1,
-        fill_pos_record=False,
-    )
+    try:
+        pf = vbt.Portfolio.from_order_func(
+            data["marks"], _account_order, data["actions"], data["prices"], data["fees"],
+            0.0, float(config["account"]["new_order_exposure_fraction"]), weights,
+            reservation, 0, np.ones((1, 1), dtype=np.float64), scheduled["event_codes"],
+            scheduled["exit_cache_quantity"], scheduled["exit_cache_event"],
+            pre_segment_func_nb=_pre_segment,
+            pre_segment_args=(
+                scheduled["pre_ptr"], scheduled["pre_ids"], scheduled["flow_col"],
+                scheduled["flow_code"], scheduled["flow_rate"], scheduled["flow_mark"],
+                scheduled["flow_time"], scheduled["flow_cache"],
+                scheduled["flow_cashflow"], scheduled["flow_quantity"],
+                scheduled["flow_applied"], scheduled["exit_cache_quantity"],
+                scheduled["exit_cache_event"], scheduled["pre_cashflow"],
+                scheduled["cash_adjustment"], scheduled["funding_cash_adjustment"],
+                scheduled["margin_funding_added"],
+                scheduled["margin_liability_repaid_by_funding"],
+                scheduled["margin_liability"],
+                scheduled["liability_stage"],
+                scheduled["nav_pre"], scheduled["cash_pre"], scheduled["free_pre"],
+                scheduled["pos_pre"],
+                scheduled["first_underflow"], scheduled["first_underflow_positions"],
+            ),
+            post_segment_func_nb=_post_segment,
+            post_segment_args=(
+                scheduled["post_ptr"], scheduled["post_ids"], scheduled["flow_col"],
+                scheduled["flow_code"], scheduled["flow_rate"], scheduled["flow_mark"],
+                scheduled["flow_time"], scheduled["flow_cache"],
+                scheduled["flow_cashflow"], scheduled["flow_quantity"],
+                scheduled["flow_applied"], scheduled["exit_cache_quantity"],
+                scheduled["exit_cache_event"], scheduled["pre_cashflow"],
+                scheduled["cash_adjustment"], scheduled["funding_cash_adjustment"],
+                scheduled["margin_funding_added"],
+                scheduled["margin_liability_repaid_by_funding"],
+                scheduled["margin_liability"],
+                scheduled["margin_liability_repaid_by_release"],
+                scheduled["liability_stage"],
+                scheduled["nav_post"], scheduled["cash_post"], scheduled["free_post"],
+                scheduled["pos_post"],
+                scheduled["first_underflow"], scheduled["first_underflow_positions"],
+            ),
+            call_pre_segment=True, call_post_segment=True, cash_sharing=True, group_by=True,
+            init_cash=float(config["account"]["initial_cash_usdt"]),
+            max_orders=int(np.count_nonzero(data["actions"])) + 1,
+            fill_pos_record=False,
+        )
+    except Exception as exc:
+        diagnostic = _first_underflow_receipt(data, scheduled)
+        if diagnostic is not None:
+            raise RuntimeError(
+                f"{exc}; first-underflow={json.dumps(diagnostic, ensure_ascii=False, allow_nan=False)}"
+            ) from exc
+        raise
     funded_legs, grouped, flow_receipt, order_audit = _position_and_order_records(pf, data, scheduled, config)
     equity, equity_audit = _build_equity(pf, data, scheduled, config)
     funded_legs["funding_scenario"] = scenario
@@ -754,6 +996,38 @@ def _run_scenario(legs: pd.DataFrame, flows: pd.DataFrame, data: dict,
         ),
         "boundary_rows_excluded": int(scheduled["flows"].scenario_status.eq("boundary_excluded").sum()),
         "outside_hold_rows": int(scheduled["flows"].scenario_status.isin(["before_entry", "after_exit"]).sum()),
+        "first_margin_funding_step": (
+            int(np.flatnonzero(scheduled["margin_funding_added"].sum(axis=0) > CASH_TOL)[0])
+            if np.any(scheduled["margin_funding_added"].sum(axis=0) > CASH_TOL) else None
+        ),
+        "first_margin_funding_added_usdt": (
+            float(scheduled["margin_funding_added"][:, np.flatnonzero(
+                scheduled["margin_funding_added"].sum(axis=0) > CASH_TOL
+            )[0]].sum())
+            if np.any(scheduled["margin_funding_added"].sum(axis=0) > CASH_TOL) else 0.0
+        ),
+        "first_margin_funding_nav_usdt": (
+            float(scheduled["nav_post"][np.flatnonzero(
+                scheduled["margin_funding_added"].sum(axis=0) > CASH_TOL
+            )[0]])
+            if np.any(scheduled["margin_funding_added"].sum(axis=0) > CASH_TOL) else None
+        ),
+        "first_margin_funding_cash_usdt": (
+            float(scheduled["cash_post"][np.flatnonzero(
+                scheduled["margin_funding_added"].sum(axis=0) > CASH_TOL
+            )[0]])
+            if np.any(scheduled["margin_funding_added"].sum(axis=0) > CASH_TOL) else None
+        ),
+        "first_margin_funding_free_cash_usdt": (
+            float(scheduled["free_post"][np.flatnonzero(
+                scheduled["margin_funding_added"].sum(axis=0) > CASH_TOL
+            )[0]])
+            if np.any(scheduled["margin_funding_added"].sum(axis=0) > CASH_TOL) else None
+        ),
+        "all_cash_and_free_cash_nonnegative": bool(
+            min(scheduled["cash_pre"].min(), scheduled["cash_post"].min(),
+                scheduled["free_pre"].min(), scheduled["free_post"].min()) >= -CASH_TOL
+        ),
         "frozen_entry_priority": data["entry_priority_audit"],
         **order_audit,
         **equity_audit,
@@ -944,7 +1218,9 @@ def run(config_path: Path = CONFIG_PATH) -> dict:
     _assert_committed_for_run(config_path)
     config = _read_json(config_path)
     _validate_config(config)
-    output_dir = EXP / "current"
+    output_dir = ROOT / config["outputs"]["scope"].rstrip("/")
+    if output_dir.resolve() != (EXP / "collateral").resolve():
+        raise ValueError("Corrected collateral output must remain isolated from the preserved current/ receipt")
     receipt_path = output_dir / "account_funding_audit.json"
     if receipt_path.exists():
         raise FileExistsError(f"Funding-account completion receipt already exists: {receipt_path}")
@@ -1112,18 +1388,97 @@ def _mini_check() -> None:
         if not np.isfinite(equity[["nav", "open_nav", "open_exit_nav", "lower_nav", "upper_nav"]]).all().all():
             raise AssertionError("Synthetic stage NAV or conservative H1 bounds are non-finite")
 
-    huge = flows.copy()
-    huge.loc[(huge.event_id.eq("a")) & (huge.tp_r.eq(0.0))
-             & (huge.funding_time_ms.eq(t0 + 5)), "funding_rate"] = 100.0
-    failed = False
+    # Full-collateral all-long fixture: debit the empty free balance into
+    # position-margin liability, repay part with later funding credits, and
+    # repay the remainder from released collateral after native VectorBT exits.
+    collateral_clock = np.arange(t0, t0 + 6 * HOUR, HOUR, dtype=np.int64)
+    collateral_ohlc = np.array([
+        [100.0, 101.0, 99.0, 100.0],
+        [100.0, 101.0, 99.0, 100.0],
+        [100.0, 101.0, 99.0, 100.0],
+        [100.0, 101.0, 99.0, 100.0],
+        [100.0, 101.0, 99.0, 100.0],
+        [100.0, 101.0, 99.0, 100.0],
+    ], dtype=np.float64)
+
+    def collateral_quotes(_symbol):
+        return collateral_clock, collateral_ohlc
+
+    collateral_legs = pd.DataFrame([
+        {"event_id": event, "parent_id": event, "symbol": "BTCUSDT", "side": 1,
+         "entry_ms": entry, "exit_bar_ms": exit_bar, "exit_phase": "close",
+         "entry_price": 100.0, "exit_price": 100.0, "exit_fee_rate": TAKER,
+         "exit_reason": "native_close", "tp_r": tp, "is_control": False,
+         "signed_size": 1.0}
+        for event, entry, exit_bar in (
+            ("collateral_a", t0, t0 + 3 * HOUR),
+            ("collateral_b", t0 + 4 * HOUR, t0 + 5 * HOUR),
+        )
+        for tp in (0.0, 2.0)
+    ])
+    collateral_data = scaleout.pair_data(
+        collateral_legs[collateral_legs.tp_r.eq(0.0)],
+        collateral_legs[collateral_legs.tp_r.eq(2.0)],
+        slots=1, start=t0, end=t0 + 6 * HOUR, quote_loader=collateral_quotes,
+    )
+    collateral_data["entry_priority_audit"] = {
+        "priority_join_key": "event_id", "priority_source_field": "synthetic full-collateral mini",
+        "frozen_position_events_joined": 2, "native_child_path_rows_joined": 4,
+        "priority_values_unique_by_event": True, "priority_events_not_found": 0,
+    }
+    collateral_flow_rows = []
+    for tp in (0.0, 2.0):
+        for funding_time, rate in (
+            (t0 + 5, 0.0005),
+            (t0 + HOUR + 5, -0.0001),
+            (t0 + 2 * HOUR + 5, -0.0001),
+        ):
+            collateral_flow_rows.append({
+                "event_id": "collateral_a", "symbol": "BTCUSDT", "tp_r": float(tp),
+                "funding_time_ms": int(funding_time), "funding_rate": float(rate),
+                "mark_price": 100.0, "mark_source": "binance_fundingRate_markPrice",
+                "boundary_ambiguous": False, "cashflow_known": True,
+            })
+    collateral_flows = pd.DataFrame(collateral_flow_rows)
+    full_cfg = {"account": {"slots": 1, "initial_cash_usdt": INITIAL_CASH,
+                            "new_order_exposure_fraction": 1.0}}
+    full_legs, full_positions, full_eq, full_output = _run_scenario(
+        collateral_legs, collateral_flows, collateral_data, full_cfg, "include_boundary",
+    )
+    full_audit = full_output["audit"]
+    if not full_audit["all_cash_and_free_cash_nonnegative"]:
+        raise AssertionError("Margin-funded settlement made available cash negative")
+    if (full_audit["first_margin_funding_added_usdt"] <= 0.0
+            or full_audit["first_margin_funding_nav_usdt"] <= 0.0
+            or full_audit["first_margin_funding_free_cash_usdt"] > 0.02):
+        raise AssertionError("A full all-long slot did not show a positive-NAV collateral shortfall")
+    if (full_audit["total_margin_liability_repaid_by_funding_usdt"] <= 0.0
+            or full_audit["total_margin_liability_repaid_by_release_usdt"] <= 0.0
+            or full_audit["terminal_margin_funding_liability_usdt"] > CASH_TOL):
+        raise AssertionError("Funding credits and released collateral did not repay the modeled liability")
+    b_funded = full_legs.loc[full_legs.event_id.eq("collateral_b"), "quantity_abs"]
+    if len(b_funded) != 2 or b_funded.le(0).any():
+        raise AssertionError("The next event was not sized from positive collateral after debt repayment")
+    if not np.isfinite(full_eq[["nav", "cash_close_usdt", "free_cash_close_usdt",
+                                 "margin_liability_close_usdt"]]).all().all():
+        raise AssertionError("Collateral fixture produced non-finite account-stage outputs")
+
+    insolvent_flows = collateral_flows.copy()
+    insolvent_flows.loc[insolvent_flows.funding_time_ms.eq(t0 + 5), "funding_rate"] = 2.0
+    insolvency = None
     try:
-        _run_scenario(events, huge, data, cfg, "exclude_boundary")
-    except ValueError as exc:
-        failed = "Funding debit exceeds" in str(exc)
+        _run_scenario(collateral_legs, insolvent_flows, collateral_data, full_cfg, "include_boundary")
     except Exception as exc:
-        failed = "Funding debit exceeds" in str(exc)
-    if not failed:
-        raise AssertionError("Funding cash shortfall did not fail closed")
+        message = str(exc)
+        if "first-underflow=" not in message or "Marked economic NAV is nonpositive" not in message:
+            raise AssertionError(f"True insolvency was rejected for the wrong reason: {message}") from exc
+        insolvency = json.loads(message.split("first-underflow=", 1)[1])
+    if insolvency is None or insolvency["marked_nav_after_funding_usdt"] > 0.0:
+        raise AssertionError("The account did not fail on nonpositive marked NAV")
+    if (insolvency["cash_after_usdt"] < -CASH_TOL
+            or insolvency["free_cash_after_usdt"] < -CASH_TOL
+            or insolvency["margin_funding_liability_after_usdt"] <= 0.0):
+        raise AssertionError("Insolvency receipt does not reconcile nonnegative cash and margin liability")
 
     close_leg = events.loc[events.event_id.eq("b") & events.tp_r.eq(0.0)].iloc[0]
     close_row = pd.Series({"funding_time_ms": int(close_leg.exit_bar_ms) + HOUR})
@@ -1158,7 +1513,12 @@ def _mini_check() -> None:
     print(
         "VectorBT funding account mini-check: PASS "
         f"(include_NAV={include_eq.nav.iloc[-1]:.6f}, exclude_NAV={exclude_eq.nav.iloc[-1]:.6f}, "
-        f"next_event_size={b_in:.8f}/{b_ex:.8f}, priority_slots={int(runner_slots['priority_z'])}/{int(runner_slots['priority_a'])}, rows={len(flows)})",
+        f"next_event_size={b_in:.8f}/{b_ex:.8f}, "
+        f"margin_debit={full_audit['total_margin_funding_added_usdt']:.8f}, "
+        f"repaid_credit/release={full_audit['total_margin_liability_repaid_by_funding_usdt']:.8f}/"
+        f"{full_audit['total_margin_liability_repaid_by_release_usdt']:.8f}, "
+        f"insolvent_NAV={insolvency['marked_nav_after_funding_usdt']:.6f}, "
+        f"priority_slots={int(runner_slots['priority_z'])}/{int(runner_slots['priority_a'])}, rows={len(flows)})",
         flush=True,
     )
 
