@@ -187,7 +187,7 @@ def btc_context(cfg):
     return out
 
 
-def features_for(sig, b, f5, rng_week, ctx, first_ns, tf):
+def features_for(sig, b, f5, rng_week, ctx, first_ns, tf, *, source_minutes=5):
     s = sig.side.to_numpy()
     atr = sig.atr.to_numpy()
     lo, hi, op, cl = (sig[k].to_numpy() for k in ("low", "high", "open", "close"))
@@ -216,11 +216,12 @@ def features_for(sig, b, f5, rng_week, ctx, first_ns, tf):
     X["hours_since_monday"] = (cns - _ns(sig.end)) / 3600 / NS
     X["dow_ny"] = pd.DatetimeIndex(cns).tz_localize("UTC").tz_convert(NY).weekday
     X["prior_touches"] = sig.prior_touches.to_numpy()
-    c5_ns = f5.index.asi8 + 300 * NS
+    c5_ns = f5.index.asi8 + source_minutes * 60 * NS
     c5 = f5.close.to_numpy()
     X["ret_24h"] = s * np.log(cl / _asof(c5_ns, c5, cns - 86400 * NS, 3600 * NS))
     X["ret_7d"] = s * np.log(cl / _asof(c5_ns, c5, cns - 7 * 86400 * NS, 3600 * NS))
-    qv = pd.Series(c5 * f5.volume.to_numpy(), index=pd.DatetimeIndex(c5_ns).tz_localize("UTC"))
+    native_qv = c5 * f5.volume.to_numpy() if source_minutes == 5 else f5["close_volume_sum_5m"].to_numpy()
+    qv = pd.Series(native_qv, index=pd.DatetimeIndex(c5_ns).tz_localize("UTC"))
     qv7 = qv.rolling("7D").sum().to_numpy()
     X["log_qv_7d"] = np.log(np.maximum(_asof(c5_ns, qv7, cns, 0), 1e-12) / 7)
     X["age_days"] = (cns - first_ns) / 86400 / NS
@@ -240,7 +241,8 @@ def _ctx(path):
     return _CTX
 
 
-def build_inputs(f, sym, ctx, *, key_timeframes=None, source_minutes=5, price_decimals=None):
+def build_inputs(f, sym, ctx, *, key_timeframes=None, source_minutes=5, price_decimals=None,
+                 feature_start_ns=None):
     """Signals, causal features, matched controls and stop schedules for one symbol.
 
     ``f`` is complete 5m OHLCV indexed by bar open. Reads no trade outcome.
@@ -249,12 +251,18 @@ def build_inputs(f, sym, ctx, *, key_timeframes=None, source_minutes=5, price_de
     skip model features and sampling of model-training controls. Key-only extraction also
     accepts complete aligned 15m or hourly OHLC when the timeframe is divisible
     by that interval. For extensions, price_decimals can be frozen before the
-    first new key. The model feature path still requires native five-minute volume.
+    first new key. With a frozen source origin (feature_start_ns), key-only mode
+    can also return the predictor columns, without training labels or controls.
+    Coarse inputs then require the exact sum of native five-minute close times
+    base volume for each source bar.
     """
     if source_minutes not in (5, 15, 60) or (source_minutes != 5 and key_timeframes is None):
         raise ValueError("Coarser intervals support only closed-key extraction")
     if key_timeframes and any(TFS[tf] % source_minutes for tf in key_timeframes):
         raise ValueError("Key timeframe must contain an integer number of source intervals")
+    if feature_start_ns is not None and (key_timeframes is None or ctx is None or "volume" not in f
+            or (source_minutes != 5 and "close_volume_sum_5m" not in f)):
+        raise ValueError("Frozen scoring requires a key timeframe, native volume data and BTC context")
     f = f.copy()
     if price_decimals is None:
         decimals = max(2, min(9, int(np.ceil(-np.log10(f[["open", "high", "low", "close"]].to_numpy().min()))) + 7))
@@ -317,6 +325,9 @@ def build_inputs(f, sym, ctx, *, key_timeframes=None, source_minutes=5, price_de
         meta = first[["signal_id", "close_ns", "side", "close", "stop", "pos", "bucket"]].copy()
         meta["tf"], meta["week"] = tf, [str(w.date()) for w in first.wk]
         if key_timeframes is not None:
+            if feature_start_ns is not None:
+                values = features_for(first,b,f,mr,ctx,feature_start_ns,tf,source_minutes=source_minutes)
+                meta = pd.concat([meta,values.drop(columns="side")],axis=1)
             sig_parts.append(meta)
             continue
         X = features_for(first, b, f, mr, ctx, close_ns5[0] - 300 * NS, tf)

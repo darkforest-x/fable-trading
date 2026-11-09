@@ -1,0 +1,10 @@
+{
+  "purpose": "Score new closed V1.7 12H keys with the already fitted test_2026 LightGBM booster, without reading any trade outcome or fitting new parameters.",
+  "single_variable": "Calendar extension only; generate current source features on native hourly aggregates, including the exact sum of 5m close times base volume, native BTC returns/EMA, original source age, and simultaneous raw-signal count over the original score model's 632-contract universe. Formerly unscored supplemental instruments stay unscored.",
+  "parity": "Validate reconstructed probabilities against the published 2026 out-of-time probabilities on common Aug/September observations prior to 2026-09-22. Supply actual aligned 5m volume/turnover for the warmup. Retain a candidate as unscored when new valid volume or cross-venue context is unavailable. No earlier score is retroactively changed.",
+  "runtime": ".venv/bin/python -m yoyo.evaluation.cloud_close_november_scores",
+  "prefix_volume_from": "2026-08-01T00:00:00Z",
+  "verify_from": "2026-08-16T00:00:00Z",
+  "verify_until": "2026-09-22T00:00:00Z",
+  "booster": "experiments/active/exp-signal-center-score-20261106-v1/results/models/12H_test_2026.txt"
+}
