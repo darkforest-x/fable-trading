@@ -1,0 +1,5 @@
+{
+ "question":"Can price protection on the 12H entry avoid paying for moves that occurred between the confirmed closing trade and the next opening trade?",
+ "single_variable":"At the completed UTC 12H signal, price the immediate-or-cancel long no higher (short no lower) than that just-completed native close. At the next actual H1 open, the simulated slippage-adjusted market fill either fits the precommitted limit or is cancelled. Second case permits exactly 5bp adverse movement, fixed from the existing market slippage scenario. No resting order and no delayed fill. Keep original shadow reservations even for cancellations, 10% of previous 60-minute median capacity, four children, 20% hourly trim and original variable exposure. Compare original market order and 5bp stress. All executed orders pay taker fees. This uses a post-order price solely to model whether a previously posted limit could be filled.",
+ "scope":"Native first traded open is an execution proxy. Best bid/ask, queue depth and actual IOC fills are not available for the whole historical sample; the price crossing is necessary evidence only. No historical OKX funding."
+}
