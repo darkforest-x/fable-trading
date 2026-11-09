@@ -1,0 +1,1771 @@
+{
+  "experiment_id": "exp-cloud-close-delist-notice-entry-20261109-v1",
+  "status": "completed",
+  "vectorbt_version": "1.2.0",
+  "source_scope": {
+    "notice_roster": "本机已核实的OKX retired-notice catalog selected=true 的68个币种；这是部分公告目录，不代表完整市场退市横截面。",
+    "notice_article_count": 24,
+    "entry_direction": "short only",
+    "market": "OKX USDT perpetual retired contracts",
+    "source_cutoff_utc": "2026-11-08T12:00:00Z"
+  },
+  "construction": {
+    "publication_source": "official cached article JSON-LD Article.datePublished matched by mainEntityOfPage.@id",
+    "publication_timezone": "datePublished must have explicit UTC offset; date-only and timezone-naive values are excluded",
+    "date_modified": "audit only; never used to determine signal eligibility",
+    "first_12h_open": "ceil(datePublished_ms / 43200000) * 43200000 on the Unix UTC grid; if publication equals a UTC 12H boundary that period may be used",
+    "first_period_only": true,
+    "complete_12h_requirement": "exactly 12 actual H1 opens at consecutive UTC-hour timestamps; no fill or imputation; an incomplete first post-publication period excludes the notice",
+    "ema": "existing V1.7 pure EMA20/50 calculation on completed 12H closes; warmup resets after a missing 12H bar; require EMA20 < EMA50 on the first complete post-publication 12H close",
+    "entry": "next exact H1 open at the 12H confirmation boundary; no nearest-bar or later-open fallback",
+    "side": -1,
+    "protective_stop": "high of the first completed post-publication 12H candle; stop must be strictly above actual short entry",
+    "exit": "existing VectorBT V1.7 path callback: fixed stop, prior-confirmed EMA flip, observed H1 gap, or last observed H1 mark; add a market exit at the last actual H1 open strictly before the official delivery timestamp",
+    "delivery_exit_priority": "native data-gap/EMA/stop path exits that occur earlier remain; if the delivery pre-open is the first exit, close at that H1 open",
+    "comparison": "same notice and short direction; enter exactly 12 hours after the actual entry only if exact H1 open exists, fixed signal-high stop remains above entry, and original native path did not exit before that time; an original open-phase exit at the same timestamp excludes the delayed row, intrabar/close at that timestamp is later than the decision open",
+    "comparison_selection": "delayed arm is conditional on surviving original path to the delayed open; report paired actual subset separately",
+    "price_path_engine": "existing cloud_close_reward_paths VectorBT 1.2.0 from_order_func native path builder; no custom fill ledger"
+  },
+  "account_config": {
+    "initial_cash_usdt": 1000.0,
+    "slots": 9,
+    "exposure": 1.0,
+    "taker_fee_rate": 0.0005,
+    "maker_fee_rate": 0.0002,
+    "market_fill_fee_class": "taker",
+    "stress_slippage_per_market_fill": 0.0005,
+    "funding_included": false,
+    "funding_note": "Funding cashflows and maintenance-margin liquidation are not modeled; report results as historical OHLC shared-cash simulation, not complete perpetual-account NAV.",
+    "source_cutoff_utc": "2026-11-08T12:00:00Z",
+    "periods": {
+      "all": [
+        null,
+        null
+      ],
+      "dev": [
+        null,
+        "2025-01-01T00:00:00Z"
+      ],
+      "2025": [
+        "2025-01-01T00:00:00Z",
+        "2026-01-01T00:00:00Z"
+      ],
+      "2026_to_source_cutoff": [
+        "2026-01-01T00:00:00Z",
+        "2026-11-08T12:00:00Z"
+      ]
+    }
+  },
+  "source_metadata": {
+    "selected_rows": 68,
+    "selected_unique_symbols": 68,
+    "unique_notices": 24,
+    "publication_field_counts": {
+      "exact_timezone_qualified_datetime": 68
+    },
+    "price_month_status_counts_over_selected_sources": {
+      "official_404": 4587,
+      "native_archive": 1057
+    },
+    "hours_read_before_delivery_and_cutoff": 563431,
+    "summed_source_hours_are_per_symbol_not_unique_market_hours": true,
+    "market_source_receipts": [
+      {
+        "instrument": "ACE-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/ACE-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/ACE-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 15205,
+        "source_first_ms": 1702886400000,
+        "source_last_ms": 1772175600000,
+        "source_receipt_hours_full": 15205,
+        "complete_native_minutes_h1_count": 15205,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 56,
+          "native_archive": 27
+        }
+      },
+      {
+        "instrument": "ALCH-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/ALCH-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/ALCH-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 6048,
+        "source_first_ms": 1735891200000,
+        "source_last_ms": 1757660400000,
+        "source_receipt_hours_full": 6048,
+        "complete_native_minutes_h1_count": 6048,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 74,
+          "native_archive": 9
+        }
+      },
+      {
+        "instrument": "ALPHA-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/ALPHA-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/ALPHA-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 10205,
+        "source_first_ms": 1692547200000,
+        "source_last_ms": 1751612400000,
+        "source_receipt_hours_full": 10205,
+        "complete_native_minutes_h1_count": 10205,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 59,
+          "native_archive": 24
+        }
+      },
+      {
+        "instrument": "ANT-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/ANT-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/ANT-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 1776,
+        "source_first_ms": 1692547200000,
+        "source_last_ms": 1706713200000,
+        "source_receipt_hours_full": 1776,
+        "complete_native_minutes_h1_count": 1776,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 73,
+          "native_archive": 10
+        }
+      },
+      {
+        "instrument": "ARC-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/ARC-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/ARC-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 5877,
+        "source_first_ms": 1737716400000,
+        "source_last_ms": 1758870000000,
+        "source_receipt_hours_full": 5877,
+        "complete_native_minutes_h1_count": 5877,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 74,
+          "native_archive": 9
+        }
+      },
+      {
+        "instrument": "AVAAI-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/AVAAI-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/AVAAI-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 6477,
+        "source_first_ms": 1737975600000,
+        "source_last_ms": 1761289200000,
+        "source_receipt_hours_full": 6477,
+        "complete_native_minutes_h1_count": 6477,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 73,
+          "native_archive": 10
+        }
+      },
+      {
+        "instrument": "BADGER-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/BADGER-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/BADGER-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 10709,
+        "source_first_ms": 1692547200000,
+        "source_last_ms": 1753426800000,
+        "source_receipt_hours_full": 10709,
+        "complete_native_minutes_h1_count": 10709,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 59,
+          "native_archive": 24
+        }
+      },
+      {
+        "instrument": "BAL-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/BAL-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/BAL-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 10709,
+        "source_first_ms": 1692547200000,
+        "source_last_ms": 1753426800000,
+        "source_receipt_hours_full": 10709,
+        "complete_native_minutes_h1_count": 10709,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 59,
+          "native_archive": 24
+        }
+      },
+      {
+        "instrument": "BLUAI-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/BLUAI-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/BLUAI-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 2237,
+        "source_first_ms": 1761217200000,
+        "source_last_ms": 1769266800000,
+        "source_receipt_hours_full": 2237,
+        "complete_native_minutes_h1_count": 2237,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 79,
+          "native_archive": 4
+        }
+      },
+      {
+        "instrument": "BNT-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/BNT-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/BNT-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 30651,
+        "source_first_ms": 1630425600000,
+        "source_last_ms": 1763103600000,
+        "source_receipt_hours_full": 30651,
+        "complete_native_minutes_h1_count": 30651,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 32,
+          "native_archive": 51
+        }
+      },
+      {
+        "instrument": "BR-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/BR-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/BR-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 1992,
+        "source_first_ms": 1742544000000,
+        "source_last_ms": 1749711600000,
+        "source_receipt_hours_full": 1992,
+        "complete_native_minutes_h1_count": 1992,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 79,
+          "native_archive": 4
+        }
+      },
+      {
+        "instrument": "BSV-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/BSV-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/BSV-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 9677,
+        "source_first_ms": 1692547200000,
+        "source_last_ms": 1749711600000,
+        "source_receipt_hours_full": 9677,
+        "complete_native_minutes_h1_count": 9677,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 60,
+          "native_archive": 23
+        }
+      },
+      {
+        "instrument": "BUZZ-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/BUZZ-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/BUZZ-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 2732,
+        "source_first_ms": 1737979200000,
+        "source_last_ms": 1747810800000,
+        "source_receipt_hours_full": 2732,
+        "complete_native_minutes_h1_count": 2732,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 78,
+          "native_archive": 5
+        }
+      },
+      {
+        "instrument": "CATI-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/CATI-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/CATI-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 11789,
+        "source_first_ms": 1726830000000,
+        "source_last_ms": 1769266800000,
+        "source_receipt_hours_full": 11789,
+        "complete_native_minutes_h1_count": 11789,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 66,
+          "native_archive": 17
+        }
+      },
+      {
+        "instrument": "CETUS-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/CETUS-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/CETUS-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 16856,
+        "source_first_ms": 1683720000000,
+        "source_last_ms": 1766732400000,
+        "source_receipt_hours_full": 16856,
+        "complete_native_minutes_h1_count": 16856,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 51,
+          "native_archive": 32
+        }
+      },
+      {
+        "instrument": "COOKIE-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/COOKIE-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/COOKIE-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 8764,
+        "source_first_ms": 1737720000000,
+        "source_last_ms": 1769266800000,
+        "source_receipt_hours_full": 8764,
+        "complete_native_minutes_h1_count": 8764,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 70,
+          "native_archive": 13
+        }
+      },
+      {
+        "instrument": "CVC-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/CVC-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/CVC-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 30648,
+        "source_first_ms": 1630425600000,
+        "source_last_ms": 1763103600000,
+        "source_receipt_hours_full": 30648,
+        "complete_native_minutes_h1_count": 30648,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 32,
+          "native_archive": 51
+        }
+      },
+      {
+        "instrument": "DEGEN-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/DEGEN-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/DEGEN-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 9599,
+        "source_first_ms": 1732179600000,
+        "source_last_ms": 1766732400000,
+        "source_receipt_hours_full": 9599,
+        "complete_native_minutes_h1_count": 9599,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 69,
+          "native_archive": 14
+        }
+      },
+      {
+        "instrument": "DGB-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/DGB-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/DGB-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 10109,
+        "source_first_ms": 1721271600000,
+        "source_last_ms": 1757660400000,
+        "source_receipt_hours_full": 10109,
+        "complete_native_minutes_h1_count": 10109,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 64,
+          "native_archive": 19
+        }
+      },
+      {
+        "instrument": "DOGS-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/DOGS-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/DOGS-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 10171,
+        "source_first_ms": 1724677200000,
+        "source_last_ms": 1761289200000,
+        "source_receipt_hours_full": 10171,
+        "complete_native_minutes_h1_count": 10171,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 68,
+          "native_archive": 15
+        }
+      },
+      {
+        "instrument": "FLM-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/FLM-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/FLM-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 12893,
+        "source_first_ms": 1692547200000,
+        "source_last_ms": 1761289200000,
+        "source_receipt_hours_full": 12893,
+        "complete_native_minutes_h1_count": 12893,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 56,
+          "native_archive": 27
+        }
+      },
+      {
+        "instrument": "FOXY-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/FOXY-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/FOXY-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 7373,
+        "source_first_ms": 1721271600000,
+        "source_last_ms": 1747810800000,
+        "source_receipt_hours_full": 7373,
+        "complete_native_minutes_h1_count": 7373,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 69,
+          "native_archive": 14
+        }
+      },
+      {
+        "instrument": "FRONT-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/FRONT-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/FRONT-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 2645,
+        "source_first_ms": 1701360000000,
+        "source_last_ms": 1725433200000,
+        "source_receipt_hours_full": 2645,
+        "complete_native_minutes_h1_count": 2645,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 71,
+          "native_archive": 12
+        }
+      },
+      {
+        "instrument": "FUN-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/FUN-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/FUN-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 989,
+        "source_first_ms": 1768618800000,
+        "source_last_ms": 1772175600000,
+        "source_receipt_hours_full": 989,
+        "complete_native_minutes_h1_count": 989,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 81,
+          "native_archive": 2
+        }
+      },
+      {
+        "instrument": "GOAT-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/GOAT-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/GOAT-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 10055,
+        "source_first_ms": 1729760400000,
+        "source_last_ms": 1765954800000,
+        "source_receipt_hours_full": 10055,
+        "complete_native_minutes_h1_count": 10055,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 68,
+          "native_archive": 15
+        }
+      },
+      {
+        "instrument": "GRIFFAIN-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/GRIFFAIN-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/GRIFFAIN-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 6552,
+        "source_first_ms": 1735286400000,
+        "source_last_ms": 1758870000000,
+        "source_receipt_hours_full": 6552,
+        "complete_native_minutes_h1_count": 6552,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 73,
+          "native_archive": 10
+        }
+      },
+      {
+        "instrument": "GUN-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/GUN-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/GUN-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 1746,
+        "source_first_ms": 1743429600000,
+        "source_last_ms": 1749711600000,
+        "source_receipt_hours_full": 1746,
+        "complete_native_minutes_h1_count": 1746,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 79,
+          "native_archive": 4
+        }
+      },
+      {
+        "instrument": "ID-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/ID-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/ID-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 10403,
+        "source_first_ms": 1702029600000,
+        "source_last_ms": 1754031600000,
+        "source_receipt_hours_full": 10403,
+        "complete_native_minutes_h1_count": 10403,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 62,
+          "native_archive": 21
+        }
+      },
+      {
+        "instrument": "JCT-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/JCT-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/JCT-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 1572,
+        "source_first_ms": 1763611200000,
+        "source_last_ms": 1769266800000,
+        "source_receipt_hours_full": 1572,
+        "complete_native_minutes_h1_count": 1572,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 80,
+          "native_archive": 3
+        }
+      },
+      {
+        "instrument": "JOE-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/JOE-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/JOE-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 12107,
+        "source_first_ms": 1704967200000,
+        "source_last_ms": 1763103600000,
+        "source_receipt_hours_full": 12107,
+        "complete_native_minutes_h1_count": 12107,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 60,
+          "native_archive": 23
+        }
+      },
+      {
+        "instrument": "JST-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/JST-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/JST-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 11549,
+        "source_first_ms": 1692547200000,
+        "source_last_ms": 1756450800000,
+        "source_receipt_hours_full": 11549,
+        "complete_native_minutes_h1_count": 11549,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 58,
+          "native_archive": 25
+        }
+      },
+      {
+        "instrument": "KNC-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/KNC-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/KNC-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 10205,
+        "source_first_ms": 1692547200000,
+        "source_last_ms": 1751612400000,
+        "source_receipt_hours_full": 10205,
+        "complete_native_minutes_h1_count": 10205,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 59,
+          "native_archive": 24
+        }
+      },
+      {
+        "instrument": "LSK-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/LSK-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/LSK-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 8796,
+        "source_first_ms": 1706605200000,
+        "source_last_ms": 1752822000000,
+        "source_receipt_hours_full": 8796,
+        "complete_native_minutes_h1_count": 8796,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 64,
+          "native_archive": 19
+        }
+      },
+      {
+        "instrument": "MEMEFI-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/MEMEFI-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/MEMEFI-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 4113,
+        "source_first_ms": 1732287600000,
+        "source_last_ms": 1747090800000,
+        "source_receipt_hours_full": 4113,
+        "complete_native_minutes_h1_count": 4113,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 76,
+          "native_archive": 7
+        }
+      },
+      {
+        "instrument": "MOVR-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/MOVR-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/MOVR-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 8269,
+        "source_first_ms": 1704787200000,
+        "source_last_ms": 1749106800000,
+        "source_receipt_hours_full": 8269,
+        "complete_native_minutes_h1_count": 8269,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 65,
+          "native_archive": 18
+        }
+      },
+      {
+        "instrument": "NEIROETH-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/NEIROETH-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/NEIROETH-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 8902,
+        "source_first_ms": 1725616800000,
+        "source_last_ms": 1757660400000,
+        "source_receipt_hours_full": 8902,
+        "complete_native_minutes_h1_count": 8902,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 70,
+          "native_archive": 13
+        }
+      },
+      {
+        "instrument": "NEWT-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/NEWT-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/NEWT-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 3477,
+        "source_first_ms": 1753441200000,
+        "source_last_ms": 1765954800000,
+        "source_receipt_hours_full": 3477,
+        "complete_native_minutes_h1_count": 3477,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 77,
+          "native_archive": 6
+        }
+      },
+      {
+        "instrument": "NFT-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/NFT-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/NFT-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 9029,
+        "source_first_ms": 1692547200000,
+        "source_last_ms": 1747378800000,
+        "source_receipt_hours_full": 9029,
+        "complete_native_minutes_h1_count": 9029,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 61,
+          "native_archive": 22
+        }
+      },
+      {
+        "instrument": "NIL-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/NIL-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/NIL-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 1872,
+        "source_first_ms": 1746691200000,
+        "source_last_ms": 1753426800000,
+        "source_receipt_hours_full": 1872,
+        "complete_native_minutes_h1_count": 1872,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 80,
+          "native_archive": 3
+        }
+      },
+      {
+        "instrument": "NXPC-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/NXPC-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/NXPC-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 3574,
+        "source_first_ms": 1748944800000,
+        "source_last_ms": 1761807600000,
+        "source_receipt_hours_full": 3574,
+        "complete_native_minutes_h1_count": 3574,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 78,
+          "native_archive": 5
+        }
+      },
+      {
+        "instrument": "ORBS-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/ORBS-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/ORBS-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 11933,
+        "source_first_ms": 1701360000000,
+        "source_last_ms": 1758870000000,
+        "source_receipt_hours_full": 11933,
+        "complete_native_minutes_h1_count": 11933,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 59,
+          "native_archive": 24
+        }
+      },
+      {
+        "instrument": "PERP-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/PERP-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/PERP-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 12893,
+        "source_first_ms": 1692547200000,
+        "source_last_ms": 1761289200000,
+        "source_receipt_hours_full": 12893,
+        "complete_native_minutes_h1_count": 12893,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 56,
+          "native_archive": 27
+        }
+      },
+      {
+        "instrument": "PROMPT-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/PROMPT-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/PROMPT-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 7746,
+        "source_first_ms": 1744293600000,
+        "source_last_ms": 1772175600000,
+        "source_receipt_hours_full": 7746,
+        "complete_native_minutes_h1_count": 7746,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 72,
+          "native_archive": 11
+        }
+      },
+      {
+        "instrument": "PUFFER-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/PUFFER-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/PUFFER-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 5611,
+        "source_first_ms": 1728910800000,
+        "source_last_ms": 1749106800000,
+        "source_receipt_hours_full": 5611,
+        "complete_native_minutes_h1_count": 5611,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 74,
+          "native_archive": 9
+        }
+      },
+      {
+        "instrument": "RDNT-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/RDNT-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/RDNT-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 10877,
+        "source_first_ms": 1692547200000,
+        "source_last_ms": 1754031600000,
+        "source_receipt_hours_full": 10877,
+        "complete_native_minutes_h1_count": 10877,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 58,
+          "native_archive": 25
+        }
+      },
+      {
+        "instrument": "REN-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/REN-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/REN-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 2789,
+        "source_first_ms": 1692547200000,
+        "source_last_ms": 1724914800000,
+        "source_receipt_hours_full": 2789,
+        "complete_native_minutes_h1_count": 2789,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 70,
+          "native_archive": 13
+        }
+      },
+      {
+        "instrument": "RON-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/RON-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/RON-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 8603,
+        "source_first_ms": 1702288800000,
+        "source_last_ms": 1747810800000,
+        "source_receipt_hours_full": 8603,
+        "complete_native_minutes_h1_count": 8603,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 65,
+          "native_archive": 18
+        }
+      },
+      {
+        "instrument": "SCR-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/SCR-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/SCR-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 8947,
+        "source_first_ms": 1729602000000,
+        "source_last_ms": 1761807600000,
+        "source_receipt_hours_full": 8947,
+        "complete_native_minutes_h1_count": 8947,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 70,
+          "native_archive": 13
+        }
+      },
+      {
+        "instrument": "SLERF-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/SLERF-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/SLERF-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 5399,
+        "source_first_ms": 1732179600000,
+        "source_last_ms": 1751612400000,
+        "source_receipt_hours_full": 5399,
+        "complete_native_minutes_h1_count": 5399,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 74,
+          "native_archive": 9
+        }
+      },
+      {
+        "instrument": "SLP-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/SLP-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/SLP-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 12893,
+        "source_first_ms": 1692547200000,
+        "source_last_ms": 1761289200000,
+        "source_receipt_hours_full": 12893,
+        "complete_native_minutes_h1_count": 12893,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 56,
+          "native_archive": 27
+        }
+      },
+      {
+        "instrument": "SOLV-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/SOLV-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/SOLV-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 8933,
+        "source_first_ms": 1737111600000,
+        "source_last_ms": 1769266800000,
+        "source_receipt_hours_full": 8933,
+        "complete_native_minutes_h1_count": 8933,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 70,
+          "native_archive": 13
+        }
+      },
+      {
+        "instrument": "SONIC-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/SONIC-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/SONIC-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 8250,
+        "source_first_ms": 1736258400000,
+        "source_last_ms": 1765954800000,
+        "source_receipt_hours_full": 8250,
+        "complete_native_minutes_h1_count": 8250,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 71,
+          "native_archive": 12
+        }
+      },
+      {
+        "instrument": "STORJ-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/STORJ-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/STORJ-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 13037,
+        "source_first_ms": 1692547200000,
+        "source_last_ms": 1761807600000,
+        "source_receipt_hours_full": 13037,
+        "complete_native_minutes_h1_count": 13037,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 56,
+          "native_archive": 27
+        }
+      },
+      {
+        "instrument": "SWARMS-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/SWARMS-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/SWARMS-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 5876,
+        "source_first_ms": 1737720000000,
+        "source_last_ms": 1758870000000,
+        "source_receipt_hours_full": 5876,
+        "complete_native_minutes_h1_count": 5876,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 74,
+          "native_archive": 9
+        }
+      },
+      {
+        "instrument": "SWELL-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/SWELL-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/SWELL-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 4774,
+        "source_first_ms": 1732528800000,
+        "source_last_ms": 1749711600000,
+        "source_receipt_hours_full": 4774,
+        "complete_native_minutes_h1_count": 4774,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 75,
+          "native_archive": 8
+        }
+      },
+      {
+        "instrument": "T-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/T-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/T-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 11117,
+        "source_first_ms": 1721271600000,
+        "source_last_ms": 1761289200000,
+        "source_receipt_hours_full": 11117,
+        "complete_native_minutes_h1_count": 11117,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 62,
+          "native_archive": 21
+        }
+      },
+      {
+        "instrument": "TNSR-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/TNSR-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/TNSR-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 11261,
+        "source_first_ms": 1721271600000,
+        "source_last_ms": 1761807600000,
+        "source_receipt_hours_full": 11261,
+        "complete_native_minutes_h1_count": 11261,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 64,
+          "native_archive": 19
+        }
+      },
+      {
+        "instrument": "TREE-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/TREE-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/TREE-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 4297,
+        "source_first_ms": 1753801200000,
+        "source_last_ms": 1769266800000,
+        "source_receipt_hours_full": 4297,
+        "complete_native_minutes_h1_count": 4297,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 76,
+          "native_archive": 7
+        }
+      },
+      {
+        "instrument": "TURTLE-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/TURTLE-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/TURTLE-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 2213,
+        "source_first_ms": 1761303600000,
+        "source_last_ms": 1769266800000,
+        "source_receipt_hours_full": 2213,
+        "complete_native_minutes_h1_count": 2213,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 79,
+          "native_archive": 4
+        }
+      },
+      {
+        "instrument": "ULTI-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/ULTI-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/ULTI-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 7373,
+        "source_first_ms": 1721271600000,
+        "source_last_ms": 1747810800000,
+        "source_receipt_hours_full": 7373,
+        "complete_native_minutes_h1_count": 7373,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 71,
+          "native_archive": 12
+        }
+      },
+      {
+        "instrument": "UXLINK-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/UXLINK-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/UXLINK-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 10372,
+        "source_first_ms": 1721296800000,
+        "source_last_ms": 1758632400000,
+        "source_receipt_hours_full": 10372,
+        "complete_native_minutes_h1_count": 10372,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 68,
+          "native_archive": 15
+        }
+      },
+      {
+        "instrument": "VELO-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/VELO-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/VELO-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 7373,
+        "source_first_ms": 1721271600000,
+        "source_last_ms": 1747810800000,
+        "source_receipt_hours_full": 7373,
+        "complete_native_minutes_h1_count": 7373,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 68,
+          "native_archive": 15
+        }
+      },
+      {
+        "instrument": "VINE-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/VINE-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/VINE-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 5829,
+        "source_first_ms": 1737889200000,
+        "source_last_ms": 1758870000000,
+        "source_receipt_hours_full": 5829,
+        "complete_native_minutes_h1_count": 5829,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 74,
+          "native_archive": 9
+        }
+      },
+      {
+        "instrument": "WAXP-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/WAXP-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/WAXP-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 11597,
+        "source_first_ms": 1701360000000,
+        "source_last_ms": 1757660400000,
+        "source_receipt_hours_full": 11597,
+        "complete_native_minutes_h1_count": 11597,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 59,
+          "native_archive": 24
+        }
+      },
+      {
+        "instrument": "XAN-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/XAN-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/XAN-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 3615,
+        "source_first_ms": 1759165200000,
+        "source_last_ms": 1772175600000,
+        "source_receipt_hours_full": 3615,
+        "complete_native_minutes_h1_count": 3615,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 77,
+          "native_archive": 6
+        }
+      },
+      {
+        "instrument": "YFII-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/YFII-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/YFII-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 1776,
+        "source_first_ms": 1692547200000,
+        "source_last_ms": 1706713200000,
+        "source_receipt_hours_full": 1776,
+        "complete_native_minutes_h1_count": 1776,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 76,
+          "native_archive": 7
+        }
+      },
+      {
+        "instrument": "ZEREBRO-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/ZEREBRO-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/ZEREBRO-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 6216,
+        "source_first_ms": 1735286400000,
+        "source_last_ms": 1757660400000,
+        "source_receipt_hours_full": 6216,
+        "complete_native_minutes_h1_count": 6216,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 73,
+          "native_archive": 10
+        }
+      },
+      {
+        "instrument": "ZKJ-USDT-SWAP",
+        "bars_path": "data/research/cloud_close_okx_retired_prices/series/ZKJ-USDT-SWAP/bars1h.csv.gz",
+        "source_receipt": "data/research/cloud_close_okx_retired_prices/series/ZKJ-USDT-SWAP/source.json",
+        "source_hours_before_cutoff": 3479,
+        "source_first_ms": 1733475600000,
+        "source_last_ms": 1745996400000,
+        "source_receipt_hours_full": 3479,
+        "complete_native_minutes_h1_count": 3479,
+        "supplemental_local_h1_count": 0,
+        "overlap_disagreement_count": 0,
+        "month_status_counts": {
+          "official_404": 78,
+          "native_archive": 5
+        }
+      }
+    ]
+  },
+  "candidate_counts": {
+    "notice_symbols": 68,
+    "first_12h_incomplete": 2,
+    "ema_not_ready": 0,
+    "first_confirmation_not_bearish": 17,
+    "actual_candidates": 41,
+    "delayed_matched": 25,
+    "delayed_unmatched_reasons": {
+      "original_path_exited_before_delayed_open": 16,
+      "matched_survived_to_exact_delayed_open": 25
+    }
+  },
+  "candidate_events": 41,
+  "actual_path_rows": 41,
+  "delayed_path_rows": 25,
+  "native_path_meta": {
+    "_meta:ACE": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:ALCH": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:ALPHA": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:ARC": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:AVAAI": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:BNT": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:BR": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:BSV": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:CETUS": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:CVC": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:DEGEN": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:DGB": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:DOGS": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:FLM": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:FUN": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:GOAT": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:GUN": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:JOE": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:JST": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:KNC": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:MOVR": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:NEIROETH": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:NEWT": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:NXPC": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:ORBS": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:PERP": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:PROMPT": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:PUFFER": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:REN": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:SCR": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:SLERF": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:SLP": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:SONIC": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:STORJ": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:SWELL": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:T": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:TNSR": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:WAXP": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:XAN": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:ZEREBRO": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    },
+    "_meta:ZKJ": {
+      "columns": 1,
+      "orders": 2,
+      "trades": 1
+    }
+  },
+  "account_results": {
+    "actual_all_base": {
+      "metrics": {
+        "all": {
+          "final_usdt": 1005.1813265320519,
+          "multiple": 1.005181326532052,
+          "dd_mark_pct": 5.377345144273161,
+          "dd_bound_pct": 7.02940126244469,
+          "trades": 41,
+          "win_pct": 31.70731707317073,
+          "payoff": 2.3198065688569454,
+          "payoff_usdt": 2.2871677999299114,
+          "median_net_pct": -0.7835183603757491
+        },
+        "dev": {
+          "final_usdt": 999.8889444166916,
+          "multiple": 0.9998889444166916,
+          "dd_mark_pct": 0.011105558330837262,
+          "dd_bound_pct": 0.011105558330837262,
+          "trades": 1,
+          "win_pct": 0.0,
+          "payoff": null,
+          "payoff_usdt": null,
+          "median_net_pct": -0.1
+        },
+        "2025": {
+          "final_usdt": 1021.3359166962524,
+          "multiple": 1.0214493543501197,
+          "dd_mark_pct": 5.377345144273161,
+          "dd_bound_pct": 7.02940126244469,
+          "trades": 36,
+          "win_pct": 36.11111111111111,
+          "payoff": 2.367173076767041,
+          "payoff_usdt": 2.331873399976689,
+          "median_net_pct": -0.5784091223558181
+        },
+        "2026_to_source_cutoff": {
+          "final_usdt": 1005.1813265320519,
+          "multiple": 0.9841828825363782,
+          "dd_mark_pct": 1.6116236515980153,
+          "dd_bound_pct": 1.9522874092973486,
+          "trades": 4,
+          "win_pct": 0.0,
+          "payoff": null,
+          "payoff_usdt": null,
+          "median_net_pct": -3.826886456514701
+        }
+      },
+      "admission": {
+        "cohort": "actual_all",
+        "input_events": 41,
+        "admitted": 41,
+        "funded": 41,
+        "skips": {
+          "same_contract": 0,
+          "all_slots_busy": 0
+        },
+        "unquoted_position_hours": 0,
+        "initial_cash_usdt": 1000.0,
+        "slots": 9,
+        "exposure": 1.0,
+        "extra_market_slippage_per_fill": 0.0
+      }
+    },
+    "actual_all_extra_5bp": {
+      "metrics": {
+        "all": {
+          "final_usdt": 1000.6040947304671,
+          "multiple": 1.000604094730467,
+          "dd_mark_pct": 5.56713475496834,
+          "dd_bound_pct": 7.087417828262854,
+          "trades": 41,
+          "win_pct": 31.70731707317073,
+          "payoff": 2.1981732444124624,
+          "payoff_usdt": 2.1688573395476944,
+          "median_net_pct": -0.8843022706912643
+        },
+        "dev": {
+          "final_usdt": 999.7779998334665,
+          "multiple": 0.9997779998334665,
+          "dd_mark_pct": 0.022200016653350918,
+          "dd_bound_pct": 0.022200016653350918,
+          "trades": 1,
+          "win_pct": 0.0,
+          "payoff": null,
+          "payoff_usdt": null,
+          "median_net_pct": -0.20010005002498804
+        },
+        "2025": {
+          "final_usdt": 1017.1437634784729,
+          "multiple": 1.0173696197034732,
+          "dd_mark_pct": 5.56713475496834,
+          "dd_bound_pct": 7.087417828262854,
+          "trades": 36,
+          "win_pct": 36.11111111111111,
+          "payoff": 2.241379431604895,
+          "payoff_usdt": 2.2086761340276415,
+          "median_net_pct": -0.6789878208274002
+        },
+        "2026_to_source_cutoff": {
+          "final_usdt": 1000.6040947304671,
+          "multiple": 0.9837391042034778,
+          "dd_mark_pct": 1.6341533746609516,
+          "dd_bound_pct": 1.97464482439349,
+          "trades": 4,
+          "win_pct": 0.0,
+          "payoff": null,
+          "payoff_usdt": null,
+          "median_net_pct": -3.930715257371633
+        }
+      },
+      "admission": {
+        "cohort": "actual_all",
+        "input_events": 41,
+        "admitted": 41,
+        "funded": 41,
+        "skips": {
+          "same_contract": 0,
+          "all_slots_busy": 0
+        },
+        "unquoted_position_hours": 0,
+        "initial_cash_usdt": 1000.0,
+        "slots": 9,
+        "exposure": 1.0,
+        "extra_market_slippage_per_fill": 0.0005
+      }
+    },
+    "actual_paired_base": {
+      "metrics": {
+        "all": {
+          "final_usdt": 1033.719580674891,
+          "multiple": 1.033719580674891,
+          "dd_mark_pct": 4.861410300722291,
+          "dd_bound_pct": 6.617997822506538,
+          "trades": 25,
+          "win_pct": 52.0,
+          "payoff": 1.5089765074079262,
+          "payoff_usdt": 1.4806013726221785,
+          "median_net_pct": 0.30100200400801363
+        },
+        "dev": {
+          "final_usdt": 1000.0,
+          "multiple": 1.0,
+          "dd_mark_pct": 0.0,
+          "dd_bound_pct": 0.0,
+          "trades": 0,
+          "win_pct": null,
+          "payoff": null,
+          "payoff_usdt": null,
+          "median_net_pct": null
+        },
+        "2025": {
+          "final_usdt": 1038.699301179235,
+          "multiple": 1.038699301179235,
+          "dd_mark_pct": 4.861410300722291,
+          "dd_bound_pct": 6.617997822506538,
+          "trades": 24,
+          "win_pct": 54.166666666666664,
+          "payoff": 1.518505968147299,
+          "payoff_usdt": 1.4901328716633462,
+          "median_net_pct": 0.431271566576069
+        },
+        "2026_to_source_cutoff": {
+          "final_usdt": 1033.719580674891,
+          "multiple": 0.9952058112500023,
+          "dd_mark_pct": 0.4889187524667937,
+          "dd_bound_pct": 0.5189578294785835,
+          "trades": 1,
+          "win_pct": 0.0,
+          "payoff": null,
+          "payoff_usdt": null,
+          "median_net_pct": -4.316927260367086
+        }
+      },
+      "admission": {
+        "cohort": "actual_paired",
+        "input_events": 25,
+        "admitted": 25,
+        "funded": 25,
+        "skips": {
+          "same_contract": 0,
+          "all_slots_busy": 0
+        },
+        "unquoted_position_hours": 0,
+        "initial_cash_usdt": 1000.0,
+        "slots": 9,
+        "exposure": 1.0,
+        "extra_market_slippage_per_fill": 0.0
+      }
+    },
+    "actual_paired_extra_5bp": {
+      "metrics": {
+        "all": {
+          "final_usdt": 1030.8540407894259,
+          "multiple": 1.0308540407894258,
+          "dd_mark_pct": 4.910341762317893,
+          "dd_bound_pct": 6.665693819844187,
+          "trades": 25,
+          "win_pct": 52.0,
+          "payoff": 1.4484055210411346,
+          "payoff_usdt": 1.4215483876135648,
+          "median_net_pct": 0.20130315658832038
+        },
+        "dev": {
+          "final_usdt": 1000.0,
+          "multiple": 1.0,
+          "dd_mark_pct": 0.0,
+          "dd_bound_pct": 0.0,
+          "trades": 0,
+          "win_pct": null,
+          "payoff": null,
+          "payoff_usdt": null,
+          "median_net_pct": null
+        },
+        "2025": {
+          "final_usdt": 1035.935442258314,
+          "multiple": 1.035935442258314,
+          "dd_mark_pct": 4.910341762317893,
+          "dd_bound_pct": 6.665693819844187,
+          "trades": 24,
+          "win_pct": 54.166666666666664,
+          "payoff": 1.4573302814568223,
+          "payoff_usdt": 1.4302891244620672,
+          "median_net_pct": 0.3317030538863172
+        },
+        "2026_to_source_cutoff": {
+          "final_usdt": 1030.8540407894259,
+          "multiple": 0.9950948666667773,
+          "dd_mark_pct": 0.49448813303489825,
+          "dd_bound_pct": 0.5245121884468018,
+          "trades": 1,
+          "win_pct": 0.0,
+          "payoff": null,
+          "payoff_usdt": null,
+          "median_net_pct": -4.421246347170847
+        }
+      },
+      "admission": {
+        "cohort": "actual_paired",
+        "input_events": 25,
+        "admitted": 25,
+        "funded": 25,
+        "skips": {
+          "same_contract": 0,
+          "all_slots_busy": 0
+        },
+        "unquoted_position_hours": 0,
+        "initial_cash_usdt": 1000.0,
+        "slots": 9,
+        "exposure": 1.0,
+        "extra_market_slippage_per_fill": 0.0005
+      }
+    },
+    "delayed_12h_base": {
+      "metrics": {
+        "all": {
+          "final_usdt": 1009.4115839091187,
+          "multiple": 1.0094115839091187,
+          "dd_mark_pct": 4.937069660862459,
+          "dd_bound_pct": 6.6989933885028385,
+          "trades": 25,
+          "win_pct": 48.0,
+          "payoff": 1.2627002667014966,
+          "payoff_usdt": 1.249185347201303,
+          "median_net_pct": -0.14193015133877174
+        },
+        "dev": {
+          "final_usdt": 1000.0,
+          "multiple": 1.0,
+          "dd_mark_pct": 0.0,
+          "dd_bound_pct": 0.0,
+          "trades": 0,
+          "win_pct": null,
+          "payoff": null,
+          "payoff_usdt": null,
+          "median_net_pct": null
+        },
+        "2025": {
+          "final_usdt": 1011.6151234702152,
+          "multiple": 1.011615123470215,
+          "dd_mark_pct": 4.937069660862459,
+          "dd_bound_pct": 6.6989933885028385,
+          "trades": 24,
+          "win_pct": 50.0,
+          "payoff": 1.2088641776216793,
+          "payoff_usdt": 1.1959622685913578,
+          "median_net_pct": -0.05199678522821061
+        },
+        "2026_to_source_cutoff": {
+          "final_usdt": 1009.4115839091187,
+          "multiple": 0.9978217609543663,
+          "dd_mark_pct": 0.21782390456337453,
+          "dd_bound_pct": 0.24172963224490251,
+          "trades": 1,
+          "win_pct": 0.0,
+          "payoff": null,
+          "payoff_usdt": null,
+          "median_net_pct": -1.9613953488372076
+        }
+      },
+      "admission": {
+        "cohort": "delayed_12h",
+        "input_events": 25,
+        "admitted": 25,
+        "funded": 25,
+        "skips": {
+          "same_contract": 0,
+          "all_slots_busy": 0
+        },
+        "unquoted_position_hours": 0,
+        "initial_cash_usdt": 1000.0,
+        "slots": 9,
+        "exposure": 1.0,
+        "extra_market_slippage_per_fill": 0.0
+      }
+    },
+    "delayed_12h_extra_5bp": {
+      "metrics": {
+        "all": {
+          "final_usdt": 1006.6060998736389,
+          "multiple": 1.0066060998736388,
+          "dd_mark_pct": 4.985951079687679,
+          "dd_bound_pct": 6.7466356370909475,
+          "trades": 25,
+          "win_pct": 44.0,
+          "payoff": 1.4217097878709233,
+          "payoff_usdt": 1.4063241045845738,
+          "median_net_pct": -0.24207215249066102
+        },
+        "dev": {
+          "final_usdt": 1000.0,
+          "multiple": 1.0,
+          "dd_mark_pct": 0.0,
+          "dd_bound_pct": 0.0,
+          "trades": 0,
+          "win_pct": null,
+          "payoff": null,
+          "payoff_usdt": null,
+          "median_net_pct": null
+        },
+        "2025": {
+          "final_usdt": 1008.9156931613228,
+          "multiple": 1.0089156931613228,
+          "dd_mark_pct": 4.985951079687679,
+          "dd_bound_pct": 6.7466356370909475,
+          "trades": 24,
+          "win_pct": 45.83333333333333,
+          "payoff": 1.370491819001266,
+          "payoff_usdt": 1.3556220056314858,
+          "median_net_pct": -0.15204880802481985
+        },
+        "2026_to_source_cutoff": {
+          "final_usdt": 1006.6060998736389,
+          "multiple": 0.9977108163711409,
+          "dd_mark_pct": 0.2289183628859104,
+          "dd_bound_pct": 0.24727730279416882,
+          "trades": 1,
+          "win_pct": 0.0,
+          "payoff": null,
+          "payoff_usdt": null,
+          "median_net_pct": -2.063357725374302
+        }
+      },
+      "admission": {
+        "cohort": "delayed_12h",
+        "input_events": 25,
+        "admitted": 25,
+        "funded": 25,
+        "skips": {
+          "same_contract": 0,
+          "all_slots_busy": 0
+        },
+        "unquoted_position_hours": 0,
+        "initial_cash_usdt": 1000.0,
+        "slots": 9,
+        "exposure": 1.0,
+        "extra_market_slippage_per_fill": 0.0005
+      }
+    }
+  },
+  "limits": [
+    "The 68 instruments are a partial notice-directory roster, not a full-market census.",
+    "Published time is the official cached Article JSON-LD datePublished field; dateModified is audit-only.",
+    "The delayed comparison is conditional on the original position surviving to the exact delayed open.",
+    "Retired-price H1 paths are historical OHLC proxies; no funding, liquidation, or market-depth model is included."
+  ]
+}

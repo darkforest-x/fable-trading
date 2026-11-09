@@ -20448,3 +20448,35 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: "Full-minute volume includes post-entry trades and is not market depth or guaranteed fill capacity. Input ledgers preserve aggregate actual_notional rather than raw units/fill prices; open-implied base units are explicitly approximate. Different hypothetical arms are not simultaneous flow. No entry selection, sizing, or account was changed."
+
+  - experiment_id: exp-cloud-close-delist-notice-entry-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "3d60300494"
+    status: "inconclusive"
+    question: "公告发布后首个完整12H云带偏空信号，是否优于同公告、同方向延迟12H入场？"
+    single_variable: "首个公告后完整12H收盘后立即入场，对比原始V1.7路径存活时同一方向延迟12H入场；固定止损为首根12H高点，V1.7止损/EMA退出不变。"
+    result: "68个公告币种中41个可执行首根偏空确认；实际全组1000→1005.18U、31.71%胜、现金盈亏比2.287、回撤上界7.03%。25个可配对幸存事件中，立即入场账户1033.72U，对照延后账户1009.41U；额外每边5bp压力后为1030.85U/1006.61U。"
+    artifacts:
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/config.json
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/summary.json
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/notice_timing.csv
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/candidate_audit.csv
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/paths.csv.gz
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/funded_actual_all_base.csv.gz
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/funded_actual_paired_base.csv.gz
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/funded_delayed_12h_base.csv.gz
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/hourly_actual_all_base.csv.gz
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/hourly_actual_paired_base.csv.gz
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/hourly_delayed_12h_base.csv.gz
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/funded_actual_all_extra_5bp.csv.gz
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/funded_actual_paired_extra_5bp.csv.gz
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/funded_delayed_12h_extra_5bp.csv.gz
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/hourly_actual_all_extra_5bp.csv.gz
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/hourly_actual_paired_extra_5bp.csv.gz
+      - experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/hourly_delayed_12h_extra_5bp.csv.gz
+    canonical_report: "experiments/active/exp-cloud-close-delist-notice-entry-20261109-v1/summary.json"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: "所有68/68公告首发时间取本机官方HTML的Article.datePublished，dateModified仅审计；首根12H要求完整12根原生H1，不完整即排除。此为部分公告目录，不是全市场退市样本； funding 与强平未建模。延后对照仅保留原路径存活到延后开盘的25/41个事件。"
