@@ -1,0 +1,140 @@
+{
+  "id": "exp-cloud-close-hourly-trim-funding-20261109-v1",
+  "status": "preregistered_builder_pending_owner_commit",
+  "venue": "Binance USD-M",
+  "question": "How do observed Binance funding settlements change cash, NAV, sizing, and hourly 20% single-contract reductions in the frozen one-hour-review account?",
+  "source_account": {
+    "experiment": "exp-cloud-close-hourly-trim-20261109-v1",
+    "source_builder": "yoyo.evaluation.cloud_close_hourly_trim",
+    "selection": "The already selected Binance actual account parents and their two original native child exits; do not reselect, re-admit, or alter entry priority.",
+    "positions": 1536,
+    "child_legs": 3072,
+    "parent_join_key": "event_id",
+    "child_join_key": ["event_id", "tp_r"]
+  },
+  "inputs": {
+    "child_windows": "experiments/active/exp-cloud-close-hourly-trim-funding-20261109-v1/child_windows.csv.gz",
+    "funding_tape": "experiments/active/exp-cloud-close-hourly-trim-funding-20261109-v1/funding_tape.csv.gz",
+    "source_coverage": "experiments/active/exp-cloud-close-hourly-trim-funding-20261109-v1/source_coverage.json",
+    "source_months": "experiments/active/exp-cloud-close-hourly-trim-funding-20261109-v1/source_months.csv.gz",
+    "symbol_convention": "The funding tape uses Binance base symbols without USDT; child paths use the same base symbol. Source month keys append USDT.",
+    "funding_clock": "Use funding_time_ms and exact entry_ms/exit_bar_ms/exit_phase; do not infer a settlement from candle hour alone."
+  },
+  "account": {
+    "initial_cash_usdt": 1000.0,
+    "slots": 9,
+    "new_order_exposure_fraction": 0.9,
+    "expected_positions": 1536,
+    "expected_child_legs": 3072,
+    "leg_fraction_by_tp_r": {
+      "2.0": 0.6666666666666666,
+      "0.0": 0.3333333333333333
+    },
+    "entry_priority": "Preserve the original native hourly account admission order: entry_ms, entry_order, symbol CRC32, symbol, event_id.",
+    "child_position_sizing": "Recalculate each child from current funding-adjusted marked NAV and available cash through the existing reward_account.account_order callback.",
+    "same_contract_overlap": "Keep the original admitted slot roster and no-overlapping-contract rule."
+  },
+  "hourly_management": {
+    "review_hours": 1,
+    "single_contract_weight_cap": 0.2,
+    "target_clock": "At each actual H1 open, use the previously completed H1 close, prevailing account NAV, and actual remaining two-leg quantity.",
+    "order_clock": "Execute a reduction at that H1 open after native open exits and before native intrabar/close exits.",
+    "trigger": "Reduce only when prevailing marked gross contract value exceeds 20% of the prior-close NAV.",
+    "execution": "VectorBT market reduction at the existing native H1 open price; 5bp taker fee; no fabricated hourly bar or future high/low trigger.",
+    "gap_policy": "Only actual native H1 bars create review/reduction opportunities; missing bars do not create synthetic fills."
+  },
+  "execution": {
+    "engine": "VectorBT 1.2.0 Portfolio.from_order_func with native reward_account.account_order and the frozen cloud_close_hourly_trim 4-stage order schedule.",
+    "stages_per_h1": [
+      "Calculate the existing trim target from the prior completed H1 close, post exact-open funding, then submit current-open entries.",
+      "Native open exits; then post exact open-exit boundary settlements using the cached pre-exit child quantity.",
+      "Execute the existing hourly weight-cap reduction at the actual H1 open; post later-millisecond or strictly in-hour settlements after this reduction and before native intrabar/close exits.",
+      "Native intrabar/close exits; then post exact close-boundary settlements using cached pre-exit quantity."
+    ],
+    "entry_fee_rate": 0.0005,
+    "entry_fee_class": "taker",
+    "native_exit_fee_rate_source": "Frozen child_windows.exit_fee_rate; maker target exits 0.0002 and market/stop/cloud exits 0.0005.",
+    "reduction_fee_rate": 0.0005,
+    "slippage": 0.0,
+    "cash_sharing": true,
+    "funding_cashflow_formula": "-signed live child quantity * funding_rate * settlement mark_price",
+    "no_fill_policy": "Any frozen parent/child without its original entry and native exit VectorBT fills invalidates the replay; do not silently drop or replace it."
+  },
+  "boundary_policy": {
+    "timestamp_resolution": "Exact source milliseconds; no timestamp tolerance",
+    "known_ordering": {
+      "interior_at_hour_open": "The hourly cap target is first calculated from the previous completed close as in the frozen manager; then a settlement exactly at the H1 timestamp is posted before current-open order fills, unless it is that child’s exact entry or exit boundary.",
+      "entry_boundary": "An exact entry_ms settlement is applied after that child's VectorBT entry; only the include-boundary scenario charges it.",
+      "after_open": "A settlement later in the hour is applied after the existing open-phase weight reduction and before native intrabar/close exits.",
+      "open_exit": "The exact open exit is exit_bar_ms; apply a coincident settlement after that exit using its cached native quantity in the include-boundary scenario.",
+      "close_exit": "The close exit is exit_bar_ms + 3,600,000ms; a coincident settlement is applied after that exit using cached quantity in the include-boundary scenario.",
+      "intrabar_exit": "A settlement exactly at exit_bar_ms is known before the intrabar event and is interior. A settlement exactly at exit_bar_ms + 3,600,000ms is at the next open after the frozen exit and is excluded. Only settlements strictly inside (exit_bar_ms, exit_bar_ms + 3,600,000ms) have unresolved ordering; include them after the hourly reduction but before native intrabar exits using the then-live post-reduction quantity, or omit them in the exclusion scenario."
+    },
+    "scenarios": {
+      "include_boundary": "Include exact entry/open-exit/close-exit boundaries and settlements strictly within an intrabar-exit hour. Exact open exits use cached pre-exit quantity; strictly in-hour ambiguous settlements apply to the already-reduced live quantity before native intrabar exits.",
+      "exclude_boundary": "Exclude those boundary-sensitive settlements; apply all settlements strictly inside the native held interval."
+    },
+    "accounting": "Funding is posted as a cash/collateral event in VectorBT pre/post-segment callbacks, never a synthetic order. Economic NAV is marked portfolio value less any position-margin funding liability."
+  },
+  "funding_source": {
+    "authority": "Frozen parent-generated source files only; this adapter does not fetch or repair rates or marks.",
+    "expected_source_receipt": {
+      "complete": true,
+      "positions": 1536,
+      "legs": 3072,
+      "symbols": 379,
+      "symbol_months": 1961,
+      "market_settlements": 77949
+    },
+    "expected_marks": {
+      "binance_fundingRate_markPrice": 1954,
+      "binance_vision_mark_1h_open_proxy": 75995
+    },
+    "coverage_gate": "Require all source month ranges, funding rates, and mark prices complete. If any gate fails, stop before a dynamic NAV replay.",
+    "mark_interpretation": "Keep exact fundingRate endpoint marks and official Binance Vision H1 mark-open proxies separately counted; a proxy is not an exact settlement mark."
+  },
+  "collateral_accounting": {
+    "exchange_rule_source": "https://www.binance.com/en/support/faq/detail/360033525031",
+    "debit_order": "Available balance first, then position margin.",
+    "margin_shortfall_representation": "Track amounts not covered by free balance as position-margin funding liability; subtract it from economic NAV and never add it to available cash.",
+    "liability_repayment": "Funding credits offset liability first; released positive free collateral repays remaining liability before subsequent entry sizing.",
+    "insolvency_gate": "Fail only when marked economic NAV after funding liability is nonpositive; zero available cash alone is not bankruptcy.",
+    "model_limit": "Historical leverage and maintenance-margin/liquidation tiers are unavailable; positive NAV does not prove that liquidation thresholds were never crossed."
+  },
+  "risk": {
+    "periods": {
+      "all": "Full frozen hourly account",
+      "dev": "Through 2024-12-31 UTC",
+      "2025": "2025 UTC",
+      "2026": "2026 through the frozen source end"
+    },
+    "equity": "Persist open, after-native-open-exit, after-hourly-reduction, and after-native-exit NAV plus conservative OHLC/funding sign envelopes.",
+    "drawdown_interpretation": "The hourly OHLC and funding sign envelope is a conservative scenario bound, not proof of the unknown intrabar order."
+  },
+  "outputs": {
+    "scope": "experiments/active/exp-cloud-close-hourly-trim-funding-20261109-v1/account/",
+    "completion_receipt": "funding_account_audit.json",
+    "per_scenario": [
+      "funded_legs.csv.gz",
+      "funded_positions.csv.gz",
+      "hourly_equity.csv.gz",
+      "applied_funding.csv.gz",
+      "orders.csv.gz",
+      "account_metrics.csv"
+    ],
+    "scenarios": ["include_boundary", "exclude_boundary"],
+    "preserve_original_hourly_trim_account": true,
+    "network_requests_started": false
+  },
+  "network_policy": "Offline account replay; use only the frozen source files and registered H1 quotes",
+  "commands": {
+    "preflight": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_hourly_trim_funding --preflight",
+    "full_account_after_owner_commit": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_hourly_trim_funding --run"
+  },
+  "limits": [
+    "The two boundary scenarios are independent funding-aware VectorBT cash accounts because funding changes later child sizes and hourly reductions.",
+    "The account is a historical simulation of frozen native paths and does not rescreen signals or change the original 1H management rule.",
+    "Mark-source proxies remain explicit and are not relabeled as exact funding settlement marks.",
+    "No strategy defaults, registry entries, deployment settings, or exchange orders are changed."
+  ]
+}
