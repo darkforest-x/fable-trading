@@ -1,0 +1,91 @@
+{
+  "id": "exp-cloud-close-current-funding-20261109-v1",
+  "status": "offline_adapter_pending_owner_commit",
+  "venue": "Binance USD-M",
+  "question": "Prepare realized-funding attribution for the frozen 680-contract NAV-tenth account without changing its historical orders or NAV.",
+  "network_policy": "preflight and mini are local-read-only; only explicit --collect may fetch sources",
+  "account": {
+    "source_experiment": "exp-cloud-close-archive-complete-20261109-v1",
+    "source_file": "experiments/active/exp-cloud-close-archive-complete-20261109-v1/funded_tenth.csv.gz",
+    "metrics_file": "experiments/active/exp-cloud-close-archive-complete-20261109-v1/account_metrics.csv",
+    "config_file": "experiments/active/exp-cloud-close-archive-complete-20261109-v1/config.json",
+    "policy": "tenth",
+    "scenario": "actual",
+    "selection": "trend_efficiency full runner when causal directional efficiency > 0.5, otherwise 2/3 scaleout",
+    "initial_cash_usdt": 1000.0,
+    "new_order_exposure_fraction": 0.9,
+    "slots": 9,
+    "expected_positions": 1635,
+    "expected_traded_symbols": 347,
+    "expected_all_period": {
+      "final_usdt": 5602.672497068329,
+      "cash_pnl_usdt": 4602.672497104925,
+      "trades": 1635,
+      "development_final_usdt": 5290.018849251764,
+      "development_trades": 1195
+    }
+  },
+  "contract_universe": {
+    "expected_universe_size": 680,
+    "base_contracts_with_native_paths": 632,
+    "previous_archived_additions": 29,
+    "supplemental_exchange_metadata_contracts": 19,
+    "too_recent_supplemental_without_90d_paths": 8,
+    "priced_path_contracts": 672,
+    "policy": "Read the already-built native path rows for 632 base contracts, 29 earlier archive additions and 11 supplemental contracts with a complete prior-90d path. The other 8 metadata contracts remain in the declared 680 but are excluded by the frozen 90-day eligibility gate."
+  },
+  "path_sources": {
+    "base_path_pool": "experiments/active/exp-cloud-close-binance-transfer-20261109-v1/work/*USDT/fills.csv.gz",
+    "daily_gap_repaired_paths": "data/research/cloud_close_binance_feb2022_replay/*USDT/",
+    "archive_addition_paths": "data/research/cloud_close_archive_cohort/symbols/*USDT/",
+    "selection_builder": "yoyo.evaluation.cloud_close_archive_cohort.pool + yoyo.evaluation.cloud_close_efficient_trend.inputs",
+    "account_join_key": "funded_tenth.event_id = native_path.event_id; each actual event retains parent_id from the original 12H signal",
+    "selection_clock": "entry_ms and the same pre-key H1 observations used in the frozen trend_efficiency selection"
+  },
+  "accounting": {
+    "leg_fraction_by_tp_r": {
+      "0.0": 0.3333333333333333,
+      "2.0": 0.6666666666666666
+    },
+    "signed_quantity_formula": "side * (parent_notional_usdt * leg_fraction) / entry_price",
+    "cash_pnl_formula": "side * (exit_price - entry_price) * abs(signed_quantity) - entry_notional * 0.0005 - exit_notional * exit_fee_rate",
+    "entry_fee_rate": 0.0005,
+    "entry_fee_class": "taker",
+    "exit_fee_class_source": "native per-leg exit_fee_rate; 0.0002=resting_maker, 0.0005=taker",
+    "cash_reconciliation_tolerance_usdt": 0.0001,
+    "notional_reconciliation_tolerance_usdt": 0.000001,
+    "preserved_fields": [
+      "symbol", "event_id", "parent_id", "is_control", "side", "tp_r", "entry_ms", "entry_price",
+      "entry_fee_rate", "entry_fee_class", "exit_bar_ms", "exit_phase", "exit_price", "exit_fee_rate",
+      "exit_fee_class", "exit_reason", "stop_price", "same_bar_ambiguous", "signed_size", "notional_usdt"
+    ]
+  },
+  "funding_adapter": {
+    "reuse_builder": "yoyo.evaluation.cloud_close_funding_ledger",
+    "reuse_phase_aware_month_windows": true,
+    "reuse_boundary_attribution": true,
+    "reuse_cache_root": "data/research/cloud_close_funding_ledger_20261109/funding_api/",
+    "currency": "USDT",
+    "scope": "current",
+    "no_nav_replay": true
+  },
+  "outputs": {
+    "scope_directory": "experiments/active/exp-cloud-close-current-funding-20261109-v1/current/",
+    "execution_legs": "experiments/active/exp-cloud-close-current-funding-20261109-v1/current/execution_legs.csv.gz",
+    "execution_leg_join_key": ["event_id", "tp_r"],
+    "preflight": "In-memory path join, fee-class, parent-notional and cash-PnL checks only; writes no artifacts.",
+    "mini": "Synthetic 2/3 child sizing, maker/taker cash reconciliation and phase-aware window check; writes no artifacts.",
+    "collect": "After commit checks, atomically writes independent execution_legs.csv.gz, then invokes the shared funding writer to generate current settlement outputs and its final audit receipt."
+  },
+  "commands": {
+    "preflight": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_current_funding --preflight",
+    "mini": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_current_funding --mini-check",
+    "collect_after_owner_schedules_network": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_current_funding --collect"
+  },
+  "limits": [
+    "This adapter reconstructs fixed actual child-leg quantities and native exits for funding attribution; it does not re-run VectorBT account admission or recompute the historical NAV.",
+    "No API request, archive download, funding cashflow calculation or persistent output is performed by preflight or mini. Collection is a separate explicit network operation.",
+    "The eight supplemental contracts without a complete 90-day native history remain excluded from funded events under the frozen eligibility policy.",
+    "The independent execution-leg table is the authoritative join for entry/exit prices, phases, fees, size, stop and same-bar ambiguity; settlement outputs are joined by event_id and tp_r without post-write mutation."
+  ]
+}
