@@ -1,0 +1,6 @@
+{
+  "question":"Does a VIX preference contribute more than a fixed side preference or simply following Bitcoin on the same trading-session calendar?",
+  "single_variable":"For the otherwise identical real nine-slot OKX queue, compare a permanently long-first order, permanently short-first, and favor longs when native BTC rose over the same last five Cboe sessions, shorts when it fell. Equal BTC closes leave the original ordering. Use the same VIX D+2 lag calendar to avoid giving the BTC control more recent information. Same low ATR and volume tie-break, all original applicants and their true turnover caps remain. Compare against completed original and VIX queues without rerunning them.",
+  "source":"Exact originally-registered Cboe daily dates plus native verified BTC H1 close at the UTC date end. Same mean-volume cap and fee/slippage cases. These within-history controls were added after seeing the VIX queue result. No funding or measured exit depth.",
+  "command":"vectorbt-python -m yoyo.evaluation.cloud_close_macro_priority_controls"
+}
