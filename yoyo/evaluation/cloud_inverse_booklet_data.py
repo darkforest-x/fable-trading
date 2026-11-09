@@ -136,7 +136,7 @@ def _draw_chart(record: dict[str, Any], frame: pd.DataFrame, ema: pd.DataFrame,
     ix = pd.Index(expected)
     visible = frame.reindex(ix)
     visible_ema = ema.reindex(ix)
-    have = set(int(t) for t in frame.index)
+    have = {int(t) for t in frame.index if start <= int(t) <= end}
     gaps = _missing_ranges(expected, have)
 
     width, height = 1280, 560
