@@ -87,9 +87,13 @@ def main():
     with ThreadPoolExecutor(max_workers=3) as threads:
         items = list(threads.map(month,[(d,cfg['native_url']) for d in dates]))
     manifest = [m for _,m in items]
-    bars = pd.concat([b for b,_ in items if b is not None]).sort_index()
-    if not bars.index.is_unique or not bars.first_id.is_monotonic_increasing or not bars.last_id.is_monotonic_increasing:
-        raise ValueError('Overlapping trade histories across exchange months')
+    blocks = pd.concat([b for b,_ in items if b is not None]).sort_values('first_id')
+    if not blocks.index.is_monotonic_increasing or (blocks.first_id.iloc[1:].to_numpy() <= blocks.last_id.iloc[:-1].to_numpy()).any():
+        raise ValueError('Overlapping native trade identities across exchange months')
+    # A monthly exporter may split one UTC hour between two archives. Distinct
+    # ordered IDs let us recover the true first/last prints and hourly extremes.
+    bars = blocks.groupby(level=0).agg(open=('open','first'),high=('high','max'),low=('low','min'),
+        close=('close','last'),first_id=('first_id','first'),last_id=('last_id','last'),prints=('prints','sum'))
     exact = (bars.last_id-bars.first_id+1).eq(bars.prints) & bars.first_id.sub(bars.last_id.shift()).eq(1) & bars.first_id.shift(-1).sub(bars.last_id).eq(1)
     ref = candle_reference().reindex(bars.index)
     have = ref.notna().all(axis=1)
