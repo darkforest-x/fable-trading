@@ -42,8 +42,11 @@ def main():
     extra.update(json.loads((admin.study.EXP / 'summary.json').read_text())['new_archive_cohorts']['priced'])
     spec = json.loads((admin.EXP / 'config.json').read_text())['settlements']
     spec.update(json.loads((oi.EXP / 'config.json').read_text())['other_funded_settlements'])
+    new_settlements = json.loads((EXP / 'config.json').read_text())['additional_settlements']
+    spec.update(new_settlements)
     minute_bars = pd.concat([pd.read_csv(path / 'settlement_index_1m.csv') for path in (admin.EXP, oi.EXP)])
     marks = minute_bars.groupby('symbol')[['low','close','high']].mean().to_dict('index')
+    marks.update(admin.reference_prices(new_settlements, directory=EXP))
     paths = archive.pool(extra)
     with archive.market_quotes(extra):
         _, selected = admin.study.tenth.trend.inputs('Binance', paths[~paths.is_control])
