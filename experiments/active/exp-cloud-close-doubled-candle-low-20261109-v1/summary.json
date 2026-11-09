@@ -1,0 +1,624 @@
+{
+  "arms": {
+    "no_extra_stop": {
+      "metrics": {
+        "all": {
+          "final_usdt": 52284.284686543135,
+          "multiple": 52.28428468654313,
+          "dd_mark_pct": 46.42048132821398,
+          "dd_bound_pct": 47.82098715229862,
+          "trades": 1585,
+          "win_pct": 21.514195583596216,
+          "payoff": 7.7368863262361725,
+          "payoff_usdt": 7.061260676525789,
+          "median_net_pct": -3.466173530168955
+        },
+        "dev": {
+          "final_usdt": 35137.02472882385,
+          "multiple": 35.13702472882385,
+          "dd_mark_pct": 46.42048132821398,
+          "dd_bound_pct": 47.82098715229862,
+          "trades": 1057,
+          "win_pct": 22.42194891201514,
+          "payoff": 8.953305725691765,
+          "payoff_usdt": 6.240581083505602,
+          "median_net_pct": -3.4587090921831174
+        },
+        "2025": {
+          "final_usdt": 50037.11961089088,
+          "multiple": 1.424056817475615,
+          "dd_mark_pct": 25.043521405498637,
+          "dd_bound_pct": 25.728449113444483,
+          "trades": 276,
+          "win_pct": 15.579710144927535,
+          "payoff": 5.06010597147801,
+          "payoff_usdt": 7.612659740321327,
+          "median_net_pct": -3.519935147175498
+        },
+        "2026": {
+          "final_usdt": 52284.284686543135,
+          "multiple": 1.0449099607077132,
+          "dd_mark_pct": 9.546468974033095,
+          "dd_bound_pct": 10.111838099802927,
+          "trades": 234,
+          "win_pct": 20.51282051282051,
+          "payoff": 3.769030791201177,
+          "payoff_usdt": 6.70735397692626,
+          "median_net_pct": -3.4461968435685173
+        }
+      },
+      "margin": {
+        "1.0": {
+          "positions_audited": 852,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.4900515811301193,
+          "worst_remaining_equity_per_margin": 0.5445876101607051,
+          "valid": true,
+          "checked_hours": [],
+          "all_flags_resolved": true
+        },
+        "2.0": {
+          "positions_audited": 766,
+          "maintenance_boundary_hits": 1,
+          "negative_equity_positions": 1,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -1.730458712780108,
+          "worst_remaining_equity_per_margin": -1.3007032640949552,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "signal-row-08041:signal",
+              "symbol": "MOODENG",
+              "side": -1,
+              "multiple": 2.0,
+              "market_slip": 0.0,
+              "entry_price": 0.09773,
+              "exit_price": 0.1069422838,
+              "threshold": 0.13316323034984098,
+              "hour": 1765054800000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251207/MOODENG-USDT-SWAP-candlesticks-2025-12-07.zip",
+              "stop_minute": 4,
+              "trade_boundary_minute": 5,
+              "mark_boundary_minute": 5,
+              "preceding_trade_close": 0.09283,
+              "stop_minute_open": 0.09296,
+              "stop_minute_trade_low": 0.09199,
+              "stop_minute_mark_low": 0.09223,
+              "stop_minute_trade_high": 0.10998,
+              "stop_minute_mark_high": 0.10964,
+              "full_hour_mark_low": 0.07259,
+              "full_hour_mark_high": 0.20693
+            }
+          ],
+          "all_flags_resolved": true
+        }
+      },
+      "trim_fills": 7880
+    },
+    "no_extra_stop_stress": {
+      "metrics": {
+        "all": {
+          "final_usdt": 48744.07151049927,
+          "multiple": 48.74407151049927,
+          "dd_mark_pct": 46.70151621965759,
+          "dd_bound_pct": 48.09749926707507,
+          "trades": 1585,
+          "win_pct": 21.198738170347003,
+          "payoff": 7.665316075753555,
+          "payoff_usdt": 6.957672928299678,
+          "median_net_pct": -3.565557594059859
+        },
+        "dev": {
+          "final_usdt": 33321.989141079706,
+          "multiple": 33.321989141079705,
+          "dd_mark_pct": 46.70151621965759,
+          "dd_bound_pct": 48.09749926707507,
+          "trades": 1057,
+          "win_pct": 22.043519394512774,
+          "payoff": 8.91302422832356,
+          "payoff_usdt": 6.2259222550599,
+          "median_net_pct": -3.558794933417005
+        },
+        "2025": {
+          "final_usdt": 46827.83208852505,
+          "multiple": 1.405313226958447,
+          "dd_mark_pct": 25.944798265183632,
+          "dd_bound_pct": 26.633666605933637,
+          "trades": 276,
+          "win_pct": 15.579710144927535,
+          "payoff": 4.874619437402869,
+          "payoff_usdt": 7.3044327471062696,
+          "median_net_pct": -3.6234568431706706
+        },
+        "2026": {
+          "final_usdt": 48744.07151049927,
+          "multiple": 1.040920950992386,
+          "dd_mark_pct": 10.268241735095229,
+          "dd_bound_pct": 10.844945620146607,
+          "trades": 234,
+          "win_pct": 20.085470085470085,
+          "payoff": 3.757470091311409,
+          "payoff_usdt": 6.574383973993398,
+          "median_net_pct": -3.5472971373284103
+        }
+      },
+      "margin": {
+        "1.0": {
+          "positions_audited": 852,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.489278787325039,
+          "worst_remaining_equity_per_margin": 0.5438148163556248,
+          "valid": true,
+          "checked_hours": [],
+          "all_flags_resolved": true
+        },
+        "2.0": {
+          "positions_audited": 766,
+          "maintenance_boundary_hits": 1,
+          "negative_equity_positions": 1,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -1.7336080644121552,
+          "worst_remaining_equity_per_margin": -1.3038526157270023,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "signal-row-08041:signal",
+              "symbol": "MOODENG",
+              "side": -1,
+              "multiple": 2.0,
+              "market_slip": 0.0005,
+              "entry_price": 0.09773,
+              "exit_price": 0.1069422838,
+              "threshold": 0.13305232384489266,
+              "hour": 1765054800000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251207/MOODENG-USDT-SWAP-candlesticks-2025-12-07.zip",
+              "stop_minute": 4,
+              "trade_boundary_minute": 5,
+              "mark_boundary_minute": 5,
+              "preceding_trade_close": 0.09283,
+              "stop_minute_open": 0.09296,
+              "stop_minute_trade_low": 0.09199,
+              "stop_minute_mark_low": 0.09223,
+              "stop_minute_trade_high": 0.10998,
+              "stop_minute_mark_high": 0.10964,
+              "full_hour_mark_low": 0.07259,
+              "full_hour_mark_high": 0.20693
+            }
+          ],
+          "all_flags_resolved": true
+        }
+      },
+      "trim_fills": 8016
+    },
+    "fixed": {
+      "metrics": {
+        "all": {
+          "final_usdt": 53248.53732190533,
+          "multiple": 53.24853732190533,
+          "dd_mark_pct": 42.16004743481746,
+          "dd_bound_pct": 43.403413615553845,
+          "trades": 1585,
+          "win_pct": 21.514195583596216,
+          "payoff": 6.7767713267444565,
+          "payoff_usdt": 7.319117472476748,
+          "median_net_pct": -3.466173530168955
+        },
+        "dev": {
+          "final_usdt": 35847.52127893764,
+          "multiple": 35.84752127893764,
+          "dd_mark_pct": 42.16004743481746,
+          "dd_bound_pct": 43.403413615553845,
+          "trades": 1057,
+          "win_pct": 22.42194891201514,
+          "payoff": 7.557252754615374,
+          "payoff_usdt": 6.724695149796542,
+          "median_net_pct": -3.4587090921831294
+        },
+        "2025": {
+          "final_usdt": 50978.5719366768,
+          "multiple": 1.4220947534977677,
+          "dd_mark_pct": 24.841999951381677,
+          "dd_bound_pct": 25.525297613040575,
+          "trades": 276,
+          "win_pct": 15.579710144927535,
+          "payoff": 5.229256787338049,
+          "payoff_usdt": 7.661845046837482,
+          "median_net_pct": -3.519935147175498
+        },
+        "2026": {
+          "final_usdt": 53248.53732190533,
+          "multiple": 1.0445278339308557,
+          "dd_mark_pct": 9.449398733678116,
+          "dd_bound_pct": 10.011310632389225,
+          "trades": 234,
+          "win_pct": 20.51282051282051,
+          "payoff": 3.769030258537761,
+          "payoff_usdt": 6.726260573126689,
+          "median_net_pct": -3.4461968435685173
+        }
+      },
+      "margin": {
+        "1.0": {
+          "positions_audited": 852,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.4900515811301193,
+          "worst_remaining_equity_per_margin": 0.5445876101607051,
+          "valid": true,
+          "checked_hours": [],
+          "all_flags_resolved": true
+        },
+        "2.0": {
+          "positions_audited": 766,
+          "maintenance_boundary_hits": 1,
+          "negative_equity_positions": 1,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -1.730458712780108,
+          "worst_remaining_equity_per_margin": -1.3007032640949552,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "signal-row-08041:signal",
+              "symbol": "MOODENG",
+              "side": -1,
+              "multiple": 2.0,
+              "market_slip": 0.0,
+              "entry_price": 0.09773,
+              "exit_price": 0.1069422838,
+              "threshold": 0.13316323034984098,
+              "hour": 1765054800000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251207/MOODENG-USDT-SWAP-candlesticks-2025-12-07.zip",
+              "stop_minute": 4,
+              "trade_boundary_minute": 5,
+              "mark_boundary_minute": 5,
+              "preceding_trade_close": 0.09283,
+              "stop_minute_open": 0.09296,
+              "stop_minute_trade_low": 0.09199,
+              "stop_minute_mark_low": 0.09223,
+              "stop_minute_trade_high": 0.10998,
+              "stop_minute_mark_high": 0.10964,
+              "full_hour_mark_low": 0.07259,
+              "full_hour_mark_high": 0.20693
+            }
+          ],
+          "all_flags_resolved": true
+        }
+      },
+      "trim_fills": 8328
+    },
+    "fixed_stress": {
+      "metrics": {
+        "all": {
+          "final_usdt": 49592.45422246006,
+          "multiple": 49.592454222460056,
+          "dd_mark_pct": 42.43344619832301,
+          "dd_bound_pct": 43.67653463547217,
+          "trades": 1585,
+          "win_pct": 21.198738170347003,
+          "payoff": 6.699681027877655,
+          "payoff_usdt": 7.206313051873398,
+          "median_net_pct": -3.565557594059859
+        },
+        "dev": {
+          "final_usdt": 33942.344158570064,
+          "multiple": 33.942344158570066,
+          "dd_mark_pct": 42.43344619832301,
+          "dd_bound_pct": 43.67653463547217,
+          "trades": 1057,
+          "win_pct": 22.043519394512774,
+          "payoff": 7.5025337232342775,
+          "payoff_usdt": 6.704568615938648,
+          "median_net_pct": -3.5643768510707914
+        },
+        "2025": {
+          "final_usdt": 47658.1190124845,
+          "multiple": 1.404090383087208,
+          "dd_mark_pct": 25.71322852253507,
+          "dd_bound_pct": 26.400843056967883,
+          "trades": 276,
+          "win_pct": 15.579710144927535,
+          "payoff": 5.039136011556961,
+          "payoff_usdt": 7.35336241950352,
+          "median_net_pct": -3.6234568431706706
+        },
+        "2026": {
+          "final_usdt": 49592.45422246006,
+          "multiple": 1.04058773720106,
+          "dd_mark_pct": 10.167741599764735,
+          "dd_bound_pct": 10.741015048344138,
+          "trades": 234,
+          "win_pct": 20.085470085470085,
+          "payoff": 3.757469527283397,
+          "payoff_usdt": 6.591109314785475,
+          "median_net_pct": -3.5472971373284103
+        }
+      },
+      "margin": {
+        "1.0": {
+          "positions_audited": 852,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.489278787325039,
+          "worst_remaining_equity_per_margin": 0.5438148163556248,
+          "valid": true,
+          "checked_hours": [],
+          "all_flags_resolved": true
+        },
+        "2.0": {
+          "positions_audited": 766,
+          "maintenance_boundary_hits": 1,
+          "negative_equity_positions": 1,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -1.7336080644121552,
+          "worst_remaining_equity_per_margin": -1.3038526157270023,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "signal-row-08041:signal",
+              "symbol": "MOODENG",
+              "side": -1,
+              "multiple": 2.0,
+              "market_slip": 0.0005,
+              "entry_price": 0.09773,
+              "exit_price": 0.1069422838,
+              "threshold": 0.13305232384489266,
+              "hour": 1765054800000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251207/MOODENG-USDT-SWAP-candlesticks-2025-12-07.zip",
+              "stop_minute": 4,
+              "trade_boundary_minute": 5,
+              "mark_boundary_minute": 5,
+              "preceding_trade_close": 0.09283,
+              "stop_minute_open": 0.09296,
+              "stop_minute_trade_low": 0.09199,
+              "stop_minute_mark_low": 0.09223,
+              "stop_minute_trade_high": 0.10998,
+              "stop_minute_mark_high": 0.10964,
+              "full_hour_mark_low": 0.07259,
+              "full_hour_mark_high": 0.20693
+            }
+          ],
+          "all_flags_resolved": true
+        }
+      },
+      "trim_fills": 8636
+    },
+    "ratchet": {
+      "metrics": {
+        "all": {
+          "final_usdt": 36378.282410852975,
+          "multiple": 36.378282410852975,
+          "dd_mark_pct": 39.496738608343165,
+          "dd_bound_pct": 40.20490924318199,
+          "trades": 1585,
+          "win_pct": 21.514195583596216,
+          "payoff": 6.011908450858967,
+          "payoff_usdt": 6.639742516285282,
+          "median_net_pct": -3.4637986418576046
+        },
+        "dev": {
+          "final_usdt": 26188.536314392484,
+          "multiple": 26.188536314392483,
+          "dd_mark_pct": 39.496738608343165,
+          "dd_bound_pct": 40.20490924318199,
+          "trades": 1058,
+          "win_pct": 22.495274102079396,
+          "payoff": 6.606856055705645,
+          "payoff_usdt": 7.212360332580723,
+          "median_net_pct": -3.45797673159524
+        },
+        "2025": {
+          "final_usdt": 34550.534927171815,
+          "multiple": 1.3192999605779347,
+          "dd_mark_pct": 26.057650267485144,
+          "dd_bound_pct": 26.79149189926453,
+          "trades": 276,
+          "win_pct": 15.579710144927535,
+          "payoff": 5.011232215865672,
+          "payoff_usdt": 6.2670868141935525,
+          "median_net_pct": -3.519935147175498
+        },
+        "2026": {
+          "final_usdt": 36378.282410852975,
+          "multiple": 1.0529007000190829,
+          "dd_mark_pct": 11.698718657419793,
+          "dd_bound_pct": 12.310870580920286,
+          "trades": 234,
+          "win_pct": 20.51282051282051,
+          "payoff": 3.768123799858848,
+          "payoff_usdt": 6.284995524189746,
+          "median_net_pct": -3.4461968435685173
+        }
+      },
+      "margin": {
+        "1.0": {
+          "positions_audited": 852,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.4900515811301193,
+          "worst_remaining_equity_per_margin": 0.5445876101607051,
+          "valid": true,
+          "checked_hours": [],
+          "all_flags_resolved": true
+        },
+        "2.0": {
+          "positions_audited": 766,
+          "maintenance_boundary_hits": 1,
+          "negative_equity_positions": 1,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -1.730458712780108,
+          "worst_remaining_equity_per_margin": -1.3007032640949552,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "signal-row-08041:signal",
+              "symbol": "MOODENG",
+              "side": -1,
+              "multiple": 2.0,
+              "market_slip": 0.0,
+              "entry_price": 0.09773,
+              "exit_price": 0.1069422838,
+              "threshold": 0.13316323034984098,
+              "hour": 1765054800000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251207/MOODENG-USDT-SWAP-candlesticks-2025-12-07.zip",
+              "stop_minute": 4,
+              "trade_boundary_minute": 5,
+              "mark_boundary_minute": 5,
+              "preceding_trade_close": 0.09283,
+              "stop_minute_open": 0.09296,
+              "stop_minute_trade_low": 0.09199,
+              "stop_minute_mark_low": 0.09223,
+              "stop_minute_trade_high": 0.10998,
+              "stop_minute_mark_high": 0.10964,
+              "full_hour_mark_low": 0.07259,
+              "full_hour_mark_high": 0.20693
+            }
+          ],
+          "all_flags_resolved": true
+        }
+      },
+      "trim_fills": 8932
+    },
+    "ratchet_stress": {
+      "metrics": {
+        "all": {
+          "final_usdt": 32573.96359842979,
+          "multiple": 32.57396359842979,
+          "dd_mark_pct": 39.79117589986018,
+          "dd_bound_pct": 40.49730530057315,
+          "trades": 1585,
+          "win_pct": 21.198738170347003,
+          "payoff": 5.955237735127541,
+          "payoff_usdt": 6.484083928916528,
+          "median_net_pct": -3.5641433862132526
+        },
+        "dev": {
+          "final_usdt": 24161.76012101033,
+          "multiple": 24.16176012101033,
+          "dd_mark_pct": 39.79117589986018,
+          "dd_bound_pct": 40.49730530057315,
+          "trades": 1058,
+          "win_pct": 22.117202268431,
+          "payoff": 6.5628780032916305,
+          "payoff_usdt": 7.102808774714402,
+          "median_net_pct": -3.5545204829879387
+        },
+        "2025": {
+          "final_usdt": 31045.751590458665,
+          "multiple": 1.2849126650943872,
+          "dd_mark_pct": 27.05100032460136,
+          "dd_bound_pct": 27.79686842251342,
+          "trades": 276,
+          "win_pct": 15.579710144927535,
+          "payoff": 4.881363022402355,
+          "payoff_usdt": 5.989794166805872,
+          "median_net_pct": -3.618969804500323
+        },
+        "2026": {
+          "final_usdt": 32573.96359842979,
+          "multiple": 1.0492245131678755,
+          "dd_mark_pct": 12.76746986107028,
+          "dd_bound_pct": 13.384361143150636,
+          "trades": 234,
+          "win_pct": 20.085470085470085,
+          "payoff": 3.756200058069495,
+          "payoff_usdt": 6.132866095497653,
+          "median_net_pct": -3.5472971373284103
+        }
+      },
+      "margin": {
+        "1.0": {
+          "positions_audited": 852,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.489278787325039,
+          "worst_remaining_equity_per_margin": 0.5438148163556248,
+          "valid": true,
+          "checked_hours": [],
+          "all_flags_resolved": true
+        },
+        "2.0": {
+          "positions_audited": 766,
+          "maintenance_boundary_hits": 1,
+          "negative_equity_positions": 1,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -1.7336080644121552,
+          "worst_remaining_equity_per_margin": -1.3038526157270023,
+          "valid": false,
+          "checked_hours": [
+            {
+              "event_id": "signal-row-08041:signal",
+              "symbol": "MOODENG",
+              "side": -1,
+              "multiple": 2.0,
+              "market_slip": 0.0005,
+              "entry_price": 0.09773,
+              "exit_price": 0.1069422838,
+              "threshold": 0.13305232384489266,
+              "hour": 1765054800000,
+              "exit_hour": true,
+              "exit_reason": "stop",
+              "phase": "intrabar",
+              "status": "stop_strictly_earlier",
+              "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251207/MOODENG-USDT-SWAP-candlesticks-2025-12-07.zip",
+              "stop_minute": 4,
+              "trade_boundary_minute": 5,
+              "mark_boundary_minute": 5,
+              "preceding_trade_close": 0.09283,
+              "stop_minute_open": 0.09296,
+              "stop_minute_trade_low": 0.09199,
+              "stop_minute_mark_low": 0.09223,
+              "stop_minute_trade_high": 0.10998,
+              "stop_minute_mark_high": 0.10964,
+              "full_hour_mark_low": 0.07259,
+              "full_hour_mark_high": 0.20693
+            }
+          ],
+          "all_flags_resolved": true
+        }
+      },
+      "trim_fills": 9140
+    }
+  },
+  "counts": {
+    "fixed": {
+      "parents_with_new_stop": 31,
+      "funded_with_new_stop": 31,
+      "changed_children": 120
+    },
+    "ratchet": {
+      "parents_with_new_stop": 43,
+      "funded_with_new_stop": 43,
+      "changed_children": 168
+    }
+  },
+  "confirmed_parent_activations": 43,
+  "funded_activations": 43
+}

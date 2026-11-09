@@ -15,6 +15,66 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-doubling-sale-fraction-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "93aad35929"
+    status: "inconclusive"
+    question: "原版云带多单翻倍时卖多少"
+    single_variable: "保留原2R止盈与仓位，对涨到开仓价两倍时仍有余仓的多单分别不卖、出售半数或全部。"
+    result: "同1585笔、46笔实际父单退出受影响。翻倍不卖52,284U、胜21.51%、比7.06、回撤47.82%；卖一半42,486U、回撤42.11%；全卖23,375U、回撤38.89%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-doubling-sale-fraction-20261109-v1/summary.json"
+    notes: "Identical original V1.7 signal pool, modeled native costs and prior-turnover cap. Historical OKX funding and full exit depth unobserved. Notion 41388564-79af-814c-b5a5-e1f2b334ad69."
+
+  - experiment_id: exp-cloud-close-doubled-candle-low-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "7ddb02cf9a"
+    status: "inconclusive"
+    question: "收盘确认翻倍后的固定K线低点能否保护余仓"
+    single_variable: "对同一批原版多单，首次完整12H收盘≥开仓价两倍才将止损设在该K低点，比较固定或逐K上移。保留2R、其余原止损、仓位与执行口径。"
+    result: "43笔确认，固定低点改变31笔、53,249U、胜21.51%、实际盈亏比7.32、回撤43.40%；逐K上移36,378U、回撤40.20%，无额外止损52,284U、47.82%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-doubled-candle-low-20261109-v1/summary.json"
+    notes: "Follow-up chosen after doubling-sale attribution. Observed hourly stop fills audited separately. Notion 41388564-79af-8164-a464-dd8e0bdb5fe8."
+
+  - experiment_id: exp-cloud-close-doubled-stop-minutes-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "98ae08e316"
+    status: "inconclusive"
+    question: "翻倍后固定保护止损是否真实跨过成交价"
+    single_variable: "逐个检查全部31个有资金的固定低点止损在原生OKX首个正成交穿越分钟的开盘跳空和成交量，并与冻结H1聚合逐项勾稽。"
+    result: "31/31有真实分钟；KSM一单穿价7.957bp，87.97变为87.90；全部初始最大数量上界都低于触发分钟全场成交量。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-doubled-stop-minutes-20261109-v1/summary.json"
+    notes: "Historical minute tape is not order book liquidity. No new portfolio in source audit. Notion 41388564-79af-815c-8bf3-c85034ec726e."
+
+  - experiment_id: exp-cloud-close-doubled-stop-gap-wallet-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "74114939a1"
+    status: "inconclusive"
+    question: "固定低点止损按真实首分钟跳空重算后账户结果"
+    single_variable: "计入全部31个成交分钟与唯一KSM跳空，重算后续资金与实际止损成交数量。"
+    result: "53,247.65U、1585笔、胜21.51%、实际盈亏比7.32、回撤上界43.40%；额外5bp 49,591.57U、43.68%。31个止损最大成交额占触发分钟8.67%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-doubled-stop-gap-wallet-20261109-v1/summary.json"
+    notes: "No guarantee of quoted price or tradable depth. OKX historical funding omitted. Entry capacity remains a causal approximation. Notion 41388564-79af-8141-bec9-cf4f892a09e6."
+
   - experiment_id: exp-cloud-close-native-target-fraction-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "270b93b270"
