@@ -1,0 +1,6 @@
+{
+  "question": "Is the gain from keeping the original cloud runner after a doubling spread across time, or could a small cluster of trends explain most of it?",
+  "scope": "Use already funded baseline-half-sale and no-doubling-sale calendar-identical hourly NAV in each venue separately. No new trades or simulated fund performance. Use lead/lag-neutral paired daily log NAV-return differences. Report yearly growth ratios and the share contributed by the largest actual calendar quarter. A two-sided 90-day overlapping moving-block resampling interval for annualized log growth differences, seed 1109, 5000 draws, is descriptive only, conditional on these historical ledgers; no prospective/statistical selection claim. Actual coins, position sizes and historical dependencies are not re-traded in resampled blocks. Do not pool overlapping venue results as independent evidence.",
+  "data": "Original OKX fee-only/opening-cap comparison and both verified real Binance funding boundary comparisons. First day from the account calendar, zero-exposure days included. Include partial calendar years explicitly. Reconcile compounded observed daily returns exactly to terminal ratio.",
+  "command": "python -m yoyo.evaluation.cloud_close_double_hold_time_check"
+}
