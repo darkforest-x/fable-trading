@@ -1,0 +1,6 @@
+{
+  "question": "Can long-side leverage improve growth independently of the known short-side risk while keeping the same 1.5x shorts on the repaired 360-name wallet?",
+  "single_variable": "Hold short notional at 1.5x original collateral and choose long notional from 1.5x (frozen exact reference), 2x, or 3x. Each trade's factor is set solely by its side before entry, with no symbol exclusion or decision based on its future path.",
+  "fixed": "1,000U, same 1,574 funded parent paths after WAVES repair. Four native child legs, original fee classes, 20% hourly single-name notional cap on true bought/sold units regardless of original multiple. Check each side's conservative 10% isolated maintenance boundary before reporting portfolio value. Any boundary hit invalidates that variant for this study. Same +5bp adverse market slippage stress.",
+  "diagnostics": "Reconcile every collateral/underlying fill and amount and compare equal-factor reproduction to already reported 1.5x results. Historical funding, mark prices and venue-specific liquidation tiers are incomplete."
+}
