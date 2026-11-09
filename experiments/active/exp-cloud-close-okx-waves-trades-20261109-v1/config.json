@@ -1,0 +1,8 @@
+{
+  "question": "Does native historical trading activity restore the absent WAVES 90-day opportunity clocks?",
+  "single_variable": "For the first independently documented omitted contract, WAVES-USDT-SWAP, supplement the confirmed OKX H1 source with H1 OHLC from native tick-by-tick monthly trade archives. Query 2020-01 to 2024-02 before documented termination. Source only, no account or adjustment of strategy parameters.",
+  "native_url": "https://static.okx.com/cdn/okex/traderecords/trades/monthly",
+  "notice": "https://www.okx.com/en-us/help/okx-to-delist-waves-margin-trading-pairs-and-perpetual-swaps",
+  "end_exclusive": "2024-02-01T08:00Z",
+  "strata": "Retain original confirmed H1 if present. Add only hours backed by trades that are bracketed by consecutive trade IDs within and across the hour, or whose entire OHLC is independently corroborated by 60 exact native minute records even where their confirmation flags were zero. Count other published-tick hours and price conflicts as unresolved. Never create a bar in an hour with no trade. Exclude independently conflicting tick/native hours from additions."
+}
