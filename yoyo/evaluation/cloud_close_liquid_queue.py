@@ -13,7 +13,7 @@ EXP = history.EXP.parent/'exp-cloud-close-liquid-queue-20261109-v1'
 
 
 def main(*,experiment=EXP,slots=9,policies=None,eligible_by_arm=None,
-         score_builder=None,fill_cases=None,compact=False):
+         score_builder=None,fill_cases=None,compact=False,cap_scales=None):
     if policies is None:
         policies = [('original_atr','entry_order'),('liquid_first','liquid'),('balanced','balanced')]
     if (experiment/'summary.json').exists():
@@ -52,6 +52,8 @@ def main(*,experiment=EXP,slots=9,policies=None,eligible_by_arm=None,
         parents = market[-1].set_index('event_id')
         ratios = 1.5-.5*parents.side*parents.entry_ms.map(regime)
         cap = pool.volume.reindex(parents.index)/600
+        if cap_scales is not None:
+            cap = cap*cap_scales[name]
         if cap.isna().any() or set(parents.index)!=set(roster.event_id):
             raise ValueError('Cap or native roster missing')
         if baseline is None:

@@ -1,0 +1,7 @@
+{
+  "question": "Are later percentage returns weaker because less capital can be deployed, or because the underlying entry/exit rules made less on the same new trades?",
+  "single_variable": "Start two flat matched books on 1 Jan 2025 and repeat on 1 Jan 2026. For each clock use identical new real admissions, no inherited trades, same nine-slot equal-rank queue and prior-hour mean entry capacity. Compare 1,000U to the historical balanced portfolio NAV at that starting boundary, without carrying historical positions. Take the first calendar year segment for each. Historical continuation is a contextual comparison only.",
+  "normalization": "For a grown start C, express its NAV in 1000-normalized units and multiply every absolute USDT opening cap by 1000/C. Entries, fees, collateral budgets and trims are proportional; this gives a directly comparable normalized multiple. Require both positive funded event-ID sets to coincide; no cross-asset or calendar reallocation. All cases use the original fee schedule, zero added slip. No funding or observed exit depth. These are diagnostics; neither restart is a full-history target result.",
+  "source": "The already frozen balanced nine-position account determines the comparison starting capital at midnight before new year signals. Corrected OKX archive including retired contracts.",
+  "command": "vectorbt-python -m yoyo.evaluation.cloud_close_capital_restarts"
+}
