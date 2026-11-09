@@ -334,7 +334,8 @@ def _collect_sources(legs: pd.DataFrame, config: dict) -> tuple[pd.DataFrame, pd
             newly_sourced_windows += 1
             request = source_audit.get("api_request_manifest") or {}
             api_pages += len(request.get("pages", [])) if isinstance(request, dict) else 0
-        merged = ledger._merge_history(pieces) if pieces else pd.DataFrame(
+        nonempty_pieces = [piece for piece in pieces if piece is not None and not piece.empty]
+        merged = ledger._merge_history(nonempty_pieces) if nonempty_pieces else pd.DataFrame(
             columns=["funding_time_ms", "funding_rate", "mark_price", "rate_source", "mark_source", "source_complete"]
         )
         merged = merged.loc[(merged.funding_time_ms >= start_ms) & (merged.funding_time_ms < end_ms)].copy()
