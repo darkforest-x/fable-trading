@@ -59,7 +59,14 @@ def main():
     reference = pd.read_csv(hourly.EXP/'funded_Binance.csv.gz',usecols=['event_id'])
     if len(reference)!=1536 or set(legs.event_id)!=set(reference.event_id) or not legs.groupby('event_id').size().eq(2).all():
         raise ValueError('Funding source must cover the original scored hourly-cap parent and both legs')
-    legs.to_csv(EXP/'child_windows.csv.gz',index=False)
+    collect(legs,EXP)
+
+
+def collect(legs,directory):
+    receipt = directory/'source_coverage.json'
+    if receipt.exists():
+        raise FileExistsError('Completed funding source receipt already exists')
+    legs.to_csv(directory/'child_windows.csv.gz',index=False)
     windows = ledger._month_windows(legs)
     old = set((x['symbol'].removesuffix('USDT'),x['month']) for x in json.loads(
         (hourly.EXP.parent/'exp-cloud-close-current-funding-20261109-v1/resolved/symbol_month_audit.json').read_text()))
@@ -90,9 +97,9 @@ def main():
     tape = pd.concat([f for f in frames if not f.empty],ignore_index=True)
     if tape.duplicated(['symbol','funding_time_ms']).any() or not np.isfinite(tape[['funding_rate','mark_price']]).all().all() or not tape.mark_price.gt(0).all():
         raise ValueError('Market tape contains duplicate events or invalid rates/marks')
-    tape.to_csv(EXP/'funding_tape.csv.gz',index=False)
-    pd.DataFrame(audits).to_csv(EXP/'source_months.csv.gz',index=False)
-    result = dict(complete=True,positions=len(reference),legs=len(legs),symbols=legs.symbol.nunique(),
+    tape.to_csv(directory/'funding_tape.csv.gz',index=False)
+    pd.DataFrame(audits).to_csv(directory/'source_months.csv.gz',index=False)
+    result = dict(complete=True,positions=legs.event_id.nunique(),legs=len(legs),symbols=legs.symbol.nunique(),
                   symbol_months=len(windows),overlap_original_reference_months=len(old.intersection(windows)),
                   market_settlements=len(tape),mark_sources=tape.mark_source.value_counts().to_dict(),
                   prices_are_official_mark_h1_open_proxies_or_exact_api=True)
