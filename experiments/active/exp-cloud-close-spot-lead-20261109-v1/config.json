@@ -1,5 +1,35 @@
 {
-  "additional_settlements": {},
+  "additional_settlements": {
+    "BADGERUSDT": {
+      "utc": "2025-04-14T09:00:00Z",
+      "minutes": 30,
+      "announcement": "https://www.binance.com/en/support/announcement/detail/fac9c3e401da4cc8b604566fd261d70c",
+      "settlement_method": "https://www.binance.com/en/support/announcement/detail/4bcabddf0e81423ebca242e185bf157d",
+      "settlement_fee": "https://www.binance.com/en/support/faq/detail/dd60dfbf654d4055aa6b217ea6d5ddba",
+      "mark": "Approximate the official mean of 1,800 one-second index prices from 08:30 to 09:00 UTC with the mean of the 30 official Binance one-minute index-price candle closes; validate all expected minute bars and OHLC."
+    },
+    "DGBUSDT": {
+      "utc": "2024-04-01T09:00:00Z",
+      "minutes": 60,
+      "announcement": "https://www.binance.com/en/support/announcement/detail/ce74360a3fd444b2b35da7186f8dd0ad",
+      "settlement_method": "https://www.binance.com/en/support/announcement/detail/4bcabddf0e81423ebca242e185bf157d",
+      "mark": "Native one-minute index close average over the historical settlement window, proxy for the official every-second index average."
+    },
+    "MLNUSDT": {
+      "utc": "2026-05-19T09:00:00Z",
+      "minutes": 30,
+      "announcement": "https://www.binance.com/en/support/announcement/detail/a42f51022cb649aea0b4cb808205fd76",
+      "settlement_method": "https://www.binance.com/en/support/announcement/detail/4bcabddf0e81423ebca242e185bf157d",
+      "mark": "Native one-minute index close average over the historical settlement window, proxy for the official every-second index average."
+    },
+    "VOXELUSDT": {
+      "utc": "2025-12-10T09:00:00Z",
+      "minutes": 30,
+      "announcement": "https://www.binance.com/en/square/post/33300268076769",
+      "settlement_method": "https://www.binance.com/en/support/announcement/detail/4bcabddf0e81423ebca242e185bf157d",
+      "mark": "Native one-minute index close average over the historical settlement window, proxy for the official every-second index average."
+    }
+  },
   "question": "When an original perpetual 12H signal confirms, does a stronger same-direction move in its contemporaneous spot market select larger persistent winners?",
   "single_variable": "At the original confirmed futures 12H decision use each instrument's closed 12H last traded close divided by its own completed NY Monday high/low midpoint. Keep the signal if the spot ratio exceeds the perpetual ratio for a long, or is lower for a short. Strict signed log difference above zero; no fitted threshold. This is a within-week relative price move, not the outright funding premium. No requirement that spot itself sweeps the level and no use of the subsequent market fill.",
   "coverage": "Use the same exact BASEUSDT native spot and futures pair. Require the original spot source coverage, actual activity in each H1 of the spot key and Monday, original futures Monday H1 grid and last confirming H1. Ratio within each market is independent of a constant token multiplier. Failed observability remains unknown in all arms.",

@@ -1,5 +1,35 @@
 {
-  "additional_settlements": {},
+  "additional_settlements": {
+    "BADGERUSDT": {
+      "utc": "2025-04-14T09:00:00Z",
+      "minutes": 30,
+      "announcement": "https://www.binance.com/en/support/announcement/detail/fac9c3e401da4cc8b604566fd261d70c",
+      "settlement_method": "https://www.binance.com/en/support/announcement/detail/4bcabddf0e81423ebca242e185bf157d",
+      "settlement_fee": "https://www.binance.com/en/support/faq/detail/dd60dfbf654d4055aa6b217ea6d5ddba",
+      "mark": "Approximate the official mean of 1,800 one-second index prices from 08:30 to 09:00 UTC with the mean of the 30 official Binance one-minute index-price candle closes; validate all expected minute bars and OHLC."
+    },
+    "MLNUSDT": {
+      "utc": "2026-05-19T09:00:00Z",
+      "minutes": 30,
+      "announcement": "https://www.binance.com/en/support/announcement/detail/a42f51022cb649aea0b4cb808205fd76",
+      "settlement_method": "https://www.binance.com/en/support/announcement/detail/4bcabddf0e81423ebca242e185bf157d",
+      "mark": "Native one-minute index close average over the historical settlement window, proxy for the official every-second index average."
+    },
+    "VANRYUSDT": {
+      "utc": "2026-08-07T09:00:00Z",
+      "minutes": 30,
+      "announcement": "https://www.binance.com/en/support/announcement/detail/64cf7544b98e4f2ca7f54ba11fd72d9d",
+      "settlement_method": "https://www.binance.com/en/support/announcement/detail/4bcabddf0e81423ebca242e185bf157d",
+      "mark": "One-minute native index closes averaged over the final 30 minutes, proxy for the official average of one-second index values."
+    },
+    "VOXELUSDT": {
+      "utc": "2025-12-10T09:00:00Z",
+      "minutes": 30,
+      "announcement": "https://www.binance.com/en/square/post/33300268076769",
+      "settlement_method": "https://www.binance.com/en/support/announcement/detail/4bcabddf0e81423ebca242e185bf157d",
+      "mark": "Native one-minute index close average over the historical settlement window, proxy for the official every-second index average."
+    }
+  },
   "single_variable": "At the original futures 12H confirmation, require the same-named Binance USDT spot market to have independently swept and closed back inside its own complete preceding NY Monday 1.618 range in the same direction on that exact UTC 12H candle. Compare the confirmed cohort to all observable spot-backed opportunities. Missing history is unknown.",
   "wallet": "Same 1000U, nine slots, NAV/10, 2/3 resting 2R with prior directional-efficiency override and original EMA, 20% hourly single-name cap. Same frozen predictions prioritized within the contemporaneous eligible subset; 5bp market, 2bp maker, no holding funding in initial comparison. Original no-filter wallet is reused.",
   "placebo": "A third wallet admits the same number of opportunities at each 12H time, direction and frozen-score availability. Draw uniformly without replacement from that covered stratum with one predetermined seed (1029), before score reranking. It controls for calendar, side, documentation availability and scarcity and is descriptive. No choice among draws."
