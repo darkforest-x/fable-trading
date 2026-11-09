@@ -15,6 +15,51 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-session-clock-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "ba427b8982"
+    status: "rejected"
+    question: "改变12H收盘时刻能否改善真正的云带收回信号"
+    single_variable: "十主流币以同一批H1重建00/12或06/18 UTC两套12H OHLC、EMA、信号及退出，共用原纽约周一锚点。"
+    result: "原时钟203笔、53528U/胜21.18%/回撤上界60.93%；偏移6H为223笔、29194U/胜19.73%/回撤上界65.17%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-session-clock-20261109-v1/summary.json"
+    notes: "Three funded slots and long-only pilot. No funding or measured depth. Notion 41388564-79af-811a-a248-f7bb001efe11."
+
+  - experiment_id: exp-cloud-close-dual-session-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "cfadc6df85"
+    status: "rejected"
+    question: "两个12H时钟的收回信号共用资金有无增益"
+    single_variable: "四个可决策钟点，始终等各自12H收盘，将两套信号放进同一三个槽的资金账户。"
+    result: "243笔，49598U、胜19.34%、现金盈亏7.30、回撤上界60.66%；压力45927U。原时钟单独53528U。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-dual-session-20261109-v1/summary.json"
+    notes: "Same-symbol competing admissions cannot use two positions. Notion 41388564-79af-81ab-a15d-f3406c55952d."
+
+  - experiment_id: exp-cloud-close-continuous-volume-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "77a44aefdc"
+    status: "inconclusive"
+    question: "补单前一小时每分钟都有成交能否降低超量成交"
+    single_variable: "仅在过去60个完整分钟均有成交时尝试补足原计划，事后对账按随后实际分钟成交额检查，收益不参与筛选。"
+    result: "未盈利组49022U、胜21.64%、现金盈亏6.77、回撤上界42.20%；205次新增均有来源，超整分钟2次，原规则296次中9次。额外5bp为44255U。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-continuous-volume-20261109-v1/summary.json"
+    notes: "All 205 additions have witnessed next-minute turnover; two still exceed 100%. USD contract funding and tradeable depth unresolved. Notion 41388564-79af-811b-9826-f5ac155dd8a3."
+
   - experiment_id: exp-cloud-close-large-exit-turnover-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "1d90f278d5"
