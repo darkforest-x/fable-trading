@@ -88,7 +88,7 @@ def main():
     baseline_roster, _ = wallet.admit(parents.reset_index(), 9)
     if set(baseline_roster.event_id) != original_ids or original_ids != set(original_tape.event_id):
         raise ValueError('Reconstructed inverse regime does not reproduce original funded parents')
-    longs = parents[parents.side.eq(1)][['symbol', 'side', 'entry_ms', 'key_open_ms']]
+    longs = parents[parents.side.eq(1)][['symbol', 'side', 'entry_ms', 'key_open_ms', 'stop_price']]
     shorts = parents.index[parents.side.eq(-1)]
     print('Eligible inverse parents', len(longs), 'long', len(shorts), 'short', flush=True)
     frame = features.build_features(longs.reset_index(), src)
