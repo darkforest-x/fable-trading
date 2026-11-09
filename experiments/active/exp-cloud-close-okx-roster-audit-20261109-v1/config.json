@@ -1,0 +1,6 @@
+{
+  "question": "Does the 291-name OKX reference omit native perpetual markets that traded historically and were already absent by November 2026?",
+  "single_variable": "Use Tardis's historical okex-swap provider directory as a discovery list. Take all exact USDT-SWAP perpetual IDs whose recorded window ended before the frozen November 8 12:00 UTC cutoff and that were absent from the original 291-symbol list. Verify one native OKX candlestick month, the previous calendar month in Shanghai, for every such instrument. Record a 404 without assigning an absence of trading. No fees, strategy decisions or wealth calculation in this source check.",
+  "scope": "The old reference contains 289 currently classified category-1 contracts plus ICX and LRC. Preserve its frozen results. A provider list or sample month is insufficient to prove a complete historical universe. Token identities and category changes still require native evidence before adding markets to a wallet.",
+  "official_reference": "https://www.okx.com/en-us/help/okx-to-delist-waves-margin-trading-pairs-and-perpetual-swaps"
+}
