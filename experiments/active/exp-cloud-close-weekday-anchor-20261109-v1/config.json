@@ -1,0 +1,6 @@
+{
+ "question":"Does reclaiming the weekend's 1.618 extension produce a better subsequent long trend than the conventional Monday range?",
+ "single_variable":"Replace only the existing New York Monday full-local-day high and low with the immediately preceding Sunday. Use Tuesday as the symmetric one-day-later control. Each calendar range must finish before the opening of the 12H signal candle, with expiry exactly seven local calendar days after the beginning of its anchor; use actual DST, including 23 or 25 hourly observations on a Sunday. Preserve first weekly key across both sides, known original signal, original touched-side fixed stop and unchanged cloud exit. Same historical ten-major 00/12 UTC long-only three-slot account and same fees and adverse 5bp stress as exp-cloud-close-session-clock-20261109-v1.",
+ "reference":"Monday results 53528U, 203 long trades, 21.18% wins, 6.89 cash payoff, maximum drawdown upper bound 60.93%. Both alternative ranges chosen before their returns. Ten historically surviving names only. No historical funding or tested depth.",
+ "command":"vectorbt-python -m yoyo.evaluation.cloud_close_weekday_anchor"
+}

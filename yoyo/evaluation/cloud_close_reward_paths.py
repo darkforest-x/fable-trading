@@ -162,10 +162,10 @@ def _signal_id(row: dict) -> str:
     return f"signal-row-{int(row['source_row_number']):05d}"
 
 
-def _ny_week_window(time_ms: int) -> dict:
-    """Pure equivalent of the existing Monday-New-York calendar window."""
+def _ny_week_window(time_ms: int, anchor_weekday: int = 0) -> dict:
+    """Local weekly boundaries; Monday by default. Convert each midnight separately across DST."""
     day = datetime.fromtimestamp(time_ms/1000, NY).date()
-    monday = day - timedelta(days=day.weekday())
+    monday = day - timedelta(days=(day.weekday()-anchor_weekday)%7)
     stamp = lambda d: int(datetime.combine(d, time.min, NY).timestamp()*1000)
     return {"week": monday.isoformat(), "start": stamp(monday),
             "monday_end": stamp(monday+timedelta(days=1)),

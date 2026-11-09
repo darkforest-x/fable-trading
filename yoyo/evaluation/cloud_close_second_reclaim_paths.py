@@ -98,11 +98,11 @@ def _load_config(config_path: Path) -> tuple[dict, dict, Path, Path, Path, Path,
     return config, path_config, signal_path, output_path, candidate_path, coverage_path, audit_path
 
 
-def _anchors(bars1: pd.DataFrame, bars12: pd.DataFrame, symbol: str) -> dict[str, dict]:
+def _anchors(bars1: pd.DataFrame, bars12: pd.DataFrame, symbol: str, *, anchor_weekday: int = 0) -> dict[str, dict]:
     """Rebuild the exact complete New York Monday 1H range used by V1.7."""
     calendar: dict[str, dict] = {}
     for value in bars12.index.to_numpy(dtype=np.int64):
-        window = engine._ny_week_window(int(value))
+        window = engine._ny_week_window(int(value),anchor_weekday)
         week = window["week"]
         if week in calendar:
             continue
@@ -128,7 +128,7 @@ def _anchors(bars1: pd.DataFrame, bars12: pd.DataFrame, symbol: str) -> dict[str
 
 
 def _signal_at(index: int, symbol: str, bars12: pd.DataFrame, features: dict,
-               calendar: dict[str, dict], cutoff_ms: int, *, utc_offset_ms: int = 0) -> dict | None:
+               calendar: dict[str, dict], cutoff_ms: int, *, utc_offset_ms: int = 0, anchor_weekday: int = 0) -> dict | None:
     """Pure V1.7 single-bar rule, copied from cloud_signals.signal (fib mode).
 
     Uses only the completed signal 12H OHLC, its confirmed EMA20/EMA50, and the
@@ -138,7 +138,7 @@ def _signal_at(index: int, symbol: str, bars12: pd.DataFrame, features: dict,
     time_ms = int(bars12.index[index])
     if (time_ms - utc_offset_ms) % BAR_MS or time_ms + BAR_MS > cutoff_ms:
         return None
-    window = engine._ny_week_window(time_ms)
+    window = engine._ny_week_window(time_ms,anchor_weekday)
     anchor = calendar.get(window["week"])
     if (anchor is None or anchor["state"] != "ready"
             or anchor["symbol"] != symbol
