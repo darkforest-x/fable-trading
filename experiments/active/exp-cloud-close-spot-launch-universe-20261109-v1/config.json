@@ -1,0 +1,7 @@
+{
+ "question":"Which Binance spot USDT pairs were genuinely tradable in the exchange's 2017 launch year and what full native hourly archive is available for each?",
+ "universe":"Use the official full spot prefix directory previously frozen on 2026-11-09, including retired symbols. Inspect the historical 1h month index of every USDT suffix pair. Admit any pair with at least one original positive-trade verified H1 in 2017; preserve every qualifying pair including those later delisted or renamed. A pair cannot trade before its first actual bars and its 50 complete causal 12H EMA warmup. No further listings after Jan 1 2018. No USDT-pair alias migration, retrospective performance, market cap or survival filter. Archive-source scope only; never infer a formal listing announcement from first bar.",
+ "source":"Reuse previously inspected official pair/month indexes and native H1 ZIPs from cloud_close_spot_reclaim_20261109; fetch only missing official indexes and archives. Validate signed native times, OHLC, volume and trade count using the repaired spot reader. Keep zero-trade rows explicitly flagged and separately count missing hours. Collect all listed months through the last complete monthly source, Oct 2026. No account outputs in this source study.",
+ "urls":["https://github.com/binance/binance-public-data","https://data.binance.vision/data/spot/monthly/klines/"],
+ "command":"vectorbt-python -m yoyo.evaluation.cloud_close_spot_launch_universe"
+}
