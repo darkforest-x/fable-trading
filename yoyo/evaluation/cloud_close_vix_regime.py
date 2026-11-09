@@ -61,6 +61,7 @@ def main():
         prior=json.loads((queue.EXP/'summary.json').read_text())['arms']['balanced']
         source_roster=set(pd.read_csv(queue.EXP/'balanced/selected_paths.csv.gz',usecols=['event_id']).event_id)
         result['arms']['covered']=dict(prior,eligible_count=result['liquid_eligible'])
+        result['covered_account_source']=str((queue.EXP/'balanced').relative_to(queue.repair.wallet.ROOT))
         for label in allowed:
             actual=set(pd.read_csv(EXP/label/'selected_paths.csv.gz',usecols=['event_id']).event_id)
             result['arms'][label]['overlap']=len(actual & source_roster)
