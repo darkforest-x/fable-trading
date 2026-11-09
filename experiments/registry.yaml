@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-adverse-btc-rank-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "b60bb9d078"
+    status: "rejected"
+    question: "逆风日的相对抗跌性能否改善选币"
+    single_variable: "按过去30个完整UTC日的逆风BTC日超额收益排列同刻入场，对照反序及固定随机顺序。"
+    result: "12,442个机会可评分，抗跌排序45,569U，胜22.15%、金额盈亏比4.66、回撤至少55.17%；反序50,379U、至少64.44%，随机95,976U、至少54.37%，均未改善原ATR排序。抗跌和反序各有4个缺失持仓小时。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-adverse-btc-rank-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81a9-b0b1-eb412a9f8e3b."
+
+  - experiment_id: exp-cloud-close-volatility-squeeze-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "7a3a2b7ff5"
+    status: "rejected"
+    question: "12小时波动收缩后突破能否获取高盈亏比大行情"
+    single_variable: "使用完成的12H布林/Keltner收缩后首次越界，沿v1.7云带趋势和保护退出，九个现金仓，对照统一晚12小时。"
+    result: "360合约8,250机会，1,406笔入资，13,369U、胜15.08%、金额盈亏比6.60、回撤64.87–67.06%。晚12小时5,228U；一个无报价持仓小时、三笔提前源尾结算。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-volatility-squeeze-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-814e-86ac-d57349179d28."
+
   - experiment_id: exp-cloud-close-cvc-trade-hour-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "ff43486b04"
