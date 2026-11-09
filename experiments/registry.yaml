@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-dispersion-expiry-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "323ff228ea"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Expire the 2R order after 12h only where market dispersion before the key exceeds its own preceding 20-bar median."
+    result: "OKX 854/1569 funded parents select expiring target; 45567.89U, 28.11% wins, cash payoff 3.85, observed DD 42.57%, upper bound 43.26%. Persistent-target parent 8866U and always-expire parent 63827U. Fee-only. Both risk and win-rate goals missed."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-dispersion-expiry-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81a2-a1b2-de0ae0ed00a8."
+
+  - experiment_id: exp-cloud-close-hourly-trim-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "9c36529a33"
+    status: "inconclusive"
+    question: "Does a faster review of one-contract concentration improve cash growth whilst controlling 35% drawdown?"
+    single_variable: "Keep the 20% marked single-contract cap but scrutinize at each completed H1 instead of only at 12H boundaries."
+    result: "The scored Binance wallet finished 10512.33U with 33.72% wins, cash payoff 2.754, observed DD 32.35% and H1 bound 34.92%, before holding funding and minimum order precision. 101 parent reductions on 5 cases; 36 reductions below 5U. OKX high-growth 68115.34U with 21.86% wins and 5.515 cash payoff; wealth target missed."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-hourly-trim-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81c7-8865-e8ee1cc6388e."
+
   - experiment_id: exp-cloud-close-funding-account-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "94d59299dd"
