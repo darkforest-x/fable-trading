@@ -77,9 +77,9 @@ def minute_quote(symbol,hour,quotes):
     return bars,url
 
 
-def snapshots(quotes,folder,account_dir=experiment.EXP):
-    base = pd.read_csv(account_dir/'hourly_1.5x_stress.csv.gz',index_col=0,parse_dates=[0])
-    old_positions = pd.read_csv(account_dir/'funded_1.5x_stress.csv.gz',index_col='event_id')
+def snapshots(quotes,folder,account_dir=experiment.EXP,*,label='1.5x_stress'):
+    base = pd.read_csv(account_dir/f'hourly_{label}.csv.gz',index_col=0,parse_dates=[0])
+    old_positions = pd.read_csv(account_dir/f'funded_{label}.csv.gz',index_col='event_id')
     times = targets(base)
 
     def capture(pf,data,positions,equity,multiple,slip):
@@ -170,6 +170,12 @@ def main(directory=EXP,account_dir=experiment.EXP,input_loader=experiment.inputs
         data,_ = experiment.parent.assemble(rows,experiment.changed_limits(rows,quotes),'OKX',quotes)
         engine.simulate(data,engine.underlying(data,quotes),1.5,.0005,quote_loader=quotes,snapshot=capture)
         del data
+    old = json.loads((account_dir/'summary.json').read_text())['cases']['fixed_5bp']['metrics']['all']
+    refine(directory,equity,quotes,old)
+
+
+def refine(directory,equity,quotes,old):
+    """Bound the supplied native account from its conserved post-trim quantities."""
     held = pd.read_csv(directory/'post_trim_units.csv.gz',dtype={'symbol':str},float_precision='round_trip')
     upper,lower = equity.upper_nav.copy(),equity.lower_nav.copy()
     attained_hi = equity[STAGES].max(axis=1)
@@ -192,7 +198,6 @@ def main(directory=EXP,account_dir=experiment.EXP,input_loader=experiment.inputs
     result = 100*(1-lower/upper.cummax().clip(lower=1000))
     # Earlier hours for distinct-hour guaranteed witnesses. Also retain the
     # original fully ordered within-hour stage witness for the same hour.
-    old = json.loads((account_dir/'summary.json').read_text())['cases']['fixed_5bp']['metrics']['all']
     witness = max(old['dd_mark_pct'],100*(1-(attained_lo/attained_hi.cummax().shift().fillna(1000).clip(lower=1000)).min()))
     if witness>result.max()+.00001:
         raise ValueError('Attained witness exceeds every possible drawdown')

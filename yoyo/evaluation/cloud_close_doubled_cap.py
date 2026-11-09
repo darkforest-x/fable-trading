@@ -13,14 +13,7 @@ base = old.exposure
 EXP = study.EXP.parent/'exp-cloud-close-doubled-cap-20261109-v1'
 
 
-def main():
-    if (EXP/'summary.json').exists():
-        raise FileExistsError('Completed doubled winner concentration study')
-    parent_dir = runner.EXP/'account'
-    tape = pd.read_csv(parent_dir/'selected_paths.csv.gz',dtype={'symbol':str},float_precision='round_trip')
-    _,quotes,_ = source.inputs()
-    data,_ = old.parent.assemble(tape,old.changed_limits(tape,quotes),'OKX',quotes)
-    native,previous,side,parents = base.underlying(data,quotes)
+def switched_hours(data,previous,parents):
     observed = pd.read_csv(runner.EXP/'native_switches.csv.gz',index_col='event_id')
     mask = np.zeros_like(previous,dtype=bool)
     eligible = parents[parents.event_id.isin(observed.index)]
@@ -30,6 +23,18 @@ def main():
             raise ValueError('Concentration cut lies outside its funded existing long')
         l,h = (np.array([opening,r.exit_bar_ms])-data['start'])//runner.wallet.HOUR
         mask[l:h+1,r.slot//4] = True
+    return mask,len(eligible)
+
+
+def main():
+    if (EXP/'summary.json').exists():
+        raise FileExistsError('Completed doubled winner concentration study')
+    parent_dir = runner.EXP/'account'
+    tape = pd.read_csv(parent_dir/'selected_paths.csv.gz',dtype={'symbol':str},float_precision='round_trip')
+    _,quotes,_ = source.inputs()
+    data,_ = old.parent.assemble(tape,old.changed_limits(tape,quotes),'OKX',quotes)
+    native,previous,side,parents = base.underlying(data,quotes)
+    mask,n_eligible = switched_hours(data,previous,parents)
     out = {}
     for cap in [.2,.1,.05]:
         caps = np.where(mask,cap,.2)
@@ -51,7 +56,7 @@ def main():
             print(key,out[key]['metrics']['all'],flush=True)
             del model,pf
             gc.collect()
-    source.correction.archive.prices.safe_json(EXP/'summary.json',dict(arms=out,funded_activations=len(eligible),
+    source.correction.archive.prices.safe_json(EXP/'summary.json',dict(arms=out,funded_activations=n_eligible,
             maintenance='Unchanged 1.5x per-unit price scenario on the identical original runner roster.'))
 
 
