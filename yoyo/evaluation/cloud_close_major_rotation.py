@@ -41,7 +41,7 @@ def run(loaded,states,name,slip):
     opening,high,low,closing=map(prices,['open','high','low','close'])
     marks=np.empty((2*len(clock),2))
     marks[::2],marks[1::2]=opening,closing
-    size=np.zeros_like(marks)
+    size=np.full_like(marks,np.nan)
     call_seq=np.tile([0,1],(len(size),1))
     for i in np.flatnonzero(changed):
         old,new=prior[i],current[i]
@@ -60,7 +60,7 @@ def run(loaded,states,name,slip):
     if (positions>1e-10).sum(axis=1).max()>1 or not np.array_equal(current,actual):
         raise ValueError('Open positions differ from the chosen single asset')
     orders=pf.orders.records
-    if len(orders)!=np.count_nonzero(size) or not np.allclose(orders.fees,orders.price*orders['size']*source.TAKER):
+    if len(orders)!=np.count_nonzero(~np.isnan(size)) or not np.allclose(orders.fees,orders.price*orders['size']*source.TAKER):
         raise ValueError('Native market order count or notional fee mismatch')
     trades=pf.trades.records.copy()
     if not trades.status.eq(1).all() or np.asarray(pf.assets())[-1].max()>1e-9:
