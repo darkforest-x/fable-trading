@@ -1,0 +1,205 @@
+{
+  "arms": {
+    "long_1.5": {
+      "metrics": {
+        "all": {
+          "final_usdt": 116058.24981308002,
+          "multiple": 116.05824981308002,
+          "dd_mark_pct": 49.120099247297546,
+          "dd_bound_pct": 49.859053272951684,
+          "trades": 1574,
+          "win_pct": 22.29987293519695,
+          "payoff": 6.936269654364799,
+          "payoff_usdt": 4.914206263613888,
+          "median_net_pct": -3.4112842862221577
+        },
+        "dev": {
+          "final_usdt": 63801.28182234513,
+          "multiple": 63.80128182234513,
+          "dd_mark_pct": 46.70297755890302,
+          "dd_bound_pct": 48.80750542455633,
+          "trades": 1095,
+          "win_pct": 23.013698630136986,
+          "payoff": 7.5270619361433235,
+          "payoff_usdt": 5.112051009963392,
+          "median_net_pct": -3.4139582472256653
+        },
+        "2025": {
+          "final_usdt": 88273.80464329201,
+          "multiple": 1.3835741559094485,
+          "dd_mark_pct": 39.94058680133209,
+          "dd_bound_pct": 40.651786727025865,
+          "trades": 244,
+          "win_pct": 15.573770491803279,
+          "payoff": 5.681758984814415,
+          "payoff_usdt": 5.202192552934137,
+          "median_net_pct": -3.5163347243731025
+        },
+        "2026": {
+          "final_usdt": 116058.24981308002,
+          "multiple": 1.3147530038165107,
+          "dd_mark_pct": 24.163823617854252,
+          "dd_bound_pct": 27.240279218138642,
+          "trades": 217,
+          "win_pct": 23.502304147465438,
+          "payoff": 4.5301414242295985,
+          "payoff_usdt": 4.604832895628766,
+          "median_net_pct": -3.1241572441471464
+        }
+      },
+      "margin": {
+        "1": {
+          "positions_audited": 667,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": 0.23507737169517887,
+          "worst_remaining_equity_per_margin": 0.31688141524105756,
+          "valid": true,
+          "events_at_boundary": []
+        },
+        "-1": {
+          "positions_audited": 907,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 1,
+          "worst_margin_buffer_per_margin": 0.315829872204473,
+          "worst_remaining_equity_per_margin": 0.5142324281150161,
+          "valid": true,
+          "events_at_boundary": []
+        }
+      },
+      "trim_fills": 2922,
+      "valid": true
+    },
+    "long_2": {
+      "margin": {
+        "1": {
+          "positions_audited": 667,
+          "maintenance_boundary_hits": 2,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -0.019896837739761503,
+          "worst_remaining_equity_per_margin": 0.08917522032141009,
+          "valid": false,
+          "events_at_boundary": [
+            "signal-row-00305:signal",
+            "signal-row-00555:signal"
+          ]
+        },
+        "-1": {
+          "positions_audited": 907,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 1,
+          "worst_margin_buffer_per_margin": 0.315829872204473,
+          "worst_remaining_equity_per_margin": 0.5142324281150161,
+          "valid": true,
+          "events_at_boundary": []
+        }
+      },
+      "valid": false
+    },
+    "long_2_stress": {
+      "margin": {
+        "1": {
+          "positions_audited": 667,
+          "maintenance_boundary_hits": 2,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -0.021442425349922065,
+          "worst_remaining_equity_per_margin": 0.08762963271124953,
+          "valid": false,
+          "events_at_boundary": [
+            "signal-row-00305:signal",
+            "signal-row-00555:signal"
+          ]
+        },
+        "-1": {
+          "positions_audited": 907,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 1,
+          "worst_margin_buffer_per_margin": 0.3140877384185309,
+          "worst_remaining_equity_per_margin": 0.512490294329074,
+          "valid": true,
+          "events_at_boundary": []
+        }
+      },
+      "valid": false
+    },
+    "long_3": {
+      "margin": {
+        "1": {
+          "positions_audited": 667,
+          "maintenance_boundary_hits": 10,
+          "negative_equity_positions": 7,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -0.5298452566096423,
+          "worst_remaining_equity_per_margin": -0.366237169517885,
+          "valid": false,
+          "events_at_boundary": [
+            "signal-row-00305:signal",
+            "signal-row-00461:signal",
+            "signal-row-00517:signal",
+            "signal-row-00554:signal",
+            "signal-row-00555:signal",
+            "signal-row-00558:signal",
+            "signal-row-07701:signal",
+            "signal-row-07857:signal",
+            "signal-row-10205:signal",
+            "signal-row-11422:signal"
+          ]
+        },
+        "-1": {
+          "positions_audited": 907,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 1,
+          "worst_margin_buffer_per_margin": 0.315829872204473,
+          "worst_remaining_equity_per_margin": 0.5142324281150161,
+          "valid": true,
+          "events_at_boundary": []
+        }
+      },
+      "valid": false
+    },
+    "long_3_stress": {
+      "margin": {
+        "1": {
+          "positions_audited": 667,
+          "maintenance_boundary_hits": 10,
+          "negative_equity_positions": 7,
+          "unquoted_position_hours": 0,
+          "worst_margin_buffer_per_margin": -0.532163638024883,
+          "worst_remaining_equity_per_margin": -0.3685555509331256,
+          "valid": false,
+          "events_at_boundary": [
+            "signal-row-00305:signal",
+            "signal-row-00461:signal",
+            "signal-row-00517:signal",
+            "signal-row-00554:signal",
+            "signal-row-00555:signal",
+            "signal-row-00558:signal",
+            "signal-row-07701:signal",
+            "signal-row-07857:signal",
+            "signal-row-10205:signal",
+            "signal-row-11422:signal"
+          ]
+        },
+        "-1": {
+          "positions_audited": 907,
+          "maintenance_boundary_hits": 0,
+          "negative_equity_positions": 0,
+          "unquoted_position_hours": 1,
+          "worst_margin_buffer_per_margin": 0.3140877384185309,
+          "worst_remaining_equity_per_margin": 0.512490294329074,
+          "valid": true,
+          "events_at_boundary": []
+        }
+      },
+      "valid": false
+    }
+  },
+  "short_multiple": 1.5
+}

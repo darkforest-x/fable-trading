@@ -1,0 +1,327 @@
+{
+  "reference": {
+    "all": {
+      "final_usdt": 116058.24981308002,
+      "multiple": 116.05824981308002,
+      "dd_mark_pct": 49.120099247297546,
+      "dd_bound_pct": 49.859053272951684,
+      "trades": 1574,
+      "win_pct": 22.29987293519695,
+      "payoff": 6.936269654364799,
+      "payoff_usdt": 4.914206263613886,
+      "median_net_pct": -3.4112842862221577
+    },
+    "dev": {
+      "final_usdt": 63801.28182234513,
+      "multiple": 63.80128182234513,
+      "dd_mark_pct": 46.70297755890302,
+      "dd_bound_pct": 48.80750542455633,
+      "trades": 1095,
+      "win_pct": 23.013698630136986,
+      "payoff": 7.5270619361433235,
+      "payoff_usdt": 5.112051009963393,
+      "median_net_pct": -3.4139582472256653
+    },
+    "2025": {
+      "final_usdt": 88273.80464329201,
+      "multiple": 1.3835741559094485,
+      "dd_mark_pct": 39.94058680133209,
+      "dd_bound_pct": 40.651786727025865,
+      "trades": 244,
+      "win_pct": 15.573770491803279,
+      "payoff": 5.681758984814415,
+      "payoff_usdt": 5.202192552934137,
+      "median_net_pct": -3.5163347243731025
+    },
+    "2026": {
+      "final_usdt": 116058.24981308002,
+      "multiple": 1.3147530038165107,
+      "dd_mark_pct": 24.163823617854252,
+      "dd_bound_pct": 27.240279218138642,
+      "trades": 217,
+      "win_pct": 23.502304147465438,
+      "payoff": 4.5301414242295985,
+      "payoff_usdt": 4.604832895628766,
+      "median_net_pct": -3.1241572441471464
+    }
+  },
+  "arms": {
+    "long_only": {
+      "cases": {
+        "fee_only": {
+          "metrics": {
+            "all": {
+              "final_usdt": 18401.32351971462,
+              "multiple": 18.40132351971462,
+              "dd_mark_pct": 71.29923861392065,
+              "dd_bound_pct": 71.75432061896254,
+              "trades": 1285,
+              "win_pct": 18.443579766536967,
+              "payoff": 8.508390926845408,
+              "payoff_usdt": 5.048327032514074,
+              "median_net_pct": -3.4784523868714974
+            },
+            "dev": {
+              "final_usdt": 22730.699170441247,
+              "multiple": 22.730699170441248,
+              "dd_mark_pct": 71.29923861392065,
+              "dd_bound_pct": 71.75432061896254,
+              "trades": 756,
+              "win_pct": 19.31216931216931,
+              "payoff": 10.548203980197842,
+              "payoff_usdt": 5.478041917835635,
+              "median_net_pct": -3.5924613022661296
+            },
+            "2025": {
+              "final_usdt": 20837.702812601827,
+              "multiple": 0.9167207157313906,
+              "dd_mark_pct": 37.62105989471463,
+              "dd_bound_pct": 42.27804982374713,
+              "trades": 208,
+              "win_pct": 16.346153846153847,
+              "payoff": 5.392939478546381,
+              "payoff_usdt": 4.650648854661747,
+              "median_net_pct": -3.607458432821517
+            },
+            "2026": {
+              "final_usdt": 18401.32351971462,
+              "multiple": 0.8830783165112721,
+              "dd_mark_pct": 36.15369905176096,
+              "dd_bound_pct": 36.54380765191665,
+              "trades": 318,
+              "win_pct": 17.61006289308176,
+              "payoff": 4.575299876829768,
+              "payoff_usdt": 4.160047667869977,
+              "median_net_pct": -3.160536038907854
+            }
+          },
+          "audit": {
+            "positions_audited": 1285,
+            "maintenance_boundary_hits": 0,
+            "negative_equity_positions": 0,
+            "unquoted_position_hours": 0,
+            "worst_margin_buffer_per_margin": 0.23507737169517887,
+            "worst_remaining_equity_per_margin": 0.31688141524105756,
+            "valid": true,
+            "affected_contracts": []
+          },
+          "trim_fills": 4015
+        },
+        "extra_5bp": {
+          "metrics": {
+            "all": {
+              "final_usdt": 15066.53557667259,
+              "multiple": 15.06653557667259,
+              "dd_mark_pct": 72.12565607417271,
+              "dd_bound_pct": 72.56729482249011,
+              "trades": 1285,
+              "win_pct": 18.054474708171206,
+              "payoff": 8.500646304699895,
+              "payoff_usdt": 5.102051876115157,
+              "median_net_pct": -3.5749756728416204
+            },
+            "dev": {
+              "final_usdt": 20197.79984897052,
+              "multiple": 20.197799848970522,
+              "dd_mark_pct": 72.12565607417271,
+              "dd_bound_pct": 72.56729482249011,
+              "trades": 756,
+              "win_pct": 19.047619047619047,
+              "payoff": 10.456247510216638,
+              "payoff_usdt": 5.471017038059722,
+              "median_net_pct": -3.688870636296828
+            },
+            "2025": {
+              "final_usdt": 17930.31672498373,
+              "multiple": 0.8877361326014743,
+              "dd_mark_pct": 37.97520966461209,
+              "dd_bound_pct": 42.60586125868959,
+              "trades": 208,
+              "win_pct": 16.346153846153847,
+              "payoff": 5.2555566239882285,
+              "payoff_usdt": 4.528602771878032,
+              "median_net_pct": -3.7038527772164933
+            },
+            "2026": {
+              "final_usdt": 15066.53557667259,
+              "multiple": 0.8402827349769674,
+              "dd_mark_pct": 37.95747039105718,
+              "dd_bound_pct": 38.44225321858753,
+              "trades": 318,
+              "win_pct": 16.666666666666664,
+              "payoff": 4.729461032050056,
+              "payoff_usdt": 4.281011124797864,
+              "median_net_pct": -3.257377082347242
+            }
+          },
+          "audit": {
+            "positions_audited": 1285,
+            "maintenance_boundary_hits": 0,
+            "negative_equity_positions": 0,
+            "unquoted_position_hours": 0,
+            "worst_margin_buffer_per_margin": 0.23391818098755848,
+            "worst_remaining_equity_per_margin": 0.3157222245334372,
+            "valid": true,
+            "affected_contracts": []
+          },
+          "trim_fills": 4099
+        }
+      },
+      "eligible_parents": 4684,
+      "funded": 1285,
+      "new_or_uncertain_tail_exits": [],
+      "gap_events": [],
+      "doubling_fills": 110
+    },
+    "short_only": {
+      "cases": {
+        "fee_only": {
+          "metrics": {
+            "all": {
+              "final_usdt": 2392.936350743906,
+              "multiple": 2.392936350743906,
+              "dd_mark_pct": 55.30030275090494,
+              "dd_bound_pct": 55.875859432190175,
+              "trades": 1086,
+              "win_pct": 22.099447513812155,
+              "payoff": 4.578607973218236,
+              "payoff_usdt": 4.384545644219457,
+              "median_net_pct": -3.2947223596395583
+            },
+            "dev": {
+              "final_usdt": 942.0448202946253,
+              "multiple": 0.9420448202946253,
+              "dd_mark_pct": 55.30030275090494,
+              "dd_bound_pct": 55.875859432190175,
+              "trades": 703,
+              "win_pct": 22.475106685633,
+              "payoff": 3.6449128094571397,
+              "payoff_usdt": 3.285599473484118,
+              "median_net_pct": -3.2280982498694772
+            },
+            "2025": {
+              "final_usdt": 1572.0559058328506,
+              "multiple": 1.6687697569858606,
+              "dd_mark_pct": 35.497269145960686,
+              "dd_bound_pct": 36.75442191725525,
+              "trades": 182,
+              "win_pct": 18.681318681318682,
+              "payoff": 5.725592321412128,
+              "payoff_usdt": 5.075354237472585,
+              "median_net_pct": -3.4531195616180983
+            },
+            "2026": {
+              "final_usdt": 2392.936350743906,
+              "multiple": 1.522170007991011,
+              "dd_mark_pct": 28.223366073216106,
+              "dd_bound_pct": 28.915821740987766,
+              "trades": 183,
+              "win_pct": 21.311475409836063,
+              "payoff": 6.6400879132090616,
+              "payoff_usdt": 6.125524433311028,
+              "median_net_pct": -3.330375072810597
+            }
+          },
+          "audit": {
+            "positions_audited": 1086,
+            "maintenance_boundary_hits": 0,
+            "negative_equity_positions": 0,
+            "unquoted_position_hours": 1,
+            "worst_margin_buffer_per_margin": 0.315829872204473,
+            "worst_remaining_equity_per_margin": 0.5142324281150161,
+            "valid": true,
+            "affected_contracts": []
+          },
+          "trim_fills": 128
+        },
+        "extra_5bp": {
+          "metrics": {
+            "all": {
+              "final_usdt": 2034.127122412511,
+              "multiple": 2.034127122412511,
+              "dd_mark_pct": 56.67924110916882,
+              "dd_bound_pct": 57.237149802686496,
+              "trades": 1086,
+              "win_pct": 22.007366482504604,
+              "payoff": 4.467370656708843,
+              "payoff_usdt": 4.2303745859141895,
+              "median_net_pct": -3.3980187301844746
+            },
+            "dev": {
+              "final_usdt": 844.8792236088166,
+              "multiple": 0.8448792236088166,
+              "dd_mark_pct": 56.67924110916882,
+              "dd_bound_pct": 57.237149802686496,
+              "trades": 703,
+              "win_pct": 22.33285917496444,
+              "payoff": 3.562779621198578,
+              "payoff_usdt": 3.2053356847217156,
+              "median_net_pct": -3.3313279629759065
+            },
+            "2025": {
+              "final_usdt": 1371.9641337251358,
+              "multiple": 1.6238582928633623,
+              "dd_mark_pct": 36.34146785287917,
+              "dd_bound_pct": 37.582411147777385,
+              "trades": 182,
+              "win_pct": 18.681318681318682,
+              "payoff": 5.563222371906326,
+              "payoff_usdt": 4.950226628697396,
+              "median_net_pct": -3.556574408603196
+            },
+            "2026": {
+              "final_usdt": 2034.127122412511,
+              "multiple": 1.4826387019968814,
+              "dd_mark_pct": 28.84135904157139,
+              "dd_bound_pct": 29.583750649159825,
+              "trades": 183,
+              "win_pct": 21.311475409836063,
+              "payoff": 6.443492058411814,
+              "payoff_usdt": 5.949680577830488,
+              "median_net_pct": -3.4337071139039423
+            }
+          },
+          "audit": {
+            "positions_audited": 1086,
+            "maintenance_boundary_hits": 0,
+            "negative_equity_positions": 0,
+            "unquoted_position_hours": 1,
+            "worst_margin_buffer_per_margin": 0.3140877384185309,
+            "worst_remaining_equity_per_margin": 0.512490294329074,
+            "valid": true,
+            "affected_contracts": []
+          },
+          "trim_fills": 132
+        }
+      },
+      "eligible_parents": 7753,
+      "funded": 1086,
+      "new_or_uncertain_tail_exits": [
+        {
+          "event_id": "signal-row-11685:signal",
+          "symbol": "ICX",
+          "exit_ms": 1788994800000
+        },
+        {
+          "event_id": "ema20-50-12h-monday-wick-v1:SLP-USDT-SWAP:1760011200000:-1",
+          "symbol": "SLP",
+          "exit_ms": 1761289200000
+        },
+        {
+          "event_id": "signal-row-11685:signal",
+          "symbol": "ICX",
+          "exit_ms": 1788994800000
+        },
+        {
+          "event_id": "ema20-50-12h-monday-wick-v1:SLP-USDT-SWAP:1760011200000:-1",
+          "symbol": "SLP",
+          "exit_ms": 1761289200000
+        }
+      ],
+      "gap_events": [
+        "ema20-50-12h-monday-wick-v1:BNT-USDT-SWAP:1663156800000:-1"
+      ],
+      "doubling_fills": 0
+    }
+  }
+}

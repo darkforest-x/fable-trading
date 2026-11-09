@@ -1,0 +1,272 @@
+{
+  "experiment_id": "exp-cloud-close-breakout-admission-20261109-v1",
+  "source_paths": {
+    "paths_csv_gz": "experiments/active/exp-cloud-close-breakout-historical-20261109-v1/paths_full_360.csv.gz"
+  },
+  "universe": {
+    "historical_names": 360,
+    "frozen_path_rows_reused": true,
+    "new_signals_or_path_pricing": false,
+    "actual_executable_breakout_opportunities": 18890
+  },
+  "single_variable": "Change only event ordering among opportunities with the same exact executable entry timestamp. Keep all native breakout paths, stop/exit prices, signal events, nine slots, cash sizing, fees, and already-open positions unchanged.",
+  "priority_audit": {
+    "opportunities": 18890,
+    "unique_entry_timestamps": 2763,
+    "same_time_competition_groups": 2034,
+    "opportunities_in_same_time_competition_groups": 18161,
+    "same_time_groups_with_equal_close_distance": 0,
+    "same_time_groups_with_equal_entry_open_distance": 0,
+    "same_time_groups_with_different_close_vs_entry_open_order": 395,
+    "opportunities_in_groups_with_different_close_vs_entry_open_order": 9861
+  },
+  "risk_semantics": {
+    "primary_priority_variable": "side*(confirmed_12h_close-stop_price)/confirmed_12h_close",
+    "known_at": "The close of the signal's completed native UTC 12H candle; fixed stop already known.",
+    "entry_open_risk_audit": "Path risk_fraction is retained separately as entry-open stop distance; it is not used for priority.",
+    "tie_break": "CRC32(symbol), symbol, event_id in the same ascending order as the frozen wallet admission rule."
+  },
+  "accounts": {
+    "crc32_original": {
+      "metrics": {
+        "all": {
+          "final_usdt": 9837.518517968027,
+          "multiple": 9.837518517968027,
+          "dd_mark_pct": 64.07287658983446,
+          "dd_bound_pct": 66.15818008205244,
+          "trades": 1319,
+          "win_pct": 19.787717968157693,
+          "payoff": 6.346308696661638,
+          "payoff_usdt": 4.644470515529618,
+          "median_net_pct": -4.369632586627917
+        },
+        "dev": {
+          "final_usdt": 12165.802459270408,
+          "multiple": 12.165802459270408,
+          "dd_mark_pct": 54.977655825892626,
+          "dd_bound_pct": 55.750443794871465,
+          "trades": 924,
+          "win_pct": 20.454545454545457,
+          "payoff": 7.208992092308859,
+          "payoff_usdt": 4.941844635869161,
+          "median_net_pct": -4.2822271729593515
+        },
+        "2025": {
+          "final_usdt": 9845.168013475597,
+          "multiple": 0.8092493731043221,
+          "dd_mark_pct": 53.92825898951747,
+          "dd_bound_pct": 62.55610630625318,
+          "trades": 210,
+          "win_pct": 12.380952380952381,
+          "payoff": 4.3139042320585,
+          "payoff_usdt": 3.896215279108672,
+          "median_net_pct": -5.044970749699283
+        },
+        "2026": {
+          "final_usdt": 9837.518517968027,
+          "multiple": 0.9992230203184852,
+          "dd_mark_pct": 24.0261204128969,
+          "dd_bound_pct": 25.410075509618725,
+          "trades": 170,
+          "win_pct": 21.176470588235293,
+          "payoff": 4.195015879635071,
+          "payoff_usdt": 4.066574407398043,
+          "median_net_pct": -4.361601200933477
+        }
+      },
+      "admission": {
+        "input_executed_events": 18890,
+        "admitted": 1319,
+        "funded": 1319,
+        "rejected": {
+          "same_contract": 882,
+          "all_slots_busy": 16689
+        },
+        "unquoted_position_hours": 4043
+      },
+      "funded_positions": 1319,
+      "exit_reasons": {
+        "stop": 975,
+        "ema_flip_open": 193,
+        "ema_flip": 136,
+        "series_tail_close": 12,
+        "stop_gap_open": 2,
+        "data_gap_markout": 1
+      },
+      "baseline_source": "experiments/active/exp-cloud-close-breakout-historical-20261109-v1/funded/funded_breakout_actual.csv.gz",
+      "selected_vs_crc32": {
+        "same_as_crc32": true,
+        "retained_from_crc32": 1319,
+        "added_vs_crc32": 0,
+        "dropped_vs_crc32": 0
+      }
+    },
+    "close_risk_min": {
+      "metrics": {
+        "all": {
+          "final_usdt": 7575.252586872353,
+          "multiple": 7.575252586872353,
+          "dd_mark_pct": 65.21314283950258,
+          "dd_bound_pct": 69.25787084220458,
+          "trades": 1702,
+          "win_pct": 15.158636897767334,
+          "payoff": 8.95906807944426,
+          "payoff_usdt": 6.334419748689477,
+          "median_net_pct": -3.65729228974251
+        },
+        "dev": {
+          "final_usdt": 6826.756627956558,
+          "multiple": 6.826756627956558,
+          "dd_mark_pct": 65.21314283950258,
+          "dd_bound_pct": 66.1213064154413,
+          "trades": 1153,
+          "win_pct": 15.95836947094536,
+          "payoff": 9.546279422118674,
+          "payoff_usdt": 6.149965648162326,
+          "median_net_pct": -3.8031140616835484
+        },
+        "2025": {
+          "final_usdt": 8525.655631472242,
+          "multiple": 1.2488588792748883,
+          "dd_mark_pct": 58.33220669970323,
+          "dd_bound_pct": 65.99613186090775,
+          "trades": 280,
+          "win_pct": 10.0,
+          "payoff": 8.541761929466848,
+          "payoff_usdt": 8.616614370351794,
+          "median_net_pct": -3.5642913538291547
+        },
+        "2026": {
+          "final_usdt": 7575.252586872353,
+          "multiple": 0.8885243451434398,
+          "dd_mark_pct": 30.151266218290306,
+          "dd_bound_pct": 32.4827818700444,
+          "trades": 255,
+          "win_pct": 14.117647058823529,
+          "payoff": 5.903681436848947,
+          "payoff_usdt": 5.624350900969303,
+          "median_net_pct": -3.303349514354635
+        }
+      },
+      "admission": {
+        "input_executable_actual_paths": 18890,
+        "admitted": 1702,
+        "funded": 1702,
+        "rejected": {
+          "same_contract": 828,
+          "all_slots_busy": 16360
+        },
+        "unquoted_position_hours": 2
+      },
+      "funded_positions": 1702,
+      "exit_reasons": {
+        "stop": 1357,
+        "ema_flip_open": 188,
+        "ema_flip": 143,
+        "series_tail_close": 10,
+        "stop_gap_open": 2,
+        "data_gap_markout": 2
+      },
+      "selected_vs_crc32": {
+        "same_as_crc32": false,
+        "retained_from_crc32": 657,
+        "added_vs_crc32": 1045,
+        "dropped_vs_crc32": 662
+      }
+    },
+    "close_risk_max": {
+      "metrics": {
+        "all": {
+          "final_usdt": 6965.678505118529,
+          "multiple": 6.965678505118529,
+          "dd_mark_pct": 66.26423347503976,
+          "dd_bound_pct": 67.03004049839143,
+          "trades": 1119,
+          "win_pct": 23.86058981233244,
+          "payoff": 4.775173653626146,
+          "payoff_usdt": 3.5180439156712087,
+          "median_net_pct": -5.141426451378361
+        },
+        "dev": {
+          "final_usdt": 10442.952511528681,
+          "multiple": 10.44295251152868,
+          "dd_mark_pct": 46.42930360943982,
+          "dd_bound_pct": 49.664872914074046,
+          "trades": 799,
+          "win_pct": 24.6558197747184,
+          "payoff": 5.676890176766213,
+          "payoff_usdt": 3.833299725927698,
+          "median_net_pct": -4.759824396828486
+        },
+        "2025": {
+          "final_usdt": 7418.471042623077,
+          "multiple": 0.7103806164428427,
+          "dd_mark_pct": 46.69430383820078,
+          "dd_bound_pct": 57.849681937194106,
+          "trades": 177,
+          "win_pct": 14.689265536723164,
+          "payoff": 3.303237263825472,
+          "payoff_usdt": 3.4493231111700284,
+          "median_net_pct": -6.930551338503893
+        },
+        "2026": {
+          "final_usdt": 6965.678505118529,
+          "multiple": 0.9389641699882614,
+          "dd_mark_pct": 37.22868899081324,
+          "dd_bound_pct": 38.96852814140138,
+          "trades": 128,
+          "win_pct": 26.5625,
+          "payoff": 2.747121676978806,
+          "payoff_usdt": 2.643650005014086,
+          "median_net_pct": -7.636343426694248
+        }
+      },
+      "admission": {
+        "input_executable_actual_paths": 18890,
+        "admitted": 1119,
+        "funded": 1119,
+        "rejected": {
+          "same_contract": 868,
+          "all_slots_busy": 16903
+        },
+        "unquoted_position_hours": 0
+      },
+      "funded_positions": 1119,
+      "exit_reasons": {
+        "stop": 761,
+        "ema_flip_open": 188,
+        "ema_flip": 157,
+        "series_tail_close": 12,
+        "stop_gap_open": 1
+      },
+      "selected_vs_crc32": {
+        "same_as_crc32": false,
+        "retained_from_crc32": 501,
+        "added_vs_crc32": 618,
+        "dropped_vs_crc32": 818
+      }
+    }
+  },
+  "baseline": {
+    "summary_json": "experiments/active/exp-cloud-close-breakout-historical-20261109-v1/summary.json",
+    "account_metrics_csv": "experiments/active/exp-cloud-close-breakout-historical-20261109-v1/account_metrics.csv",
+    "funded_actual_csv_gz": "experiments/active/exp-cloud-close-breakout-historical-20261109-v1/funded/funded_breakout_actual.csv.gz",
+    "funded_positions": 1319,
+    "all_slots_busy_rejections": 16689,
+    "same_contract_rejections": 882
+  },
+  "outputs": {
+    "priority_audit_csv_gz": "priority_audit.csv.gz",
+    "admission_changes_csv_gz": "admission_changes.csv.gz",
+    "account_metrics_csv": "account_metrics.csv",
+    "summary_json": "summary.json",
+    "funded_files": {
+      "close_risk_min": "funded_close_risk_min.csv.gz",
+      "close_risk_max": "funded_close_risk_max.csv.gz"
+    },
+    "hourly_files": {
+      "close_risk_min": "hourly_close_risk_min.csv.gz",
+      "close_risk_max": "hourly_close_risk_max.csv.gz"
+    }
+  }
+}
