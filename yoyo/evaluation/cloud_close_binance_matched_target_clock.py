@@ -23,7 +23,8 @@ def twelve_hour_expiry(data, quotes):
             not np.array_equal(old[['event_id','entry_ms','entry_price','side','stop_price']].to_numpy(),
                                runner[['event_id','entry_ms','entry_price','side','stop_price']].to_numpy())):
         raise ValueError('A scheduled expiry refers to an already terminated or mismatched original runner')
-    cols = ['exit_bar_ms','exit_phase','exit_reason','exit_price','exit_fee_rate','same_bar_ambiguous','gap_flag']
+    cols = ['exit_bar_ms','exit_phase','exit_reason','exit_price','exit_fee_rate']
+    cols += [name for name in ['same_bar_ambiguous','gap_flag'] if name in selected]
     changed = old[cols[:5]].ne(runner[cols[:5]]).any(axis=1)
     selected.loc[eligible,cols] = runner[cols].to_numpy()
     # The unmodified odd 2R child can only hit its profit target during the first 12 hours.
