@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-three-ratio-slots-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "751db4d395"
+    status: "inconclusive"
+    question: "三组相对行情仓位的保证金约束"
+    single_variable: "九币/BTC 12H收盘止损组合的同一总名义本金由一对分为最多三对，各自等值对冲。"
+    result: "实际可排入398对。保守逐腿保证金代理在3对跨界，包括一条BTC空腿和LINK、AVAX两笔山寨空腿；仅山寨半仓对照也有2笔。三仓终值未核定。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-three-ratio-slots-20261109-v1/summary.json"
+    notes: "Conservative per-leg maintenance scenario with actual held H1 trade-price extrema. No terminal figure or verified liquidation was inferred. Notion 41388564-79af-81e7-856b-d2cee40cbd06."
+
   - experiment_id: exp-cloud-close-major-ratio-stop-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "320b2a560a"
