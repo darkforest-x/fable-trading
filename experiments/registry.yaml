@@ -15,6 +15,81 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-okx-retired-prices-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "8568b0f851"
+    status: "inconclusive"
+    question: "退市合约的 OKX 小时行情"
+    single_variable: "在2020年1月至2026年11月逐月查询159个独立目录记录，复用本地原生报价，仅聚合60个已确认分钟齐全的小时。"
+    result: "159个候选中139个找到H1，合计1,022,092小时、2,028个月档。不是全部退市合约或其完整存续期。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-okx-retired-prices-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81c1-b164-ccab6bcdf2b4."
+
+  - experiment_id: exp-cloud-close-okx-retired-account-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "3543fc2d30"
+    status: "inconclusive"
+    question: "把 17 个有公告的 OKX 退市合约放回原策略"
+    single_variable: "仅扩大交易池，保持信号、选币、资金分配和退出相同。"
+    result: "新增120个合格机会、20笔退市币实持，51笔进了新账本、40笔被替换；1,580笔终值64,496.48U，回撤上界47.36%。发现CATI和TREE四条子仓持有至交割，指数校正另登记。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-okx-retired-account-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-815e-8f89-c2561a229e17."
+
+  - experiment_id: exp-cloud-close-okx-retired-delivery-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "9618ff48d8"
+    status: "inconclusive"
+    question: "校正 CATI 与 TREE 官方交割"
+    single_variable: "固定扩容后的1,580笔账户，真实无交割费，按退市前一小时USDT指数的60个分钟估算结算。"
+    result: "交割均价代理后64,494.39U、胜率22.03%、金额盈亏比5.436、回撤上界47.36%。用分钟低高均值估价为64,482.90–64,507.92U；市场单另计5bp滑点后55,066.51U，回撤上界47.69%。尚未计资金费。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-okx-retired-delivery-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-813c-a275-c98c066b7ddd."
+
+  - experiment_id: exp-cloud-close-tenr-exposure-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "1876262750"
+    status: "rejected"
+    question: "10R 盈亏比策略的逐仓杠杆"
+    single_variable: "九仓、四分之三10R止盈，四分之一保留云带跟踪，仅改变初始逐仓名义倍数。"
+    result: "1倍复现20,630.85U。1.25倍34,607.08U，1.5倍54,347.35U，胜率20.33%、金额盈亏比5.542、回撤上界47.69%。1.5倍另加5bp市场滑点后42,812.54U，回撤49.55%至50.21%。2倍有三条子仓触碰保守维保核验线。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-tenr-exposure-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81c3-ae02-fe8aaaa13ba9."
+
+  - experiment_id: exp-cloud-close-contract-interest-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "dbf970e95d"
+    status: "rejected"
+    question: "同合约未平仓量收缩过滤"
+    single_variable: "用离12H收盘至少5分钟的两个原生OI快照，间隔12小时，筛选币安永续自身未平仓合约量减少的信号。"
+    result: "23,262信号中21,667可观测，11,829个OI下降。下降组1,865.89U，覆盖组3,606.32U，匹配随机组3,295.27U。下降组胜率32.29%、金额盈亏比2.41、回撤上界31.15%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-contract-interest-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-816d-bbc9-d8a1d4545f2b."
+
   - experiment_id: exp-cloud-close-spot-reclaim-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "368918039d"
