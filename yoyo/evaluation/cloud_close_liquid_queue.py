@@ -12,7 +12,7 @@ engine = rank.reference.engine
 EXP = history.EXP.parent/'exp-cloud-close-liquid-queue-20261109-v1'
 
 
-def main(*,experiment=EXP,slots=9,policies=None):
+def main(*,experiment=EXP,slots=9,policies=None,eligible_by_arm=None):
     if policies is None:
         policies = [('original_atr','entry_order'),('liquid_first','liquid'),('balanced','balanced')]
     if (experiment/'summary.json').exists():
@@ -36,7 +36,8 @@ def main(*,experiment=EXP,slots=9,policies=None):
         ordered = pool.sort_values(['entry_ms',score] if name=='original_atr' else ['entry_ms',score,'entry_order'])
         keys = ['entry_ms',score] if name=='original_atr' else ['entry_ms',score,'entry_order']
         order = pd.Series(pd.MultiIndex.from_frame(ordered[keys]).factorize(sort=False)[0],index=ordered.index)
-        plans = rows[rows.event_id.isin(pool.index)].copy()
+        eligible = pool.index if eligible_by_arm is None else pool.index.intersection(eligible_by_arm[name])
+        plans = rows[rows.event_id.isin(eligible)].copy()
         plans['entry_order'] = plans.event_id.map(order)
         roster,skips = repair.wallet.admit(plans[plans.tp_r.eq(0)],slots)
         directory = experiment/name
@@ -57,7 +58,7 @@ def main(*,experiment=EXP,slots=9,policies=None):
             cases[key]=engine.simulate(data,market,quotes,ratios,slip,directory,key,entry_limits=cap)
             print(name,key,cases[key].get('metrics',{}).get('all'),flush=True)
             gc.collect()
-        outcomes[name]=dict(cases=cases,signals=len(roster),overlap=len(set(parents.index)&baseline),
+        outcomes[name]=dict(cases=cases,eligible_count=len(eligible),signals=len(roster),overlap=len(set(parents.index)&baseline),
                    symbols=parents.symbol.nunique(),skips=skips,settlement=settlement,
                    missing_holding_hours=data['gap_marks'],gap_events=int(tape[tape.gap_flag].event_id.nunique()))
     repair.archive.prices.safe_json(experiment/'summary.json',dict(parent_slots=slots,eligible=len(original),liquid_eligible=len(pool),arms=outcomes,
