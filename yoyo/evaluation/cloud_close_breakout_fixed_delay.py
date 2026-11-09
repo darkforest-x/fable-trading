@@ -16,7 +16,7 @@ EXP = branch.EXP.parent / 'exp-cloud-close-breakout-fixed-delay-20261109-v1'
 
 
 def delayed_symbol(symbol, parents, source, delay):
-    bars12, hourly, _, _, _ = branch._load_symbol(symbol, source)
+    bars12, hourly, *_ = branch._load_symbol(symbol, source)
     cutoff = source['account']['end_ms']
     quotes, clocks, _ = branch.engine._prepare_symbol(bars12, hourly.loc[hourly.index < cutoff])
     events = []
