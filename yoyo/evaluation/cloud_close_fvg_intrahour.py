@@ -112,19 +112,29 @@ def main():
         minutes.to_csv(EXP/f'minutes_{scenario}.csv',index=False)
         receipts.extend(urls)
         stages = equity.loc[peak,STAGES].astype(float)
+        all_orders = pd.read_csv(folder/'orders.csv.gz',usecols=['hour_open_ms','price','size','fees'])
+        peak_hour = peak.value//1_000_000-HOUR
+        peak_fees = all_orders.loc[all_orders.hour_open_ms.eq(peak_hour),'fees'].sum()
+        all_flows = pd.read_csv(folder/'applied_funding.csv.gz',
+                                usecols=['scheduled_stage','applied','funding_cashflow_usdt'])
+        peak_offset = (peak_hour-path.venue.START)//HOUR
+        peak_flows = all_flows.loc[all_flows.applied&all_flows.scheduled_stage.floordiv(4).eq(peak_offset),
+                                   'funding_cashflow_usdt'].abs().sum()
         worst_later = equity.loc[equity.index>peak,STAGES].stack().idxmin()
         later_mark = float(equity.loc[worst_later])
         known = max(float(stages.max()),float(minutes.witness.max()))
         if known<=0 or later_mark<=0:
             raise ValueError('Invalid marked NAV evidence')
         revised = equity.upper_nav.copy()
-        upper = max(stages.max(),minutes.high.max())
+        upper = max(max(stages.max(),equity.loc[peak,'post_trim_pre_funding_nav'])+peak_fees+peak_flows,
+                    minutes.high.max())
         revised.loc[peak] = min(revised.loc[peak],upper)
         witness_dd = max(source['scenarios'][scenario]['metrics']['all']['dd_mark_pct'],100*(1-later_mark/known))
         tighter = 100*float((1-equity.lower_nav/revised.cummax().clip(lower=1000)).max())
         if tighter+1.e-7<witness_dd:
             raise ValueError('Drawdown witness exceeded estimated upper bound')
         output[scenario] = dict(peak_hour_end_utc=str(peak),possible_trough_hour_end_utc=str(trough),
+                    minute_witness_utc=str(pd.Timestamp(int(minutes.loc[minutes.witness.idxmax(),'minute_ms']),unit='ms',tz='UTC')),
                     later_witness_hour_end_utc=str(worst_later[0]),later_witness_stage=worst_later[1],
                     later_witness_nav_usdt=later_mark,earlier_witness_peak_usdt=known,refined_peak_max_usdt=upper,
                     dynamic_dd_lower_pct=witness_dd,refined_full_upper_pct=tighter,
