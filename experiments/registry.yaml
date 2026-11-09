@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-okx-opposite-entry-three-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "c36934655f"
+    status: "inconclusive"
+    question: "币安前十大多单的三项入场条件，叠加到历史收益最高的 OKX 逆 ETH/BTC 云带 v1.7 1.5 倍账户后，收益、盈亏比与回撤如何？"
+    single_variable: "原机会池在9个仓位准入之前只筛多单；周一下轨首次严格刺穿，信号振幅>1 ATR，成交量高于此前20根中位数。附只把振幅改为>=1.5 ATR的敏感性。"
+    result: "原终值147590U / 回撤上界58.54%。主组合1000→59619U（1035单，22.51%，金额盈亏比5.01，回撤上界48.62%），5bp压力51075U/49.52%；严格振幅50265U/41.94%，5bp压力43834U/42.72%。2245多单候选有901/488分别通过，3041空单候选原样；原多单十大有4笔实际保留，491笔原亏损多单挡272笔。两套进入50%回撤内，均未达千倍。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-okx-opposite-entry-three-20261109-v1/summary.json"
+    notes: "Paid 2/5bp as original inverse account. Funding and depth omitted. One unquoted parent holding hour. All 2245 conjunctions determined; the single missing volume (CVC) had a failing 0.768 ATR. OKX native volCcy 12H or monthly minutes, 3 WAVES trade-record ratios, 3 ICX/LRC contract volume ratios checked against base volume. Notion 41388564-79af-8129-91fc-c926edd36267."
+
   - experiment_id: exp-cloud-close-binance-winner-entry-contrast-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "30086b7631"
