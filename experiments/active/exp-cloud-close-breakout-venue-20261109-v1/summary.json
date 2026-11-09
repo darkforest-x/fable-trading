@@ -1,0 +1,1171 @@
+{
+  "experiment_id": "exp-cloud-close-breakout-venue-20261109-v1",
+  "engine": "VectorBT native path and shared-cash account; no alternate fill simulator",
+  "symbols": [
+    "BTC",
+    "ETH",
+    "SOL",
+    "BNB",
+    "XRP",
+    "DOGE",
+    "ADA",
+    "LINK",
+    "LTC",
+    "AVAX"
+  ],
+  "venues": [
+    "OKX",
+    "Binance"
+  ],
+  "modes": [
+    "immediate",
+    "delayed_12h"
+  ],
+  "account": {
+    "starting_usdt": 1000,
+    "slots": 9,
+    "sizing": "Each venue/mode/sample is an independent 1,000 USDT shared-cash, unlevered VectorBT account with nine equal slots, actual free-cash sizing, and one position per symbol. No transfers between venues or account variants.",
+    "samples": [
+      "full_observable",
+      "common_90d"
+    ],
+    "periods": {
+      "all": "From each sample account's stated start through 2026-09-23T04:00:00Z exclusive.",
+      "dev": "Each account start through 2025-01-01T00:00:00Z exclusive.",
+      "2025": "2025-01-01T00:00:00Z through 2026-01-01T00:00:00Z.",
+      "2026_ytd": "2026-01-01T00:00:00Z through common cutoff."
+    },
+    "metrics": "Report final marked USDT, cash payoff ratio, equal-notional net-return payoff ratio, win rate, trade count, observed mark drawdown and synchronized conservative hourly OHLC drawdown bound. Keep each venue's history and its common-90d sample separate.",
+    "controls": "This first causal account build has no random or matched controls. Add control arms only after the independently funded venue accounts are delivered and reviewed."
+  },
+  "data": {
+    "symbols": [
+      "BTC",
+      "ETH",
+      "SOL",
+      "BNB",
+      "XRP",
+      "DOGE",
+      "ADA",
+      "LINK",
+      "LTC",
+      "AVAX"
+    ],
+    "okx_source_experiment": "exp-cloud-close-breakout-branch-20261109-v1",
+    "okx_source_config": "experiments/active/exp-cloud-close-breakout-branch-20261109-v1/config.json",
+    "okx_resolution": "Use each frozen source's native UTC H1 and 12H OHLC; stop all inputs at the common cutoff.",
+    "binance_source_experiment": "exp-cloud-close-binance-transfer-20261109-v1",
+    "binance_quote_archive": "experiments/active/exp-cloud-close-binance-transfer-20261109-v1/work/{symbol}USDT/quotes.npz",
+    "binance_official_repair_archive": "data/research/cloud_close_binance_feb2022_replay/{symbol}USDT/quotes.npz when the official repair exists",
+    "binance_resolution": "Use the frozen Binance UM complete H1 price archive; aggregate 12H from twelve contiguous UTC H1 bars only. The cache's H1 bars were aggregated from complete 5m source bars; an official repaired H1 archive takes precedence for affected symbols.",
+    "cutoff_utc_exclusive": "2026-09-23T04:00:00Z",
+    "cutoff_ms": 1790136000000,
+    "cutoff_rule": "Use the close of the last exact H1 opening timestamp jointly present across all ten symbols on both venues. Last common H1 open is 2026-09-23T03:00:00Z. Exclude all later rows from candidate/path pricing and close any remaining positions at that common H1 close.",
+    "full_history_start_utc": "2020-01-24T00:00:00Z",
+    "full_history_start_ms": 1579824000000,
+    "common_90d_account_start_utc": "2023-03-23T06:00:00Z",
+    "common_90d_account_start_ms": 1679551200000,
+    "common_90d_rule": "Additional same-name common-history sample only: include an event if both venues have the exact confirmation H1 open and 2,160 consecutive prior hourly opens ending immediately before that open for that symbol. The account begins at the earliest date with 90 days after every one of the ten symbol pairs first has common H1 coverage. This is a data-coverage screen, not a listing-date claim or a 90-day signal rank.",
+    "historical_bounds_note": "Input first/last timestamps describe available frozen market history, not official contract listing or delisting times. Binance coverage is shorter for BTC/ETH/SOL/BNB/XRP/DOGE than for ADA/LINK/LTC/AVAX. The ten selected symbols have no retired-contract rows in this fixed panel; timestamp gaps are preserved and recorded per symbol/venue."
+  },
+  "fees": {
+    "market_taker_rate": 0.0005,
+    "okx_source": "Use verified OKX Lv1 5bp taker fee per market/stop fill.",
+    "binance_source": "No verified historical Binance account fee tier is available in these frozen public OHLC sources; map the same 5bp single-side taker rate for symmetric comparison and do not call it an actual Binance tier.",
+    "entry_exit_class": "All entries and stop/EMA/gap/tail exits are market taker fills; charge each fill separately.",
+    "maker_rate_unused": 0.0002,
+    "funding": "Omitted."
+  },
+  "source_audit": {
+    "common_last_h1_open_ms": 1790132400000,
+    "common_cutoff_exclusive_ms": 1790136000000,
+    "common_first_panel_h1_open_ms": 1671775200000,
+    "common_90d_account_start_ms": 1679551200000,
+    "common_90d_required_hourly_bars": 2160,
+    "hourly_clock_count": 20
+  },
+  "source_coverage_rows": 20,
+  "first_weekly_signal_events": {
+    "OKX": 1382,
+    "Binance": 1109
+  },
+  "path_counts": {
+    "OKX": {
+      "immediate": {
+        "all_candidates": 1382,
+        "executed": 1382,
+        "common_90d_executed": 783,
+        "exit_reasons": {
+          "stop": 992,
+          "ema_flip_open": 217,
+          "ema_flip": 152,
+          "series_tail_close": 21
+        }
+      },
+      "delayed_12h": {
+        "all_candidates": 1382,
+        "executed": 1382,
+        "common_90d_executed": 783,
+        "exit_reasons": {
+          "stop": 986,
+          "ema_flip_open": 206,
+          "ema_flip": 169,
+          "series_tail_close": 21
+        }
+      }
+    },
+    "Binance": {
+      "immediate": {
+        "all_candidates": 1109,
+        "executed": 1109,
+        "common_90d_executed": 785,
+        "exit_reasons": {
+          "stop": 795,
+          "ema_flip_open": 169,
+          "ema_flip": 123,
+          "series_tail_close": 21,
+          "data_gap_markout": 1
+        }
+      },
+      "delayed_12h": {
+        "all_candidates": 1109,
+        "executed": 1109,
+        "common_90d_executed": 785,
+        "exit_reasons": {
+          "stop": 788,
+          "ema_flip_open": 161,
+          "ema_flip": 139,
+          "series_tail_close": 20,
+          "data_gap_markout": 1
+        }
+      }
+    }
+  },
+  "accounts": {
+    "OKX_immediate_full_observable": {
+      "metrics": {
+        "all": {
+          "final_usdt": 38151.347845037155,
+          "multiple": 38.15134784503716,
+          "dd_mark_pct": 47.96116110486752,
+          "dd_bound_pct": 48.591449506967734,
+          "trades": 737,
+          "win_pct": 25.10176390773406,
+          "payoff": 9.09143527023956,
+          "payoff_usdt": 5.587063961075603,
+          "median_net_pct": -3.6381867439587032
+        },
+        "dev": {
+          "final_usdt": 21461.257818266633,
+          "multiple": 21.461257818266635,
+          "dd_mark_pct": 47.96116110486752,
+          "dd_bound_pct": 48.591449506967734,
+          "trades": 536,
+          "win_pct": 23.134328358208954,
+          "payoff": 10.870661473959888,
+          "payoff_usdt": 5.375013686944065,
+          "median_net_pct": -3.7670273200997153
+        },
+        "2025": {
+          "final_usdt": 27393.849251454598,
+          "multiple": 1.2764326063003852,
+          "dd_mark_pct": 23.60127847144964,
+          "dd_bound_pct": 24.54044633372966,
+          "trades": 99,
+          "win_pct": 21.21212121212121,
+          "payoff": 3.112929561519195,
+          "payoff_usdt": 3.1981981805355026,
+          "median_net_pct": -3.590381861244038
+        },
+        "2026_ytd": {
+          "final_usdt": 38151.347845037155,
+          "multiple": 1.392697590427579,
+          "dd_mark_pct": 20.983142293530776,
+          "dd_bound_pct": 24.377300168338735,
+          "trades": 88,
+          "win_pct": 34.090909090909086,
+          "payoff": 5.487244399803579,
+          "payoff_usdt": 5.353302252135296,
+          "median_net_pct": -3.239838058673103
+        }
+      },
+      "admission": {
+        "input_executed_events": 1382,
+        "admitted": 737,
+        "funded": 737,
+        "rejected": {
+          "same_contract": 608,
+          "all_slots_busy": 37
+        },
+        "unquoted_position_hours": 0,
+        "cash_reconciliation_error_usdt": 1.013128348859027e-05
+      },
+      "starting_usdt": 1000.0,
+      "slots": 9,
+      "account_start_ms": 1579824000000,
+      "account_end_exclusive_ms": 1790136000000
+    },
+    "OKX_immediate_common_90d": {
+      "metrics": {
+        "all": {
+          "final_usdt": 3478.9975340717774,
+          "multiple": 3.4789975340717776,
+          "dd_mark_pct": 36.4101567292474,
+          "dd_bound_pct": 37.32804587325775,
+          "trades": 413,
+          "win_pct": 26.634382566585955,
+          "payoff": 5.439479074421016,
+          "payoff_usdt": 5.4397509107540465,
+          "median_net_pct": -3.538767672529682
+        },
+        "dev": {
+          "final_usdt": 1957.0386695404995,
+          "multiple": 1.9570386695404995,
+          "dd_mark_pct": 36.4101567292474,
+          "dd_bound_pct": 37.32804587325775,
+          "trades": 212,
+          "win_pct": 23.11320754716981,
+          "payoff": 5.678565492929762,
+          "payoff_usdt": 5.120473011356352,
+          "median_net_pct": -3.6524104868961347
+        },
+        "2025": {
+          "final_usdt": 2498.0279695922163,
+          "multiple": 1.2764326063003844,
+          "dd_mark_pct": 23.601278471449604,
+          "dd_bound_pct": 24.540446333729605,
+          "trades": 99,
+          "win_pct": 21.21212121212121,
+          "payoff": 3.112929561519195,
+          "payoff_usdt": 3.1981981805355035,
+          "median_net_pct": -3.5903818612440386
+        },
+        "2026_ytd": {
+          "final_usdt": 3478.9975340717774,
+          "multiple": 1.3926975904275791,
+          "dd_mark_pct": 20.983142293530797,
+          "dd_bound_pct": 24.377300168338735,
+          "trades": 88,
+          "win_pct": 34.090909090909086,
+          "payoff": 5.487244399803578,
+          "payoff_usdt": 5.353302252135296,
+          "median_net_pct": -3.239838058673102
+        }
+      },
+      "admission": {
+        "input_executed_events": 783,
+        "admitted": 413,
+        "funded": 413,
+        "rejected": {
+          "same_contract": 335,
+          "all_slots_busy": 35
+        },
+        "unquoted_position_hours": 0,
+        "cash_reconciliation_error_usdt": 8.099978003883734e-07
+      },
+      "starting_usdt": 1000.0,
+      "slots": 9,
+      "account_start_ms": 1679551200000,
+      "account_end_exclusive_ms": 1790136000000
+    },
+    "OKX_delayed_12h_full_observable": {
+      "metrics": {
+        "all": {
+          "final_usdt": 44419.262924747934,
+          "multiple": 44.41926292474793,
+          "dd_mark_pct": 47.32706989487032,
+          "dd_bound_pct": 48.57124145430702,
+          "trades": 736,
+          "win_pct": 24.728260869565215,
+          "payoff": 9.62430470754337,
+          "payoff_usdt": 5.573596909846138,
+          "median_net_pct": -3.585602339066189
+        },
+        "dev": {
+          "final_usdt": 26734.29804635232,
+          "multiple": 26.73429804635232,
+          "dd_mark_pct": 47.32706989487032,
+          "dd_bound_pct": 48.57124145430702,
+          "trades": 534,
+          "win_pct": 22.659176029962545,
+          "payoff": 11.800963436664903,
+          "payoff_usdt": 5.62225031182284,
+          "median_net_pct": -3.6524104868961347
+        },
+        "2025": {
+          "final_usdt": 33059.366391613745,
+          "multiple": 1.236590028819718,
+          "dd_mark_pct": 21.214174972324564,
+          "dd_bound_pct": 22.01442775726533,
+          "trades": 104,
+          "win_pct": 22.115384615384613,
+          "payoff": 3.043561493745726,
+          "payoff_usdt": 3.091049000604125,
+          "median_net_pct": -3.698961681141534
+        },
+        "2026_ytd": {
+          "final_usdt": 44419.262924747934,
+          "multiple": 1.3436211208214772,
+          "dd_mark_pct": 17.424012870004447,
+          "dd_bound_pct": 21.199157411331303,
+          "trades": 84,
+          "win_pct": 33.33333333333333,
+          "payoff": 5.631218179815474,
+          "payoff_usdt": 5.465173154683009,
+          "median_net_pct": -3.0753076722840986
+        }
+      },
+      "admission": {
+        "input_executed_events": 1382,
+        "admitted": 736,
+        "funded": 736,
+        "rejected": {
+          "same_contract": 617,
+          "all_slots_busy": 29
+        },
+        "unquoted_position_hours": 0,
+        "cash_reconciliation_error_usdt": 1.070773578248918e-05
+      },
+      "starting_usdt": 1000.0,
+      "slots": 9,
+      "account_start_ms": 1579824000000,
+      "account_end_exclusive_ms": 1790136000000
+    },
+    "OKX_delayed_12h_common_90d": {
+      "metrics": {
+        "all": {
+          "final_usdt": 3330.5771701956164,
+          "multiple": 3.3305771701956166,
+          "dd_mark_pct": 32.72276100492114,
+          "dd_bound_pct": 35.31460089833514,
+          "trades": 414,
+          "win_pct": 26.08695652173913,
+          "payoff": 5.555049012130231,
+          "payoff_usdt": 5.367043986660394,
+          "median_net_pct": -3.5379826734313613
+        },
+        "dev": {
+          "final_usdt": 2004.5502079859607,
+          "multiple": 2.0045502079859605,
+          "dd_mark_pct": 31.69435672717945,
+          "dd_bound_pct": 33.027053886050474,
+          "trades": 212,
+          "win_pct": 22.169811320754718,
+          "payoff": 6.210192158042242,
+          "payoff_usdt": 5.537970307814543,
+          "median_net_pct": -3.632722689584845
+        },
+        "2025": {
+          "final_usdt": 2478.806799463924,
+          "multiple": 1.2365900288197147,
+          "dd_mark_pct": 21.214174972324663,
+          "dd_bound_pct": 22.01442775726543,
+          "trades": 104,
+          "win_pct": 22.115384615384613,
+          "payoff": 3.043561493745727,
+          "payoff_usdt": 3.091049000604125,
+          "median_net_pct": -3.698961681141534
+        },
+        "2026_ytd": {
+          "final_usdt": 3330.5771701956164,
+          "multiple": 1.3436211208214772,
+          "dd_mark_pct": 17.4240128700044,
+          "dd_bound_pct": 21.19915741133126,
+          "trades": 84,
+          "win_pct": 33.33333333333333,
+          "payoff": 5.631218179815474,
+          "payoff_usdt": 5.465173154683008,
+          "median_net_pct": -3.0753076722840986
+        }
+      },
+      "admission": {
+        "input_executed_events": 783,
+        "admitted": 414,
+        "funded": 414,
+        "rejected": {
+          "same_contract": 341,
+          "all_slots_busy": 28
+        },
+        "unquoted_position_hours": 0,
+        "cash_reconciliation_error_usdt": 6.800246410421096e-07
+      },
+      "starting_usdt": 1000.0,
+      "slots": 9,
+      "account_start_ms": 1679551200000,
+      "account_end_exclusive_ms": 1790136000000
+    },
+    "Binance_immediate_full_observable": {
+      "metrics": {
+        "all": {
+          "final_usdt": 13011.437192649324,
+          "multiple": 13.011437192649325,
+          "dd_mark_pct": 40.265450916114496,
+          "dd_bound_pct": 41.045883357747485,
+          "trades": 593,
+          "win_pct": 25.126475548060707,
+          "payoff": 7.30189556460253,
+          "payoff_usdt": 5.842633665651075,
+          "median_net_pct": -3.60329054261365
+        },
+        "dev": {
+          "final_usdt": 7390.397060415013,
+          "multiple": 7.390397060415013,
+          "dd_mark_pct": 40.265450916114496,
+          "dd_bound_pct": 41.045883357747485,
+          "trades": 391,
+          "win_pct": 22.506393861892583,
+          "payoff": 8.692701013383141,
+          "payoff_usdt": 5.90866809103958,
+          "median_net_pct": -3.806974516029746
+        },
+        "2025": {
+          "final_usdt": 9336.338098812423,
+          "multiple": 1.2633066968512967,
+          "dd_mark_pct": 23.509589258993714,
+          "dd_bound_pct": 24.528951348475125,
+          "trades": 101,
+          "win_pct": 20.792079207920793,
+          "payoff": 3.16207618747931,
+          "payoff_usdt": 3.2359120999567255,
+          "median_net_pct": -3.5672899214285936
+        },
+        "2026_ytd": {
+          "final_usdt": 13011.437192649324,
+          "multiple": 1.393633891033185,
+          "dd_mark_pct": 20.932238034615082,
+          "dd_bound_pct": 24.33337387076051,
+          "trades": 87,
+          "win_pct": 34.48275862068966,
+          "payoff": 5.403988014413101,
+          "payoff_usdt": 5.271822443672289,
+          "median_net_pct": -3.3026884574404636
+        }
+      },
+      "admission": {
+        "input_executed_events": 1109,
+        "admitted": 593,
+        "funded": 593,
+        "rejected": {
+          "same_contract": 478,
+          "all_slots_busy": 38
+        },
+        "unquoted_position_hours": 48,
+        "cash_reconciliation_error_usdt": 3.2223524613073096e-06
+      },
+      "starting_usdt": 1000.0,
+      "slots": 9,
+      "account_start_ms": 1579824000000,
+      "account_end_exclusive_ms": 1790136000000
+    },
+    "Binance_immediate_common_90d": {
+      "metrics": {
+        "all": {
+          "final_usdt": 3516.9082364492438,
+          "multiple": 3.5169082364492437,
+          "dd_mark_pct": 37.27891858011409,
+          "dd_bound_pct": 38.242842825826365,
+          "trades": 415,
+          "win_pct": 26.265060240963855,
+          "payoff": 5.580975420098821,
+          "payoff_usdt": 5.529860999834027,
+          "median_net_pct": -3.5447836007029982
+        },
+        "dev": {
+          "final_usdt": 1997.5770476060388,
+          "multiple": 1.9975770476060388,
+          "dd_mark_pct": 37.27891858011409,
+          "dd_bound_pct": 38.242842825826365,
+          "trades": 213,
+          "win_pct": 22.535211267605636,
+          "payoff": 5.976326641346459,
+          "payoff_usdt": 5.349536760326975,
+          "median_net_pct": -3.6023453938407135
+        },
+        "2025": {
+          "final_usdt": 2523.55246171715,
+          "multiple": 1.2633066968512965,
+          "dd_mark_pct": 23.509589258993792,
+          "dd_bound_pct": 24.528951348475214,
+          "trades": 101,
+          "win_pct": 20.792079207920793,
+          "payoff": 3.16207618747931,
+          "payoff_usdt": 3.2359120999567246,
+          "median_net_pct": -3.567289921428593
+        },
+        "2026_ytd": {
+          "final_usdt": 3516.9082364492438,
+          "multiple": 1.3936338910331847,
+          "dd_mark_pct": 20.932238034615036,
+          "dd_bound_pct": 24.33337387076048,
+          "trades": 87,
+          "win_pct": 34.48275862068966,
+          "payoff": 5.403988014413101,
+          "payoff_usdt": 5.271822443672288,
+          "median_net_pct": -3.3026884574404636
+        }
+      },
+      "admission": {
+        "input_executed_events": 785,
+        "admitted": 415,
+        "funded": 415,
+        "rejected": {
+          "same_contract": 335,
+          "all_slots_busy": 35
+        },
+        "unquoted_position_hours": 0,
+        "cash_reconciliation_error_usdt": 8.379352038900834e-07
+      },
+      "starting_usdt": 1000.0,
+      "slots": 9,
+      "account_start_ms": 1679551200000,
+      "account_end_exclusive_ms": 1790136000000
+    },
+    "Binance_delayed_12h_full_observable": {
+      "metrics": {
+        "all": {
+          "final_usdt": 11878.344721895015,
+          "multiple": 11.878344721895015,
+          "dd_mark_pct": 36.69206107486585,
+          "dd_bound_pct": 37.73818921524542,
+          "trades": 595,
+          "win_pct": 24.705882352941178,
+          "payoff": 7.355517528910256,
+          "payoff_usdt": 5.621381341995519,
+          "median_net_pct": -3.60159409163559
+        },
+        "dev": {
+          "final_usdt": 7200.236609808404,
+          "multiple": 7.200236609808404,
+          "dd_mark_pct": 36.69206107486585,
+          "dd_bound_pct": 37.73818921524542,
+          "trades": 391,
+          "win_pct": 21.994884910485936,
+          "payoff": 8.94212789144635,
+          "payoff_usdt": 5.865508145796036,
+          "median_net_pct": -3.744621859735777
+        },
+        "2025": {
+          "final_usdt": 8881.025624276703,
+          "multiple": 1.2334352474165462,
+          "dd_mark_pct": 21.171426566603092,
+          "dd_bound_pct": 21.966915756348392,
+          "trades": 106,
+          "win_pct": 21.69811320754717,
+          "payoff": 3.0934513037836147,
+          "payoff_usdt": 3.142208461808691,
+          "median_net_pct": -3.6630472411944526
+        },
+        "2026_ytd": {
+          "final_usdt": 11878.344721895015,
+          "multiple": 1.3374969541158623,
+          "dd_mark_pct": 17.37072552261584,
+          "dd_bound_pct": 21.162348546966303,
+          "trades": 84,
+          "win_pct": 33.33333333333333,
+          "payoff": 5.521814007210013,
+          "payoff_usdt": 5.367041308648874,
+          "median_net_pct": -3.2555346882529217
+        }
+      },
+      "admission": {
+        "input_executed_events": 1109,
+        "admitted": 595,
+        "funded": 595,
+        "rejected": {
+          "same_contract": 484,
+          "all_slots_busy": 30
+        },
+        "unquoted_position_hours": 48,
+        "cash_reconciliation_error_usdt": 2.5146455300273374e-06
+      },
+      "starting_usdt": 1000.0,
+      "slots": 9,
+      "account_start_ms": 1579824000000,
+      "account_end_exclusive_ms": 1790136000000
+    },
+    "Binance_delayed_12h_common_90d": {
+      "metrics": {
+        "all": {
+          "final_usdt": 2828.282745322545,
+          "multiple": 2.828282745322545,
+          "dd_mark_pct": 33.61102096440051,
+          "dd_bound_pct": 36.35438391660356,
+          "trades": 422,
+          "win_pct": 25.118483412322274,
+          "payoff": 5.411556391154904,
+          "payoff_usdt": 5.307999036176401,
+          "median_net_pct": -3.5563097612215504
+        },
+        "dev": {
+          "final_usdt": 1714.4059582833843,
+          "multiple": 1.7144059582833844,
+          "dd_mark_pct": 33.4890039776337,
+          "dd_bound_pct": 34.37475235914425,
+          "trades": 218,
+          "win_pct": 20.642201834862387,
+          "payoff": 5.877765064157902,
+          "payoff_usdt": 5.293616414726673,
+          "median_net_pct": -3.6042205163154604
+        },
+        "2025": {
+          "final_usdt": 2114.6087373276646,
+          "multiple": 1.2334352474165446,
+          "dd_mark_pct": 21.171426566603124,
+          "dd_bound_pct": 21.966915756348428,
+          "trades": 106,
+          "win_pct": 21.69811320754717,
+          "payoff": 3.0934513037836147,
+          "payoff_usdt": 3.142208461808692,
+          "median_net_pct": -3.6630472411944526
+        },
+        "2026_ytd": {
+          "final_usdt": 2828.282745322545,
+          "multiple": 1.3374969541158643,
+          "dd_mark_pct": 17.370725522615892,
+          "dd_bound_pct": 21.162348546966324,
+          "trades": 84,
+          "win_pct": 33.33333333333333,
+          "payoff": 5.521814007210013,
+          "payoff_usdt": 5.367041308648877,
+          "median_net_pct": -3.2555346882529217
+        }
+      },
+      "admission": {
+        "input_executed_events": 785,
+        "admitted": 422,
+        "funded": 422,
+        "rejected": {
+          "same_contract": 335,
+          "all_slots_busy": 28
+        },
+        "unquoted_position_hours": 0,
+        "cash_reconciliation_error_usdt": 5.546394277189393e-07
+      },
+      "starting_usdt": 1000.0,
+      "slots": 9,
+      "account_start_ms": 1679551200000,
+      "account_end_exclusive_ms": 1790136000000
+    }
+  },
+  "symbol_audit": {
+    "OKX/BTC": {
+      "venue": "OKX",
+      "symbol": "BTC",
+      "valid_ema_aligned_breakout_trigger_bars": 819,
+      "first_weekly_breakout_events": 145,
+      "common_90d_eligible_events": 73,
+      "entry_status_counts": {
+        "executed": 145
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 145,
+      "immediate_vectorbt": {
+        "columns": 145,
+        "orders": 290,
+        "trades": 145
+      },
+      "delayed_vectorbt": {
+        "columns": 145,
+        "orders": 290,
+        "trades": 145
+      },
+      "delayed_entry_status_counts": {
+        "executed": 145
+      }
+    },
+    "OKX/ETH": {
+      "venue": "OKX",
+      "symbol": "ETH",
+      "valid_ema_aligned_breakout_trigger_bars": 794,
+      "first_weekly_breakout_events": 146,
+      "common_90d_eligible_events": 75,
+      "entry_status_counts": {
+        "executed": 146
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 146,
+      "immediate_vectorbt": {
+        "columns": 146,
+        "orders": 292,
+        "trades": 146
+      },
+      "delayed_vectorbt": {
+        "columns": 146,
+        "orders": 292,
+        "trades": 146
+      },
+      "delayed_entry_status_counts": {
+        "executed": 146
+      }
+    },
+    "OKX/SOL": {
+      "venue": "OKX",
+      "symbol": "SOL",
+      "valid_ema_aligned_breakout_trigger_bars": 710,
+      "first_weekly_breakout_events": 134,
+      "common_90d_eligible_events": 81,
+      "entry_status_counts": {
+        "executed": 134
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 134,
+      "immediate_vectorbt": {
+        "columns": 134,
+        "orders": 268,
+        "trades": 134
+      },
+      "delayed_vectorbt": {
+        "columns": 134,
+        "orders": 268,
+        "trades": 134
+      },
+      "delayed_entry_status_counts": {
+        "executed": 134
+      }
+    },
+    "OKX/BNB": {
+      "venue": "OKX",
+      "symbol": "BNB",
+      "valid_ema_aligned_breakout_trigger_bars": 411,
+      "first_weekly_breakout_events": 82,
+      "common_90d_eligible_events": 77,
+      "entry_status_counts": {
+        "executed": 82
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 82,
+      "immediate_vectorbt": {
+        "columns": 82,
+        "orders": 164,
+        "trades": 82
+      },
+      "delayed_vectorbt": {
+        "columns": 82,
+        "orders": 164,
+        "trades": 82
+      },
+      "delayed_entry_status_counts": {
+        "executed": 82
+      }
+    },
+    "OKX/XRP": {
+      "venue": "OKX",
+      "symbol": "XRP",
+      "valid_ema_aligned_breakout_trigger_bars": 725,
+      "first_weekly_breakout_events": 143,
+      "common_90d_eligible_events": 74,
+      "entry_status_counts": {
+        "executed": 143
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 143,
+      "immediate_vectorbt": {
+        "columns": 143,
+        "orders": 286,
+        "trades": 143
+      },
+      "delayed_vectorbt": {
+        "columns": 143,
+        "orders": 286,
+        "trades": 143
+      },
+      "delayed_entry_status_counts": {
+        "executed": 143
+      }
+    },
+    "OKX/DOGE": {
+      "venue": "OKX",
+      "symbol": "DOGE",
+      "valid_ema_aligned_breakout_trigger_bars": 661,
+      "first_weekly_breakout_events": 134,
+      "common_90d_eligible_events": 79,
+      "entry_status_counts": {
+        "executed": 134
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 134,
+      "immediate_vectorbt": {
+        "columns": 134,
+        "orders": 268,
+        "trades": 134
+      },
+      "delayed_vectorbt": {
+        "columns": 134,
+        "orders": 268,
+        "trades": 134
+      },
+      "delayed_entry_status_counts": {
+        "executed": 134
+      }
+    },
+    "OKX/ADA": {
+      "venue": "OKX",
+      "symbol": "ADA",
+      "valid_ema_aligned_breakout_trigger_bars": 796,
+      "first_weekly_breakout_events": 154,
+      "common_90d_eligible_events": 83,
+      "entry_status_counts": {
+        "executed": 154
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 154,
+      "immediate_vectorbt": {
+        "columns": 154,
+        "orders": 308,
+        "trades": 154
+      },
+      "delayed_vectorbt": {
+        "columns": 154,
+        "orders": 308,
+        "trades": 154
+      },
+      "delayed_entry_status_counts": {
+        "executed": 154
+      }
+    },
+    "OKX/LINK": {
+      "venue": "OKX",
+      "symbol": "LINK",
+      "valid_ema_aligned_breakout_trigger_bars": 763,
+      "first_weekly_breakout_events": 154,
+      "common_90d_eligible_events": 77,
+      "entry_status_counts": {
+        "executed": 154
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 154,
+      "immediate_vectorbt": {
+        "columns": 154,
+        "orders": 308,
+        "trades": 154
+      },
+      "delayed_vectorbt": {
+        "columns": 154,
+        "orders": 308,
+        "trades": 154
+      },
+      "delayed_entry_status_counts": {
+        "executed": 154
+      }
+    },
+    "OKX/LTC": {
+      "venue": "OKX",
+      "symbol": "LTC",
+      "valid_ema_aligned_breakout_trigger_bars": 711,
+      "first_weekly_breakout_events": 150,
+      "common_90d_eligible_events": 80,
+      "entry_status_counts": {
+        "executed": 150
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 150,
+      "immediate_vectorbt": {
+        "columns": 150,
+        "orders": 300,
+        "trades": 150
+      },
+      "delayed_vectorbt": {
+        "columns": 150,
+        "orders": 300,
+        "trades": 150
+      },
+      "delayed_entry_status_counts": {
+        "executed": 150
+      }
+    },
+    "OKX/AVAX": {
+      "venue": "OKX",
+      "symbol": "AVAX",
+      "valid_ema_aligned_breakout_trigger_bars": 715,
+      "first_weekly_breakout_events": 140,
+      "common_90d_eligible_events": 84,
+      "entry_status_counts": {
+        "executed": 140
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 140,
+      "immediate_vectorbt": {
+        "columns": 140,
+        "orders": 280,
+        "trades": 140
+      },
+      "delayed_vectorbt": {
+        "columns": 140,
+        "orders": 280,
+        "trades": 140
+      },
+      "delayed_entry_status_counts": {
+        "executed": 140
+      }
+    },
+    "Binance/BTC": {
+      "venue": "Binance",
+      "symbol": "BTC",
+      "valid_ema_aligned_breakout_trigger_bars": 472,
+      "first_weekly_breakout_events": 83,
+      "common_90d_eligible_events": 74,
+      "entry_status_counts": {
+        "executed": 83
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 83,
+      "immediate_vectorbt": {
+        "columns": 83,
+        "orders": 166,
+        "trades": 83
+      },
+      "delayed_vectorbt": {
+        "columns": 83,
+        "orders": 166,
+        "trades": 83
+      },
+      "delayed_entry_status_counts": {
+        "executed": 83
+      }
+    },
+    "Binance/ETH": {
+      "venue": "Binance",
+      "symbol": "ETH",
+      "valid_ema_aligned_breakout_trigger_bars": 442,
+      "first_weekly_breakout_events": 84,
+      "common_90d_eligible_events": 76,
+      "entry_status_counts": {
+        "executed": 84
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 84,
+      "immediate_vectorbt": {
+        "columns": 84,
+        "orders": 168,
+        "trades": 84
+      },
+      "delayed_vectorbt": {
+        "columns": 84,
+        "orders": 168,
+        "trades": 84
+      },
+      "delayed_entry_status_counts": {
+        "executed": 84
+      }
+    },
+    "Binance/SOL": {
+      "venue": "Binance",
+      "symbol": "SOL",
+      "valid_ema_aligned_breakout_trigger_bars": 483,
+      "first_weekly_breakout_events": 88,
+      "common_90d_eligible_events": 81,
+      "entry_status_counts": {
+        "executed": 88
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 88,
+      "immediate_vectorbt": {
+        "columns": 88,
+        "orders": 176,
+        "trades": 88
+      },
+      "delayed_vectorbt": {
+        "columns": 88,
+        "orders": 176,
+        "trades": 88
+      },
+      "delayed_entry_status_counts": {
+        "executed": 88
+      }
+    },
+    "Binance/BNB": {
+      "venue": "Binance",
+      "symbol": "BNB",
+      "valid_ema_aligned_breakout_trigger_bars": 431,
+      "first_weekly_breakout_events": 86,
+      "common_90d_eligible_events": 79,
+      "entry_status_counts": {
+        "executed": 86
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 86,
+      "immediate_vectorbt": {
+        "columns": 86,
+        "orders": 172,
+        "trades": 86
+      },
+      "delayed_vectorbt": {
+        "columns": 86,
+        "orders": 172,
+        "trades": 86
+      },
+      "delayed_entry_status_counts": {
+        "executed": 86
+      }
+    },
+    "Binance/XRP": {
+      "venue": "Binance",
+      "symbol": "XRP",
+      "valid_ema_aligned_breakout_trigger_bars": 385,
+      "first_weekly_breakout_events": 80,
+      "common_90d_eligible_events": 75,
+      "entry_status_counts": {
+        "executed": 80
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 80,
+      "immediate_vectorbt": {
+        "columns": 80,
+        "orders": 160,
+        "trades": 80
+      },
+      "delayed_vectorbt": {
+        "columns": 80,
+        "orders": 160,
+        "trades": 80
+      },
+      "delayed_entry_status_counts": {
+        "executed": 80
+      }
+    },
+    "Binance/DOGE": {
+      "venue": "Binance",
+      "symbol": "DOGE",
+      "valid_ema_aligned_breakout_trigger_bars": 426,
+      "first_weekly_breakout_events": 85,
+      "common_90d_eligible_events": 77,
+      "entry_status_counts": {
+        "executed": 85
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 85,
+      "immediate_vectorbt": {
+        "columns": 85,
+        "orders": 170,
+        "trades": 85
+      },
+      "delayed_vectorbt": {
+        "columns": 85,
+        "orders": 170,
+        "trades": 85
+      },
+      "delayed_entry_status_counts": {
+        "executed": 85
+      }
+    },
+    "Binance/ADA": {
+      "venue": "Binance",
+      "symbol": "ADA",
+      "valid_ema_aligned_breakout_trigger_bars": 819,
+      "first_weekly_breakout_events": 160,
+      "common_90d_eligible_events": 83,
+      "entry_status_counts": {
+        "executed": 160
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 160,
+      "immediate_vectorbt": {
+        "columns": 160,
+        "orders": 320,
+        "trades": 160
+      },
+      "delayed_vectorbt": {
+        "columns": 160,
+        "orders": 320,
+        "trades": 160
+      },
+      "delayed_entry_status_counts": {
+        "executed": 160
+      }
+    },
+    "Binance/LINK": {
+      "venue": "Binance",
+      "symbol": "LINK",
+      "valid_ema_aligned_breakout_trigger_bars": 785,
+      "first_weekly_breakout_events": 155,
+      "common_90d_eligible_events": 76,
+      "entry_status_counts": {
+        "executed": 155
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 155,
+      "immediate_vectorbt": {
+        "columns": 155,
+        "orders": 310,
+        "trades": 155
+      },
+      "delayed_vectorbt": {
+        "columns": 155,
+        "orders": 310,
+        "trades": 155
+      },
+      "delayed_entry_status_counts": {
+        "executed": 155
+      }
+    },
+    "Binance/LTC": {
+      "venue": "Binance",
+      "symbol": "LTC",
+      "valid_ema_aligned_breakout_trigger_bars": 701,
+      "first_weekly_breakout_events": 147,
+      "common_90d_eligible_events": 80,
+      "entry_status_counts": {
+        "executed": 147
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 147,
+      "immediate_vectorbt": {
+        "columns": 147,
+        "orders": 294,
+        "trades": 147
+      },
+      "delayed_vectorbt": {
+        "columns": 147,
+        "orders": 294,
+        "trades": 147
+      },
+      "delayed_entry_status_counts": {
+        "executed": 147
+      }
+    },
+    "Binance/AVAX": {
+      "venue": "Binance",
+      "symbol": "AVAX",
+      "valid_ema_aligned_breakout_trigger_bars": 718,
+      "first_weekly_breakout_events": 141,
+      "common_90d_eligible_events": 84,
+      "entry_status_counts": {
+        "executed": 141
+      },
+      "weekly_lock": "first valid EMA-aligned strict close beyond either band, same week shares long/short lock",
+      "signals_within_source_cutoff": 141,
+      "immediate_vectorbt": {
+        "columns": 141,
+        "orders": 282,
+        "trades": 141
+      },
+      "delayed_vectorbt": {
+        "columns": 141,
+        "orders": 282,
+        "trades": 141
+      },
+      "delayed_entry_status_counts": {
+        "executed": 141
+      }
+    }
+  },
+  "okx_frozen_parity": {
+    "frozen_source_paths": "experiments/active/exp-cloud-close-breakout-branch-20261109-v1/paths.csv.gz",
+    "matched_candidate_identities_pre_cutoff": 1382,
+    "executable_entry_clock_price_stop_exact_matches": 1382,
+    "max_abs_entry_price_difference": 0.0,
+    "max_abs_stop_difference": 0.0,
+    "cutoff_boundary_confirmation_events_no_entry": 0,
+    "cutoff_tail_closes": 21,
+    "tail_close_price_matches_final_common_h1_close": 21,
+    "frozen_paths_surviving_cutoff": 21
+  },
+  "limitations": [
+    "The Binance cache stores complete H1 candles assembled from frozen 5m archives; 12H is aggregated only from complete consecutive H1 bars. OKX uses native 12H and H1 inputs.",
+    "The 2026-09-23 04:00 UTC exclusive end is the last common observed H1 close across all ten symbols and both venues; later OKX and partial Binance bars are excluded.",
+    "Source-first timestamps are coverage bounds, not exchange listing dates. The fixed ten-coin panel does not include retired contracts; gaps are preserved and the native engine closes at the first observable gap open.",
+    "Binance historical account fee tier was unavailable in the frozen research sources. Both venues use the verified OKX 5bp single-side taker convention as a common cost mapping; no Binance-specific fee claim is made.",
+    "Funding, market impact, lot/tick rounding, and exchange-specific leverage or maintenance rules are omitted. These are unlevered fully cash-collateralized simulations.",
+    "The one-12H-delayed arm uses the existing fixed-delay convention: retain the immediate signal's relative stop fraction and re-anchor that distance at the scheduled delayed H1 open; no future survival or outcome filter is applied."
+  ]
+}

@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-breakout-delay-historical-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "8f71dd997e"
+    status: "rejected"
+    question: "突破延后一根的收益是否能在历史宽币池复现"
+    single_variable: "将固定十币已测的延后一根12H入场无条件扩至360合约，以及用原信号时点成交额确认的动态前十；原相对风险、九仓和费用不变。"
+    result: "18,890个原始机会，18,877个在精确延后点有报价。360合约终值9,838U→4,193U、延后回撤75.18%；动态成交额前十8,159U→3,304U、延后回撤56.57%、胜率19.94%。固定十币晚一根增益在两组扩样均翻转。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-breakout-delay-historical-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81ec-a77b-c541f1494f91."
+
+  - experiment_id: exp-cloud-close-breakout-venue-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "9983d58903"
+    status: "inconclusive"
+    question: "十主流币顺势突破在两个交易所的同名同时段复验"
+    single_variable: "同十币、相同结束时点与各币自身周一云带，分别在OKX和Binance冻结永续行情重建并比较即时/晚12H。两地都按每笔市价5bp统一比较。另从双方均有90日历史的共同时间起步。"
+    result: "共同起点2023-03-23 06UTC、截止2026-09-23 04UTC，即时OKX 3,479U/币安3,517U，延后3,331U/2,828U；即时金额盈亏比5.44/5.53、回撤上界37.33%/38.24%。各自更长可观察历史即时38,151U/13,011U，上市数据起点不同。OKX基准1,382个原事件与同截止入场时、价、止损全部一致。币安费率为对称映射。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-breakout-venue-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-818b-8cb1-d5a7dcebe423."
+
   - experiment_id: exp-cloud-close-breakout-liquid-ten-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "d25322f2d2"
