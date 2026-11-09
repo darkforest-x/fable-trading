@@ -1,0 +1,7 @@
+{
+  "id": "exp-cloud-close-breakout-pullback-20261109-v1",
+  "hypothesis": "A cloud pullback might catch the continuation of a market that has recently broken out to a new quarterly closing extreme. Preserve the V1.7 12H first-entry signal; no new orders at the breakout itself.",
+  "single_variable": "Look at the fourteen completed native 12H bars ending at the OPEN of the V1.7 signal candle. For a long at least one of those closes must strictly exceed all 180 native closes immediately preceding that breakout observation; shorts mirror to the minimum. This uses a seven-day setup window and the existing 90d eligibility horizon. No percentile or holding-time scan. Require a fully contiguous native history for the setup indicator; compare with all signals on the same available observations.",
+  "account": "OKX native 291 market coverage, 1000 U, 9 slots, NAV/10 nominal order cap, existing two-thirds 2R and conditional full runner, paid fees 5bp market / 2bp resting. Underlying stop and native EMA exit remain fixed. All dates already examined, this is exploratory.",
+  "tests": "Development through 2024, calendar 2025 and 2026, full window. Run matched later controls and adverse 5bp market fills on an improved development candidate passing the risk/win/payoff screen. Consider separate Binance extension only after an OKX development improvement. Report the supported history and omitted opportunities."
+}
