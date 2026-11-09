@@ -1410,6 +1410,21 @@ experiments:
     canonical_report: "experiments/active/exp-cloud-close-hourly-trim-funding-20261109-v1/summary.json"
     notes: "1000U shared VectorBT wallet, 5bp taker and 2bp maker. Binance funding timestamps/rates with 75,995 native H1 mark-open proxies and 1,954 exact settlement marks in tape. Intrabar high-low DD bound. Price paths end in Sep 2026, later 2025/26 scores retrospectively explored. No historic lot or depth proof. Notion 41388564-79af-8111-9ea5-fcadf34ae7d9."
 
+  - experiment_id: exp-cloud-close-november-funding-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "7e3cc7d822"
+    status: "inconclusive"
+    question: "Does the scored Binance cloud wallet retain its account performance after completing the official archive extension and accounting for actual funding through 2026-11-08 12:00 UTC?"
+    single_variable: "Continue the frozen 1000U, nine-slot NAV/10, two-thirds resting 2R and one-third runner wallet with native Binance USD-M funding settlements; separately bound exact timestamp ownership and replay +5bp adverse market fills."
+    result: "1562 parents, 3124 child legs, 387 contracts through 2026-11-08 12:00 UTC. Funding source complete across 2004 held symbol-months and 80108 unique observed settlements; no uncovered rate/mark gap or zero-fill. Boundary-inclusive final 7393.83U, 33.80% wins, cash payoff 2.559, marked DD 32.40% and conservative H1 bound 34.34%; boundary-exclusive 7352.47U, 33.74%, 2.565, 32.51%/34.34%. With extra 5bp market-fill slippage: 6420.59–6384.69U, 33.48% wins, cash payoff 2.545–2.543, marked DD 33.95–34.06%, conservative bound 34.63–34.74%."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-november-funding-20261109-v1/account/funding_account_audit.json"
+    notes: "This is the continuation 20% hourly-cap account: 1000U shared wallet, nine slots, NAV/10 per parent entry, 2/3 maker 2R plus 1/3 native runner, 5bp taker/2bp maker and 20% single-contract hourly cap; it is not the separate 1x/2x main account. Source reuse: 77949 older settlement rows across 1961 months; 52 new official/API source segments and 38 public Binance pages. Funding settlement marks: 76909 official H1-open proxies and 3199 exact markPrice observations in the source tape. Drawdown bound combines H1 OHLC and funding-sign extremes, not an observed intrabar path. Eight new listings were carried in the extended universe: 17 native actual signals across DATAIP/GRAM/GRVT/DOS/牛来/MARSCOIN/PONS/哈基米 (raw 12H activity 26); only 3 passed both native 90-day and cross-sectional eligibility and none funded. All source/account outputs are stored under experiments/active/exp-cloud-close-november-funding-20261109-v1/ and data/research/cloud_close_november_supplemental/."
+
   - experiment_id: exp-cloud-close-okx-funding-archives-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "38467f2ce8"
