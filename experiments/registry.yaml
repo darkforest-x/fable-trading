@@ -15,6 +15,96 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-liquid-priority-history-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "d451b23171"
+    status: "inconclusive"
+    question: "交易信号入场前的成交额是否有可核查的完整来源"
+    single_variable: "为原始12442次候选补齐上一完整小时成交额。"
+    result: "12287次覆盖，其中8526次有新增OKX官方小时记录。141次缺源，14次与冻结行情不一致，3次成交额为零。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-liquid-priority-history-20261109-v1/summary.json"
+    notes: "Source coverage only. Closed-hour OKX quote turnover. Notion 41388564-79af-81d5-8f20-cdc48ffb4365."
+
+  - experiment_id: exp-cloud-close-liquid-queue-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "61579a3643"
+    status: "rejected"
+    question: "同一资金账户按成交额与波动率安排并发信号"
+    single_variable: "仅改变同刻候选的优先顺序。按上一小时分钟均额的10%限制开仓。"
+    result: "低ATR优先35710U，成交额优先25222U且回撤超50%，两者等权51957U、1593笔、胜21.41%、盈亏比6.36、回撤上界42.36%。额外5bp为45904U。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-liquid-queue-20261109-v1/summary.json"
+    notes: "OKX real trade fee model. Prior hour mean entry cap; no funding or measured exit depth. Notion 41388564-79af-81bb-a93c-e3999ab9131d."
+
+  - experiment_id: exp-cloud-close-liquid-breadth-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "756f38c3bf"
+    status: "rejected"
+    question: "成交量限仓后的九份和十八份资金"
+    single_variable: "固定低ATR优先，将同一资金由9份分为18份。"
+    result: "18份38886U、2863笔、胜21.94%、盈亏比5.68、回撤上界46.34%；加5bp 35623U、回撤上界48.11%。9份35710U。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-liquid-breadth-20261109-v1/summary.json"
+    notes: "OKX real trade fee model. Prior hour mean entry cap; no funding or measured exit depth. Notion 41388564-79af-81ab-8d4c-ebb33dc01b3c."
+
+  - experiment_id: exp-cloud-close-perp-basis-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "30e01a67f1"
+    status: "rejected"
+    question: "现货永续价格错位可否筛出更高收益的云带入场"
+    single_variable: "筛选收盘时多头永续折价或空头永续溢价至少10bp，两边对照均使用相同数据覆盖。"
+    result: "19491次覆盖中2596次通过。1000U账户确认组1301U，对齐时间方向评分的随机组1460U，全覆盖7578U。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-perp-basis-20261109-v1/summary.json"
+    notes: "Binance venue; OKX fee schedule applied for comparison. No funding or depth. Notion 41388564-79af-81b9-afb8-fbf5f6381a55."
+
+  - experiment_id: exp-cloud-close-ioc-book-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "e13ad18d45"
+    status: "inconclusive"
+    question: "按信号收盘价容忍5bp的订单实际可成交占比"
+    single_variable: "在已分层选定的UTC零点样本中，用官方400档盘口核对收盘价外5bp的IOC。"
+    result: "普通24次中23次可重建，其中9次全成、10次部分、4次零成交。实际可成交总名义额占原下单量32.78%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-ioc-book-20261109-v1/summary.json"
+    notes: "Historical 400-level snapshot study. No portfolio PnL. Notion 41388564-79af-81eb-af5f-d7d6dfd972a1."
+
+  - experiment_id: exp-cloud-close-noon-book-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "dbb4b39f66"
+    status: "inconclusive"
+    question: "另一组UTC中午收盘的盘口是否也出现容量不足"
+    single_variable: "从362次UTC中午历史开仓按年及方向取8例，重建到收盘及一秒后。"
+    result: "7例可核验，5bp IOC两时刻均4笔零成。市价冲击超5bp收盘3/7，一秒后4/7。1例盘口交叉无法确认。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-noon-book-20261109-v1/summary.json"
+    notes: "Historical 400-level noon book reconstruction. No account PnL. Notion 41388564-79af-81ab-a8e1-d8c993d4a6ef."
+
   - experiment_id: exp-cloud-close-entry-turnover-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "3894c2b087"
@@ -58,7 +148,7 @@ experiments:
     reuse_allowed: true
     artifacts: []
     canonical_report: "experiments/active/exp-cloud-close-liquid-entry-wallet-20261109-v1/summary.json"
-    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-816a-9ccc-c7a05991e6c8."
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. Prior-minute median entry capacity tested at 10% and 1%. No funding or exit capacity modeling. Notion 41388564-79af-816a-9ccc-c7a05991e6c8."
 
   - experiment_id: exp-cloud-close-native-book-impact-20261109-v1
     source_repo: "darkforest-x/fable-trading"
