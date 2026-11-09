@@ -245,7 +245,7 @@ def _fill_rows(group: pd.DataFrame) -> list[dict[str, Any]]:
 
 
 def _draw_chart(record: dict[str, Any], frame: pd.DataFrame, ema: pd.DataFrame,
-                fills: pd.DataFrame, path: pd.Series, monday: pd.DataFrame,
+                fills: pd.DataFrame, rail: float,
                 dest: Path) -> dict[str, Any]:
     """Write one standalone SVG, leaving each missing 12H candle as empty time."""
     start, end = int(record["windowStartMs"]), int(record["windowEndMs"])
@@ -266,7 +266,6 @@ def _draw_chart(record: dict[str, Any], frame: pd.DataFrame, ema: pd.DataFrame,
     for col in ("ema20", "ema50"):
         values.extend([float(v) for v in visible_ema[col].dropna().to_numpy()])
     values.extend(float(r.fill_price) for r in fills.itertuples() if pd.notna(r.fill_price))
-    rail = float(path.stop_price)
     if not values or min(values) <= 0:
         raise ValueError(f"No positive chart prices for {record['id']}")
     lo, hi = min(values + [rail]), max(values + [rail])
@@ -318,7 +317,7 @@ def _draw_chart(record: dict[str, Any], frame: pd.DataFrame, ema: pd.DataFrame,
         xa = float(np.interp(max(0., rx1), np.arange(n), x))
         xb = float(np.interp(min(n - 1., rx2), np.arange(n), x))
         parts.append(f'<path d="M {xa:.1f} {y(rail):.1f} H {xb:.1f}" stroke="{RAIL}" stroke-width="1.5" stroke-dasharray="7 5"/>')
-        rail_label = "当周 1.618 外轨 / 止损" if int(record["mondayBarCount"]) == 24 else "冻结止损价（周一K线有缺）"
+        rail_label = "当周 1.618 外轨" if int(record["mondayBarCount"]) == 24 else "冻结止损价（周一K线有缺）"
         parts.append(f'<text x="{min(xb, right-4):.1f}" y="{y(rail)-6:.1f}" text-anchor="end" font-size="10" fill="{RAIL}">{rail_label} {rail:.5g}</text>')
 
     # EMA lines break at missing data and across a reset. No forward-filled prices are drawn.
@@ -373,9 +372,10 @@ def _draw_chart(record: dict[str, Any], frame: pd.DataFrame, ema: pd.DataFrame,
             label = "开多" if is_long else "开空"
             c = "#185a8b"
         elif action == "trim":
-            label, c = "分批减仓", RAIL
+            parts.append(f'<circle cx="{xx:.1f}" cy="{yy:.1f}" r="2" fill="{RAIL}" opacity=".65"><title>敞口减仓 {r.fill_price:.6g}</title></circle>')
+            continue
         elif action.startswith("take_profit"):
-            label = "翻倍止盈" if np.isclose(r.fill_price, 2 * float(path.entry_price)) and is_long else "2R 止盈"
+            label = "翻倍止盈" if np.isclose(r.fill_price, 2 * record["entryPrice"]) and is_long else "2R 止盈"
             c = "#986311"
         elif action.startswith("stop"):
             label, c = "止损", "#a23742"
@@ -461,7 +461,7 @@ def build() -> dict[str, Any]:
     positions = positions.assign(_event=positions.index.astype(str)).sort_values(["entry_ms", "_event"], kind="stable")
     records: list[dict[str, Any]] = []
     event_payloads: list[tuple[str, dict[str, Any]]] = []
-    chart_specs: list[tuple[dict[str, Any], pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.Series, pd.DataFrame]] = []
+    chart_specs: list[tuple[dict[str, Any], pd.DataFrame, pd.DataFrame, pd.DataFrame, float]] = []
     entry_evidence_summaries: list[dict[str, Any]] = []
     symbol_windows: dict[str, list[tuple[int, int]]] = {}
 
@@ -591,7 +591,7 @@ def build() -> dict[str, Any]:
                       "ratesFromFrozenPath": sorted(float(v) for v in tape.loc[tape.event_id.eq(event_id), "exit_fee_rate"].drop_duplicates())},
         }
         event_payloads.append((event_url, event))
-        chart_specs.append((record, bars, ema, chart_fills, path, monday))
+        chart_specs.append((record, bars, ema, chart_fills, float(rail)))
 
     # Source files are scoped to the union of requested chart windows for each symbol.
     symbol_manifest: dict[str, Any] = {}
@@ -619,9 +619,9 @@ def build() -> dict[str, Any]:
         _json_gzip(OUT / url, event)
 
     chart_audits = {}
-    for record, bars, ema, chart_fills, path, monday in chart_specs:
+    for record, bars, ema, chart_fills, rail in chart_specs:
         # Chart coverage is built from the real 12H source only, with a visible empty slot for every gap.
-        meta = _draw_chart(record, bars, ema, chart_fills, path, monday, OUT / record["chartUrl"])
+        meta = _draw_chart(record, bars, ema, chart_fills, rail, OUT / record["chartUrl"])
         record["chartAudit"] = meta
         chart_audits[record["id"]] = meta
 
@@ -735,7 +735,29 @@ def add_entry_evidence_to_existing_bundle() -> dict[str, Any]:
             "tp2TargetMismatches": tp2_mismatch}
 
 
+def redraw_saved_charts():
+    """Re-render charts from published candles and fills without replaying the account."""
+    manifest = json.loads((OUT / "manifest.json").read_text())
+    frames = {}
+    for symbol, source in manifest["symbols"].items():
+        with gzip.open(OUT / source["dataUrl"], "rt") as stream:
+            bars = json.load(stream)
+        frames[symbol] = pd.DataFrame(bars["rows"], columns=bars["columns"]).set_index("timeMs")
+    for record in manifest["records"]:
+        with gzip.open(OUT / record["dataUrl"], "rt") as stream:
+            event = json.load(stream)
+        source = frames[record["symbol"]]
+        fills = pd.DataFrame(event["fills"]).rename(columns={"hourMs": "hour_ms", "fillPrice": "fill_price"})
+        audit = _draw_chart(record, source, source, fills, event["mondayRail"]["level"], OUT / record["chartUrl"])
+        if audit != record["chartAudit"]:
+            raise ValueError(f"Saved chart window changed for {record['id']}")
+    return {"charts": len(manifest["records"])}
+
+
 if __name__ == "__main__":
     import sys
-    result = add_entry_evidence_to_existing_bundle() if "--entry-evidence-only" in sys.argv else build()
+    if "--charts-only" in sys.argv:
+        result = redraw_saved_charts()
+    else:
+        result = add_entry_evidence_to_existing_bundle() if "--entry-evidence-only" in sys.argv else build()
     print(json.dumps(result, ensure_ascii=False, indent=2))
