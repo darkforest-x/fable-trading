@@ -1,0 +1,90 @@
+{
+  "experiment_id": "exp-cloud-close-breakout-branch-20261109-v1",
+  "question": "On a fixed ten-coin OKX panel, does following the first EMA-aligned 12H close outside the completed NY Monday 1.618 band improve on the original V1.7 wick-and-close reclaim?",
+  "single_variable": "Replace the V1.7 same-week first wick-through/reclaim close rule with a same-week first strict close beyond the upper/lower 1.618 band in the aligned EMA20/50 direction. Use next exact 1H open for both arms. Keep the fixed stop reference anchor, native EMA exit, nine-slot shared-cash account, and fees consistent.",
+  "data": {
+    "venue": "OKX USDT perpetual native 12H and 1H OHLC",
+    "symbols": ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "ADA", "LINK", "LTC", "AVAX"],
+    "source_roots": {
+      "frozen_top20": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs",
+      "allmarket_okx": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs"
+    },
+    "symbol_source_groups": {
+      "BTC": "frozen_top20",
+      "ETH": "frozen_top20",
+      "SOL": "frozen_top20",
+      "BNB": "frozen_top20",
+      "XRP": "frozen_top20",
+      "DOGE": "frozen_top20",
+      "ADA": "allmarket_okx",
+      "LINK": "allmarket_okx",
+      "LTC": "allmarket_okx",
+      "AVAX": "allmarket_okx"
+    },
+    "cutoff_utc_exclusive": "2026-11-08T12:00:00Z",
+    "cutoff_ms": 1794139200000,
+    "candidate_bars": "Complete native UTC 12H bars whose key-open and confirmation lie in the same New York Monday week, after a complete Monday 1H range, with V1.7 EMA20/EMA50 warmup complete. EMA state resets on any missing 12H bar.",
+    "monday_anchor": "Rebuild per-symbol NY Monday 00:00-to-Tuesday 00:00 local-time extrema from exactly 24 observed H1 rows; upper = high + 0.618 * (high-low); lower = low - 0.618 * (high-low). Incomplete Monday is ineligible and never filled.",
+    "breakout_rule": "Within each symbol/NY week, use only the first valid 12H close strictly above upper with EMA20>EMA50 (long) or strictly below lower with EMA20<EMA50 (short); long/short share one weekly signal lock. A qualifying signal without the exact next H1 open remains a no-entry event and still consumes that week's lock.",
+    "original_reclaim_comparator": "Within each symbol/NY week, use the first native V1.7 reclaim from cloud_close_second_reclaim_paths._signal_at: long low<lower<close<upper and EMA20>EMA50; short lower<close<upper<high and EMA20<EMA50. This is rebuilt from native bars, not filtered from an already-funded parent list.",
+    "entry": "Market at the exact H1 open whose UTC timestamp equals completed 12H confirmation; missing exact open or confirmation at/after account cutoff is no-entry.",
+    "stop": "For breakout, use the actual crossed band as the source fixed_stop anchor: upper band for long and lower band for short. For the original reclaim comparator, retain the V1.7 touched-side anchor: lower band for long and upper band for short. Source fixed_stop(symbol, side, reference_anchor) keeps BTC/ETH 1.5% and others 3%; actual entry-to-stop distance is recomputed from the exact H1 open. Reject if the entry is not on the adverse side of its anchored stop.",
+    "original_exit": "Use the existing V1.7 native 12H EMA-cross path callback and unchanged stop. First observed hourly gap open, earliest stale-12H observation, and true account/source tail close retain existing explicit exit behavior. No future completeness or outcome filtering.",
+    "data_quality": "Retain actual source counts and 1H/12H gap counts per symbol. Inputs are already frozen OKX history; no downloads, gap filling, or post-cutoff H1 rows in path pricing."
+  },
+  "controls": {
+    "method": "For each signal, sample one non-signal completed 12H confirmation from the same symbol, same NY week, same direction, and same EMA alignment, strictly after parent confirmation; require prior confirmed 12H ATR14/previous close within 25% relative difference.",
+    "atr_relative_tolerance": 0.25,
+    "seed": 20261109,
+    "exclude_signal_bars": "Exclude every bar that independently qualifies either the frozen breakout or original reclaim trigger.",
+    "stop": "Inherit the parent actual-entry-to-fixed-stop risk fraction at the control's exact next H1 open.",
+    "without_replacement": "One control per parent and without replacement within each arm/symbol/week.",
+    "seed": 20261109,
+    "unmatched": "Keep a corresponding explicit unmatched control row with reason. Never match to a confirmation at or before parent confirmation."
+  },
+  "account": {
+    "starting_usdt": 1000,
+    "start_ms": 1579824000000,
+    "end_ms": 1794139200000,
+    "positions": "One nine-slot shared-cash VectorBT account per arm and diagnostic scenario, fully collateralized and unlevered; at most one position per symbol. Entry priority is the existing wallet CRC32(symbol), symbol, event_id order. Existing open positions are not resized.",
+    "costs": "OKX Lv1 taker 0.0005 each entry and market/stop/EMA exit. No limit exits. No extra slippage, funding, impact, maintenance-tier, or lot rounding in this experiment.",
+    "diagnostics": ["breakout actual", "breakout paired actual parents", "breakout matched-control account", "original-reclaim actual", "original-reclaim paired actual parents", "original-reclaim matched-control account"],
+    "periods": {
+      "all": "2020-01-24T00:00:00Z through 2026-11-08T12:00:00Z exclusive",
+      "development": "from account start through 2025-01-01T00:00:00Z exclusive",
+      "2025": "2025-01-01T00:00:00Z through 2026-01-01T00:00:00Z exclusive",
+      "2026_ytd": "2026-01-01T00:00:00Z through the account cutoff exclusive"
+    },
+    "drawdown": "Report VectorBT close/open NAV and synchronized conservative hourly intrabar upper drawdown bound; OHLC cannot establish exact within-hour high/low ordering.",
+    "trade_metrics": "Report actual realized USDT payoff as well as equal-notional net-return payoff; wins and trade counts use closed funded positions within each period."
+  },
+  "fees": {
+    "taker_per_fill": 0.0005,
+    "entry_fill_class": "taker market",
+    "exit_fill_class": "taker market/stop/EMA/gap/tail",
+    "maker_per_fill": 0.0002,
+    "maker_usage": "No resting limit orders in either arm."
+  },
+  "execution": {
+    "path_engine": "Existing VectorBT 1.2.0 Portfolio.from_order_func in cloud_close_reward_paths._simulate_symbol using the frozen V1.7 native order callback; independent one-unit path is only a fill price source.",
+    "account_engine": "Existing VectorBT 1.2.0 shared-cash account in cloud_close_reward_account.account, with actual finite slot/cash sizing.",
+    "runtime": "/Users/zhangzc/.local/bin/vectorbt-python",
+    "event_batch_size": 8,
+    "no_trade_engine": "No hand-written bar-by-bar fill or PnL simulator; candidate construction is separate from VectorBT execution."
+  },
+  "outputs": {
+    "paths_csv_gz": "paths.csv.gz",
+    "candidate_audit_csv_gz": "candidate_audit.csv.gz",
+    "account_metrics_csv": "account_metrics.csv",
+    "funded_dir": "funded",
+    "audit_json": "audit.json",
+    "summary_json": "summary.json"
+  },
+  "mini_check": {
+    "real_symbol": "BTC",
+    "commands": [
+      "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_breakout_branch --mini-check",
+      "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_breakout_branch --run"
+    ]
+  }
+}
