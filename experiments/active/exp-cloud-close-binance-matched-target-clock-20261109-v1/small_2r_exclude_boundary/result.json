@@ -1,0 +1,98 @@
+{
+  "metrics": {
+    "all": {
+      "final_usdt": 59050.55100993144,
+      "multiple": 59.05055100993144,
+      "dd_mark_pct": 41.49304652546465,
+      "dd_bound_pct": 43.038604885012056,
+      "trades": 1583,
+      "win_pct": 20.78332280480101,
+      "payoff": 6.044502329568937,
+      "payoff_usdt": 6.743778729077639,
+      "median_net_pct": -3.6146718766986927
+    },
+    "dev": {
+      "final_usdt": 33463.13168919874,
+      "multiple": 33.46313168919874,
+      "dd_mark_pct": 41.49304652546465,
+      "dd_bound_pct": 43.038604885012056,
+      "trades": 1215,
+      "win_pct": 20.0,
+      "payoff": 6.341016691193201,
+      "payoff_usdt": 6.482403372017448,
+      "median_net_pct": -3.492479647178644
+    },
+    "2025": {
+      "final_usdt": 45298.943226834,
+      "multiple": 1.3536970671951676,
+      "dd_mark_pct": 15.09288578438932,
+      "dd_bound_pct": 23.259022139286945,
+      "trades": 207,
+      "win_pct": 19.32367149758454,
+      "payoff": 3.978479818553701,
+      "payoff_usdt": 6.922762072979712,
+      "median_net_pct": -4.102911883037853
+    },
+    "2026": {
+      "final_usdt": 59050.55100993144,
+      "multiple": 1.3035745826174443,
+      "dd_mark_pct": 18.279586215453424,
+      "dd_bound_pct": 20.409205009930332,
+      "trades": 143,
+      "win_pct": 25.874125874125873,
+      "payoff": 6.038798384557359,
+      "payoff_usdt": 6.5337835476105965,
+      "median_net_pct": -4.736910236940525
+    }
+  },
+  "audit": {
+    "scenario": "exclude_boundary",
+    "market_slip": 0.0,
+    "positions": 1583,
+    "hourly_single_contract_cap_fraction": 0.2,
+    "entry_capacity_limit_active": true,
+    "child_legs": 6332,
+    "applied_funding_rows": 262390,
+    "funding_cashflow_usdt": 7874.465259100021,
+    "exact_mark_rows_applied": 5802,
+    "official_1h_mark_proxy_rows_applied": 256588,
+    "boundary_rows_applied": 0,
+    "boundary_rows_excluded": 3467,
+    "trim_order_count": 8720,
+    "trimmed_parents": 259,
+    "trim_turnover_usdt": 113519.3516485741,
+    "funding_cashflow_by_child_matches_native_size": true,
+    "cash_from_orders_and_funding_usdt": 59050.551009931485,
+    "source_coverage": {
+      "covered_child_legs": 6332,
+      "covered_symbol_months": 2000,
+      "settlement_rows_scanned_in_interval": 266167,
+      "settlement_rows_inside_native_child_hold": 265857,
+      "boundary_sensitive_child_settlement_rows": 3467,
+      "uncovered_symbol_months": 0,
+      "unproven_zero_settlement_windows": 0,
+      "verified_zero_settlement_symbols": 51,
+      "verified_zero_settlement_spans": 63,
+      "funding_tape_has_no_SC_rows": true,
+      "source_interval_check": "every four-child hold is contained in a complete donor symbol-month query interval"
+    },
+    "stage_rows": 235968,
+    "h1_rows": 58992,
+    "cash_reconstruction_max_abs_error_usdt": 2.0742882043123245e-06,
+    "nav_reconstruction_max_abs_error_usdt": 2.074302756227553e-06,
+    "raw_value_difference_matches_settlements": true,
+    "hourly_bounds_include_funding_cash_extremes": true,
+    "all_positions_closed": true,
+    "terminal_margin_funding_liability_usdt": 0.0
+  },
+  "cash_bridge": {
+    "initial_cash_usdt": 1000.0,
+    "native_order_cash_pnl_usdt": 50176.085750831466,
+    "applied_funding_cashflow_usdt": 7874.465259100021,
+    "parent_cash_pnl_usdt": 58050.551009931485,
+    "terminal_nav_usdt": 59050.55100993144,
+    "account_bridge_error_usdt": 4.3655745685100555e-11,
+    "parent_ledger_bridge_error_usdt": 0.0,
+    "funding_is_a_cashflow_not_a_terminal_nav_addition": true
+  }
+}
