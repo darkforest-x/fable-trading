@@ -46,7 +46,7 @@ def score(book, quotes):
     return pd.concat(samples, ignore_index=True)
 
 
-def settle(tape, src):
+def settle(tape, src, directory=EXP):
     """Reuse known settlement minutes only at the exact venue delivery time."""
     price_sources = [repair.old.DELIVERY/'settlement_index_minutes.csv', *deliveries.EXP.glob('index_*.csv')]
     cached = pd.concat([pd.read_csv(p) for p in price_sources], ignore_index=True)
@@ -60,7 +60,8 @@ def settle(tape, src):
             raise ValueError(f'Unverified preterminal exit for {symbol}')
         series = cached[(cached.symbol==symbol) & cached.time.between(end-wallet.HOUR, end-1)].drop_duplicates('time').sort_values('time')
         if len(series)!=60:
-            path = EXP/f'index_{symbol}.csv'
+            previous = EXP/f'index_{symbol}.csv'
+            path = previous if previous.exists() else directory/f'index_{symbol}.csv'
             if not path.exists():
                 series = deliveries.delivery.index_data(dict(cfg,symbols=[symbol]),end,directory=None)
                 series.to_csv(path,index=False)
