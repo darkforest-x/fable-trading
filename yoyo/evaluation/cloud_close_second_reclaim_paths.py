@@ -128,7 +128,7 @@ def _anchors(bars1: pd.DataFrame, bars12: pd.DataFrame, symbol: str) -> dict[str
 
 
 def _signal_at(index: int, symbol: str, bars12: pd.DataFrame, features: dict,
-               calendar: dict[str, dict], cutoff_ms: int) -> dict | None:
+               calendar: dict[str, dict], cutoff_ms: int, *, utc_offset_ms: int = 0) -> dict | None:
     """Pure V1.7 single-bar rule, copied from cloud_signals.signal (fib mode).
 
     Uses only the completed signal 12H OHLC, its confirmed EMA20/EMA50, and the
@@ -136,7 +136,7 @@ def _signal_at(index: int, symbol: str, bars12: pd.DataFrame, features: dict,
     state enters this function.
     """
     time_ms = int(bars12.index[index])
-    if time_ms % BAR_MS or time_ms + BAR_MS > cutoff_ms:
+    if (time_ms - utc_offset_ms) % BAR_MS or time_ms + BAR_MS > cutoff_ms:
         return None
     window = engine._ny_week_window(time_ms)
     anchor = calendar.get(window["week"])

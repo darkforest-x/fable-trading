@@ -1,0 +1,6 @@
+{
+ "question":"Does the 12H candle's time of day, independently of its length, change the weekly V1.7 reclaim?",
+ "single_variable":"Use the same real UTC H1 data for both accounts. A reference 12H bar starts at UTC 00/12; alternate bars start at UTC 06/18. Recompute the entire EMA20/50, prior ATR, signal wick, and native cloud exit on that bar clock. Preserve the identical New York Monday boundaries, weekly first-key reservation across sides, touched-side 1.618 fixed stop, and exact first H1 open at signal close. Only complete blocks of 12 consecutive native H1 bars can be a key. Confirm at least 50 consecutive 12H bars for the EMA. No shifted signal is executed at the original clock.",
+ "account":"Pilot on the ten previously named liquid major OKX swaps, using long-only entries from each symbol's first observed weekly key. Three positive-cash 1x slots, lowest prior ATR first, one symbol at a time, cloud runner with the existing protective stop, taker fees on both market orders and extra 5bp stress, 1000U. Skip shorts after they have reserved that symbol-week. Historical named survivors and no funding or observed depth.",
+ "command":"vectorbt-python -m yoyo.evaluation.cloud_close_session_clock"
+}
