@@ -70,16 +70,18 @@ def main():
     grid=pd.read_csv(local.EXP/'opportunities.csv.gz',dtype={'symbol':str})
     quotes,_=local.repair.checked_quotes()
     # Only final prior-hour receipts from this study, with 60 fully measured minutes, may transfer.
-    local_minute=[]
-    for path in minute.CACHE.glob('*.json'):
-        d=json.loads(path.read_text())
-        if d.get('status')=='observed':
-            local_minute.append((d['event_id'],d['mean_usdt']*60))
-    if local_minute:
-        m=pd.Series(dict(local_minute)); values=grid.event_id.map(m)
-        ready=grid.prior_turnover_usdt.isna()&values.notna()
-        grid.loc[ready,'prior_turnover_usdt']=values[ready]
-        grid.loc[ready,'source']='verified_prior_60m'
+    receipt = EXP/'transferred_minutes.csv.gz'
+    if receipt.exists():
+        transferred = pd.read_csv(receipt,index_col='event_id').prior_turnover_usdt
+    else:
+        prior = pd.read_csv(minute.EXP/'prior_liquidity.csv.gz',index_col='event_id')
+        transferred = prior.loc[prior.status.eq('observed'),'mean_usdt'].mul(60)
+    values = grid.event_id.map(transferred)
+    ready = grid.prior_turnover_usdt.isna() & values.notna()
+    grid.loc[ready,'prior_turnover_usdt'] = values[ready]
+    grid.loc[ready,'source'] = 'verified_prior_60m'
+    if not receipt.exists():
+        grid.loc[ready,['event_id','prior_turnover_usdt']].to_csv(receipt,index=False)
     misses=grid[grid.prior_turnover_usdt.isna()]
     keys=dict(zip(zip(grid.symbol,grid.prior_hour_ms),grid.index))
     if len(keys)!=len(grid):
