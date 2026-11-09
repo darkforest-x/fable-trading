@@ -1,0 +1,114 @@
+{
+  "metrics": {
+    "all": {
+      "final_usdt": 19949.065345862207,
+      "multiple": 19.949065345862206,
+      "dd_mark_pct": 29.753977723180135,
+      "dd_bound_pct": 39.250229718696815,
+      "trades": 1583,
+      "win_pct": 33.79658875552748,
+      "payoff": 2.8696014263754632,
+      "payoff_usdt": 2.889401053002496,
+      "median_net_pct": -3.1560024637714448
+    },
+    "dev": {
+      "final_usdt": 12660.022790489242,
+      "multiple": 12.660022790489242,
+      "dd_mark_pct": 29.753977723180135,
+      "dd_bound_pct": 30.59163945667205,
+      "trades": 1215,
+      "win_pct": 32.757201646090536,
+      "payoff": 2.976756241988047,
+      "payoff_usdt": 2.948961628321099,
+      "median_net_pct": -3.0858816447161903
+    },
+    "2025": {
+      "final_usdt": 17555.194336616405,
+      "multiple": 1.3866637230546401,
+      "dd_mark_pct": 22.917663945597667,
+      "dd_bound_pct": 37.257301596953866,
+      "trades": 207,
+      "win_pct": 32.850241545893724,
+      "payoff": 2.2242899494032184,
+      "payoff_usdt": 2.9184937333961587,
+      "median_net_pct": -3.6904695249008372
+    },
+    "2026": {
+      "final_usdt": 19949.065345862207,
+      "multiple": 1.136362546796346,
+      "dd_mark_pct": 15.48734367373652,
+      "dd_bound_pct": 17.043571233310452,
+      "trades": 143,
+      "win_pct": 38.46153846153847,
+      "payoff": 2.8276377848105256,
+      "payoff_usdt": 2.2592325852111195,
+      "median_net_pct": -3.8462356216451705
+    }
+  },
+  "audit": {
+    "scenario": "zero_funding",
+    "market_slip": 0.0,
+    "positions": 1583,
+    "hourly_single_contract_cap_fraction": 0.2,
+    "entry_capacity_limit_active": true,
+    "child_legs": 6332,
+    "applied_funding_rows": 0,
+    "funding_cashflow_usdt": 0.0,
+    "exact_mark_rows_applied": 0,
+    "official_1h_mark_proxy_rows_applied": 0,
+    "boundary_rows_applied": 0,
+    "boundary_rows_excluded": 0,
+    "trim_order_count": 8405,
+    "trimmed_parents": 357,
+    "trim_turnover_usdt": 63493.294776546536,
+    "funding_cashflow_by_child_matches_native_size": true,
+    "cash_from_orders_and_funding_usdt": 19949.06534586222,
+    "source_coverage": {
+      "covered_child_legs": 6332,
+      "covered_symbol_months": 2000,
+      "settlement_rows_scanned_in_interval": 181456,
+      "settlement_rows_inside_native_child_hold": 181135,
+      "boundary_sensitive_child_settlement_rows": 3376,
+      "uncovered_symbol_months": 0,
+      "unproven_zero_settlement_windows": 0,
+      "verified_zero_settlement_symbols": 51,
+      "verified_zero_settlement_spans": 63,
+      "funding_tape_has_no_SC_rows": true,
+      "source_interval_check": "every four-child hold is contained in a complete donor symbol-month query interval"
+    },
+    "stage_rows": 235968,
+    "h1_rows": 58992,
+    "cash_reconstruction_max_abs_error_usdt": 6.548361852765083e-11,
+    "nav_reconstruction_max_abs_error_usdt": 8.36735125631094e-11,
+    "raw_value_difference_matches_settlements": true,
+    "hourly_bounds_include_funding_cash_extremes": true,
+    "all_positions_closed": true,
+    "terminal_margin_funding_liability_usdt": 0.0
+  },
+  "cash_bridge": {
+    "initial_cash_usdt": 1000.0,
+    "native_order_cash_pnl_usdt": 18949.06534586222,
+    "applied_funding_cashflow_usdt": 0.0,
+    "parent_cash_pnl_usdt": 18949.06534586222,
+    "terminal_nav_usdt": 19949.065345862207,
+    "account_bridge_error_usdt": 1.0913936421275139e-11,
+    "parent_ledger_bridge_error_usdt": 0.0,
+    "funding_is_a_cashflow_not_a_terminal_nav_addition": true
+  },
+  "cap10_reference_parity": {
+    "parent_ids_match": true,
+    "parent_cash_rows": 1583,
+    "parent_cash_pnl_max_abs_error_usdt": 2.0463630789890885e-12,
+    "parent_notional_max_abs_error_usdt": 0.0,
+    "hourly_nav_rows": 58992,
+    "hourly_max_abs_error_usdt": {
+      "nav": 7.275957614183426e-12,
+      "open_nav": 7.275957614183426e-12,
+      "open_exit_nav": 7.275957614183426e-12,
+      "post_trim_nav": 7.275957614183426e-12,
+      "lower_nav": 8.36735125631094e-11,
+      "upper_nav": 8.36735125631094e-11
+    },
+    "reproduced_frozen_native_four_child_zero_funding_account": true
+  }
+}

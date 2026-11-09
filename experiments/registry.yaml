@@ -20174,3 +20174,31 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: "The cap uses 1m quote-volume median as turnover proxy, not order-book depth; spread, impact, lot sizes and Binance funding are omitted. Frozen 2bp maker/5bp taker assumptions are used; Binance's historical VIP fee tier is not asserted. H1 maintenance prefilter flags in 2x are resolved for all inspected accounts: GHST (2025-12-17 15:00Z) stop minute 1 vs trade/mark threshold minute 15; MOVR (2026-08-27 04:00Z) stop minute 3 vs threshold minute 11. Summary preserves H1 screen flags and its native-minute audit; this does not model exchange-specific liquidation tiers or sub-minute paths. No production eligibility or account change."
+  - experiment_id: exp-cloud-close-binance-capacity-funding-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 917bfd4589
+    status: complete
+    question: "How do actual Binance USD-M funding settlements change the frozen 10% entry-cap account when its original 20% hourly single-contract trim is retained?"
+    single_variable: "Add source-timestamped funding cashflows to the 1,583 capacity-observed parents. Keep original nine-slot order and slot IDs, four native child legs, 1x/2x exposure, 10% of prior 60 complete 1m quote-volume median entry cap, 20% prior-H1-NAV single-contract trim, fees, prices and exits. Leave three missing-capacity entries empty with no replacement; bracket same-time settlements and add a separate 5bp fill stress."
+    result: "VectorBT 1.2.0 zero-funding parity: 1,583 parents / 58,992 H1 rows; maximum hourly NAV error 8.4e-11U. Include boundary: final 19,643.73U, win 33.80%, cash payoff 2.992, DD bound 39.10%; net funding +1,594.29U while subsequent native order cash changed -1,899.63U vs baseline, net terminal delta -305.34U. Exclude: 19,555.77U, win 33.73%, payoff 2.998, DD bound 39.03%; funding +1,558.59U and order-cash delta -1,951.88U. +5bp stress: include 17,268.76U / 39.74% DD bound; exclude 17,160.99U / 39.67%. Development include/exclude 10,547.22 / 10,456.41U vs baseline 12,660.02U; 2025 15,225.81 / 15,140.54U vs 17,555.19U; 2026 partial through 2026-09-23 19,643.73 / 19,555.77U vs 19,949.07U."
+    artifacts:
+      - experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/summary.json
+      - experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/zero_funding_cap10_parity/metrics.json
+      - experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/zero_funding_cap10_parity/funded_positions.csv.gz
+      - experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/zero_funding_cap10_parity/hourly_equity.csv.gz
+      - experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/include_boundary/metrics.json
+      - experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/include_boundary/funded_positions.csv.gz
+      - experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/include_boundary/applied_funding.csv.gz
+      - experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/include_boundary/hourly_equity.csv.gz
+      - experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/exclude_boundary/metrics.json
+      - experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/exclude_boundary/funded_positions.csv.gz
+      - experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/exclude_boundary/applied_funding.csv.gz
+      - experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/exclude_boundary/hourly_equity.csv.gz
+      - experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/stress_include_boundary/metrics.json
+      - experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/stress_exclude_boundary/metrics.json
+    canonical_report: experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: "Funding coverage: all 6,332 retained child legs and 2,000 required symbol-months; 181,135 settlements inside native holds; no uncovered months or unproven zero-settlement windows. Marks: official exact fundingRate API or official 1h mark-open proxy. Entry capacity exclusions: WAVES twice and XTZ once, retained empty in original slots. 2026 is partial through September 23. This is a historical simulation, not production approval."
