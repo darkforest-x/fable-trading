@@ -1,0 +1,160 @@
+{
+  "experiment_id": "exp-cloud-close-direction-sleeves-20261109-v1",
+  "source": {
+    "candidate_actual_events": 11780,
+    "candidate_controls": 10833,
+    "parent_matched_control_events": 10816,
+    "controls_without_eligible_actual_parent": 17,
+    "source_paths": 45226,
+    "target_expiry_decisions": 22613,
+    "late_2r_limits_replaced_by_runner": 6294,
+    "12h_expiry_hours": 12,
+    "eligible_path_builder": "cloud_close_thirds.okx_paths() (corrected V1.7 90d roster and low-prior-ATR priority)",
+    "target_expiry_transform": "cloud_close_target_expiry.time_in_force(..., defer=False, hours=12)"
+  },
+  "frozen_baseline": {
+    "frozen_funded_positions": 1569,
+    "frozen_side_counts": {
+      "long": 682,
+      "short": 887
+    },
+    "frozen_terminal_usdt_from_cash": 49959.47124397866,
+    "frozen_terminal_usdt_from_hourly_nav": 49959.47120010835,
+    "frozen_cash_nav_delta_usdt": 4.387030639918521e-05,
+    "frozen_source_summary_final_usdt": 49959.47120010835,
+    "native_path_return_max_abs_error": 1.7763568394002505e-15,
+    "native_path_return_rows_checked": 1569,
+    "native_runner_source": "experiments/active/exp-cloud-close-reward-20261109-v1/paths.csv.gz (tp_r=0)",
+    "native_target_source": "same source paths rotated with the frozen 12h expiry rule",
+    "funded_source": "experiments/active/exp-cloud-close-target-expiry-20261109-v1/funded_OKX.csv.gz",
+    "hourly_source": "experiments/active/exp-cloud-close-target-expiry-20261109-v1/hourly_OKX.csv.gz",
+    "prior_direction_study": {
+      "source": "experiments/active/exp-cloud-close-direction-history-20261109-v1/summary.json",
+      "equivalent_independent_side_wallets": false,
+      "reason": "It gates positions by past directional expectancy and funds one 1000U account; it does not isolate long and short capital."
+    }
+  },
+  "arms": {
+    "long4_short5": {
+      "slots": {
+        "long": 4,
+        "short": 5
+      },
+      "initial_capital_usdt": {
+        "long": 444.44444444444446,
+        "short": 555.5555555555555
+      },
+      "combined": {
+        "positions_funded": 1419,
+        "long_positions": 728,
+        "short_positions": 691,
+        "initial_capital_usdt": 1000.0,
+        "final_cash_usdt": 7396.375194811719,
+        "final_synchronous_nav_usdt": 7396.375158828076,
+        "cash_nav_delta_usdt": 3.59836431016447e-05,
+        "hourly_marks": 59532
+      },
+      "sleeves": {
+        "long": {
+          "side": "long",
+          "slots": 4,
+          "capital_weight": 0.4444444444444444,
+          "initial_capital_usdt": 444.4444444444444,
+          "target_initial_slot_gross_usdt": 111.11111111111111,
+          "positions_funded": 728,
+          "minimum_scaled_position_notional_usdt": 85.60894989594966,
+          "numerical_zero_order_floor_usdt": 1e-08,
+          "unique_slots_used": 4,
+          "unquoted_position_hours": 0,
+          "admission_rejections": {
+            "same_contract": 187,
+            "all_slots_busy": 3537
+          },
+          "scaled_cash_nav_delta_usdt": 3.598364219215e-05,
+          "normalized_vbt_initial_usdt": 1000.0
+        },
+        "short": {
+          "side": "short",
+          "slots": 5,
+          "capital_weight": 0.5555555555555556,
+          "initial_capital_usdt": 555.5555555555555,
+          "target_initial_slot_gross_usdt": 111.11111111111111,
+          "positions_funded": 691,
+          "minimum_scaled_position_notional_usdt": 38.14749790710916,
+          "numerical_zero_order_floor_usdt": 1e-08,
+          "unique_slots_used": 5,
+          "unquoted_position_hours": 0,
+          "admission_rejections": {
+            "same_contract": 319,
+            "all_slots_busy": 6318
+          },
+          "scaled_cash_nav_delta_usdt": 5.684341886080801e-13,
+          "normalized_vbt_initial_usdt": 1000.0
+        }
+      },
+      "development_gate_pass": false,
+      "checks_run": []
+    },
+    "long5_short4": {
+      "slots": {
+        "long": 5,
+        "short": 4
+      },
+      "initial_capital_usdt": {
+        "long": 555.5555555555555,
+        "short": 444.44444444444446
+      },
+      "combined": {
+        "positions_funded": 1428,
+        "long_positions": 831,
+        "short_positions": 597,
+        "initial_capital_usdt": 1000.0,
+        "final_cash_usdt": 12992.455112027073,
+        "final_synchronous_nav_usdt": 12992.455067392808,
+        "cash_nav_delta_usdt": 4.463426557776984e-05,
+        "hourly_marks": 59532
+      },
+      "sleeves": {
+        "long": {
+          "side": "long",
+          "slots": 5,
+          "capital_weight": 0.5555555555555556,
+          "initial_capital_usdt": 555.5555555555555,
+          "target_initial_slot_gross_usdt": 111.11111111111111,
+          "positions_funded": 831,
+          "minimum_scaled_position_notional_usdt": 86.68175048064923,
+          "numerical_zero_order_floor_usdt": 1e-08,
+          "unique_slots_used": 5,
+          "unquoted_position_hours": 0,
+          "admission_rejections": {
+            "same_contract": 234,
+            "all_slots_busy": 3387
+          },
+          "scaled_cash_nav_delta_usdt": 4.4634269215748645e-05,
+          "normalized_vbt_initial_usdt": 1000.0
+        },
+        "short": {
+          "side": "short",
+          "slots": 4,
+          "capital_weight": 0.4444444444444444,
+          "initial_capital_usdt": 444.4444444444444,
+          "target_initial_slot_gross_usdt": 111.11111111111111,
+          "positions_funded": 597,
+          "minimum_scaled_position_notional_usdt": 35.626543763846925,
+          "numerical_zero_order_floor_usdt": 1e-08,
+          "unique_slots_used": 4,
+          "unquoted_position_hours": 0,
+          "admission_rejections": {
+            "same_contract": 252,
+            "all_slots_busy": 6479
+          },
+          "scaled_cash_nav_delta_usdt": -2.8421709430404007e-13,
+          "normalized_vbt_initial_usdt": 1000.0
+        }
+      },
+      "development_gate_pass": false,
+      "checks_run": []
+    }
+  },
+  "linearity_assumptions": "Each account is run by the existing VectorBT wallet with 1000 normalized U and its side slot count. The position, cash-flow and mark outputs are scaled by slots/9 to produce the actual sleeve capital. Existing fills use continuous quantities, proportional maker/taker fees, no fixed fee, no exchange minimum amount, and no contract-lot rounding. The adapter's only numerical zero-order cutoff is 1e-8 normalized USDT; the builder fails closed if any funded scaled full position is too small to keep either child leg above it. Entry/exit order decisions and collateral ratios are otherwise invariant under this scale."
+}
