@@ -364,6 +364,75 @@ def _archive_bars(
     return result, source_receipts
 
 
+def _local_contract_bars(missing_by_symbol: Mapping[str, Set[int]]) -> Dict[str, Dict[int, dict]]:
+    """Aggregate receipt-listed OKX 15m ``volume`` (native contract ``vol``).
+
+    This bounded fallback exists for ICX/LRC, where the frozen account price
+    receipts point to historical OKX 15m CSVs but some monthly 1m archive
+    windows are incomplete. 48 adjacent confirmed 15m source rows are required
+    per 12H bar; no absolute amount is labeled as base-asset volume.
+    """
+    result: Dict[str, Dict[int, dict]] = {}
+    for symbol, wanted in missing_by_symbol.items():
+        if symbol not in {"ICX", "LRC"} or not wanted:
+            continue
+        receipt_path = ALLMARKET_INPUTS / symbol / "receipt.json"
+        if not receipt_path.is_file():
+            continue
+        try:
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            relative_paths = receipt.get("local_sources", {}).get("fifteen_minute_files", [])
+        except (OSError, json.JSONDecodeError, AttributeError):
+            continue
+        intervals = _merge_intervals(wanted)
+        values: Dict[int, float] = {}
+        source_paths: Dict[int, Set[str]] = {}
+        conflicts: Set[int] = set()
+        for relative in relative_paths:
+            path = Path(str(relative))
+            if not path.is_absolute():
+                path = ROOT / path
+            if not path.is_file():
+                continue
+            try:
+                frame = pd.read_csv(path, usecols=["ts", "volume"], float_precision="round_trip")
+                frame["ts"] = pd.to_numeric(frame["ts"], errors="raise").astype("int64")
+                frame["volume"] = pd.to_numeric(frame["volume"], errors="raise").astype("float64")
+            except (OSError, ValueError, KeyError, OverflowError):
+                continue
+            times = frame.ts.to_numpy(dtype="int64")
+            frame = frame.loc[_within_intervals(times, intervals)]
+            if (frame.ts % (15 * STEP_1M_MS)).any() or (frame.volume < 0).any() or not np.isfinite(frame.volume).all():
+                continue
+            label = _path_label(path)
+            for stamp, volume in frame[["ts", "volume"]].itertuples(index=False, name=None):
+                stamp, volume = int(stamp), float(volume)
+                prior = values.get(stamp)
+                if prior is not None and not _close(prior, volume):
+                    conflicts.add(stamp)
+                else:
+                    values[stamp] = volume
+                source_paths.setdefault(stamp, set()).add(label)
+
+        bars: Dict[int, dict] = {}
+        for stamp in wanted:
+            expected = np.arange(stamp, stamp + STEP_12H_MS, 15 * STEP_1M_MS, dtype="int64")
+            present = [int(t) in values for t in expected]
+            conflict = any(int(t) in conflicts for t in expected)
+            complete = len(expected) == 48 and all(present) and not conflict
+            used_paths = sorted({p for t in expected for p in source_paths.get(int(t), set())})
+            bars[int(stamp)] = {
+                "contract_volume": math.fsum(values[int(t)] for t in expected) if complete else None,
+                "confirmed": bool(complete),
+                "source": "OKX_frozen_15m_native_contract_vol",
+                "source_paths": used_paths,
+                "conflict": bool(conflict),
+                "bar_count": int(sum(present)),
+            }
+        result[symbol] = bars
+    return result
+
+
 def volume_features(
     parents: pd.DataFrame,
     source_map: Optional[Mapping[str, object]] = None,
@@ -410,6 +479,16 @@ def volume_features(
                     existing["conflict"] = True
                     existing["source_paths"].extend(archived.get("source_paths", []))
 
+    contract_needed: Dict[str, Set[int]] = {}
+    for row in frame.itertuples(index=False):
+        symbol = str(row.symbol)
+        if symbol not in {"ICX", "LRC"}:
+            continue
+        complete, _, _ = _native_window_status(event_windows[str(row.event_id)], combined.get(symbol, {}))
+        if not complete:
+            contract_needed.setdefault(symbol, set()).update(event_windows[str(row.event_id)])
+    contract_bars = _local_contract_bars(contract_needed)
+
     receipts_by_symbol = archive_receipts
     receipts_by_symbol_month = {
         symbol: {str(receipt.get("month")): receipt for receipt in receipts}
@@ -439,27 +518,60 @@ def volume_features(
         prior_complete = int(sum(np.isfinite(value) for value in prior_values))
         prior_median = np.nan
         relative = np.nan
+        unit = "base_asset"
+        current_base = current
+        prior_base_median = np.nan
+        generic_current = current
+        generic_prior_median = np.nan
+        selected_sources = set(sources)
+        missing_count = len(invalid) + len(conflicts)
         if conflicts:
             reason = "conflicting_native_or_archive_volume"
         elif invalid:
-            month_receipts = receipts_by_symbol_month.get(symbol, {})
-            relevant = [
-                month_receipts.get(month, {}).get("status")
-                for stamp in invalid
-                for month in _month_strings(stamp, stamp + STEP_12H_MS)
-            ]
-            if "official_404" in relevant:
-                reason = "official_archive_404_or_delisted_gap"
-            elif "not_cached" in relevant:
-                reason = "required_official_archive_month_not_cached"
-            elif "volume_fields_missing" in relevant:
-                reason = "archive_base_volume_field_missing"
-            elif "archive_read_error" in relevant or "invalid_archive_values" in relevant:
-                reason = "archive_read_or_value_error"
-            elif any(bars.get(t, {}).get("minute_count", 0) not in (0, 720) for t in invalid):
-                reason = "incomplete_or_unconfirmed_12h_archive_bar"
-            else:
-                reason = "missing_confirmed_native_or_archive_bar"
+            fallback = contract_bars.get(symbol, {})
+            contract_values = {
+                stamp: float(fallback[stamp]["contract_volume"])
+                for stamp in times
+                if stamp in fallback and fallback[stamp].get("confirmed")
+                and fallback[stamp].get("contract_volume") is not None
+                and not fallback[stamp].get("conflict")
+            }
+            contract_missing = [stamp for stamp in times if stamp not in contract_values]
+            if not contract_missing:
+                contract_prior = [contract_values[stamp] for stamp in times[:-1]]
+                contract_median = float(np.median(np.asarray(contract_prior, dtype="float64")))
+                if contract_median > 0:
+                    unit = "contracts"
+                    current_base = np.nan
+                    prior_base_median = np.nan
+                    generic_current = contract_values[key]
+                    generic_prior_median = contract_median
+                    relative = float(generic_current / generic_prior_median)
+                    prior_complete = 20
+                    missing_count = 0
+                    selected_sources = {str(fallback[t]["source"]) for t in times}
+                else:
+                    reason = "zero_prior20_median_volume"
+            if unit != "contracts":
+                reason = "incomplete_or_conflicting_contract_15m_fallback"
+                month_receipts = receipts_by_symbol_month.get(symbol, {})
+                relevant = [
+                    month_receipts.get(month, {}).get("status")
+                    for stamp in invalid
+                    for month in _month_strings(stamp, stamp + STEP_12H_MS)
+                ]
+                if "official_404" in relevant:
+                    reason = "official_archive_404_or_delisted_gap"
+                elif "not_cached" in relevant:
+                    reason = "required_official_archive_month_not_cached"
+                elif "volume_fields_missing" in relevant:
+                    reason = "archive_base_volume_field_missing"
+                elif "archive_read_error" in relevant or "invalid_archive_values" in relevant:
+                    reason = "archive_read_or_value_error"
+                elif any(bars.get(t, {}).get("minute_count", 0) not in (0, 720) for t in invalid):
+                    reason = "incomplete_or_unconfirmed_12h_archive_bar"
+                else:
+                    reason = "missing_confirmed_native_or_archive_bar"
         else:
             prior_array = np.asarray(prior_values, dtype="float64")
             prior_median = float(np.median(prior_array))
@@ -467,20 +579,26 @@ def volume_features(
                 reason = "zero_prior20_median_volume"
             else:
                 relative = float(current / prior_median)
-        source = "+".join(sorted(sources))
+                prior_base_median = prior_median
+                generic_prior_median = prior_median
+        if unit == "base_asset":
+            generic_current = current
+        source = "+".join(sorted(selected_sources))
         records.append({
             "event_id": event_id,
             "symbol": symbol,
             "key_open_ms": key,
-            "current_base_volume": current,
-            "prior20_median_base_volume": prior_median,
+            "current_base_volume": current_base,
+            "prior20_median_base_volume": prior_base_median,
+            "current_volume": generic_current,
+            "prior20_median_volume": generic_prior_median,
             "prior_complete_bars": prior_complete,
-            "missing_bar_count": len(invalid) + len(conflicts),
+            "missing_bar_count": missing_count,
             "relative_volume": relative,
             "relative_volume_missing": bool(reason),
             "volume_missing_reason": reason,
             "volume_source": source,
-            "volume_unit": "base_asset",
+            "volume_unit": unit,
             "source_map_present": None if source_map_symbols is None else symbol in source_map_symbols,
         })
     result = pd.DataFrame.from_records(records).set_index("event_id")
