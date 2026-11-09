@@ -1,0 +1,6 @@
+{
+  "question": "Does the 10-major cloud breakout, immediately or after a fixed 12H delay, retain high payoff and a drawdown below 50% after 5bp of added market slippage per fill?",
+  "single_variable": "Apply 5bp adverse slippage to every actual market entry and exit while retaining the OKX Lv1 taker fee of 5bp per fill, the fixed ten-coin native paths and shared nine-slot cash account.",
+  "fixed_cases": ["breakout_immediate", "breakout_delayed_12h", "reclaim_comparator"],
+  "period": "2020-01-24 through 2026-11-08 12:00 UTC exclusive, subject to each asset's native source history. Funding remains omitted."
+}
