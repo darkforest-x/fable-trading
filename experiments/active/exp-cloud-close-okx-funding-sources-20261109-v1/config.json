@@ -1,0 +1,45 @@
+{
+  "id": "exp-cloud-close-okx-funding-sources-20261109-v1",
+  "purpose": "Prepare and audit exact OKX native realized funding-rate and derivative mark-price H1 inputs for the frozen high-growth hourly-trim account. This is source coverage only: no wallet replay and no funding cash-flow estimate.",
+  "account_anchor": {
+    "strategy": "V1.7 target expires after one completed 12H interval; hourly 20% single-contract exposure cap; 9 slots; one original 2R partial and one original cloud runner",
+    "frozen_roster": "experiments/active/exp-cloud-close-hourly-trim-20261109-v1/funded_OKX.csv.gz",
+    "funded_parent_events": 1569,
+    "native_child_paths": 3138,
+    "initial_usdt": 1000.0,
+    "frozen_final_usdt": 68115.33865050803,
+    "funded_parent_cash_profit_usdt": 67115.33865050803
+  },
+  "exact_path": "Rebuild native children from cloud_close_target_expiry.time_in_force(cloud_close_thirds.okx_paths()), then restrict to the exact hourly-trim funded event_id roster. Do not reuse cloud_close_okx_funding_archives.funded_legs() as the exit-time source; it uses the older trend-input paths. Verified expected difference: 409 target-child exit times / 170 target-child phases, zero runner exit changes, unchanged 1911 instrument-month key union.",
+  "sources": {
+    "monthly_realized_rates": "Existing OKX per-instrument monthly funding-rate ZIP extracts under exp-cloud-close-okx-funding-archives-20261109-v1; raw files under data/research/cloud_close_okx_funding_20261109.",
+    "daily_realized_rates": "Official OKX GET /api/v5/public/market-data-history, module=3, instType=SWAP, instFamilyList=ANY, dateAggrType=daily. Download only daily allswap funding ZIPs needed to check frozen holding-window gaps. Preserve raw ZIPs in data/research/cloud_close_okx_funding_sources_20261109/allswap-daily.",
+    "recent_realized_rates": "Existing OKX GET /api/v5/public/funding-rate-history realizedRate supplement. Never use forecast fundingRate and never double-count monthly/daily/REST overlaps.",
+    "mark_price_h1": "Official OKX GET /api/v5/market/history-mark-price-candles with bar=1H. OHLC is derivative mark price, not last price or the underlying index. No index or spot candles may substitute."
+  },
+  "coverage_rules": {
+    "holding_window_ms": "entry_ms minus one minute through native exit_bar_ms plus one hour except open-phase exits, then plus one minute; same conservative source-bracketing convention as the prior audit.",
+    "source_gap_threshold": "8 hours plus 2 minutes; report gaps rather than imputing zero or forward-filling a rate.",
+    "overlap_policy": "Monthly per-contract rates remain authoritative. Daily allswap or recent REST rows may fill missing settlements only after instrument/time/rate reconciliation; do not add matching settlements twice.",
+    "funding_interval": "Use native funding_time timestamps; do not assume every instrument pays on a fixed 8-hour schedule.",
+    "mark_bars": "Retain UTC H1 bar-open milliseconds, open/high/low/close and confirmation state. Missing bars remain missing."
+  },
+  "raw_cache": "data/research/cloud_close_okx_funding_sources_20261109",
+  "outputs": [
+    "frozen_actual_legs.csv.gz",
+    "funding_source_gap_candidates.csv.gz",
+    "daily_funding_rates.csv.gz",
+    "daily_funding_receipts.csv.gz",
+    "merged_funding_rates.csv.gz",
+    "funding_coverage.csv.gz",
+    "funding_source_summary.json",
+    "mark_price_h1.csv.gz",
+    "mark_price_h1_receipts.csv.gz",
+    "mark_price_h1_summary.json"
+  ],
+  "limitations": [
+    "Source coverage does not establish a funding-adjusted account result.",
+    "Mark OHLC gives hourly bounds, not within-hour settlement ordering.",
+    "Funding marks, API availability and record timestamps are exchange-data evidence; exact cash attribution and a restarted 1000U account require a separate wallet implementation."
+  ]
+}
