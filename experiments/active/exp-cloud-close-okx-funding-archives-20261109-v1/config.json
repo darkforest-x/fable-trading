@@ -6,5 +6,6 @@
   "market_data_history": "https://www.okx.com/api/v5/public/market-data-history",
   "scope": "Both native runner and target legs of all frozen exp-cloud-close-tenth-sizing-20261109-v1 funded OKX parents. Retain published rates for each required local-calendar month. Endpoints padded by a minute solely for source visibility, not cash attribution. Boundaries between adjacent archived months may include a gap of almost eight hours.",
   "coverage": "Report archive status, rows and any observed internal settlement gap exceeding eight hours plus two minutes. Raw observations are preserved without inferring an interval or replacing missing values by zero. Record direct official archive HTTP 404 receipts irrespective of date and preserve null rates explicitly. No settlement marks or compounded PnL are estimated here.",
-  "raw_cache": "data/research/cloud_close_okx_funding_20261109"
+  "raw_cache": "data/research/cloud_close_okx_funding_20261109",
+  "recent_supplement": "For held 2026-11 contracts use native public funding-rate-history realizedRate (not predicted fundingRate), from local Nov 1 through the frozen strategy cutoff, with one preceding day for independently cross-checking the October archive. Record API pagination, gaps, exact timestamps, null rows and coverage separately."
 }
