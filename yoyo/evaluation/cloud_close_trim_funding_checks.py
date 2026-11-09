@@ -56,7 +56,7 @@ def verify_case(location):
     # Initial native output counted the number of child legs with trims; reconstruct actual executions.
     if not np.array_equal(counts,parents.trim_order_count):
         parents['trim_order_count'] = counts
-        engine._write_frame(location/'funded_positions.csv.gz',parents,index=False,compression={'method':'gzip','mtime':0})
+        engine._write_frame(location/'funded_positions.csv.gz',parents,index=False)
     periods = engine._period_summary(parents,eq)
     return dict(periods=periods,funding_usdt=float(cash.sum()),applied_child_payments=len(live),
                 trim_child_fills=len(trims),trim_parent_hours=len(trims.drop_duplicates(['event_id','hour_open_ms'])),
