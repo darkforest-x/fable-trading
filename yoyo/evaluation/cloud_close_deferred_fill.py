@@ -140,12 +140,20 @@ def run(context,label,slip,arm,model,levered,limits,signals):
         return dict(disabled_parent_hourly_parity=True,terminal=float(curve.nav.iloc[-1]),funded=len(funds))
     adds=fills.loc[fills.stage.eq(2)&fills.side.eq(0)].copy()
     checks=adds.groupby(['underlying_event_id','hour']).notional.sum().rename('actual_notional').reset_index()
-    for row in checks.itertuples():
-        eid=row.underlying_event_id
-        when=(row.hour-data['start'])//cash.H
-        slot=parents.at[eid,'slot']//4
-        if row.hour!=allowed.at[eid,'second_entry_ms'] or row.actual_notional>min(second[when,slot],*audit[when,slot])+1e-6:
-            raise ValueError('Actual second fill exceeds its clock, volume, remaining original plan, concentration or wallet limit')
+    eids=checks.underlying_event_id
+    when=((checks.hour-data['start'])//cash.H).to_numpy(dtype=int)
+    slot=(parents.loc[eids,'slot']//4).to_numpy(dtype=int)
+    checks['original_filled_usdt']=eids.map(initial)
+    checks['original_cap_usdt']=eids.map(caps)
+    checks['shadow_previous_net_usdt']=eids.map(allowed.previous_net_usdt)
+    checks['second_capacity_usdt']=second[when,slot]
+    for col,label in enumerate(['original_unfilled_usdt','spare_concentration_usdt','free_cash_notional_usdt']):
+        checks[label]=audit[when,slot,col]
+    constraints=checks[['second_capacity_usdt','original_unfilled_usdt','spare_concentration_usdt','free_cash_notional_usdt']]
+    if (not checks.hour.equals(eids.map(allowed.second_entry_ms)) or checks.underlying_event_id.duplicated().any()
+            or not np.allclose(checks.original_filled_usdt,checks.original_cap_usdt,rtol=1e-8,atol=1e-6)
+            or not (checks.actual_notional<=constraints.min(axis=1)+1e-6).all()):
+        raise ValueError('Second fill fails original cap hit, clock, budget or capacity reconciliation')
     checks.to_csv(EXP/f'additions_{name}.csv.gz',index=False)
     funds.to_csv(EXP/f'funded_{name}.csv.gz')
     curve.to_csv(EXP/f'hourly_{name}.csv.gz',index_label='hour_end_utc')
