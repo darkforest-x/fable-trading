@@ -156,7 +156,7 @@ def receipts(pf, data, model, multiple, *, fill_sink=None):
 
 
 def build_portfolio(data,model,native_open,previous_close,directions,multiple,slip,*,caps=None,entry_limits=None,
-                    order_func=trade,extra_order_args=(),extra_order_count=0):
+                    order_func=trade,extra_order_args=(),extra_order_count=0,child_weights=WEIGHTS):
     """Run four-stage native account orders with the supplied underlying quantities."""
     hours,cols = len(data['actions'])//3,data['actions'].shape[1]
     def expand(field):
@@ -164,6 +164,10 @@ def build_portfolio(data,model,native_open,previous_close,directions,multiple,sl
     actions = expand('actions')
     actions[2::4] = 0
     trim = np.zeros(cols//4)
+    weights = np.asarray(child_weights, dtype=float)
+    if (weights.shape != (4,) or not np.isfinite(weights).all() or (weights <= 0).any()
+            or not np.isclose(weights.sum(), 1., rtol=0., atol=1e-12)):
+        raise ValueError('Four positive child weights must sum to one')
     if caps is None:
         caps = np.array([[.2]])
     elif caps.shape!=previous_close.shape or not ((caps>0)&(caps<=1)).all():
@@ -173,7 +177,7 @@ def build_portfolio(data,model,native_open,previous_close,directions,multiple,sl
     elif entry_limits.shape!=previous_close.shape or np.isnan(entry_limits).any() or (entry_limits<0).any():
         raise ValueError('Each opening limit must be nonnegative, in real underlying quote notional')
     portfolio = wallet.vbt.Portfolio.from_order_func(expand('marks'),order_func,actions,expand('prices'),expand('fees'),
-        np.zeros(1),WEIGHTS,np.ones((1,1)),trim,native_open,directions,multiple,slip,entry_limits,*extra_order_args,
+        np.zeros(1),weights,np.ones((1,1)),trim,native_open,directions,multiple,slip,entry_limits,*extra_order_args,
         pre_segment_func_nb=mark_and_cap,pre_segment_args=(multiple,previous_close,np.full(cols//4,-1.),trim,caps),
         cash_sharing=True,group_by=True,init_cash=1000.,fill_pos_record=False,
         max_orders=int(np.count_nonzero(actions)+4*np.count_nonzero(previous_close)+1+extra_order_count))
