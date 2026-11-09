@@ -7,6 +7,7 @@ import re
 import zipfile
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
+from urllib.parse import quote
 
 import numpy as np
 import pandas as pd
@@ -136,8 +137,10 @@ def prepare_supplemental_history():
         frames, month_receipts = [], []
         for month in expected_months:
             key = keys_by_month[month]
-            status = fetch(SUPPLEMENTAL_CACHE, 'monthly_1h', ticker, f'https://data.binance.vision/{key}')[2]
-            raw_path = SUPPLEMENTAL_CACHE/'monthly_1h'/ticker/Path(key).name
+            encoded_key = quote(key,safe='/')
+            url = f'https://data.binance.vision/{encoded_key}'
+            status = fetch(SUPPLEMENTAL_CACHE, 'monthly_1h', ticker, url)[2]
+            raw_path = SUPPLEMENTAL_CACHE/'monthly_1h'/ticker/Path(url).name
             if status not in ('fetched','cached') or not raw_path.is_file():
                 raise IOError(f'Official Binance monthly 1h history unavailable for {ticker} {month}: {status}')
             part = _monthly_prices(raw_path)
