@@ -15,6 +15,51 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-rotation-entry-low-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "6d8c51c81a"
+    status: "rejected"
+    question: "12H收盘跌破进场K低点能否保护轮动账户"
+    single_variable: "同一领涨币持仓内收盘跌破进场K低点时，退出至原领涨币换手；对照延后12H。"
+    result: "66次触发，即时退出10180U、回撤上界74.99%；延后16185U、72.95%；原54329U、77.13%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-rotation-entry-low-20261109-v1/summary.json"
+    notes: "No entry changes and same ten named survivors. Notion 41388564-79af-8123-aba4-e2d44dd743a8."
+
+  - experiment_id: exp-cloud-close-rotation-cash-reserve-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "82be3b2d29"
+    status: "inconclusive"
+    question: "落袋保留历次平仓最高净值一半能否保住收益"
+    single_variable: "固定轮动信号，每次开仓仅用超出历次已实现最高净值一半的资金，并与固定半仓、原满仓对照。"
+    result: "原满仓54329U/77.13%，按当时净值半仓14688U/51.71%，永久保留最高已实现净值一半9196U/45.18%，其中5853U已保留。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-rotation-cash-reserve-20261109-v1/summary.json"
+    notes: "Funded cash remains in the ledger. Intratrade marks count toward drawdown. Notion 41388564-79af-812d-82d7-c821c3ceb3f2."
+
+  - experiment_id: exp-cloud-close-vol-cut-timing-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "1e7af14505"
+    status: "inconclusive"
+    question: "控制减仓次数后期权波动率信号时点还有多少价值"
+    single_variable: "每次原波动率剪仓生成一个名额，延后至少12小时或30日用于下一笔合格2倍仓。"
+    result: "同步106次40991U/38.44%；至少迟12H同106次39789U/39.39%；至少迟30日实际98次42604U/42.11%，余8未使用。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-vol-cut-timing-20261109-v1/summary.json"
+    notes: "Both the timing and common sample are causal. Thirty-day arm runs out of future eligible original positions for eight cuts. Notion 41388564-79af-8101-a650-d885424bdb6d."
+
   - experiment_id: exp-cloud-close-relative-cloud-leaders-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "c635873cdf"
