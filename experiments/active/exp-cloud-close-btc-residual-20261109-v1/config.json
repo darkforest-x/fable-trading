@@ -1,0 +1,6 @@
+{
+  "id": "exp-cloud-close-btc-residual-20261109-v1",
+  "hypothesis": "A V1.7 reclaim may have better follow-through when its own directional return on the confirmed 12H candle exceeds the return explained by its historical BTC sensitivity.",
+  "single_variable": "Gate each native 12H signal on strictly positive side-adjusted asset log(open to close return) minus trailing beta times BTC log(open to close return). Estimate beta as covariance/variance from 180 contiguous paired close-to-close returns (90 days) strictly before the candidate candle. No fitted return intercept, asset thresholds, outcomes or cross-sectional ranking. BTC itself has zero residual. A tolerance of 1e-12 suppresses roundoff. Report an identical-history control wallet.",
+  "account": "Fixed high-growth OKX twelve-hour target-expiry account with 20% marked-weight trimming (exp-cloud-close-weight-trim-20261109-v1). Start 1000U, nine slots with proportional cash locking, 2/3 resting 2R only for the first 12 hours and native runner thereafter. All fills pay 5bp taker or 2bp maker as in the baseline. Funding, impact and tradable-lot rounding are excluded. If the filtered portfolio exceeds all-history and development risk/win/payoff thresholds and improves development wealth, matched timing controls and second-market transfer follow separately."
+}
