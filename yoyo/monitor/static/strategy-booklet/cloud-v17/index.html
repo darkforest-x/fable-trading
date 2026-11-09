@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f8f9fb"><title>云带 v1.7 · 12H 逆向｜策略小册</title>
+<link rel="stylesheet" href="book.css"><script type="module" src="book.js"></script></head>
+<body>
+<header class="mast"><div class="wrap identity"><a class="brand" href="/#signals?pane=reclaim" aria-label="返回模拟盘">SPIKE</a>
+<h1>云带 v1.7 <span>· 12H 逆向</span></h1><a class="return" href="/#signals?pane=reclaim">返回模拟盘 ↗</a></div>
+<nav class="wrap" aria-label="小册章节"><a href="#overview">概览</a><a href="#rules">交易规则</a><a href="#history">历史开仓图</a><a href="#forward">前向账户</a></nav></header>
+<main class="wrap">
+<section id="overview" data-chapter>
+<div class="kicker">OKX USDT 永续 <i>／</i> 12H 收盘确认 <i>／</i> 1.5 倍仓位</div>
+<p class="lead">顺个币趋势，等价格刺穿周一轨道后收回。ETH 相对 BTC 走弱时只做多，走强时只做空。</p>
+<div class="metrics" id="historical-metrics" aria-live="polite"></div>
+<figure class="panel figure"><div class="bar"><h2>历史资金路径与回撤</h2><a href="equity.png" target="_blank" rel="noopener">查看原图 ↗</a></div>
+<img src="equity.png" width="1800" height="982" alt="历史账户从 1,000U 到 147,590U，2024 年账面回撤最大，为 57.83%。">
+<figcaption>上图为小时收盘净值，对数轴。下图取每小时可重建阶段中的最深回撤。阴影从 2024 年 3 月前高延续到 12 月收复前高。</figcaption></figure>
+<div class="twocol"><article class="panel"><h2>收益靠哪些交易</h2>
+<p>每赚一笔平均 <b>+1,873.47U</b>，每亏一笔平均 <b>−349.98U</b>。最大的十笔合计贡献净利润的 120.15%，其余交易合计亏损。</p>
+<div class="linklist"><a href="#history?trade=cloud-v17-001082">BEAT 多单 · 翻倍后如何减仓 <b>+55,392.05U ↗</b></a>
+<a href="#history?trade=cloud-v17-000643">CFX 空单 · 2R 与余仓分开退出 <b>+864.55U ↗</b></a>
+<a href="#history?trade=cloud-v17-000251">TRX 多单 · 信号成立仍触发止损 <b class="red">−123.02U ↗</b></a></div></article>
+<article class="panel"><h2>最难熬的一段</h2><p>约 <b>264 天</b>才收复前高。净值从 79,519U 跌到 33,534U，账面最大回撤 57.83%，超过设定的 50% 上限。按小时高低值估计，回撤上界为 58.54%。</p>
+<p>若每次市价成交再付出 0.05% 滑点，终值降至 123,004U，回撤上界升至 59.55%。历史测算未计资金费和盘口容量。</p></article></div>
+<article class="panel"><div class="bar"><h2>逐年资金</h2><span>UTC 年界 · USDT</span></div><div id="years"></div></article>
+<footer><a href="funded.csv" download>下载资金账本 CSV</a><a href="handbook.md" download>下载文字小册</a><a href="https://app.notion.com/p/4138856479af81d2b289cc95c681fa84" target="_blank" rel="noopener">原始实验记录 ↗</a></footer>
+</section>
+<section id="rules" data-chapter hidden><div class="bar heading"><h2>交易规则</h2><a href="handbook.md" download>下载文字版</a></div><article class="panel prose" id="rule-text">正在载入规则…</article></section>
+<section id="history" data-chapter hidden>
+<div class="bar heading"><div><h2>历史开仓图</h2><p>一笔资金单，一张 12H 图。日期按北京时间筛选。</p></div><a href="cloud-v17-charts.zip" download>下载全部图 ZIP ↓</a></div>
+<form id="filters" class="filters" role="search"><label>搜索币种<input name="query" type="search" placeholder="例如 ETH、CFX" autocomplete="off"></label>
+<label>方向<select name="side"><option value="">全部</option><option value="1">做多</option><option value="-1">做空</option></select></label>
+<label>结果<select name="outcome"><option value="">全部</option><option value="win">盈利</option><option value="loss">亏损</option></select></label>
+<label>开仓起日<input name="from" type="date"></label><label>开仓止日<input name="until" type="date"></label>
+<label>排序<select name="order"><option value="recent">最新开仓</option><option value="early">最早开仓</option><option value="profit">盈利最多</option><option value="loss">亏损最多</option></select></label>
+<button type="reset">清除</button></form>
+<p id="gallery-state" role="status">正在读取交易目录…</p>
+<article id="trade" class="panel trade" hidden></article>
+<div class="panel" id="list-panel" hidden><div class="bar"><h3>交易目录</h3><div id="pages" class="pager"></div></div><div id="list"></div></div></section>
+<section id="forward" data-chapter hidden><div class="bar heading"><div><h2>前向账户</h2><p>live-cloud-v17 · 本地独立模拟账本</p></div><button id="refresh" type="button">刷新</button></div><div id="forward-body" aria-live="polite">正在读取账户…</div></section>
+<noscript>请启用 JavaScript 浏览交易，也可以<a href="handbook.md">阅读文字小册</a>或<a href="cloud-v17-charts.zip">下载所有开仓图</a>。</noscript>
+</main></body></html>

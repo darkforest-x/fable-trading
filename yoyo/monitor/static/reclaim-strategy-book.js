@@ -9,8 +9,8 @@
 (() => {
   'use strict';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const BREADTH='breadth-ema20',LIVE_BREADTH='live-breadth';
-  const label=t=>({60:'60m',5:'5m',[BREADTH]:'全市场下轨反弹'}[t]||t);
+  const BREADTH='breadth-ema20',LIVE_BREADTH='live-breadth',CLOUD='live-cloud-v17';
+  const label=t=>({60:'60m',5:'5m',[BREADTH]:'全市场下轨反弹',[CLOUD]:'云带 v1.7 · 12H 逆向'}[t]||t);
   // Stitch 1e1df06e25b64257b3f0de741e8f8c81: independent pre-touch account.
   const TITLES={'live-breadth':'全市场宽度信号 · SOL 计资金','live-wick6x3':'插针收盘 · 6份3倍','live-wick6x3mid':'浅穿中点 · 6份3倍','live-wick3x3':'插针收盘 · 3份3倍','live-wick6x3hi':'插针收盘 · 6份3倍 · 高分加仓','live-wick3x3far':'插针收盘 · 3份3倍 · 离1.618≥1.5%','live-allin3':'触价前评分 · 模拟运行',60:'等待回收',5:'快速确认',v3:'分数决定目标',v3add:'逆向分步加仓',spike:'排列过滤插针',v3lock:'回收后锁住利润',allin3:'单仓 · 梭哈3倍',v3add20:'20份动态保证金 · 3倍加仓'};
   // Existing account picker and book, Stitch 1caa5938d14240e6b8e95e0436d44c5e.
@@ -57,7 +57,7 @@
     const sign=value>0?'+':value<0?'−':'',amount=Math.abs(value);
     return {text:sign+(amount>0&&amount<.005?'<0.01':amount.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})),tone:value>0?'rp-positive':value<0?'rp-negative':'',title:'已实现净盈亏 · USDT · 不含浮盈亏和补充本金'};
   }
-  function pickerHTML(tracks){return tracks.map(t=>`<div class="rs-account-row" data-account-row="${esc(t)}"><button type="button" data-account-drag="${esc(t)}" aria-label="拖动调整 ${esc(label(t))} 顺序" aria-description="拖动排序或移入移出常用；Alt 加上下键排序，Alt 加左键移入常用、右键收入更多" title="拖动排序或移入移出常用 · Alt + ↑/↓ 排序 · Alt + ←/→ 分组"><svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" aria-hidden="true"><circle cx="4" cy="5" r="1.2"/><circle cx="10" cy="5" r="1.2"/><circle cx="4" cy="10" r="1.2"/><circle cx="10" cy="10" r="1.2"/><circle cx="4" cy="15" r="1.2"/><circle cx="10" cy="15" r="1.2"/></svg></button><button type="button" data-strategy-select="${esc(t)}" aria-pressed="false"><span>${esc(label(t))}${t===LIVE_BREADTH?'<em class="rs-account-tag">宽度·SOL</em>':t==='live-wick6x3mid'?'<em class="rs-account-tag">浅穿中点</em>':''}</span>${t===BREADTH?'<small title="查看前向模拟账户">模拟</small>':`<strong data-account-pnl="${esc(t)}">—</strong>`}<i aria-hidden="true">✓</i></button><button type="button" data-strategy-book="${esc(t)}" aria-label="查看 ${esc(label(t))} 策略小册" title="策略小册">${BOOK}</button><button type="button" data-strategy-backtest="${esc(t)}" aria-label="查看 ${esc(label(t))} 回测交易" title="回测交易">${BACKTEST}</button></div>`).join('');}
+  function pickerHTML(tracks){return tracks.map(t=>`<div class="rs-account-row" data-account-row="${esc(t)}"><button type="button" data-account-drag="${esc(t)}" aria-label="拖动调整 ${esc(label(t))} 顺序" aria-description="拖动排序或移入移出常用；Alt 加上下键排序，Alt 加左键移入常用、右键收入更多" title="拖动排序或移入移出常用 · Alt + ↑/↓ 排序 · Alt + ←/→ 分组"><svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" aria-hidden="true"><circle cx="4" cy="5" r="1.2"/><circle cx="10" cy="5" r="1.2"/><circle cx="4" cy="10" r="1.2"/><circle cx="10" cy="10" r="1.2"/><circle cx="4" cy="15" r="1.2"/><circle cx="10" cy="15" r="1.2"/></svg></button><button type="button" data-strategy-select="${esc(t)}" aria-pressed="false"><span>${esc(label(t))}${t===LIVE_BREADTH?'<em class="rs-account-tag">宽度·SOL</em>':t==='live-wick6x3mid'?'<em class="rs-account-tag">浅穿中点</em>':''}</span>${(t===BREADTH||t===CLOUD)?'<small title="查看前向模拟账户">模拟</small>':`<strong data-account-pnl="${esc(t)}">—</strong>`}<i aria-hidden="true">✓</i></button><button type="button" data-strategy-book="${esc(t)}" aria-label="查看 ${esc(label(t))} 策略小册" title="策略小册">${BOOK}</button><button type="button" data-strategy-backtest="${esc(t)}" aria-label="查看 ${esc(label(t))} 回测交易" title="回测交易">${BACKTEST}</button></div>`).join('');}
   function tableHTML(headers,rows){return `<div class="rs-table-wrap"><table><thead><tr>${headers.map(h=>`<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map((v,i)=>i?`<td>${typeof v==='number'?num(v):esc(v??'—')}</td>`:`<th scope="row">${esc(v)}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;}
   const historyDate=ms=>new Date(ms).toISOString().slice(0,10);
   function validateHistory(h,track){
@@ -217,7 +217,7 @@
     const trigger=root.querySelector('[data-rp="track"]');
     let storage;try{storage=window.localStorage;}catch{}
     const stored=key=>{try{return JSON.parse(storage?.getItem(key)||'null');}catch{return null;}};
-    const catalog=[...tracks,BREADTH];
+    const catalog=[...tracks,BREADTH,CLOUD];
     let layout=accountLayout(stored(LAYOUT_KEY),catalog,stored(ORDER_KEY)),drag=null,dragFrame=0,blockedUntil=0;
     const picker=document.createElement('div');picker.id='rs-account-picker';picker.className='rs-account-picker';picker.setAttribute('popover','auto');picker.setAttribute('role','dialog');picker.setAttribute('aria-label','策略');
     picker.innerHTML='<header><b>策略</b><small>已实现盈亏 · USDT</small></header><div class="rs-account-list"><div class="rs-group-title">常用策略 <span data-main-count></span></div><div class="rs-account-group" data-account-group="main" aria-label="常用策略">'+pickerHTML(layout.main)+'</div><button type="button" class="rs-more-toggle" data-account-more aria-expanded="false" aria-controls="rs-more-accounts"><span>更多策略</span><span class="rs-group-count" data-more-count></span><small data-more-current></small><span class="rs-more-chevron" aria-hidden="true">⌄</span></button><div id="rs-more-accounts" class="rs-account-group rs-more-accounts" data-account-group="more" aria-label="更多策略" hidden>'+pickerHTML(layout.more)+'</div></div><p class="rs-order-status" role="status">拖动把手排序或移入常用</p>';root.append(picker);
@@ -405,7 +405,13 @@
         (target===moreToggle?target:target.querySelectorAll('button')[Math.max(0,column)]).focus();
       }
     });
-    picker.addEventListener('click',event=>{if(event.detail!==0&&Date.now()<blockedUntil){event.preventDefault();event.stopPropagation();return;}const b=event.target.closest('button');if(!b)return;if(b.hasAttribute('data-account-more')){setMore(groups.more.hidden);return;}if(b.dataset.strategySelect===BREADTH){picker.hidePopover();show(BREADTH);return;}if(b.dataset.strategySelect){onSelect(b.dataset.strategySelect);sync();picker.hidePopover();trigger.focus({preventScroll:true});}if(b.dataset.strategyBook){picker.hidePopover();show(b.dataset.strategyBook);}if(b.dataset.strategyBacktest){picker.hidePopover();if(b.dataset.strategyBacktest===BREADTH)openBreadthReplay({});else onBacktest?.(b.dataset.strategyBacktest);}});
+    picker.addEventListener('click',event=>{if(event.detail!==0&&Date.now()<blockedUntil){event.preventDefault();event.stopPropagation();return;}const b=event.target.closest('button');if(!b)return;if(b.hasAttribute('data-account-more')){setMore(groups.more.hidden);return;}if([b.dataset.strategySelect,b.dataset.strategyBook,b.dataset.strategyBacktest].includes(CLOUD)){
+        picker.hidePopover();
+        const chapter=b.dataset.strategySelect?'forward':b.dataset.strategyBacktest?'history':'overview';
+        location.assign('/static/strategy-booklet/cloud-v17/index.html#'+chapter);
+        return;
+      }
+      if(b.dataset.strategySelect===BREADTH){picker.hidePopover();show(BREADTH);return;}if(b.dataset.strategySelect){onSelect(b.dataset.strategySelect);sync();picker.hidePopover();trigger.focus({preventScroll:true});}if(b.dataset.strategyBook){picker.hidePopover();show(b.dataset.strategyBook);}if(b.dataset.strategyBacktest){picker.hidePopover();if(b.dataset.strategyBacktest===BREADTH)openBreadthReplay({});else onBacktest?.(b.dataset.strategyBacktest);}});
     function stopCharts(){chartObserver.disconnect();visibleCharts.clear();for(const frame of [chartFrame,resizeFrame,zoomFrame])cancelAnimationFrame(frame);chartFrame=resizeFrame=zoomFrame=null;bars.forEach(c=>c?.dispose());bars=[];barPaintKeys=[];line?.dispose();line=null;forwardPaintData=null;historyChart?.dispose();historyChart=null;historyPaintKey='';}
     function close(immediate=false){
       closeCalendar();
