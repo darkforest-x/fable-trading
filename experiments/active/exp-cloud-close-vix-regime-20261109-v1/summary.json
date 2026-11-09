@@ -1,0 +1,1073 @@
+{
+  "parent_slots": 9,
+  "eligible": 12442,
+  "liquid_eligible": 12284,
+  "arms": {
+    "covered": {
+      "cases": {
+        "fees": {
+          "metrics": {
+            "all": {
+              "final_usdt": 51957.209636755935,
+              "multiple": 51.957209636755934,
+              "dd_mark_pct": 40.901713064931066,
+              "dd_bound_pct": 42.36000101948575,
+              "trades": 1593,
+              "win_pct": 21.40615191462649,
+              "payoff": 6.989828319557846,
+              "payoff_usdt": 6.363862459157285,
+              "median_net_pct": -3.4275635208110176
+            },
+            "dev": {
+              "final_usdt": 36587.82694575576,
+              "multiple": 36.587826945755765,
+              "dd_mark_pct": 40.901713064931066,
+              "dd_bound_pct": 42.36000101948575,
+              "trades": 1094,
+              "win_pct": 21.937842778793417,
+              "payoff": 7.721302960397587,
+              "payoff_usdt": 6.062076544150207,
+              "median_net_pct": -3.431877391622323
+            },
+            "2025": {
+              "final_usdt": 49704.99295621701,
+              "multiple": 1.3585117539204623,
+              "dd_mark_pct": 29.925353221974582,
+              "dd_bound_pct": 30.605549038004433,
+              "trades": 267,
+              "win_pct": 15.730337078651685,
+              "payoff": 5.352357736924388,
+              "payoff_usdt": 6.4378397231084685,
+              "median_net_pct": -3.5140687446940557
+            },
+            "2026": {
+              "final_usdt": 51957.209636755935,
+              "multiple": 1.0453116788995989,
+              "dd_mark_pct": 12.029009831483561,
+              "dd_bound_pct": 12.454121920809557,
+              "trades": 214,
+              "win_pct": 21.962616822429908,
+              "payoff": 4.280736018454933,
+              "payoff_usdt": 6.7483509628022444,
+              "median_net_pct": -3.1717017973543613
+            }
+          },
+          "margin": {
+            "1.0": {
+              "positions_audited": 859,
+              "maintenance_boundary_hits": 0,
+              "negative_equity_positions": 0,
+              "unquoted_position_hours": 0,
+              "worst_margin_buffer_per_margin": 0.4900515811301193,
+              "worst_remaining_equity_per_margin": 0.5445876101607051,
+              "valid": true,
+              "checked_hours": [],
+              "all_flags_resolved": true
+            },
+            "2.0": {
+              "positions_audited": 734,
+              "maintenance_boundary_hits": 2,
+              "negative_equity_positions": 2,
+              "unquoted_position_hours": 0,
+              "worst_margin_buffer_per_margin": -1.730458712780108,
+              "worst_remaining_equity_per_margin": -1.3007032640949552,
+              "valid": false,
+              "checked_hours": [
+                {
+                  "event_id": "signal-row-07824:signal",
+                  "symbol": "LTC",
+                  "side": 1,
+                  "multiple": 2.0,
+                  "market_slip": 0.0,
+                  "entry_price": 116.83,
+                  "exit_price": 111.813452,
+                  "threshold": 65.00657587548638,
+                  "hour": 1760130000000,
+                  "exit_hour": true,
+                  "exit_reason": "stop",
+                  "phase": "intrabar",
+                  "status": "stop_strictly_earlier",
+                  "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251011/LTC-USDT-SWAP-candlesticks-2025-10-11.zip",
+                  "stop_minute": 14,
+                  "trade_boundary_minute": 20,
+                  "mark_boundary_minute": 20,
+                  "preceding_trade_close": 118.06,
+                  "stop_minute_open": 118.05,
+                  "stop_minute_trade_low": 110.38,
+                  "stop_minute_mark_low": 110.67,
+                  "stop_minute_trade_high": 118.47,
+                  "stop_minute_mark_high": 118.36,
+                  "full_hour_mark_low": 51.44,
+                  "full_hour_mark_high": 123.31
+                },
+                {
+                  "event_id": "signal-row-08041:signal",
+                  "symbol": "MOODENG",
+                  "side": -1,
+                  "multiple": 2.0,
+                  "market_slip": 0.0,
+                  "entry_price": 0.09773,
+                  "exit_price": 0.1069422838,
+                  "threshold": 0.13316323034984098,
+                  "hour": 1765054800000,
+                  "exit_hour": true,
+                  "exit_reason": "stop",
+                  "phase": "intrabar",
+                  "status": "stop_strictly_earlier",
+                  "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251207/MOODENG-USDT-SWAP-candlesticks-2025-12-07.zip",
+                  "stop_minute": 4,
+                  "trade_boundary_minute": 5,
+                  "mark_boundary_minute": 5,
+                  "preceding_trade_close": 0.09283,
+                  "stop_minute_open": 0.09296,
+                  "stop_minute_trade_low": 0.09199,
+                  "stop_minute_mark_low": 0.09223,
+                  "stop_minute_trade_high": 0.10998,
+                  "stop_minute_mark_high": 0.10964,
+                  "full_hour_mark_low": 0.07259,
+                  "full_hour_mark_high": 0.20693
+                }
+              ],
+              "all_flags_resolved": true
+            }
+          },
+          "trim_fills": 8120
+        },
+        "stress": {
+          "metrics": {
+            "all": {
+              "final_usdt": 45904.17888711962,
+              "multiple": 45.90417888711962,
+              "dd_mark_pct": 41.20938620180308,
+              "dd_bound_pct": 42.664350288159,
+              "trades": 1593,
+              "win_pct": 21.155053358443187,
+              "payoff": 6.877831607514425,
+              "payoff_usdt": 6.17829788000376,
+              "median_net_pct": -3.53099279897089
+            },
+            "dev": {
+              "final_usdt": 33536.22603482079,
+              "multiple": 33.53622603482079,
+              "dd_mark_pct": 41.20938620180308,
+              "dd_bound_pct": 42.664350288159,
+              "trades": 1094,
+              "win_pct": 21.572212065813527,
+              "payoff": 7.652408548349779,
+              "payoff_usdt": 5.99638388614452,
+              "median_net_pct": -3.5323377465779515
+            },
+            "2025": {
+              "final_usdt": 44264.88486379043,
+              "multiple": 1.3199125273616068,
+              "dd_mark_pct": 31.29841902045457,
+              "dd_bound_pct": 32.00273776198198,
+              "trades": 267,
+              "win_pct": 15.730337078651685,
+              "payoff": 5.156067183490457,
+              "payoff_usdt": 6.092173998449891,
+              "median_net_pct": -3.612458498710369
+            },
+            "2026": {
+              "final_usdt": 45904.17888711962,
+              "multiple": 1.037033735168939,
+              "dd_mark_pct": 12.836807240110348,
+              "dd_bound_pct": 13.26376281636662,
+              "trades": 214,
+              "win_pct": 21.962616822429908,
+              "payoff": 4.141909894589186,
+              "payoff_usdt": 6.3602950686324,
+              "median_net_pct": -3.2729163006769273
+            }
+          },
+          "margin": {
+            "1.0": {
+              "positions_audited": 859,
+              "maintenance_boundary_hits": 0,
+              "negative_equity_positions": 0,
+              "unquoted_position_hours": 0,
+              "worst_margin_buffer_per_margin": 0.489278787325039,
+              "worst_remaining_equity_per_margin": 0.5438148163556248,
+              "valid": true,
+              "checked_hours": [],
+              "all_flags_resolved": true
+            },
+            "2.0": {
+              "positions_audited": 734,
+              "maintenance_boundary_hits": 2,
+              "negative_equity_positions": 2,
+              "unquoted_position_hours": 0,
+              "worst_margin_buffer_per_margin": -1.7336080644121552,
+              "worst_remaining_equity_per_margin": -1.3038526157270023,
+              "valid": false,
+              "checked_hours": [
+                {
+                  "event_id": "signal-row-07824:signal",
+                  "symbol": "LTC",
+                  "side": 1,
+                  "multiple": 2.0,
+                  "market_slip": 0.0005,
+                  "entry_price": 116.83,
+                  "exit_price": 111.813452,
+                  "threshold": 65.10410203156052,
+                  "hour": 1760130000000,
+                  "exit_hour": true,
+                  "exit_reason": "stop",
+                  "phase": "intrabar",
+                  "status": "stop_strictly_earlier",
+                  "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251011/LTC-USDT-SWAP-candlesticks-2025-10-11.zip",
+                  "stop_minute": 14,
+                  "trade_boundary_minute": 20,
+                  "mark_boundary_minute": 20,
+                  "preceding_trade_close": 118.06,
+                  "stop_minute_open": 118.05,
+                  "stop_minute_trade_low": 110.38,
+                  "stop_minute_mark_low": 110.67,
+                  "stop_minute_trade_high": 118.47,
+                  "stop_minute_mark_high": 118.36,
+                  "full_hour_mark_low": 51.44,
+                  "full_hour_mark_high": 123.31
+                },
+                {
+                  "event_id": "signal-row-08041:signal",
+                  "symbol": "MOODENG",
+                  "side": -1,
+                  "multiple": 2.0,
+                  "market_slip": 0.0005,
+                  "entry_price": 0.09773,
+                  "exit_price": 0.1069422838,
+                  "threshold": 0.13305232384489266,
+                  "hour": 1765054800000,
+                  "exit_hour": true,
+                  "exit_reason": "stop",
+                  "phase": "intrabar",
+                  "status": "stop_strictly_earlier",
+                  "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251207/MOODENG-USDT-SWAP-candlesticks-2025-12-07.zip",
+                  "stop_minute": 4,
+                  "trade_boundary_minute": 5,
+                  "mark_boundary_minute": 5,
+                  "preceding_trade_close": 0.09283,
+                  "stop_minute_open": 0.09296,
+                  "stop_minute_trade_low": 0.09199,
+                  "stop_minute_mark_low": 0.09223,
+                  "stop_minute_trade_high": 0.10998,
+                  "stop_minute_mark_high": 0.10964,
+                  "full_hour_mark_low": 0.07259,
+                  "full_hour_mark_high": 0.20693
+                }
+              ],
+              "all_flags_resolved": true
+            }
+          },
+          "trim_fills": 8340
+        }
+      },
+      "eligible_count": 12284,
+      "signals": 1593,
+      "overlap": 1593,
+      "symbols": 223,
+      "skips": {
+        "same_contract": 723,
+        "all_slots_busy": 9968
+      },
+      "settlement": {
+        "ARC": {
+          "mean_index": 0.019757000000000004,
+          "legs": 2
+        },
+        "CATI": {
+          "mean_index": 0.05919699999999999,
+          "legs": 2
+        },
+        "CETUS": {
+          "mean_index": 0.023350499999999996,
+          "legs": 2
+        },
+        "TREE": {
+          "mean_index": 0.10789450000000002,
+          "legs": 2
+        }
+      },
+      "missing_holding_hours": 0,
+      "gap_events": 0
+    },
+    "aligned": {
+      "cases": {
+        "fees": {
+          "metrics": {
+            "all": {
+              "final_usdt": 44830.66995653535,
+              "multiple": 44.830669956535345,
+              "dd_mark_pct": 39.94519921461747,
+              "dd_bound_pct": 40.90166084533142,
+              "trades": 1259,
+              "win_pct": 24.463860206513104,
+              "payoff": 5.833618670174847,
+              "payoff_usdt": 6.632352389888159,
+              "median_net_pct": -3.4620937683786566
+            },
+            "dev": {
+              "final_usdt": 22214.908167048423,
+              "multiple": 22.214908167048424,
+              "dd_mark_pct": 39.94519921461747,
+              "dd_bound_pct": 40.90166084533142,
+              "trades": 816,
+              "win_pct": 25.122549019607842,
+              "payoff": 6.082607601129155,
+              "payoff_usdt": 5.756867660212002,
+              "median_net_pct": -3.5590970023556503
+            },
+            "2025": {
+              "final_usdt": 38785.81702435755,
+              "multiple": 1.7459364104817192,
+              "dd_mark_pct": 16.982357743927455,
+              "dd_bound_pct": 17.950884084807218,
+              "trades": 213,
+              "win_pct": 17.84037558685446,
+              "payoff": 5.408425980493361,
+              "payoff_usdt": 8.618642363192615,
+              "median_net_pct": -3.508134778281248
+            },
+            "2026": {
+              "final_usdt": 44830.66995653535,
+              "multiple": 1.155852148953872,
+              "dd_mark_pct": 14.54923974408161,
+              "dd_bound_pct": 15.520622846315668,
+              "trades": 214,
+              "win_pct": 24.766355140186917,
+              "payoff": 4.204782881570862,
+              "payoff_usdt": 6.450826973991674,
+              "median_net_pct": -3.2873907579375876
+            }
+          },
+          "margin": {
+            "1.0": {
+              "positions_audited": 717,
+              "maintenance_boundary_hits": 0,
+              "negative_equity_positions": 0,
+              "unquoted_position_hours": 0,
+              "worst_margin_buffer_per_margin": 0.6178298450665943,
+              "worst_remaining_equity_per_margin": 0.6865713509105736,
+              "valid": true,
+              "checked_hours": [],
+              "all_flags_resolved": true
+            },
+            "2.0": {
+              "positions_audited": 542,
+              "maintenance_boundary_hits": 2,
+              "negative_equity_positions": 2,
+              "unquoted_position_hours": 0,
+              "worst_margin_buffer_per_margin": -1.730458712780108,
+              "worst_remaining_equity_per_margin": -1.3007032640949552,
+              "valid": false,
+              "checked_hours": [
+                {
+                  "event_id": "signal-row-07748:signal",
+                  "symbol": "ZRO",
+                  "side": 1,
+                  "multiple": 2.0,
+                  "market_slip": 0.0,
+                  "entry_price": 2.173,
+                  "exit_price": 1.98475774,
+                  "threshold": 1.209101167315175,
+                  "hour": 1760130000000,
+                  "exit_hour": true,
+                  "exit_reason": "stop",
+                  "phase": "intrabar",
+                  "status": "stop_strictly_earlier",
+                  "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251011/ZRO-USDT-SWAP-candlesticks-2025-10-11.zip",
+                  "stop_minute": 13,
+                  "trade_boundary_minute": 19,
+                  "mark_boundary_minute": 19,
+                  "preceding_trade_close": 2.039,
+                  "stop_minute_open": 2.038,
+                  "stop_minute_trade_low": 1.907,
+                  "stop_minute_mark_low": 1.909,
+                  "stop_minute_trade_high": 2.041,
+                  "stop_minute_mark_high": 2.04,
+                  "full_hour_mark_low": 0.915,
+                  "full_hour_mark_high": 2.099
+                },
+                {
+                  "event_id": "signal-row-08041:signal",
+                  "symbol": "MOODENG",
+                  "side": -1,
+                  "multiple": 2.0,
+                  "market_slip": 0.0,
+                  "entry_price": 0.09773,
+                  "exit_price": 0.1069422838,
+                  "threshold": 0.13316323034984098,
+                  "hour": 1765054800000,
+                  "exit_hour": true,
+                  "exit_reason": "stop",
+                  "phase": "intrabar",
+                  "status": "stop_strictly_earlier",
+                  "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251207/MOODENG-USDT-SWAP-candlesticks-2025-12-07.zip",
+                  "stop_minute": 4,
+                  "trade_boundary_minute": 5,
+                  "mark_boundary_minute": 5,
+                  "preceding_trade_close": 0.09283,
+                  "stop_minute_open": 0.09296,
+                  "stop_minute_trade_low": 0.09199,
+                  "stop_minute_mark_low": 0.09223,
+                  "stop_minute_trade_high": 0.10998,
+                  "stop_minute_mark_high": 0.10964,
+                  "full_hour_mark_low": 0.07259,
+                  "full_hour_mark_high": 0.20693
+                }
+              ],
+              "all_flags_resolved": true
+            }
+          },
+          "trim_fills": 7626
+        },
+        "stress": {
+          "metrics": {
+            "all": {
+              "final_usdt": 41267.59651511448,
+              "multiple": 41.26759651511448,
+              "dd_mark_pct": 41.35367144947606,
+              "dd_bound_pct": 42.29304982026439,
+              "trades": 1259,
+              "win_pct": 24.225575853852263,
+              "payoff": 5.761284466134916,
+              "payoff_usdt": 6.500305753527327,
+              "median_net_pct": -3.565557594059871
+            },
+            "dev": {
+              "final_usdt": 20570.701743472247,
+              "multiple": 20.57070174347225,
+              "dd_mark_pct": 41.35367144947606,
+              "dd_bound_pct": 42.29304982026439,
+              "trades": 816,
+              "win_pct": 24.877450980392158,
+              "payoff": 6.009689502406661,
+              "payoff_usdt": 5.657960095414354,
+              "median_net_pct": -3.6485738626118702
+            },
+            "2025": {
+              "final_usdt": 35474.34774812556,
+              "multiple": 1.7245083901613967,
+              "dd_mark_pct": 17.111774750084606,
+              "dd_bound_pct": 18.101039766860538,
+              "trades": 213,
+              "win_pct": 17.84037558685446,
+              "payoff": 5.263324525790111,
+              "payoff_usdt": 8.251421330422462,
+              "median_net_pct": -3.611644668004374
+            },
+            "2026": {
+              "final_usdt": 41267.59651511448,
+              "multiple": 1.163308112332947,
+              "dd_mark_pct": 14.682126015240138,
+              "dd_bound_pct": 15.661207783184928,
+              "trades": 214,
+              "win_pct": 24.299065420560748,
+              "payoff": 4.201526914814162,
+              "payoff_usdt": 6.52643196160721,
+              "median_net_pct": -3.3874081758757906
+            }
+          },
+          "margin": {
+            "1.0": {
+              "positions_audited": 717,
+              "maintenance_boundary_hits": 0,
+              "negative_equity_positions": 0,
+              "unquoted_position_hours": 0,
+              "worst_margin_buffer_per_margin": 0.616986059391139,
+              "worst_remaining_equity_per_margin": 0.6857275652351184,
+              "valid": true,
+              "checked_hours": [],
+              "all_flags_resolved": true
+            },
+            "2.0": {
+              "positions_audited": 542,
+              "maintenance_boundary_hits": 2,
+              "negative_equity_positions": 2,
+              "unquoted_position_hours": 0,
+              "worst_margin_buffer_per_margin": -1.7336080644121552,
+              "worst_remaining_equity_per_margin": -1.3038526157270023,
+              "valid": false,
+              "checked_hours": [
+                {
+                  "event_id": "signal-row-07748:signal",
+                  "symbol": "ZRO",
+                  "side": 1,
+                  "multiple": 2.0,
+                  "market_slip": 0.0005,
+                  "entry_price": 2.173,
+                  "exit_price": 1.98475774,
+                  "threshold": 1.2109151220969014,
+                  "hour": 1760130000000,
+                  "exit_hour": true,
+                  "exit_reason": "stop",
+                  "phase": "intrabar",
+                  "status": "stop_strictly_earlier",
+                  "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251011/ZRO-USDT-SWAP-candlesticks-2025-10-11.zip",
+                  "stop_minute": 13,
+                  "trade_boundary_minute": 19,
+                  "mark_boundary_minute": 19,
+                  "preceding_trade_close": 2.039,
+                  "stop_minute_open": 2.038,
+                  "stop_minute_trade_low": 1.907,
+                  "stop_minute_mark_low": 1.909,
+                  "stop_minute_trade_high": 2.041,
+                  "stop_minute_mark_high": 2.04,
+                  "full_hour_mark_low": 0.915,
+                  "full_hour_mark_high": 2.099
+                },
+                {
+                  "event_id": "signal-row-08041:signal",
+                  "symbol": "MOODENG",
+                  "side": -1,
+                  "multiple": 2.0,
+                  "market_slip": 0.0005,
+                  "entry_price": 0.09773,
+                  "exit_price": 0.1069422838,
+                  "threshold": 0.13305232384489266,
+                  "hour": 1765054800000,
+                  "exit_hour": true,
+                  "exit_reason": "stop",
+                  "phase": "intrabar",
+                  "status": "stop_strictly_earlier",
+                  "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251207/MOODENG-USDT-SWAP-candlesticks-2025-12-07.zip",
+                  "stop_minute": 4,
+                  "trade_boundary_minute": 5,
+                  "mark_boundary_minute": 5,
+                  "preceding_trade_close": 0.09283,
+                  "stop_minute_open": 0.09296,
+                  "stop_minute_trade_low": 0.09199,
+                  "stop_minute_mark_low": 0.09223,
+                  "stop_minute_trade_high": 0.10998,
+                  "stop_minute_mark_high": 0.10964,
+                  "full_hour_mark_low": 0.07259,
+                  "full_hour_mark_high": 0.20693
+                }
+              ],
+              "all_flags_resolved": true
+            }
+          },
+          "trim_fills": 7910
+        }
+      },
+      "eligible_count": 5875,
+      "signals": 1259,
+      "overlap": 655,
+      "symbols": 238,
+      "skips": {
+        "same_contract": 269,
+        "all_slots_busy": 4347
+      },
+      "settlement": {
+        "ARC": {
+          "mean_index": 0.019757000000000004,
+          "legs": 2
+        },
+        "CATI": {
+          "mean_index": 0.05919699999999999,
+          "legs": 2
+        },
+        "NEIROETH": {
+          "mean_index": 0.06018699999999999,
+          "legs": 2
+        },
+        "SLP": {
+          "mean_index": 0.001194183333333333,
+          "legs": 2
+        },
+        "SONIC": {
+          "mean_index": 0.073987,
+          "legs": 2
+        },
+        "STORJ": {
+          "mean_index": 0.17115666666666665,
+          "legs": 2
+        },
+        "TREE": {
+          "mean_index": 0.10789450000000002,
+          "legs": 2
+        }
+      },
+      "missing_holding_hours": 0,
+      "gap_events": 0
+    },
+    "opposed": {
+      "cases": {
+        "fees": {
+          "metrics": {
+            "all": {
+              "final_usdt": 12483.384120342966,
+              "multiple": 12.483384120342965,
+              "dd_mark_pct": 51.29028228678677,
+              "dd_bound_pct": 51.948362265565564,
+              "trades": 1417,
+              "win_pct": 20.606916019760057,
+              "payoff": 6.390352570789217,
+              "payoff_usdt": 5.036833846273206,
+              "median_net_pct": -3.367324813913406
+            },
+            "dev": {
+              "final_usdt": 10006.569584137565,
+              "multiple": 10.006569584137566,
+              "dd_mark_pct": 50.453957443158316,
+              "dd_bound_pct": 51.29800411673021,
+              "trades": 918,
+              "win_pct": 20.588235294117645,
+              "payoff": 7.387091036371857,
+              "payoff_usdt": 5.161635754434873,
+              "median_net_pct": -3.3427848420184243
+            },
+            "2025": {
+              "final_usdt": 9886.475216003824,
+              "multiple": 0.9879984477073827,
+              "dd_mark_pct": 26.040535044911483,
+              "dd_bound_pct": 27.44469401363505,
+              "trades": 207,
+              "win_pct": 17.874396135265698,
+              "payoff": 4.284542063765478,
+              "payoff_usdt": 2.6645082989212074,
+              "median_net_pct": -3.5020368408339655
+            },
+            "2026": {
+              "final_usdt": 12483.384120342966,
+              "multiple": 1.2626728786145511,
+              "dd_mark_pct": 26.648179682039185,
+              "dd_bound_pct": 27.880057249868926,
+              "trades": 275,
+              "win_pct": 20.0,
+              "payoff": 4.608348171031112,
+              "payoff_usdt": 6.751604423155954,
+              "median_net_pct": -3.42950412110553
+            }
+          },
+          "margin": {
+            "1.0": {
+              "positions_audited": 695,
+              "maintenance_boundary_hits": 0,
+              "negative_equity_positions": 0,
+              "unquoted_position_hours": 0,
+              "worst_margin_buffer_per_margin": 0.4900515811301193,
+              "worst_remaining_equity_per_margin": 0.5445876101607051,
+              "valid": true,
+              "checked_hours": [],
+              "all_flags_resolved": true
+            },
+            "2.0": {
+              "positions_audited": 722,
+              "maintenance_boundary_hits": 1,
+              "negative_equity_positions": 1,
+              "unquoted_position_hours": 0,
+              "worst_margin_buffer_per_margin": -0.21028999400838808,
+              "worst_remaining_equity_per_margin": -0.12238449028502933,
+              "valid": false,
+              "checked_hours": [
+                {
+                  "event_id": "signal-row-07824:signal",
+                  "symbol": "LTC",
+                  "side": 1,
+                  "multiple": 2.0,
+                  "market_slip": 0.0,
+                  "entry_price": 116.83,
+                  "exit_price": 111.813452,
+                  "threshold": 65.00657587548638,
+                  "hour": 1760130000000,
+                  "exit_hour": true,
+                  "exit_reason": "stop",
+                  "phase": "intrabar",
+                  "status": "stop_strictly_earlier",
+                  "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251011/LTC-USDT-SWAP-candlesticks-2025-10-11.zip",
+                  "stop_minute": 14,
+                  "trade_boundary_minute": 20,
+                  "mark_boundary_minute": 20,
+                  "preceding_trade_close": 118.06,
+                  "stop_minute_open": 118.05,
+                  "stop_minute_trade_low": 110.38,
+                  "stop_minute_mark_low": 110.67,
+                  "stop_minute_trade_high": 118.47,
+                  "stop_minute_mark_high": 118.36,
+                  "full_hour_mark_low": 51.44,
+                  "full_hour_mark_high": 123.31
+                }
+              ],
+              "all_flags_resolved": true
+            }
+          },
+          "trim_fills": 7918
+        },
+        "stress": {
+          "metrics": {
+            "all": {
+              "final_usdt": 11040.720036907034,
+              "multiple": 11.040720036907034,
+              "dd_mark_pct": 53.92232427796604,
+              "dd_bound_pct": 54.556295170171,
+              "trades": 1417,
+              "win_pct": 20.25405786873677,
+              "payoff": 6.328527432137401,
+              "payoff_usdt": 5.019397793349979,
+              "median_net_pct": -3.4639591719204845
+            },
+            "dev": {
+              "final_usdt": 9174.241973568327,
+              "multiple": 9.174241973568327,
+              "dd_mark_pct": 52.134792056750044,
+              "dd_bound_pct": 52.96521755307324,
+              "trades": 918,
+              "win_pct": 20.37037037037037,
+              "payoff": 7.276414579545753,
+              "payoff_usdt": 5.124257132831063,
+              "median_net_pct": -3.416409324303766
+            },
+            "2025": {
+              "final_usdt": 8937.33735333594,
+              "multiple": 0.9741771994988877,
+              "dd_mark_pct": 26.898399926610228,
+              "dd_bound_pct": 28.316001799227976,
+              "trades": 207,
+              "win_pct": 17.391304347826086,
+              "payoff": 4.32196771613136,
+              "payoff_usdt": 2.7485847698079957,
+              "median_net_pct": -3.5868377994148375
+            },
+            "2026": {
+              "final_usdt": 11040.720036907034,
+              "multiple": 1.2353477999558768,
+              "dd_mark_pct": 27.263531583129343,
+              "dd_bound_pct": 28.49438816591363,
+              "trades": 275,
+              "win_pct": 19.272727272727273,
+              "payoff": 4.56622793996033,
+              "payoff_usdt": 6.691070295182679,
+              "median_net_pct": -3.532935340836485
+            }
+          },
+          "margin": {
+            "1.0": {
+              "positions_audited": 695,
+              "maintenance_boundary_hits": 0,
+              "negative_equity_positions": 0,
+              "unquoted_position_hours": 0,
+              "worst_margin_buffer_per_margin": 0.489278787325039,
+              "worst_remaining_equity_per_margin": 0.5438148163556248,
+              "valid": true,
+              "checked_hours": [],
+              "all_flags_resolved": true
+            },
+            "2.0": {
+              "positions_audited": 722,
+              "maintenance_boundary_hits": 1,
+              "negative_equity_positions": 1,
+              "unquoted_position_hours": 0,
+              "worst_margin_buffer_per_margin": -0.21172980176324552,
+              "worst_remaining_equity_per_margin": -0.12382429803988677,
+              "valid": false,
+              "checked_hours": [
+                {
+                  "event_id": "signal-row-07824:signal",
+                  "symbol": "LTC",
+                  "side": 1,
+                  "multiple": 2.0,
+                  "market_slip": 0.0005,
+                  "entry_price": 116.83,
+                  "exit_price": 111.813452,
+                  "threshold": 65.10410203156052,
+                  "hour": 1760130000000,
+                  "exit_hour": true,
+                  "exit_reason": "stop",
+                  "phase": "intrabar",
+                  "status": "stop_strictly_earlier",
+                  "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251011/LTC-USDT-SWAP-candlesticks-2025-10-11.zip",
+                  "stop_minute": 14,
+                  "trade_boundary_minute": 20,
+                  "mark_boundary_minute": 20,
+                  "preceding_trade_close": 118.06,
+                  "stop_minute_open": 118.05,
+                  "stop_minute_trade_low": 110.38,
+                  "stop_minute_mark_low": 110.67,
+                  "stop_minute_trade_high": 118.47,
+                  "stop_minute_mark_high": 118.36,
+                  "full_hour_mark_low": 51.44,
+                  "full_hour_mark_high": 123.31
+                }
+              ],
+              "all_flags_resolved": true
+            }
+          },
+          "trim_fills": 8194
+        }
+      },
+      "eligible_count": 6408,
+      "signals": 1417,
+      "overlap": 649,
+      "symbols": 250,
+      "skips": {
+        "same_contract": 301,
+        "all_slots_busy": 4690
+      },
+      "settlement": {
+        "CETUS": {
+          "mean_index": 0.023350499999999996,
+          "legs": 2
+        },
+        "CVC": {
+          "mean_index": 0.051864833333333346,
+          "legs": 2
+        }
+      },
+      "missing_holding_hours": 0,
+      "gap_events": 0
+    },
+    "lagged": {
+      "cases": {
+        "fees": {
+          "margin": {
+            "1.0": {
+              "positions_audited": 800,
+              "maintenance_boundary_hits": 0,
+              "negative_equity_positions": 0,
+              "unquoted_position_hours": 0,
+              "worst_margin_buffer_per_margin": 0.4900515811301193,
+              "worst_remaining_equity_per_margin": 0.5445876101607051,
+              "valid": true,
+              "checked_hours": [],
+              "all_flags_resolved": true
+            },
+            "2.0": {
+              "positions_audited": 604,
+              "maintenance_boundary_hits": 3,
+              "negative_equity_positions": 2,
+              "unquoted_position_hours": 0,
+              "worst_margin_buffer_per_margin": -1.730458712780108,
+              "worst_remaining_equity_per_margin": -1.3007032640949552,
+              "valid": false,
+              "checked_hours": [
+                {
+                  "event_id": "signal-row-04518:signal",
+                  "symbol": "ZETA",
+                  "side": -1,
+                  "multiple": 2.0,
+                  "market_slip": 0.0,
+                  "entry_price": 1.2881,
+                  "exit_price": 1.401259586,
+                  "threshold": 1.755116719672876,
+                  "hour": 1714712400000,
+                  "exit_hour": true,
+                  "exit_reason": "stop",
+                  "phase": "intrabar",
+                  "status": "same_or_earlier_boundary_minute",
+                  "trade_source": "https://www.okx.com/api/v5/market/history-candles",
+                  "stop_minute": 36,
+                  "trade_boundary_minute": 36,
+                  "mark_boundary_minute": 36,
+                  "preceding_trade_close": 1.3643,
+                  "stop_minute_open": 1.3641,
+                  "stop_minute_trade_low": 1.364,
+                  "stop_minute_mark_low": 1.3641,
+                  "stop_minute_trade_high": 1.8418,
+                  "stop_minute_mark_high": 1.8219,
+                  "full_hour_mark_low": 1.3597,
+                  "full_hour_mark_high": 1.8724
+                },
+                {
+                  "event_id": "signal-row-07824:signal",
+                  "symbol": "LTC",
+                  "side": 1,
+                  "multiple": 2.0,
+                  "market_slip": 0.0,
+                  "entry_price": 116.83,
+                  "exit_price": 111.813452,
+                  "threshold": 65.00657587548638,
+                  "hour": 1760130000000,
+                  "exit_hour": true,
+                  "exit_reason": "stop",
+                  "phase": "intrabar",
+                  "status": "stop_strictly_earlier",
+                  "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251011/LTC-USDT-SWAP-candlesticks-2025-10-11.zip",
+                  "stop_minute": 14,
+                  "trade_boundary_minute": 20,
+                  "mark_boundary_minute": 20,
+                  "preceding_trade_close": 118.06,
+                  "stop_minute_open": 118.05,
+                  "stop_minute_trade_low": 110.38,
+                  "stop_minute_mark_low": 110.67,
+                  "stop_minute_trade_high": 118.47,
+                  "stop_minute_mark_high": 118.36,
+                  "full_hour_mark_low": 51.44,
+                  "full_hour_mark_high": 123.31
+                },
+                {
+                  "event_id": "signal-row-08041:signal",
+                  "symbol": "MOODENG",
+                  "side": -1,
+                  "multiple": 2.0,
+                  "market_slip": 0.0,
+                  "entry_price": 0.09773,
+                  "exit_price": 0.1069422838,
+                  "threshold": 0.13316323034984098,
+                  "hour": 1765054800000,
+                  "exit_hour": true,
+                  "exit_reason": "stop",
+                  "phase": "intrabar",
+                  "status": "stop_strictly_earlier",
+                  "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251207/MOODENG-USDT-SWAP-candlesticks-2025-12-07.zip",
+                  "stop_minute": 4,
+                  "trade_boundary_minute": 5,
+                  "mark_boundary_minute": 5,
+                  "preceding_trade_close": 0.09283,
+                  "stop_minute_open": 0.09296,
+                  "stop_minute_trade_low": 0.09199,
+                  "stop_minute_mark_low": 0.09223,
+                  "stop_minute_trade_high": 0.10998,
+                  "stop_minute_mark_high": 0.10964,
+                  "full_hour_mark_low": 0.07259,
+                  "full_hour_mark_high": 0.20693
+                }
+              ],
+              "all_flags_resolved": false
+            }
+          },
+          "unresolved": true
+        },
+        "stress": {
+          "margin": {
+            "1.0": {
+              "positions_audited": 800,
+              "maintenance_boundary_hits": 0,
+              "negative_equity_positions": 0,
+              "unquoted_position_hours": 0,
+              "worst_margin_buffer_per_margin": 0.489278787325039,
+              "worst_remaining_equity_per_margin": 0.5438148163556248,
+              "valid": true,
+              "checked_hours": [],
+              "all_flags_resolved": true
+            },
+            "2.0": {
+              "positions_audited": 604,
+              "maintenance_boundary_hits": 3,
+              "negative_equity_positions": 2,
+              "unquoted_position_hours": 0,
+              "worst_margin_buffer_per_margin": -1.7336080644121552,
+              "worst_remaining_equity_per_margin": -1.3038526157270023,
+              "valid": false,
+              "checked_hours": [
+                {
+                  "event_id": "signal-row-04518:signal",
+                  "symbol": "ZETA",
+                  "side": -1,
+                  "multiple": 2.0,
+                  "market_slip": 0.0005,
+                  "entry_price": 1.2881,
+                  "exit_price": 1.401259586,
+                  "threshold": 1.7536549508299013,
+                  "hour": 1714712400000,
+                  "exit_hour": true,
+                  "exit_reason": "stop",
+                  "phase": "intrabar",
+                  "status": "same_or_earlier_boundary_minute",
+                  "trade_source": "https://www.okx.com/api/v5/market/history-candles",
+                  "stop_minute": 36,
+                  "trade_boundary_minute": 36,
+                  "mark_boundary_minute": 36,
+                  "preceding_trade_close": 1.3643,
+                  "stop_minute_open": 1.3641,
+                  "stop_minute_trade_low": 1.364,
+                  "stop_minute_mark_low": 1.3641,
+                  "stop_minute_trade_high": 1.8418,
+                  "stop_minute_mark_high": 1.8219,
+                  "full_hour_mark_low": 1.3597,
+                  "full_hour_mark_high": 1.8724
+                },
+                {
+                  "event_id": "signal-row-07824:signal",
+                  "symbol": "LTC",
+                  "side": 1,
+                  "multiple": 2.0,
+                  "market_slip": 0.0005,
+                  "entry_price": 116.83,
+                  "exit_price": 111.813452,
+                  "threshold": 65.10410203156052,
+                  "hour": 1760130000000,
+                  "exit_hour": true,
+                  "exit_reason": "stop",
+                  "phase": "intrabar",
+                  "status": "stop_strictly_earlier",
+                  "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251011/LTC-USDT-SWAP-candlesticks-2025-10-11.zip",
+                  "stop_minute": 14,
+                  "trade_boundary_minute": 20,
+                  "mark_boundary_minute": 20,
+                  "preceding_trade_close": 118.06,
+                  "stop_minute_open": 118.05,
+                  "stop_minute_trade_low": 110.38,
+                  "stop_minute_mark_low": 110.67,
+                  "stop_minute_trade_high": 118.47,
+                  "stop_minute_mark_high": 118.36,
+                  "full_hour_mark_low": 51.44,
+                  "full_hour_mark_high": 123.31
+                },
+                {
+                  "event_id": "signal-row-08041:signal",
+                  "symbol": "MOODENG",
+                  "side": -1,
+                  "multiple": 2.0,
+                  "market_slip": 0.0005,
+                  "entry_price": 0.09773,
+                  "exit_price": 0.1069422838,
+                  "threshold": 0.13305232384489266,
+                  "hour": 1765054800000,
+                  "exit_hour": true,
+                  "exit_reason": "stop",
+                  "phase": "intrabar",
+                  "status": "stop_strictly_earlier",
+                  "trade_source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/20251207/MOODENG-USDT-SWAP-candlesticks-2025-12-07.zip",
+                  "stop_minute": 4,
+                  "trade_boundary_minute": 5,
+                  "mark_boundary_minute": 5,
+                  "preceding_trade_close": 0.09283,
+                  "stop_minute_open": 0.09296,
+                  "stop_minute_trade_low": 0.09199,
+                  "stop_minute_mark_low": 0.09223,
+                  "stop_minute_trade_high": 0.10998,
+                  "stop_minute_mark_high": 0.10964,
+                  "full_hour_mark_low": 0.07259,
+                  "full_hour_mark_high": 0.20693
+                }
+              ],
+              "all_flags_resolved": false
+            }
+          },
+          "unresolved": true
+        }
+      },
+      "eligible_count": 6181,
+      "signals": 1404,
+      "overlap": 693,
+      "symbols": 237,
+      "skips": {
+        "same_contract": 296,
+        "all_slots_busy": 4481
+      },
+      "settlement": {
+        "AVAAI": {
+          "mean_index": 0.01390033333333333,
+          "legs": 2
+        },
+        "CATI": {
+          "mean_index": 0.05919699999999999,
+          "legs": 2
+        },
+        "CVC": {
+          "mean_index": 0.051864833333333346,
+          "legs": 2
+        },
+        "NEIROETH": {
+          "mean_index": 0.06018699999999999,
+          "legs": 2
+        }
+      },
+      "missing_holding_hours": 0,
+      "gap_events": 0
+    }
+  },
+  "limits": "Entry capacity only. Positive prior-volume venue coverage; funding and actual exit depth remain unmodeled.",
+  "covered_account_source": "experiments/active/exp-cloud-close-liquid-queue-20261109-v1/balanced"
+}
