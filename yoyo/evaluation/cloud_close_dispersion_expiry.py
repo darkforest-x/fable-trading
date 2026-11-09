@@ -39,17 +39,26 @@ def main():
     paths = paths[~paths.is_control]
     expiring,_ = tested.expiry.time_in_force(paths)
     wide_keys = set(paths.loc[paths.entry_ms.isin(panel.index[panel.wide]),'event_id'])
-    mixed = pd.concat([paths[~paths.event_id.isin(wide_keys)],expiring[expiring.event_id.isin(wide_keys)]])
+    mixed = pd.concat([paths[~paths.event_id.isin(wide_keys)],expiring[expiring.event_id.isin(wide_keys)]],ignore_index=True)
     ref = pd.read_csv(tested.EXP/'funded_OKX.csv.gz').set_index('event_id')
     summary = dict(frozen_always_expire=json.loads((tested.EXP/'summary.json').read_text())['OKX']['metrics'])
     for label,rows in [('always_rest',paths),('wide_market_expiry',mixed)]:
-        data = tested.admin.study.tenth.split.pair_data(rows[rows.tp_r.eq(0)],rows[rows.tp_r.eq(2)],9)
-        metrics,pos,eq,trims = tested.trim_account(data,tested.w.quotes,1.,.2)
+        pos_path,eq_path,trim_path = (EXP/f'funded_{label}.csv.gz', EXP/f'hourly_{label}.csv.gz', EXP/f'trim_orders_{label}.csv.gz')
+        if all(p.is_file() for p in (pos_path,eq_path,trim_path)):
+            pos = pd.read_csv(pos_path).set_index('event_id')
+            eq = pd.read_csv(eq_path,index_col='hour_end_utc',parse_dates=True)
+            trims = pd.read_csv(trim_path)
+            metrics = tested.summarize(pos,eq)
+        else:
+            data = tested.admin.study.tenth.split.pair_data(rows[rows.tp_r.eq(0)],rows[rows.tp_r.eq(2)],9)
+            metrics,pos,eq,trims = tested.trim_account(data,tested.w.quotes,1.,.2)
+            pos.to_csv(pos_path)
+            eq.to_csv(eq_path,index_label='hour_end_utc')
+            trims.to_csv(trim_path,index=False)
         if set(pos.index)!=set(ref.index):
             raise ValueError('Changing an exit fraction before runner close must not change the funded parent set')
-        pos.to_csv(EXP/f'funded_{label}.csv.gz')
-        eq.to_csv(EXP/f'hourly_{label}.csv.gz',index_label='hour_end_utc')
-        trims.to_csv(EXP/f'trim_orders_{label}.csv.gz',index=False)
+        if not np.isclose(1000+pos.cash_pnl.sum(),eq.nav.iloc[-1],atol=.005,rtol=1e-8):
+            raise ValueError('Funded cash and marked wealth differ')
         summary[label] = dict(metrics=metrics,trimmed=trims.event_id.nunique(),
                               wide_events=len(set(pos.index)&wide_keys),
                               missing_regime_fallback=int((~pos.entry_ms.isin(panel.index[panel.available])).sum()))

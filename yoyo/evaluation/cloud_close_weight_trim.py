@@ -109,16 +109,22 @@ def trim_account(data, quote_loader, exposure, limit, leg_weights=(2/3,1/3)):
     index = pd.to_datetime(data['start'] + (1+np.arange(hours))*w.HOUR, unit='ms', utc=True)
     equity = pd.DataFrame(dict(nav=nav[:,3], open_nav=nav[:,0], open_exit_nav=nav[:,1],
                                post_trim_nav=nav[:,2], lower_nav=lower, upper_nav=upper), index=index)
+    return summarize(parents,equity), parents, equity, fills[fills.action.eq(3)]
+
+
+def summarize(parents,equity):
     metrics = admin.study.tenth.trend.rotation._period_metrics(parents,equity)
     # Include all four executable stages in the observed drawdown.
+    index = equity.index
+    nav = equity[['open_nav','open_exit_nav','post_trim_nav','nav']].to_numpy()
     for key,(lo,hi) in admin.study.tenth.trend.rotation.PERIODS.items():
-        dates = (index > pd.Timestamp(lo)) if lo else np.ones(hours, dtype=bool)
+        dates = (index > pd.Timestamp(lo)) if lo else np.ones(len(nav), dtype=bool)
         if hi:
             dates &= index <= pd.Timestamp(hi)
         start = np.flatnonzero(dates)[0]
         points = np.r_[nav[start-1,-1] if start else 1000.,nav[dates].ravel()]
         metrics[key]['dd_mark_pct'] = 100*float(1-(points/np.maximum.accumulate(points)).min())
-    return metrics, parents, equity, fills[fills.action.eq(3)]
+    return metrics
 
 
 def binance_inputs(extra):
