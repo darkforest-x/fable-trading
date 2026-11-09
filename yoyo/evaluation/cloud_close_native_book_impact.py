@@ -80,13 +80,15 @@ def walk(book,side,qty,face,reference):
 
 def evaluate(row,quotes):
     inst,stamp = row.symbol,int(row.entry_ms)
-    hour = stamp-audit.minute.HOUR
-    bars,url = audit.minute.minute_quote(inst,hour,quotes)
-    if bars is None:
-        raise ValueError('Cannot confirm historical contract face prior to entry')
-    amounts,_ = audit.volume_hour(inst,hour,bars,url)
-    if amounts is None:
-        raise ValueError('Missing contract-to-base evidence')
+    for lag in range(1,25):
+        hour = stamp-lag*audit.minute.HOUR
+        bars,url = audit.minute.minute_quote(inst,hour,quotes)
+        if bars is not None:
+            amounts,_ = audit.volume_hour(inst,hour,bars,url)
+            if amounts is not None and amounts.vol.gt(0).sum()>=3:
+                break
+    else:
+        raise ValueError(f'No compatible native pre-entry contract face within 24H for {inst}')
     face = (amounts.base / amounts.vol)[amounts.vol.gt(0)].dropna()
     if len(face)<3 or not np.allclose(face,face.median(),rtol=1e-8,atol=1e-12):
         raise ValueError('Changing or unsupported contract face')
@@ -126,7 +128,7 @@ def evaluate(row,quotes):
         prev=last_time=t
     result['one_second'] = dict(last_update_ms_after_close=last_time-stamp,**walk(book,row.side,qty,face,row.entry_price))
     return dict(event_id=row.event_id,symbol=inst,entry_ms=stamp,entry_open=row.entry_price,entry_notional=row.notional,
-                cash_pnl=row.cash_pnl,contract_face=face,official_archive=file,observations=result)
+                cash_pnl=row.cash_pnl,contract_face=face,contract_face_hour_ms=hour,official_archive=file,observations=result)
 
 
 def main():
