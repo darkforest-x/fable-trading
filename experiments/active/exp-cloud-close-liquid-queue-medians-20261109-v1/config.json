@@ -1,0 +1,6 @@
+{
+  "question":"Does the equal ATR/turnover ranking still beat original ATR when recent turnover spikes cannot inflate the order-size budget?",
+  "single_variable":"Replace 10% of mean per-minute last-hour turnover with 10% of median minute turnover over the same 60 prior minutes. Only for the two published original-ATR and balanced nine-slot rosters. Keep original gating and reserved slots; where prior-minute observations cannot be matched or have zero median, do not place the order and do not retrospectively reassign the slot. Also apply the mean ceiling to the exact same positive-median subset as an observability-matched control. Reuse original all-covered means; do not rerun them.",
+  "inputs":"Resolve native OKX prior-hour 60-minute volume for the union of the two original rosters. Previously checked rows are read by exact stable parent and original entry clock. Distinctly measure the subsequent first-minute turnover as an execution diagnostic only. Use the actual source 1x/2x tilts and same VectorBT cash account, 5bp taker/2bp maker and +5bp market stress.",
+  "limits":"Original ranking was selected after comparing three in-sample ranking methods. Historical funding and real exit depth are unmodeled. A higher score on the same revisited history is exploratory."
+}
