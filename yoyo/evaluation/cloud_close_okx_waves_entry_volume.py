@@ -71,7 +71,7 @@ def _trade_archives(start_ms: int, end_ms_exclusive: int) -> pd.DataFrame:
                     chunk["trade_id"] = pd.to_numeric(chunk.trade_id, errors="raise").astype("int64")
                     chunk["created_time"] = pd.to_numeric(chunk.created_time, errors="raise").astype("int64")
                     chunk["price"] = pd.to_numeric(chunk.price, errors="raise").astype("float64")
-                    chunk["size"] = pd.to_numeric(chunk.size, errors="raise").astype("float64")
+                    chunk["size"] = pd.to_numeric(chunk["size"], errors="raise").astype("float64")
                     chunk = chunk.loc[
                         chunk.created_time.ge(start_ms) & chunk.created_time.lt(end_ms_exclusive)
                     ]
