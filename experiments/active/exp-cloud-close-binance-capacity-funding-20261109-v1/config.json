@@ -66,6 +66,12 @@
     "stress_include_boundary",
     "stress_exclude_boundary"
   ],
+  "reporting": {
+    "periods": ["all", "development through 2024-12-31", "each calendar year 2020-2026"],
+    "metrics": ["final_usdt", "multiple", "dd_mark_pct", "dd_bound_pct", "trades", "win_pct", "payoff", "payoff_usdt", "median_net_pct"],
+    "zero_funding_references": ["cap10 baseline", "cap10 +5bp market-fill stress"],
+    "cash_bridge": "Initial cash + executed order cashflows + actually applied funding cashflows = terminal NAV; funding deltas are not added to a frozen terminal balance."
+  },
   "execution": {
     "framework": "Local VectorBT 1.2.0 cash-sharing from_order_func. Capacity, hourly trim, funding posting, all fills and later sizing remain inside the same portfolio callback.",
     "network_policy": "Offline replay only; no funding collection, archive download, alternate venue, or substitute price source.",

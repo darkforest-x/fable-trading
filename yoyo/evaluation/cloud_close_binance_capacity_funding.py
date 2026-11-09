@@ -114,8 +114,10 @@ def _load_capacity_inputs(config: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.
     panel_path = ROOT / paths["capacity_panel"]
     funded_path = ROOT / paths["cap10_funded_parent_reference"]
     hourly_path = ROOT / paths["cap10_hourly_reference"]
+    stress_funded_path = ROOT / paths["cap10_stress_funded_reference"]
+    stress_hourly_path = ROOT / paths["cap10_stress_hourly_reference"]
     original_path = ROOT / paths["original_funded_parent_reference"]
-    for path in (panel_path, funded_path, hourly_path, original_path):
+    for path in (panel_path, funded_path, hourly_path, stress_funded_path, stress_hourly_path, original_path):
         if not path.is_file():
             raise FileNotFoundError(f"Frozen cap10 capacity reference missing: {path}")
     panel = pd.read_csv(panel_path, dtype={"event_id": str, "symbol": str}, float_precision="round_trip")
@@ -124,7 +126,13 @@ def _load_capacity_inputs(config: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.
     original = pd.read_csv(original_path, dtype={"event_id": str, "parent_id": str, "symbol": str},
                            float_precision="round_trip")
     hourly = pd.read_csv(hourly_path, index_col=0, parse_dates=True, float_precision="round_trip")
+    stress_funded = pd.read_csv(stress_funded_path,
+                                dtype={"event_id": str, "parent_id": str, "symbol": str},
+                                float_precision="round_trip")
+    stress_hourly = pd.read_csv(stress_hourly_path, index_col=0, parse_dates=True,
+                                float_precision="round_trip")
     hourly.index = pd.to_datetime(hourly.index, utc=True)
+    stress_hourly.index = pd.to_datetime(stress_hourly.index, utc=True)
     required_panel = {
         "event_id", "symbol", "side", "entry_ms", "window_start_ms", "window_end_exclusive_ms",
         "required_minutes", "prior_minutes", "status", "prior_median_quote_usdt", "h1_ohlc_match",
@@ -150,6 +158,16 @@ def _load_capacity_inputs(config: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.
         raise ValueError("The cap10 funded ledger must contain the 1,583 positive observed-capacity parents")
     if funded.event_id.duplicated().any() or original.event_id.duplicated().any() or len(original) != 1586:
         raise ValueError("Frozen actual roster must contain 1,586 distinct original parents")
+    if (len(stress_funded) != 1583 or stress_funded.event_id.duplicated().any()
+            or set(stress_funded.event_id.astype(str)) != set(funded.event_id.astype(str))):
+        raise ValueError("Frozen cap10 +5bp parent reference does not match the same 1,583 eligible parents")
+    base_stress = funded.set_index("event_id").sort_index()
+    stressed = stress_funded.set_index("event_id").sort_index()
+    for field in ("parent_id", "symbol", "side", "entry_ms", "exit_bar_ms", "exposure", "entry_limit_usdt"):
+        if not np.array_equal(base_stress[field].to_numpy(), stressed[field].to_numpy()):
+            raise ValueError(f"Frozen cap10 +5bp reference changed the parent roster field {field}")
+    if not stress_hourly.index.equals(hourly.index):
+        raise ValueError("Frozen cap10 and cap10 +5bp H1 reference clocks differ")
     if set(panel.event_id.astype(str)) != set(original.event_id.astype(str)):
         raise ValueError("Capacity panel no longer covers the original 1,586 account roster")
     if set(funded.event_id.astype(str)) != set(observed.index.astype(str)):
@@ -171,11 +189,15 @@ def _load_capacity_inputs(config: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.
         raise ValueError("Frozen cap10 account contains an entry above its 10% turnover limit")
     if not np.isclose(INITIAL_CASH + funded.cash_pnl.sum(), float(hourly.nav.iloc[-1]), atol=0.02, rtol=1e-9):
         raise ValueError("Frozen cap10 parent cash does not reconcile to its H1 hourly account")
+    if not np.isclose(INITIAL_CASH + stress_funded.cash_pnl.sum(),
+                      float(stress_hourly.nav.iloc[-1]), atol=0.02, rtol=1e-9):
+        raise ValueError("Frozen cap10 +5bp parent cash does not reconcile to its H1 hourly account")
     return panel, funded, hourly, {
         "capacity_rows": int(len(panel)), "status_counts": {str(k): int(v) for k, v in statuses.items()},
         "eligible_parent_ids": set(funded.event_id.astype(str)),
         "unknown_parent_ids": sorted(unknown), "entry_limits": cap_by_id,
         "original_parent_ids": set(original.event_id.astype(str)),
+        "stress_funded": stress_funded, "stress_hourly": stress_hourly,
     }
 
 
@@ -363,6 +385,14 @@ def _run() -> dict:
         "cash_bridge": _cash_bridge(parents0, flows0, equity0), "cap10_reference_parity": parity,
     })
     print("zero-funding cap10 parity", json.dumps(parity, ensure_ascii=False), flush=True)
+    baseline_stress = capacity_audit["stress_funded"].set_index("event_id", drop=True)
+    baseline_stress_equity = capacity_audit["stress_hourly"]
+    baseline_metrics = {
+        "zero_funding_cap10": result0["metrics"],
+        "zero_funding_cap10_stress_reference": relative.hourly_funding._period_summary(
+            baseline_stress, baseline_stress_equity,
+        ),
+    }
     del children0, parents0, equity0, flows0, zero
     gc.collect()
 
@@ -383,6 +413,17 @@ def _run() -> dict:
             raise ValueError(f"Funding scenario {name} failed to preserve the 20% hourly single-contract trim")
         bridge = _cash_bridge(parents, flows, equity)
         result["audit"]["cash_bridge"] = bridge
+        baseline_parents = reference.set_index("event_id", drop=True) if not slip else baseline_stress
+        baseline_metrics_for_scenario = (baseline_metrics["zero_funding_cap10"] if not slip
+                                         else baseline_metrics["zero_funding_cap10_stress_reference"])
+        result["audit"]["delta_vs_matching_zero_funding_reference"] = {
+            "parent_cash_pnl_usdt": float(parents.cash_pnl.sum() - baseline_parents.cash_pnl.sum()),
+            "final_nav_usdt": float(result["metrics"]["all"]["final_usdt"]
+                                     - baseline_metrics_for_scenario["all"]["final_usdt"]),
+            "funding_cashflow_usdt": bridge["applied_funding_cashflow_usdt"],
+            "nav_change_need_not_equal_funding_cashflow": True,
+            "note": "Funding cash changes later shared-cash size and hourly trims; do not treat it as a terminal NAV adjustment.",
+        }
         result["audit"]["entry_capacity"] = {
             "fraction": ENTRY_FRACTION,
             "parents_at_or_above_cap": int(np.isclose(
@@ -418,12 +459,14 @@ def _run() -> dict:
         "account_roster_audit": account_audit,
         "capacity_source_audit": {
             key: value for key, value in capacity_audit.items()
-            if key not in {"eligible_parent_ids", "entry_limits", "original_parent_ids"}
+            if key not in {"eligible_parent_ids", "entry_limits", "original_parent_ids",
+                           "stress_funded", "stress_hourly"}
         },
         "entry_limit_matrix_audit": entry_matrix_audit,
         "funding_source_coverage": source_coverage,
         "funding_window_audit": coverage_audit,
         "zero_funding_cap10_reference_parity": parity,
+        "frozen_zero_funding_baselines": baseline_metrics,
         "zero_funding_metrics": result0["metrics"],
         "zero_funding_audit": result0["audit"],
         "scenarios": scenarios,

@@ -175,9 +175,32 @@ def _prepare_account(reference: pd.DataFrame, *, expected_event_ids: set[str] | 
             eligible_rows = selected.event_id.astype(str).isin(expected_event_ids)
             if not selected.loc[eligible_rows].groupby("event_id").size().eq(4).all():
                 raise ValueError("Every capacity-eligible parent must retain its original four children")
-            excluded_slots = selected.loc[~eligible_rows, "slot"].astype(int).to_numpy()
+            excluded_rows = selected.loc[~eligible_rows]
             actions = data["actions"].copy()
-            actions[:, excluded_slots] = 0
+            # A child slot is reused by later parents. Remove only each excluded
+            # event's exact entry and exit actions; clearing the whole column can
+            # erase an eligible event's close and cause an unrelated position
+            # collision later in the original slot.
+            removed_cells = set()
+            for row in excluded_rows.itertuples(index=False):
+                column = int(row.slot)
+                first = (int(row.entry_ms) - int(data["start"])) // HOUR
+                last = (int(row.exit_bar_ms) - int(data["start"])) // HOUR
+                entry_cell = (int(first * 3), column)
+                exit_phase = 1 if str(row.exit_phase) == "open" else 2
+                exit_cell = (int(last * 3 + exit_phase), column)
+                if (entry_cell in removed_cells or exit_cell in removed_cells
+                        or not 0 <= entry_cell[0] < len(actions)
+                        or not 0 <= exit_cell[0] < len(actions)):
+                    raise ValueError("Excluded parent entry/exit cells collide or fall outside native actions")
+                if int(actions[entry_cell]) != int(row.side):
+                    raise ValueError(f"Capacity-excluded entry action is not uniquely mapped: {row.event_id}/{row.slot}")
+                if int(actions[exit_cell]) != 2:
+                    raise ValueError(f"Capacity-excluded exit action is not uniquely mapped: {row.event_id}/{row.slot}")
+                actions[entry_cell] = 0
+                actions[exit_cell] = 0
+                removed_cells.add(entry_cell)
+                removed_cells.add(exit_cell)
             data["actions"] = actions
             data["selected"] = selected.loc[eligible_rows].copy()
         market = sizing.base.underlying(data, quotes)
@@ -217,6 +240,9 @@ def _prepare_account(reference: pd.DataFrame, *, expected_event_ids: set[str] | 
             "capacity_excluded_parents": len(source_parent_ids) - expected_positions,
             "capacity_excluded_parent_ids": sorted(source_parent_ids - set(runners.index.astype(str))),
             "original_slot_assignments_preserved_for_eligible_parents": True,
+            "capacity_excluded_native_action_cells_removed": (
+                int(len(removed_cells)) if expected_event_ids is not None else 0
+            ),
             "exposure_counts": {str(k): int(v) for k, v in multipliers.value_counts().sort_index().items()},
             "double_limit_child_exits": len(doubled), "parent_roster_matches_reference": True,
             "exposure_map_matches_reference": True,
