@@ -1,0 +1,9 @@
+{
+  "single_variable": "Extend the frozen 680-contract Binance USD-M V1.7 12H opportunity and 0/2R exit tape to the same closed UTC hour as OKX, preserving all previously known native prices and all genuine exits. Reopen historical series-tail settlements only when authentic later candles exist for the same contract period. No trading rule or parameter search.",
+  "end_exclusive_utc": "2026-11-08T12:00:00Z",
+  "source": "exp-cloud-close-november-prices-20261109-v1",
+  "prefix": "exp-cloud-close-archive-complete-20261109-v1",
+  "price_precision": "Before the first new key, freeze the original precision rule on the oldest-to-last known complete historical hourly low. On separately listed instruments use only the opening period's first completed hour. Equal native OHLC clocks must match. A cross-listing or an earlier conflicting historical source must be diagnosed before combining.",
+  "key_parity": "Compare existing real executable event identities against past 90 days of closed 12H keys, ending one day before the frozen per-symbol tail, including missing-entry and positive-risk checks. Save all differences; the wallet cannot be certified on unresolved key mismatches.",
+  "source_data_scope": "The fixed historical symbol set includes delistings. New symbols outside that set are a separate universe change. Per-period missing hours and differences between exchange raw observations and the frozen prefix are retained. The extension uses the first eligible actual H1 open after the 12H close, with no delayed market fill."
+}

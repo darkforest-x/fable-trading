@@ -59,17 +59,18 @@ def process(job):
     return price_frames(ticker,slot,hourly,twelve,signals)
 
 
-def price_frames(ticker,slot,hourly,twelve,signals):
+def price_frames(ticker,slot,hourly,twelve,signals,*,end=END,carry=None,save_quotes=True):
     """Price the supplied V1.7 keys and later matched controls in the supplied native market."""
     receipt=slot/'coverage.json'
     rank_times=leader.trailing_return(twelve.reset_index()).dropna().index.to_numpy(dtype='int64')
-    np.savez(slot/'quotes.npz',clock=hourly.index.to_numpy(),prices=hourly[FIELDS].to_numpy(),
-             rank_times=rank_times)
-    signals=signals[signals.tf.eq('12H') & signals.close_ns.ge(START*1_000_000)&signals.close_ns.lt(END*1_000_000)]
+    if save_quotes:
+        np.savez(slot/'quotes.npz',clock=hourly.index.to_numpy(),prices=hourly[FIELDS].to_numpy(),
+                 rank_times=rank_times)
+    signals=signals[signals.tf.eq('12H') & signals.close_ns.ge(START*1_000_000)&signals.close_ns.lt(end*1_000_000)]
     skips=dict(missing_entry=0,nonpositive_risk=0)
     rows=[]
     counts=dict(matched=0,unmatched=0)
-    if len(signals):
+    if len(signals) or (carry is not None and len(carry)):
         q,clock,prepared=engine._prepare_symbol(twelve,hourly)
         features=prepared['features']
         atr=pd.Series(features['prior_atr_pct'],index=features['close_times'])
@@ -102,6 +103,21 @@ def price_frames(ticker,slot,hourly,twelve,signals):
         counts=dict(matched=match['matched'],unmatched=match['unmatched'])
         events=[p for p in parents if p['entry_i'] is not None]+controls
         ranks={p['parent_id']:p['signal_prior_atr_pct'] for p in parents}
+        if carry is not None:
+            for n,r in enumerate(carry.itertuples(),1):
+                i=int(clock.searchsorted(r.entry_ms))
+                if i==len(clock) or clock[i]!=r.entry_ms or not np.isclose(q[i,0],r.entry_price,rtol=1.e-12,atol=0):
+                    raise ValueError(f'Frozen carry no longer has its original market entry: {r.event_id}')
+                risk=(r.entry_price-r.stop_price)*r.side
+                if not np.isfinite(risk) or risk<=0:
+                    raise ValueError(f'Invalid frozen entry risk: {r.event_id}')
+                events.append(dict(parent_id=r.parent_id,event_id=r.event_id,symbol=r.symbol,side=r.side,
+                    stop_price=r.stop_price,entry_i=i,entry_ms=r.entry_ms,entry_price=r.entry_price,
+                    risk_distance=risk,risk_fraction=risk/r.entry_price,is_control=r.is_control,
+                    source_row_number=n,week=engine._ny_week_window(int(r.entry_ms)-engine.STEP_12H)['week']))
+                ranks[r.parent_id]=r.entry_order
+        if len({e['event_id'] for e in events})!=len(events):
+            raise ValueError('Fresh and carried event identities overlap')
         for e in events:
             e['end_i'],e['path_upper_bound_reason']=engine._safe_path_end(e['entry_i'],e['side'],q,clock)
         fills,_=engine._simulate_symbol(events,q,clock,(0.,2.),8)

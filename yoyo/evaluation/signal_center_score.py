@@ -119,9 +119,11 @@ def monday_ranges(f, source_minutes=5):
 
 def tf_bars(f, minutes, source_minutes=5):
     """Complete UTC-aligned bars with EMA20/50, Wilder ATR14 and next-bar cross price."""
-    b = f.resample(f"{minutes}min", origin="epoch", label="left", closed="left").agg(
-        open=("open", "first"), high=("high", "max"), low=("low", "min"),
-        close=("close", "last"), volume=("volume", "sum"), n=("close", "size"))
+    fields = dict(open=("open", "first"), high=("high", "max"), low=("low", "min"),
+                  close=("close", "last"), n=("close", "size"))
+    if "volume" in f:
+        fields["volume"] = ("volume", "sum")
+    b = f.resample(f"{minutes}min", origin="epoch", label="left", closed="left").agg(**fields)
     b = b[b.n == minutes // source_minutes].drop(columns="n").copy()
     b.index = b.index.as_unit("ns")
     step = minutes * 60 * NS
@@ -238,19 +240,28 @@ def _ctx(path):
     return _CTX
 
 
-def build_inputs(f, sym, ctx, *, key_timeframes=None, source_minutes=5):
+def build_inputs(f, sym, ctx, *, key_timeframes=None, source_minutes=5, price_decimals=None):
     """Signals, causal features, matched controls and stop schedules for one symbol.
 
     ``f`` is complete 5m OHLCV indexed by bar open. Reads no trade outcome.
     Returns (f_rounded, tick, decimals, close_ns5, signals, raw, entries, schedules).
     With key_timeframes only the key columns for those timeframes are needed;
     skip model features and sampling of model-training controls. Key-only extraction also
-    accepts complete 15m OHLCV on exact open clocks with source_minutes=15.
+    accepts complete aligned 15m or hourly OHLC when the timeframe is divisible
+    by that interval. For extensions, price_decimals can be frozen before the
+    first new key. The model feature path still requires native five-minute volume.
     """
-    if source_minutes not in (5, 15) or (source_minutes != 5 and key_timeframes is None):
-        raise ValueError("15m source supports only closed-key extraction")
+    if source_minutes not in (5, 15, 60) or (source_minutes != 5 and key_timeframes is None):
+        raise ValueError("Coarser intervals support only closed-key extraction")
+    if key_timeframes and any(TFS[tf] % source_minutes for tf in key_timeframes):
+        raise ValueError("Key timeframe must contain an integer number of source intervals")
     f = f.copy()
-    decimals = max(2, min(9, int(np.ceil(-np.log10(f[["open", "high", "low", "close"]].to_numpy().min()))) + 7))
+    if price_decimals is None:
+        decimals = max(2, min(9, int(np.ceil(-np.log10(f[["open", "high", "low", "close"]].to_numpy().min()))) + 7))
+    elif isinstance(price_decimals, int) and 2 <= price_decimals <= 9:
+        decimals = price_decimals
+    else:
+        raise ValueError("Invalid frozen input precision")
     tick = 10.0 ** (-decimals)
     f[["open", "high", "low", "close"]] = f[["open", "high", "low", "close"]].round(decimals)
     close_ns5 = f.index.asi8 + source_minutes * 60 * NS
