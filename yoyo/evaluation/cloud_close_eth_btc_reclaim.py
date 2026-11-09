@@ -99,14 +99,14 @@ def paths(marks,ratio,ema,*,asset='ETH',overlaps=False,stop_clock=H):
     return pd.DataFrame(rows)
 
 
-def fund(events,paired,slip,*,directory=EXP,asset_label='eth_half',pair_slots=1):
+def fund(events,paired,slip,*,directory=EXP,asset_label='eth_half',pair_slots=1,margin_audit=None):
     if paired:
         roster=events
     else:
         roster=events[events.slot.mod(2).eq(0)].copy()
         roster['slot']=roster.slot//2
     slots=pair_slots*(2 if paired else 1)
-    if roster.margin_buffer.le(0).any():
+    if margin_audit is None and roster.margin_buffer.le(0).any():
         raise ValueError('A funded 1x native leg requires intrahour margin evidence')
     data=wallet.prepare(None,slots,assigned=(roster,{}))
     legs,equity=wallet.account(data,slip=slip,exposure=1. if paired else .5,weights=(.5,.5) if paired else (1.,))
@@ -123,8 +123,11 @@ def fund(events,paired,slip,*,directory=EXP,asset_label='eth_half',pair_slots=1)
     label=('pair' if paired else asset_label)+('_stress' if slip else '')
     legs.to_csv(directory/f'legs_{label}.csv.gz',index=False)
     equity.to_csv(directory/f'hourly_{label}.csv.gz',index_label='hour_end_utc')
+    checks=margin_audit(legs,equity) if margin_audit is not None else {}
+    if checks and not checks['valid']:
+        return label,dict(margin=checks,gap_marks=data['gap_marks'])
     return label,dict(metrics={k:wallet.summarize(funded,equity,*bounds) for k,bounds in spread.periods.PERIODS.items()},
-                      gap_marks=data['gap_marks'])
+                      gap_marks=data['gap_marks'],**({'margin':checks} if checks else {}))
 
 
 def main():

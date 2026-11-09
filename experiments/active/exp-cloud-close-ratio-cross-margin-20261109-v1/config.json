@@ -1,0 +1,6 @@
+{
+ "question":"Does each leg's standalone collateral failure also occur when all offsetting perpetual legs are backed by the single common crypto-futures cash account?",
+ "single_variable":"Use the identical frozen 398 pairs and six real legs/slots from the prior experiment. Change only the margin assumption from each leg isolated to all positions cross-collateralized by the native shared cash wallet. For every held native hour compare the conservative portfolio NAV lower bound to 10% of gross notional plus 20bp reserve using each open leg's actual units and the sum of all simultaneous hourly high notionals. Include even positions exiting at the open throughout that hour in the gross upper bound. Native 5bp fees with separate +5bp market stress. Withhold metrics if a bound crosses or an hourly mark cannot be sourced.",
+ "limits":"Conservative historical traded-price cross-margin proxy; actual historical mark prices, maintenance tiers, funding, and executable depth remain unmodeled. This neither erases the isolated-leg flags nor establishes the exchange's historical liquidation decisions.",
+ "command":"vectorbt-python -m yoyo.evaluation.cloud_close_ratio_cross_margin"
+}
