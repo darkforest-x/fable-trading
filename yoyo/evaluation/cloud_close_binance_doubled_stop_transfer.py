@@ -11,8 +11,8 @@ from yoyo.evaluation import cloud_close_doubled_candle_low as stops
 EXP = funding.EXP.parent/'exp-cloud-close-binance-doubled-stop-transfer-20261109-v1'
 
 
-def scenario(prepared,data,no_settle,key,boundary,slip):
-    folder = EXP/key
+def scenario(prepared,data,no_settle,key,boundary,slip,*,directory=EXP):
+    folder = directory/key
     saved = folder/'result.json'
     if saved.exists():
         recovered = json.loads(saved.read_text())
@@ -30,8 +30,6 @@ def scenario(prepared,data,no_settle,key,boundary,slip):
     audit = funding._cash_bridge(parents,flows,equity)
     reference = prepared['reference'].set_index('event_id')
     limits = prepared['capacity_audit']['entry_limits']
-    if (not parents.index.isin(reference.index).all() and 'event_id' not in parents):
-        raise ValueError('Funded native trade identifiers missing')
     keys = parents.set_index('event_id') if 'event_id' in parents else parents
     if (set(keys.index)!=set(reference.index) or len(children)!=4*len(reference) or
             not np.array_equal(keys.entry_ms, reference.entry_ms.reindex(keys.index)) or
