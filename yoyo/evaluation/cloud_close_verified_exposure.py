@@ -18,7 +18,7 @@ def account():
     return data,base.underlying(data,quotes),quotes
 
 
-def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=None,snapshot=None,inspect_flag=evidence.inspect):
+def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=None,snapshot=None,inspect_flag=evidence.inspect,entry_limits=None):
     native,previous,side,runners = market
     if set(multiples.index)!=set(runners.event_id) or not multiples.index.is_unique or multiples.isna().any():
         raise ValueError('Each occupied parent needs exactly one pre-entry multiplier')
@@ -49,8 +49,21 @@ def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=No
         ratio_grid[first:last+1,row.slot//4] = multiples.at[row.event_id]
     if (ratio_grid[native>0]<=0).any():
         raise ValueError('Native units lost their collateral rate')
-    pf = base.build_portfolio(data,model,native*ratio_grid,previous*ratio_grid,side,1.,slip)
-    funds,curve,trims = base.receipts(pf,data,model,multiples)
+    cap_grid = None
+    receipt_data = data
+    if entry_limits is not None:
+        if (not entry_limits.index.is_unique or set(entry_limits.index)!=set(multiples.index)
+                or entry_limits.isna().any() or (entry_limits<0).any()):
+            raise ValueError('Each original funded parent requires a nonnegative entry notional limit')
+        cap_grid = np.full_like(native,np.inf)
+        rows = (runners.entry_ms-data['start'])//base.wallet.HOUR
+        cap_grid[rows,runners.slot//4] = runners.event_id.map(entry_limits)
+        active = data['selected'].event_id.map(entry_limits).gt(0)
+        receipt_data = dict(data,selected=data['selected'][active])
+    pf = base.build_portfolio(data,model,native*ratio_grid,previous*ratio_grid,side,1.,slip,entry_limits=cap_grid)
+    funds,curve,trims = base.receipts(pf,receipt_data,model,multiples)
+    if entry_limits is not None and (funds.notional>entry_limits.reindex(funds.index)+1.e-6).any():
+        raise ValueError('Actual aggregate child entry notional exceeds the pre-entry cap')
     funds['exposure'] = multiples
     if snapshot is not None:
         snapshot(pf,data,funds,curve,multiples,slip)

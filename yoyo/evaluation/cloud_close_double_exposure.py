@@ -80,7 +80,7 @@ def mark_and_cap(c,multiple,previous_close,share_target,trim,caps):
 
 
 @njit(cache=True)
-def trade(c,nav,actions,prices,fees,reserve,weights,unit_weights,trim,native_open,directions,multiple,slip):
+def trade(c,nav,actions,prices,fees,reserve,weights,unit_weights,trim,native_open,directions,multiple,slip,entry_limits):
     if c.i%4==2:
         slot = c.col//4
         if c.position_now<=0. or trim[slot]<=1.e-10:
@@ -93,6 +93,15 @@ def trade(c,nav,actions,prices,fees,reserve,weights,unit_weights,trim,native_ope
         fee = wallet.TAKER*multiple*underlying_ratio*(1-side*slip)/price
         return nb.order_nb(size=-c.position_now*trim[slot],price=price,fees=fee,lock_cash=True,
                            allow_partial=False,raise_reject=True)
+    if entry_limits.size>1 and c.i%4==0 and actions[c.i,c.col]==1:
+        hour,slot = c.i//4,c.col//4
+        limit = entry_limits[hour,slot]
+        if np.isfinite(limit):
+            leverage = native_open[hour,slot]*multiple
+            unit_notional = leverage*(1.+directions[hour,slot]*slip)
+            unit_cost = prices[c.i,c.col]*(1.+fees[c.i,c.col])
+            # account_order reserves at most nav / physical slots, then splits it by child weights.
+            nav = min(nav,limit*unit_cost/unit_notional*(c.group_len//len(weights)))
     return wallet.account_order(c,nav,actions,prices,fees,0.,1.,weights,reserve,0,unit_weights)
 
 
@@ -144,7 +153,7 @@ def receipts(pf, data, model, multiple):
     return positions,curve,int(fills.stage.eq(2).sum())
 
 
-def build_portfolio(data,model,native_open,previous_close,directions,multiple,slip,*,caps=None):
+def build_portfolio(data,model,native_open,previous_close,directions,multiple,slip,*,caps=None,entry_limits=None):
     """Run four-stage native account orders with the supplied underlying quantities."""
     hours,cols = len(data['actions'])//3,data['actions'].shape[1]
     def expand(field):
@@ -156,8 +165,12 @@ def build_portfolio(data,model,native_open,previous_close,directions,multiple,sl
         caps = np.array([[.2]])
     elif caps.shape!=previous_close.shape or not ((caps>0)&(caps<=1)).all():
         raise ValueError('Every real review needs an admissible notional cap')
+    if entry_limits is None:
+        entry_limits = np.full((1,1),np.inf)
+    elif entry_limits.shape!=previous_close.shape or np.isnan(entry_limits).any() or (entry_limits<0).any():
+        raise ValueError('Each opening limit must be nonnegative, in real underlying quote notional')
     portfolio = wallet.vbt.Portfolio.from_order_func(expand('marks'),trade,actions,expand('prices'),expand('fees'),
-        np.zeros(1),WEIGHTS,np.ones((1,1)),trim,native_open,directions,multiple,slip,
+        np.zeros(1),WEIGHTS,np.ones((1,1)),trim,native_open,directions,multiple,slip,entry_limits,
         pre_segment_func_nb=mark_and_cap,pre_segment_args=(multiple,previous_close,np.full(cols//4,-1.),trim,caps),
         cash_sharing=True,group_by=True,init_cash=1000.,fill_pos_record=False,
         max_orders=int(np.count_nonzero(actions)+4*np.count_nonzero(previous_close)+1))
