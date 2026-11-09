@@ -3375,6 +3375,21 @@ experiments:
     canonical_report: experiments/active/exp-cloud-close-trail-20261109-v1/summary.json
     notes: Development ends 2024, later years previously studied. OKX 12h confirmation, next 1h open, 5bp market / 2bp resting TP. No funding or capacity model. Notion 4128856479af81aebd50c0b38ee111bc.
 
+  - experiment_id: exp-cloud-close-reclaim-acceptance-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: fb5665b0bc
+    status: rejected
+    question: "Within frozen original 12H V1.7 reclaims, do three consecutive H1 closes inside the touched Monday 1.618 outperform a final-hour-only reclaim?"
+    single_variable: "Classify the last three completed H1 closes within the signal key as stable_3 or last_only_1; preserve all other observed sequences in the no-gate base."
+    result: "Of 12442 actual events, 12284 had positive turnover; 10186 were stable_3 and 728 last_only_1. Native VectorBT nine-slot balanced account: stable_3 funded 1500, ended 51309.14U, wins 22.07%, cash payoff 6.013, DD bound 44.30%; all-observable frozen baseline funded 1593, ended 51957.21U, wins 21.41%, cash payoff 6.364, DD bound 42.36%. Last-only funded 580, ended 2329.33U, wins 18.62%, cash payoff 6.634, DD bound 27.82%. Neither gate improved the baseline."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-cloud-close-reclaim-acceptance-20261109-v1/summary.json
+    notes: "No matched non-signal controls; all-observable reuses the frozen queue account. All 12442 H1 windows, next-open entry quotes, frozen signal closes and Monday ranges reconcile. 13 candidate-audit keys fall back to frozen signals.csv reference plus stop inversion; no H1 or Monday-range gaps. OKX taker 5bp / resting TP maker 2bp; +5bp slippage stress kept. Funding and exit depth not modeled. Notion 4138856479af81bbaa70dd68afc4746e."
+
   - experiment_id: exp-live-wick-two-closes-exit-20261109-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 7ebf62bf64
