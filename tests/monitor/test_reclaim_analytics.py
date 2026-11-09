@@ -1,6 +1,7 @@
 """Full-history, tranche-aware paper analytics; never infer stats from UI pages."""
 import unittest
-from yoyo.monitor.reclaim_analytics import DAY, build_analytics, compress_curve
+import sqlite3
+from yoyo.monitor.reclaim_analytics import DAY, build_analytics, compress_curve, paired_wick_payoff
 
 NOW = 40*DAY
 ACCOUNT = dict(track=60, started_ms=DAY, start_equity=1000, equity=1000)
@@ -16,6 +17,35 @@ def analyze(rows, fills=(), **kw):
     return build_analytics(rows, fills, kw.pop('account',ACCOUNT), kw.pop('quotes',{}), NOW, **kw)
 
 class AnalyticsTests(unittest.TestCase):
+    def test_wick_pair_uses_common_automatic_settlements_and_equal_notional_returns(self):
+        with sqlite3.connect(':memory:') as db:
+            db.executescript("""
+                CREATE TABLE tracks(track, started_ms);
+                CREATE TABLE positions(id INTEGER PRIMARY KEY, signal_id, track, fill_ms, entry,
+                    target, taken, notional REAL, stage, pnl REAL, exit_ms, reason);
+                CREATE TABLE exits(position_id, reason);
+            """)
+            db.executemany("INSERT INTO tracks VALUES (?,?)", [(8060, DAY), (8260, 4*DAY)])
+            def add(signal, gains, fill=5*DAY, end=NOW, taken=1, stage='closed'):
+                for i, (track, amount) in enumerate(((8060, 100), (8260, 500))):
+                    db.execute("INSERT INTO positions VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                               (signal*2+i, signal, track, fill, 1, 2+i, taken if i else 1,
+                                amount, stage if i else 'closed', amount*gains[i],
+                                end if i else end-DAY, 'target'))
+            add(1,(.1,.2)); add(2,(-.05,-.04))
+            add(3,(1,2),fill=3*DAY); add(4,(1,2),stage='pending_confirm')
+            add(5,(1,2),taken=0); add(6,(1,2))
+            db.execute("INSERT INTO exits VALUES (12,'manual')")
+            add(7,(.4,.2),end=NOW-8*DAY); add(8,(.3,.4),end=NOW+DAY)
+            row=paired_wick_payoff(db,8060,8260,NOW,7)
+            self.assertEqual((row['pairs'],row['changed_targets']),(2,2))
+            self.assertAlmostEqual(row['original']['payoff'],2.)
+            self.assertAlmostEqual(row['midpoint']['payoff'],5.)
+            self.assertAlmostEqual(row['midpoint']['mean_net_pct'],8.)
+            self.assertEqual(paired_wick_payoff(db,8060,8260,NOW,0)['pairs'],3)
+            db.execute("DELETE FROM positions WHERE signal_id=2")
+            self.assertIsNone(paired_wick_payoff(db,8060,8260,NOW,7)['midpoint']['payoff'])
+
     def test_empty_account_has_no_invented_win_rate_or_profit_factor(self):
         a=analyze([]);s=a['summary']
         self.assertEqual(s['realized_pnl'],0);self.assertEqual(s['unrealized_pnl'],0)

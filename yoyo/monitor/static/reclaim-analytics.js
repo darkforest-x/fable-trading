@@ -11,7 +11,7 @@
   const reason=(v,track)=>({target:'到达目标',breakeven:track==='4060'?'利润锁止损':'保本止损',backstop:'兜底止损',reclaimed_inside_be:track==='4060'?'收回但未越过利润锁价':'收回但未越过保本价',failed_reclaim:'确认未收回',manual:'手动平仓'}[v]||'其他退出');
   const time=v=>new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(v);
   function validate(d,track,days){
-    if(d?.paper_only!==true||d.track!==({v3:'1060',v3add:'2060',spike:'3060',v3lock:'4060',allin3:'5060',v3add20:'6060','live-allin3':'7060','live-wick6x3':'8060','live-wick3x3':'9060','live-wick6x3hi':'8160','live-wick3x3far':'9160','live-breadth':'9260'}[track]||track)||d.days!==days||!finite(d.now_ms)||!d.summary||!d.coverage||!['curve','by_side','by_symbol','by_reason'].every(k=>Array.isArray(d[k]))||!d.curve.every(p=>finite(p.time_ms)&&finite(p.equity)))throw Error('统计返回格式不完整');
+    if(d?.paper_only!==true||d.track!==({v3:'1060',v3add:'2060',spike:'3060',v3lock:'4060',allin3:'5060',v3add20:'6060','live-allin3':'7060','live-wick6x3':'8060','live-wick6x3mid':'8260','live-wick3x3':'9060','live-wick6x3hi':'8160','live-wick3x3far':'9160','live-breadth':'9260'}[track]||track)||d.days!==days||!finite(d.now_ms)||!d.summary||!d.coverage||!['curve','by_side','by_symbol','by_reason'].every(k=>Array.isArray(d[k]))||!d.curve.every(p=>finite(p.time_ms)&&finite(p.equity)))throw Error('统计返回格式不完整');
     return d;
   }
   const pf=s=>s.profit_factor_state==='no_losses'?'∞':num(s.profit_factor);
@@ -39,7 +39,15 @@
   function breakdownHTML(d){
     const section=(name,headers,rows,empty)=>`<section class="rp-analysis-section"><h3>${name}</h3>${rows.length?`<table><thead><tr>${headers.map(v=>`<th>${v}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`:`<p class="rp-analysis-empty">${empty}</p>`}</section>`;
     const tradeRow=(name,r)=>`<tr><th scope="row">${name}</th><td>${r.closed_count} / ${rate(r.win_rate)}</td><td class="${tone(r.realized_pnl)}">${signed(r.realized_pnl)}</td></tr>`;
-    return section('多空表现',['方向','结清 / 胜率','已实现 USDT'],d.by_side.map(r=>tradeRow(r.side===1?'做多':'做空',r)),'暂无交易')+
+    const paired=d.paired_wick;
+    let comparison='';
+    if(paired){
+      const rows=[['原版',paired.original],['浅穿中点',paired.midpoint]].map(([label,r])=>
+        `<tr><th scope="row">${label}</th><td>${num(r.payoff)}</td><td>${r.wins} / ${r.losses}</td><td>${finite(r.mean_net_pct)?signed(r.mean_net_pct)+'%':'—'}</td></tr>`);
+      comparison=section(`同信号前向对照 · ${paired.pairs} 对`,['策略','盈亏比','胜 / 负','每笔净收益'],rows,'')+
+        `<p class="rp-analysis-note">其中 ${paired.changed_targets} 对止盈目标不同。两版须在同一信号开仓、均计入资金且自动结清，按较晚平仓时间归入所选时段。盈亏比按每笔净收益率的平均盈利幅度 ÷ 平均亏损幅度计算，缺盈利或亏损样本时显示 —。</p>`;
+    }
+    return comparison+section('多空表现',['方向','结清 / 胜率','已实现 USDT'],d.by_side.map(r=>tradeRow(r.side===1?'做多':'做空',r)),'暂无交易')+
       section('退出原因',['原因','成交批次','已实现 USDT'],d.by_reason.map(r=>`<tr><th scope="row">${reason(r.reason,d.track)}</th><td>${r.exit_count}</td><td class="${tone(r.realized_pnl)}">${signed(r.realized_pnl)}</td></tr>`),'所选时间内尚无平仓成交')+
       section('币种表现 · 按盈亏影响排序',['币种','结清 / 胜率','已实现 USDT'],d.by_symbol.map(r=>tradeRow(esc(r.symbol.replace('-USDT-SWAP','')),r)),'所选时间内尚无已实现盈亏');
   }
@@ -49,7 +57,7 @@
   function create({root,createFeed,onOpen,onTrack}){
     const trigger=root.querySelector('[data-rp-action="analytics"]'),panel=document.createElement('section');
     panel.id='rp-analysis-panel';panel.className='rp-analysis rp-glass';panel.setAttribute('aria-label','模拟盘统计分析');
-    panel.innerHTML=`<header class="rp-record-heading" data-yd-sheet-drag><div><strong data-analysis-title>统计分析</strong><small>仅计入资金的模拟交易</small></div><button data-analysis-action="close" aria-label="收起统计分析">×</button></header><div class="rp-analysis-filters"><label class="rp-track-picker"><span>策略</span><select data-analysis-track aria-label="统计策略">${['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3','live-wick6x3','live-wick3x3','live-wick6x3hi','live-wick3x3far'].map(t=>`<option value="${t}">${t==='60'?'60m':t==='5'?'5m':t}</option>`).join('')}</select></label><div class="rp-tabs" role="group" aria-label="统计时段">${[[7,'近 7 天'],[30,'近 30 天'],[0,'全部']].map(([n,l])=>`<button data-analysis-days="${n}" aria-pressed="false">${l}</button>`).join('')}</div></div><p class="rp-analysis-status" role="status"></p><div class="rp-analysis-body"><div class="rp-analysis-warning" role="alert" hidden></div><div class="rp-analysis-grid"></div><section class="rp-analysis-section"><h3>已实现资金曲线 <small>USDT</small></h3><div class="rp-equity-chart" role="img" aria-label="已实现资金曲线"></div><p class="rp-curve-note"></p></section><div class="rp-analysis-breakdowns"></div><p class="rp-analysis-note">盈亏与手续费按每次平仓的成交时间计入，包含部分平仓；胜率与盈利因子按整笔最终结清时间统计。资金曲线不含浮动盈亏。手续费包含已平份额对应的开仓费与平仓费，未平份额不计入已结算费用。影子记录和待成交加仓不参与统计。v3add 与 v3add20 各自的主单和已成交加仓分别计笔，分别归入对应策略。</p></div><footer class="rp-analysis-footer"><span>完整账本 · 北京时间</span><button data-analysis-action="refresh">刷新统计</button></footer>`;
+    panel.innerHTML=`<header class="rp-record-heading" data-yd-sheet-drag><div><strong data-analysis-title>统计分析</strong><small>仅计入资金的模拟交易</small></div><button data-analysis-action="close" aria-label="收起统计分析">×</button></header><div class="rp-analysis-filters"><label class="rp-track-picker"><span>策略</span><select data-analysis-track aria-label="统计策略">${['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3','live-wick6x3','live-wick6x3mid','live-wick3x3','live-wick6x3hi','live-wick3x3far'].map(t=>`<option value="${t}">${t==='60'?'60m':t==='5'?'5m':t}</option>`).join('')}</select></label><div class="rp-tabs" role="group" aria-label="统计时段">${[[7,'近 7 天'],[30,'近 30 天'],[0,'全部']].map(([n,l])=>`<button data-analysis-days="${n}" aria-pressed="false">${l}</button>`).join('')}</div></div><p class="rp-analysis-status" role="status"></p><div class="rp-analysis-body"><div class="rp-analysis-warning" role="alert" hidden></div><div class="rp-analysis-grid"></div><section class="rp-analysis-section"><h3>已实现资金曲线 <small>USDT</small></h3><div class="rp-equity-chart" role="img" aria-label="已实现资金曲线"></div><p class="rp-curve-note"></p></section><div class="rp-analysis-breakdowns"></div><p class="rp-analysis-note">盈亏与手续费按每次平仓的成交时间计入，包含部分平仓；胜率与盈利因子按整笔最终结清时间统计。资金曲线不含浮动盈亏。手续费包含已平份额对应的开仓费与平仓费，未平份额不计入已结算费用。影子记录和待成交加仓不参与统计。v3add 与 v3add20 各自的主单和已成交加仓分别计笔，分别归入对应策略。</p></div><footer class="rp-analysis-footer"><span>完整账本 · 北京时间</span><button data-analysis-action="refresh">刷新统计</button></footer>`;
     root.append(panel);
     let track='60',days=0,active=false,open=false,feed=null,chart=null,chartLoading=false,chartError='',signature='',lastChartData=null;
     const requests=window.SpikeRuntime.createRequests(),el=s=>panel.querySelector(s);
@@ -82,7 +90,7 @@
       el('[data-analysis-action="refresh"]').disabled=busy;
       el('.rp-analysis-body').hidden=!data;
       if(!data)return;
-      const s=data.summary,c=data.coverage,key=JSON.stringify([s,c,data.by_side,data.by_symbol,data.by_reason]);
+      const s=data.summary,c=data.coverage,key=JSON.stringify([s,c,data.by_side,data.by_symbol,data.by_reason,data.paired_wick]);
       if(signature!==key){el('.rp-analysis-grid').innerHTML=metricsHTML(s,data.track);el('.rp-analysis-breakdowns').innerHTML=breakdownHTML(data);signature=key;}
       const warning=coverageNote(c);
       el('.rp-analysis-warning').hidden=!warning;el('.rp-analysis-warning').textContent=warning;

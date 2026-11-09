@@ -25,9 +25,11 @@ MIDPOINT_OLD_LEGS = A / 'exp-monday-limit-close-survivor-paths-20261101-v5'
 MIDPOINT_TRACK = 'live-wick6x3mid'
 MIDPOINT_EXPERIMENT_COMMIT = 'd203587331'
 MIDPOINT_RULE = ('其余入场和持仓管理沿用 live-wick6x3：触价5分钟K线收盘评分≥0.5、收盘仍在1.618外，'
-                 '收回幅度<64%、离1.618<30%时收盘市价进场；开仓价−20%止损，下一根1小时收盘未回到1.618以内则市价退出，'
-                 '回到以内后止损移到1.618。止盈按触价收盘按方向计算的1.618越界幅度 beyond_pct 分档：严格满足0<beyond_pct<1.5%时，'
-                 '以纽约时区周一区间中点止盈；其他合格交易仍以近侧周一边界止盈。6个槽位，保证金=已实现净值/6，3倍。'
+                 '收回幅度<64%、穿幅<30%时收盘市价进场；初始止损距离开仓价20%（多单向下，空单向上），'
+                 '下一根1小时收盘未回到1.618以内则市价退出，'
+                 '回到以内后止损移到1.618。穿幅=触价收盘价与对应1.618价位之差的绝对值÷该1.618价位×100%；'
+                 '严格满足0<穿幅<1.5%时以纽约时区周一区间中点止盈，'
+                 '其他合格交易仍以近侧周一边界止盈。6个槽位，保证金=已实现净值/6，3倍。'
                  'Taker 5bp并计10bp入场滑点，Maker 2bp止盈，其他退出Taker 5bp并计10bp滑点，不含资金费。')
 BOOST = {'live-wick6x3hi': '评分≥0.76时保证金×1.5（观察账户：0.76由2025–26回测事后选出，2025年前没有这类单，未经检验）。',
          'live-wick3x3far': '只做收盘离1.618至少1.5%的单（观察账户：门槛由回测事后发现，2020–24与2025–26两段都成立，待前向检验）。'}
@@ -44,7 +46,7 @@ LIMITATION = ('live-标识可在收盘后执行的规则，当前仅模拟运行
               '与OKX逐分钟模拟存在差异；固定同刻排序不等于实时到达顺序。入场条件在2020–2024选出、2025–2026检验，'
               '止损和仓位是看过2025–2026后定的；不代表未来收益。2026-09-21之后的成交来自币安每日归档补数，同一规则同一框架；'
               '币安没有发布10月28日数据，10-26当周只看到10-27收盘，10-28至10-31的触价没有计入。')
-MIDPOINT_LIMITATION = (LIMITATION + '浅穿越止盈切换由历史结果事后启发，10月原近侧路径已知后补跑了中点目标，不是前瞻验证。'
+MIDPOINT_LIMITATION = (LIMITATION + '浅穿中点目标由历史结果事后启发，10月原近侧路径已知后补跑了中点目标，不是前瞻验证。'
                        '历史1000U资金曲线仅作回看，未转入live-wick6x3mid独立前向1000U模拟账户。')
 
 
@@ -201,7 +203,7 @@ def _midpoint_ledger(signature):
         duration = 5 * 60000
         symbol = original['symbol']
         trade = dict(id=source_id, symbol=symbol, event=event, side=int(float(original['side'])),
-                     entry_ms=entry_ms, exit_ms=exit_ms, entry_start_ms=entry_ms-duration, pnl=pnl,
+                     entry_ms=entry_ms, exit_ms=exit_ms, entry_start_ms=entry_ms, pnl=pnl,
                      return_pct=100*pnl/notional, exit_reason=reason, target=target,
                      entry_rules=dict(status='saved', score=score, minimum=.5, kind='touch_close',
                                       score_basis='touch_close', variant='E20', recovery=recovery,
@@ -209,7 +211,7 @@ def _midpoint_ledger(signature):
                                       target_rule=('shallow_ny_monday_midpoint' if use_midpoint else 'near_monday_edge'),
                                       source_net_bp=net_bp),
                      fills=dict(entry_price=float(original['entry']), exit_price=float(leg['exit_price']),
-                                entry_start_ms=entry_ms-duration, entry_end_ms=entry_ms,
+                                entry_start_ms=entry_ms, entry_end_ms=entry_ms,
                                 exit_start_ms=exit_ms if reason in CLOSE_EXITS else exit_ms-duration,
                                 exit_end_ms=exit_ms, score_close_ms=entry_ms, execution_minutes=5,
                                 exit_kind='close' if reason in CLOSE_EXITS else 'interval'))
@@ -262,7 +264,7 @@ def midpoint_history():
     summary = json.loads((MIDPOINT_SOURCE / 'summary.json').read_text())
     source_manifest = json.loads((MIDPOINT_BASE / 'manifest.json').read_text())
     source_account = summary['accounts']['2020-01-01']['shallow_midpoint']
-    meta = dict(target='浅穿越中点 / 其他近侧周一边界', start='2020-01-01',
+    meta = dict(target='浅穿中点 / 其他近侧周一边界', start='2020-01-01',
                 end=str(pd.to_datetime(int(frame.time_ms.iloc[-1]), unit='ms', utc=True)),
                 seed=source_manifest['seed'], candidates=416, funded=400,
                 allocator=dict(kind='frac', slots=6, leverage=3),
@@ -331,22 +333,22 @@ def midpoint_section():
     summary = json.loads((MIDPOINT_SOURCE / 'summary.json').read_text())
     accounts = summary['accounts']
     rows = []
-    for start, label, period_end in (('2020-01-01', '2020-01-01 至 2026-10-27 UTC', '全期'),
-                                     ('2025-01-01', '2025-01-01 至 2026-10-27 UTC', '近年')):
+    for start, label in (('2020-01-01', '2020-01-01 至 2026-10-27 UTC'),
+                         ('2025-01-01', '2025-01-01 至 2026-10-27 UTC')):
         near = accounts[start]['near']
         midpoint = accounts[start]['shallow_midpoint']
         a, b = near['funded'], midpoint['funded']
         rows.append([f'{label} · {a["trades"]}笔',
-                     f'近侧 {near["final_multiple"]:.2f}倍 / 回撤{near["max_drawdown_pct"]:.1f}% / 胜率{a["win_pct"]:.1f}%',
-                     f'浅穿越中点 {midpoint["final_multiple"]:.2f}倍 / 回撤{midpoint["max_drawdown_pct"]:.1f}% / 胜率{b["win_pct"]:.1f}%'])
+                     f'{a["payoff"]:.3f} · {a["mean_net_bp"]:+.2f}bp/笔 · {near["final_multiple"]:.2f}倍资金 / 回撤{near["max_drawdown_pct"]:.1f}% / 胜率{a["win_pct"]:.1f}%',
+                     f'{b["payoff"]:.3f} · {b["mean_net_bp"]:+.2f}bp/笔 · {midpoint["final_multiple"]:.2f}倍资金 / 回撤{midpoint["max_drawdown_pct"]:.1f}% / 胜率{b["win_pct"]:.1f}%'])
     october = accounts['2026-10-01']
     near, midpoint = october['near'], october['shallow_midpoint']
     rows.append([f'2026-10-01 至 2026-10-27 UTC · {midpoint["taken"]}笔，10笔切换目标',
-                 f'近侧 {near["funded"]["wins"]}/{near["taken"]}胜 · {near["funded"]["mean_net_bp"]:+.0f}bp/笔',
-                 f'浅穿越中点 {midpoint["funded"]["wins"]}/{midpoint["taken"]}胜 · {midpoint["funded"]["mean_net_bp"]:+.0f}bp/笔'])
+                 f'{near["funded"]["payoff"]:.3f} · {near["funded"]["mean_net_bp"]:+.2f}bp/笔 · {near["funded"]["wins"]}/{near["taken"]}胜',
+                 f'{midpoint["funded"]["payoff"]:.3f} · {midpoint["funded"]["mean_net_bp"]:+.2f}bp/笔 · {midpoint["funded"]["wins"]}/{midpoint["taken"]}胜'])
     return dict(title='事后目标对照 · 尚未前瞻验证',
-                note='同一触价事件与六槽分配口径，只有小于1.5%的浅穿越目标切到区间中点。初始资本各自1000U；区间和目标档位见实验登记。结果由已知历史驱动，不代表未来表现。',
-                headers=['区间 / 样本', '近侧周一边界', '浅穿越中点'], rows=rows)
+                note='名义盈亏比=平均每笔盈利bp÷平均每笔亏损bp绝对值；它与按USDT金额盈利总和/亏损总和计算的Profit Factor不同。每个账户各自从1000U起步，资金倍数和回撤来自对应区间的资金账本。同一触价事件与六槽分配口径，只有穿幅严格小于1.5%的交易改用区间中点；结果受已知历史驱动，不代表未来表现。',
+                headers=['区间 / funded笔数', '近侧周一边界：名义盈亏比 · 平均净收益 · 资金表现', '浅穿中点：名义盈亏比 · 平均净收益 · 资金表现'], rows=rows)
 
 
 def publish_booklet():
@@ -376,7 +378,7 @@ def publish_booklet():
     out.joinpath(f'{MIDPOINT_TRACK}-history.json').write_text(
         json.dumps(history, ensure_ascii=False, separators=(',', ':'), allow_nan=False))
     research['accounts'][MIDPOINT_TRACK] = dict(
-        status='浅穿越目标切换 · 独立模拟策略', note=MIDPOINT_RULE,
+        status='浅穿中点 · OKX 前向观察', note=MIDPOINT_RULE,
         detail=(f"历史账本区间 2020-01-01 至 2026-10-27 UTC：416个候选机会中实际开仓{value['meta']['trades']}笔，"
                 f"中点目标{value['meta']['midpoint_trades']}笔、近侧目标{value['meta']['near_target_trades']}笔、"
                 f"16个机会未获资金分配。历史1000U期末{history['summary']['end']:,.2f}U，"

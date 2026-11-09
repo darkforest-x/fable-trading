@@ -27,6 +27,45 @@ def trade_stats(rows):
                 average_pnl=sum(p["pnl"] for p in valid)/len(valid) if valid else None)
 
 
+def paired_wick_payoff(db, original, midpoint, now_ms, days):
+    """Compare fully settled automatic entries since both accounts started.
+
+    Match on the shared signal ID. Use the later settlement for the period
+    filter and each leg's actual net P&L divided by its own original notional.
+    A manual partial exit disqualifies the pair even if its final exit was automatic.
+    """
+    start = db.execute("SELECT MAX(started_ms) FROM tracks WHERE track IN (?, ?) "
+                       "HAVING COUNT(*)=2", (original, midpoint)).fetchone()
+    if start is None:
+        return None
+    observed_from = start[0]
+    period_from = max(observed_from, now_ms - days*DAY) if days else observed_from
+    rows = db.execute("""
+        SELECT a.pnl/a.notional AS original_return, b.pnl/b.notional AS midpoint_return,
+               a.target != b.target AS target_changed
+          FROM positions a JOIN positions b ON b.signal_id=a.signal_id
+         WHERE a.track=? AND b.track=?
+           AND a.fill_ms >= ? AND b.fill_ms >= ? AND a.fill_ms=b.fill_ms AND a.entry=b.entry
+           AND a.taken=1 AND b.taken=1 AND a.notional>0 AND b.notional>0
+           AND a.stage='closed' AND b.stage='closed'
+           AND a.pnl IS NOT NULL AND b.pnl IS NOT NULL
+           AND MAX(a.exit_ms,b.exit_ms) BETWEEN ? AND ?
+           AND a.reason!='manual' AND b.reason!='manual'
+           AND NOT EXISTS (SELECT 1 FROM exits e WHERE e.position_id IN (a.id,b.id) AND e.reason='manual')
+        """, (original, midpoint, observed_from, observed_from, period_from, now_ms)).fetchall()
+
+    def stats(column):
+        returns = [r[column] for r in rows]
+        gains = [r for r in returns if r > 0]
+        losses = [r for r in returns if r < 0]
+        payoff = (math.fsum(gains)/len(gains)) / (-math.fsum(losses)/len(losses)) if gains and losses else None
+        return dict(payoff=payoff, wins=len(gains), losses=len(losses),
+                    mean_net_pct=100*math.fsum(returns)/len(returns) if returns else None)
+
+    return dict(started_ms=observed_from, pairs=len(rows), changed_targets=sum(r[2] for r in rows),
+                original=stats(0), midpoint=stats(1))
+
+
 def compress_curve(points, limit=1000):
     """Preserve endpoints and local cash-equity extrema; stats use full points."""
     if len(points) <= limit:

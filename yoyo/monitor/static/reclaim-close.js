@@ -5,13 +5,14 @@
 (() => {
   'use strict';
   const finite=Number.isFinite;
+  const isWick=id=>[8060,8160,8260,9060,9160].includes(id);
   function estimate(p,percentage){
     if(!p||p.taken!==1||p.stage==='closed'||!finite(p.remaining_notional)||p.remaining_notional<=0||!finite(p.entry)||p.entry<=0||!finite(percentage)||percentage<=0||percentage>100)return null;
-    if([3060,5060,6060,6061,7060,8060,8160,9060,9160].includes(p.track)&&(!finite(p.margin_leverage)||p.margin_leverage<=0))return null;
+    if([3060,5060,6060,6061,7060,8060,8160,8260,9060,9160].includes(p.track)&&(!finite(p.margin_leverage)||p.margin_leverage<=0))return null;
     const amount=p.remaining_notional*percentage/100,quantity=amount/p.entry;
-    const rawPnl=finite(p.mark)&&p.mark>0?p.side*(p.mark-p.entry)*quantity-amount*(p.track===7060?.0017:[8060,8160,9060,9160].includes(p.track)?.003:.0007):null;
-    return {amount,quantity,remaining:(p.remaining_notional-amount)/p.entry,entryFee:amount*.0002,exitFee:amount*.0005,
-      pnl:rawPnl===null?null:[3060,5060,6060,6061,7060,8060,8160,9060,9160].includes(p.track)?Math.max(rawPnl,-amount/p.margin_leverage):rawPnl};
+    const rawPnl=finite(p.mark)&&p.mark>0?p.side*(p.mark-p.entry)*quantity-amount*(p.track===7060?.0017:isWick(p.track)?.003:.0007):null;
+    return {amount,quantity,remaining:(p.remaining_notional-amount)/p.entry,entryFee:amount*(isWick(p.track)?.0005:.0002),exitFee:amount*.0005,
+      pnl:rawPnl===null?null:[3060,5060,6060,6061,7060,8060,8160,8260,9060,9160].includes(p.track)?Math.max(rawPnl,-amount/p.margin_leverage):rawPnl};
   }
   function createSubmitter({send,uuid=()=>crypto.randomUUID()}){
     let pending=null,key='',id='';
@@ -47,11 +48,11 @@
     const field=(label,value)=>`<div><dt>${label}</dt><dd>${value}</dd></div>`;
     function render(){
       const pct=Number(input.value),e=estimate(position,pct),base=position?.symbol.replace('-USDT-SWAP','')||'';
-      dialog.querySelector('.rp-close-hint').textContent='按最新报价模拟成交；净盈亏含分摊开仓费与本次平仓费。'+([3060,5060,6060,6061,7060,8060,8160,9060,9160].includes(position?.track)?` ${position.track===8060?'live-wick6x3':position.track===9060?'live-wick3x3':position.track===8160?'live-wick6x3hi':position.track===9160?'live-wick3x3far':position.track===7060?'live-allin3':position.track===5060?'allin3':[6060,6061].includes(position.track)?'v3add20':'spike'} 本次亏损按平仓份额的保证金封顶。`:'')+([5060,7060].includes(position?.track)?' 完全平仓后的补充本金以后台记录为准，不计入本次交易盈亏。':'')+(position?.track===7060?' 非目标退出另扣0.10%滑点情景。':[8060,8160,9060,9160].includes(position?.track)?' 开仓按吃单另扣0.10%滑点，非目标退出另扣0.10%滑点。':'');
-      el('identity').innerHTML=`<b>${esc(base)} / USDT</b> <span class="${position?.side===1?'rp-positive':'rp-negative'}">${position?.side===1?'做多':'做空'}</span> <small>${({60:'60m',5:'5m',1060:'v3',2060:'v3add · 主单',2061:'v3add · 加仓',3060:'spike',4060:'v3lock',5060:'allin3',7060:'live-allin3',8060:'live-wick6x3',9060:'live-wick3x3',8160:'live-wick6x3hi',9160:'live-wick3x3far',6060:'v3add20 · 主单',6061:'v3add20 · 加仓'}[position?.track]||'未知策略')} 模拟</small>`;
+      dialog.querySelector('.rp-close-hint').textContent='按最新报价模拟成交；净盈亏含分摊开仓费与本次平仓费。'+([3060,5060,6060,6061,7060,8060,8160,8260,9060,9160].includes(position?.track)?` ${position.track===8060?'live-wick6x3':position.track===8260?'live-wick6x3mid':position.track===9060?'live-wick3x3':position.track===8160?'live-wick6x3hi':position.track===9160?'live-wick3x3far':position.track===7060?'live-allin3':position.track===5060?'allin3':[6060,6061].includes(position.track)?'v3add20':'spike'} 本次亏损按平仓份额的保证金封顶。`:'')+([5060,7060].includes(position?.track)?' 完全平仓后的补充本金以后台记录为准，不计入本次交易盈亏。':'')+(position?.track===7060?' 非目标退出另扣0.10%滑点情景。':isWick(position?.track)?' 开仓按吃单另扣0.10%滑点，非目标退出另扣0.10%滑点。':'');
+      el('identity').innerHTML=`<b>${esc(base)} / USDT</b> <span class="${position?.side===1?'rp-positive':'rp-negative'}">${position?.side===1?'做多':'做空'}</span> <small>${({60:'60m',5:'5m',1060:'v3',2060:'v3add · 主单',2061:'v3add · 加仓',3060:'spike',4060:'v3lock',5060:'allin3',7060:'live-allin3',8060:'live-wick6x3',8260:'live-wick6x3mid',9060:'live-wick3x3',8160:'live-wick6x3hi',9160:'live-wick3x3far',6060:'v3add20 · 主单',6061:'v3add20 · 加仓'}[position?.track]||'未知策略')} 模拟</small>`;
       dialog.querySelectorAll('[data-close-percent]').forEach(b=>{b.setAttribute('aria-pressed',String(Number(b.dataset.closePercent)===pct));b.disabled=busy||success;});
       input.disabled=busy||success;
-      el('estimate').innerHTML=field('当前持仓',`${number(position?.remaining_notional/position?.entry)} ${esc(base)}`)+field('拟平仓数量',`${number(e?.quantity)} ${esc(base)}`)+field('平仓后剩余',`${number(e?.remaining)} ${esc(base)}`)+field('参考价格',`${number(position?.mark)} USDT`)+field('预计平仓费 · Taker 0.05%',`${number(e?.exitFee)} USDT`)+field('分摊开仓费 · Maker 0.02%',`${number(e?.entryFee)} USDT`)+field('预计已实现净盈亏',`<b class="${e?.pnl>0?'rp-positive':e?.pnl<0?'rp-negative':''}">${money(e?.pnl)} USDT</b>`);
+      el('estimate').innerHTML=field('当前持仓',`${number(position?.remaining_notional/position?.entry)} ${esc(base)}`)+field('拟平仓数量',`${number(e?.quantity)} ${esc(base)}`)+field('平仓后剩余',`${number(e?.remaining)} ${esc(base)}`)+field('参考价格',`${number(position?.mark)} USDT`)+field('预计平仓费 · Taker 0.05%',`${number(e?.exitFee)} USDT`)+field(isWick(position?.track)?'分摊开仓费 · Taker 0.05%':'分摊开仓费 · Maker 0.02%',`${number(e?.entryFee)} USDT`)+field('预计已实现净盈亏',`<b class="${e?.pnl>0?'rp-positive':e?.pnl<0?'rp-negative':''}">${money(e?.pnl)} USDT</b>`);
       submit.disabled=busy||(!success&&(!e||e.pnl===null));submit.textContent=busy?'撮合确认中…':success?'完成':'确认模拟平仓';
       dialog.querySelectorAll('[data-close-action="cancel"]').forEach(b=>b.disabled=busy);
     }

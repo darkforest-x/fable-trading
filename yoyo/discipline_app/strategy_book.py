@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 
 MAX_POINTS = 480
 COIN = re.compile(r'[A-Z0-9]{1,32}USDT')
-WICK = ('live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far')
+WICK = ('live-wick6x3', 'live-wick6x3mid', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far')
 V3 = ('v3', 'v3add', 'v3lock', 'v3add20')
 EXIT_REASONS = frozenset(('target', 'breakeven', 'backstop', 'reclaimed_inside_be', 'failed_reclaim', 'manual', 'time_6d',
                           'stop', 'settlement', 'end', 'liquidation', 'timeout', 'time'))
@@ -114,6 +114,8 @@ def flow(track):
     entry = ('冻结入场评分仅使用触价前已收盘信息；当前模拟运行。' if track == 'live-allin3' else
              '触价5m收盘时评分并检查收回比例，收盘后市价入场，不回记；当前模拟运行。' if wick else
              '原回测评分包含触价5m收盘信息，收盘后回记触价入场。')
+    if track == 'live-wick6x3mid':
+        entry += '向外穿过 1.618 不足 1.5% 时，整仓止盈取纽约周一高低点的中点；达到 1.5% 时，多单取周一低点，空单取周一高点。'
     confirm = ('触价所在1小时K线之后，下一根1小时K线收盘，以 1.618 判断是否收回。未收回则退出；目标可在确认前成交。' if wick else
                '触价所在K线之后，下一根确认周期K线收盘。未收回则退出；目标可在确认前成交。')
     protection = '收回后止损移到 1.618，不加偏移。' if wick else '收回且越过保护价才移动止损；收回但未越过时按确认收盘退出。多单加偏移，空单减偏移。'

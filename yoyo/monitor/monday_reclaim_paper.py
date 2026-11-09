@@ -95,11 +95,19 @@ forward observation of that sizing, not a validated rule.
 Owner 2026-11-01 ("开观察账户", exp-monday-limit-close-beyond-filter-20261101-v1): a fourth account "live-wick3x3far" is
 live-wick3x3 but only takes touches whose close is at least 1.5 percent past the level. The distance effect was noticed on
 the backtest trades (post hoc), held in both periods and beat random same-size subsets; this account observes it forward.
+
+Owner 2026-11-09 (exp-live-wick-shallow-midpoint-20261109-v1): a fifth account "live-wick6x3mid" (track 8260)
+keeps the original score, E20 stop, survivor/reclaim rules, and 6 slots x 3 sizing. Its target is range_0.5 (the NY
+Monday high-low midpoint) only when the touch close is strictly 0 < beyond_pct < 1.5, where beyond_pct retains the raw
+1.618 level as its denominator; otherwise the target stays at the near Monday edge. The 1.5 boundary is inclusive on
+the near-edge side. This post-hoc cut is a forward observation only, starts with 1000 USDT when enabled, and never
+imports historical account equity or pre-activation touches.
 """
 from __future__ import annotations
 
 from contextlib import contextmanager
 from datetime import datetime
+from decimal import Decimal
 import json
 from functools import wraps
 import uuid
@@ -140,12 +148,18 @@ CONFIRM[LIVE_ALLIN3_TRACK] = 60
 WICK6_TRACK, WICK3_TRACK = 8060, 9060  # touch-close market entries; API keys "live-wick6x3" / "live-wick3x3"
 WICK6HI_TRACK = 8160  # live-wick6x3 with 1.5 x margin from score 0.76; API key "live-wick6x3hi"
 WICK3FAR_TRACK = 9160  # live-wick3x3 only when the close is >= 1.5 percent past the level; API key "live-wick3x3far"
-WICK_TRACKS = (WICK6_TRACK, WICK3_TRACK, WICK6HI_TRACK, WICK3FAR_TRACK)
+WICK6MID_TRACK = 8260  # live-wick6x3 with a midpoint target for shallow closes; API key "live-wick6x3mid"
+WICK_TRACKS = (WICK6_TRACK, WICK3_TRACK, WICK6HI_TRACK, WICK3FAR_TRACK, WICK6MID_TRACK)
 LIVE_TRACKS = (LIVE_ALLIN3_TRACK,)+WICK_TRACKS  # live- accounts named in TG / Bark notifications
 CONFIRM[WICK6_TRACK] = CONFIRM[WICK3_TRACK] = CONFIRM[WICK6HI_TRACK] = CONFIRM[WICK3FAR_TRACK] = 60
+CONFIRM[WICK6MID_TRACK] = 60
 WICK = dict(min_score=.5, max_recovery=0.6395668107499273, max_beyond_pct=30., stop_pct=20., leverage=3.)
-WICK_SLOTS = {WICK6_TRACK: 6, WICK3_TRACK: 3, WICK6HI_TRACK: 6, WICK3FAR_TRACK: 3}
+WICK_SLOTS = {WICK6_TRACK: 6, WICK3_TRACK: 3, WICK6HI_TRACK: 6, WICK3FAR_TRACK: 3, WICK6MID_TRACK: 6}
 WICK_BOOST = {WICK6HI_TRACK: dict(boost_from_score=.76, boost=1.5), WICK3FAR_TRACK: dict(min_beyond_pct=1.5)}
+WICK6MID_MIN_BEYOND_PCT, WICK6MID_MAX_BEYOND_PCT = 0., 1.5
+WICK_MIDPOINT = {WICK6MID_TRACK: dict(midpoint_min_beyond_pct=WICK6MID_MIN_BEYOND_PCT,
+                                      midpoint_max_beyond_pct=WICK6MID_MAX_BEYOND_PCT,
+                                      target_rule="shallow_ny_monday_midpoint")}
 V3ADD20_TRACK, V3ADD20_LEG = 6060, 6061  # v3add with margin = equity / 20 at 3x and its add legs; API key "v3add20"
 CONFIRM[V3ADD20_TRACK] = CONFIRM[V3ADD20_LEG] = 60
 ACCOUNT[V3ADD20_LEG] = V3ADD20_TRACK
@@ -153,7 +167,8 @@ V3ADD20 = dict(ADD, slots=20, leverage=3.)
 LEGS = {V3ADD_TRACK: V3ADD_LEG, V3ADD20_TRACK: V3ADD20_LEG}
 KEYS = {V3_TRACK: "v3", V3ADD_TRACK: "v3add", SPIKE_TRACK: "spike", V3LOCK_TRACK: "v3lock", ALLIN3_TRACK: "allin3",
         V3ADD20_TRACK: "v3add20", LIVE_ALLIN3_TRACK: "live-allin3", WICK6_TRACK: "live-wick6x3",
-        WICK3_TRACK: "live-wick3x3", WICK6HI_TRACK: "live-wick6x3hi", WICK3FAR_TRACK: "live-wick3x3far"}
+        WICK3_TRACK: "live-wick3x3", WICK6HI_TRACK: "live-wick6x3hi", WICK3FAR_TRACK: "live-wick3x3far",
+        WICK6MID_TRACK: "live-wick6x3mid"}
 POSITION_SCORES = ("CASE WHEN p.track=7060 THEN ls.score ELSE s.score END AS score, s.ema_order, "
                    "CASE WHEN p.track=7060 THEN 'pre_touch' ELSE s.score_basis END AS score_basis")
 SCORE_JOIN = " LEFT JOIN signals s ON s.id=p.signal_id LEFT JOIN live_scores ls ON ls.signal_id=p.signal_id "
@@ -335,6 +350,25 @@ def wick_entry(side, level, target, bar):
     return dict(close=close, recovery=recovery, beyond_pct=beyond), None
 
 
+def shallow_wick_beyond(side, level, close):
+    """Strict 0 < beyond < 1.5% using decimal prices and the raw 1.618 level denominator."""
+    level, close = Decimal(str(level)), Decimal(str(close))
+    if level <= 0:
+        return False
+    past = Decimal(str(side)) * (level-close)
+    scaled_past = Decimal("100")*past
+    return (scaled_past > Decimal(str(WICK6MID_MIN_BEYOND_PCT))*level
+            and scaled_past < Decimal(str(WICK6MID_MAX_BEYOND_PCT))*level)
+
+
+def wick_account_target(track, levels, side, level, close):
+    """Return the account's target: shallow live-wick6x3mid entries use Monday range_0.5; others use the near edge."""
+    near = levels["low"] if side == 1 else levels["high"]
+    if track == WICK6MID_TRACK and shallow_wick_beyond(side, level, close):
+        return levels["low"] + .5 * (levels["high"] - levels["low"])
+    return near
+
+
 class ReclaimPaper:
     def __init__(self, runtime, fib, model_path=MODEL, v3_path=V3, enable_v3=True, enable_v3add=True, enable_spike=True,
                  enable_v3lock=True, enable_allin3=True, enable_v3add20=True, score_basis="touch_close",
@@ -354,7 +388,8 @@ class ReclaimPaper:
         self.allin = dict(ALLIN3) if enable_allin3 else None
         self.live_allin = dict(ALLIN3, score_basis="pre_touch", slippage_bp=SLIP_BP) if enable_live_allin3 else None
         self.add20 = dict(V3ADD20) if self.v3 and enable_v3add20 else None
-        self.wick = {t: dict(WICK, slots=WICK_SLOTS[t], **WICK_BOOST.get(t, {})) for t in WICK_TRACKS} if enable_live_wick else {}
+        self.wick = {t: dict(WICK, slots=WICK_SLOTS[t], **WICK_BOOST.get(t, {}), **WICK_MIDPOINT.get(t, {}))
+                     for t in WICK_TRACKS} if enable_live_wick else {}
         self.path = Path(runtime)/"monday-reclaim-paper.sqlite3"
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.events = queue.Queue(maxsize=200_000)
@@ -806,6 +841,14 @@ class ReclaimPaper:
         for track, w in self.wick.items():
             if facts["beyond_pct"] < w.get("min_beyond_pct", 0.):
                 continue
+            # A newly enabled account starts at its own activation time and cannot
+            # acquire pending touches observed before that point after a restart.
+            if track == WICK6MID_TRACK:
+                signal = db.execute("SELECT observed_ms FROM signals WHERE id=?", (sid,)).fetchone()
+                started = db.execute("SELECT started_ms FROM tracks WHERE track=?", (track,)).fetchone()
+                if signal is None or started is None or signal["observed_ms"] < started["started_ms"]:
+                    continue
+            account_target = wick_account_target(track, levels, side, level, facts["close"])
             notional, note = 0., None
             equity = db.execute("SELECT equity FROM tracks WHERE track=?", (track,)).fetchone()["equity"]
             row = db.execute("SELECT COUNT(*) n, COALESCE(SUM(COALESCE(remaining_notional,notional)),0) s FROM positions "
@@ -819,7 +862,7 @@ class ReclaimPaper:
                 notional = margin*w["leverage"]
             db.execute("INSERT INTO positions (signal_id,track,symbol,side,entry,target,fill_ms,decision_ms,stage,taken,notional,"
                        "last_seen_ms,note,remaining_notional,backstop,reclaim_ref) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                       (sid, track, symbol, side, entry, target, fill, decision, "pending_confirm", int(notional > 0), notional,
+                       (sid, track, symbol, side, entry, account_target, fill, decision, "pending_confirm", int(notional > 0), notional,
                         fill, note, notional, backstop, level))
 
     def _open_spike(self, db, sid, symbol, side, level, target, candle_ms, order):
@@ -1118,13 +1161,14 @@ class ReclaimPaper:
                     self.handle_quote(row["symbol"], {"candle_ms": ts, "high": h, "low": l, "price": c})
 
     def analytics(self, track=60, days=0):
-        from .reclaim_analytics import build_analytics
+        from .reclaim_analytics import build_analytics, paired_wick_payoff
         if track in self.extra_accounts:
             with self.fib.lock:
                 quotes, connected = dict(self.fib.quotes), self.fib.connected
             return self.extra_accounts[track].paper_analytics(quotes, self.client.clock(), days, connected)
         track = track_id(track)
         tracks = members(track); marks = ",".join("?"*len(tracks))
+        now_ms = self.client.clock()
         with self.fib.lock:
             quotes, connected = dict(self.fib.quotes), self.fib.connected
         with self.db() as db:
@@ -1134,8 +1178,13 @@ class ReclaimPaper:
             exits = [dict(r) for r in db.execute(f"SELECT e.* FROM exits e JOIN positions p ON p.id=e.position_id WHERE p.track IN ({marks})", tracks)]
             acct["refills"] = [dict(r) for r in db.execute("SELECT ms time_ms, equity_after-equity_before amount FROM refills "
                                                            "WHERE track=? ORDER BY ms,id", (track,))]
+            paired = (paired_wick_payoff(db, WICK6_TRACK, WICK6MID_TRACK, now_ms, days)
+                      if track in (WICK6_TRACK, WICK6MID_TRACK) else None)
         acct["start_equity"] = START_EQUITY
-        return build_analytics(positions, exits, acct, quotes, self.client.clock(), days, connected)
+        result = build_analytics(positions, exits, acct, quotes, now_ms, days, connected)
+        if paired is not None:
+            result["paired_wick"] = paired
+        return result
 
     def snapshot(self, list_period="recent", track=None):
         """Return every account's summary, open positions and pending adds.
@@ -1373,14 +1422,14 @@ def install(app, engine):
     @app.get("/api/monday-reclaim-paper/analytics")
     def analytics(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20", "live-allin3",
                                   "live-wick6x3", "live-wick3x3",
-                                  "live-wick6x3hi", "live-wick3x3far", "live-breadth"] = "60",
+                                  "live-wick6x3hi", "live-wick3x3far", "live-wick6x3mid", "live-breadth"] = "60",
                   days: Literal["0", "7", "30"] = "0"):
         return engine.analytics(track, int(days))
 
     @app.get("/api/monday-reclaim-paper/history")
     def record_history(track: Literal["60", "5", "v3", "v3add", "spike", "v3lock", "allin3", "v3add20", "live-allin3",
                                   "live-wick6x3", "live-wick3x3",
-                                  "live-wick6x3hi", "live-wick3x3far", "live-breadth"] = "60",
+                                  "live-wick6x3hi", "live-wick3x3far", "live-wick6x3mid", "live-breadth"] = "60",
                        tab: Literal["events", "closed"] = "events",
                        scope: Literal["funded", "shadow", "all"] = "funded",
                        q: str = Query("", max_length=100), offset: int = Query(0, ge=0),

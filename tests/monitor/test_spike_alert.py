@@ -199,7 +199,9 @@ class SpikeAlertLiveWindowTests(unittest.TestCase):
         paper = sqlite3.connect(root/"monday-reclaim-paper.sqlite3")
         paper.execute("CREATE TABLE positions (id INTEGER PRIMARY KEY, track INTEGER, symbol TEXT, fill_ms INTEGER, taken INTEGER)")
         paper.executemany("INSERT INTO positions (track,symbol,fill_ms,taken) VALUES (?,?,?,?)",
-                          [(8060, "SOL-USDT-SWAP", T0+MIN, 1), (8060, "ADA-USDT-SWAP", T0+MIN*2, 0), (60, "SOL-USDT-SWAP", T0+MIN, 1), (7060, "BTC-USDT-SWAP", T0-3600_000, 1)])
+                          [(8060, "SOL-USDT-SWAP", T0+MIN, 1), (8260, "SOL-USDT-SWAP", T0+MIN, 1),
+                           (8060, "ADA-USDT-SWAP", T0+MIN*2, 0), (60, "SOL-USDT-SWAP", T0+MIN, 1),
+                           (7060, "BTC-USDT-SWAP", T0-3600_000, 1)])
         paper.commit(); paper.close()
         self.a = SpikeAlert(self.tmp.name, threshold=2, telegram_creds=None, bark_key="", sender=lambda *a, **k: None, clock=lambda: self.now[0])
         self.a.telegram_creds = None
@@ -225,6 +227,7 @@ class SpikeAlertLiveWindowTests(unittest.TestCase):
         self.assertEqual((got["SOL-USDT-SWAP"]["level"], got["SOL-USDT-SWAP"]["price"], got["ADA-USDT-SWAP"]["price"]), (100., 99.5, None))
         self.assertEqual(live["window_end_ms"], T0 + MIN + 30*MIN)
         self.assertEqual({p["track"]: p["opened"] for p in live["paper"]}["live-wick6x3"], 1, "only taken live- positions in the window count")
+        self.assertEqual({p["track"]: p["opened"] for p in live["paper"]}["live-wick6x3mid"], 1)
         self.assertNotIn("ref_prices", self.a.snapshot()["alerts"][0])
 
     def test_stale_quotes_are_not_shown_as_current(self):

@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const tracks=['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3','live-wick6x3','live-wick3x3','live-wick6x3hi','live-wick3x3far','live-breadth'];
+  const tracks=['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3','live-wick6x3','live-wick6x3mid','live-wick3x3','live-wick6x3hi','live-wick3x3far','live-breadth'];
   const BREADTH='breadth-ema20', SEPTEMBER_CASE='BTC|2026-09-15T19:20:00Z';
   tracks.push(BREADTH);
   const steps={'1m':60000,'2m':120000,'3m':180000,'5m':300000,'15m':900000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000};
@@ -17,7 +17,7 @@
   const date=t=>format.format(t);
   const pointFormat=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
   const shortTime=t=>date(t).slice(-5);
-  const entryLabel=r=>r.point_times?date(r.entry_ms):Number.isFinite(r.entry_start_ms)?`${date(r.entry_start_ms)}–${shortTime(r.entry_ms)}`:date(r.entry_ms)+'（记账）';
+  const entryLabel=r=>r.point_times||r.entry_start_ms===r.entry_ms?date(r.entry_ms):Number.isFinite(r.entry_start_ms)?`${date(r.entry_start_ms)}–${shortTime(r.entry_ms)}`:date(r.entry_ms)+'（记账）';
   const price=v=>Number.isFinite(v)&&v>0?v.toLocaleString('en-US',{maximumFractionDigits:10}):'—';
   function fillLabel(r,key){
     const f=r.fills,start=f?.[key+'_start_ms'],end=f?.[key+'_end_ms'];
@@ -36,10 +36,17 @@
       fills.map((f,i)=>`<div class="bt-summary-fill" data-fill="${i?'exit':'entry'}"><span>${esc(f.label||'平仓')}</span><b>${price(f.price)}</b><time>${date(f.time_ms)}</time></div>`).join('')+
       `<div class="bt-summary-pnl"><span>${alt?'篮子净收益':'净收益'} <small>USDT</small></span><strong class="${tone(r.pnl)}">${money(r.pnl)}</strong><small>${money(r.return_pct)}%</small></div><small class="bt-summary-note">北京时间 · ${cost}${details}</small>`;
   }
+  function wickTargetText(r){
+    const rule=r.entry_rules;
+    if(!['shallow_ny_monday_midpoint','near_monday_edge'].includes(rule?.target_rule)||!Number.isFinite(rule.beyond_pct))return '';
+    const target=r.target==='range_0.5'?'周一中点':r.target==='near_monday_edge'?'周一近侧':'';
+    return target?`穿幅 ${Number(rule.beyond_pct.toFixed(4))}% · 目标 ${target}`:'';
+  }
   function summaryHTML(r,{source='Binance',mode='历史回测',costNote='已扣原研究成本',funded=true}={}){
     if(r.event_id&&r.branch_label)return breadthSummary(r);
+    const wickTarget=wickTargetText(r);
     const interval=['entry','exit'].some(k=>r.fills?.[k+'_end_ms']>r.fills?.[k+'_start_ms']);
-    return `<div class="bt-summary-coin"><strong>${esc(base(r.symbol))}<small> / USDT</small></strong><span><em class="${r.side===1?'rp-positive':'rp-negative'}">${r.side===1?'做多':'做空'}</em> · ${esc(source)} · ${esc(mode)}</span></div>${['entry','exit'].map((key,i)=>`<div class="bt-summary-fill" data-fill="${key}"><span>${i===0?'① 开仓':'② 平仓'}</span><b>${price(r.fills?.[key+'_price'])}</b><time>${fillLabel(r,key)}</time></div>`).join('')}${Number.isFinite(r.entry_rules?.score)?`<div class="bt-summary-fill bt-summary-score" data-fill="score"><span>入场评分</span><b>${r.entry_rules.score.toFixed(4)}</b><time>${r.entry_rules.score_basis==='pre_touch'?'触价前评分':r.entry_rules.kind==='touch_close'?'触价收盘评分':'原回测评分'} · 门槛 ${r.entry_rules.minimum<.3?'前40%':'≥'+r.entry_rules.minimum}</time></div>`:''}<div class="bt-summary-pnl"><span>${funded?'净收益 <small>USDT</small>':'未计入资金'}</span><strong class="${funded?tone(r.pnl):''}">${funded?(Number.isFinite(r.pnl)?money(r.pnl):'—'):'影子记录'}</strong>${funded&&Number.isFinite(r.return_pct)?`<small class="${tone(r.return_pct)}">${money(r.return_pct)}%</small>`:''}</div><small class="bt-summary-note">北京时间 · ${r.point_times?'按实际成交标记':interval?'横线表示原周期成交区间':'按原回测成交记录'} · ${esc(costNote)}</small>`;
+    return `<div class="bt-summary-coin"><strong>${esc(base(r.symbol))}<small> / USDT</small></strong><span><em class="${r.side===1?'rp-positive':'rp-negative'}">${r.side===1?'做多':'做空'}</em> · ${esc(source)} · ${esc(mode)}</span></div>${['entry','exit'].map((key,i)=>`<div class="bt-summary-fill" data-fill="${key}"><span>${i===0?'① 开仓':'② 平仓'}</span><b>${price(r.fills?.[key+'_price'])}</b><time>${fillLabel(r,key)}</time></div>`).join('')}${Number.isFinite(r.entry_rules?.score)?`<div class="bt-summary-fill bt-summary-score" data-fill="score"><span>入场评分</span><b>${r.entry_rules.score.toFixed(4)}</b><time>${r.entry_rules.score_basis==='pre_touch'?'触价前评分':r.entry_rules.kind==='touch_close'?'触价收盘评分':'原回测评分'} · 门槛 ${r.entry_rules.minimum<.3?'前40%':'≥'+r.entry_rules.minimum}</time></div>`:''}<div class="bt-summary-pnl"><span>${funded?'净收益 <small>USDT</small>':'未计入资金'}</span><strong class="${funded?tone(r.pnl):''}">${funded?(Number.isFinite(r.pnl)?money(r.pnl):'—'):'影子记录'}</strong>${funded&&Number.isFinite(r.return_pct)?`<small class="${tone(r.return_pct)}">${money(r.return_pct)}%</small>`:''}</div><small class="bt-summary-note">北京时间 · ${r.point_times?'按实际成交标记':interval?'横线表示原周期成交区间':'按原回测成交记录'} · ${esc(costNote)}${wickTarget?' · '+esc(wickTarget):''}</small>`;
   }
   function rulesHTML(r){
     if(r.event_id&&r.branch_label){const b=r.signal_snapshot;return `<span class="bt-entry">${esc(r.branch_label)}${Number.isInteger(b?.initial_touch_count)?' · 首触 '+b.initial_touch_count+' 币':''}${Number.isInteger(b?.new_coins)?' · 新增 '+b.new_coins+' 币':''}</span>`;}
@@ -48,7 +55,8 @@
     if(e?.status==='saved'&&e.kind==='breadth'&&Number.isFinite(e.initial))return `<span class="bt-entry">宽度信号 · ${esc(e.initial)} 个币 · 30分钟零新增</span>`;
     if(e?.status!=='saved'||!Number.isFinite(e.score)||!Number.isFinite(e.minimum))return '<span class="bt-entry">入场条件／评分未留存</span>';
     const add=e.kind==='add5',gate=e.minimum<.3?' · 前40%':`≥${e.minimum}`;
-    return `<span class="bt-entry"><span>${add?'逆向5%加仓':e.kind==='touch_close'?'触价收盘进场':'1.618首触'}</span><span class="bt-score" title="原回测评分 ${e.score}，门槛 ${e.minimum}；不是胜率">${e.score_basis==='pre_touch'?'触价前评分':add?'主单评分':'评分'} ${e.score.toFixed(4)}${gate}</span>${Number.isFinite(e.minimum_order)&&Number.isFinite(e.order)?`<span>排列 ${e.order}≥${e.minimum_order}</span>`:''}</span>`;
+    const wickTarget=wickTargetText(r);
+    return `<span class="bt-entry"><span>${add?'逆向5%加仓':e.kind==='touch_close'?'触价收盘进场':'1.618首触'}</span><span class="bt-score" title="原回测评分 ${e.score}，门槛 ${e.minimum}；不是胜率">${e.score_basis==='pre_touch'?'触价前评分':add?'主单评分':'评分'} ${e.score.toFixed(4)}${gate}</span>${Number.isFinite(e.minimum_order)&&Number.isFinite(e.order)?`<span>排列 ${e.order}≥${e.minimum_order}</span>`:''}${wickTarget?`<span>${esc(wickTarget)}</span>`: ''}</span>`;
   }
   function periodFor(row,period){
     if(row.event_id&&steps[period])return period;

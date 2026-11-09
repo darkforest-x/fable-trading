@@ -2,6 +2,15 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const ui=require('../../yoyo/monitor/static/reclaim-analytics.js');
 const data={paper_only:true,track:'60',days:0,now_ms:1000,summary:{},coverage:{},curve:[{time_ms:0,equity:1000,pnl:0},{time_ms:1000,equity:1010,pnl:10}],by_side:[],by_symbol:[],by_reason:[]};
+test('the midpoint account displays only the paired forward payoff supplied by its ledger',()=>{
+ const leg={wins:0,losses:0,payoff:null,mean_net_pct:null};
+ const d={...data,track:'8260',paired_wick:{pairs:0,changed_targets:0,original:leg,midpoint:leg}};
+ assert.equal(ui.validate(d,'live-wick6x3mid',0),d);
+ assert.throws(()=>ui.validate(d,'live-wick6x3',0));
+ assert.match(ui.breakdownHTML(d),/同信号前向对照 · 0 对/);
+ assert.match(ui.breakdownHTML(d),/浅穿中点<\/th><td>—<\/td>/);
+ assert.doesNotMatch(ui.breakdownHTML(data),/同信号前向对照/);
+});
 test('analytics responses belong to one exact track and period and reject malformed curves',()=>{
  assert.equal(ui.validate(data,'60',0),data);
  for(const d of [{...data,track:'5'},{...data,days:7},{...data,paper_only:false},{...data,curve:[{time_ms:0,equity:null}]}])assert.throws(()=>ui.validate(d,'60',0));

@@ -36,13 +36,13 @@ TRACK_KEY = re.compile(r'[a-z0-9][a-z0-9-]{0,19}')
 # ``tracks``. These tuples only fix the display order of the accounts known today (the web
 # picker order, reclaim-strategy-book.js); any account the monitor adds later is appended after
 # them, live- keys in the live group, so a new account appears without an app release.
-LIVE_TRACKS = ('live-breadth', 'live-allin3', 'live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far')
+LIVE_TRACKS = ('live-breadth', 'live-allin3', 'live-wick6x3', 'live-wick6x3mid', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far')
 REPLICA_TRACKS = ('spike', 'v3add20', 'allin3', '60', '5', 'v3', 'v3add', 'v3lock')
 TRACKS = LIVE_TRACKS + REPLICA_TRACKS
 LABELS = {'60': '60m', '5': '5m', 'breadth-ema20': '全市场下轨反弹'}
 # Subtitles copied from reclaim-strategy-book.js TITLES (display text only).
 TITLES = {'live-breadth': '全市场宽度信号 · SOL 计资金', 'live-wick6x3': '插针收盘 · 6份3倍', 'live-wick3x3': '插针收盘 · 3份3倍',
-          'live-wick6x3hi': '插针收盘 · 6份3倍 · 高分加仓', 'live-wick3x3far': '插针收盘 · 3份3倍 · 离1.618≥1.5%',
+          'live-wick6x3mid': '浅穿中点 · 6份3倍', 'live-wick6x3hi': '插针收盘 · 6份3倍 · 高分加仓', 'live-wick3x3far': '插针收盘 · 3份3倍 · 离1.618≥1.5%',
           'live-allin3': '触价前评分 · 模拟运行', '60': '等待回收', '5': '快速确认', 'v3': '分数决定目标', 'v3add': '逆向分步加仓',
           'spike': '排列过滤插针', 'v3lock': '回收后锁住利润', 'allin3': '单仓 · 梭哈3倍', 'v3add20': '20份动态保证金 · 3倍加仓'}
 # Strategies with a research booklet but no forward paper account (owner 2026-11-09: “也要能看小册”).

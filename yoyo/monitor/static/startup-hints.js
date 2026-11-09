@@ -16,7 +16,7 @@
   }
   function paperSymbol(data,params){
     const pinned=params.get('symbol');if(pinned)return /^[A-Z0-9]{1,32}-USDT-SWAP$/.test(pinned)?pinned:null;
-    const track=data?.tracks?.[['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3','live-wick6x3','live-wick3x3','live-wick6x3hi','live-wick3x3far','live-breadth'].includes(params.get('track'))?params.get('track'):'spike'],id=params.get('trade');
+    const track=data?.tracks?.[['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3','live-wick6x3','live-wick6x3mid','live-wick3x3','live-wick6x3hi','live-wick3x3far','live-breadth'].includes(params.get('track'))?params.get('track'):'spike'],id=params.get('trade');
     const rows=[...(track?.open||[]),...(track?.closed||[]),...(track?.latest_funded?[track.latest_funded]:[])].filter(p=>/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(p.symbol)&&[1,-1].includes(p.side)&&Number.isFinite(p.fill_ms)&&p.fill_ms>0&&Number.isFinite(p.entry)&&p.entry>0);
     return (id?rows.find(p=>String(p.id)===id):rows.filter(p=>p.taken===1&&p.notional>0).sort((a,b)=>b.fill_ms-a.fill_ms||b.id-a.id)[0])?.symbol||(id?null:'BTC-USDT-SWAP');
   }
@@ -52,7 +52,7 @@
   if(paper){
     // Same account default as monday-reclaim-paper.js route(); the snapshot
     // then carries closed/today records for this account only.
-    const track=['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3','live-wick6x3','live-wick3x3','live-wick6x3hi','live-wick3x3far','live-breadth'].includes(params.get('track'))?params.get('track'):'spike';
+    const track=['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3','live-wick6x3','live-wick6x3mid','live-wick3x3','live-wick6x3hi','live-wick3x3far','live-breadth'].includes(params.get('track'))?params.get('track'):'spike';
     const snapshot=start('paper-snapshot:'+track,'/api/monday-reclaim-paper?list_period=today&track='+encodeURIComponent(track));
     function warmChart(symbol){
       if(!symbol)return;

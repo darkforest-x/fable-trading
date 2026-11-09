@@ -53,7 +53,8 @@ HOT_MS = 60*MINUTE
 PUSH_EVERY_MS = 3000
 PRICE_FRESH_MS = 5*MINUTE
 REFERENCE = ("BTC-USDT-SWAP", "ETH-USDT-SWAP")
-LIVE_TRACKS = {7060: "live-allin3", 8060: "live-wick6x3", 8160: "live-wick6x3hi", 9060: "live-wick3x3", 9160: "live-wick3x3far"}
+LIVE_TRACKS = {7060: "live-allin3", 8060: "live-wick6x3", 8160: "live-wick6x3hi", 9060: "live-wick3x3",
+               9160: "live-wick3x3far", 8260: "live-wick6x3mid"}
 
 
 def alert_text(alert):
