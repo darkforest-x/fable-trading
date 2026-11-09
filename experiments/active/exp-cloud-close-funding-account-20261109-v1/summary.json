@@ -1,0 +1,106 @@
+{
+  "source": "collateral/account_funding_audit.json",
+  "prior_failed_technical_replay": "current/account_funding_audit.json",
+  "unfunded_reference_final_usdt": 5602.672497068329,
+  "original_legs": 3270,
+  "held_months": 2040,
+  "scenario_interpretation": "include and exclude ambiguous entry/exit coincident settlements, recomputing subsequent size. Not general terminal bounds.",
+  "include_boundary": {
+    "metrics": {
+      "all": {
+        "final_usdt": 4363.941963966985,
+        "multiple": 4.363941963966985,
+        "dd_mark_pct": 35.70272308484531,
+        "dd_bound_pct": 36.332509381100664,
+        "trades": 1635,
+        "win_pct": 32.23241590214067,
+        "payoff": 2.960358467223684,
+        "payoff_usdt": 2.5498321007487434,
+        "median_net_pct": -3.1017318225396813
+      },
+      "dev": {
+        "final_usdt": 4162.269312734588,
+        "multiple": 4.162269312734589,
+        "dd_mark_pct": 35.70272308484531,
+        "dd_bound_pct": 36.332509381100664,
+        "trades": 1195,
+        "win_pct": 32.63598326359833,
+        "payoff": 3.0645556148031985,
+        "payoff_usdt": 2.585282521544264,
+        "median_net_pct": -3.2015388073814064
+      },
+      "2025": {
+        "final_usdt": 4636.303747555569,
+        "multiple": 1.1138884582433575,
+        "dd_mark_pct": 18.740571027177566,
+        "dd_bound_pct": 19.037976465056218,
+        "trades": 212,
+        "win_pct": 28.30188679245283,
+        "payoff": 2.266717321057176,
+        "payoff_usdt": 2.2027534056815625,
+        "median_net_pct": -3.085554923951175
+      },
+      "2026": {
+        "final_usdt": 4363.941963966985,
+        "multiple": 0.941254542752471,
+        "dd_mark_pct": 19.526609358442716,
+        "dd_bound_pct": 21.497807732929665,
+        "trades": 210,
+        "win_pct": 29.04761904761905,
+        "payoff": 2.355862931818125,
+        "payoff_usdt": 2.314305737541874,
+        "median_net_pct": -2.876178150285021
+      }
+    },
+    "applied_net_funding": -560.955019384583
+  },
+  "exclude_boundary": {
+    "metrics": {
+      "all": {
+        "final_usdt": 4338.432070793455,
+        "multiple": 4.338432070793455,
+        "dd_mark_pct": 35.72171249567303,
+        "dd_bound_pct": 36.352067956938605,
+        "trades": 1635,
+        "win_pct": 32.11009174311927,
+        "payoff": 2.973265477642969,
+        "payoff_usdt": 2.561615320958312,
+        "median_net_pct": -3.108868908780033
+      },
+      "dev": {
+        "final_usdt": 4135.745350271389,
+        "multiple": 4.135745350271389,
+        "dd_mark_pct": 35.72171249567303,
+        "dd_bound_pct": 36.352067956938605,
+        "trades": 1195,
+        "win_pct": 32.55230125523013,
+        "payoff": 3.070869757800355,
+        "payoff_usdt": 2.5905495492740456,
+        "median_net_pct": -3.213473819610756
+      },
+      "2025": {
+        "final_usdt": 4608.066610333142,
+        "multiple": 1.1142046282009987,
+        "dd_mark_pct": 18.751836818427282,
+        "dd_bound_pct": 19.04918268458955,
+        "trades": 212,
+        "win_pct": 27.830188679245282,
+        "payoff": 2.3215072644140764,
+        "payoff_usdt": 2.2558663828408845,
+        "median_net_pct": -3.0925194555112667
+      },
+      "2026": {
+        "final_usdt": 4338.432070793455,
+        "multiple": 0.9414864058312312,
+        "dd_mark_pct": 19.52383132375759,
+        "dd_bound_pct": 21.4958477083797,
+        "trades": 210,
+        "win_pct": 29.04761904761905,
+        "payoff": 2.3571857641153833,
+        "payoff_usdt": 2.3155871454314445,
+        "median_net_pct": -2.88186009305921
+      }
+    },
+    "applied_net_funding": -582.0145811036252
+  }
+}
