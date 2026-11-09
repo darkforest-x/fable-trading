@@ -12,7 +12,7 @@ import sys
 import threading
 import time
 
-from .cloud_inverse_account import STEP_12H_MS, CloudInversePaper
+from .cloud_inverse_account import HOUR_MS, STEP_12H_MS, CloudInversePaper
 from .monday_fib import week_window
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -90,12 +90,23 @@ def cycle(feed, account):
             LOG.exception("%s failed", name)
             errors.append(f"{name}暂不可用（{type(exc).__name__}）")
     # Admission requires this pass's account marks and complete signal ordering.
+    last_due_close = (feed.clock() - 120000) // HOUR_MS * HOUR_MS
+    overdue = [p["symbol"] for p in account.open_positions() if p["last_mark_ms"] < last_due_close]
+    if overdue:
+        errors.append("持仓缺少已收盘报价，估值待核对：" + "、".join(sorted(overdue)))
     if not errors:
         try:
             feed.process_queued(account, feed.clock())
         except Exception as exc:
             LOG.exception("Signal admission failed")
             errors.append(f"入场判定暂不可用（{type(exc).__name__}）")
+    if errors:
+        from .cloud_inverse_feed import SIGNAL_BATCH_MAX_DELAY_MS
+        checked = feed.clock()
+        for boundary in account.queued_boundaries():
+            if checked - boundary > SIGNAL_BATCH_MAX_DELAY_MS:
+                for event in account.queued_candidates(boundary):
+                    account.mark_missed(event["event_id"], "admission_unavailable_at_deadline", now_ms=checked)
     raw_health = feed.health()
     health = {k:raw_health[k] for k in (
         "state","source_db","public_market","public_only","private_or_order_api_used","clock_offset_ms",

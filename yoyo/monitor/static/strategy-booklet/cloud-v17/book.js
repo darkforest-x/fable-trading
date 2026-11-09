@@ -48,7 +48,8 @@ const reasons = {
   source_clock_ahead_of_runner:'信号时钟快于本地校准时钟',source_clock_before_confirmed_close:'信号时钟早于收盘',
   signal_batch_expired:'已错过 15 分钟收集窗口',signal_batch_expired_during_quote_collection:'等待新报价时超时',
   source_scan_incomplete_at_deadline:'收集窗口结束时仍有合约未扫描',missing_public_ticker_quote:'缺少有效公开买卖报价',
-  missing_or_invalid_public_quote:'公开报价缺失或无效'
+  missing_or_invalid_public_quote:'公开报价缺失或无效',admission_unavailable_at_deadline:'入场时限已过，行情或账户估值未就绪',
+  ticker_stale_or_predates_confirmation:'报价已过期或早于信号确认'
 };
 function positions(rows,closed=false) {
   if(!rows.length) return '<p class="muted">'+(closed?'尚无启用后结清的交易。':'当前空仓。')+'</p>';
