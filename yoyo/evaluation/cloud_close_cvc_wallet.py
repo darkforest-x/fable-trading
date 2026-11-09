@@ -19,8 +19,8 @@ RISK = source.EXP.parent/'exp-cloud-close-cvc-wallet-minutes-20261109-v1'
 
 
 def checked_quotes():
-    proof = json.loads((PROOF/'source_check.json').read_text())
-    if proof.get('verified') is not True:
+    proof = json.loads((PROOF/'source_check_v2.json').read_text())
+    if proof.get('verified') is not True or proof.get('eligible_for_admission') is not True:
         raise ValueError('CVC native tick recovery has not passed source admission')
     _,old_quotes,src = source.inputs()
     filepath = wallet.ROOT/proof['output_series_path']
