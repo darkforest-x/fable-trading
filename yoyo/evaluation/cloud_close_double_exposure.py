@@ -111,8 +111,9 @@ def receipts(pf, data, model, multiple):
     sign = fills.underlying_side
     base = fills.underlying_entry_price
     opened = fills.side.eq(0)
-    scale = fills['size']*multiple/base
-    spot_fill = base*(1+sign*(fills.price-1)/multiple)
+    fill_multiple = fills.underlying_event_id.map(multiple) if isinstance(multiple,pd.Series) else multiple
+    scale = fills['size']*fill_multiple/base
+    spot_fill = base*(1+sign*(fills.price-1)/fill_multiple)
     real_notional = scale*spot_fill
     expected_fee = real_notional*np.where(opened|fills.stage.eq(2),wallet.TAKER,fills.underlying_exit_fee_rate)
     if not np.allclose(fills.fees,expected_fee,rtol=1.e-8,atol=1.e-7):
@@ -142,13 +143,8 @@ def receipts(pf, data, model, multiple):
     return positions,curve,int(fills.stage.eq(2).sum())
 
 
-def simulate(data,market,multiple,slip,*,directory=EXP,quote_loader=wallet.quotes,snapshot=None):
-    native_open,previous_close,directions,runners = market
-    audit,coverage = study.leverage._margin_audit(runners.reset_index(drop=True),multiple,slip,quote_loader=quote_loader)
-    coverage['affected_contracts'] = sorted(audit.loc[audit.maintenance_boundary_hit,'symbol'].unique())
-    if not coverage['valid']:
-        return dict(audit=coverage)
-    model,_ = study.leverage._syntheticize(dict(data,actions=data['actions'].copy()),multiple,slip)
+def build_portfolio(data,model,native_open,previous_close,directions,multiple,slip):
+    """Run four-stage native account orders with the supplied underlying quantities."""
     hours,cols = len(data['actions'])//3,data['actions'].shape[1]
     def expand(field):
         return model[field].reshape(hours,3,cols)[:,[0,1,1,2],:].reshape(-1,cols).copy()
@@ -160,6 +156,17 @@ def simulate(data,market,multiple,slip,*,directory=EXP,quote_loader=wallet.quote
         pre_segment_func_nb=mark_and_cap,pre_segment_args=(multiple,previous_close,np.full(cols//4,-1.),trim),
         cash_sharing=True,group_by=True,init_cash=1000.,fill_pos_record=False,
         max_orders=int(np.count_nonzero(actions)+4*np.count_nonzero(previous_close)+1))
+    return portfolio
+
+
+def simulate(data,market,multiple,slip,*,directory=EXP,quote_loader=wallet.quotes,snapshot=None):
+    native_open,previous_close,directions,runners = market
+    audit,coverage = study.leverage._margin_audit(runners.reset_index(drop=True),multiple,slip,quote_loader=quote_loader)
+    coverage['affected_contracts'] = sorted(audit.loc[audit.maintenance_boundary_hit,'symbol'].unique())
+    if not coverage['valid']:
+        return dict(audit=coverage)
+    model,_ = study.leverage._syntheticize(dict(data,actions=data['actions'].copy()),multiple,slip)
+    portfolio = build_portfolio(data,model,native_open,previous_close,directions,multiple,slip)
     positions,equity,trims = receipts(portfolio,data,model,multiple)
     if snapshot is not None:
         # A new intrahour audit needs the actual quantities after market-open
