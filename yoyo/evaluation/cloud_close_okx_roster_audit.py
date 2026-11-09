@@ -46,10 +46,20 @@ def native_check(row):
         if len(files)!=1:
             raise ValueError(f'Invalid native archive {inst} {month}')
         frame = pd.read_csv(io.BytesIO(archive.read(files[0])),
-                            usecols=['instrument_name','open_time','close','confirm'])
-    if not len(frame) or set(frame.instrument_name)!={inst} or not frame['confirm'].eq(1).all() or not frame.close.gt(0).all():
+                            usecols=['instrument_name','open_time','close','confirm','vol'])
+    if not len(frame):
+        return dict(row,native_status='empty_native_archive')
+    if set(frame.instrument_name)!={inst} or not frame['confirm'].isin([0,1]).all() or not frame.close.gt(0).all():
         raise ValueError(f'Archive observations do not verify the requested instrument {inst}')
-    return dict(row,native_status='official_confirmed_candles',archived_minutes=frame.open_time.nunique(),
+    traded = frame.vol.gt(0)
+    if not traded.any():
+        status = 'no_native_volume'
+    elif frame['confirm'].eq(1).all():
+        status = 'official_confirmed_candles'
+    else:
+        status = 'official_file_contains_unconfirmed_rows'
+    return dict(row,native_status=status,archived_minutes=frame.open_time.nunique(),
+                confirmed_minutes=int(frame['confirm'].eq(1).sum()),positive_volume_minutes=int(traded.sum()),
                 first_ms=int(frame.open_time.min()),last_ms=int(frame.open_time.max()))
 
 
@@ -77,10 +87,12 @@ def main():
         rows = pd.DataFrame(pool.map(native_check, candidates))
     rows.to_csv(EXP/'historical_directory_checks.csv.gz',index=False)
     native = rows[rows.native_status.eq('official_confirmed_candles')]
-    if 'WAVES-USDT-SWAP' not in set(native.instrument):
-        raise ValueError('Native delisted reference was not reproduced')
+    example = rows[rows.instrument.eq('WAVES-USDT-SWAP')]
+    if len(example)!=1 or not example.positive_volume_minutes.gt(0).all():
+        raise ValueError('Native delisted reference volume was not reproduced')
     j = dict(original_roster=len(original),historical_provider_only_ended_by_cutoff=len(rows),
              confirmed_with_native_month=len(native),archive_not_found=int(rows.native_status.eq('archive_404').sum()),
+             archive_status=rows.native_status.value_counts().to_dict(),
              independently_documented_omission='WAVES-USDT-SWAP',
              scope='Provider recording endpoints are not listing/delisting times or product-class proofs. An official monthly file is independent evidence of trading in that month. No all-market census or counterfactual wallet.',
              source=INDEX, native_reference=rows.loc[rows.instrument.eq('WAVES-USDT-SWAP'),'archive_url'].iat[0])
