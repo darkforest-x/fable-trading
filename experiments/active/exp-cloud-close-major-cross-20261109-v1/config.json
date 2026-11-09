@@ -1,0 +1,92 @@
+{
+  "experiment_id": "exp-cloud-close-major-cross-20261109-v1",
+  "question": "On the complete common native OKX BTC/ETH history, how does entering the first completed 12H EMA20/50 direction flip only when that same candle closes strictly beyond both EMAs perform with the native V1.7 cloud reversal and a fixed stop anchored to that signal's slow EMA, compared with a 50/50 BTC/ETH buy-and-hold account?",
+  "single_rule": "New entry qualification is the first confirmed EMA20/50 direction reversal whose same 12H close is strictly above both EMAs for long or below both for short. An inside-cloud close skips that reversal and is never delayed into a later bar.",
+  "data": {
+    "venue": "OKX USDT perpetual",
+    "symbols": ["BTC", "ETH"],
+    "top20_inputs_root": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs",
+    "source_receipts": {
+      "BTC": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BTC/receipt.json",
+      "ETH": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ETH/receipt.json"
+    },
+    "expected_common_start_ms": 1577232000000,
+    "cutoff_utc_exclusive": "2026-11-08T12:00:00Z",
+    "cutoff_ms": 1794139200000,
+    "expected_common_12h_rows_per_symbol": 5021,
+    "expected_common_1h_rows_per_symbol": 60252,
+    "bar_contract": "UTC open timestamps; use native 12H OHLC where the frozen receipt marks native12Hutc and the exact contiguous complete_1H_archive aggregate for the early common rows (BTC 14 rows, ETH 14 rows; the 17 earlier BTC archive rows precede the common start and are excluded); native 1H OHLC drives entry, intrabar V1.7 exits, account marks and drawdown bounds. Preserve source counts. No missing-bar fills or future-completeness filters."
+  },
+  "signal_rule": {
+    "ema": "Reuse cloud_close_reward_paths._ema_points_12h: alpha=2/(period+1), first completed close seed, 50 consecutive 12H bars required, reset after any 12H gap.",
+    "direction_flip": "A nonzero EMA20-EMA50 sign change from the last nonzero direction; equality is neutral and does not create a flip. The initial ready direction is not an entry because no prior direction exists.",
+    "entry_filter": "At that exact flip's completed 12H close: long requires close>EMA20 and close>EMA50; short requires close<EMA20 and close<EMA50. Strict inequalities. If it fails, skip that flip and wait for a later opposite direction reversal.",
+    "entry_execution": "Market at the exact H1 open timestamp equal to the completed 12H confirmation time. If no exact open exists, mark no entry; do not shift later.",
+    "stop": "Use fixed_stop('BTC' or 'ETH', side, confirmed_signal_EMA50); this retains the original BTC/ETH 1.5% fixed distance from the completed slow EMA. Reject and count an entry if the stop is not adverse relative to the executable H1 open.",
+    "weekly_filter": "None. The native New York-week calendar is retained only as a descriptive label."
+  },
+  "exit_rule": {
+    "engine": "Reuse cloud_close_reward_paths._simulate_symbol / VectorBT callback with tp_r=0; use the V1.7 intrabar EMA20/50 cross, open-gap, stale-data, and true source-tail semantics.",
+    "protection": "The signal EMA50-anchored fixed_stop remains unchanged for the entire position.",
+    "same_open_reverse": "Keep the existing wallet.admit rule: an old position with exit_bar_ms equal to a new same-symbol entry_ms still occupies that symbol slot. Do not use lookahead to close then re-enter within one open; count and label such missed reversals.",
+    "funding": "Not included."
+  },
+  "account": {
+    "starting_usdt": 1000,
+    "slots": 2,
+    "position_sizing": "The existing VectorBT wallet allocates one equal 50% NAV slot per open position, with at most one open position per symbol. No position replacement or leverage.",
+    "scenarios": ["ema_cross_long_short", "ema_cross_long_only", "buy_hold_btc_eth_50_50"],
+    "slippage_scenarios": {
+      "fee_only": 0.0,
+      "stress_5bp_each_market_fill": 0.0005
+    },
+    "benchmark": "At the first common H1 open, invest 50% of the 1000U wallet including entry fee/slippage in each of BTC and ETH; liquidate both at the common final H1 close with taker fee and the selected market-slippage scenario. Use the same VectorBT two-slot account and hourly OHLC NAV envelope."
+  },
+  "fees": {
+    "source": "Owner-confirmed OKX Lv1 fee schedule read 2026-10-23; 5bp taker per market/stop/cloud/tail fill.",
+    "taker_per_fill": 0.0005,
+    "resting_maker_per_fill": 0.0002,
+    "all_entries_and_exits": "taker"
+  },
+  "execution": {
+    "path_engine": "Existing cloud_close_reward_paths VectorBT from_order_func, one independent zero-TP path per eligible cross event.",
+    "account_engine": "Existing cloud_close_reward_account VectorBT shared-cash two-slot wallet.",
+    "reproduction": [
+      "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_major_cross --mini-check",
+      "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_major_cross --run"
+    ]
+  },
+  "outputs": {
+    "signal_candidates_csv_gz": "signal_candidates.csv.gz",
+    "native_paths_csv_gz": "native_paths_tp0.csv.gz",
+    "account_metrics_csv": "account_metrics.csv",
+    "summary_json": "summary.json",
+    "funded_files": {
+      "ema_cross_long_short_fee_only": "funded_ema_cross_long_short_fee_only.csv.gz",
+      "ema_cross_long_short_stress_5bp_each_market_fill": "funded_ema_cross_long_short_stress_5bp.csv.gz",
+      "ema_cross_long_only_fee_only": "funded_ema_cross_long_only_fee_only.csv.gz",
+      "ema_cross_long_only_stress_5bp_each_market_fill": "funded_ema_cross_long_only_stress_5bp.csv.gz",
+      "buy_hold_btc_eth_50_50_fee_only": "funded_buy_hold_fee_only.csv.gz",
+      "buy_hold_btc_eth_50_50_stress_5bp_each_market_fill": "funded_buy_hold_stress_5bp.csv.gz"
+    },
+    "hourly_files": {
+      "ema_cross_long_short_fee_only": "hourly_ema_cross_long_short_fee_only.csv.gz",
+      "ema_cross_long_short_stress_5bp_each_market_fill": "hourly_ema_cross_long_short_stress_5bp.csv.gz",
+      "ema_cross_long_only_fee_only": "hourly_ema_cross_long_only_fee_only.csv.gz",
+      "ema_cross_long_only_stress_5bp_each_market_fill": "hourly_ema_cross_long_only_stress_5bp.csv.gz",
+      "buy_hold_btc_eth_50_50_fee_only": "hourly_buy_hold_fee_only.csv.gz",
+      "buy_hold_btc_eth_50_50_stress_5bp_each_market_fill": "hourly_buy_hold_stress_5bp.csv.gz"
+    },
+    "missed_files": {
+      "ema_cross_long_short_fee_only": "missed_ema_cross_long_short_fee_only.csv.gz",
+      "ema_cross_long_short_stress_5bp_each_market_fill": "missed_ema_cross_long_short_stress_5bp.csv.gz",
+      "ema_cross_long_only_fee_only": "missed_ema_cross_long_only_fee_only.csv.gz",
+      "ema_cross_long_only_stress_5bp_each_market_fill": "missed_ema_cross_long_only_stress_5bp.csv.gz"
+    }
+  },
+  "mini_check": {
+    "flip_fixture": "A completed long flip outside both lines enters; a short flip whose same-bar close is at/inside either line is skipped and does not enter on the next same-direction candle.",
+    "path_fixture": "The existing VectorBT path callback fills the slow-EMA-anchored fixed stop intrabar.",
+    "capacity_fixture": "A prior same-symbol path exiting on the exact new entry open still occupies that slot; the reverse is counted missed while the other symbol may enter in the second slot."
+  }
+}
