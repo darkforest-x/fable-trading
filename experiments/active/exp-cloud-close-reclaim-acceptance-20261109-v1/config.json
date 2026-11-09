@@ -1,0 +1,76 @@
+{
+  "experiment_id": "exp-cloud-close-reclaim-acceptance-20261109-v1",
+  "question": "Within an already-confirmed OKX V1.7 12H reclaim, do three consecutive H1 closes on the inward side of the touched Monday 1.618 differ economically from a last-hour-only reclaim?",
+  "single_variable": "Condition only the original 12H V1.7 event on completed H1 closes inside the exact touched-side Monday 1.618 within that signal key. All entries, fixed stops, four-child allocation, queue priority, actual price paths, leverage schedule, volume budget, fees and exits stay frozen.",
+  "novelty_audit": {
+    "wick_timing": "exp-cloud-close-wick-timing-20261109-v1 measures elapsed hours since the final H1 wick strictly crossed the extension, not consecutive H1 closes inside the extension.",
+    "reclaim_failure": "exp-cloud-close-reclaim-failure-20261109-v1 measures post-entry closes through the extension as an exit, not H1 acceptance within the signal key.",
+    "second_reclaim": "exp-cloud-close-second-reclaim-20261109-v1 measures a later separate 12H event in the same week.",
+    "breakout_historical": "exp-cloud-close-breakout-historical-20261109-v1 compares the original 12H reclaim event with an outside-band breakout event; it does not condition the reclaim on its internal H1 close sequence."
+  },
+  "input_pool": {
+    "source_experiment": "exp-cloud-close-liquid-queue-20261109-v1",
+    "source_arm": "balanced",
+    "candidate_audit": "experiments/active/exp-cloud-close-breakout-historical-20261109-v1/candidate_audit_full_360.csv.gz",
+    "signals": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/signals.csv",
+    "prior_turnover": "experiments/active/exp-cloud-close-liquid-priority-history-20261109-v1/opportunities.csv.gz",
+    "baseline_summary": "experiments/active/exp-cloud-close-liquid-queue-20261109-v1/summary.json",
+    "historical_contract_sources": 360,
+    "actual_signal_opportunities_expected": 12442,
+    "positive_turnover_opportunities_expected": 12284,
+    "matched_random_control": false,
+    "control": "The frozen no-gate all-observable balanced account is the comparison/control. This queue source is actual V1.7 signals only; it contains no separate non-signal matched controls."
+  },
+  "decision_clock": {
+    "original_signal": "Completed native UTC 12H V1.7 key; entry_ms equals its confirmation close and exact next H1 open.",
+    "feature_h1_open_ms": ["entry_ms - 3h", "entry_ms - 2h", "entry_ms - 1h"],
+    "feature_close_ms": ["entry_ms - 2h", "entry_ms - 1h", "entry_ms"],
+    "execution": "The H1 open at entry_ms is used only as the next-open entry price and is excluded from close features. No H1 or 12H observation after entry_ms can determine eligibility.",
+    "week_gate": "The 12H key must be wholly inside the same New York week after Monday 1H range completion; use the same America/New_York Monday window as native V1.7."
+  },
+  "price_states": {
+    "inside_strict": "Long: H1 close > the frozen touched lower 1.618. Short: H1 close < the frozen touched upper 1.618. Equality is neither inside nor outside.",
+    "stable_3": "All three final contiguous completed H1 closes are strictly inside.",
+    "last_only_1": "The final H1 close is inside while both preceding H1 closes are strictly outside. The original V1.7 12H close already implies the final H1 close is inside; using only an at-least-one threshold would duplicate the whole sample, so this exact last-only state identifies a distinct late reclaim.",
+    "other_observed": "Two consecutive inside closes, an interrupted pattern, or a boundary-equality pattern. Retain in feature audit and all-observable control; do not force into either primary cohort.",
+    "missing": "Missing/invalid H1 rows or Monday range remain explicit and are excluded only from conditional cohorts; they remain in the no-gate account."
+  },
+  "account": {
+    "starting_usdt": 1000,
+    "slots": 9,
+    "entry_cap_fraction": 0.1,
+    "capital_allocation": "Same actual equal-slot cash allocation and four-child entry/trim path as frozen liquid-queue balanced account.",
+    "entry_priority": "Balanced ordinal rank of previous native H1 minute-average quote turnover and previous ATR, exactly as cloud_close_liquid_queue balanced.",
+    "entry_cap": "10% of prior completed H1 mean per-minute native quote turnover; missing or zero-volume entries are excluded as in the frozen source.",
+    "exposure": "Frozen source's actual 1x/2x long-short exposure schedule based on prior 30-day ETH/BTC direction.",
+    "costs": "OKX taker 0.0005 per market fill and resting maker 0.0002 per resting limit fill; existing +0.0005 market-fill stress is retained.",
+    "funding_and_depth": "Not modeled; unchanged from the source account."
+  },
+  "periods": {
+    "all": "Frozen source account window through 2026-11-08 12:00 UTC.",
+    "dev": "From frozen account start through 2025-01-01 00:00 UTC.",
+    "2025": "2025-01-01 through 2026-01-01 UTC.",
+    "2026": "2026-01-01 through the frozen source account cutoff."
+  },
+  "execution": {
+    "engine": "Native VectorBT shared-cash account called via cloud_close_liquid_queue.main; no custom fill or PnL simulator.",
+    "path_source": "Frozen 360-name V1.7 actual paths from cloud_close_liquid_queue.repair.pool().",
+    "baseline_reuse": "Reuse exp-cloud-close-liquid-queue-20261109-v1/balanced outputs only if the reconstructed positive-turnover event IDs equal the frozen 12,284 IDs and frozen baseline metrics reconcile.",
+    "conditional_runs": ["stable_3", "last_only_1"],
+    "command": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_reclaim_acceptance --run"
+  },
+  "outputs": {
+    "confirmation_features": "confirmation_features.csv.gz",
+    "source_coverage": "source_coverage.csv",
+    "feature_audit": "feature_audit.json",
+    "account_metrics": "account_metrics.csv",
+    "summary": "summary.json",
+    "paths_audit": "paths_audit.json",
+    "conditional_account_dirs": ["stable_3/", "last_only_1/"]
+  },
+  "preflight": {
+    "synthetic_policy_check": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_reclaim_acceptance --mini-check",
+    "expected_original_baseline_final_usdt": 51957.209636755935,
+    "expected_all_observable_candidates": 12284
+  }
+}
