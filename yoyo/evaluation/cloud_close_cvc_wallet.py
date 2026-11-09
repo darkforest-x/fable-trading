@@ -19,10 +19,12 @@ RISK = source.EXP.parent/'exp-cloud-close-cvc-wallet-minutes-20261109-v1'
 
 
 def checked_quotes():
-    if json.loads((PROOF/'source_check.json').read_text()).get('verified') is not True:
+    proof = json.loads((PROOF/'source_check.json').read_text())
+    if proof.get('verified') is not True:
         raise ValueError('CVC native tick recovery has not passed source admission')
     _,old_quotes,src = source.inputs()
-    corrected = pd.read_csv(PROOF/'bars1h.csv.gz',float_precision='round_trip')
+    filepath = wallet.ROOT/proof['output_series_path']
+    corrected = pd.read_csv(filepath,float_precision='round_trip')
     before,prices = old_quotes('CVC')
     extra = corrected[~corrected.time.isin(before)]
     stamp = pd.Timestamp('2022-10-26T03:00Z').value//1_000_000
@@ -30,7 +32,7 @@ def checked_quotes():
     if not (extra.time.tolist()==[stamp] and np.array_equal(before,original.time)
             and np.array_equal(prices,original[archive.FIELDS].to_numpy())):
         raise ValueError('CVC price source edit was not limited to the verified hour')
-    src['CVC'] = (PROOF/'bars1h.csv.gz',None,src['CVC'][2])
+    src['CVC'] = (filepath,None,src['CVC'][2])
 
     @lru_cache(maxsize=None)
     def quotes(s):
