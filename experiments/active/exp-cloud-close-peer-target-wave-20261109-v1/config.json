@@ -1,0 +1,6 @@
+{
+ "question":"Do realized 2R exits in other coins identify a directional market move that still has room for new weekly V1.7 reclaims?",
+ "single_variable":"Use the frozen original VIX-ranked nine-slot median-cap wallet as a continuously running observation account. After its unmodified 2R child actually sells/buys back at the target, record its side only after the execution H1 has closed, including for open exits. At each fresh 12H opportunity, count the most recent such target per other distinct symbol over the preceding seven days. Prefer the majority direction among new proposals, keeping neutral clocks, all proposals and the existing balanced liquidity/ATR tie-break. Compare prioritizing against it and following the same weekly vote 30 days earlier. No future final profits, no own symbol vote and no thresholds selected from returns.",
+ "account":"Native shared nine slots, all four historical child fills, previous-hour average volume cap and hourly exposure trims, taker 5bp / maker 2bp plus 5bp stress, 1000U. Compare to same balanced and fixed-short source accounts. Historical funding and realized depth absent.",
+ "command":"vectorbt-python -m yoyo.evaluation.cloud_close_peer_target_wave"
+}
