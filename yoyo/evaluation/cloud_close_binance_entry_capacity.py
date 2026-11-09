@@ -39,7 +39,7 @@ DAY_MS = 86_400_000
 ENTRY_PERIODS = {
     "all": (None, None),
     "dev": (None, "2025-01-01T00:00Z"),
-    "2025": ("2025-01-01T00:00Z", "2026-01-01T00:00Z"),
+    **{str(year): (f"{year}-01-01T00:00Z", f"{year+1}-01-01T00:00Z") for year in range(2020, 2026)},
     "2026": ("2026-01-01T00:00Z", None),
 }
 FEE_TAKER = 0.0005
@@ -505,6 +505,9 @@ def run(workers: int = 4) -> dict:
             str(year): {str(status): int(count) for status, count in values.items()}
             for year, values in counts_by_year.to_dict(orient="index").items()
         }
+        missing_events = observations.loc[observations.status.eq("missing_archive"),
+                                          ["event_id", "symbol", "source_days"]]
+        missing_source_days = source_receipt.loc[source_receipt.status.eq("missing"), ["symbol", "day", "url"]]
         summary = dict(
             scope="Frozen Binance USD-M native 1x/2x September account; 1,586 V1.7 funded parents; original admission and exit paths; no November two-leg/funding-adjusted account.",
             source=dict(provider="Binance public data.binance.vision", endpoint="/data/futures/um/daily/klines/<symbol>/1m/<symbol>-1m-YYYY-MM-DD.zip",
@@ -513,6 +516,8 @@ def run(workers: int = 4) -> dict:
                         source_receipt=str((CACHE / "daily_archive_receipt.csv").relative_to(ROOT)),
                         events=len(observations), event_status_counts={str(k): int(v) for k, v in status_counts.items()},
                         yearly_status_counts=yearly_status,
+                        missing_archive_events=missing_events.to_dict(orient="records"),
+                        missing_daily_archives=missing_source_days.to_dict(orient="records"),
                         observed_positive_prior60=int(positive.sum()), excluded_or_unknown=int((~positive).sum()),
                         h1_ohlc_matches=int(observations.h1_ohlc_match.sum()), entry_open_matches=int(observations.status.isin(["observed", "zero_prior_median"]).sum()),
                         zero_quote_entry_minutes=int(observations.entry_quote_volume_usdt.fillna(-1).eq(0).sum()),
@@ -537,6 +542,43 @@ def run(workers: int = 4) -> dict:
         (EXP / "summary.json").write_text(json.dumps(summary, indent=2, allow_nan=False, default=_json_default) + "\n")
         print(json.dumps({k: v.get("metrics", {}).get("all") for k, v in arms.items()}, indent=2, default=_json_default), flush=True)
         return summary
+
+
+def rescore_existing() -> dict:
+    """Refresh annual metrics from saved funded/hourly ledgers without account replay."""
+    summary_path = EXP / "summary.json"
+    if not summary_path.is_file():
+        raise FileNotFoundError("Cannot rescore before first completed funded accounts")
+    summary = json.loads(summary_path.read_text())
+    observations = pd.read_csv(EXP / "entry_capacity.csv.gz", dtype={"event_id": str, "symbol": str})
+    source_receipt = pd.read_csv(EXP / "daily_archive_sources.csv", dtype={"symbol": str, "day": str})
+    labels = ["unrestricted", "unrestricted_stress", "same_coverage_unrestricted",
+              "same_coverage_unrestricted_stress", "cap_10pct", "cap_10pct_stress",
+              "cap_1pct", "cap_1pct_stress"]
+    records = []
+    for label in labels:
+        funds = pd.read_csv(EXP / f"funded_{label}.csv.gz", index_col="event_id", float_precision="round_trip")
+        curve = pd.read_csv(EXP / f"hourly_{label}.csv.gz", index_col=0, parse_dates=True)
+        if (funds.index.duplicated().any() or not np.isclose(1000. + funds.cash_pnl.sum(), curve.nav.iat[-1],
+                                                           rtol=1e-9, atol=.01)):
+            raise ValueError(f"Saved cash and hourly NAV fail rescore reconciliation: {label}")
+        metrics = _funded_metrics(funds, curve)
+        summary["arms"][label]["metrics"] = metrics
+        for period, row in metrics.items():
+            records.append(dict(arm=label, period=period, **row))
+        if label == "unrestricted":
+            summary["baseline"]["metrics"] = metrics
+    pd.DataFrame(records).to_csv(EXP / "account_metrics.csv", index=False)
+    summary["reporting"] = dict(
+        periods=list(ENTRY_PERIODS),
+        cross_boundary_policy="A trade enters a year’s trade statistics only when both entry and exit are in that year. Period NAV starts from the last hourly NAV at or before the year boundary.")
+    summary["source"]["missing_archive_events"] = observations.loc[
+        observations.status.eq("missing_archive"), ["event_id", "symbol", "source_days"]].to_dict(orient="records")
+    summary["source"]["missing_daily_archives"] = source_receipt.loc[
+        source_receipt.status.eq("missing"), ["symbol", "day", "url"]].to_dict(orient="records")
+    summary_path.write_text(json.dumps(summary, indent=2, allow_nan=False, default=_json_default) + "\n")
+    print(f"Rescored {len(labels)} saved accounts over {len(ENTRY_PERIODS)} periods; no portfolio replay.", flush=True)
+    return summary
 
 
 def _json_default(value):
@@ -594,14 +636,17 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--run", action="store_true")
+    parser.add_argument("--rescore-existing", action="store_true")
     parser.add_argument("--workers", type=int, default=4)
     args = parser.parse_args()
-    if args.preflight == args.run:
-        parser.error("Choose exactly one of --preflight or --run")
+    if sum((args.preflight, args.run, args.rescore_existing)) != 1:
+        parser.error("Choose exactly one of --preflight, --run, or --rescore-existing")
     if args.preflight:
         preflight()
-    else:
+    elif args.run:
         run(workers=args.workers)
+    else:
+        rescore_existing()
 
 
 if __name__ == "__main__":
