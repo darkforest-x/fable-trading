@@ -392,6 +392,46 @@ def _arm_summary(funds: pd.DataFrame, observed: pd.DataFrame, cap: pd.Series, *,
     return out
 
 
+def _margin_resolution(arms: dict) -> dict:
+    """Explain H1 margin-screen flags with the already collected native-minute order audit."""
+    per_arm = {}
+    for arm_name, arm in arms.items():
+        audit = arm.get("margin", {}).get("2.0")
+        if audit is None:
+            continue
+        events = []
+        for row in audit.get("checked_hours", []):
+            event = {key: row.get(key) for key in (
+                "event_id", "symbol", "side", "multiple", "market_slip", "threshold",
+                "hour", "exit_price", "exit_reason", "phase", "status", "trade_source",
+                "stop_minute", "trade_boundary_minute", "mark_boundary_minute",
+                "stop_minute_open", "stop_minute_trade_high", "stop_minute_trade_low",
+                "stop_minute_mark_high", "stop_minute_mark_low",
+                "full_hour_mark_high", "full_hour_mark_low")}
+            if event["hour"] is not None:
+                event["hour_utc"] = pd.Timestamp(int(event["hour"]), unit="ms", tz="UTC").isoformat()
+            events.append(event)
+        per_arm[arm_name] = dict(
+            h1_prefilter_clear=bool(audit.get("valid", False)),
+            h1_boundary_hits=int(audit.get("maintenance_boundary_hits", 0)),
+            h1_range_negative_equity_flags=int(audit.get("negative_equity_positions", 0)),
+            all_minute_flags_resolved=bool(audit.get("all_flags_resolved", False)),
+            events=events)
+    checked = [row for row in per_arm.values() if row["h1_boundary_hits"]]
+    return dict(
+        screen_semantics=("The margin `valid` and negative-equity fields are the conservative H1 OHLC prefilter. "
+                          "A flagged H1 range is not itself an executed liquidation; read its per-arm checked_hours "
+                          "and this native-minute ordering audit."),
+        minute_method=("For flagged H1 bars, compare the actual USD-M 1m trade stop touch with both 1m traded-price "
+                       "and markPriceKlines maintenance-threshold touches; require the stop minute to be strictly earlier."),
+        all_checked_2x_flags_resolved=bool(checked) and all(row["all_minute_flags_resolved"] for row in checked),
+        unresolved_2x_h1_flags=sum(row["h1_boundary_hits"] for row in checked
+                                   if not row["all_minute_flags_resolved"]),
+        limitation=("This resolves event ordering at one-minute resolution for the identified H1 flags. It does not "
+                    "model Binance account-specific maintenance tiers, liquidation fees, or sub-minute price paths."),
+        by_arm=per_arm)
+
+
 def run(workers: int = 4) -> dict:
     if (EXP / "summary.json").exists():
         raise FileExistsError("Completed Binance entry-capacity study exists")
@@ -535,10 +575,12 @@ def run(workers: int = 4) -> dict:
                         execution="Existing 9-slot shared-cash VectorBT account; frozen entry order/slot and exact child paths; market limits use native actual notional; 5bp extra adverse market slippage stress.",
                         fees="Frozen model maker 2bp / taker 5bp. Binance historical VIP-specific fee tier is not asserted.",
                         funding="Not included.",
+                        margin_audit="The raw H1 `valid` flag is a conservative screen. See summary.margin_validation for native-minute stop-versus-trade/mark boundary ordering.",
                         limitations=["Minute quote-volume median is a turnover proxy, not visible order-book depth or guaranteed fill capacity.",
                                      "No minimum quantity, lot size, queue position, spread, nonlinear market impact, or Binance funding is modeled.",
                                      "A complete entry H1 is checked against the frozen H1 source; those post-entry minutes are not inputs to the cap."]),
             arms=arms)
+        summary["margin_validation"] = _margin_resolution(arms)
         (EXP / "summary.json").write_text(json.dumps(summary, indent=2, allow_nan=False, default=_json_default) + "\n")
         print(json.dumps({k: v.get("metrics", {}).get("all") for k, v in arms.items()}, indent=2, default=_json_default), flush=True)
         return summary
@@ -576,6 +618,10 @@ def rescore_existing() -> dict:
         observations.status.eq("missing_archive"), ["event_id", "symbol", "source_days"]].to_dict(orient="records")
     summary["source"]["missing_daily_archives"] = source_receipt.loc[
         source_receipt.status.eq("missing"), ["symbol", "day", "url"]].to_dict(orient="records")
+    summary["margin_validation"] = _margin_resolution(summary["arms"])
+    summary["limits"]["margin_audit"] = (
+        "The raw H1 `valid` flag is a conservative screen. See summary.margin_validation for native-minute "
+        "stop-versus-trade/mark boundary ordering.")
     summary_path.write_text(json.dumps(summary, indent=2, allow_nan=False, default=_json_default) + "\n")
     print(f"Rescored {len(labels)} saved accounts over {len(ENTRY_PERIODS)} periods; no portfolio replay.", flush=True)
     return summary

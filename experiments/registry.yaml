@@ -19975,3 +19975,37 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: "The position interval is first entry 2020-05-10 12:00Z through final flat 2026-09-24 00:00Z (last exit bar opens 2026-09-23 23:00Z and closes at 00:00Z). Last applied settlement is 2026-09-23 16:00:00.004Z, with zero rate/cashflow; donor tape ends 2026-09-24 00:00:00.002Z, 2ms after the final flat time, and contains no settlement exactly at the cutoff. Coverage: 2,003 required symbol-months, zero missing or unproven empty windows, 181,393 in-hold settlements. Funding rates have sources; marks are 1,587 exact API marks plus 76,844 official 1h-open proxies. Largest parent entry-notional change: 2x short SIGN 5,363.23U to 4,366.93U (-996.30U / -18.58 percent); its cash change combines smaller later order sizing and -320.76U funding. No production eligibility or account change."
+  - experiment_id: exp-cloud-close-binance-entry-capacity-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: a7f39b10b1
+    status: complete
+    question: "Does limiting actual entry notional to a fraction of the preceding 60 Binance USD-M 1m median quote volume change the frozen 1x/2x account's performance and marked drawdown?"
+    single_variable: "Entry capacity only: cap actual funded parent notional at 10% of the median quote volume in the 60 complete minutes strictly before entry; 1% is the sensitivity arm. Keep the frozen 1x/2x exposure, 9-slot order, entries, exits, fees, and parent set. Add separate +5bp adverse market-fill stress; no replacements."
+    result: "Full 1,586-parent baseline: 26,003.50U; win 33.67%; cash payoff 2.603; mark / conservative hourly drawdown 41.43% / 46.15%. On the 1,583 parents with valid positive minute history, the 10% cap ends at 19,949.07U (win 33.80%, cash payoff 2.889, DD 29.75% / 39.25%); its +5bp stress ends 17,753.57U (33.67%, 2.839, DD bound 39.72%). The 1% sensitivity ends 6,634.82U (33.80%, 2.941, DD 25.03% / 25.96%); +5bp ends 6,257.17U (33.67%, 2.895, DD bound 26.49%). Development and annual metrics are in account_metrics.csv. Three parents are unknown after four official S3 daily-archive 404s. All 1,583 observed entry H1 bars match frozen OHLC."
+    artifacts:
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/summary.json
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/account_metrics.csv
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/entry_capacity.csv.gz
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/daily_archive_sources.csv
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/funded_unrestricted.csv.gz
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/hourly_unrestricted.csv.gz
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/funded_unrestricted_stress.csv.gz
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/hourly_unrestricted_stress.csv.gz
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/funded_same_coverage_unrestricted.csv.gz
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/hourly_same_coverage_unrestricted.csv.gz
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/funded_same_coverage_unrestricted_stress.csv.gz
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/hourly_same_coverage_unrestricted_stress.csv.gz
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/funded_cap_10pct.csv.gz
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/hourly_cap_10pct.csv.gz
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/funded_cap_10pct_stress.csv.gz
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/hourly_cap_10pct_stress.csv.gz
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/funded_cap_1pct.csv.gz
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/hourly_cap_1pct.csv.gz
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/funded_cap_1pct_stress.csv.gz
+      - experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/hourly_cap_1pct_stress.csv.gz
+    canonical_report: experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: "The cap uses 1m quote-volume median as turnover proxy, not order-book depth; spread, impact, lot sizes and Binance funding are omitted. Frozen 2bp maker/5bp taker assumptions are used; Binance's historical VIP fee tier is not asserted. H1 maintenance prefilter flags in 2x are resolved for all inspected accounts: GHST (2025-12-17 15:00Z) stop minute 1 vs trade/mark threshold minute 15; MOVR (2026-08-27 04:00Z) stop minute 3 vs threshold minute 11. Summary preserves H1 screen flags and its native-minute audit; this does not model exchange-specific liquidation tiers or sub-minute paths. No production eligibility or account change."
