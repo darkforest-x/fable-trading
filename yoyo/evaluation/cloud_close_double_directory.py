@@ -60,7 +60,7 @@ def changed_limits(tape,quotes):
                            exit_phase='open' if early else 'intrabar',exit_price=r.price,
                            exit_fee_rate=exposure.study.leverage.MAKER,same_bar_ambiguous=False))
     changes = pd.concat([pd.DataFrame(cached),new],ignore_index=True)
-    if not changes.event_id.is_unique:
+    if not changes.empty and not changes.event_id.is_unique:
         raise ValueError('Cached and new native doubling events overlap')
     return changes
 
