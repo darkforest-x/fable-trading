@@ -38,6 +38,7 @@ def main():
     if not (EXP/'source_coverage.json').exists():
         source.collect(legs,EXP)
     tape = pd.read_csv(EXP/'funding_tape.csv.gz',dtype={'symbol':str},float_precision='round_trip')
+    data['funding_no_settlement_windows'] = replay.verified_empty_windows(pd.read_csv(EXP/'source_months.csv.gz'))
     result = {}
     for slip in (0.,.0005):
         cfg = dict(account=dict(new_order_exposure_fraction=.9,initial_cash_usdt=1000.,expected_positions=len(expected)),market_slip=slip)

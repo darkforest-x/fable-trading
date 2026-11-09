@@ -300,6 +300,26 @@ def _relation(ts: int, row: pd.Series) -> str:
     return "after_exit"
 
 
+def verified_empty_windows(months: pd.DataFrame) -> dict:
+    """Contiguous native query spans which demonstrably contained no settlements."""
+    complete = _bool_column(months.range_complete, 'range_complete')
+    empty = months[complete & months.missing_mark_rows.eq(0) & months.missing_rate_rows.eq(0)
+                   & months.funding_settlement_rows_in_query_window.eq(0)]
+    result = {}
+    for symbol, group in empty.groupby('symbol'):
+        spans = []
+        for row in group.sort_values('query_start_ms').itertuples():
+            left,right = int(row.query_start_ms),int(row.query_end_exclusive_ms)
+            if left>=right:
+                raise ValueError(f'Invalid zero-settlement coverage interval for {symbol}')
+            if spans and left<=spans[-1][1]:
+                spans[-1] = (spans[-1][0],max(spans[-1][1],right))
+            else:
+                spans.append((left,right))
+        result[str(symbol).removesuffix('USDT')] = spans
+    return result
+
+
 def _schedule_flows(data: dict, children: pd.DataFrame, tape: pd.DataFrame, scenario: str) -> dict:
     if scenario not in {"include_boundary", "exclude_boundary"}:
         raise ValueError(f"Unknown funding boundary scenario: {scenario}")
@@ -319,12 +339,15 @@ def _schedule_flows(data: dict, children: pd.DataFrame, tape: pd.DataFrame, scen
         source_row = child_index.loc[key]
         symbol = str(source_row.symbol)
         source = tape_by_symbol.get(symbol)
-        if source is None:
-            raise ValueError(f"Missing funding tape for selected held contract {symbol}")
         exit_bound = int(source_row.exit_bar_ms)
         phase = str(source_row.exit_phase)
         if phase in {"close", "intrabar"}:
             exit_bound += HOUR
+        if source is None:
+            windows = data.get('funding_no_settlement_windows', {}).get(symbol, [])
+            if any(start<=int(source_row.entry_ms) and exit_bound<end for start,end in windows):
+                continue
+            raise ValueError(f"Missing funding tape for selected held contract {symbol}")
         stamps = source.funding_time_ms.to_numpy(dtype=np.int64)
         lo = int(source_row.entry_ms)
         left = int(np.searchsorted(stamps, lo, side="left"))
