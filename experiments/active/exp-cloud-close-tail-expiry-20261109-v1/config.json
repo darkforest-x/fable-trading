@@ -1,0 +1,5 @@
+{
+  "id": "exp-cloud-close-tail-expiry-20261109-v1",
+  "single_variable": "At a native V1.7 signal, use the asset's trailing 180 consecutive pre-key 12H log returns. If its upper decile is further from the median than the lower decile, allow longs to cancel the 2R target after the first 12H. Reverse for shorts. Otherwise keep the full 2/3 resting 2R target. Unknown or equal asymmetry defaults to persistent orders. The 90/10 quantiles and the existing 90-day eligibility interval are fixed without a grid.",
+  "account": "Same 1000U OKX 9-slot original stop/EMA account, NAV/9 and 20% contract cap assessed at 12H closes. Original market and resting-limit fees 5bp and 2bp. Compare with exact previously funded persistent-target and 12H-expiry parents. Funding, fills below lot sizes and impact omitted. Both development and later windows previously studied. Independently extend a candidate only if it beats persistent-target development terminal capital and clears win/payoff/risk checks in development and full history."
+}
