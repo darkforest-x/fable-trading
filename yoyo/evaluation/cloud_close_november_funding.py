@@ -79,6 +79,8 @@ def _validate_config(config: dict) -> None:
         raise ValueError("This adapter requires the frozen hourly 20% contract cap")
     if config["boundary_policy"]["timestamp_resolution"] != "Exact source milliseconds; no timestamp tolerance":
         raise ValueError("Funding boundaries must use exact source milliseconds")
+    if not np.isclose(float(config["execution"]["market_slippage_stress"]), 0.0005):
+        raise ValueError("The preregistered adverse market-slippage sensitivity changed")
     if config["network_policy"] != (
         "Only official Binance USD-M funding and mark archives or public fundingRate history "
         "for uncovered held windows; no market-price collection in this adapter"
@@ -507,12 +509,13 @@ def run(config_path: Path = CONFIG_PATH) -> dict:
     tape, months, source_audit = _funding_sources(legs, config)
     data["funding_no_settlement_windows"] = hourly.verified_empty_windows(months)
     account_output.mkdir(parents=True, exist_ok=True)
+    market_slip = float(config["execution"]["market_slippage_stress"])
     scenarios = {}
     for name, slip, subdir in (
         ("include_boundary", 0.0, account_output),
         ("exclude_boundary", 0.0, account_output),
-        ("include_boundary", float(config["additional_market_slippage"]), account_output / "market_slip_5bp"),
-        ("exclude_boundary", float(config["additional_market_slippage"]), account_output / "market_slip_5bp"),
+        ("include_boundary", market_slip, account_output / "market_slip_5bp"),
+        ("exclude_boundary", market_slip, account_output / "market_slip_5bp"),
     ):
         label = f"{'market_slip_5bp/' if slip else ''}{name}"
         scenarios[label] = _write_scenario(subdir, name, data, tape, config, slip)
@@ -521,7 +524,7 @@ def run(config_path: Path = CONFIG_PATH) -> dict:
         "id": config["id"], "status": "complete", "vectorbt_version": hourly.vbt.__version__,
         "source_account": leg_audit, "funding_source": source_audit,
         "funding_boundaries": ["include_boundary", "exclude_boundary"],
-        "additional_market_slippage": float(config["additional_market_slippage"]),
+        "additional_market_slippage": market_slip,
         "scenarios": {key: {"metrics": value["metrics"], "audit": value["audit"]}
                       for key, value in scenarios.items()},
         "full_parent_roster_replayed": True, "all_selected_children_have_native_entry_exit_orders": True,
