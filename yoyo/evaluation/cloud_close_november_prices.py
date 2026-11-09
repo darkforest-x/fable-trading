@@ -679,7 +679,9 @@ def _build_period(period: dict[str, Any], *, config: dict[str, Any], local: pd.D
     })
     if active is None:
         base.update({"expected_5m": 0, "observed_5m": 0, "missing_5m": 0, "complete_h1": 0, "incomplete_h1": 0,
-                     "series_path": "", "parity_status": "not_applicable"})
+                     "series_path": "", "parity_status": "not_applicable",
+                     "overlap_parity_status": "not_applicable", "overlap_parity_checked_bars": 0,
+                     "overlap_parity_mismatched_bars": 0, "overlap_parity_examples": []})
         return base
 
     lo, hi = active
@@ -803,7 +805,7 @@ def collect(*, fetch: bool, symbols: set[str] | None = None) -> dict[str, Any]:
 
     if fetch and symbols is None:
         active_rows = [r for r in output_rows if r["collection_start_utc"]]
-        mismatches = sum(int(r["overlap_parity_mismatched_bars"]) for r in output_rows)
+        mismatches = sum(int(r.get("overlap_parity_mismatched_bars", 0)) for r in output_rows)
         fixed_symbols = {r["symbol"] for r in output_rows}
         nonfixed = _local_nonfixed_symbols(fixed_symbols)
         coverage = pd.DataFrame(output_rows)
