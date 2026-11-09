@@ -89,7 +89,7 @@ def _validate_no_sale_route(data: dict) -> dict:
     selected = data["selected"].copy()
     if "child" not in selected:
         raise ValueError("No-sale route did not retain its original source-child identity")
-    expected = selected.slot.astype(int).map({0: 1, 1: 1, 2: 3, 3: 3})
+    expected = selected.slot.astype(int).mod(4).map({0: 1, 1: 1, 2: 3, 3: 3})
     if not np.array_equal(selected.child.to_numpy(dtype=int), expected.to_numpy(dtype=int)):
         raise ValueError("The selected children include an absolute 2x sale instead of hold_doubling")
     if len(selected) != 6332 or not selected.event_id.nunique() == 1583:
