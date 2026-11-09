@@ -150,19 +150,26 @@ def prepare_supplemental_history():
         if history.empty or not history.index.is_unique or not history.index.is_monotonic_increasing:
             raise ValueError(f'No valid official H1 history for supplemental contract {ticker}')
         expected = pd.Index(np.arange(history.index[0], history.index[-1] + HOUR, HOUR), name='open_time_ms')
-        missing = expected.difference(history.index)
-        if len(missing):
-            raise ValueError(f'{ticker}: official monthly history has {len(missing)} missing H1 clocks')
         row = source_rows.loc[ticker]
         extension_path = SOURCE/'series'/(str(row.contract_period_id)+'.csv.gz')
         extension = pd.read_csv(extension_path, usecols=['open_time_ms',*OHLC], dtype={'open_time_ms':'int64'},
                                 float_precision='round_trip').set_index('open_time_ms')[OHLC]
+        if (len(extension) != int(row.complete_h1) or not extension.index.is_unique or
+                not extension.index.is_monotonic_increasing or (extension.index % HOUR).any()):
+            raise ValueError(f'{ticker}: official FAPI-derived H1 extension does not match its coverage receipt')
         overlap = history.index.intersection(extension.index)
         same = np.allclose(history.loc[overlap,OHLC], extension.loc[overlap,OHLC], rtol=2e-11, atol=1e-13) if len(overlap) else True
         if not same:
             raise ValueError(f'{ticker}: monthly official H1 and November source disagree on {len(overlap)} overlap bars')
         if len(overlap) != len(extension[(extension.index >= history.index[0]) & (extension.index < history.index[-1] + HOUR)]):
             raise ValueError(f'{ticker}: H1 source overlap is incomplete against the monthly archive')
+        monthly_missing = expected.difference(history.index)
+        repairable = monthly_missing.intersection(extension.index)
+        if len(repairable):
+            history = pd.concat([history,extension.loc[repairable]]).sort_index()
+        missing = expected.difference(history.index)
+        if len(missing):
+            raise ValueError(f'{ticker}: {len(missing)} historical H1 clocks remain unavailable after official FAPI repair')
         slot.mkdir(parents=True, exist_ok=True)
         if (slot/'quotes.npz').is_file() or (slot/'fills.csv.gz').is_file():
             raise FileExistsError(f'Refusing to overwrite supplemental history paths for {ticker}')
@@ -179,8 +186,12 @@ def prepare_supplemental_history():
             raw.to_csv(slot/'raw_events.csv.gz',index=False)
         receipt = dict(symbol=ticker,onboard_ms=onboard,history_cutoff_ms=cutoff,first_h1_ms=int(history.index[0]),
                        last_h1_ms=int(history.index[-1]),history_bars=len(history),missing_h1_clocks=0,
+                       monthly_missing_h1_clocks=int(len(monthly_missing)),
+                       h1_repaired_from_official_fapi_5m_aggregate=int(len(repairable)),
+                       repair_clock_utc=[str(x) for x in pd.to_datetime(repairable,unit='ms',utc=True)],
                        monthly_archive_bars=int(sum(x['rows'] for x in month_receipts)),source_months=month_receipts,
-                       source_period_id=str(row.contract_period_id),extension_overlap_bars=len(overlap),
+                       source_period_id=str(row.contract_period_id),extension_source_period=str(extension_path.relative_to(ROOT)),
+                       extension_overlap_bars=len(overlap),
                        extension_overlap_ohlc_equal=bool(same),raw_keys=int(len(raw)),path_keys=int(len(signals)),
                        source_signals=int(priced.get('source_signals',0)),price_decimals=decimals,
                        mature_at_ms=onboard+90*24*HOUR,state='complete')
