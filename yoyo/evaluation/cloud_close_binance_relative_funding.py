@@ -112,7 +112,7 @@ def _assert_committed() -> None:
             raise RuntimeError(f"Commit the relative funding builder/config first: {relative}")
 
 
-def _load_funding_inputs(config: dict) -> tuple[pd.DataFrame, pd.DataFrame, dict, pd.DataFrame, pd.DataFrame]:
+def _load_funding_inputs(config: dict, *, expected_parent_count: int = 1586) -> tuple[pd.DataFrame, pd.DataFrame, dict, pd.DataFrame, pd.DataFrame]:
     paths = config["inputs"]
     tape_path, months_path = ROOT / paths["funding_tape"], ROOT / paths["source_months"]
     coverage_path = ROOT / paths["source_coverage"]
@@ -136,8 +136,10 @@ def _load_funding_inputs(config: dict) -> tuple[pd.DataFrame, pd.DataFrame, dict
         raise ValueError("Frozen funding or relative-account schema changed")
     months["range_complete"] = _bool_column(months.range_complete, "source_months.range_complete")
     tape["source_complete"] = _bool_column(tape.source_complete, "funding_tape.source_complete")
-    if len(parents) != 1586 or parents.event_id.nunique() != 1586 or parents.event_id.duplicated().any():
-        raise ValueError("Frozen contrarian_half parent roster is not unique at 1,586")
+    if (len(parents) != expected_parent_count
+            or parents.event_id.nunique() != expected_parent_count
+            or parents.event_id.duplicated().any()):
+        raise ValueError(f"Frozen account parent roster is not unique at {expected_parent_count}")
     if not np.isclose(1000.0 + parents.cash_pnl.sum(), float(equity.nav.iloc[-1]), atol=0.02, rtol=1e-9):
         raise ValueError("Frozen relative account parent cash does not reconcile to its H1 NAV")
     if not coverage.get("complete") or coverage.get("positions") != 1586 or coverage.get("legs") != 3172:
@@ -155,7 +157,7 @@ def _load_funding_inputs(config: dict) -> tuple[pd.DataFrame, pd.DataFrame, dict
     return tape, months, coverage, parents, equity
 
 
-def _prepare_account(reference: pd.DataFrame) -> tuple[dict, tuple, object, pd.Series, dict]:
+def _prepare_account(reference: pd.DataFrame, *, expected_event_ids: set[str] | None = None) -> tuple[dict, tuple, object, pd.Series, dict]:
     archive = sizing.archive
     bundle = sizing.bundle
     extra = set(_json(archive.EXP / "summary.json")["archived_additions"])
@@ -164,8 +166,25 @@ def _prepare_account(reference: pd.DataFrame) -> tuple[dict, tuple, object, pd.S
         rows, loader, _ = bundle.paths("Binance")
         quotes = lru_cache(maxsize=None)(loader)
         data, doubled = sizing.make_account(rows, quotes)
+        source_parent_ids = set(data["selected"].event_id.astype(str))
+        if expected_event_ids is not None:
+            expected_event_ids = {str(value) for value in expected_event_ids}
+            if not expected_event_ids or not expected_event_ids.issubset(source_parent_ids):
+                raise ValueError("Capacity eligible IDs are empty or outside the frozen original roster")
+            selected = data["selected"].copy()
+            eligible_rows = selected.event_id.astype(str).isin(expected_event_ids)
+            if not selected.loc[eligible_rows].groupby("event_id").size().eq(4).all():
+                raise ValueError("Every capacity-eligible parent must retain its original four children")
+            excluded_slots = selected.loc[~eligible_rows, "slot"].astype(int).to_numpy()
+            actions = data["actions"].copy()
+            actions[:, excluded_slots] = 0
+            data["actions"] = actions
+            data["selected"] = selected.loc[eligible_rows].copy()
         market = sizing.base.underlying(data, quotes)
         runners = market[-1].set_index("event_id")
+        expected_positions = len(expected_event_ids) if expected_event_ids is not None else 1586
+        if len(runners) != expected_positions or len(data["selected"]) != expected_positions * 4:
+            raise ValueError("Capacity-filtered child rows do not preserve the selected parent roster")
         state = runners.entry_ms.map(sizing.relative(quotes))
         sign = state * runners.side
         multipliers = pd.Series(1.5 - 0.5 * sign, index=runners.index, name="exposure")
@@ -175,8 +194,8 @@ def _prepare_account(reference: pd.DataFrame) -> tuple[dict, tuple, object, pd.S
         actual = multipliers.reindex(saved.index).sort_index()
         if actual.isna().any() or not np.array_equal(actual.to_numpy(), saved.to_numpy()):
             raise ValueError("Rebuilt causal ETH/BTC 1x/2x exposure map differs from frozen output")
-        if len(runners) != 1586 or data["selected"].event_id.nunique() != 1586 or len(data["selected"]) != 6344:
-            raise ValueError("Rebuilt four-child V1.7 roster changed")
+        if data["selected"].event_id.nunique() != expected_positions:
+            raise ValueError("Rebuilt four-child V1.7 event count changed")
         child_counts = data["selected"].groupby("event_id").size()
         if not child_counts.eq(4).all() or data["selected"].duplicated(["event_id", "slot"]).any():
             raise ValueError("Every frozen parent must have four unique child slots")
@@ -190,10 +209,14 @@ def _prepare_account(reference: pd.DataFrame) -> tuple[dict, tuple, object, pd.S
             raise ValueError("A 2x flagged stop was not proven strictly earlier by Binance minutes")
         if len(two.get("checked_hours", [])) != 2:
             raise ValueError("Expected the two frozen 2x minute-resolved stop flags")
-        data["expected_positions"] = 1586
-        data["expected_child_legs"] = 6344
+        data["expected_positions"] = expected_positions
+        data["expected_child_legs"] = expected_positions * 4
         audit = {
+            "source_parent_ids": len(source_parent_ids),
             "positions": len(runners), "four_child_rows": len(data["selected"]),
+            "capacity_excluded_parents": len(source_parent_ids) - expected_positions,
+            "capacity_excluded_parent_ids": sorted(source_parent_ids - set(runners.index.astype(str))),
+            "original_slot_assignments_preserved_for_eligible_parents": True,
             "exposure_counts": {str(k): int(v) for k, v in multipliers.value_counts().sort_index().items()},
             "double_limit_child_exits": len(doubled), "parent_roster_matches_reference": True,
             "exposure_map_matches_reference": True,
@@ -410,7 +433,7 @@ def _funded_segment(c, previous_close, target, trim_fraction, cap,
                     first_underflow, first_underflow_positions):
     phase = c.i % 4
     if phase == 0:
-        # The 20% single-contract target uses the last completed H1 NAV/close.
+        # The optional single-contract target uses the last completed H1 NAV/close.
         prior_nav = nb.get_group_value_ctx_nb(c) - margin_liability[c.group]
         for col in range(c.from_col, c.to_col, 4):
             slot = col // 4
@@ -455,7 +478,7 @@ def _funded_segment(c, previous_close, target, trim_fraction, cap,
 @njit(cache=True)
 def _funded_order(c, nav, actions, prices, fees, weights, reservation, slot_weights,
                   trim_fraction, native_open_multiple, directions, slip, event_codes,
-                  exit_cache_quantity, exit_cache_event):
+                  exit_cache_quantity, exit_cache_event, entry_limits):
     if c.i % 4 == 2:
         slot = c.col // 4
         fraction = trim_fraction[slot]
@@ -464,7 +487,7 @@ def _funded_order(c, nav, actions, prices, fees, weights, reservation, slot_weig
         native_ratio = native_open_multiple[c.i // 4, slot]
         side = directions[c.i // 4, slot]
         if native_ratio <= 0.0 or side == 0:
-            raise ValueError("20% cap trim lacks its actual native H1 open")
+            raise ValueError("Single-contract cap trim lacks its actual native H1 open")
         price = c.close[c.i, c.col] - native_ratio * slip
         fee_rate = TAKER * native_ratio * (1.0 - side * slip) / price
         return nb.order_nb(size=-c.position_now * fraction, price=price, fees=fee_rate,
@@ -473,6 +496,22 @@ def _funded_order(c, nav, actions, prices, fees, weights, reservation, slot_weig
     if action == 2:
         exit_cache_quantity[c.col] = c.position_now
         exit_cache_event[c.col] = event_codes[c.i, c.col]
+    elif action == 1 and c.i % 4 == 0 and entry_limits.size > 1:
+        # The limit is the parent's true underlying USDT notional, derived from
+        # the 60 complete minute quote-volume observations before its entry.
+        hour, slot = c.i // 4, c.col // 4
+        limit = entry_limits[hour, slot]
+        if np.isfinite(limit):
+            native_ratio = native_open_multiple[hour, slot]
+            side = directions[hour, slot]
+            if limit <= 0.0 or native_ratio <= 0.0 or side == 0:
+                raise ValueError("Entry-cap parent lacks a positive capacity or native open")
+            capacity = c.group_len // len(weights)
+            unit_notional = native_ratio * (1.0 + side * slip)
+            unit_cost = prices[c.i, c.col] * (1.0 + fees[c.i, c.col])
+            if unit_notional <= 0.0 or capacity <= 0:
+                raise ValueError("Entry-cap unit notional or shared position capacity is invalid")
+            nav = min(nav, limit * unit_cost / unit_notional * capacity)
     return sizing.base.wallet.account_order(
         c, nav, actions, prices, fees, 0.0, 1.0, weights,
         reservation, 0, slot_weights,
@@ -482,7 +521,21 @@ def _funded_order(c, nav, actions, prices, fees, weights, reservation, slot_weig
 def _run_scenario(data: dict, tape: pd.DataFrame | None, scenario: str | None,
                   slip: float, exposure_map: pd.Series, previous_close: np.ndarray,
                   native_open: np.ndarray, directions: np.ndarray,
-                  no_settlement_windows: dict):
+                  no_settlement_windows: dict, *,
+                  hourly_cap_fraction: float | None = CAP,
+                  entry_limits: np.ndarray | None = None):
+    if hourly_cap_fraction is None:
+        cap_value = np.inf
+    else:
+        cap_value = float(hourly_cap_fraction)
+        if not np.isfinite(cap_value) or cap_value <= 0.0:
+            raise ValueError("Optional H1 single-contract cap must be positive or disabled")
+    limit_grid = (np.full((1, 1), np.inf, dtype=np.float64) if entry_limits is None
+                  else np.asarray(entry_limits, dtype=np.float64))
+    if (limit_grid.ndim != 2 or
+            (limit_grid.size > 1 and limit_grid.shape != previous_close.shape) or
+            np.isnan(limit_grid).any() or (limit_grid[np.isfinite(limit_grid)] <= 0.0).any()):
+        raise ValueError("Entry capacity matrix must match the native H1 slot grid and be positive")
     model = _make_model(data, exposure_map, slip)
     selected = model["selected"].copy()
     selected["source_tp_r"] = selected.tp_r.astype(float)
@@ -502,10 +555,10 @@ def _run_scenario(data: dict, tape: pd.DataFrame | None, scenario: str | None,
         run_data["marks"], _funded_order, run_data["actions"], run_data["prices"], run_data["fees"],
         WEIGHTS, reservation, slot_weights, trim_fraction, native_open, directions,
         float(slip), scheduled["event_codes"], scheduled["exit_cache_quantity"],
-        scheduled["exit_cache_event"],
+        scheduled["exit_cache_event"], limit_grid,
         pre_segment_func_nb=_funded_segment,
         pre_segment_args=(
-            previous_close, target, trim_fraction, CAP,
+            previous_close, target, trim_fraction, cap_value,
             scheduled["pre_ptr"], scheduled["pre_ids"], scheduled["flow_col"],
             scheduled["flow_code"], scheduled.get("flow_rate_effective", scheduled["flow_rate"]),
             scheduled["flow_mark"], scheduled["flow_time"], scheduled["flow_cache"],
@@ -544,6 +597,9 @@ def _run_scenario(data: dict, tape: pd.DataFrame | None, scenario: str | None,
     audit = {
         "scenario": "zero_funding" if scenario is None else scenario,
         "market_slip": float(slip), "positions": len(parents),
+        "hourly_single_contract_cap_fraction": (None if hourly_cap_fraction is None
+                                                  else float(hourly_cap_fraction)),
+        "entry_capacity_limit_active": bool(limit_grid.size > 1),
         "child_legs": len(children), "applied_funding_rows": int(flow_rows.applied.sum()),
         "funding_cashflow_usdt": float(flow_rows.loc[flow_rows.applied, "funding_cashflow_usdt"].sum()),
         "exact_mark_rows_applied": int(flow_rows.loc[flow_rows.applied, "mark_source"].astype(str)
@@ -1004,6 +1060,12 @@ def _mini_check() -> dict:
                             previous, native, directions, no_settlement)
     stress = _run_scenario(data, tape, "include_boundary", 0.0005, multipliers,
                            previous, native, directions, no_settlement)
+    entry_limits = np.full_like(previous, np.inf)
+    entry_limits[0, 0] = 30.0
+    no_hourly_cap = _run_scenario(
+        data, None, None, 0.0, multipliers, previous, native, directions,
+        no_settlement, hourly_cap_fraction=None, entry_limits=entry_limits,
+    )
     if len(zero[0]) != 12 or zero[1].index.nunique() != 3:
         raise AssertionError("Four-leg mini account did not produce its full parent roster")
     if not np.isclose(include[4]["audit"]["funding_cashflow_usdt"],
@@ -1022,6 +1084,12 @@ def _mini_check() -> dict:
     later_funded_size = float(include[0].loc[include[0].event_id.eq("mini-later"), "entry_signed_size"].abs().sum())
     if np.isclose(later_zero_size, later_funded_size, rtol=1e-10, atol=1e-10):
         raise AssertionError("Mini funding did not change a subsequent VectorBT-funded native position size")
+    capped_notional = float(no_hourly_cap[1].at["mini-long", "notional"])
+    uncapped_notional = float(zero[1].at["mini-long", "notional"])
+    if not 0.0 < capped_notional <= 30.0 + 1e-6 or capped_notional >= uncapped_notional:
+        raise AssertionError("Mini prior-minute entry capacity did not cap native parent notional")
+    if no_hourly_cap[4]["audit"]["trim_order_count"] != 0:
+        raise AssertionError("Mini disabled the hourly cap but still emitted a scheduled trim")
     result = {
         "status": "pass", "mini_parents": 3, "mini_children": 12,
         "boundary_rows_include": int(include[4]["audit"]["boundary_rows_applied"]),
@@ -1031,6 +1099,10 @@ def _mini_check() -> dict:
         "funding_exclude_usdt": float(exclude[4]["audit"]["funding_cashflow_usdt"]),
         "later_parent_native_size_zero_usdt": later_zero_size,
         "later_parent_native_size_funded_usdt": later_funded_size,
+        "mini_entry_capacity_limit_usdt": 30.0,
+        "mini_capped_parent_notional_usdt": capped_notional,
+        "mini_uncapped_parent_notional_usdt": uncapped_notional,
+        "mini_hourly_trim_count_when_disabled": int(no_hourly_cap[4]["audit"]["trim_order_count"]),
         "five_bp_stress_run": True, "vectorbt_version": vbt.__version__,
     }
     print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False), flush=True)

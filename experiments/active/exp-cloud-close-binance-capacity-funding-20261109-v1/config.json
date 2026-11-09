@@ -1,0 +1,82 @@
+{
+  "id": "exp-cloud-close-binance-capacity-funding-20261109-v1",
+  "venue": "Binance USD-M",
+  "question": "How do verified realized Binance funding cashflows change the existing 10% prior-hour turnover-cap account when its original 20% hourly single-contract trim is also retained?",
+  "single_variable": "Add the archived Binance USD-M funding tape to the frozen cap_10pct cash account. Keep the 1,583 parents with complete positive prior-60-minute quote-turnover evidence, their original nine-slot admission order and slot assignments, four actual child legs, frozen 1x/2x relative exposure, the 10% entry notional limit, the original 20% per-contract hourly NAV trim, fees, native execution prices, and exits. The three pre-entry capacity rows marked missing_archive remain skipped in their original slots; no replacement opportunities are admitted.",
+  "account": {
+    "initial_cash_usdt": 1000.0,
+    "original_parent_denominator": 1586,
+    "expected_positions": 1583,
+    "expected_child_legs": 6332,
+    "slots": 9,
+    "entry_capacity_fraction": 0.1,
+    "entry_capacity_window": "Median quote turnover of exactly 60 complete Binance USD-M 1m bars in [entry_ms - 60 minutes, entry_ms); entry minute is excluded.",
+    "single_contract_hourly_cap_fraction": 0.2,
+    "hourly_trim": "At each H1 open, determine the position target from the prior completed H1 NAV and prior close; trim any contract whose notional exceeds 20% of that prior NAV, with the existing market order and taker fee.",
+    "child_weights": [0.3333333333333333, 0.3333333333333333, 0.16666666666666666, 0.16666666666666666],
+    "relative_exposure_levels": [1.0, 2.0],
+    "excluded_event_ids": [
+      "12H|WAVESUSDT|1606694400000000000|1",
+      "12H|WAVESUSDT|1606867200000000000|1",
+      "12H|XTZUSDT|1606867200000000000|1"
+    ],
+    "entry_priority": "Preserve original frozen V1.7 entry order, CRC32 symbol priority, event order, and slot assignment. The three capacity-unknown entries leave their slots empty; do not refill those slots.",
+    "period_end_utc": "2026-09-23T23:00:00Z"
+  },
+  "fees": {
+    "taker": 0.0005,
+    "resting_maker": 0.0002,
+    "additional_market_slippage_stress": 0.0005
+  },
+  "funding": {
+    "venue": "Binance USD-M",
+    "boundary_scenarios": ["include_boundary", "exclude_boundary"],
+    "accounting": "Use frozen fundingTime milliseconds, actual native four-leg contract quantity and the source mark. Funding posts to shared cash and changes later order size. Existing collateral liability handling applies when a funding debit exceeds available cash; no deposit or skipped debit is allowed.",
+    "marks": {
+      "binance_vision_mark_1h_open_proxy": 76844,
+      "binance_fundingRate_markPrice": 1587
+    },
+    "source_complete": true
+  },
+  "inputs": {
+    "original_funded_parent_reference": "experiments/active/exp-cloud-close-binance-relative-minutes-20261109-v1/funded_contrarian_half.csv.gz",
+    "capacity_panel": "experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/entry_capacity.csv.gz",
+    "cap10_funded_parent_reference": "experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/funded_cap_10pct.csv.gz",
+    "cap10_hourly_reference": "experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/hourly_cap_10pct.csv.gz",
+    "cap10_stress_funded_reference": "experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/funded_cap_10pct_stress.csv.gz",
+    "cap10_stress_hourly_reference": "experiments/active/exp-cloud-close-binance-entry-capacity-20261109-v1/hourly_cap_10pct_stress.csv.gz",
+    "native_children": "experiments/active/exp-cloud-close-fvg-priority-funding-20261109-v1/child_windows.csv.gz",
+    "funding_tape": "experiments/active/exp-cloud-close-fvg-priority-funding-20261109-v1/funding_tape.csv.gz",
+    "source_months": "experiments/active/exp-cloud-close-fvg-priority-funding-20261109-v1/source_months.csv.gz",
+    "source_coverage": "experiments/active/exp-cloud-close-fvg-priority-funding-20261109-v1/source_coverage.json"
+  },
+  "coverage_expectation": {
+    "capacity_rows": 1586,
+    "observed_positive_capacity_rows": 1583,
+    "missing_archive_rows": 3,
+    "funding_tape_rows": 78431,
+    "funding_source_positions": 1586,
+    "funding_source_child_rows": 3172,
+    "funding_source_symbol_months": 2021
+  },
+  "scenarios": [
+    "zero_funding_cap10_parity",
+    "include_boundary",
+    "exclude_boundary",
+    "stress_include_boundary",
+    "stress_exclude_boundary"
+  ],
+  "execution": {
+    "framework": "Local VectorBT 1.2.0 cash-sharing from_order_func. Capacity, hourly trim, funding posting, all fills and later sizing remain inside the same portfolio callback.",
+    "network_policy": "Offline replay only; no funding collection, archive download, alternate venue, or substitute price source.",
+    "unresolved_capacity": "Keep the three original no-capacity events out of the run and preserve original slots. Do not infer turnover from later prices or substitute another event.",
+    "cash_check": "For each run, initial cash plus VectorBT execution cashflows plus applied funding cashflows must equal terminal NAV, and parent order cash plus funding must reconcile to each parent ledger."
+  },
+  "outputs": {
+    "scope": "experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/",
+    "zero_funding": "Persist parent, child, hourly, trim/order data and exact parity against cap10 funded/hourly references.",
+    "per_funding_scenario": ["funded_legs.csv.gz", "funded_positions.csv.gz", "applied_funding.csv.gz", "hourly_equity.csv.gz", "orders.csv.gz", "metrics.json"],
+    "summary": "summary.json"
+  },
+  "status": "preregistered_frozen_inputs"
+}
