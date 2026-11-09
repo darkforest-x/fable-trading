@@ -15,6 +15,51 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-binance-doubled-stop-transfer-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "ade6c4e1da"
+    status: "inconclusive"
+    question: "云带原多单翻倍后如何退出：币安资金费跨市场复核"
+    single_variable: "冻结原生币安1583笔，在原组合中取消翻倍售半，再单独检验首次翻倍12H收盘的K线低点保护；实际资金费及盘中结算两种顺序。"
+    result: "原售半19,556–19,644U；不卖27,483–27,615U、回撤38.41–38.50%；加固定低点19,073–19,222U。两所仅不卖方向一致，低点保护效果未复现。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-binance-doubled-stop-transfer-20261109-v1/summary.json"
+    notes: "Native 50 affected doubling parents; 46 closed 12H confirmations, 35 modified stop fills; windows/fees and funding cash bridges checked. Notion 41388564-79af-81b8-95e3-cf681d69e401."
+
+  - experiment_id: exp-cloud-close-binance-double-hold-stress-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "e8f599cdee"
+    status: "inconclusive"
+    question: "取消翻倍售半在币安加市场滑点后能否保留优势"
+    single_variable: "相同原生1583笔，已选不翻倍售半规则加逐次市场成交5bp不利滑点；两资金结算边界与对称基准。"
+    result: "实资金费、额外5bp后24,294–24,425U、胜33.48%、现金盈亏比3.16、回撤上界38.84–38.92%；同成本售半17,161–17,269U。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-binance-double-hold-stress-20261109-v1/summary.json"
+    notes: "Follow-up stress on the no-sale arm after inspecting the transfer, not a previously unseen test period. Notion 41388564-79af-81b8-82b3-f5b253b180f8."
+
+  - experiment_id: exp-cloud-close-double-hold-time-check-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "749373399e"
+    status: "inconclusive"
+    question: "原云带翻倍不卖的增益是否集中在少数季度"
+    single_variable: "同所原始两账户逐日净值，比较配对年、季贡献，并按90日成块随机抽取每天对数收益差，只评价历史路径稳定性。"
+    result: "OKX增益集中在2021Q1，扣除该季后相对财富0.946；币安贡献最大季为2021Q3，剔除后仍约1.256。两所90天分块年化差区间都包含0。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-double-hold-time-check-20261109-v1/summary.json"
+    notes: "Conditional descriptive check; no re-trading resampled paths and overlapping venues are not independent trials. Notion 41388564-79af-811d-91be-cd43505c5a30."
+
   - experiment_id: exp-cloud-close-doubling-sale-fraction-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "93aad35929"
