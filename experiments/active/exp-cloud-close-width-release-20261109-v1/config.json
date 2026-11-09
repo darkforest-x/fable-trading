@@ -1,0 +1,5 @@
+{
+  "id": "exp-cloud-close-width-release-20261109-v1",
+  "only_change": "Accept a closed V1.7 key when its normalized EMA band width first widens after the previous bar attained the minimum of 20 prior completed 12H widths. Width = abs(EMA20-EMA50)/close using the native V1.7 warmup and gap reset. The lookback equals the existing EMA20 period, with no search. Compute the same predicate at each control's own clock.",
+  "account": "Test the native OKX 291-contract higher-growth parent: two thirds offered at 2R only during the first 12 hours, remainder held to the original market stop/EMA exit. 1000U, 9 prefunded slots, market fills 5bp and resting targets 2bp. Reuse original baseline if every actual key has feature coverage. Funding, impact and minimum tradable lots excluded. Exploratory, including both previously used later years."
+}
