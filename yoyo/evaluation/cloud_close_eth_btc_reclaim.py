@@ -99,15 +99,19 @@ def paths(marks,ratio,ema,*,asset='ETH',overlaps=False,stop_clock=H):
     return pd.DataFrame(rows)
 
 
-def fund(events,paired,slip,*,directory=EXP,asset_label='eth_half'):
-    roster=events if paired else events[events.slot.eq(0)]
-    slots=2 if paired else 1
+def fund(events,paired,slip,*,directory=EXP,asset_label='eth_half',pair_slots=1):
+    if paired:
+        roster=events
+    else:
+        roster=events[events.slot.mod(2).eq(0)].copy()
+        roster['slot']=roster.slot//2
+    slots=pair_slots*(2 if paired else 1)
     if roster.margin_buffer.le(0).any():
         raise ValueError('A funded 1x native leg requires intrahour margin evidence')
     data=wallet.prepare(None,slots,assigned=(roster,{}))
     legs,equity=wallet.account(data,slip=slip,exposure=1. if paired else .5,weights=(.5,.5) if paired else (1.,))
     groups=legs.groupby('event_id',sort=False)
-    if not groups.size().eq(slots).all():
+    if not groups.size().eq(2 if paired else 1).all():
         raise ValueError('Missing a native leg')
     if paired:
         sizes=legs.assign(base=legs.quantity*legs.entry_price).groupby('event_id').base

@@ -1,0 +1,6 @@
+{
+ "question":"Can three simultaneously funded relative-price pairs reduce the 12H-stop strategy's 72% drawdown?",
+ "single_variable":"Divide the same 1x gross portfolio into three pair slots instead of one. Keep nine named alt/BTC ratios, same 12H stop and EMA rules, native entry and exit opens, same CRC32 priority and fees. Each position has equal ETH-or-alt and opposing BTC notional within its own slot. No duplicate active altcoin. The three pairs share available equity and cash. Fund BTC legs separately and charge every side without any cross-pair fee netting. Matched alt-only control holds half the gross allocation with the same slots.",
+ "limits":"Compare the previously frozen one-pair 157-trade portfolio. This is a historical survivor-selected sample with no funding or measured depth; conservative per-leg maintenance check before outcomes.",
+ "command":"vectorbt-python -m yoyo.evaluation.cloud_close_major_btc_reclaim --three-pairs"
+}
