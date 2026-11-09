@@ -28,7 +28,8 @@ def candidates(symbol,offset):
     if hourly.index.has_duplicates or not hourly.index.is_monotonic_increasing or (hourly.index%H).any():
         raise ValueError('Native H1 series is not an aligned clock')
     bars=bars_for(hourly,offset)
-    q,clocks,feature=branch.engine._prepare_symbol(bars,hourly)
+    q,clocks,prepared=branch.engine._prepare_symbol(bars,hourly)
+    feature=prepared['features']
     calendar=branch.reclaim._anchors(hourly,bars,symbol)
     events=[]
     observed=[]
