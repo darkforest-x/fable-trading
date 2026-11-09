@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-fvg-priority-funding-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "f951618802"
+    status: "inconclusive"
+    question: "Does the FVG priority account preserve its funded gains and fit the risk gate after native cash settlements?"
+    single_variable: "Exact realized funding with post-trim quantities, dynamic shared cash and two exact boundary conventions, plus a 5bp market-fill stress on the frozen 1,586-parent FVG priority roster."
+    result: "409 assets; all 2,021 held asset-months covered, 78,431 market settlements, 1,587 exact settlement marks and 76,844 official H1 mark-open proxies. From 1,000U to 10,336.10–10,375.49U, wins 33.73–33.80%, cash payoff 2.815–2.822. Extra 5bp per market fill 8,958.33–8,992.46U. Aggregate nominal funding receipts +59.14 to +66.34U do not capture the subsequent change in position sizes. H1-only observed DD 32.16–32.22%, upper bound 40.89–40.97%; minute study below establishes breach."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-fvg-priority-funding-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. Market 5bp / resting 2bp. Binance native funding at landed child quantities, fee-only and extra 5bp market stress. No historic lot-size/depth guarantee. Notion 41388564-79af-81d2-bcd1-d516ebe7a468."
+
+  - experiment_id: exp-cloud-close-fvg-intrahour-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "9a27ae6a5c"
+    status: "rejected"
+    question: "Does synchronized one-minute evidence prove a greater than 35% drawdown on the complete funded FVG-priority wallet?"
+    single_variable: "Revalue critical peak hour using native Binance 1m candles and the exact post-trim funded account inventory plus conservative funding/slippage ranges."
+    result: "Eight symbols at the peak, 2025-09-30 17:37 UTC; later marked trough 2026-01-14. Realized-funding account drawdown at least 40.29–40.37%, refined upper 40.73–40.81%; stress at least 40.61–40.69%. Exceeds 35% in both settlement-boundary policies with or without extra 5bp market slippage. No entry/exit was changed."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-fvg-intrahour-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. Market 5bp / resting 2bp. Binance native funding at landed child quantities, fee-only and extra 5bp market stress. No historic lot-size/depth guarantee. Notion 41388564-79af-81de-92e3-e069f135aeab."
+
   - experiment_id: exp-cloud-close-fvg-priority-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "3e12447c3e"
