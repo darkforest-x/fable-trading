@@ -1,5 +1,7 @@
 """Gate closed V1.7 entries by the previously published direction of Cboe's VIX."""
 
+import json
+
 import numpy as np
 import pandas as pd
 import requests
@@ -49,7 +51,20 @@ def main():
     product=features.side*features.direction
     allowed=dict(covered=features.index,aligned=features.index[product<0],opposed=features.index[product>0],
                  lagged=features.index[features.side*features.stale_direction<0])
+    fully_covered = len(features)==len(events) and set(features.index)==set(events.event_id)
+    if fully_covered:
+        del allowed['covered']
     queue.main(experiment=EXP,policies=[(s,'balanced') for s in allowed],eligible_by_arm=allowed)
+    if fully_covered:
+        path=EXP/'summary.json'
+        result=json.loads(path.read_text())
+        prior=json.loads((queue.EXP/'summary.json').read_text())['arms']['balanced']
+        source_roster=set(pd.read_csv(queue.EXP/'balanced/selected_paths.csv.gz',usecols=['event_id']).event_id)
+        result['arms']['covered']=dict(prior,eligible_count=result['liquid_eligible'])
+        for label in allowed:
+            actual=set(pd.read_csv(EXP/label/'selected_paths.csv.gz',usecols=['event_id']).event_id)
+            result['arms'][label]['overlap']=len(actual & source_roster)
+        queue.repair.archive.prices.safe_json(path,result)
 
 
 if __name__=='__main__':
