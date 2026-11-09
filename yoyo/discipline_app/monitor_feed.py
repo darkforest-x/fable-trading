@@ -50,6 +50,9 @@ RESEARCH = (dict(key='breadth-ema20', label='全市场下轨反弹', title='BTC 
 BREADTH_STATUS = frozenset(('taken', 'closed', 'followers', 'busy', 'out_of_band', 'watching', 'entering', 'price_missing'))
 TOUCH_STATUS = frozenset(('scored', 'excluded', 'feature_error'))
 MAX_ROWS = 60
+# Owner 2026-11-09 (“有多少显示多少”): an alarm carries every coin (trigger + same-side touches until the cooldown
+# ends); the 10-30 04:42 alert (#18) had 117. The bound only guards against a malformed payload (OKX lists a few hundred swaps).
+MAX_ALARM_SYMBOLS = 500
 
 
 class MonitorUnavailable(ValueError):
@@ -249,7 +252,9 @@ def project_alerts(raw):
             symbols = [s for s in (row.get('symbols') or []) if _symbol(s)]
             alerts.append(dict(id=_ms(row.get('id')), side=side, first_ms=_ms(row.get('first_ms')),
                                last_ms=_ms(row.get('last_ms')), n=_ms(row.get('n')) or len(symbols),
-                               symbols=symbols[:80], active=bool(row.get('active')),
+                               trigger_n=_ms(row.get('trigger_n')) or _ms(row.get('n')) or len(symbols),
+                               complete=row.get('complete') is not False,
+                               symbols=symbols[:MAX_ALARM_SYMBOLS], active=bool(row.get('active')),
                                acknowledged=bool(_ms(row.get('ack_ms'))), test=bool(row.get('test'))))
         return dict(now_ms=_ms(raw['now_ms']), threshold=_ms(raw.get('threshold')),
                     window_minutes=_ms(raw.get('window_minutes')), worker_alive=bool(raw.get('worker_alive')),

@@ -244,7 +244,7 @@ def synthetic_monitor():
         rows = [dict(id=40, side='lower', first_ms=t-300_000, last_ms=t-60_000, n=27, active=True, ack_ms=None, test=0,
                      symbols=[c+'-USDT-SWAP' for c in ['BTC', 'ETH', *coins, 'WIF', 'PEPE', 'BONK', 'ORDI', 'SEI', 'INJ', 'JUP', 'PYTH', 'STRK', 'ENA', 'W', 'ZK', 'ONDO']])]
         rows += [dict(id=39-i, side=['lower', 'upper'][i % 2], first_ms=t-3600_000*(3+i*9), last_ms=t-3600_000*(3+i*9)+300_000,
-                      n=31-i, active=False, ack_ms=t if i != 1 else None, test=1 if i == 1 else 0,
+                      n=117 if i == 2 else 31-i, active=False, ack_ms=t if i != 1 else None, test=1 if i == 1 else 0,
                       symbols=[c+'-USDT-SWAP' for c in coins]) for i in range(6)]
         return dict(now_ms=t, threshold=25, window_minutes=5, worker_alive=True, channels=dict(telegram=True, bark=True), alerts=rows)
 

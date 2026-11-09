@@ -160,3 +160,21 @@ test('particle field drifts with the move, surges on new touches and releases it
  field.surge();field.stop();assert.equal(frames.size,0);
  assert.equal(particleField({canvas:{getContext:()=>null}}).start(),false,'no 2D context: nothing runs');
 });
+test('owner 2026-11-09: alerts show the complete coin count; the firing moment is optional and kept apart',()=>{
+ const M=60000,S=k=>`C${k}-USDT-SWAP`,all=[0,1,2,3].map(S);
+ const full=alert(5,{n:4,symbols:all,trigger_n:2,trigger_symbols:all.slice(0,2),complete:false,follow_end_ms:NOW+30*M});
+ assert.equal(packet({version:1,now_ms:NOW,active:[full]}).active[0].n,4);
+ assert.doesNotThrow(()=>packet({version:1,now_ms:NOW,active:[alert(6)]}),'older server: no trigger fields');
+ for(const extra of [{trigger_n:5},{trigger_n:0},{trigger_symbols:['<b>']},{trigger_symbols:[0,1,2,3,4].map(S)}])
+  assert.throws(()=>packet({version:1,now_ms:NOW,active:[{...full,...extra}]}));
+ const base={now_ms:NOW,threshold:25,window_minutes:5,cooldown_minutes:30,channels:{telegram:true,bark:true},alerts:[]};
+ const [h]=historyPacket({...base,alerts:[{...full,ack_ms:NOW,telegram:'sent',bark:'sent'}]}).alerts;
+ assert.deepEqual([h.n,h.trigger_n,h.complete,h.follow_end_ms,h.symbols.length],[4,2,false,NOW+30*M,4]);
+ const [old]=historyPacket({...base,alerts:[{...alert(7),ack_ms:NOW,telegram:'sent',bark:'sent'}]}).alerts;
+ assert.deepEqual([old.n,old.trigger_n,old.complete,old.follow_end_ms],[2,2,true,null]);
+ // 新增 counts coins outside the firing set, including a late touch inside the firing candle.
+ const live={window_end_ms:NOW+30*M,touches:[{symbol:S(0),level:1,candle_ms:NOW-M,observed_ms:NOW-M},{symbol:S(1),level:1,candle_ms:NOW,observed_ms:NOW},
+  {symbol:S(2),level:1,candle_ms:NOW,observed_ms:NOW+40000},{symbol:S(3),level:1,candle_ms:NOW+4*M,observed_ms:NOW+4*M},{symbol:'PRE-USDT-SWAP',level:1,candle_ms:NOW-3*M,observed_ms:NOW-3*M}]};
+ const f=deskFacts({...full,live},NOW+5*M);
+ assert.equal(f.later,2);assert.deepEqual(f.latest,[S(3),S(2)]);
+});

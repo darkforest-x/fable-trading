@@ -96,9 +96,10 @@ class SpikeAlertTests(unittest.TestCase):
         row = a.snapshot()["alerts"][0]
         self.assertEqual((row["telegram"], row["bark"]), ("unknown", "no_channel"))
 
-    def test_text_lists_at_most_twelve_names(self):
+    def test_text_names_every_trigger_coin(self):
+        # Owner 2026-11-09: “有多少显示多少” — the push lists all coins, not the first 12.
         text = alert_text(dict(side="upper", last_ms=T0, n=15, symbols=[f"S{k}-USDT-SWAP" for k in range(15)]))
-        self.assertIn("等 15 个", text); self.assertIn("上方 1.618", text); self.assertIn("只通知", text)
+        self.assertIn("15 个币同时触及上方 1.618", text); self.assertIn("S14", text); self.assertNotIn("等", text); self.assertIn("只通知", text)
 
     def test_api_is_read_only(self):
         from fastapi import FastAPI
@@ -229,6 +230,38 @@ class SpikeAlertLiveWindowTests(unittest.TestCase):
         self.assertEqual({p["track"]: p["opened"] for p in live["paper"]}["live-wick6x3"], 1, "only taken live- positions in the window count")
         self.assertEqual({p["track"]: p["opened"] for p in live["paper"]}["live-wick6x3mid"], 1)
         self.assertNotIn("ref_prices", self.a.snapshot()["alerts"][0])
+
+    def test_shown_alert_counts_every_coin_until_the_cooldown_ends(self):
+        """Owner 2026-11-09: 25 is the trigger; the shown count and coins are complete (11-09 05:55 froze at 25 of 27)."""
+        import sqlite3
+        book = sqlite3.connect(self.a.touch_book)
+        book.executemany("INSERT INTO touches (week,symbol,side,level,price,observed_ms,candle_ms,source) VALUES ('w',?,'lower',1,1,?,?,'live')",
+                         [("C0-USDT-SWAP", T0+MIN+1, T0+MIN), ("C1-USDT-SWAP", T0+MIN+2, T0+MIN)])
+        book.commit()
+        for k in range(2):
+            self.a.on_touch({}, f"C{k}-USDT-SWAP", "lower", 1., T0+MIN+1+k, T0+MIN, "live")
+        book.execute("INSERT INTO touches (week,symbol,side,level,price,observed_ms,candle_ms,source) VALUES ('w','C9-USDT-SWAP','lower',1,1,?,?,'live')",
+                     (T0+MIN+30, T0+MIN))  # same candle, arrived after the alert fired
+        book.commit()
+        self.now[0] = T0 + 25*MIN
+        row = self.a.snapshot()["alerts"][0]
+        self.assertEqual(row["trigger_n"], 2)
+        self.assertEqual(row["symbols"], ["C0-USDT-SWAP", "C1-USDT-SWAP", "C9-USDT-SWAP", "ADA-USDT-SWAP"],
+                         "touch order; SOL before the first touch, LINK after the cooldown, the upper side and history excluded")
+        self.assertEqual((row["n"], row["complete"], row["follow_end_ms"]), (4, False, T0 + 31*MIN))
+        self.assertIn("2 个币同时触及", row["text"], "the pushed text keeps the firing moment")
+        self.assertEqual(self.a.snapshot()["active"][0]["n"], len(self.a.snapshot()["active"][0]["symbols"]))
+        self.now[0] = T0 + 34*MIN
+        self.assertTrue(self.a.snapshot()["alerts"][0]["complete"])
+        book.execute("INSERT INTO touches (week,symbol,side,level,price,observed_ms,candle_ms,source) VALUES ('w2','LATE-USDT-SWAP','lower',1,1,?,?,'live')",
+                     (T0+40*MIN, T0+20*MIN))
+        book.commit(); book.close()
+        self.assertEqual(self.a.snapshot()["alerts"][0]["n"], 4, "frozen once the window has closed")
+        test = self.a.snapshot()["alerts"][0]
+        self.a.test_alert()
+        row = self.a.snapshot()["alerts"][0]
+        self.assertEqual((row["test"], row["n"], row["trigger_n"], row["complete"]), (1, 2, 2, True))
+        self.assertEqual(test["id"], self.a.snapshot()["alerts"][1]["id"])
 
     def test_stale_quotes_are_not_shown_as_current(self):
         self.quote("SOL-USDT-SWAP", 99.5, at=T0 - 10*MIN)

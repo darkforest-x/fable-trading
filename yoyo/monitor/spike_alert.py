@@ -24,6 +24,13 @@ the monitor's monday-fib touch book, so a restart keeps them), the latest 1m clo
 captured when the alert fired, and how many positions the live- paper accounts opened in that window (read-only from the
 paper book). Quotes and touches only set a flag; the worker pushes at most every PUSH_EVERY_MS while an alert is less
 than HOT_MS old, so an idle monitor still costs nothing. Display only: nothing here places, sizes or closes a position.
+Owner 2026-11-09 ("底线是25个，但是显示的应该是完整的，有多少显示多少"): the 11-09 05:55 alert froze at the 25th
+coin, while a 26th touched in the same 5m candle and a 27th four minutes later. 25 stays the trigger; the shown alert is
+complete: `n`/`symbols` are the trigger coins plus every same-side live first touch from the alert's first touch until
+its cooldown ends (no new alert can fire on that side before then, so those coins would otherwise never be reported).
+They are read from the monitor's touch book (written before listeners run) and frozen into `all_symbols` once the
+window has closed. `trigger_n`/`trigger_symbols` keep the firing moment; the Telegram/Bark text is sent once at firing
+and now names every trigger coin instead of the first 12.
 """
 from __future__ import annotations
 
@@ -55,14 +62,15 @@ PRICE_FRESH_MS = 5*MINUTE
 REFERENCE = ("BTC-USDT-SWAP", "ETH-USDT-SWAP")
 LIVE_TRACKS = {7060: "live-allin3", 8060: "live-wick6x3", 8160: "live-wick6x3hi", 9060: "live-wick3x3",
                9160: "live-wick3x3far", 8260: "live-wick6x3mid"}
+SETTLE_MS = 2*MINUTE  # late 1m deliveries for the last candle of the follow window land before it is frozen
 
 
 def alert_text(alert):
+    """Push text at firing time: the trigger count and every trigger coin (owner 2026-11-09: no 12-name cut)."""
     at = datetime.fromtimestamp(alert["last_ms"]/1000, ZoneInfo("Asia/Shanghai")).strftime("%m-%d %H:%M")
-    names = [s.split("-")[0] for s in alert["symbols"]]
-    shown = "、".join(names[:12])+(f" 等 {len(names)} 个" if len(names) > 12 else "")
+    names = "、".join(s.split("-")[0] for s in alert["symbols"])
     return (f"全市场插针报警\n5 分钟内 {alert['n']} 个币同时触及{SIDE_TEXT[alert['side']]}\n"
-            f"时间 {at}（北京时间）\n{shown}\n只通知，不动仓位；模拟盘照常按规则处理")
+            f"时间 {at}（北京时间）\n{names}\n只通知，不动仓位；模拟盘照常按规则处理")
 
 
 class SpikeAlert:
@@ -91,7 +99,7 @@ class SpikeAlert:
             db.execute("""CREATE TABLE IF NOT EXISTS alerts (id INTEGER PRIMARY KEY, side TEXT, first_ms INTEGER, last_ms INTEGER,
                           n INTEGER, symbols TEXT, created_ms INTEGER, telegram TEXT, bark TEXT, error TEXT)""")
             columns = {r["name"] for r in db.execute("PRAGMA table_info(alerts)")}
-            for name, spec in {"ack_ms": "INTEGER", "test": "INTEGER NOT NULL DEFAULT 0", "ref_prices": "TEXT"}.items():
+            for name, spec in {"ack_ms": "INTEGER", "test": "INTEGER NOT NULL DEFAULT 0", "ref_prices": "TEXT", "all_symbols": "TEXT"}.items():
                 if name not in columns:
                     db.execute(f"ALTER TABLE alerts ADD COLUMN {name} {spec}")
             self.last_alert = {s: (db.execute("SELECT MAX(last_ms) m FROM alerts WHERE side=? AND test=0", (s,)).fetchone()["m"] or -10**15)
@@ -256,12 +264,47 @@ class SpikeAlert:
                 db.execute("UPDATE alerts SET error=? WHERE id=?", ("; ".join(errors), alert["id"]))
         return status
 
+    def _members(self, row, now):
+        """(complete coin list, final) for one alert: trigger coins plus same-side live first touches until the cooldown ends.
+
+        Ordered by touch time; a trigger coin missing from the touch book is kept at the end. Final once the follow
+        window has closed and the book was readable; the caller then freezes the list into `all_symbols`."""
+        if row.get("all_symbols"):
+            try:
+                return json.loads(row["all_symbols"]), True
+            except (TypeError, ValueError):
+                pass
+        trigger = list(row["symbols"])
+        if row["test"] or not self.touch_book.exists():
+            return trigger, bool(row["test"])
+        end = row["last_ms"] + self.cooldown_ms
+        try:
+            book = sqlite3.connect(f"file:{self.touch_book}?mode=ro", uri=True, timeout=2)
+            try:
+                found = book.execute("SELECT symbol FROM touches WHERE source='live' AND side=? AND candle_ms >= ? AND candle_ms < ? "
+                                     "ORDER BY observed_ms, candle_ms, symbol", (row["side"], row["first_ms"], end)).fetchall()
+            finally:
+                book.close()
+        except sqlite3.Error:
+            return trigger, False
+        members = dict.fromkeys(s for (s,) in found)
+        members.update(dict.fromkeys(trigger))
+        return list(members), now >= end + SETTLE_MS
+
     def snapshot(self, limit=50):
         now = self.clock()
         with self.db() as db:
             rows = [dict(r, symbols=json.loads(r["symbols"]), text=None) for r in db.execute("SELECT * FROM alerts ORDER BY id DESC LIMIT ?", (limit,))]
+            for r in rows:
+                members, final = self._members(r, now)
+                if final and not r["test"] and not r["all_symbols"]:
+                    db.execute("UPDATE alerts SET all_symbols=? WHERE id=? AND all_symbols IS NULL", (json.dumps(members), r["id"]))
+                r["text"] = alert_text(r)  # what was pushed at firing
+                r["trigger_n"], r["trigger_symbols"] = r["n"], r["symbols"]
+                r["n"], r["symbols"] = len(members), members
+                r["follow_end_ms"], r["complete"] = r["last_ms"] + self.cooldown_ms, final
+                r.pop("all_symbols", None)
         for r in rows:
-            r["text"] = alert_text(r)
             r["active"] = r["ack_ms"] is None and now-r["created_ms"] <= ACTIVE_MS
             if r["active"]:
                 r["live"] = self._live(r, now)

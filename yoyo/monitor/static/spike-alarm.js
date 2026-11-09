@@ -4,18 +4,26 @@
  * Web_Audio_API/Best_practices. Six-hour expiry uses server time + monotonic elapsed time.
  * History (owner 2026-11-05 "连历史消息都没有"): GET /api/spike-alerts (last 50 rows, already served) is read
  * only when the settings panel opens and again when the stream version changes while it is open; never polled.
+ * Owner 2026-11-09 ("底线是25个，但是显示的应该是完整的，有多少显示多少"): `n`/`symbols` are the complete alert (trigger
+ * coins plus same-side touches until the cooldown ends); `trigger_n`/`trigger_symbols` are the firing moment. Older
+ * servers send neither, so both stay optional and default to the complete values.
  */
 (() => {
   'use strict';
   const ACTIVE_MS=6*60*60*1000;
   const timestamp=v=>Number.isSafeInteger(v)&&v>0&&v<=8640000000000000;
+  const SYMBOL=/^[A-Z0-9]{1,32}-USDT-SWAP$/;
+  // Firing-moment fields: absent (older server) or a subset of the complete alert.
+  const triggerOk=a=>(a.trigger_n==null||Number.isSafeInteger(a.trigger_n)&&a.trigger_n>=1&&a.trigger_n<=a.n)&&
+    (a.trigger_symbols==null||Array.isArray(a.trigger_symbols)&&a.trigger_symbols.length<=a.n&&a.trigger_symbols.every(s=>typeof s==='string'&&SYMBOL.test(s)));
+  const triggerN=a=>Number.isSafeInteger(a?.trigger_n)?a.trigger_n:a?.n;
   function packet(value){
     if(!value||!timestamp(value.now_ms)||!Number.isInteger(value.version)||!Array.isArray(value.active)||value.active.length>50)throw Error('invalid_alert_packet');
     const ids=new Set();
     for(const a of value.active){
       if(!a||!Number.isSafeInteger(a.id)||a.id<=0||ids.has(a.id)||!['lower','upper'].includes(a.side)||!Number.isSafeInteger(a.n)||a.n<1||
         ![a.first_ms,a.last_ms,a.created_ms].every(timestamp)||a.first_ms>a.last_ms||a.ack_ms!=null||![0,1,false,true].includes(a.test)||
-        !Array.isArray(a.symbols)||a.symbols.length!==a.n||a.n>1000||!a.symbols.every(s=>typeof s==='string'&&/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(s)))throw Error('invalid_alert_row');
+        !Array.isArray(a.symbols)||a.symbols.length!==a.n||a.n>1000||!a.symbols.every(s=>typeof s==='string'&&SYMBOL.test(s))||!triggerOk(a))throw Error('invalid_alert_row');
       ids.add(a.id);
     }
     return value;
@@ -29,9 +37,10 @@
     for(const a of value.alerts){
       if(!a||!Number.isSafeInteger(a.id)||a.id<=0||ids.has(a.id)||!['lower','upper'].includes(a.side)||!Number.isSafeInteger(a.n)||a.n<1||
         ![a.first_ms,a.last_ms,a.created_ms].every(timestamp)||!(a.ack_ms==null||timestamp(a.ack_ms))||![0,1,false,true].includes(a.test)||
-        !Array.isArray(a.symbols)||a.symbols.length>1000||!a.symbols.every(s=>typeof s==='string'&&/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(s)))throw Error('invalid_history_row');
+        !Array.isArray(a.symbols)||a.symbols.length>1000||!a.symbols.every(s=>typeof s==='string'&&SYMBOL.test(s))||!triggerOk(a))throw Error('invalid_history_row');
       ids.add(a.id);
-      alerts.push({id:a.id,side:a.side,n:a.n,symbols:a.symbols.slice(),first_ms:a.first_ms,last_ms:a.last_ms,created_ms:a.created_ms,ack_ms:a.ack_ms??null,
+      alerts.push({id:a.id,side:a.side,n:a.n,symbols:a.symbols.slice(),trigger_n:triggerN(a),complete:a.complete!==false,follow_end_ms:timestamp(a.follow_end_ms)?a.follow_end_ms:null,
+        first_ms:a.first_ms,last_ms:a.last_ms,created_ms:a.created_ms,ack_ms:a.ack_ms??null,
         test:Boolean(a.test),active:a.active===true,telegram:DELIVERY.has(a.telegram)?a.telegram:'unknown',bark:DELIVERY.has(a.bark)?a.bark:'unknown'});
     }
     alerts.sort((a,b)=>b.created_ms-a.created_ms||b.id-a.id);
@@ -286,11 +295,15 @@
   }
   function deskFacts(alert,nowMs){
     const live=liveFacts(alert),d=alert.side==='lower'?1:-1,start=timestamp(alert.created_ms)?alert.created_ms:alert.last_ms;
-    const flow=live.touches.map(t=>{const depth=t.price==null?null:d*(t.level-t.price)/t.level*100;return {...t,depth,outside:depth==null?null:depth>0,later:t.candle_ms>alert.last_ms};})
+    // 新增 = coins outside the firing set, including a late touch in the firing candle (11-09 05:55 lost one there).
+    const fired=Array.isArray(alert.trigger_symbols)?new Set(alert.trigger_symbols):null;
+    const isLater=t=>fired?!fired.has(t.symbol)&&t.candle_ms>=alert.first_ms:t.candle_ms>alert.last_ms;
+    const flow=live.touches.map(t=>{const depth=t.price==null?null:d*(t.level-t.price)/t.level*100;return {...t,depth,outside:depth==null?null:depth>0,later:isLater(t)};})
       .sort((a,b)=>b.observed_ms-a.observed_ms||a.symbol.localeCompare(b.symbol));
     const later=flow.filter(t=>t.later),move=s=>{const r=live.reference[s];return r.at&&r.now?(r.now/r.at-1)*100:null;};
     const first=[...live.touches].sort((a,b)=>a.candle_ms-b.candle_ms||a.observed_ms-b.observed_ms)[0]?.symbol||null;
-    return {flow,later:later.length,latest:later.slice(0,3).map(t=>t.symbol),btc:move('BTC-USDT-SWAP'),eth:move('ETH-USDT-SWAP'),btcNow:live.reference['BTC-USDT-SWAP'].now,
+    const added=fired&&Number.isSafeInteger(alert.trigger_n)?Math.max(0,alert.n-alert.trigger_n):later.length;
+    return {flow,later:added,latest:later.slice(0,3).map(t=>t.symbol),btc:move('BTC-USDT-SWAP'),eth:move('ETH-USDT-SWAP'),btcNow:live.reference['BTC-USDT-SWAP'].now,
       elapsed:Math.max(0,nowMs-start),remaining:Math.max(0,live.window_end_ms-nowMs),windowMs:Math.max(1,live.window_end_ms-alert.last_ms),paper:live.paper,first};
   }
   const bell='<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M9 21h6"/></svg>';
@@ -382,10 +395,12 @@
     function historyRow(a){
       const st=alertStatus(a),down=a.side==='lower',open=expanded.has(a.id),preview=a.symbols.slice(0,4).map(coin).join(' ')+(a.symbols.length>4?' 等':'');
       const coins=replayCoins(a),chart=coins.length?'':' disabled title="测试报警没有行情"';
+      const follow=a.follow_end_ms?Math.round((a.follow_end_ms-a.last_ms)/60000):null;
+      const count=`共 ${a.n} 个 · 触发时 ${a.trigger_n} 个${follow&&!a.test?` · 之后 ${follow} 分钟内 +${a.n-a.trigger_n}`:''}${a.complete?'':' · 统计中'}`;
       return `<div class="sa-h" data-side="${a.side}" data-state="${st}"${a.test?' data-test=""':''}>
 <button type="button" class="sa-h-main" data-sa-row="${a.id}" aria-expanded="${open}" aria-controls="spike-alarm-h-${a.id}"><i class="sa-h-dir" aria-hidden="true">${down?'↘':'↗'}</i><span class="sa-h-text"><span class="sa-h-title"><b>${down?'急跌':'急涨'} · ${a.n} 个币</b>${a.test?'<small class="sa-h-test">测试</small>':`<em>${down?'做多方向':'做空方向'}</em>`}<span class="sa-h-state">${stateText[st]}</span></span><span class="sa-h-meta">${short(a.last_ms)} · ${preview}</span></span></button>
 <button type="button" class="sa-h-chart" data-sa-chart="${a.id}" aria-label="查看 ${short(a.last_ms)} 报警后的走势"${chart}>${chartIcon}<span>走势</span></button>
-<div class="sa-h-detail" id="spike-alarm-h-${a.id}"${open?'':' hidden'}><dl><dt>触及</dt><dd>首次 ${hms(a.first_ms)} → 最后 ${hms(a.last_ms)}</dd><dt>推送</dt><dd class="sa-h-ch">${a.test?'<span class="sa-ch-muted">测试不推送</span>':channel('Telegram',a.telegram)+channel('Bark',a.bark)}</dd><dt>确认</dt><dd>${a.ack_ms!=null?short(a.ack_ms)+':'+hms(a.ack_ms).slice(6):st==='pending'?'待确认（全屏报警中）':'未确认 · 已超过 6 小时'}</dd></dl>
+<div class="sa-h-detail" id="spike-alarm-h-${a.id}"${open?'':' hidden'}><dl><dt>数量</dt><dd>${count}</dd><dt>触及</dt><dd>首次 ${hms(a.first_ms)} → 报警 ${hms(a.last_ms)}</dd><dt>推送</dt><dd class="sa-h-ch">${a.test?'<span class="sa-ch-muted">测试不推送</span>':channel('Telegram',a.telegram)+channel('Bark',a.bark)}</dd><dt>确认</dt><dd>${a.ack_ms!=null?short(a.ack_ms)+':'+hms(a.ack_ms).slice(6):st==='pending'?'待确认（全屏报警中）':'未确认 · 已超过 6 小时'}</dd></dl>
 <div class="sa-h-coins">${coins.length?a.symbols.map(s=>`<button type="button" data-sa-chart="${a.id}" data-symbol="${esc(s)}" aria-label="查看 ${coin(s)} 报警后走势">${coin(s)}</button>`).join(''):a.symbols.slice(0,12).map(s=>`<span>${coin(s)}</span>`).join('')+(a.symbols.length>12?`<span>+${a.symbols.length-12}</span>`:'')}</div>
 ${coins.length?`<button type="button" class="sa-h-open" data-sa-chart="${a.id}">${chartIcon}查看走势</button>`:''}</div></div>`;
     }
@@ -537,7 +552,7 @@ ${coins.length?`<button type="button" class="sa-h-open" data-sa-chart="${a.id}">
     replay.addEventListener('close',()=>{replayChart?.hide();replayMode='';env.clearTimeout(jumpTimer);replayState=null;rq('.sa-rp-chart').replaceChildren();const back=replayOpener?.node?.isConnected?replayOpener.node:replayOpener&&dock.querySelector(`.sa-h-chart[data-sa-chart="${replayOpener.id}"]`);if(back?.getClientRects().length)back.focus({preventScroll:true});replayOpener=null;});
     function finishClose(){closing=null;if(state.alerts.length)return;stopDesk();motion.stop();dialog.classList.remove('sa-leaving');dialog.close();shown=null;if(focusBefore?.isConnected&&focusBefore.getClientRects().length&&!focusBefore.closest('[inert]'))focusBefore.focus({preventScroll:true});else trigger.focus({preventScroll:true});}
     // ---- Alarm response desk (Stitch 5b0423b0 layout, 1e45b37d long/short themes) ----
-    let deskChart=null,deskAlert=null,deskSymbol='',deskTimer=null,deskTabs='',deskShown=null,lastLater=0;const seenFlow=new Set();
+    let deskChart=null,deskAlert=null,deskSymbol='',deskTimer=null,deskTabs='',deskShown=null,lastLater=0,lastWithin=0;const seenFlow=new Set();
     const pct=v=>v==null?'—':(v>0?'+':'')+v.toFixed(2)+'%',clockText=ms=>{const t=Math.floor(ms/1000);return String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');};
     function countUp(node,to,prefix=''){
       if(reduced.matches||!env.requestAnimationFrame){node.textContent=prefix+to;return;}
@@ -598,14 +613,18 @@ ${coins.length?`<button type="button" class="sa-h-open" data-sa-chart="${a.id}">
       if(changed){
         $('.sa-test').hidden=!alert.test;$('.sa-dir-badge b').textContent=down?'↓':'↑';
         $('#spike-alarm-title').textContent=down?'急跌 · 做多':'急涨 · 做空';$('.sa-time').textContent=hms(alert.last_ms);
-        countUp($('[data-kpi=within]'),alert.n);seenFlow.clear();lastLater=f.later;$('[data-kpi=later]').textContent='+'+f.later;$('[data-kpi=later]').dataset.value=String(f.later);
-      }else if(f.later!==lastLater){countUp($('[data-kpi=later]'),f.later,'+');if(f.later>lastLater)surge();lastLater=f.later;}
+        countUp($('[data-kpi=within]'),alert.n);lastWithin=alert.n;seenFlow.clear();lastLater=f.later;$('[data-kpi=later]').textContent='+'+f.later;$('[data-kpi=later]').dataset.value=String(f.later);
+      }else{
+        // Owner 2026-11-09: the big number is the complete count and keeps growing with the alert.
+        if(alert.n!==lastWithin){countUp($('[data-kpi=within]'),alert.n);lastWithin=alert.n;}
+        if(f.later!==lastLater){countUp($('[data-kpi=later]'),f.later,'+');if(f.later>lastLater)surge();lastLater=f.later;}
+      }
       const btc=$('[data-kpi=btc]');btc.textContent=pct(f.btc);btc.dataset.tone=f.btc==null||Math.abs(f.btc)<.005?'':((down?1:-1)*f.btc>0?'with':'against');
       // Owner 2026-11-06 (Stitch 1ebf02793e9d42b2b38e5476ac68c2f5): one chip row — BTC, ETH, then the touched
       // coins with their depth past 1.618. The first chip is the default wallpaper; any chip switches it.
       const fresh=deskShown===alert.id,touched=new Map();
       for(const t of f.flow)if(!touched.has(t.symbol))touched.set(t.symbol,t);
-      const tabs=[...new Set(['BTC-USDT-SWAP','ETH-USDT-SWAP',...(alert.test?[]:[...touched.keys()])])].slice(0,16);
+      const tabs=[...new Set(['BTC-USDT-SWAP','ETH-USDT-SWAP',...(alert.test?[]:[...touched.keys()])])];// all touched coins; the row scrolls
       if(changed||!tabs.includes(deskSymbol))deskSymbol=tabs[0];
       const chip=s=>{const t=touched.get(s),key=t?s+'|'+t.candle_ms:'',isNew=fresh&&t&&!seenFlow.has(key);if(t)seenFlow.add(key);
         return `<button type="button" data-desk-symbol="${esc(s)}" aria-pressed="${s===deskSymbol}"${t?` data-state="${t.outside==null?'':t.outside?'out':'in'}"`:''}${isNew?' class="is-new"':''}><b>${coin(s)}</b>${t&&t.depth!=null?`<span>${Math.abs(t.depth).toFixed(1)}%</span>`:''}</button>`;};

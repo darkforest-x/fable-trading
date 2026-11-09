@@ -30,13 +30,22 @@ struct AlertsSection: View {
                         VStack(alignment: .leading, spacing: 10) {
                             Button { Haptics.tap(); withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { expanded = expanded == alarm.rowId ? nil : alarm.rowId } } label: {
                                 HStack(spacing: 12) {
-                                    Image(systemName: alarm.side == .lower ? "arrow.down" : "arrow.up").font(.headline)
-                                        .foregroundStyle(alarm.side == .lower ? Color.down : Color.up)
-                                        .frame(width: 34, height: 34).background((alarm.side == .lower ? Color.down : Color.up).opacity(0.12), in: .circle)
+                                    // Owner 2026-11-09 (“上下箭头的样式好丑”, Stitch waived this time): the complete coin
+                                    // count in the side color replaces the pastel arrow circle.
+                                    let tint: Color = alarm.side == .lower ? .down : .up
+                                    VStack(spacing: -1) {
+                                        Text("\(alarm.n)").font(.system(size: 22, weight: .bold, design: .rounded)).monospacedDigit()
+                                            .foregroundStyle(tint).contentTransition(.numericText()).minimumScaleFactor(0.7).lineLimit(1)
+                                        Text("个币").font(.system(size: 10, weight: .medium)).foregroundStyle(.secondary)
+                                    }
+                                    .frame(width: 46)
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("\(Fmt.edge(alarm.side)) · \(alarm.n) 币").font(.subheadline.weight(.semibold))
+                                        (Text(alarm.side == .lower ? "急跌" : "急涨").foregroundStyle(tint) + Text(" · \(Fmt.edge(alarm.side))"))
+                                            .font(.subheadline.weight(.semibold))
                                         Text(range(alarm)).font(.caption).foregroundStyle(.secondary).monospacedDigit()
                                     }
+                                    .accessibilityElement(children: .ignore)
+                                    .accessibilityLabel("\(alarm.side == .lower ? "急跌" : "急涨") \(Fmt.edge(alarm.side))，\(alarm.n) 个币，\(range(alarm))")
                                     Spacer()
                                     if !alarm.acknowledged { Circle().fill(Color.blue).frame(width: 7, height: 7).accessibilityLabel("未确认") }
                                     Image(systemName: "chevron.down").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)
@@ -87,14 +96,14 @@ struct AlarmHero: View {
     }
 }
 
-/// Alarm coins; each chip opens that coin's chart.
+/// Alarm coins; each chip opens that coin's chart. Owner 2026-11-09 (“有多少显示多少”): every coin of the
+/// complete alarm is shown — no 12-coin fold.
 struct CoinChips: View {
     let symbols: [String]
     @Environment(\.openChart) private var openChart
-    @State private var all = false
     var body: some View {
         FlowLayout {
-            ForEach(all ? symbols : Array(symbols.prefix(12)), id: \.self) { s in
+            ForEach(symbols, id: \.self) { s in
                 Button { Haptics.open(); openChart(s) } label: {
                     HStack(spacing: 5) { CoinLogo(coin: Fmt.coin(s), size: 18); Text(Fmt.coin(s)).font(.footnote.weight(.semibold)).foregroundStyle(.primary) }
                         .padding(.leading, 4).padding(.trailing, 9).padding(.vertical, 4)
@@ -103,10 +112,6 @@ struct CoinChips: View {
                 }
                 .buttonStyle(CardPressStyle())
                 .accessibilityLabel("查看 \(Fmt.coin(s)) K线")
-            }
-            if !all && symbols.count > 12 {
-                Button("+\(symbols.count - 12)") { Haptics.tap(); withAnimation(.snappy) { all = true } }
-                    .font(.footnote.weight(.semibold)).buttonStyle(.pill(.soft, height: 28))
             }
         }
     }

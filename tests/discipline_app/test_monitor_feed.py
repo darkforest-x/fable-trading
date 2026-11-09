@@ -394,3 +394,16 @@ def test_strategy_frame_routes_project_booklet_backtest_and_candles_without_inte
     assert any(isinstance(c, str) and 'history?' in c and 'tab=events' in c and 'scope=all' in c for c in calls)
     after = book.snapshot()
     assert before['positions'] == after['positions'] and before['pending'] == after['pending']
+
+
+def test_alarm_projection_keeps_every_coin_and_the_trigger_count():
+    """Owner 2026-11-09 (“有多少显示多少”): the app gets the complete alarm, not the first 80 coins."""
+    coins = [f'C{k}-USDT-SWAP' for k in range(117)]
+    raw = alerts_raw()
+    raw['alerts'] = [dict(id=18, side='lower', first_ms=1, last_ms=2, n=117, symbols=coins, trigger_n=25, complete=True,
+                          active=False, ack_ms=3, test=0)]
+    alarm = project_alerts(raw)['alerts'][0]
+    assert (alarm['n'], len(alarm['symbols']), alarm['trigger_n'], alarm['complete']) == (117, 117, 25, True)
+    raw['alerts'][0].pop('trigger_n'); raw['alerts'][0].pop('complete')
+    alarm = project_alerts(raw)['alerts'][0]
+    assert (alarm['trigger_n'], alarm['complete']) == (117, True), 'older monitor: the trigger count defaults to n'
