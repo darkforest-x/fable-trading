@@ -1,0 +1,7 @@
+{
+  "question": "The VIX direction gate improved later years but excluded many entries. Does giving aligned trades priority over opposed trades without excluding the latter improve the same account?",
+  "single_variable": "When the 5-session VIX change is nonzero, consider aligned confirmed entries before opposed ones at the same clock; within each group retain the original equal ATR/turnover rank and the original ATR tie-break. When VIX is flat every application retains original rank. One contemporaneous and one 20-session-delayed preference; true entry amount and ticker-specific capacity remain unchanged. All eligible signals continue competing for nine real slots.",
+  "benchmark": "Compare directly against previously executed balanced nine with no VIX preference and the VIX gate experiment. Freeze before these two new parent-account results. The gate research informed the ranking variant.",
+  "source": "Use the exact saved Cboe VIX observations and clock in exp-cloud-close-vix-regime-20261109-v1. Prior-hour mean volume, fees and stress as in exp-cloud-close-liquid-queue-20261109-v1. No funding or actual exit depth.",
+  "command": "vectorbt-python -m yoyo.evaluation.cloud_close_vix_priority"
+}
