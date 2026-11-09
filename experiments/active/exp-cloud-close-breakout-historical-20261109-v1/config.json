@@ -2,6 +2,14 @@
   "experiment_id": "exp-cloud-close-breakout-historical-20261109-v1",
   "question": "Across the expanded 360-name OKX historical source scope, does following the first EMA-aligned 12H close outside the completed NY Monday 1.618 band improve on the original V1.7 wick-and-close reclaim?",
   "single_variable": "Keep the ten-symbol original run's native path rows frozen and reuse them. For the additional historical source names, replace the V1.7 same-week first wick-through/reclaim close rule with a same-week first strict close beyond the upper/lower 1.618 band in the aligned EMA20/50 direction. Use next exact 1H open for both arms. Keep the fixed stop reference anchor, native EMA exit, nine-slot shared-cash account, and fees consistent.",
+  "cache_compatibility": {
+    "previous_cache": {
+      "code_sha256": "1b73016d88b5353c2913fd15cc2d6f40d63156a9d729efdc69e96128e2141289",
+      "config_sha256": "075348c65a1689cd3b902ad2fa5cd6a369a499a14393dd8d338d82ccaed6d2a3"
+    },
+    "invalidate_symbols": ["ICX", "LRC"],
+    "reason": "Only the two original archived delistings gain separate official-delivery and last-observed-source-end contracts. Other cached symbols retain the same input files, signal/path code, indicators, controls, timing, stop, fees, and account parameters; their per-file size/mtime signatures must also match."
+  },
   "data": {
     "venue": "OKX USDT perpetual native 12H and 1H OHLC",
     "symbols": [
@@ -1346,6 +1354,22 @@
       }
     },
     "retired_source_list": "experiments/active/exp-cloud-close-okx-directory-account-20261109-v1/config.json notices; 69 names absent from original 291 pool",
+    "archived_original_sources": {
+      "ICX": {
+        "available_source_end_ms": 1788998400000,
+        "official_delivery_ms": 1789632000000,
+        "official_notice_url": "https://www.okx.com/help/okx-to-delist-perpetual-futures-for-icxusdt",
+        "source_receipt_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ICX/receipt.json",
+        "source_kind": "Original-291 archived native 12H and H1 series; last H1 close 2026-09-10T00:00Z precedes official delivery 2026-09-17T08:00Z by 176 hours."
+      },
+      "LRC": {
+        "available_source_end_ms": 1784221200000,
+        "official_delivery_ms": 1784534400000,
+        "official_notice_url": "https://www.okx.com/help/okx-to-delist-perpetual-futures-for-lrcusdt",
+        "source_receipt_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LRC/receipt.json",
+        "source_kind": "Original-291 archived native 12H and H1 series; last H1 close 2026-07-16T17:00Z precedes official delivery 2026-07-20T08:00Z by 87 hours."
+      }
+    },
     "history_counts": {
       "original_291_inputs": 291,
       "additional_documented_delisted": 69,

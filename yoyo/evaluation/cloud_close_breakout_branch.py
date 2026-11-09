@@ -72,6 +72,9 @@ def _cache_source_signatures(symbol: str, config: dict) -> dict[str, dict[str, i
         source = config["data"]["retired_h1_sources"][symbol]
         source_paths.extend((ROOT / source["source_receipt_path"],
                              ROOT / source["months_manifest_path"]))
+    archived_source = config["data"].get("archived_original_sources", {}).get(symbol)
+    if archived_source:
+        source_paths.append(ROOT / archived_source["source_receipt_path"])
     signatures = {}
     for path in source_paths:
         stat = path.stat()
@@ -92,7 +95,8 @@ def _cache_contract(symbol: str, config: dict, config_sha256: str,
     }
 
 
-def _load_symbol_cache(cache_dir: Path, contract: dict) -> tuple[list[dict], list[dict], dict] | None:
+def _load_symbol_cache(cache_dir: Path, contract: dict,
+                       compatibility: dict) -> tuple[list[dict], list[dict], dict] | None:
     symbol_dir = cache_dir / contract["symbol"]
     manifest_path = symbol_dir / "manifest.json"
     if not manifest_path.is_file():
@@ -100,8 +104,16 @@ def _load_symbol_cache(cache_dir: Path, contract: dict) -> tuple[list[dict], lis
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     if not manifest.get("complete"):
         return None
-    if any(manifest.get(key) != value for key, value in contract.items()):
+    if any(manifest.get(key) != contract[key]
+           for key in ("format_version", "symbol", "source_files")):
         return None
+    if (manifest.get("config_sha256") != contract["config_sha256"]
+            or manifest.get("code_sha256") != contract["code_sha256"]):
+        previous = compatibility.get("previous_cache", {})
+        if (contract["symbol"] in compatibility.get("invalidate_symbols", [])
+                or manifest.get("config_sha256") != previous.get("config_sha256")
+                or manifest.get("code_sha256") != previous.get("code_sha256")):
+            return None
     paths_path = symbol_dir / "paths.csv.gz"
     candidates_path = symbol_dir / "candidates.csv.gz"
     audit_path = symbol_dir / "audit.json"
@@ -175,6 +187,10 @@ def _retired_frames_cached(hour_path: str, end_ms: int) -> tuple[pd.DataFrame, p
 def _load_symbol(symbol: str, config: dict) -> tuple[pd.DataFrame, pd.DataFrame, str, str, str, int]:
     p12, p1, group = _input_paths(symbol, config)
     data_end_ms = int(config["data"]["cutoff_ms"])
+    archived_original = config["data"].get("archived_original_sources", {}).get(symbol)
+    is_archived_original = archived_original is not None
+    if archived_original:
+        data_end_ms = int(archived_original["available_source_end_ms"])
     if group == "retired_documented_h1":
         source = config["data"]["retired_h1_sources"][symbol]
         p1 = ROOT / source["bars1h_path"]
@@ -195,10 +211,17 @@ def _load_symbol(symbol: str, config: dict) -> tuple[pd.DataFrame, pd.DataFrame,
         bars1 = engine._load_bars(p1, "1h")
     if bars12.empty or bars1.empty:
         raise ValueError(f"Missing native OHLC input for {symbol}: {p12}, {p1}")
-    if group != "retired_documented_h1" and int(bars12.index.max()) + STEP < int(config["data"]["cutoff_ms"]):
+    if (group != "retired_documented_h1" and not is_archived_original
+            and int(bars12.index.max()) + STEP < int(config["data"]["cutoff_ms"])):
         raise ValueError(f"12H input for {symbol} ends before frozen cutoff")
-    if group != "retired_documented_h1" and int(bars1.index.max()) + HOUR < int(config["data"]["cutoff_ms"]):
+    if (group != "retired_documented_h1" and not is_archived_original
+            and int(bars1.index.max()) + HOUR < int(config["data"]["cutoff_ms"])):
         raise ValueError(f"1H input for {symbol} ends before frozen cutoff")
+    if is_archived_original:
+        source_end = int(archived_original["available_source_end_ms"])
+        if (int(bars1.index[-1]) + HOUR != source_end
+                or int(bars12.index[-1]) + STEP > source_end):
+            raise ValueError(f"Archived source tail does not match its frozen receipt for {symbol}")
     p12_string = str(p12.relative_to(ROOT)) if isinstance(p12, Path) else str(p12)
     return bars12, bars1, group, p12_string, str(p1.relative_to(ROOT)), data_end_ms
 
@@ -521,7 +544,9 @@ def _prepare_one_symbol(symbol: str, config: dict, row_counter: list[int]) -> tu
     bars1 = source_bars1.loc[source_bars1.index < cutoff]
     if bars1.empty:
         raise ValueError(f"No H1 observations through the available lifetime for {symbol}")
-    if source_group != "retired_documented_h1" and int(bars1.index[-1]) + HOUR < cutoff:
+    archived_original = config["data"].get("archived_original_sources", {}).get(symbol)
+    is_archived = source_group == "retired_documented_h1" or archived_original is not None
+    if not is_archived and int(bars1.index[-1]) + HOUR < cutoff:
         raise ValueError(f"No complete H1 observations through the frozen cutoff for {symbol}")
     if int(bars1.index[-1]) + HOUR > source_end_ms:
         raise ValueError(f"H1 row extends past source availability for {symbol}")
@@ -560,6 +585,17 @@ def _prepare_one_symbol(symbol: str, config: dict, row_counter: list[int]) -> tu
             "overlap_hours": int(receipt["overlap_hours"]),
             "overlap_disagreements": int(receipt["overlap_disagreements"]),
             "month_status_counts": dict(Counter(row["status"] for row in months)),
+        }
+    elif archived_original:
+        source_tail_ms = int(bars1.index[-1]) + HOUR
+        retired_provenance = {
+            "source_receipt_path": archived_original["source_receipt_path"],
+            "official_notice_url": archived_original["official_notice_url"],
+            "official_delivery_ms": int(archived_original["official_delivery_ms"]),
+            "available_source_end_ms": source_tail_ms,
+            "source_tail_before_official_delivery_hours":
+                (int(archived_original["official_delivery_ms"]) - source_tail_ms) // HOUR,
+            "source_tail_policy": "No bars through announced delivery; retain actual source tail and label any end-of-series exit as source-tail close, not delivery-price settlement.",
         }
     audit = {
         "symbol": symbol, "source_group": source_group,
@@ -610,7 +646,7 @@ def run(config_path: Path = CONFIG_PATH) -> dict:
     run_symbols = config["data"]["symbols"]
     for symbol_number, symbol in enumerate(run_symbols, start=1):
         contract = _cache_contract(symbol, config, config_sha256, code_sha256)
-        cached = _load_symbol_cache(cache_dir, contract)
+        cached = _load_symbol_cache(cache_dir, contract, config.get("cache_compatibility", {}))
         if cached is None:
             prepared_paths, candidate_rows, audit = _prepare_one_symbol(symbol, config, row_counter)
             path_rows = [row for arm_rows in prepared_paths.values() for row in arm_rows]
