@@ -1,0 +1,112 @@
+{
+  "id": "exp-cloud-close-funding-account-20261109-v1",
+  "status": "preregistered_builder_pending_owner_commit",
+  "venue": "Binance USD-M",
+  "question": "How does funding paid or received at each observed Binance settlement affect the cash, NAV, and later funded size of the already-frozen 680-contract NAV-tenth account?",
+  "source_account": {
+    "experiment": "exp-cloud-close-archive-complete-20261109-v1",
+    "account_file": "experiments/active/exp-cloud-close-archive-complete-20261109-v1/funded_tenth.csv.gz",
+    "account_metrics": "experiments/active/exp-cloud-close-archive-complete-20261109-v1/account_metrics.csv",
+    "positions": 1635,
+    "child_legs": 3270,
+    "traded_symbols": 347,
+    "parent_join_key": "event_id",
+    "child_join_key": [
+      "event_id",
+      "tp_r"
+    ]
+  },
+  "inputs": {
+    "current_adapter_config": "experiments/active/exp-cloud-close-current-funding-20261109-v1/config.json",
+    "execution_legs": "experiments/active/exp-cloud-close-current-funding-20261109-v1/current/execution_legs.csv.gz",
+    "settlement_flows": "experiments/active/exp-cloud-close-current-funding-20261109-v1/resolved/settlement_flows.csv.gz",
+    "funding_audit": "experiments/active/exp-cloud-close-current-funding-20261109-v1/resolved/funding_audit.json",
+    "symbol_month_coverage": "experiments/active/exp-cloud-close-current-funding-20261109-v1/resolved/symbol_month_audit.json",
+    "h1_quotes": "yoyo.evaluation.cloud_close_binance_gap_repair.quotes; previously archived Binance USD-M H1 only",
+    "quote_policy": "Use frozen native Binance H1 OHLC for marks and preserve original entry, exit, fee class, exit phase, and event priority."
+  },
+  "account": {
+    "initial_cash_usdt": 1000.0,
+    "slots": 9,
+    "new_order_exposure_fraction": 0.9,
+    "expected_positions": 1635,
+    "expected_child_legs": 3270,
+    "leg_fraction_by_tp_r": {
+      "0.0": 0.3333333333333333,
+      "2.0": 0.6666666666666666
+    },
+    "selection": "Use the already-frozen current actual event roster and original direction-specific native runner/2R child exits; do not rescreen, refit, or re-admit candidates.",
+    "entry_priority": "Rejoin the frozen native paths by event_id and use their original entry_order; preserve the existing wallet admission order entry_ms, entry_order, symbol CRC32, symbol, event_id."
+  },
+  "execution": {
+    "engine": "VectorBT 1.2.0 Portfolio.from_order_func with the existing reward_account.account_order callback",
+    "order_behavior": "All entry and exit orders are native VectorBT orders at frozen H1 entry/exit prices and phases; actual child quantity is recomputed from current NAV and free cash.",
+    "entry_fee_rate": 0.0005,
+    "entry_fee_class": "taker",
+    "exit_fee_rate_source": "Frozen native execution_legs; maker 0.0002, taker 0.0005",
+    "slippage": 0.0,
+    "cash_sharing": true,
+    "funding_cashflow_formula": "-signed live child quantity * observed funding_rate * settlement mark_price",
+    "cash_apply_hook": "Apply cash-only event in the VectorBT pre/post-segment callbacks; adjust shared last_cash and last_free_cash before the next order sizing; no synthetic market orders.",
+    "no_fill_policy": "Any planned entry or exit without a matching filled VectorBT order invalidates the account replay; do not silently drop a frozen event or claim complete NAV."
+  },
+  "boundary_policy": {
+    "timestamp_resolution": "Use exact source milliseconds; no ±1s timing inference",
+    "known_ordering": {
+      "funding_before_entry": "A settlement with funding_time_ms < entry_ms is before the new position opens and is not charged to that child.",
+      "funding_after_entry": "A settlement with funding_time_ms > entry_ms and before a known exit is applied after the entry fill and before the next account sizing decision, even when it is only milliseconds later.",
+      "open_exit": "The exact exit instant is exit_bar_ms. Earlier settlements are charged; later settlements are excluded.",
+      "close_exit": "The exact exit instant is exit_bar_ms + 3600000. Earlier settlements are charged; later settlements are excluded.",
+      "intrabar_exit": "A settlement in [exit_bar_ms, exit_bar_ms + 3600000] has unresolved ownership order and is boundary-sensitive."
+    },
+    "scenarios": {
+      "include_boundary": "Include all known entry/exit coincidence and intrabar-exit-hour settlements. For a just-exited leg only, use its actual signed quantity cached immediately before its VectorBT exit order.",
+      "exclude_boundary": "Exclude all entry/exit coincidence and intrabar-exit-hour settlements. Interior settlements still apply to live positions.",
+      "non_boundary": "Apply only if the exact fundingTime falls within the child's known held interval; ledger rows included solely by the older ±1s collection tolerance are classified before-entry or after-exit and excluded."
+    },
+    "event_stage_order": "Three H1 stages: entry/open, open-phase exits, then intrabar/close exits. Exact entry settlements post after the entry stage when included; exact open-exit settlements post after that exit using the cached pre-exit quantity; close/intrabar boundary settlements post after the exit stage using the cached quantity.",
+    "accounting": "Reconstruct every stage cash and NAV from VectorBT order records plus explicit funding event records; raw Portfolio.value omits these external flows and must not be reported as the funded NAV."
+  },
+  "coverage_policy": {
+    "complete_gate": "Require complete symbol-month windows and known rate/mark for every observed settlement before producing dynamic full NAV scenarios.",
+    "incomplete_behavior": "If any funding range, rate, or mark is unknown, list only known settlement cashflow scenarios on the frozen quantities; set full NAV metrics null and do not run or report a complete account replay.",
+    "mark_proxy": "Keep Binance official markPriceKlines 1h-open proxy rows separately counted; never treat a proxy as exact fundingRate markPrice.",
+    "insufficient_cash": "If a funding debit makes shared cash or free collateral negative, fail the path closed. Do not cap the payment, top up cash, permit negative cash, or silently omit later trades."
+  },
+  "risk": {
+    "periods": {
+      "all": "full current funded account",
+      "dev": "through 2024-12-31 UTC",
+      "2025": "2025 UTC",
+      "2026": "2026 through the frozen source end"
+    },
+    "equity": "Persist H1 open NAV, after-open-exit NAV, close NAV, and conservative high/low envelopes including funding cash events.",
+    "drawdown_interpretation": "H1 OHLC envelope is a conservative scenario bound, not proof of intrabar trade/funding order."
+  },
+  "outputs": {
+    "scope": "experiments/active/exp-cloud-close-funding-account-20261109-v1/current/",
+    "complete_receipt": "account_funding_audit.json",
+    "per_scenario": [
+      "funded_legs.csv.gz",
+      "funded_positions.csv.gz",
+      "hourly_equity.csv.gz",
+      "applied_funding.csv.gz",
+      "account_metrics.csv"
+    ],
+    "incomplete_receipt": "Known funding scenarios only; no funded NAV metrics.",
+    "preserve_original_account": true,
+    "preserve_fixed_quantity_funding_ledger": true
+  },
+  "network_policy": "Read existing local execution and settlement files only; no network, archive download, or collector",
+  "commands": {
+    "mini_check": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_funding_account --mini-check",
+    "preflight_after_funding_receipt_exists": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_funding_account --preflight",
+    "full_account_after_owner_commit": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_funding_account --run"
+  },
+  "limits": [
+    "This adapter replays the already-frozen current actual event roster and native orders; it does not reselect signals or controls.",
+    "Boundary inclusion and exclusion are separate complete cash account scenarios because funding changes subsequent position size.",
+    "Any incomplete rate/mark/month coverage prevents reporting full NAV; frozen-quantity known-fee totals remain a cashflow sensitivity only.",
+    "No account is promoted, registered for execution, or connected to a live order system."
+  ]
+}
