@@ -1,0 +1,5 @@
+{
+  "question": "Does the fixed 1.5x expanded OKX account breach 50% traded-price drawdown in the 5bp market-slippage case?",
+  "single_variable": "Tighten the same marked wallet's hourly drawdown bound with synchronized native one-minute OHLC, only at every possible peak and trough needed for a 50% breach. Keep every original fill, quantity, entry, cost, markout and historical universe fixed. Reconstruct actual post-trim underlying quantities in the previous native VectorBT strategy, checking all saved positions and equity stages.",
+  "rules": "Use UTC minute open/close and intraminute price bounds, with signed quantities. Constrain possible time of intrabar settlement by the first and last observed minute that could contain the specified trigger; show impossible/ambiguous intervals rather than invent a fill minute. Retain initial, intermediate and final H1 NAV points. A missing or nonmatching minute source retains the full H1 bounds for that hour. Market prices do not establish actual liquidation mark or funding. The CVC missing source hour remains in this particular account."
+}

@@ -142,7 +142,7 @@ def receipts(pf, data, model, multiple):
     return positions,curve,int(fills.stage.eq(2).sum())
 
 
-def simulate(data,market,multiple,slip,*,directory=EXP,quote_loader=wallet.quotes):
+def simulate(data,market,multiple,slip,*,directory=EXP,quote_loader=wallet.quotes,snapshot=None):
     native_open,previous_close,directions,runners = market
     audit,coverage = study.leverage._margin_audit(runners.reset_index(drop=True),multiple,slip,quote_loader=quote_loader)
     coverage['affected_contracts'] = sorted(audit.loc[audit.maintenance_boundary_hit,'symbol'].unique())
@@ -161,7 +161,11 @@ def simulate(data,market,multiple,slip,*,directory=EXP,quote_loader=wallet.quote
         cash_sharing=True,group_by=True,init_cash=1000.,fill_pos_record=False,
         max_orders=int(np.count_nonzero(actions)+4*np.count_nonzero(previous_close)+1))
     positions,equity,trims = receipts(portfolio,data,model,multiple)
-    if multiple==1 and not slip and directory==EXP:
+    if snapshot is not None:
+        # A new intrahour audit needs the actual quantities after market-open
+        # exits and trims; the ordinary per-parent ledger cannot recover them.
+        snapshot(portfolio,data,positions,equity,multiple,slip)
+    elif multiple==1 and not slip and directory==EXP:
         old = pd.read_csv(parent.EXP/'funded_OKX.csv.gz',index_col='event_id').sort_index()
         base = pd.read_csv(parent.EXP/'hourly_OKX.csv.gz',index_col=0)
         ours = positions.sort_index()
