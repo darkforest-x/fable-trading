@@ -1,0 +1,45 @@
+{
+  "experiment_id": "exp-cloud-close-second-window-capacity-20261109-v1",
+  "question": "Among frozen OKX median-cap parents whose original 10% prior-minute cap bound the actual entry in either saved cost scenario, what native next-window turnover and price coverage exists at the next 12H open, and was the parent still open and positive after costs at that decision close?",
+  "scope": "Source and decision-state panel only. No new order, portfolio replay, account changes, or outcome-based candidate filtering.",
+  "frozen_inputs": {
+    "fee_only_funded": "experiments/active/exp-cloud-close-vix-priority-medians-20261109-v1/aligned/funded_median.csv.gz",
+    "fee_only_orders": "experiments/active/exp-cloud-close-cash-giveback-20261109-v1/orders_median.csv.gz",
+    "stress_5bp_funded": "experiments/active/exp-cloud-close-vix-priority-medians-20261109-v1/aligned/funded_median_stress.csv.gz",
+    "stress_5bp_orders": "experiments/active/exp-cloud-close-cash-giveback-20261109-v1/orders_median_stress.csv.gz",
+    "original_capacity_features": "experiments/active/exp-cloud-close-vix-priority-medians-20261109-v1/source_rows.csv.gz",
+    "native_runner_paths": "experiments/active/exp-cloud-close-vix-priority-20261109-v1/aligned/selected_paths.csv.gz",
+    "expected_funded_parents_per_cost": 1585
+  },
+  "candidate_definition": {
+    "selection": "Union of parents where each saved cost scenario's actual funded entry notional is approximately 10% of that parent's original prior-60-minute median USDT quote volume. Keep scenario-specific binding flags; do not filter by later profit or exit.",
+    "binding_tolerance": "abs(actual_notional - 0.10 * prior_median_usdt) <= max(1e-6 USDT, 1e-8 * cap_usdt)",
+    "expected_fee_only_bound": 1064,
+    "expected_stress_5bp_bound": 1054,
+    "expected_union": 1064
+  },
+  "decision_and_capacity_clock": {
+    "second_entry_ms": "original_entry_ms + 12 hours",
+    "decision_close": "Close of the complete native H1 bar opening at second_entry_ms - 1 hour; fills are accumulated through that bar only.",
+    "next_12h_open": "Exact native OKX H1 open at second_entry_ms.",
+    "capacity_window": "Exactly the 60 complete native 1m bars with opens in [second_entry_ms - 60 minutes, second_entry_ms).",
+    "capacity_source": "Reuse cloud_close_prior_minute_liquidity.prior, its native OKX minute OHLC and quote-volume helper, and existing symbol/hour cache. Validate minute H1 aggregate and final minute timestamp. Deduplicate by symbol and second_entry_ms; original event_id remains the output join key.",
+    "second_entry_limit": "0.10 * median USDT quote volume in the second-window prior 60 minutes; source observation only, not a simulated fill."
+  },
+  "decision_state": {
+    "ledger": "Use exact saved orders_median.csv.gz and orders_median_stress.csv.gz per parent. Sum underlying_cash, net_units, and fees through the decision H1 bar; reconcile all order cash and final units to each saved funded parent.",
+    "mark": "At decision H1 close, report realized cash plus remaining side-adjusted position marked to close, net of a taker exit fee. Stress scenario additionally applies its existing 5bp adverse fill assumption to the hypothetical close mark.",
+    "position_status": "Based only on net units after the last completed decision H1 bar. Do not include fills from the next open in the decision snapshot.",
+    "cost_lines": ["fee_only", "stress_5bp"]
+  },
+  "outputs": [
+    "second_window_capacity.csv.gz",
+    "source_receipts.csv",
+    "summary.json"
+  ],
+  "limitations": [
+    "Quote volume is a turnover proxy, not order-book depth or a guaranteed executable amount.",
+    "At the next H1 open the original parent may itself exit; this panel does not use future exit status to select candidates. The downstream account must preserve its established same-open order sequence.",
+    "The panel reports source availability and decision-time inventory/PnL only; it does not calculate subsequent PnL or reallocate account cash."
+  ]
+}
