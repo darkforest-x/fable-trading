@@ -1,0 +1,69 @@
+{
+  "experiment_id": "exp-cloud-close-breakout-admission-20261109-v1",
+  "question": "Among the same 18,890 executable 360-name breakout opportunities, does prioritizing the event closest to its frozen stop at the completed 12H confirmation close change the nine-slot cash account compared with farthest-risk-first and the frozen CRC32 admission order?",
+  "single_variable": "Change only event ordering among opportunities with the same exact executable entry timestamp. Keep all native breakout paths, stop/exit prices, signal events, nine slots, cash sizing, fees, and already-open positions unchanged.",
+  "data": {
+    "venue": "OKX USDT perpetual",
+    "historical_names": 360,
+    "frozen_paths_csv_gz": "experiments/active/exp-cloud-close-breakout-historical-20261109-v1/paths_full_360.csv.gz",
+    "history_config": "experiments/active/exp-cloud-close-breakout-historical-20261109-v1/config.json",
+    "expected_executable_actual_paths": 18890,
+    "confirmation_price": "Native UTC 12H close at key_open_ms + 12 hours; for the 69 documented H1-only archives, reuse the exact complete-12-hour aggregation used by the frozen historical experiment.",
+    "event_time": "Only events with status=executed, arm=breakout, tp_r=0, is_control=false. entry_ms must equal confirmation_ms and key_open_ms + 12 hours.",
+    "no_path_repricing": true
+  },
+  "priority_policies": {
+    "close_risk_min": {
+      "sort": "For events at the same entry_ms, ascending side*(confirmed_12h_close-stop_price)/confirmed_12h_close."
+    },
+    "close_risk_max": {
+      "sort": "For events at the same entry_ms, descending side*(confirmed_12h_close-stop_price)/confirmed_12h_close."
+    },
+    "tie_break_for_both": "CRC32(symbol), symbol, event_id ascending, matching the original deterministic wallet tie ordering.",
+    "crc32_original": "Reuse the already-frozen 360-name CRC32 actual account receipt. Do not rerun its account.",
+    "risk_fraction_audit": "Retain path risk_fraction (entry-open-to-stop percentage) for audit and compare its same-time ordering to the stricter confirmation-close ordering; it is not used by the primary priority variants."
+  },
+  "account": {
+    "starting_usdt": 1000,
+    "slots": 9,
+    "start_ms": 1579824000000,
+    "end_ms": 1794139200000,
+    "positions": "Existing positions are never replaced or resized. The original wallet.admit and VectorBT shared-cash account decide capacity and funding.",
+    "costs": "OKX Lv1 taker 0.0005 per entry and market/stop/EMA/gap/tail exit. No resting-limit orders, added leverage, or slippage.",
+    "metrics": ["all", "dev", "2025", "2026"],
+    "baseline": {
+      "summary_json": "experiments/active/exp-cloud-close-breakout-historical-20261109-v1/summary.json",
+      "account_metrics_csv": "experiments/active/exp-cloud-close-breakout-historical-20261109-v1/account_metrics.csv",
+      "funded_actual_csv_gz": "experiments/active/exp-cloud-close-breakout-historical-20261109-v1/funded/funded_breakout_actual.csv.gz",
+      "funded_positions": 1319,
+      "all_slots_busy_rejections": 16689,
+      "same_contract_rejections": 882
+    }
+  },
+  "execution": {
+    "admission_engine": "Existing cloud_close_reward_account.admit; only entry_order is added for the two confirmation-close risk priority policies.",
+    "account_engine": "Existing VectorBT 1.2.0 cloud_close_reward_account.account_order with one nine-slot shared-cash account per alternate policy.",
+    "reproduction": [
+      "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_breakout_admission --mini-check",
+      "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_breakout_admission --run"
+    ]
+  },
+  "outputs": {
+    "priority_audit_csv_gz": "priority_audit.csv.gz",
+    "admission_changes_csv_gz": "admission_changes.csv.gz",
+    "account_metrics_csv": "account_metrics.csv",
+    "summary_json": "summary.json",
+    "funded_files": {
+      "close_risk_min": "funded_close_risk_min.csv.gz",
+      "close_risk_max": "funded_close_risk_max.csv.gz"
+    },
+    "hourly_files": {
+      "close_risk_min": "hourly_close_risk_min.csv.gz",
+      "close_risk_max": "hourly_close_risk_max.csv.gz"
+    }
+  },
+  "mini_check": {
+    "fixture": "11 same-time candidates competing for nine open slots",
+    "expected": "Minimum confirmed-close stop-distance priority funds the nine smallest distances; maximum priority funds the nine largest; each rejects exactly two through the existing admission function."
+  }
+}
