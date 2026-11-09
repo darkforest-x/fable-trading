@@ -77,9 +77,9 @@ def minute_quote(symbol,hour,quotes):
     return bars,url
 
 
-def snapshots(quotes,folder):
-    base = pd.read_csv(experiment.EXP/'hourly_1.5x_stress.csv.gz',index_col=0,parse_dates=[0])
-    old_positions = pd.read_csv(experiment.EXP/'funded_1.5x_stress.csv.gz',index_col='event_id')
+def snapshots(quotes,folder,account_dir=experiment.EXP):
+    base = pd.read_csv(account_dir/'hourly_1.5x_stress.csv.gz',index_col=0,parse_dates=[0])
+    old_positions = pd.read_csv(account_dir/'funded_1.5x_stress.csv.gz',index_col='event_id')
     times = targets(base)
 
     def capture(pf,data,positions,equity,multiple,slip):
@@ -161,16 +161,16 @@ def ranges(group,row,hour,quotes):
     return pd.DataFrame(dict(time=hour+np.arange(60)*60000,low=low,high=high,close_lower=lo_close,close_upper=hi_close)),notes
 
 
-def main():
-    if (EXP/'summary.json').exists():
+def main(directory=EXP,account_dir=experiment.EXP,input_loader=experiment.inputs):
+    if (directory/'summary.json').exists():
         raise FileExistsError('Completed historical minute exposure audit')
-    rows,quotes,_ = experiment.inputs()
-    equity,capture = snapshots(quotes,EXP)
-    if not (EXP/'post_trim_units.csv.gz').exists():
+    rows,quotes,_ = input_loader()
+    equity,capture = snapshots(quotes,directory,account_dir)
+    if not (directory/'post_trim_units.csv.gz').exists():
         data,_ = experiment.parent.assemble(rows,experiment.changed_limits(rows,quotes),'OKX',quotes)
         engine.simulate(data,engine.underlying(data,quotes),1.5,.0005,quote_loader=quotes,snapshot=capture)
         del data
-    held = pd.read_csv(EXP/'post_trim_units.csv.gz',dtype={'symbol':str},float_precision='round_trip')
+    held = pd.read_csv(directory/'post_trim_units.csv.gz',dtype={'symbol':str},float_precision='round_trip')
     upper,lower = equity.upper_nav.copy(),equity.lower_nav.copy()
     attained_hi = equity[STAGES].max(axis=1)
     attained_lo = equity[STAGES].min(axis=1)
@@ -192,18 +192,18 @@ def main():
     result = 100*(1-lower/upper.cummax().clip(lower=1000))
     # Earlier hours for distinct-hour guaranteed witnesses. Also retain the
     # original fully ordered within-hour stage witness for the same hour.
-    old = json.loads((experiment.EXP/'summary.json').read_text())['cases']['fixed_5bp']['metrics']['all']
+    old = json.loads((account_dir/'summary.json').read_text())['cases']['fixed_5bp']['metrics']['all']
     witness = max(old['dd_mark_pct'],100*(1-(attained_lo/attained_hi.cummax().shift().fillna(1000).clip(lower=1000)).min()))
     if witness>result.max()+.00001:
         raise ValueError('Attained witness exceeds every possible drawdown')
     if observations:
-        pd.concat(observations,ignore_index=True).to_csv(EXP/'minute_bounds.csv.gz',index=False)
-    pd.DataFrame(notes).to_csv(EXP/'source_receipts.csv',index=False)
+        pd.concat(observations,ignore_index=True).to_csv(directory/'minute_bounds.csv.gz',index=False)
+    pd.DataFrame(notes).to_csv(directory/'source_receipts.csv',index=False)
     obj = dict(original_upper_pct=old['dd_bound_pct'],original_observed_pct=old['dd_mark_pct'],
         refined_lower_pct=witness,refined_upper_pct=result.max(),fully_refined=used,
         targeted_hours=len(targets(equity)),remaining_potential_breach_hours=int(result.ge(50).sum()),
         scope='This bounds traded-price drawdown for the frozen 5bp-slippage 360-name account, including its published CVC gap exit. Historical funding and unobserved margin marks remain unresolved.')
-    (EXP/'summary.json').write_text(json.dumps(obj,indent=2,allow_nan=False)+'\n')
+    (directory/'summary.json').write_text(json.dumps(obj,indent=2,allow_nan=False)+'\n')
     print(obj,flush=True)
 
 

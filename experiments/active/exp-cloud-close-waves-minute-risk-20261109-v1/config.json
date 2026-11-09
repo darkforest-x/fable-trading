@@ -1,0 +1,6 @@
+{
+  "question": "After the WAVES repair, do native minute execution-price bounds establish a 50 percent drawdown breach for the fixed 1.5x account with 5bp adverse market slippage?",
+  "source": "exp-cloud-close-waves-wallet-20261109-v1",
+  "method": "Reuse the existing OHLC/position reconciliation for all candidate trough and peak hours from the updated hourly equity. Reconstruct native filled parent membership by retaining unchanged parents, dropping displaced parents and adding newly funded WAVES paths. Match the original cash PnL and hourly NAV before using quantities. If an official minute quote cannot be verified, retain its hourly conservative bound.",
+  "costs": "Source account market 5bp, resting 2bp plus separate market slippage 5bp. Historical funding absent."
+}
