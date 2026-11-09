@@ -1,6 +1,7 @@
 """Compare actual V1.7 parent entry notional with venue-reported first-minute turnover."""
 import json
 import time
+from zipfile import BadZipFile
 from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
@@ -72,7 +73,7 @@ def run():
         for attempt in range(3):
             try:
                 return observation(row,quotes)
-            except (requests.RequestException,TimeoutError) as exc:
+            except (requests.RequestException,TimeoutError,BadZipFile):
                 if attempt==2:
                     raise
                 time.sleep(2**attempt)

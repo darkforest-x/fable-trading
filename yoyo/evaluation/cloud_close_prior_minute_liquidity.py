@@ -1,6 +1,7 @@
 """Measure the real traded USDT in the 60 completed minutes immediately before each V1.7 entry."""
 import json
 import time
+from zipfile import BadZipFile
 from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
@@ -59,7 +60,7 @@ def main():
         for attempt in range(3):
             try:
                 return prior(r,quotes)
-            except requests.RequestException:
+            except (requests.RequestException,BadZipFile):
                 if attempt==2:
                     raise
                 time.sleep(2**attempt)
