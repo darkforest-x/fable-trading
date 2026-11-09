@@ -9,6 +9,7 @@ Missing candles are kept as gaps and never forward-filled.
 from __future__ import annotations
 
 import argparse
+import ast
 import csv
 import gzip
 import json
@@ -816,7 +817,7 @@ def collect(*, fetch: bool, symbols: set[str] | None = None) -> dict[str, Any]:
             "generated_at_utc": _utc_now(),
             "local_source_rows": source_audit,
             "fapi_day_requests": request_audit,
-            "source_policy": config["source_policy"],
+            "source_policy": config.get("source_policy", config.get("sources", {})),
         })
         manifest = {
             "experiment_id": config["id"], "generated_at_utc": _utc_now(),
@@ -847,6 +848,140 @@ def collect(*, fetch: bool, symbols: set[str] | None = None) -> dict[str, Any]:
         return manifest
     return {"universe": universe, "coverage": output_rows, "source_audit": source_audit,
             "requests": request_audit, "request_state": request_state}
+
+
+def finalize_existing() -> dict[str, Any]:
+    """Rebuild global receipts from a complete coverage checkpoint and cached inputs.
+
+    This path is intentionally network-free. It is for recovery after all period
+    rows/series were written but the final manifest transaction failed.
+    """
+    config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    periods, universe = _fixed_contract_periods()
+    period_by_id = {str(p["contract_period_id"]): p for p in periods}
+    checkpoint = OUTPUT_ROOT / "coverage.csv.gz"
+    if not checkpoint.is_file():
+        raise FileNotFoundError(f"No coverage checkpoint to finalize: {checkpoint}")
+    coverage = pd.read_csv(checkpoint, dtype={"symbol": str, "contract_period_id": str}).fillna("")
+    if coverage.contract_period_id.duplicated().any() or set(coverage.contract_period_id) != set(period_by_id):
+        raise SourceError("Coverage checkpoint period IDs do not match the frozen lifecycle set")
+
+    local_audit: list[dict[str, Any]] = []
+    for symbol in sorted(universe["fixed_symbols"]):
+        _local_5m(symbol, local_audit)
+
+    request_audit: list[dict[str, Any]] = []
+    expected_raw: set[str] = set()
+    rebuilt_rows = []
+    for row in coverage.to_dict("records"):
+        period_id = str(row["contract_period_id"])
+        period = period_by_id[period_id]
+        days_value = row.get("day_audit", "")
+        days = ast.literal_eval(days_value) if isinstance(days_value, str) and days_value else []
+        active = bool(str(row.get("collection_start_utc", "")))
+        if active:
+            if not days:
+                raise SourceError(f"Active coverage checkpoint lacks day audit: {period_id}")
+            for name, field in (("expected_5m", "expected_5m"), ("observed_5m", "observed_5m"),
+                                ("missing_5m", "missing_5m")):
+                if int(row[name]) != sum(int(d[field]) for d in days):
+                    raise SourceError(f"Coverage/day audit total mismatch for {period_id}: {name}")
+            if int(row["missing_5m"]) != 0 or int(row["incomplete_h1"]) != 0:
+                raise SourceError(f"Checkpoint is not a complete source window: {period_id}")
+            for day in days:
+                fetched = bool(day.get("fetched", False))
+                status = str(day.get("fetch_status", ""))
+                if not fetched:
+                    if status != "not_needed":
+                        raise SourceError(f"Unresolved fetch state in checkpoint: {period_id} {day.get('day')} {status}")
+                    continue
+                date = str(day["day"])
+                raw_path = RAW_REST_ROOT / period["symbol"] / f"{date}.json.gz"
+                url = f"{FAPI_URL}?{urllib.parse.urlencode({'symbol': period['symbol'], 'interval': '5m', 'startTime': _date_ms(date), 'endTime': _date_ms(date) + DAY_MS - 1, 'limit': FAPI_LIMIT})}"
+                if status == "validated_raw_cache":
+                    if not raw_path.is_file():
+                        raise SourceError(f"Validated raw cache missing for checkpoint day: {period_id} {date}")
+                    expected_raw.add(str(raw_path.relative_to(RAW_REST_ROOT)))
+                    request_audit.append({"date": date, "symbol": period["symbol"], "status": status,
+                                          "url": url, "raw_path": str(raw_path), "raw_bytes": raw_path.stat().st_size,
+                                          "requests": 0, "request_weight": 0})
+                else:
+                    # The coverage checkpoint does not preserve retry counts or
+                    # raw response payloads for network statuses. Do not invent them.
+                    raise SourceError(f"Cannot exactly reconstruct request receipt {status} for {period_id} {date}")
+
+        source_path = SERIES_ROOT / f"{period_id.replace('/', '_')}.csv.gz"
+        if int(row.get("complete_h1", 0) or 0):
+            if not source_path.is_file():
+                raise SourceError(f"Coverage checkpoint series file is missing: {source_path}")
+            h1 = pd.read_csv(source_path, float_precision="round_trip")
+            if len(h1) != int(row["complete_h1"]):
+                raise SourceError(f"Coverage/H1 row count mismatch: {period_id}")
+            required = {"open_time_ms", "close_time_ms", *PRICE_COLUMNS, "volume", "n_5m"}
+            if not required.issubset(h1.columns) or h1.open_time_ms.duplicated().any() or not h1.open_time_ms.is_monotonic_increasing:
+                raise SourceError(f"Invalid H1 series schema/order: {period_id}")
+            values = h1[[*PRICE_COLUMNS, "volume"]].to_numpy(dtype=np.float64)
+            if not np.isfinite(values).all() or (h1[PRICE_COLUMNS] <= 0).any().any() or (h1.volume < 0).any():
+                raise SourceError(f"Invalid H1 price/volume values: {period_id}")
+            if ((h1.high < h1[["open", "low", "close"]].max(axis=1)) |
+                    (h1.low > h1[["open", "high", "close"]].min(axis=1)) | h1.n_5m.ne(12)).any():
+                raise SourceError(f"Invalid H1 OHLC geometry or aggregation count: {period_id}")
+            if len(h1) > 1 and not h1.open_time_ms.diff().dropna().eq(HOUR_MS).all():
+                raise SourceError(f"Unexpected H1 gap in series: {period_id}")
+            parity = _quote_parity(period, h1)
+            if (parity["checked_bars"] != int(row["overlap_parity_checked_bars"]) or
+                    parity["mismatched_bars"] != int(row["overlap_parity_mismatched_bars"])):
+                raise SourceError(f"Coverage/frozen overlap parity mismatch: {period_id}")
+        elif source_path.exists():
+            raise SourceError(f"Series exists for a period reported with no complete H1 bars: {period_id}")
+        rebuilt_rows.append(row)
+
+    actual_raw = {str(p.relative_to(RAW_REST_ROOT)) for p in RAW_REST_ROOT.glob("*/*.json.gz")}
+    missing_raw = expected_raw - actual_raw
+    if missing_raw:
+        raise SourceError(f"Referenced raw cache files are missing: {sorted(missing_raw)[:5]}")
+    mismatches = sum(int(r["overlap_parity_mismatched_bars"]) for r in rebuilt_rows)
+    active_rows = [r for r in rebuilt_rows if str(r.get("collection_start_utc", ""))]
+    nonfixed = _local_nonfixed_symbols(set(universe["fixed_symbols"]))
+    source_audit_path = OUTPUT_ROOT / "source_audit.json"
+    manifest = {
+        "experiment_id": config["id"], "generated_at_utc": _utc_now(),
+        "source_scope": "data source only; no signal generation, strategy run, or PnL calculation",
+        "receipt_recovered_from_checkpoint": str(checkpoint),
+        "receipt_note": "The failed collector had already validated all referenced API day payloads from disk cache; this finalizer issued no network requests. Historical attempt counts from before this recovery are unavailable.",
+        "request_count_scope": "finalization invocation only; prior collection attempts were not preserved in the failed manifest",
+        "requested_range": config["range"],
+        "universe": {k: v for k, v in universe.items() if k != "fixed_symbols"},
+        "period_rows": len(rebuilt_rows), "active_period_rows": len(active_rows),
+        "period_status_counts": dict(Counter(str(r["status"]) for r in rebuilt_rows)),
+        "fixed_symbols_with_any_h1": len({r["symbol"] for r in rebuilt_rows if int(r.get("complete_h1", 0) or 0)}),
+        "h1_rows": int(sum(int(r.get("complete_h1", 0) or 0) for r in rebuilt_rows)),
+        "h1_gap_periods": sum(int(int(r.get("incomplete_h1", 0) or 0) > 0) for r in rebuilt_rows),
+        "overlap_parity_checked_bars": int(sum(int(r["overlap_parity_checked_bars"]) for r in rebuilt_rows)),
+        "overlap_parity_mismatched_bars": int(mismatches),
+        "request_count": 0, "request_weight": 0,
+        "coverage_path": str(checkpoint), "source_audit_path": str(source_audit_path),
+        "series_dir": str(SERIES_ROOT), "raw_rest_cache_dir": str(RAW_REST_ROOT),
+        "nonfixed_local_source_summary": nonfixed,
+    }
+    _write_json_atomic(source_audit_path, {
+        "generated_at_utc": manifest["generated_at_utc"],
+        "receipt_recovered_from_checkpoint": str(checkpoint),
+        "local_source_rows": local_audit, "fapi_day_requests": request_audit,
+        "source_policy": config.get("source_policy", config.get("sources", {})),
+        "raw_cache_files_referenced": len(expected_raw), "raw_cache_files_present": len(actual_raw),
+        "raw_cache_files_unreferenced": len(actual_raw - expected_raw),
+        "network_requests_during_finalization": 0,
+    })
+    _write_json_atomic(OUTPUT_ROOT / "manifest.json", manifest)
+    EXPERIMENT.mkdir(parents=True, exist_ok=True)
+    _write_json_atomic(EXPERIMENT / "manifest.json", {
+        "experiment_id": config["id"], "data_manifest": str(OUTPUT_ROOT / "manifest.json"),
+        "coverage": str(checkpoint), "generated_at_utc": manifest["generated_at_utc"],
+        "fixed_symbols": universe["fixed_symbol_count"], "lifecycle_periods": len(rebuilt_rows),
+        "source_only": True,
+    })
+    return manifest
 
 
 def _aggregate_fixture() -> None:
@@ -961,6 +1096,7 @@ def main(argv: list[str] | None = None) -> int:
     mode.add_argument("--smoke-network", action="store_true", help="validate a real FAPI daily response and 5m->1h aggregation")
     mode.add_argument("--preflight", action="store_true", help="inspect frozen 680-symbol pool and local inputs without network")
     mode.add_argument("--collect", action="store_true", help="build full fixed-pool H1 OHLCV continuation; may use public FAPI")
+    mode.add_argument("--finalize-existing", action="store_true", help="validate a complete coverage checkpoint and rebuild receipts without network")
     parser.add_argument("--symbol", default="ADAUSDT", help="fixed-pool symbol for network smoke")
     parser.add_argument("--day", default="2026-10-28", help="UTC day for 5m -> 1h network smoke")
     parser.add_argument("--overlap-day", default="2026-09-22", help="UTC day for frozen H1 overlap smoke")
@@ -971,6 +1107,8 @@ def main(argv: list[str] | None = None) -> int:
         result = smoke_network(args.symbol, args.day, args.overlap_day)
     elif args.collect:
         result = collect(fetch=True)
+    elif args.finalize_existing:
+        result = finalize_existing()
     else:
         periods, universe = _fixed_contract_periods()
         result = {"ok": True, "universe": {k: v for k, v in universe.items() if k != "fixed_symbols"},
