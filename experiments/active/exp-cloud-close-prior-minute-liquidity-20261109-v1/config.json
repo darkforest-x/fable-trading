@@ -1,0 +1,4 @@
+{
+  "single_variable": "Measure turnover known before each original 1x/2x parent opens. Use all 60 observed native minute quote turnovers of the immediately preceding hour only. Retain median per-minute USDT volume and mean, explicitly recording zero volume and missing sources. Require exact OHLC reconciliation with the prior completed H1. Ignored data in the new entry hour cannot affect availability, rankings, or sizing.",
+  "source": "Original full 1570-entry corrected CVC parent roster and official OKX quote turnover. Use official quote turnover with no conversion based on present-day contract values. Validate native quote/base ratios against minute low/high when available and positive."
+}
