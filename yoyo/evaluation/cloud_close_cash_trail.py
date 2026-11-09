@@ -29,29 +29,32 @@ def change_children(children,triggers,quotes):
     return rows,pd.DataFrame(records)
 
 
-def main():
-    if (EXP/'summary.json').exists():
+def main(*,experiment=EXP,signal_loader=None):
+    if (experiment/'summary.json').exists():
         raise FileExistsError('Completed cash-peak exits')
-    data,_,quotes,_,cap,ratios=cash.account()
+    data,_,quotes,parents,cap,ratios=cash.account()
     result={}
     for label,slip in [('median',0.),('median_stress',.0005)]:
         obs=pd.read_csv(cash.EXP/f'parents_{label}.csv.gz',index_col='event_id')
-        signal=obs.trigger_ms.dropna().astype('int64')
+        if signal_loader is None:
+            signal=obs.trigger_ms.dropna().astype('int64')
+        else:
+            signal=signal_loader(label,slip,quotes,parents)
         for name,delay in [('confirmed',0),('late',cash.STEP)]:
             key=label+'_'+name
             updated,changes=change_children(data['selected'],signal+delay,quotes)
-            changes.to_csv(EXP/f'exits_{key}.csv.gz',index=False)
+            changes.to_csv(experiment/f'exits_{key}.csv.gz',index=False)
             prepared=queue.repair.wallet.prepare(None,data['actions'].shape[1],assigned=(updated,{}),quote_loader=quotes)
             market=queue.engine.base.underlying(prepared,quotes)
-            case=queue.engine.simulate(prepared,market,quotes,ratios,slip,EXP,key,entry_limits=cap)
+            case=queue.engine.simulate(prepared,market,quotes,ratios,slip,experiment,key,entry_limits=cap)
             result[key]=dict(case=case,signals=len(signal),changed_parents=changes.event_id.nunique(),
                              changed_children=len(changes),missing_holding_hours=prepared['gap_marks'])
             if 'metrics' in case:
-                funds=pd.read_csv(EXP/f'funded_{key}.csv.gz',index_col='event_id')
+                funds=pd.read_csv(experiment/f'funded_{key}.csv.gz',index_col='event_id')
                 if set(funds.index)!=set(obs.index):
                     raise ValueError('Positive opening roster changed despite reserved shadow slots')
                 print(key,case['metrics']['all'],flush=True)
-    queue.repair.archive.prices.safe_json(EXP/'summary.json',result)
+    queue.repair.archive.prices.safe_json(experiment/'summary.json',result)
 
 
 if __name__=='__main__':

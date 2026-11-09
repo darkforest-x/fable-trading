@@ -1,0 +1,6 @@
+{
+ "question":"Can the account cut losses on shallow failed starts without truncating already established multi-R winners?",
+ "single_variable":"Only when an earlier completed 12H cash peak was strictly positive but always below 2 original risks, close remaining legs at the first following native open where current completed 12H net liquidation value is nonpositive. Once 2R has been achieved, permanently exempt the parent from this new rule. Zero before any sampled open mark is not a gain. Compare the original VIX-ranked 10% median-turnover cash wallet and the same exit executed one additional fixed 12H later.",
+ "context":"Earlier cash-peak observation showed 597 parents turned a prior positive mark into a final loss, but protecting established >=2R winners at half their cash peak reduced final capital. This new rule is outcome-informed. All causal signals derive from the unaltered shadow book's real prior fills. No new admissions; originally reserved slots and original priority maintained. Full 5bp market stress and actual fee classes. No funding or exit-depth assumptions added.",
+ "command":"vectorbt-python -m yoyo.evaluation.cloud_close_false_start"
+}
