@@ -25,6 +25,40 @@ def funded(boundary):
     return data[data.side.eq(1)].copy()
 
 
+def stored_or_reconstructed(inputs):
+    """Reuse original causal signal rows, and reconstruct only IDs absent from the direct archive."""
+    from yoyo.evaluation.cloud_binance_winner_entry_features import build_features, CANONICAL_FEATURES
+    folder = ROOT/"exp-signal-center-score-20261106-v1/results/symbols"
+    parts = []
+    for symbol, group in inputs.groupby("symbol"):
+        path = folder/f"{symbol}USDT"/"signals.csv.gz"
+        if not path.is_file():
+            continue
+        frame = pd.read_csv(path,float_precision="round_trip",dtype={"symbol":str}).set_index("signal_id")
+        direct = frame.loc[frame.index.intersection(group.index)]
+        if direct.empty:
+            continue
+        expected_ns = group.loc[direct.index,"entry_ms"]*1_000_000
+        if (not direct.index.is_unique or not direct.tf.eq("12H").all() or not direct.side.eq(1).all()
+                or not direct.symbol.eq(f"{symbol}USDT").all() or not np.array_equal(direct.close_ns,expected_ns)):
+            raise ValueError("Original signal row differs in direction, time or contract")
+        fields = direct.reindex(columns=CANONICAL_FEATURES).copy()
+        fields["signal_time_ms"] = expected_ns//1_000_000
+        fields["signal_feature_source_status"] = "frozen_signal_center_table"
+        parts.append(fields)
+    direct = pd.concat(parts)
+    missing = inputs.index.difference(direct.index)
+    if len(missing):
+        extra = build_features(inputs.loc[missing])
+        if set(extra.index) != set(missing) or not extra.index.is_unique:
+            raise ValueError("Reconstruction roster differs from the missing native source rows")
+        parts.append(extra.reindex(columns=direct.columns))
+    result = pd.concat(parts).reindex(inputs.index)
+    if not result.index.is_unique or not np.array_equal(result.signal_time_ms,inputs.entry_ms):
+        raise ValueError("Combined original and reconstructed source clocks differ")
+    return result
+
+
 def attach_labels(features, accounts, other):
     panel = features.reindex(accounts.index).copy()
     if (not features.index.is_unique or set(features.index) != set(accounts.index)
@@ -167,7 +201,6 @@ def shared_observations(panel):
 
 
 def main():
-    from yoyo.evaluation.cloud_binance_winner_entry_features import build_features
     if (EXP/"summary.json").exists():
         raise FileExistsError("Completed comparison")
     config = json.loads((EXP/"config.json").read_text())
@@ -175,7 +208,7 @@ def main():
     alternate = funded("exclude")
     # Do not pass outcomes, exposure allocations, or holding length into the feature extractor.
     inputs = original[["symbol","entry_ms","side"]].copy()
-    features = build_features(inputs)
+    features = stored_or_reconstructed(inputs)
     panel = attach_labels(features,original,alternate)
     rules = config["univariate_rules"]
     screens, windows, temporal = evaluate(panel,rules)
@@ -198,7 +231,7 @@ def main():
            other_winners=int((panel.cash_pnl.gt(0) & ~panel.winner10).sum()),scratch=int(panel.cash_pnl.eq(0).sum()),
            ten=list(ten.index),alternate_ten=ranked,overlap={k:len(set(v)&set(ten.index)) for k,v in ranked.items()},
            timestamp_match_cases=int(ten.entry_ms.isin(panel.loc[panel.loser,"entry_ms"]).sum()),
-           causal_source_counts=panel.source_status.value_counts(dropna=False).to_dict(),
+           causal_source_counts=panel.signal_feature_source_status.value_counts(dropna=False).to_dict(),
            tests=len(rules),holm_significant=int(screens.holm_p.lt(.05).sum()),chronology=temporal)
     (EXP/"summary.json").write_text(json.dumps(summary,indent=2,ensure_ascii=False,allow_nan=False)+"\n")
     print(json.dumps(summary,ensure_ascii=False,allow_nan=False),flush=True)
