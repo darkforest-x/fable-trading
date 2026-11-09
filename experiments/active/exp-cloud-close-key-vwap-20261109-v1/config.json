@@ -3,5 +3,21 @@
   "single_variable": "At each confirmed 12H key prefer V1.7 trades whose completed key close has moved furthest in the trade direction from the price at which actual contract volume traded, scaled by that key's high-low range. No threshold or fitted weights.",
   "formula": "side * (confirmed 12H close - sum(exchanged quote volume) / sum(exchanged base volume)) / (confirmed 12H high - low). Sum exact Binance futures raw volume trades aggregated in 5m/15m Binance Vision OHLCV. Every one of twelve aggregated hourly OHLC records must match the original confirmed input. Exclude entry-hour bars, zero volume, flat keys or missing quotes. Unknown observations retain their original rank.",
   "wallet": "Same native Binance 680-contract, 9-slot, NAV/10, 1000U reference with original conditional 2R exit. Rank contemporaneous candidates only, higher first, ties keep original priority. Reuse documented delistings and contemporary index prices. Account pays 5bp for markets and 2bp for resting targets, before funding, market impact and lot rounding. Only if development improves terminal wealth and passes >=100 trades / >=30% wins / >=2.5 both payoffs / <=35% conservative DD, run stress, then matched and funding checks. Previously explored later years. No new model training.",
-  "additional_settlements": {}
+  "additional_settlements": {
+    "BTSUSDT": {
+      "utc": "2022-08-18T09:00:00Z",
+      "minutes": 60,
+      "announcement": "https://www.binance.com/en/support/announcement/detail/90498d8e2fec42468ec3d659bdfbb78b"
+    },
+    "PERPUSDT": {
+      "utc": "2025-11-21T09:00:00Z",
+      "minutes": 30,
+      "announcement": "https://www.binance.com/en/support/announcement/detail/6392491d998b4cbaa6d4beee0fd898c6"
+    },
+    "ZRCUSDT": {
+      "utc": "2026-01-21T09:00:00Z",
+      "minutes": 30,
+      "announcement": "https://www.binance.com/en/support/announcement/detail/5798be852fb5449bb438dde4166126dc"
+    }
+  }
 }
