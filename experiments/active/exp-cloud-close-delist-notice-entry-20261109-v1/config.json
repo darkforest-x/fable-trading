@@ -1,0 +1,74 @@
+{
+  "experiment_id": "exp-cloud-close-delist-notice-entry-20261109-v1",
+  "question": "公告公开后首个完整12H收盘的云带偏空入场，能否胜过同一公告与方向延迟12H入场？",
+  "single_variable": "只比较同一公告/同一偏空方向在首个符合规则的12H确认后立即入场，与原路径存活至12H后的下一精确H1开盘入场；两者共享原始确认高点止损和V1.7退出。",
+  "scope": {
+    "notice_roster": "本机已核实的OKX retired-notice catalog selected=true 的68个币种；这是部分公告目录，不代表完整市场退市横截面。",
+    "notice_article_count": 24,
+    "entry_direction": "short only",
+    "market": "OKX USDT perpetual retired contracts",
+    "source_cutoff_utc": "2026-11-08T12:00:00Z"
+  },
+  "inputs": {
+    "crosschecked_lifecycles": "experiments/active/exp-cloud-close-okx-retired-notices-20261109-v1/crosschecked_lifecycles.csv",
+    "official_article_html": "data/research/cloud_close_okx_retired_notices/articles",
+    "retired_price_series": "data/research/cloud_close_okx_retired_prices/series"
+  },
+  "roster": {
+    "selected_column": "selected",
+    "selected_value": true,
+    "expected_selected_symbols": 68,
+    "identity_column": "symbol",
+    "official_notice_url_column": "notice",
+    "official_delivery_column": "delivery_utc"
+  },
+  "construction": {
+    "publication_source": "official cached article JSON-LD Article.datePublished matched by mainEntityOfPage.@id",
+    "publication_timezone": "datePublished must have explicit UTC offset; date-only and timezone-naive values are excluded",
+    "date_modified": "audit only; never used to determine signal eligibility",
+    "first_12h_open": "ceil(datePublished_ms / 43200000) * 43200000 on the Unix UTC grid; if publication equals a UTC 12H boundary that period may be used",
+    "first_period_only": true,
+    "complete_12h_requirement": "exactly 12 actual H1 opens at consecutive UTC-hour timestamps; no fill or imputation; an incomplete first post-publication period excludes the notice",
+    "ema": "existing V1.7 pure EMA20/50 calculation on completed 12H closes; warmup resets after a missing 12H bar; require EMA20 < EMA50 on the first complete post-publication 12H close",
+    "entry": "next exact H1 open at the 12H confirmation boundary; no nearest-bar or later-open fallback",
+    "side": -1,
+    "protective_stop": "high of the first completed post-publication 12H candle; stop must be strictly above actual short entry",
+    "exit": "existing VectorBT V1.7 path callback: fixed stop, prior-confirmed EMA flip, observed H1 gap, or last observed H1 mark; add a market exit at the last actual H1 open strictly before the official delivery timestamp",
+    "delivery_exit_priority": "native data-gap/EMA/stop path exits that occur earlier remain; if the delivery pre-open is the first exit, close at that H1 open",
+    "comparison": "same notice and short direction; enter exactly 12 hours after the actual entry only if exact H1 open exists, fixed signal-high stop remains above entry, and original native path did not exit before that time; an original open-phase exit at the same timestamp excludes the delayed row, intrabar/close at that timestamp is later than the decision open",
+    "comparison_selection": "delayed arm is conditional on surviving original path to the delayed open; report paired actual subset separately",
+    "price_path_engine": "existing cloud_close_reward_paths VectorBT 1.2.0 from_order_func native path builder; no custom fill ledger"
+  },
+  "account": {
+    "initial_cash_usdt": 1000.0,
+    "slots": 9,
+    "exposure": 1.0,
+    "taker_fee_rate": 0.0005,
+    "maker_fee_rate": 0.0002,
+    "market_fill_fee_class": "taker",
+    "stress_slippage_per_market_fill": 0.0005,
+    "funding_included": false,
+    "funding_note": "Funding cashflows and maintenance-margin liquidation are not modeled; report results as historical OHLC shared-cash simulation, not complete perpetual-account NAV.",
+    "source_cutoff_utc": "2026-11-08T12:00:00Z",
+    "periods": {
+      "all": [null, null],
+      "dev": [null, "2025-01-01T00:00:00Z"],
+      "2025": ["2025-01-01T00:00:00Z", "2026-01-01T00:00:00Z"],
+      "2026_to_source_cutoff": ["2026-01-01T00:00:00Z", "2026-11-08T12:00:00Z"]
+    }
+  },
+  "comparison": {
+    "delay_hours": 12,
+    "tp_r": 0.0
+  },
+  "execution": {
+    "path_batch_size": 128,
+    "vectorbt_required_version": "1.2.0"
+  },
+  "outputs": {
+    "notice_timing": "notice_timing.csv",
+    "candidate_audit": "candidate_audit.csv",
+    "native_paths": "paths.csv.gz",
+    "summary": "summary.json"
+  }
+}
