@@ -1,0 +1,578 @@
+[
+  {
+    "symbol": "ADAUSDT",
+    "month": "2020-11",
+    "query_start_ms": 1606391999000,
+    "query_end_exclusive_ms": 1606780800000,
+    "position_ids": [
+      "12H|ADAUSDT|1606392000000000000|1"
+    ],
+    "exit_phases": [
+      "intrabar"
+    ],
+    "source": "binance_public_fundingRate_api",
+    "normalized_sources": [],
+    "monthly_rate_archive": "data/research/monday_breadth_optimization_20261108/funding_archives/funding/ADAUSDT/ADAUSDT-fundingRate-2020-11.zip",
+    "monthly_mark_1h_archive": "data/research/monday_breadth_optimization_20261108/funding_archives/mark_1h/ADAUSDT/ADAUSDT-1h-2020-11.zip",
+    "monthly_mark_1h_archive_exists": true,
+    "monthly_mark_1h_archive_bytes": 16086,
+    "monthly_mark_proxy_rows_available": 90,
+    "funding_settlement_rows_in_query_window": 13,
+    "missing_rate_rows": 0,
+    "missing_mark_rows": 0,
+    "range_complete": true,
+    "api_request_manifest": {
+      "actual_historical_first_seen": "unknown",
+      "api_range_traversed": true,
+      "cost_policy": "Observed actual rates only. Missing rates/marks are unknown, never zero or predicted-rate substitution.",
+      "first_funding_ms": 1606406400001,
+      "full_settlement_schedule": "unknown",
+      "generated_at": "2026-11-09T00:04:37.885491+00:00",
+      "last_funding_ms": 1606752000000,
+      "missing_actual_rate_rows": 0,
+      "missing_mark_price_rows": 13,
+      "pages": [
+        {
+          "body_sha256": "d13f4a882500a36f70eb848c3fb2873d8bc80ff01bbd833bc0c4a5fe5860222d",
+          "fetched_at": "2026-11-09T00:04:37.771417+00:00",
+          "relative_body_path": "raw/binance/b8/b8573fba7be6d38f0298847895eb29809c7b1e5ff3c0dc31980e081bfd99a267.json.gz",
+          "request": {
+            "method": "GET",
+            "params": {
+              "endTime": 1606780799999,
+              "limit": 1000,
+              "startTime": 1606391999000,
+              "symbol": "ADAUSDT"
+            },
+            "url": "https://fapi.binance.com/fapi/v1/fundingRate"
+          },
+          "retained_rows": 13,
+          "returned_rows": 13
+        },
+        {
+          "body_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "fetched_at": "2026-11-09T00:04:37.882209+00:00",
+          "relative_body_path": "raw/binance/94/9463c66d977e3effea21d6387756eaa1cad2d65597b9a6b6dc423a618b258df1.json.gz",
+          "request": {
+            "method": "GET",
+            "params": {
+              "endTime": 1606780799999,
+              "limit": 1000,
+              "startTime": 1606752000001,
+              "symbol": "ADAUSDT"
+            },
+            "url": "https://fapi.binance.com/fapi/v1/fundingRate"
+          },
+          "retained_rows": 0,
+          "returned_rows": 0
+        }
+      ],
+      "path": "/Users/zhangzc/fable-trading/data/research/cloud_close_funding_ledger_20261109/funding_api/ADAUSDT/2020-11/normalized/binance/ADAUSDT_funding.csv.gz",
+      "record_clock_policy": "Native exchange timestamp preserved; Gate history may be timestamped seconds after nominal boundary.",
+      "request_spec": {
+        "end_ms": 1606780800000,
+        "start_ms": 1606391999000,
+        "symbol": "ADAUSDT",
+        "venue": "binance"
+      },
+      "row_count": 13,
+      "schema_version": "altseason-realized-funding-v1",
+      "sha256": "1868a068c99ba467d53a45ba2a08b0087ce61d6db391c080ddf17c580590e89b",
+      "source_sha256": "419c518bcfb168ed926525003ad20fe96a082f143e1be7bb851d2111db248484",
+      "stop_reason": "empty_page",
+      "transport_sha256": "d9182612de0c5401ae74a00a2b220f6b280e6e71b9de306c26a4acb3638d0eb7"
+    },
+    "interval_profile": {
+      "settlements": 13,
+      "intervals": 12,
+      "hours_1": 0,
+      "hours_4": 0,
+      "hours_8": 12,
+      "other_hours": 0,
+      "observed_interval_hours": [
+        8.0
+      ]
+    },
+    "proxy_policy": "official Binance markPriceKlines 1h open, joined at the fundingTime hour; explicit proxy flag"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "month": "2020-12",
+    "query_start_ms": 1606780800000,
+    "query_end_exclusive_ms": 1609459200000,
+    "position_ids": [
+      "12H|ADAUSDT|1606392000000000000|1"
+    ],
+    "exit_phases": [
+      "intrabar"
+    ],
+    "source": "binance_public_fundingRate_api",
+    "normalized_sources": [],
+    "monthly_rate_archive": "data/research/monday_breadth_optimization_20261108/funding_archives/funding/ADAUSDT/ADAUSDT-fundingRate-2020-12.zip",
+    "monthly_mark_1h_archive": "data/research/monday_breadth_optimization_20261108/funding_archives/mark_1h/ADAUSDT/ADAUSDT-1h-2020-12.zip",
+    "monthly_mark_1h_archive_exists": true,
+    "monthly_mark_1h_archive_bytes": 16595,
+    "monthly_mark_proxy_rows_available": 93,
+    "funding_settlement_rows_in_query_window": 93,
+    "missing_rate_rows": 0,
+    "missing_mark_rows": 0,
+    "range_complete": true,
+    "api_request_manifest": {
+      "actual_historical_first_seen": "unknown",
+      "api_range_traversed": true,
+      "cost_policy": "Observed actual rates only. Missing rates/marks are unknown, never zero or predicted-rate substitution.",
+      "first_funding_ms": 1606780800000,
+      "full_settlement_schedule": "unknown",
+      "generated_at": "2026-11-09T00:04:40.892207+00:00",
+      "last_funding_ms": 1609430400010,
+      "missing_actual_rate_rows": 0,
+      "missing_mark_price_rows": 93,
+      "pages": [
+        {
+          "body_sha256": "9ad7c7c981105f5c169031076417eb737cbd190175ba7ea71e5588c8ff5f9de5",
+          "fetched_at": "2026-11-09T00:04:40.083770+00:00",
+          "relative_body_path": "raw/binance/bd/bdb16153e1b708d10210e96cc517ea4e712e4f33a0c03522c452bdc9c3145ea8.json.gz",
+          "request": {
+            "method": "GET",
+            "params": {
+              "endTime": 1609459199999,
+              "limit": 1000,
+              "startTime": 1606780800000,
+              "symbol": "ADAUSDT"
+            },
+            "url": "https://fapi.binance.com/fapi/v1/fundingRate"
+          },
+          "retained_rows": 93,
+          "returned_rows": 93
+        },
+        {
+          "body_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "fetched_at": "2026-11-09T00:04:40.890311+00:00",
+          "relative_body_path": "raw/binance/c6/c63f05a83a0a276be21c95c8c28e589b0912db4ebaec2234fff40210b4f6a61b.json.gz",
+          "request": {
+            "method": "GET",
+            "params": {
+              "endTime": 1609459199999,
+              "limit": 1000,
+              "startTime": 1609430400011,
+              "symbol": "ADAUSDT"
+            },
+            "url": "https://fapi.binance.com/fapi/v1/fundingRate"
+          },
+          "retained_rows": 0,
+          "returned_rows": 0
+        }
+      ],
+      "path": "/Users/zhangzc/fable-trading/data/research/cloud_close_funding_ledger_20261109/funding_api/ADAUSDT/2020-12/normalized/binance/ADAUSDT_funding.csv.gz",
+      "record_clock_policy": "Native exchange timestamp preserved; Gate history may be timestamped seconds after nominal boundary.",
+      "request_spec": {
+        "end_ms": 1609459200000,
+        "start_ms": 1606780800000,
+        "symbol": "ADAUSDT",
+        "venue": "binance"
+      },
+      "row_count": 93,
+      "schema_version": "altseason-realized-funding-v1",
+      "sha256": "452e95a758e2747ba4545b2e42d432594d6c386e527e9fc7d30f57692f633707",
+      "source_sha256": "419c518bcfb168ed926525003ad20fe96a082f143e1be7bb851d2111db248484",
+      "stop_reason": "empty_page",
+      "transport_sha256": "d9182612de0c5401ae74a00a2b220f6b280e6e71b9de306c26a4acb3638d0eb7"
+    },
+    "interval_profile": {
+      "settlements": 93,
+      "intervals": 92,
+      "hours_1": 0,
+      "hours_4": 0,
+      "hours_8": 92,
+      "other_hours": 0,
+      "observed_interval_hours": [
+        8.0
+      ]
+    },
+    "proxy_policy": "official Binance markPriceKlines 1h open, joined at the fundingTime hour; explicit proxy flag"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "month": "2021-01",
+    "query_start_ms": 1609459200000,
+    "query_end_exclusive_ms": 1612137600000,
+    "position_ids": [
+      "12H|ADAUSDT|1606392000000000000|1"
+    ],
+    "exit_phases": [
+      "intrabar"
+    ],
+    "source": "binance_public_fundingRate_api",
+    "normalized_sources": [],
+    "monthly_rate_archive": "data/research/monday_breadth_optimization_20261108/funding_archives/funding/ADAUSDT/ADAUSDT-fundingRate-2021-01.zip",
+    "monthly_mark_1h_archive": "data/research/monday_breadth_optimization_20261108/funding_archives/mark_1h/ADAUSDT/ADAUSDT-1h-2021-01.zip",
+    "monthly_mark_1h_archive_exists": true,
+    "monthly_mark_1h_archive_bytes": 17614,
+    "monthly_mark_proxy_rows_available": 93,
+    "funding_settlement_rows_in_query_window": 93,
+    "missing_rate_rows": 0,
+    "missing_mark_rows": 0,
+    "range_complete": true,
+    "api_request_manifest": {
+      "actual_historical_first_seen": "unknown",
+      "api_range_traversed": true,
+      "cost_policy": "Observed actual rates only. Missing rates/marks are unknown, never zero or predicted-rate substitution.",
+      "first_funding_ms": 1609459200002,
+      "full_settlement_schedule": "unknown",
+      "generated_at": "2026-11-09T00:04:43.954291+00:00",
+      "last_funding_ms": 1612108800000,
+      "missing_actual_rate_rows": 0,
+      "missing_mark_price_rows": 93,
+      "pages": [
+        {
+          "body_sha256": "25b180dacef8ef2f90bf7f622137abdf3747f90bc1733b3e4df19e1c4b34783e",
+          "fetched_at": "2026-11-09T00:04:43.132096+00:00",
+          "relative_body_path": "raw/binance/de/defc35e48773aa4871fde1ec13f30eb2e36e6217faab640a8954bc464deff61b.json.gz",
+          "request": {
+            "method": "GET",
+            "params": {
+              "endTime": 1612137599999,
+              "limit": 1000,
+              "startTime": 1609459200000,
+              "symbol": "ADAUSDT"
+            },
+            "url": "https://fapi.binance.com/fapi/v1/fundingRate"
+          },
+          "retained_rows": 93,
+          "returned_rows": 93
+        },
+        {
+          "body_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "fetched_at": "2026-11-09T00:04:43.952207+00:00",
+          "relative_body_path": "raw/binance/3b/3bbcf71bac4efb8061bab998bb74e6fcb03073bb8fd1495227613abf8ffe4637.json.gz",
+          "request": {
+            "method": "GET",
+            "params": {
+              "endTime": 1612137599999,
+              "limit": 1000,
+              "startTime": 1612108800001,
+              "symbol": "ADAUSDT"
+            },
+            "url": "https://fapi.binance.com/fapi/v1/fundingRate"
+          },
+          "retained_rows": 0,
+          "returned_rows": 0
+        }
+      ],
+      "path": "/Users/zhangzc/fable-trading/data/research/cloud_close_funding_ledger_20261109/funding_api/ADAUSDT/2021-01/normalized/binance/ADAUSDT_funding.csv.gz",
+      "record_clock_policy": "Native exchange timestamp preserved; Gate history may be timestamped seconds after nominal boundary.",
+      "request_spec": {
+        "end_ms": 1612137600000,
+        "start_ms": 1609459200000,
+        "symbol": "ADAUSDT",
+        "venue": "binance"
+      },
+      "row_count": 93,
+      "schema_version": "altseason-realized-funding-v1",
+      "sha256": "061819f5aa37f9a3057a31c1b5013ae67c425cf7620ade8bd7ce910575df019d",
+      "source_sha256": "419c518bcfb168ed926525003ad20fe96a082f143e1be7bb851d2111db248484",
+      "stop_reason": "empty_page",
+      "transport_sha256": "d9182612de0c5401ae74a00a2b220f6b280e6e71b9de306c26a4acb3638d0eb7"
+    },
+    "interval_profile": {
+      "settlements": 93,
+      "intervals": 92,
+      "hours_1": 0,
+      "hours_4": 0,
+      "hours_8": 92,
+      "other_hours": 0,
+      "observed_interval_hours": [
+        8.0
+      ]
+    },
+    "proxy_policy": "official Binance markPriceKlines 1h open, joined at the fundingTime hour; explicit proxy flag"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "month": "2021-02",
+    "query_start_ms": 1612137600000,
+    "query_end_exclusive_ms": 1614556800000,
+    "position_ids": [
+      "12H|ADAUSDT|1606392000000000000|1"
+    ],
+    "exit_phases": [
+      "intrabar"
+    ],
+    "source": "binance_public_fundingRate_api",
+    "normalized_sources": [],
+    "monthly_rate_archive": "data/research/monday_breadth_optimization_20261108/funding_archives/funding/ADAUSDT/ADAUSDT-fundingRate-2021-02.zip",
+    "monthly_mark_1h_archive": "data/research/monday_breadth_optimization_20261108/funding_archives/mark_1h/ADAUSDT/ADAUSDT-1h-2021-02.zip",
+    "monthly_mark_1h_archive_exists": true,
+    "monthly_mark_1h_archive_bytes": 16814,
+    "monthly_mark_proxy_rows_available": 84,
+    "funding_settlement_rows_in_query_window": 84,
+    "missing_rate_rows": 0,
+    "missing_mark_rows": 0,
+    "range_complete": true,
+    "api_request_manifest": {
+      "actual_historical_first_seen": "unknown",
+      "api_range_traversed": true,
+      "cost_policy": "Observed actual rates only. Missing rates/marks are unknown, never zero or predicted-rate substitution.",
+      "first_funding_ms": 1612137600001,
+      "full_settlement_schedule": "unknown",
+      "generated_at": "2026-11-09T00:04:46.901056+00:00",
+      "last_funding_ms": 1614528000000,
+      "missing_actual_rate_rows": 0,
+      "missing_mark_price_rows": 84,
+      "pages": [
+        {
+          "body_sha256": "2ba590b49ffea1ff45a3835e130cf40c41f33d2c0b58206598e1edc85e787893",
+          "fetched_at": "2026-11-09T00:04:46.087315+00:00",
+          "relative_body_path": "raw/binance/5c/5c3dde2a3e6b8a0d27991ef161371493cc395760b8a72218745fba242eeeb1b6.json.gz",
+          "request": {
+            "method": "GET",
+            "params": {
+              "endTime": 1614556799999,
+              "limit": 1000,
+              "startTime": 1612137600000,
+              "symbol": "ADAUSDT"
+            },
+            "url": "https://fapi.binance.com/fapi/v1/fundingRate"
+          },
+          "retained_rows": 84,
+          "returned_rows": 84
+        },
+        {
+          "body_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "fetched_at": "2026-11-09T00:04:46.899251+00:00",
+          "relative_body_path": "raw/binance/91/91febd45ed7741c776617bae87f47642d5e8122f965a2975657a9eb9f3378450.json.gz",
+          "request": {
+            "method": "GET",
+            "params": {
+              "endTime": 1614556799999,
+              "limit": 1000,
+              "startTime": 1614528000001,
+              "symbol": "ADAUSDT"
+            },
+            "url": "https://fapi.binance.com/fapi/v1/fundingRate"
+          },
+          "retained_rows": 0,
+          "returned_rows": 0
+        }
+      ],
+      "path": "/Users/zhangzc/fable-trading/data/research/cloud_close_funding_ledger_20261109/funding_api/ADAUSDT/2021-02/normalized/binance/ADAUSDT_funding.csv.gz",
+      "record_clock_policy": "Native exchange timestamp preserved; Gate history may be timestamped seconds after nominal boundary.",
+      "request_spec": {
+        "end_ms": 1614556800000,
+        "start_ms": 1612137600000,
+        "symbol": "ADAUSDT",
+        "venue": "binance"
+      },
+      "row_count": 84,
+      "schema_version": "altseason-realized-funding-v1",
+      "sha256": "d1e263e7bde643843dc7761978970766a94b2b7c5defb30ee336b8f1646932c5",
+      "source_sha256": "419c518bcfb168ed926525003ad20fe96a082f143e1be7bb851d2111db248484",
+      "stop_reason": "empty_page",
+      "transport_sha256": "d9182612de0c5401ae74a00a2b220f6b280e6e71b9de306c26a4acb3638d0eb7"
+    },
+    "interval_profile": {
+      "settlements": 84,
+      "intervals": 83,
+      "hours_1": 0,
+      "hours_4": 0,
+      "hours_8": 83,
+      "other_hours": 0,
+      "observed_interval_hours": [
+        8.0
+      ]
+    },
+    "proxy_policy": "official Binance markPriceKlines 1h open, joined at the fundingTime hour; explicit proxy flag"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "month": "2021-03",
+    "query_start_ms": 1614556800000,
+    "query_end_exclusive_ms": 1617235200000,
+    "position_ids": [
+      "12H|ADAUSDT|1606392000000000000|1"
+    ],
+    "exit_phases": [
+      "intrabar"
+    ],
+    "source": "binance_public_fundingRate_api",
+    "normalized_sources": [],
+    "monthly_rate_archive": "data/research/monday_breadth_optimization_20261108/funding_archives/funding/ADAUSDT/ADAUSDT-fundingRate-2021-03.zip",
+    "monthly_mark_1h_archive": "data/research/monday_breadth_optimization_20261108/funding_archives/mark_1h/ADAUSDT/ADAUSDT-1h-2021-03.zip",
+    "monthly_mark_1h_archive_exists": true,
+    "monthly_mark_1h_archive_bytes": 17820,
+    "monthly_mark_proxy_rows_available": 93,
+    "funding_settlement_rows_in_query_window": 93,
+    "missing_rate_rows": 0,
+    "missing_mark_rows": 0,
+    "range_complete": true,
+    "api_request_manifest": {
+      "actual_historical_first_seen": "unknown",
+      "api_range_traversed": true,
+      "cost_policy": "Observed actual rates only. Missing rates/marks are unknown, never zero or predicted-rate substitution.",
+      "first_funding_ms": 1614556800000,
+      "full_settlement_schedule": "unknown",
+      "generated_at": "2026-11-09T00:04:49.753896+00:00",
+      "last_funding_ms": 1617206400000,
+      "missing_actual_rate_rows": 0,
+      "missing_mark_price_rows": 93,
+      "pages": [
+        {
+          "body_sha256": "c019e99fa6f605254101673168f401073c1ae67aff8b00a04bab425266711795",
+          "fetched_at": "2026-11-09T00:04:48.944064+00:00",
+          "relative_body_path": "raw/binance/d7/d70c4d48943024bd6ba5235c7723be86dd2f6b08a40673306f842040eb1d5262.json.gz",
+          "request": {
+            "method": "GET",
+            "params": {
+              "endTime": 1617235199999,
+              "limit": 1000,
+              "startTime": 1614556800000,
+              "symbol": "ADAUSDT"
+            },
+            "url": "https://fapi.binance.com/fapi/v1/fundingRate"
+          },
+          "retained_rows": 93,
+          "returned_rows": 93
+        },
+        {
+          "body_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "fetched_at": "2026-11-09T00:04:49.752022+00:00",
+          "relative_body_path": "raw/binance/86/86907d8c263a671d697f76ebc002d2b7c22e8db078c43cf14c8cf9f98a9d53fb.json.gz",
+          "request": {
+            "method": "GET",
+            "params": {
+              "endTime": 1617235199999,
+              "limit": 1000,
+              "startTime": 1617206400001,
+              "symbol": "ADAUSDT"
+            },
+            "url": "https://fapi.binance.com/fapi/v1/fundingRate"
+          },
+          "retained_rows": 0,
+          "returned_rows": 0
+        }
+      ],
+      "path": "/Users/zhangzc/fable-trading/data/research/cloud_close_funding_ledger_20261109/funding_api/ADAUSDT/2021-03/normalized/binance/ADAUSDT_funding.csv.gz",
+      "record_clock_policy": "Native exchange timestamp preserved; Gate history may be timestamped seconds after nominal boundary.",
+      "request_spec": {
+        "end_ms": 1617235200000,
+        "start_ms": 1614556800000,
+        "symbol": "ADAUSDT",
+        "venue": "binance"
+      },
+      "row_count": 93,
+      "schema_version": "altseason-realized-funding-v1",
+      "sha256": "d7c13271e958af2d436b43abb8c079a4fb5f3496723625353bbba0823bca31de",
+      "source_sha256": "419c518bcfb168ed926525003ad20fe96a082f143e1be7bb851d2111db248484",
+      "stop_reason": "empty_page",
+      "transport_sha256": "d9182612de0c5401ae74a00a2b220f6b280e6e71b9de306c26a4acb3638d0eb7"
+    },
+    "interval_profile": {
+      "settlements": 93,
+      "intervals": 92,
+      "hours_1": 0,
+      "hours_4": 0,
+      "hours_8": 92,
+      "other_hours": 0,
+      "observed_interval_hours": [
+        8.0
+      ]
+    },
+    "proxy_policy": "official Binance markPriceKlines 1h open, joined at the fundingTime hour; explicit proxy flag"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "month": "2021-04",
+    "query_start_ms": 1617235200000,
+    "query_end_exclusive_ms": 1619143202000,
+    "position_ids": [
+      "12H|ADAUSDT|1606392000000000000|1"
+    ],
+    "exit_phases": [
+      "intrabar"
+    ],
+    "source": "binance_public_fundingRate_api",
+    "normalized_sources": [],
+    "monthly_rate_archive": "data/research/monday_breadth_optimization_20261108/funding_archives/funding/ADAUSDT/ADAUSDT-fundingRate-2021-04.zip",
+    "monthly_mark_1h_archive": "data/research/monday_breadth_optimization_20261108/funding_archives/mark_1h/ADAUSDT/ADAUSDT-1h-2021-04.zip",
+    "monthly_mark_1h_archive_exists": true,
+    "monthly_mark_1h_archive_bytes": 17292,
+    "monthly_mark_proxy_rows_available": 90,
+    "funding_settlement_rows_in_query_window": 67,
+    "missing_rate_rows": 0,
+    "missing_mark_rows": 0,
+    "range_complete": true,
+    "api_request_manifest": {
+      "schema_version": "altseason-realized-funding-v1",
+      "request_spec": {
+        "venue": "binance",
+        "symbol": "ADAUSDT",
+        "start_ms": 1617235200000,
+        "end_ms": 1619143202000
+      },
+      "source_sha256": "419c518bcfb168ed926525003ad20fe96a082f143e1be7bb851d2111db248484",
+      "transport_sha256": "d9182612de0c5401ae74a00a2b220f6b280e6e71b9de306c26a4acb3638d0eb7",
+      "path": "/Users/zhangzc/fable-trading/data/research/cloud_close_funding_ledger_20261109/funding_api/ADAUSDT/2021-04/normalized/binance/ADAUSDT_funding.csv.gz",
+      "sha256": "09133a0c6f3d755a452585ce007b547f09ea777276b7b752c0a53b9ea5a76b12",
+      "generated_at": "2026-11-09T00:17:18.571891+00:00",
+      "row_count": 67,
+      "missing_actual_rate_rows": 0,
+      "missing_mark_price_rows": 67,
+      "first_funding_ms": 1617235200025,
+      "last_funding_ms": 1619136000002,
+      "stop_reason": "empty_page",
+      "api_range_traversed": true,
+      "full_settlement_schedule": "unknown",
+      "actual_historical_first_seen": "unknown",
+      "record_clock_policy": "Native exchange timestamp preserved; Gate history may be timestamped seconds after nominal boundary.",
+      "cost_policy": "Observed actual rates only. Missing rates/marks are unknown, never zero or predicted-rate substitution.",
+      "pages": [
+        {
+          "request": {
+            "method": "GET",
+            "url": "https://fapi.binance.com/fapi/v1/fundingRate",
+            "params": {
+              "symbol": "ADAUSDT",
+              "startTime": 1617235200000,
+              "endTime": 1619143201999,
+              "limit": 1000
+            }
+          },
+          "returned_rows": 67,
+          "retained_rows": 67,
+          "body_sha256": "ad583c0aa056c0d4aa7fd1a68937dc0d4b9a6c8f89b080b554fa29f2971cc24e",
+          "relative_body_path": "raw/binance/5f/5f985dab0ea0e80f20d75917d43d2e538ae476db2642faf5e5a5a15199275625.json.gz",
+          "fetched_at": "2026-11-09T00:17:18.441661+00:00"
+        },
+        {
+          "request": {
+            "method": "GET",
+            "url": "https://fapi.binance.com/fapi/v1/fundingRate",
+            "params": {
+              "symbol": "ADAUSDT",
+              "startTime": 1619136000003,
+              "endTime": 1619143201999,
+              "limit": 1000
+            }
+          },
+          "returned_rows": 0,
+          "retained_rows": 0,
+          "body_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "relative_body_path": "raw/binance/47/4790c53e782ded1dcec1e5d6dbfd45f29be4b46ada43f9d1de7d47510cbb4f94.json.gz",
+          "fetched_at": "2026-11-09T00:17:18.568555+00:00"
+        }
+      ]
+    },
+    "interval_profile": {
+      "settlements": 67,
+      "intervals": 66,
+      "hours_1": 0,
+      "hours_4": 0,
+      "hours_8": 66,
+      "other_hours": 0,
+      "observed_interval_hours": [
+        8.0
+      ]
+    },
+    "proxy_policy": "official Binance markPriceKlines 1h open, joined at the fundingTime hour; explicit proxy flag"
+  }
+]
