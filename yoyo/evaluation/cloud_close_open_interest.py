@@ -66,33 +66,44 @@ def market_panel():
 def main():
     if (EXP / 'summary.json').exists():
         raise FileExistsError('Completed 12H open-interest screening')
-    panel = market_panel()
+    clock_file = EXP / 'market_clocks.csv.gz'
+    panel = pd.read_csv(clock_file, index_col='entry_ms') if clock_file.exists() else market_panel()
     archive = admin.archive
     extra = set(json.loads((archive.EXP / 'summary.json').read_text())['archived_additions'])
     extra.update(json.loads((admin.study.EXP / 'summary.json').read_text())['new_archive_cohorts']['priced'])
     config = json.loads((admin.EXP / 'config.json').read_text())
     previous = json.loads((admin.EXP / 'summary.json').read_text())
+    additional = json.loads((EXP / 'config.json').read_text())['other_funded_settlements']
+    marks = {**previous['index_price_scenarios'], **admin.reference_prices(additional, directory=EXP)}
     paths = archive.pool(extra)
     records, summary = [], {}
     with archive.market_quotes(extra):
         _, selected = admin.study.tenth.trend.inputs('Binance', paths)
-        ready = admin.adjusted_legs(selected, extra, config['settlements'])
+        ready = admin.adjusted_legs(selected, extra, {**config['settlements'], **additional})
         covered = ready[ready.entry_ms.isin(panel.index[panel.covered.ge(7)])]
         for name, rows in [('coverage', covered), ('shrinking', covered[covered.entry_ms.isin(panel.index[panel.majority])])]:
             real = rows[~rows.is_control]
             original = admin.admitted(real)
-            metrics, pos, eq = admin.fund(original.copy(), previous['index_price_scenarios'], 'proxy')
+            position_file, hourly_file = EXP / f'funded_{name}.csv.gz', EXP / f'hourly_{name}.csv.gz'
+            if name == 'coverage' and position_file.exists() and hourly_file.exists():
+                pos = pd.read_csv(position_file).set_index('event_id')
+                eq = pd.read_csv(hourly_file, index_col='hour_end_utc', parse_dates=True)
+                if set(pos.index) != set(original.event_id) or not np.isclose(1000+pos.cash_pnl.sum(), eq.nav.iloc[-1], atol=1e-4):
+                    raise ValueError('Saved coverage wallet does not match the eligible roster')
+                metrics = admin.study.tenth.trend.rotation._period_metrics(pos, eq)
+            else:
+                metrics, pos, eq = admin.fund(original.copy(), marks, 'proxy')
+                pos.to_csv(position_file)
+                eq.to_csv(hourly_file, index_label='hour_end_utc')
             records.extend(dict(scenario=name,period=p,**m) for p,m in metrics.items())
             summary[name] = dict(full=metrics['all'], dev=metrics['dev'], eligible=len(real)//2,
                                  development_pass=admin.study.tenth.trend.second.meets(metrics['dev']),
                                  funded_deliveries=int(original.delivery.sum()))
-            pos.to_csv(EXP / f'funded_{name}.csv.gz')
-            eq.to_csv(EXP / f'hourly_{name}.csv.gz', index_label='hour_end_utc')
             if name=='shrinking' and summary[name]['development_pass'] and metrics['dev']['final_usdt'] > summary['coverage']['dev']['final_usdt']:
                 control = rows[rows.is_control & rows.parent_id.isin(real.parent_id)]
                 paired = real[real.parent_id.isin(control.parent_id)]
                 for label, cohort, slip in [('paired', paired, 0.), ('control', control, 0.), ('stress', real, .0005)]:
-                    checked = admin.fund(admin.admitted(cohort), previous['index_price_scenarios'], 'proxy', slip=slip)[0]
+                    checked = admin.fund(admin.admitted(cohort), marks, 'proxy', slip=slip)[0]
                     records.extend(dict(scenario=label,period=p,**m) for p,m in checked.items())
     summary['first_observed_market_clock_utc'] = pd.Timestamp(panel.index[panel.covered.ge(7)].min(),unit='ms',tz='UTC').isoformat()
     summary['last_observed_market_clock_utc'] = pd.Timestamp(panel.index[panel.covered.ge(7)].max(),unit='ms',tz='UTC').isoformat()

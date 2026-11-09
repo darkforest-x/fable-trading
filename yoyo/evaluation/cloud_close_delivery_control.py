@@ -13,7 +13,7 @@ HOUR = archive.native.wallet.HOUR
 EXP = study.EXP.parent / 'exp-cloud-close-delivery-control-20261109-v1'
 
 
-def reference_prices(spec):
+def reference_prices(spec, *, directory=EXP):
     """Use only OHLC of the exact sixty or thirty one-minute index-price bars preceding delivery."""
     marks, inputs = {}, []
     for symbol, details in spec.items():
@@ -36,7 +36,7 @@ def reference_prices(spec):
             raise ValueError(f'Incomplete or invalid settlement index for {symbol}')
         marks[symbol] = {name: float(bars[name].mean()) for name in ['low','close','high']}
         inputs.append(bars.assign(symbol=symbol, archive=url))
-    pd.concat(inputs).to_csv(EXP / 'settlement_index_1m.csv', index_label='minute_open_ms')
+    pd.concat(inputs).to_csv(directory / 'settlement_index_1m.csv', index_label='minute_open_ms')
     return marks
 
 
