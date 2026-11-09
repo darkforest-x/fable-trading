@@ -78,8 +78,9 @@ def remaining_equity_per_margin(side: int, exposure: float, spot_ratio: float,
 
 
 def _margin_audit(selected: pd.DataFrame, exposure: float, slip: float,
-                  mmr: float = MMR) -> tuple[pd.DataFrame, dict]:
+                  mmr: float = MMR, *, quote_loader=None) -> tuple[pd.DataFrame, dict]:
     """Vectorized per-position boundary audit; never creates liquidation fills."""
+    loader = wallet.quotes if quote_loader is None else quote_loader
     out = selected.copy()
     lev = effective_leverage(exposure)
     out['liquidation_threshold_ratio'] = [
@@ -92,7 +93,7 @@ def _margin_audit(selected: pd.DataFrame, exposure: float, slip: float,
                   unquoted_position_hours=0, worst_margin_buffer_per_margin=float('inf'),
                   worst_remaining_equity_per_margin=float('inf'))
     for idx, row in out.iterrows():
-        clock, bars = wallet.quotes(row.symbol)
+        clock, bars = loader(row.symbol)
         first = int(np.searchsorted(clock, int(row.entry_ms)))
         last = int(np.searchsorted(clock, int(row.exit_bar_ms)))
         if first >= len(clock) or last >= len(clock) or int(clock[first]) != int(row.entry_ms) or int(clock[last]) != int(row.exit_bar_ms):

@@ -37,7 +37,7 @@ def original_children():
     return data
 
 
-def underlying(data):
+def underlying(data,quote_loader=wallet.quotes):
     """Native price per original entry and availability of the previous closed H1 at each review."""
     n = len(data['actions'])//3
     slots = data['actions'].shape[1]//len(WEIGHTS)
@@ -46,7 +46,7 @@ def underlying(data):
     directions = np.zeros((n,slots),dtype='int8')
     runners = data['selected'].loc[data['selected'].slot.mod(4).eq(3)]
     for r in runners.itertuples():
-        clock,x = wallet.quotes(r.symbol)
+        clock,x = quote_loader(r.symbol)
         a,b = clock.searchsorted([r.entry_ms,r.exit_bar_ms+wallet.HOUR])
         t = clock[a:b]
         h = ((t-data['start'])//wallet.HOUR).astype('int64')
@@ -95,7 +95,7 @@ def trade(c,nav,actions,prices,fees,reserve,weights,unit_weights,trim,native_ope
     return wallet.account_order(c,nav,actions,prices,fees,0.,1.,weights,reserve,0,unit_weights)
 
 
-def receipts(pf, data, model, actions, multiple):
+def receipts(pf, data, model, multiple):
     fills = pf.orders.records.copy()
     fills['stage'] = fills.idx.mod(4)
     fills['hour'] = data['start']+fills.idx.floordiv(4)*wallet.HOUR
@@ -142,9 +142,9 @@ def receipts(pf, data, model, actions, multiple):
     return positions,curve,int(fills.stage.eq(2).sum())
 
 
-def simulate(data,market,multiple,slip):
+def simulate(data,market,multiple,slip,*,directory=EXP,quote_loader=wallet.quotes):
     native_open,previous_close,directions,runners = market
-    audit,coverage = study.leverage._margin_audit(runners.reset_index(drop=True),multiple,slip)
+    audit,coverage = study.leverage._margin_audit(runners.reset_index(drop=True),multiple,slip,quote_loader=quote_loader)
     coverage['affected_contracts'] = sorted(audit.loc[audit.maintenance_boundary_hit,'symbol'].unique())
     if not coverage['valid']:
         return dict(audit=coverage)
@@ -160,8 +160,8 @@ def simulate(data,market,multiple,slip):
         pre_segment_func_nb=mark_and_cap,pre_segment_args=(multiple,previous_close,np.full(cols//4,-1.),trim),
         cash_sharing=True,group_by=True,init_cash=1000.,fill_pos_record=False,
         max_orders=int(np.count_nonzero(actions)+4*np.count_nonzero(previous_close)+1))
-    positions,equity,trims = receipts(portfolio,data,model,actions,multiple)
-    if multiple==1 and not slip:
+    positions,equity,trims = receipts(portfolio,data,model,multiple)
+    if multiple==1 and not slip and directory==EXP:
         old = pd.read_csv(parent.EXP/'funded_OKX.csv.gz',index_col='event_id').sort_index()
         base = pd.read_csv(parent.EXP/'hourly_OKX.csv.gz',index_col=0)
         ours = positions.sort_index()
@@ -170,8 +170,8 @@ def simulate(data,market,multiple,slip):
             raise ValueError('Reconstructed 1x doubled-limit cash or hourly marks differ from frozen account')
     else:
         label = f'{multiple:g}x'+('_stress' if slip else '')
-        positions.to_csv(EXP/f'funded_{label}.csv.gz')
-        equity.to_csv(EXP/f'hourly_{label}.csv.gz',index_label='hour_end_utc')
+        positions.to_csv(directory/f'funded_{label}.csv.gz')
+        equity.to_csv(directory/f'hourly_{label}.csv.gz',index_label='hour_end_utc')
     return dict(metrics=parent.spot.hourly.tested.summarize(positions,equity),audit=coverage,trim_fills=trims)
 
 
