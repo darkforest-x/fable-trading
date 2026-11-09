@@ -184,7 +184,7 @@ def prepare_supplemental_history():
         twelve = twelve_hour(joined)
         signals, raw = keys.build_inputs(utc_frame(joined),ticker,None,key_timeframes=['12H'],
                                         source_minutes=60,price_decimals=decimals)[4:6]
-        signals = signals[signals.close_ns < cutoff*1_000_000].copy() if len(signals) else signals
+        signals = signals[signals.close_ns < cutoff*1_000_000].copy().reset_index(drop=True) if len(signals) else signals
         priced = venue.price_frames(ticker,slot,joined,twelve,signals,end=cutoff,save_quotes=True)
         raw = raw[raw.close_ns < cutoff*1_000_000].copy() if len(raw) else raw
         if len(raw):
