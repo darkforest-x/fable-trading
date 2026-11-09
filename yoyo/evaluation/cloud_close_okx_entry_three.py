@@ -279,6 +279,23 @@ def _volume_features(events: pd.DataFrame, src) -> pd.DataFrame:
         raise TypeError("OKX volume adapter must return an event_id-indexed DataFrame with relative_volume")
     if result.index.name != "event_id" or not result.index.is_unique:
         raise ValueError("OKX volume adapter output must have unique event_id index")
+    if set(result.index) != set(events.event_id):
+        raise ValueError("OKX volume adapter did not preserve every supplied LONG event")
+    result = result.reindex(events.event_id).copy()
+    expected = events.set_index("event_id")
+    for column in ("symbol", "key_open_ms"):
+        if column in result:
+            left = result[column]
+            right = expected[column].reindex(result.index)
+            if column == "key_open_ms":
+                same = pd.to_numeric(left, errors="coerce").astype("Int64").eq(
+                    pd.to_numeric(right, errors="coerce").astype("Int64")
+                )
+            else:
+                same = left.astype(str).eq(right.astype(str))
+            if not same.all():
+                raise ValueError(f"OKX volume adapter {column} keys disagree with source parents")
+            result = result.drop(columns=[column])
     if "relative_volume_missing" not in result:
         result = result.copy()
         result["relative_volume_missing"] = result.relative_volume.isna()
@@ -304,7 +321,8 @@ def build_features(parents: pd.DataFrame, src) -> pd.DataFrame:
     if set(volume.index) != set(events.event_id):
         raise ValueError("Volume adapter did not preserve every supplied LONG event")
     out = price.join(volume, how="left", validate="one_to_one")
-    if out.relative_volume_missing.isna().any():
-        out["relative_volume_missing"] = out.relative_volume_missing.fillna(True).astype(bool)
+    out["relative_volume_missing"] = (
+        out.relative_volume_missing.fillna(True).astype(bool) | out.relative_volume.isna()
+    )
     return out
 
