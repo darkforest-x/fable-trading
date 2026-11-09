@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 
 from yoyo.evaluation import signal_center_score as keys
-from yoyo.evaluation import cloud_close_november_paths as path
 from yoyo.evaluation.monday_limit_reclaim_inputs import jobs
 
 ROOT = keys.ROOT
@@ -19,6 +18,7 @@ EXP = ROOT/'experiments/active/exp-cloud-close-november-scores-20261109-v1'
 MODEL = EXP.parent/'exp-signal-center-score-20261106-v1/results'
 SOURCE = ROOT/'data/research/cloud_close_november_prices'
 WORK = ROOT/'data/research/cloud_close_november_scores'
+SUPPLEMENTAL_SYMBOLS = ROOT/'data/research/cloud_close_november_supplemental/symbols'
 CFG = json.loads((EXP/'config.json').read_text())
 FROM,VERIFY,UNTIL = [pd.Timestamp(CFG[k]).value//1_000_000 for k in ('prefix_volume_from','verify_from','verify_until')]
 HOUR = 3_600_000
@@ -169,7 +169,7 @@ def supplemental_activity():
     parts = []
     receipt_rows = []
     for ticker in ids:
-        slot = path.SUPPLEMENTAL_SYMBOLS/ticker
+        slot = SUPPLEMENTAL_SYMBOLS/ticker
         receipt = json.loads((slot/'source_receipt.json').read_text())
         if receipt.get('state') != 'complete':
             raise ValueError(f'{ticker}: supplemental H1 source is not complete')
