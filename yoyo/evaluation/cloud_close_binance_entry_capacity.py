@@ -365,7 +365,7 @@ def _enrich_receipt(path: Path, observed: pd.DataFrame, cap: pd.Series) -> pd.Da
     funds = pd.read_csv(path, index_col="event_id", float_precision="round_trip")
     meta = observed.set_index("event_id")
     for col in ("status", "prior_median_quote_usdt", "prior_mean_quote_usdt", "zero_prior_minutes",
-                "entry_quote_volume_usdt", "entry_h1_ohlc_match"):
+                "entry_quote_volume_usdt", "h1_ohlc_match"):
         funds[col] = funds.index.map(meta[col])
     funds["entry_limit_usdt"] = cap.reindex(funds.index)
     funds["notional_to_prior_median"] = funds.notional / funds.prior_median_quote_usdt
