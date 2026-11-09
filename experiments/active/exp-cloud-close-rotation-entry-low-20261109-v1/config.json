@@ -1,0 +1,7 @@
+{
+ "question":"Can a failed launch be cut without repeatedly buying the same losing relative leader?",
+ "single_variable":"Keep the frozen ten-major BTC-bull-only 12H target. On each new underlying target episode, store the minimum native H1 low of the twelve already closed hours immediately before entry. If a later fully completed 12H close falls strictly below that original candle low, return to cash at its next H1 open and remain flat until the original target changes. No reset on price recovery. Compare an exit one more 12H later on the same episode. Original BTC gate and eligible dates stay frozen.",
+ "risk":"The stop is only tested on 12H closes, not guaranteed at the stop price. Actual H1 highs and lows count toward drawdown while held; native fee at each fill, second 5bp slippage case, 1000U initially.",
+ "scope":"A post-result attempt to address 77% drawdown of outright long leader rotation. Ten surviving named majors, funding and execution depth absent.",
+ "command":"vectorbt-python -m yoyo.evaluation.cloud_close_rotation_entry_low"
+}
