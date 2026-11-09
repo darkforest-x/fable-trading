@@ -20337,3 +20337,39 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: "Funding coverage: all 6,332 retained child legs and 2,000 required symbol-months; 181,135 settlements inside native holds; no uncovered months or unproven zero-settlement windows. Marks: official exact fundingRate API or official 1h mark-open proxy. Entry capacity exclusions: WAVES twice and XTZ once, retained empty in original slots. 2026 is partial through September 23. This is a historical simulation, not production approval."
+  - experiment_id: exp-cloud-close-second-window-capacity-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0a0d807af9
+    status: complete
+    question: "For cap-bound funded OKX parents, is there an observed next 12H window to top up the original order, and what is the as-of decision state?"
+    single_variable: "No account change. Build a read-only source panel for the next 12H opening using 60 prior confirmed OKX 1m bars and native H1 decision/open bars, only for the union of fee-only and +5bp parents whose original entry reached its pre-entry 10% median-turnover cap."
+    result: "1,064 unique cap-bound parents; 1,056/1,064 prior-minute capacity windows reproduce frozen H1, while 8 remain unknown for native-minute/H1 OHLC mismatch. All 1,064 decision H1 closes and next opens are present. Fee-only: 786 live at decision close, 473 live and net-positive, 468 of those with observed capacity and 5 unknown. +5bp: 786 live, 454 live and net-positive, 449 observed and 5 unknown. Decision state consumes fills through the completed H1 only; it does not include the next-open order. No outcome filtering or account replay."
+    artifacts:
+      - experiments/active/exp-cloud-close-second-window-capacity-20261109-v1/config.json
+      - experiments/active/exp-cloud-close-second-window-capacity-20261109-v1/summary.json
+      - experiments/active/exp-cloud-close-second-window-capacity-20261109-v1/second_window_capacity.csv.gz
+      - experiments/active/exp-cloud-close-second-window-capacity-20261109-v1/source_receipts.csv
+    canonical_report: experiments/active/exp-cloud-close-second-window-capacity-20261109-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: "Prior turnover is a proxy, not order-book depth or guaranteed capacity. Eight source conflicts remain unknown and are explicitly listed in summary.json. No account fills or sizing changed."
+  - experiment_id: exp-cloud-close-deferred-fill-capacity-audit-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: e66fcf9b41
+    status: complete
+    question: "How large were actual deferred-add order notionals relative to the full observed quote turnover in their entry minute?"
+    single_variable: "Ex-post source audit only: compare saved actual_notional for all four deferred-fill outcome arms, two all-parent arms, and two fixed-original-price arms with the official OKX quote volume in the corresponding entry minute. Deduplicate price/volume source work by symbol/hour."
+    result: "3,560 scenario order rows map to 758 unique symbol/hour windows across 191 symbols. 755 windows have 60 confirmed 1m bars that reproduce frozen H1 OHLC (594 daily-archive, 161 history-candles API); three API windows remain unknown for open-price mismatch: SNX 2021-03-21 12:00Z, BAT 2021-05-14 00:00Z, GMX 2023-09-20 12:00Z. In the complete median arm, notional/positive full-minute quote-turnover p50/p90/p99 = 2.88/14.58/270.35%; 12/753 orders exceed the entire minute turnover, max 31.25x (ORBS, 2025-01-11 12:00Z). Two zero-turnover windows (NFT, UMA) remain separately flagged. The two fixed-original-price additions add no source windows."
+    artifacts:
+      - experiments/active/exp-cloud-close-deferred-fill-capacity-audit-20261109-v1/config.json
+      - experiments/active/exp-cloud-close-deferred-fill-capacity-audit-20261109-v1/summary.json
+      - experiments/active/exp-cloud-close-deferred-fill-capacity-audit-20261109-v1/minute_windows.csv.gz
+      - experiments/active/exp-cloud-close-deferred-fill-capacity-audit-20261109-v1/order_minute_turnover.csv.gz
+    canonical_report: experiments/active/exp-cloud-close-deferred-fill-capacity-audit-20261109-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: "Full-minute volume includes post-entry trades and is not market depth or guaranteed fill capacity. Input ledgers preserve aggregate actual_notional rather than raw units/fill prices; open-implied base units are explicitly approximate. Different hypothetical arms are not simultaneous flow. No entry selection, sizing, or account was changed."
