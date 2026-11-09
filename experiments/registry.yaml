@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-eth-btc-reclaim-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "8e02339671"
+    status: "rejected"
+    question: "将V1.7应用到ETH/BTC相对价格，双腿交易能否获得高盈亏比"
+    single_variable: "在同步小时收盘比价构成的周一边界上做12H收回，比较半仓ETH与等额反向BTC双腿，沿用同一入出时点。"
+    result: "128次确认，68次实际交易。双腿1333U、胜14.71%、实际盈亏比8.90、回撤上界31.05%；加5bp为1245U。对照半仓ETH 1429U。高盈亏比未带来足够交易胜率和总收益。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-eth-btc-reclaim-20261109-v1/summary.json"
+    notes: "Fixed ETH/BTC ratio of observed hourly closes, actual dual leg market orders. Separately audited 1x collateral scenario. No funding or exit depth. Notion 41388564-79af-81b7-988b-e02843af7b7e."
+
+  - experiment_id: exp-cloud-close-macro-priority-controls-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "1b814d98d8"
+    status: "rejected"
+    question: "固定多空方向或BTC方向能否解释VIX排序收益"
+    single_variable: "协变量仅为排队时优先的方向，固定先多、先空或同美股日历的BTC五日方向，保留同一币的容量与原组内排序。"
+    result: "先多40281U；先空65002U、实际盈亏比7.08、回撤上界42.36%；BTC方向50002U。VIX 67880U接近固定先空，未证明有稳定独立择时优势。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-macro-priority-controls-20261109-v1/summary.json"
+    notes: "Same fee model and prior-hour mean capacity. Controls selected after the VIX queue; no funding or measured exit depth. Notion 41388564-79af-8146-a0a5-ed0ed3aba028."
+
   - experiment_id: exp-cloud-close-vix-priority-medians-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "1e3da16d42"
