@@ -1,0 +1,8 @@
+{
+  "question": "When the past month's realized BTC volatility exceeds the options market's 30-day implied volatility, can scaling back existing 2x trades improve the funded cloud account?",
+  "single_variable": "From the unchanged median-volume VIX-ranked OKX account, reduce an otherwise 2x original parent to 1x when BTC 30-day realized volatility exceeds official Deribit BTC DVOL. Compute annualized realized vol as sample deviation of 720 adjacent native H1 log close returns times sqrt(24*365)*100. Use the last included H1 ending at the 12H signal, and the official Deribit hourly close ending then. Remaining entries and 1x parents unchanged, no re-ranking. Compare the complementary condition and the identical risk cut from a fixed 30 days earlier. All arms fall back to the original leverage when current or stale DVOL is unavailable so all use a common window.",
+  "execution": "Original frozen 12H close confirmation, next native H1 open, starting 1000 USDT, four children, median volume entry cap, hourly 20% concentration trim, 5bp taker / 2bp maker and extra 5bp on market orders. All margin flags must resolve using native evidence before any performance claim.",
+  "sources": ["exp-monday-1618-dvol-20261023-v1/inputs/dvol_BTC.csv", "https://www.deribit.com/api/v2/public/get_volatility_index_data", "https://insights.deribit.com/exchange-updates/dvol-deribit-implied-volatility-index/"],
+  "scope": "Derivative-implied signal is observed on its registered historical data only; missing values do not stand for low risk. No historical OKX funding or measured exit depth.",
+  "command": "vectorbt-python -m yoyo.evaluation.cloud_close_option_vol_budget"
+}
