@@ -18,7 +18,7 @@ def account():
     return data,base.underlying(data,quotes),quotes
 
 
-def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=None,snapshot=None):
+def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=None,snapshot=None,inspect_flag=evidence.inspect):
     native,previous,side,runners = market
     if set(multiples.index)!=set(runners.event_id) or not multiples.index.is_unique or multiples.isna().any():
         raise ValueError('Each occupied parent needs exactly one pre-entry multiplier')
@@ -29,7 +29,10 @@ def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=No
         raw,summary = base.study.leverage._margin_audit(group,ratio,slip,quote_loader=quotes)
         details = []
         for r in raw[raw.maintenance_boundary_hit].itertuples():
-            details.extend(evidence.inspect(r,ratio,slip,quotes))
+            if inspect_flag is None:
+                details.append(dict(event_id=r.event_id,symbol=r.symbol,status='native_margin_order_unresolved'))
+            else:
+                details.extend(inspect_flag(r,ratio,slip,quotes))
         summary['checked_hours'] = details
         summary['all_flags_resolved'] = all(x['status']=='stop_strictly_earlier' for x in details)
         audits[str(ratio)] = summary
