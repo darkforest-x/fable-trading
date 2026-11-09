@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-waves-wallet-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "219fc84d2c"
+    status: "inconclusive"
+    question: "修复WAVES历史后的360合约共享账户"
+    single_variable: "固定360合约与1.5倍云带规则，只将WAVES小时历史从1,776根补到20,388根，重算90日资格及共享账户入选。"
+    result: "新增10个可开机会、2笔新WAVES空单实际入资并挤出1笔原单。总计1,574笔，终值由116,917U降至116,058U，胜率22.30%、金额盈亏比4.91、回撤上界49.86%；额外5bp市场滑点下91,781U，小时回撤上界50.79%，另作分钟核验。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-waves-wallet-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-814a-ad01-c30c28fea4f5."
+
+  - experiment_id: exp-cloud-close-waves-minute-risk-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "2bf8312421"
+    status: "inconclusive"
+    question: "修复后账户在5bp滑点下的逐分钟回撤界"
+    single_variable: "固定补齐WAVES后账户与市价5bp额外滑点，使用同步OKX原生1分钟OHLC及实际VectorBT逐时减仓后数量，细化全期所有可能跨50%门槛的小时。"
+    result: "15个关键小时全部可复核，小时原始回撤49.61%至50.79%，细化后的全期最大回撤在49.8275%至49.9115%之间，可观察成交价数据上未跨50%。历史资金费与未观察到的保证金标记没有纳入。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-waves-minute-risk-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81d7-bced-dda435a360d6."
+
   - experiment_id: exp-cloud-close-breakout-branch-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "f958a2c9d2"
