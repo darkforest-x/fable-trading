@@ -15,6 +15,51 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-native-book-impact-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "acb409f90d"
+    status: "inconclusive"
+    question: "三笔原始大单按400档盘口重估开仓价"
+    single_variable: "读取历史真实400档，按主账户原始三笔极值订单的真实标的数量，重建12H收盘后开仓的盘口平均价。"
+    result: "三个样本的开盘不利偏差，最大名义MINA 69.51bp，盈利最大多仓H 136.04bp，盈利最大空仓LA 56.30bp；一秒时69.51/138.32/57.35bp。全部400档内足量，样本按极值选取。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-native-book-impact-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81c4-811b-ffdfd9570234."
+
+  - experiment_id: exp-cloud-close-book-sample-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "45a17101cd"
+    status: "inconclusive"
+    question: "普通开仓的真实盘口偏差"
+    single_variable: "从590笔普通00 UTC入场中按年份及方向等量确定24笔，先定名单再看各自历史400档盘口；不替补。"
+    result: "23/24有可定价档位，一笔T缺首秒状态。首次盘口13/23超5bp，中位5.79bp、最大110.42bp；一秒后11/23超5bp、中位4.73bp。范围仅限2023年3月后UTC零点。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-book-sample-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81e3-8304-fdaf87c42325."
+
+  - experiment_id: exp-cloud-close-liquid-priority-inputs-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "b6d67fd9f0"
+    status: "inconclusive"
+    question: "全机会集的开仓前流动性来源"
+    single_variable: "仅核实同刻竞争的12,442个12H信号上一个已收盘小时的真实USDT成交额，使用既有历史及共享缓存。"
+    result: "完整候选保留12,442个，2,779个已核实，9,663个需补来源，331个有候选币，8个当前没有一条匹配的成交额；不凭未核实数据排名。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-liquid-priority-inputs-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-8127-82b1-f75490318328."
+
   - experiment_id: exp-cloud-close-adverse-btc-rank-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "b60bb9d078"
