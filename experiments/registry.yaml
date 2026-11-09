@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-archive-complete-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "71fd1890a0"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Compare the frozen normal exit, trend runner and tenth-NAV sizing on another 19 archive-verified regular crypto USD-M perpetuals in addition to the 661-contract archive; screen each contract on its own price history and listing time."
+    result: "680 tickers. Each new ticker has all 96 native 15m bars on 2026-09-23. Six more 90d-eligible original signals, one funded. Original size normal ends 4665.79U; original-size trend 6255.64U with 35.28% observed drawdown. Tenth-NAV trend reaches 5602.67U with 1635 parents, 32.11% wins, 2.603 monetary payoff, drawdown 32.409–33.021%, and 4838.39U under extra market 5bp. Development amounts/trade counts reconcile to the previous archived 661. All amounts exclude holding funding. Separate delivery audit examines the old MDT contract with stale post-settlement prices."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-archive-complete-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-812b-8a17-e85a274926f3."
+
   - experiment_id: exp-cloud-close-target-expiry-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "f333840e5b"
