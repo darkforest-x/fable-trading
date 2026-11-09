@@ -467,7 +467,7 @@ def run() -> dict:
         "generated_at_utc": pd.Timestamp.now(tz="UTC").isoformat(),
         "source_commit": _repo_commit(),
         "vectorbt_version": hourly.tested.w.vbt.__version__,
-        "tag_source": str(DECISIONS_PATH.relative_to(expiry.thirds.wallet.ROOT)),
+        "tag_source": str(DECISIONS_PATH.relative_to(fvg.wallet.ROOT)),
         "frozen_full_account_reference": baseline_ref,
         "frozen_fvg_coverage": meta,
         "known_coverage_used_by_all_policies": {
@@ -493,13 +493,120 @@ def run() -> dict:
     return summary
 
 
+def resume_existing(account_run_commit: str) -> dict:
+    """Rebuild summary/metrics from a completed account run's cached ledgers.
+
+    This is for a run that wrote all policy ledgers but stopped during final
+    metadata assembly. It never reruns VectorBT accounts.
+    """
+    if (EXP / "summary.json").exists() or (EXP / "account_metrics.csv").exists():
+        raise FileExistsError("Summary artifacts already exist")
+    paths, known, meta = load_tagged_paths()
+    decisions = pd.read_csv(EXP / "policy_decisions.csv.gz", dtype={"event_id": str})
+    expected = set(known.loc[known.tp_r.eq(2), "event_id"].astype(str))
+    if decisions.event_id.duplicated().any() or set(decisions.event_id.astype(str)) != expected:
+        raise ValueError("Saved policy decisions do not cover the frozen known target events")
+    is_native_tp = decisions.exit_reason.astype(str).str.startswith("take_profit")
+    if not is_native_tp.equals(decisions.target_is_fill.astype(bool)):
+        raise ValueError("Saved target-fill decisions disagree with native exit reasons")
+
+    ref = json.loads((hourly.EXP / "summary.json").read_text())
+    policy_results: dict[str, dict] = {}
+    metric_rows: list[dict] = []
+    funded_rosters: dict[str, set[str]] = {}
+    for policy in POLICIES:
+        positions = pd.read_csv(EXP / f"funded_OKX_{policy}.csv.gz", index_col=0)
+        positions.index = positions.index.astype(str)
+        positions.index.name = "event_id"
+        equity = pd.read_csv(EXP / f"hourly_OKX_{policy}.csv.gz", parse_dates=["hour_end_utc"])
+        equity = equity.set_index("hour_end_utc")
+        equity.index = pd.to_datetime(equity.index, utc=True)
+        if positions.index.duplicated().any() or not positions.is_control.eq(False).all():
+            raise ValueError(f"{policy}: saved account ledger has duplicate or control positions")
+        if not equity.index.is_unique or not equity.index.is_monotonic_increasing:
+            raise ValueError(f"{policy}: saved hourly NAV index is not ordered and unique")
+        reconciles = bool(np.isclose(1000.0 + positions.cash_pnl.sum(), equity.nav.iloc[-1],
+                                     rtol=1e-8, atol=0.005))
+        if not reconciles:
+            raise ValueError(f"{policy}: saved cash ledger does not reconcile to terminal NAV")
+        metrics = hourly.tested.summarize(positions, equity)
+        funded_rosters[policy] = set(positions.index)
+        for period, values in metrics.items():
+            metric_rows.append(dict(policy=policy, scenario="actual", period=period, **values))
+        choices = decisions[policy].astype(str)
+        cancelled = (is_native_tp & decisions.exit_bar_ms.ge(decisions.expiry_ms)
+                     & choices.eq("full_runner"))
+        policy_results[policy] = {
+            "label": POLICY_LABEL[policy],
+            "funded": int(len(positions)),
+            "late_funded_targets_as_full_runner": int(choices.eq("full_runner").sum()),
+            "target_fill_at_or_after_12h_cancelled": int(cancelled.sum()),
+            "metrics": metrics,
+            "cash_reconciles": reconciles,
+        }
+    if len({frozenset(ids) for ids in funded_rosters.values()}) != 1:
+        raise ValueError("Saved policy accounts do not have the same funded event roster")
+
+    primary = policy_results["outside_expire_overlap_persist"]["metrics"]
+    baseline_expiry = policy_results["always_expire_12h"]["metrics"]
+    baseline_persist = policy_results["always_persist_2r"]["metrics"]
+    risk_payoff_gate = _risk_payoff_pass(primary["dev"]) and _risk_payoff_pass(primary["all"])
+    beats_both = all(primary[period]["final_usdt"] > baseline[period]["final_usdt"]
+                     for period in ("dev", "all")
+                     for baseline in (baseline_expiry, baseline_persist))
+    sensitivity_gate = risk_payoff_gate and beats_both
+    if sensitivity_gate:
+        raise ValueError("Saved run passed the sensitivity gate but contains no paired/stress ledgers; rerun --run")
+
+    baseline_ref = ref["OKX"]["metrics"]
+    summary = {
+        "schema": 1,
+        "generated_at_utc": pd.Timestamp.now(tz="UTC").isoformat(),
+        "source_commit": account_run_commit,
+        "summary_rebuilt_from_cached_ledgers": True,
+        "summary_rebuild_commit": _repo_commit(),
+        "vectorbt_version": hourly.tested.w.vbt.__version__,
+        "tag_source": str(DECISIONS_PATH.relative_to(fvg.wallet.ROOT)),
+        "frozen_full_account_reference": baseline_ref,
+        "frozen_fvg_coverage": meta,
+        "known_coverage_used_by_all_policies": {
+            "tags": sorted(KNOWN_TAGS),
+            "actual_events": meta["known_actual_events"],
+            "matched_control_events": meta["known_matched_control_events"],
+            "same_event_slot_roster_across_policies": True,
+        },
+        "policy_results": policy_results,
+        "primary_risk_payoff_gate_dev_and_all": risk_payoff_gate,
+        "primary_beats_both_fixed_controls_dev_and_all": beats_both,
+        "run_paired_and_5bp_sensitivity": sensitivity_gate,
+        "sensitivity": {},
+        "control_semantics": "Later matched controls inherit the frozen parent source_row_number and its FVG tag, as in the registered FVG exclusion study.",
+        "limitations": ["No funding payments, market impact, or exchange minimum quantity/tick rounding.",
+                        "The FVG tag is a historical frozen event label; this is a retrospective strategy comparison, not forward validation."],
+    }
+    pd.DataFrame(metric_rows).to_csv(EXP / "account_metrics.csv", index=False)
+    (EXP / "summary.json").write_text(json.dumps(summary, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    print(json.dumps({"known": meta,
+                      "policies": {k: {"dev": v["metrics"]["dev"], "all": v["metrics"]["all"]}
+                                   for k, v in policy_results.items()},
+                      "sensitivity_gate": sensitivity_gate}, indent=2), flush=True)
+    return summary
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--smoke", action="store_true", help="validate tag joins, path rotation, and bounded VectorBT parity")
     mode.add_argument("--run", action="store_true", help="run the frozen known-coverage OKX account sweep")
+    mode.add_argument("--resume-existing", action="store_true", help="rebuild summary from completed funded/hourly ledgers without rerunning VectorBT")
+    parser.add_argument("--account-run-commit", help="source commit used for the existing account ledgers")
     args = parser.parse_args()
-    result = _run_smoke() if args.smoke else run()
+    if args.resume_existing:
+        if not args.account_run_commit:
+            parser.error("--resume-existing requires --account-run-commit")
+        result = resume_existing(args.account_run_commit)
+    else:
+        result = _run_smoke() if args.smoke else run()
     print(json.dumps(result, indent=2, default=str), flush=True)
 
 

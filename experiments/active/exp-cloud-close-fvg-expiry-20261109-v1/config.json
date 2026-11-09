@@ -18,5 +18,6 @@
   "costs_and_limits": "Maker 2bp per resting fill, taker 5bp per market/stop fill, optional additional 5bp market impact for the gated stress. No funding, exchange lot/tick rounding, queue position, or order-book capacity. Research only.",
   "builder": "yoyo/evaluation/cloud_close_fvg_expiry.py",
   "runner": "python3 -m yoyo.evaluation.cloud_close_fvg_expiry --run",
-  "smoke_runner": "python3 -m yoyo.evaluation.cloud_close_fvg_expiry --smoke"
+  "smoke_runner": "python3 -m yoyo.evaluation.cloud_close_fvg_expiry --smoke",
+  "cached_summary_recovery": "python3 -m yoyo.evaluation.cloud_close_fvg_expiry --resume-existing --account-run-commit 828eb59fc9df7aefddb6ea60e826ef60cb18ab88"
 }
