@@ -1,0 +1,6 @@
+{
+ "question":"Can realized gains be kept in cash while a separate portion compounds in the existing relative-leader signals?",
+ "single_variable":"On each ordinary buy, after selling the previous holding in full, protect at least 50% of the greatest realized flat equity so far, starting from 500U protected and deploying only the excess. The protected amount can never shrink. No mid-position sales or withdrawals. Matched alternative invests half the current flat account at each new trade without a high-water ratchet. Compare exact original full-size account with the new VectorBT native order callback off. Use the already frozen BTC-bull leader targets including all cash spells; no additional stops.",
+ "risks":"Unrealized intratrade peaks are not continuously locked, so the realized floor by itself does not establish a 50% mark-to-market drawdown. Account includes all retained cash; trades, fees, and hourly path are checked. No OKX funding or measured market depth. Known named survivors only.",
+ "command":"vectorbt-python -m yoyo.evaluation.cloud_close_rotation_cash_reserve"
+}

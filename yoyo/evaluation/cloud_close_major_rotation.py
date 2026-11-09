@@ -28,7 +28,7 @@ def targets(loaded):
     return states
 
 
-def run(loaded,states,name,slip,*,symbols=SYMBOLS,directory=EXP):
+def run(loaded,states,name,slip,*,symbols=SYMBOLS,directory=EXP,portfolio_builder=None,reference=None):
     clock=loaded['BTC']['bars1'].index
     series=states[name].reindex(clock,method='ffill').fillna(-1).astype(int)
     current=series.to_numpy()
@@ -58,9 +58,12 @@ def run(loaded,states,name,slip,*,symbols=SYMBOLS,directory=EXP):
             size[2*i,new]=np.inf
     if current[-1]>=0:
         size[-1,current[-1]]=-np.inf
-    pf=source.wallet.vbt.Portfolio.from_orders(marks,size=size,price=marks,direction='longonly',
+    if portfolio_builder is None:
+        pf=source.wallet.vbt.Portfolio.from_orders(marks,size=size,price=marks,direction='longonly',
             fees=source.TAKER,slippage=slip,init_cash=1000.,group_by=True,cash_sharing=True,call_seq=call_seq,
             allow_partial=True,raise_reject=True)
+    else:
+        pf=portfolio_builder(marks,size,call_seq,slip)
     positions=np.asarray(pf.assets())[::2]
     actual=np.where(positions.max(axis=1)>1e-10,positions.argmax(axis=1),-1)
     if (positions>1e-10).sum(axis=1).max()>1 or not np.array_equal(current,actual):
@@ -100,8 +103,16 @@ def run(loaded,states,name,slip,*,symbols=SYMBOLS,directory=EXP):
     if not metrics['all']['dd_mark_pct']-1e-8<=confirmed<=metrics['all']['dd_bound_pct']+1e-8:
         raise ValueError('Verified chronological wick drawdown outside its bounds')
     key=name+('_stress' if slip else '')
-    funds.to_csv(directory/f'funded_{key}.csv.gz',index=False)
-    curve.to_csv(directory/f'hourly_{key}.csv.gz',index_label='hour_end_utc')
+    if reference is None:
+        funds.to_csv(directory/f'funded_{key}.csv.gz',index=False)
+        curve.to_csv(directory/f'hourly_{key}.csv.gz',index_label='hour_end_utc')
+    else:
+        old,old_curve=reference
+        if (not funds[['symbol','entry_ms','exit_bar_ms']].equals(old[['symbol','entry_ms','exit_bar_ms']])
+                or not np.allclose(old[['cash_pnl','notional']],funds[['cash_pnl','notional']],rtol=1e-7,atol=1e-5)
+                or not curve.index.equals(old_curve.index)
+                or not np.allclose(old_curve,curve[old_curve.columns],rtol=1e-7,atol=1e-5)):
+            raise ValueError('Rotation adapter fails original trade or hourly equity parity')
     return dict(metrics=metrics,confirmed_wick_dd_pct=float(confirmed),orders=len(orders),
                 fees_usdt=float(orders.fees.sum()),hours_btc=int((current==symbols.index('BTC')).sum()),
                 hours_eth=int((current==symbols.index('ETH')).sum()),hours_cash=int((current==-1).sum()),
