@@ -61,7 +61,10 @@ def relative(quotes):
     return state
 
 
-def main(*,directory=EXP,inspect_flag=None):
+DEFAULT_CASES = [('same_size',0.),('contrarian_quarter',.25),('contrarian_half',.5),('momentum_half',-.5)]
+
+
+def main(*,directory=EXP,inspect_flag=None,midpoint=1.5,policies=DEFAULT_CASES):
     if (directory/'summary.json').exists():
         raise FileExistsError('Completed matched Binance relative-size transfer')
     extra = set(json.loads((archive.EXP/'summary.json').read_text())['archived_additions'])
@@ -76,8 +79,8 @@ def main(*,directory=EXP,inspect_flag=None):
             raise ValueError('Missing native ETH or BTC 30-day window on the Binance funded book')
         sign = balance*parents.side
         result = {}
-        for name,k in [('same_size',0.),('contrarian_quarter',.25),('contrarian_half',.5),('momentum_half',-.5)]:
-            weights = 1.5-k*sign
+        for name,k in policies:
+            weights = midpoint-k*sign
             for slip in [0.,.0005]:
                 key = name+('_stress' if slip else '')
                 result[key] = engine.simulate(data,market,quotes,weights,slip,directory,key,inspect_flag=inspect_flag)
