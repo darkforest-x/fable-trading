@@ -14,7 +14,7 @@ Owner 2026-11-07 否定 1.0.x 网页改版（“和我的预期差一大截 做�
 - 新增只读 GET：`/v1/monitor/paper/history`、`/v1/monitor/booklet`、`/v1/monitor/backtest`、`/v1/monitor/backtest/candles`（周期 5m/15m/1H/4H）；投影白名单在 `strategy_book.py`，来源路径、提交号、模型特征不出服务。旧版 App 读的顶层 `signals` 不变。
 - 监控页标题与分段固定，4 个菜单是横向分页、各自纵向滚动与下拉刷新，分段滑块跟手；滑过第一 / 最后一个菜单交给主 tab（合约 / 1.618）。主 tab 分页在监控页保持可用——锁住它会让边缘拖动失效（见 `docs/learnings/nested-pager-edge-handoff-needs-the-outer-pager-enabled.md`）。
 - Stitch（GEMINI_3_8_FLASH）：模拟盘 `59777299a3284e88a4edc59fdea2294f`、账户详情 `f88adbbd640045b9a60d563068f10db6`、小册 `c85cd00cb6c14b0f8e7d5eebd3cce9d5`、历史开单 `04710b2877bf422395b19a310c10edce`、K 线回放 `4b7277a8035e4df0a4cdf0d9d12a879e`（账户详情与 K 线回放两个请求客户端超时，经 list_screens + get_screen 取回，未重发）；素材在 `design/native-2.7.0/`。
-- 验证：服务测试 256 项通过（1 项跳过），XCTest 27 项通过。iPhone 17 Pro 模拟器连 fixture 18923（合成数据，交易所写入 0）：14 个账户 + 研究小册、左右滑动切 4 个菜单与边缘交给主 tab、live-breadth 持仓 / 信号 / 小册 / 历史开单 / K 线、spike 与 live-wick6x3 的小册与开单、breadth-ema20 小册；截图在 `evidence/native-2.7.0/`。小册曲线长按读数未截图验证（模拟器工具无法在按住时截图）。真机安装需 owner 连接手机，未做。
+- 验证：服务测试 256 项通过（1 项跳过），XCTest 27 项通过。iPhone 17 Pro 模拟器连 fixture 18923（合成数据，交易所写入 0）：14 个账户 + 研究小册、左右滑动切 4 个菜单与边缘交给主 tab、live-breadth 持仓 / 信号 / 小册 / 历史开单 / K 线、spike 与 live-wick6x3 的小册与开单、breadth-ema20 小册；截图在 `evidence/native-2.7.0/`。小册曲线长按读数未截图验证（模拟器工具无法在按住时截图）。2026-11-09 经 owner 批准重启 `com.spike.discipline.live`（重启前持仓、挂单、处理中请求与未完成交易所指令均为 0），本机与公网四个新接口均 200、无令牌 401，模拟盘返回 14 个账户；同日 Release 包装到 iPhone Air 并启动，设备回读 2.7.0 / 15，App 与小组件扩展进程在运行。
 
 ### 2.6.2（14）· 往周区间线看全历史（owner 11-09“历史的区间线只能看到最近几周的，我需要看全历史的”）
 
