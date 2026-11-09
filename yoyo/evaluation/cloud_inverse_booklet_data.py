@@ -235,11 +235,15 @@ def _draw_chart(record: dict[str, Any], frame: pd.DataFrame, ema: pd.DataFrame,
             parts.append(f'<rect x="{xx-bar_width/2:.1f}" y="{body_top:.1f}" width="{bar_width:.1f}" height="{body_bottom-body_top:.1f}" fill="{c}" stroke="{c}" stroke-width=".7"/>')
 
     # Collapse only identical same-hour/action receipts for display; every raw order remains in event JSON.
-    plotted = fills[fills.action.ne("trim")].groupby(["hour_ms", "action"], sort=True).fill_price
+    non_trim = fills[fills.action.ne("trim")]
+    plotted = non_trim.groupby(["hour_ms", "action"], sort=True).fill_price
     low_prices, high_prices = plotted.min(), plotted.max()
     if not np.allclose(low_prices.to_numpy(), high_prices.to_numpy(), rtol=1e-9, atol=1e-12):
         raise ValueError(f"Native fills disagree within a chart marker group for {record['id']}")
-    visible_fills = plotted.first().reset_index().sort_values("hour_ms", kind="stable")
+    visible_fills = plotted.first().reset_index()
+    trims = (fills[fills.action.eq("trim")].groupby(["hour_ms", "action", "fill_price"], as_index=False)
+             .size()[["hour_ms", "action", "fill_price"]])
+    visible_fills = pd.concat([visible_fills, trims], ignore_index=True).sort_values("hour_ms", kind="stable")
     label_rows = []
     for num, r in enumerate(visible_fills.itertuples(index=False)):
         stamp = int(r.hour_ms) // STEP * STEP
@@ -251,6 +255,8 @@ def _draw_chart(record: dict[str, Any], frame: pd.DataFrame, ema: pd.DataFrame,
         if action == "entry":
             label = "开多" if is_long else "开空"
             c = "#185a8b"
+        elif action == "trim":
+            label, c = "分批减仓", RAIL
         elif action.startswith("take_profit"):
             label = "翻倍止盈" if np.isclose(r.fill_price, 2 * float(path.entry_price)) and is_long else "2R 止盈"
             c = "#986311"
@@ -382,6 +388,16 @@ def build() -> dict[str, Any]:
             })
         child_reasons = sorted(set(item["reason"] for item in child_exits))
         reasons = child_reasons[0] if len(child_reasons) == 1 else "mixed_child_exits"
+        source_paths = tape[tape.event_id.eq(event_id)]
+        source_path_flags = [{
+            "tpR": float(r.tp_r), "sameBarAmbiguous": bool(r.same_bar_ambiguous),
+            "gapFlag": bool(r.gap_flag), "exitReason": str(r.exit_reason),
+            "exitMs": int(r.exit_bar_ms), "exitPhase": str(r.exit_phase),
+        } for r in source_paths.itertuples(index=False)]
+        if len(source_path_flags) != 2:
+            raise ValueError(f"Expected two frozen target paths for {event_id}")
+        same_bar_ambiguous = any(item["sameBarAmbiguous"] for item in source_path_flags)
+        source_gap = any(item["gapFlag"] for item in source_path_flags)
         fees = float(chart_fills.fees.sum())
         notional = float(position.notional)
         symbol_data_url = f"symbols/{_safe_symbol(symbol)}.json.gz"
@@ -398,6 +414,8 @@ def build() -> dict[str, Any]:
             "exitReason": str(path.exit_reason), "exitReasonLabel": _format_reason(str(path.exit_reason)),
             "exitReasons": child_reasons, "notional": notional, "fees": fees,
             "exposure": float(position.exposure), "chartUrl": chart_url, "dataUrl": event_url,
+            "sameBarAmbiguous": same_bar_ambiguous, "sourceGapFlag": source_gap,
+            "sourcePathFlags": source_path_flags,
             "searchText": f"{stable_id} {event_id} {symbol} {('long' if int(position.side) == 1 else 'short')} {_utc(entry_ms)} {reasons}",
             "windowStartMs": start, "windowEndMs": end,
         }
@@ -454,6 +472,8 @@ def build() -> dict[str, Any]:
             "mondayRail": {"level": float(rail), "barCount": monday_count,
                            "expectedBars": 24, "complete": bool(monday_count == 24),
                            "source": "exact hourly OHLC window; no gaps filled"},
+            "sourcePathFlags": source_path_flags, "sameBarAmbiguous": same_bar_ambiguous,
+            "sourceGapFlag": source_gap,
             "fills": _fill_rows(chart_fills), "childExits": child_exits,
             "costs": {"feeTotal": fees, "feeRows": int(len(chart_fills)),
                       "ratesFromFrozenPath": sorted(float(v) for v in tape.loc[tape.event_id.eq(event_id), "exit_fee_rate"].drop_duplicates())},
@@ -513,6 +533,14 @@ def build() -> dict[str, Any]:
                    "bars": "frozen OKX 12H OHLC sources; requested missing timestamps remain absent"},
         "chartWindow": {"timeframe": "12h", "beforeEntryBars": BEFORE, "afterFundedExitBars": AFTER,
                         "timezoneLabels": "Asia/Shanghai", "missingBars": "shown as empty shaded time; never forward-filled"},
+        "dataQuality": {
+            "frozenSourcePathRows": int(len(tape)),
+            "sameBarAmbiguousTrades": int(sum(bool(r["sameBarAmbiguous"]) for r in records)),
+            "sourceGapFlagTrades": int(sum(bool(r["sourceGapFlag"]) for r in records)),
+            "incompleteMondayWindows": int(sum(int(r["mondayBarCount"]) != 24 for r in records)),
+            "tradesWithMissing12hBars": int(sum(int(r["chartAudit"]["missingBars"]) > 0 for r in records)),
+            "missing12hBars": int(sum(int(r["chartAudit"]["missingBars"]) for r in records)),
+        },
         "symbols": symbol_manifest, "records": records,
     }
     _json_write(OUT / "manifest.json", manifest)
