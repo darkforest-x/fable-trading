@@ -18,6 +18,22 @@ def account():
     return data,base.underlying(data,quotes),quotes
 
 
+def collateral_model(data,market,multiples,slip):
+    native,_,_,runners = market
+    model = dict(data,actions=data['actions'].copy())
+    for ratio in sorted(multiples.unique()):
+        model['selected'] = data['selected'][data['selected'].event_id.map(multiples).eq(ratio)]
+        model,_ = base.study.leverage._syntheticize(model,ratio,slip)
+    model['selected'] = data['selected']
+    ratio_grid = np.zeros_like(native)
+    for row in runners.itertuples():
+        first,last = (np.array([row.entry_ms,row.exit_bar_ms])-data['start'])//base.wallet.HOUR
+        ratio_grid[first:last+1,row.slot//4] = multiples.at[row.event_id]
+    if (ratio_grid[native>0]<=0).any():
+        raise ValueError('Native units lost their collateral rate')
+    return model,ratio_grid
+
+
 def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=None,snapshot=None,inspect_flag=evidence.inspect,entry_limits=None,fill_sink=None):
     native,previous,side,runners = market
     if set(multiples.index)!=set(runners.event_id) or not multiples.index.is_unique or multiples.isna().any():
@@ -38,17 +54,7 @@ def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=No
         audits[str(ratio)] = summary
     if not all(v['all_flags_resolved'] for v in audits.values()):
         return dict(margin=audits,unresolved=True)
-    model = dict(data,actions=data['actions'].copy())
-    for ratio in sorted(multiples.unique()):
-        model['selected'] = data['selected'][data['selected'].event_id.map(multiples).eq(ratio)]
-        model,_ = base.study.leverage._syntheticize(model,ratio,slip)
-    model['selected'] = data['selected']
-    ratio_grid = np.zeros_like(native)
-    for row in runners.itertuples():
-        first,last = (np.array([row.entry_ms,row.exit_bar_ms])-data['start'])//base.wallet.HOUR
-        ratio_grid[first:last+1,row.slot//4] = multiples.at[row.event_id]
-    if (ratio_grid[native>0]<=0).any():
-        raise ValueError('Native units lost their collateral rate')
+    model,ratio_grid = collateral_model(data,market,multiples,slip)
     cap_grid = None
     receipt_data = data
     if entry_limits is not None:

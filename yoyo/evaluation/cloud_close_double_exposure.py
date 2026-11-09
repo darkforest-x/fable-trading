@@ -155,7 +155,8 @@ def receipts(pf, data, model, multiple, *, fill_sink=None):
     return positions,curve,int(fills.stage.eq(2).sum())
 
 
-def build_portfolio(data,model,native_open,previous_close,directions,multiple,slip,*,caps=None,entry_limits=None):
+def build_portfolio(data,model,native_open,previous_close,directions,multiple,slip,*,caps=None,entry_limits=None,
+                    order_func=trade,extra_order_args=(),extra_order_count=0):
     """Run four-stage native account orders with the supplied underlying quantities."""
     hours,cols = len(data['actions'])//3,data['actions'].shape[1]
     def expand(field):
@@ -171,11 +172,11 @@ def build_portfolio(data,model,native_open,previous_close,directions,multiple,sl
         entry_limits = np.full((1,1),np.inf)
     elif entry_limits.shape!=previous_close.shape or np.isnan(entry_limits).any() or (entry_limits<0).any():
         raise ValueError('Each opening limit must be nonnegative, in real underlying quote notional')
-    portfolio = wallet.vbt.Portfolio.from_order_func(expand('marks'),trade,actions,expand('prices'),expand('fees'),
-        np.zeros(1),WEIGHTS,np.ones((1,1)),trim,native_open,directions,multiple,slip,entry_limits,
+    portfolio = wallet.vbt.Portfolio.from_order_func(expand('marks'),order_func,actions,expand('prices'),expand('fees'),
+        np.zeros(1),WEIGHTS,np.ones((1,1)),trim,native_open,directions,multiple,slip,entry_limits,*extra_order_args,
         pre_segment_func_nb=mark_and_cap,pre_segment_args=(multiple,previous_close,np.full(cols//4,-1.),trim,caps),
         cash_sharing=True,group_by=True,init_cash=1000.,fill_pos_record=False,
-        max_orders=int(np.count_nonzero(actions)+4*np.count_nonzero(previous_close)+1))
+        max_orders=int(np.count_nonzero(actions)+4*np.count_nonzero(previous_close)+1+extra_order_count))
     return portfolio
 
 
