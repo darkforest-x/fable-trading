@@ -1,0 +1,5 @@
+{
+  "question": "Can already confirmed absolute doubling winners pay more of the losing trades if their surviving units follow a daily cloud?",
+  "single_variable": "Only when a real long on the original V1.7 path is still held and a completed 12H closes at or above twice its actual entry, switch its surviving exposure from the intrabar 12H cloud exit to the last completed UTC daily EMA20/50 reversal at an actual H1 open. Keep the original protective stop, same 2R partial and doubling fills, 20% single-name trim, 1.5x isolated leverage, 9 slots, true 1,000U shared balance. Daily EMA requires 50 fully observed days; retain original exit policy on missing daily state. No activation after a previous stop or flattening at the activation open.",
+  "priority": "Reprice before admitting the changed chronological portfolio; longer-held positions must block later entrants and compete for cash. Recompute new native transactions in VectorBT. Record source-tail exits and known unsettled gaps before treating results as candidates. Market trades 5bp and resting limits 2bp, repeat with extra 5bp slippage. Omit funding."
+}
