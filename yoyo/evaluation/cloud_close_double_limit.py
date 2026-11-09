@@ -63,8 +63,8 @@ def new_exits(children,loader):
     return pd.DataFrame(records)
 
 
-def assemble(children,new,venue,loader):
-    original,skips = wallet.admit(children[children.tp_r.eq(0)],9)
+def assemble(children,new,venue,loader,*,parent_slots=9):
+    original,skips = wallet.admit(children[children.tp_r.eq(0)],parent_slots)
     known = original.set_index('event_id').slot
     results = []
     records = []
@@ -93,7 +93,7 @@ def assemble(children,new,venue,loader):
                                     entry_ms=r.entry_ms,limit_ms=int(adjusted.exit_bar_ms),price=adjusted.exit_price))
         results.append(rows)
     calendar = {} if venue=='OKX' else dict(start=price.venue.START,end=price.venue.END)
-    return wallet.prepare(None,36,assigned=(pd.concat(results,ignore_index=True),skips),
+    return wallet.prepare(None,parent_slots*4,assigned=(pd.concat(results,ignore_index=True),skips),
                           quote_loader=loader,**calendar),records
 
 

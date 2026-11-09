@@ -12,8 +12,10 @@ engine = rank.reference.engine
 EXP = history.EXP.parent/'exp-cloud-close-liquid-queue-20261109-v1'
 
 
-def main():
-    if (EXP/'summary.json').exists():
+def main(*,experiment=EXP,slots=9,policies=None):
+    if policies is None:
+        policies = [('original_atr','entry_order'),('liquid_first','liquid'),('balanced','balanced')]
+    if (experiment/'summary.json').exists():
         raise FileExistsError('Completed native liquidity queue account')
     prices = pd.read_csv(history.EXP/'opportunities.csv.gz',index_col='event_id',float_precision='round_trip')
     rows,quotes,src,_ = repair.pool()
@@ -30,18 +32,18 @@ def main():
     outcomes = {}
     regime = rank.reference.study.season.direction(src)
     baseline = None
-    for name,score in [('original_atr','entry_order'),('liquid_first','liquid'),('balanced','balanced')]:
+    for name,score in policies:
         ordered = pool.sort_values(['entry_ms',score] if name=='original_atr' else ['entry_ms',score,'entry_order'])
         keys = ['entry_ms',score] if name=='original_atr' else ['entry_ms',score,'entry_order']
         order = pd.Series(pd.MultiIndex.from_frame(ordered[keys]).factorize(sort=False)[0],index=ordered.index)
         plans = rows[rows.event_id.isin(pool.index)].copy()
         plans['entry_order'] = plans.event_id.map(order)
-        roster,skips = repair.wallet.admit(plans[plans.tp_r.eq(0)],9)
-        directory = EXP/name
+        roster,skips = repair.wallet.admit(plans[plans.tp_r.eq(0)],slots)
+        directory = experiment/name
         directory.mkdir(exist_ok=True)
         tape,settlement = rank.settle(plans[plans.event_id.isin(roster.event_id)],src,directory=directory)
         repair.parent.save_execution_tape(tape,directory)
-        data,_ = repair.old.parent.assemble(tape,repair.old.changed_limits(tape,quotes),'OKX',quotes)
+        data,_ = repair.old.parent.assemble(tape,repair.old.changed_limits(tape,quotes),'OKX',quotes,parent_slots=slots)
         market = engine.base.underlying(data,quotes)
         parents = market[-1].set_index('event_id')
         ratios = 1.5-.5*parents.side*parents.entry_ms.map(regime)
@@ -58,9 +60,16 @@ def main():
         outcomes[name]=dict(cases=cases,signals=len(roster),overlap=len(set(parents.index)&baseline),
                    symbols=parents.symbol.nunique(),skips=skips,settlement=settlement,
                    missing_holding_hours=data['gap_marks'],gap_events=int(tape[tape.gap_flag].event_id.nunique()))
-    repair.archive.prices.safe_json(EXP/'summary.json',dict(eligible=len(original),liquid_eligible=len(pool),arms=outcomes,
+    repair.archive.prices.safe_json(experiment/'summary.json',dict(parent_slots=slots,eligible=len(original),liquid_eligible=len(pool),arms=outcomes,
                limits='Entry capacity only. Positive prior-volume venue coverage; funding and actual exit depth remain unmodeled.'))
 
 
 if __name__=='__main__':
-    main()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--eighteen',action='store_true')
+    if parser.parse_args().eighteen:
+        main(experiment=EXP.parent/'exp-cloud-close-liquid-breadth-20261109-v1',slots=18,
+             policies=[('original_atr','entry_order')])
+    else:
+        main()
