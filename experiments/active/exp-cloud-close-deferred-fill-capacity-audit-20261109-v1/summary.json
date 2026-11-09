@@ -1,0 +1,1164 @@
+{
+  "input_arms": {
+    "deferred_median_profit": {
+      "path": "exp-cloud-close-deferred-fill-20261109-v1/additions_median_profit.csv.gz",
+      "rows": 462
+    },
+    "deferred_median_nonpositive": {
+      "path": "exp-cloud-close-deferred-fill-20261109-v1/additions_median_nonpositive.csv.gz",
+      "rows": 296
+    },
+    "deferred_median_stress_profit": {
+      "path": "exp-cloud-close-deferred-fill-20261109-v1/additions_median_stress_profit.csv.gz",
+      "rows": 441
+    },
+    "deferred_median_stress_nonpositive": {
+      "path": "exp-cloud-close-deferred-fill-20261109-v1/additions_median_stress_nonpositive.csv.gz",
+      "rows": 310
+    },
+    "complete_median_all": {
+      "path": "exp-cloud-close-complete-order-20261109-v1/additions_median_all.csv.gz",
+      "rows": 758
+    },
+    "complete_median_stress_all": {
+      "path": "exp-cloud-close-complete-order-20261109-v1/additions_median_stress_all.csv.gz",
+      "rows": 751
+    },
+    "deferred_median_original_price": {
+      "path": "exp-cloud-close-deferred-price-limit-20261109-v1/additions_median_original_price.csv.gz",
+      "rows": 273
+    },
+    "deferred_median_stress_original_price": {
+      "path": "exp-cloud-close-deferred-price-limit-20261109-v1/additions_median_stress_original_price.csv.gz",
+      "rows": 269
+    }
+  },
+  "input_order_rows": 3560,
+  "unique_symbol_hour_windows": 758,
+  "unique_symbols": 191,
+  "minute_window_statuses": {
+    "observed": 755,
+    "native_minute_ohlc_differs_from_frozen_H1": 3
+  },
+  "minute_price_source_kinds": {
+    "daily_archive": 594,
+    "history_candles_api": 161,
+    "history_candles_api_cached": 3
+  },
+  "windows_requiring_minute_source": 758,
+  "by_arm": {
+    "complete_median_all": {
+      "orders": 758,
+      "observed_orders": 755,
+      "source_coverage_pct": 99.6042216358839,
+      "zero_market_turnover_orders": 2,
+      "observed_actual_notional_usdt": 403264.01802129624,
+      "notional_to_full_minute_quote_turnover": {
+        "orders_with_positive_turnover": 753,
+        "p50": 0.028771416571158337,
+        "p90": 0.14579047839044493,
+        "p99": 2.7034549101033916,
+        "max": 31.249141836253326,
+        "orders_over_1pct": 599,
+        "orders_over_10pct": 112,
+        "orders_over_100pct": 12
+      }
+    },
+    "complete_median_stress_all": {
+      "orders": 751,
+      "observed_orders": 748,
+      "source_coverage_pct": 99.6005326231691,
+      "zero_market_turnover_orders": 2,
+      "observed_actual_notional_usdt": 382201.9846792265,
+      "notional_to_full_minute_quote_turnover": {
+        "orders_with_positive_turnover": 746,
+        "p50": 0.028564162210186664,
+        "p90": 0.14190803677113428,
+        "p99": 2.7210647278135447,
+        "max": 31.249141836253337,
+        "orders_over_1pct": 592,
+        "orders_over_10pct": 108,
+        "orders_over_100pct": 12
+      }
+    },
+    "deferred_median_nonpositive": {
+      "orders": 296,
+      "observed_orders": 296,
+      "source_coverage_pct": 100.0,
+      "zero_market_turnover_orders": 2,
+      "observed_actual_notional_usdt": 122328.78446237747,
+      "notional_to_full_minute_quote_turnover": {
+        "orders_with_positive_turnover": 294,
+        "p50": 0.03168623400581441,
+        "p90": 0.14405678658560633,
+        "p99": 3.0068498827386354,
+        "max": 25.79383243286554,
+        "orders_over_1pct": 229,
+        "orders_over_10pct": 51,
+        "orders_over_100pct": 7
+      }
+    },
+    "deferred_median_original_price": {
+      "orders": 273,
+      "observed_orders": 273,
+      "source_coverage_pct": 100.0,
+      "zero_market_turnover_orders": 2,
+      "observed_actual_notional_usdt": 107862.60117330466,
+      "notional_to_full_minute_quote_turnover": {
+        "orders_with_positive_turnover": 271,
+        "p50": 0.030801366611628123,
+        "p90": 0.14292250169479112,
+        "p99": 3.573895772798188,
+        "max": 25.79383243286554,
+        "orders_over_1pct": 209,
+        "orders_over_10pct": 46,
+        "orders_over_100pct": 7
+      }
+    },
+    "deferred_median_profit": {
+      "orders": 462,
+      "observed_orders": 459,
+      "source_coverage_pct": 99.35064935064935,
+      "zero_market_turnover_orders": 0,
+      "observed_actual_notional_usdt": 231104.96908360743,
+      "notional_to_full_minute_quote_turnover": {
+        "orders_with_positive_turnover": 459,
+        "p50": 0.024411951003472154,
+        "p90": 0.1168698856762615,
+        "p99": 1.5306556496551866,
+        "max": 31.249141836253326,
+        "orders_over_1pct": 357,
+        "orders_over_10pct": 54,
+        "orders_over_100pct": 5
+      }
+    },
+    "deferred_median_stress_nonpositive": {
+      "orders": 310,
+      "observed_orders": 310,
+      "source_coverage_pct": 100.0,
+      "zero_market_turnover_orders": 2,
+      "observed_actual_notional_usdt": 121814.56919580653,
+      "notional_to_full_minute_quote_turnover": {
+        "orders_with_positive_turnover": 308,
+        "p50": 0.031599449505564634,
+        "p90": 0.14399799295566126,
+        "p99": 3.4609634882020788,
+        "max": 25.793832432865543,
+        "orders_over_1pct": 241,
+        "orders_over_10pct": 51,
+        "orders_over_100pct": 8
+      }
+    },
+    "deferred_median_stress_original_price": {
+      "orders": 269,
+      "observed_orders": 269,
+      "source_coverage_pct": 100.0,
+      "zero_market_turnover_orders": 2,
+      "observed_actual_notional_usdt": 102407.04696927952,
+      "notional_to_full_minute_quote_turnover": {
+        "orders_with_positive_turnover": 267,
+        "p50": 0.0312154664262128,
+        "p90": 0.14170514378640295,
+        "p99": 3.6725124493301866,
+        "max": 25.793832432865543,
+        "orders_over_1pct": 207,
+        "orders_over_10pct": 45,
+        "orders_over_100pct": 7
+      }
+    },
+    "deferred_median_stress_profit": {
+      "orders": 441,
+      "observed_orders": 438,
+      "source_coverage_pct": 99.31972789115646,
+      "zero_market_turnover_orders": 0,
+      "observed_actual_notional_usdt": 211583.65304342576,
+      "notional_to_full_minute_quote_turnover": {
+        "orders_with_positive_turnover": 438,
+        "p50": 0.024239570138502822,
+        "p90": 0.11507228034093278,
+        "p99": 0.6956873600666119,
+        "max": 31.249141836253337,
+        "orders_over_1pct": 339,
+        "orders_over_10pct": 52,
+        "orders_over_100pct": 4
+      }
+    }
+  },
+  "by_arm_and_year": {
+    "complete_median_all": {
+      "2020": {
+        "orders": 35,
+        "observed_orders": 35,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 1516.204126857468,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 35,
+          "p50": 0.0143548939340977,
+          "p90": 0.08756445890768302,
+          "p99": 0.29119944861689634,
+          "max": 0.38121322788952766,
+          "orders_over_1pct": 20,
+          "orders_over_10pct": 3,
+          "orders_over_100pct": 0
+        }
+      },
+      "2021": {
+        "orders": 61,
+        "observed_orders": 59,
+        "source_coverage_pct": 96.72131147540983,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 16415.096183474994,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 59,
+          "p50": 0.04239683694538733,
+          "p90": 0.16164052527828326,
+          "p99": 0.5273941280937962,
+          "max": 0.7688290731327952,
+          "orders_over_1pct": 49,
+          "orders_over_10pct": 11,
+          "orders_over_100pct": 0
+        }
+      },
+      "2022": {
+        "orders": 94,
+        "observed_orders": 94,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 33235.62335974198,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 94,
+          "p50": 0.0336354714303955,
+          "p90": 0.20786519974160944,
+          "p99": 4.441440020191404,
+          "max": 25.79383243286554,
+          "orders_over_1pct": 79,
+          "orders_over_10pct": 19,
+          "orders_over_100pct": 2
+        }
+      },
+      "2023": {
+        "orders": 128,
+        "observed_orders": 127,
+        "source_coverage_pct": 99.21875,
+        "zero_market_turnover_orders": 1,
+        "observed_actual_notional_usdt": 46004.42342680398,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 126,
+          "p50": 0.02257681539119246,
+          "p90": 0.13479670259596166,
+          "p99": 3.1984955728195863,
+          "max": 3.508133913210268,
+          "orders_over_1pct": 92,
+          "orders_over_10pct": 15,
+          "orders_over_100pct": 3
+        }
+      },
+      "2024": {
+        "orders": 133,
+        "observed_orders": 133,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 1,
+        "observed_actual_notional_usdt": 109434.00647622797,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 132,
+          "p50": 0.026425162047664257,
+          "p90": 0.09961895411770144,
+          "p99": 0.1882768738510964,
+          "max": 0.21307252073311117,
+          "orders_over_1pct": 109,
+          "orders_over_10pct": 13,
+          "orders_over_100pct": 0
+        }
+      },
+      "2025": {
+        "orders": 147,
+        "observed_orders": 147,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 116894.47748726752,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 147,
+          "p50": 0.03257392414516947,
+          "p90": 0.14594900427697607,
+          "p99": 3.0459557286581527,
+          "max": 31.249141836253326,
+          "orders_over_1pct": 125,
+          "orders_over_10pct": 26,
+          "orders_over_100pct": 2
+        }
+      },
+      "2026": {
+        "orders": 160,
+        "observed_orders": 160,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 79764.18696092235,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 160,
+          "p50": 0.026995420092270656,
+          "p90": 0.18339695534621153,
+          "p99": 3.7279494245144065,
+          "max": 5.583132749259338,
+          "orders_over_1pct": 125,
+          "orders_over_10pct": 25,
+          "orders_over_100pct": 5
+        }
+      }
+    },
+    "complete_median_stress_all": {
+      "2020": {
+        "orders": 35,
+        "observed_orders": 35,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 1504.9654472687796,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 35,
+          "p50": 0.014354893934097699,
+          "p90": 0.08756445890768302,
+          "p99": 0.29119944861689634,
+          "max": 0.3812132278895276,
+          "orders_over_1pct": 20,
+          "orders_over_10pct": 3,
+          "orders_over_100pct": 0
+        }
+      },
+      "2021": {
+        "orders": 61,
+        "observed_orders": 59,
+        "source_coverage_pct": 96.72131147540983,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 16106.957889977934,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 59,
+          "p50": 0.04207100098369774,
+          "p90": 0.15805309452859198,
+          "p99": 0.5273941280937959,
+          "max": 0.7688290731327949,
+          "orders_over_1pct": 49,
+          "orders_over_10pct": 11,
+          "orders_over_100pct": 0
+        }
+      },
+      "2022": {
+        "orders": 94,
+        "observed_orders": 94,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 32412.521555060852,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 94,
+          "p50": 0.0332814958279468,
+          "p90": 0.20634049895582487,
+          "p99": 4.441440020191405,
+          "max": 25.793832432865543,
+          "orders_over_1pct": 79,
+          "orders_over_10pct": 19,
+          "orders_over_100pct": 2
+        }
+      },
+      "2023": {
+        "orders": 126,
+        "observed_orders": 125,
+        "source_coverage_pct": 99.2063492063492,
+        "zero_market_turnover_orders": 1,
+        "observed_actual_notional_usdt": 43592.55347390325,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 124,
+          "p50": 0.020572879883253566,
+          "p90": 0.12349688006683136,
+          "p99": 3.217647926966513,
+          "max": 3.5081339132102682,
+          "orders_over_1pct": 90,
+          "orders_over_10pct": 14,
+          "orders_over_100pct": 3
+        }
+      },
+      "2024": {
+        "orders": 131,
+        "observed_orders": 131,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 1,
+        "observed_actual_notional_usdt": 103666.21978993954,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 130,
+          "p50": 0.025020641666130865,
+          "p90": 0.09888014208842683,
+          "p99": 0.18866912408402609,
+          "max": 0.21307252073311106,
+          "orders_over_1pct": 107,
+          "orders_over_10pct": 11,
+          "orders_over_100pct": 0
+        }
+      },
+      "2025": {
+        "orders": 145,
+        "observed_orders": 145,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 110602.43810369482,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 145,
+          "p50": 0.032314235625269874,
+          "p90": 0.15013272878865652,
+          "p99": 3.1439440714169637,
+          "max": 31.249141836253337,
+          "orders_over_1pct": 123,
+          "orders_over_10pct": 25,
+          "orders_over_100pct": 2
+        }
+      },
+      "2026": {
+        "orders": 159,
+        "observed_orders": 159,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 74316.32841938129,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 159,
+          "p50": 0.02743352382396016,
+          "p90": 0.17207933904853573,
+          "p99": 3.7558822915909156,
+          "max": 5.583132749259337,
+          "orders_over_1pct": 124,
+          "orders_over_10pct": 25,
+          "orders_over_100pct": 5
+        }
+      }
+    },
+    "deferred_median_nonpositive": {
+      "2020": {
+        "orders": 11,
+        "observed_orders": 11,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 592.735696243507,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 11,
+          "p50": 0.009393096618617416,
+          "p90": 0.042129795723218746,
+          "p99": 0.08665699298165402,
+          "max": 0.09160445934370237,
+          "orders_over_1pct": 5,
+          "orders_over_10pct": 0,
+          "orders_over_100pct": 0
+        }
+      },
+      "2021": {
+        "orders": 22,
+        "observed_orders": 22,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 3585.3868912520747,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 22,
+          "p50": 0.020803170735892662,
+          "p90": 0.11111269287648753,
+          "p99": 0.3088779327690763,
+          "max": 0.3525619265138301,
+          "orders_over_1pct": 15,
+          "orders_over_10pct": 3,
+          "orders_over_100pct": 0
+        }
+      },
+      "2022": {
+        "orders": 35,
+        "observed_orders": 35,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 8088.574368858811,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 35,
+          "p50": 0.03171757950988868,
+          "p90": 0.2552256569062341,
+          "p99": 17.987581443285727,
+          "max": 25.79383243286554,
+          "orders_over_1pct": 25,
+          "orders_over_10pct": 8,
+          "orders_over_100pct": 2
+        }
+      },
+      "2023": {
+        "orders": 55,
+        "observed_orders": 55,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 1,
+        "observed_actual_notional_usdt": 16861.123316146222,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 54,
+          "p50": 0.02730134281769088,
+          "p90": 0.1354340994264152,
+          "p99": 1.6018947499347005,
+          "max": 2.4802822923097136,
+          "orders_over_1pct": 44,
+          "orders_over_10pct": 7,
+          "orders_over_100pct": 1
+        }
+      },
+      "2024": {
+        "orders": 44,
+        "observed_orders": 44,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 1,
+        "observed_actual_notional_usdt": 30151.65760356527,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 43,
+          "p50": 0.02991464505715847,
+          "p90": 0.11005823337578463,
+          "p99": 0.20521189805903775,
+          "max": 0.21307252073311117,
+          "orders_over_1pct": 34,
+          "orders_over_10pct": 6,
+          "orders_over_100pct": 0
+        }
+      },
+      "2025": {
+        "orders": 61,
+        "observed_orders": 61,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 32254.070235816835,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 61,
+          "p50": 0.03580112078793858,
+          "p90": 0.12960148413340047,
+          "p99": 2.360037329346854,
+          "max": 5.299687612109705,
+          "orders_over_1pct": 54,
+          "orders_over_10pct": 10,
+          "orders_over_100pct": 1
+        }
+      },
+      "2026": {
+        "orders": 68,
+        "observed_orders": 68,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 30795.236350494757,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 68,
+          "p50": 0.03531593973814149,
+          "p90": 0.2514972876254264,
+          "p99": 2.500283516245603,
+          "max": 5.375988582029931,
+          "orders_over_1pct": 52,
+          "orders_over_10pct": 17,
+          "orders_over_100pct": 3
+        }
+      }
+    },
+    "deferred_median_original_price": {
+      "2020": {
+        "orders": 11,
+        "observed_orders": 11,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 592.735696243507,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 11,
+          "p50": 0.009393096618617416,
+          "p90": 0.042129795723218746,
+          "p99": 0.08665699298165402,
+          "max": 0.09160445934370237,
+          "orders_over_1pct": 5,
+          "orders_over_10pct": 0,
+          "orders_over_100pct": 0
+        }
+      },
+      "2021": {
+        "orders": 22,
+        "observed_orders": 22,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 3585.3868912520747,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 22,
+          "p50": 0.020803170735892662,
+          "p90": 0.11111269287648753,
+          "p99": 0.3088779327690763,
+          "max": 0.3525619265138301,
+          "orders_over_1pct": 15,
+          "orders_over_10pct": 3,
+          "orders_over_100pct": 0
+        }
+      },
+      "2022": {
+        "orders": 31,
+        "observed_orders": 31,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 7213.787589647387,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 31,
+          "p50": 0.03609934569084321,
+          "p90": 0.3314470469454047,
+          "p99": 18.90596391264811,
+          "max": 25.79383243286554,
+          "orders_over_1pct": 22,
+          "orders_over_10pct": 7,
+          "orders_over_100pct": 2
+        }
+      },
+      "2023": {
+        "orders": 49,
+        "observed_orders": 49,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 1,
+        "observed_actual_notional_usdt": 15646.025621152712,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 48,
+          "p50": 0.02730134281769088,
+          "p90": 0.13415930576550816,
+          "p99": 1.701334849071498,
+          "max": 2.4802822923097136,
+          "orders_over_1pct": 38,
+          "orders_over_10pct": 6,
+          "orders_over_100pct": 1
+        }
+      },
+      "2024": {
+        "orders": 39,
+        "observed_orders": 39,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 1,
+        "observed_actual_notional_usdt": 24059.848652704717,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 38,
+          "p50": 0.02822379764473999,
+          "p90": 0.11490939860431915,
+          "p99": 0.206147686472618,
+          "max": 0.21307252073311117,
+          "orders_over_1pct": 30,
+          "orders_over_10pct": 6,
+          "orders_over_100pct": 0
+        }
+      },
+      "2025": {
+        "orders": 58,
+        "observed_orders": 58,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 30682.376739134896,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 58,
+          "p50": 0.035366811451612114,
+          "p90": 0.1188276421104235,
+          "p99": 2.507019843485002,
+          "max": 5.299687612109705,
+          "orders_over_1pct": 52,
+          "orders_over_10pct": 9,
+          "orders_over_100pct": 1
+        }
+      },
+      "2026": {
+        "orders": 63,
+        "observed_orders": 63,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 26082.43998316937,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 63,
+          "p50": 0.030801366611628123,
+          "p90": 0.23382638302947015,
+          "p99": 2.714888371901168,
+          "max": 5.375988582029931,
+          "orders_over_1pct": 47,
+          "orders_over_10pct": 15,
+          "orders_over_100pct": 3
+        }
+      }
+    },
+    "deferred_median_profit": {
+      "2020": {
+        "orders": 24,
+        "observed_orders": 24,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 940.7714243353118,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 24,
+          "p50": 0.019242442646592296,
+          "p90": 0.10114970286836995,
+          "p99": 0.3203215536756893,
+          "max": 0.38121322788952766,
+          "orders_over_1pct": 15,
+          "orders_over_10pct": 3,
+          "orders_over_100pct": 0
+        }
+      },
+      "2021": {
+        "orders": 39,
+        "observed_orders": 37,
+        "source_coverage_pct": 94.87179487179488,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 10716.282252545489,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 37,
+          "p50": 0.05106588919564499,
+          "p90": 0.1858080477895035,
+          "p99": 0.6070843944346557,
+          "max": 0.7688290731327952,
+          "orders_over_1pct": 32,
+          "orders_over_10pct": 7,
+          "orders_over_100pct": 0
+        }
+      },
+      "2022": {
+        "orders": 59,
+        "observed_orders": 59,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 22933.69989509917,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 59,
+          "p50": 0.03314294194023642,
+          "p90": 0.19095881902710662,
+          "p99": 0.3523556531645442,
+          "max": 0.4516244516268013,
+          "orders_over_1pct": 53,
+          "orders_over_10pct": 11,
+          "orders_over_100pct": 0
+        }
+      },
+      "2023": {
+        "orders": 73,
+        "observed_orders": 72,
+        "source_coverage_pct": 98.63013698630137,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 22335.970972172785,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 72,
+          "p50": 0.015297019388222158,
+          "p90": 0.07933329806705777,
+          "p99": 3.4582678345868874,
+          "max": 3.508133913210268,
+          "orders_over_1pct": 46,
+          "orders_over_10pct": 5,
+          "orders_over_100pct": 2
+        }
+      },
+      "2024": {
+        "orders": 89,
+        "observed_orders": 89,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 62055.47550975028,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 89,
+          "p50": 0.022522082673524266,
+          "p90": 0.08514826572502003,
+          "p99": 0.1640448720427649,
+          "max": 0.1747442408150194,
+          "orders_over_1pct": 71,
+          "orders_over_10pct": 5,
+          "orders_over_100pct": 0
+        }
+      },
+      "2025": {
+        "orders": 86,
+        "observed_orders": 86,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 72545.47613168666,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 86,
+          "p50": 0.027581451448909083,
+          "p90": 0.17762634803227328,
+          "p99": 5.002300455268864,
+          "max": 31.249141836253326,
+          "orders_over_1pct": 68,
+          "orders_over_10pct": 15,
+          "orders_over_100pct": 1
+        }
+      },
+      "2026": {
+        "orders": 92,
+        "observed_orders": 92,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 39577.292898017724,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 92,
+          "p50": 0.022071311202378364,
+          "p90": 0.09453565920326928,
+          "p99": 2.85274065311598,
+          "max": 5.583132749259338,
+          "orders_over_1pct": 72,
+          "orders_over_10pct": 8,
+          "orders_over_100pct": 2
+        }
+      }
+    },
+    "deferred_median_stress_nonpositive": {
+      "2020": {
+        "orders": 11,
+        "observed_orders": 11,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 589.7839201433659,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 11,
+          "p50": 0.009393096618617414,
+          "p90": 0.04212979572321873,
+          "p99": 0.08665699298165402,
+          "max": 0.09160445934370237,
+          "orders_over_1pct": 5,
+          "orders_over_10pct": 0,
+          "orders_over_100pct": 0
+        }
+      },
+      "2021": {
+        "orders": 24,
+        "observed_orders": 24,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 3717.9955997903053,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 24,
+          "p50": 0.02019519632075545,
+          "p90": 0.10413825638408127,
+          "p99": 0.3037965222196709,
+          "max": 0.35256192651383,
+          "orders_over_1pct": 16,
+          "orders_over_10pct": 3,
+          "orders_over_100pct": 0
+        }
+      },
+      "2022": {
+        "orders": 38,
+        "observed_orders": 38,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 8930.50643848046,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 38,
+          "p50": 0.03168623400581441,
+          "p90": 0.19805961437685643,
+          "p99": 17.298794591264127,
+          "max": 25.793832432865543,
+          "orders_over_1pct": 28,
+          "orders_over_10pct": 6,
+          "orders_over_100pct": 2
+        }
+      },
+      "2023": {
+        "orders": 60,
+        "observed_orders": 60,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 1,
+        "observed_actual_notional_usdt": 16462.98997974744,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 59,
+          "p50": 0.027811362447168416,
+          "p90": 0.138413650250548,
+          "p99": 2.911979973087949,
+          "max": 3.5081339132102682,
+          "orders_over_1pct": 47,
+          "orders_over_10pct": 8,
+          "orders_over_100pct": 2
+        }
+      },
+      "2024": {
+        "orders": 45,
+        "observed_orders": 45,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 1,
+        "observed_actual_notional_usdt": 29082.19630143273,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 44,
+          "p50": 0.027962199609602344,
+          "p90": 0.10891414257688278,
+          "p99": 0.20502474037632168,
+          "max": 0.21307252073311106,
+          "orders_over_1pct": 35,
+          "orders_over_10pct": 6,
+          "orders_over_100pct": 0
+        }
+      },
+      "2025": {
+        "orders": 62,
+        "observed_orders": 62,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 31749.4358319571,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 62,
+          "p50": 0.03536681145161212,
+          "p90": 0.1355017187782203,
+          "p99": 2.3110431579674833,
+          "max": 5.299687612109705,
+          "orders_over_1pct": 56,
+          "orders_over_10pct": 11,
+          "orders_over_100pct": 1
+        }
+      },
+      "2026": {
+        "orders": 70,
+        "observed_orders": 70,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 31281.661124255104,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 70,
+          "p50": 0.03645070715429094,
+          "p90": 0.24203336067542436,
+          "p99": 2.414441573983402,
+          "max": 5.375988582029931,
+          "orders_over_1pct": 54,
+          "orders_over_10pct": 17,
+          "orders_over_100pct": 3
+        }
+      }
+    },
+    "deferred_median_stress_original_price": {
+      "2020": {
+        "orders": 11,
+        "observed_orders": 11,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 589.7839201433659,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 11,
+          "p50": 0.009393096618617414,
+          "p90": 0.04212979572321873,
+          "p99": 0.08665699298165402,
+          "max": 0.09160445934370237,
+          "orders_over_1pct": 5,
+          "orders_over_10pct": 0,
+          "orders_over_100pct": 0
+        }
+      },
+      "2021": {
+        "orders": 22,
+        "observed_orders": 22,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 3445.5642893497593,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 22,
+          "p50": 0.02019519632075545,
+          "p90": 0.11066832766608299,
+          "p99": 0.30803699215829333,
+          "max": 0.35256192651383,
+          "orders_over_1pct": 15,
+          "orders_over_10pct": 3,
+          "orders_over_100pct": 0
+        }
+      },
+      "2022": {
+        "orders": 31,
+        "observed_orders": 31,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 6944.097923294795,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 31,
+          "p50": 0.03609934569084323,
+          "p90": 0.33144704694540467,
+          "p99": 18.90596391264811,
+          "max": 25.793832432865543,
+          "orders_over_1pct": 22,
+          "orders_over_10pct": 6,
+          "orders_over_100pct": 2
+        }
+      },
+      "2023": {
+        "orders": 47,
+        "observed_orders": 47,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 1,
+        "observed_actual_notional_usdt": 14727.558574469216,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 46,
+          "p50": 0.02951341443669061,
+          "p90": 0.13479670259596166,
+          "p99": 1.7344815487837564,
+          "max": 2.4802822923097145,
+          "orders_over_1pct": 37,
+          "orders_over_10pct": 6,
+          "orders_over_100pct": 1
+        }
+      },
+      "2024": {
+        "orders": 39,
+        "observed_orders": 39,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 1,
+        "observed_actual_notional_usdt": 22957.71189662057,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 38,
+          "p50": 0.027962199609602344,
+          "p90": 0.11490939860431916,
+          "p99": 0.2061476864726179,
+          "max": 0.21307252073311106,
+          "orders_over_1pct": 30,
+          "orders_over_10pct": 6,
+          "orders_over_100pct": 0
+        }
+      },
+      "2025": {
+        "orders": 56,
+        "observed_orders": 56,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 28461.074810481095,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 56,
+          "p50": 0.03536681145161212,
+          "p90": 0.12190588268841689,
+          "p99": 2.605008186243779,
+          "max": 5.299687612109705,
+          "orders_over_1pct": 51,
+          "orders_over_10pct": 9,
+          "orders_over_100pct": 1
+        }
+      },
+      "2026": {
+        "orders": 63,
+        "observed_orders": 63,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 25281.255554920725,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 63,
+          "p50": 0.030801366611628123,
+          "p90": 0.23382638302947015,
+          "p99": 2.714888371901168,
+          "max": 5.375988582029931,
+          "orders_over_1pct": 47,
+          "orders_over_10pct": 15,
+          "orders_over_100pct": 3
+        }
+      }
+    },
+    "deferred_median_stress_profit": {
+      "2020": {
+        "orders": 24,
+        "observed_orders": 24,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 932.9225621967182,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 24,
+          "p50": 0.01924244264659229,
+          "p90": 0.10114970286836993,
+          "p99": 0.32032155367568926,
+          "max": 0.3812132278895276,
+          "orders_over_1pct": 15,
+          "orders_over_10pct": 3,
+          "orders_over_100pct": 0
+        }
+      },
+      "2021": {
+        "orders": 37,
+        "observed_orders": 35,
+        "source_coverage_pct": 94.5945945945946,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 10324.672313844123,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 35,
+          "p50": 0.050671729087356586,
+          "p90": 0.19737511545395506,
+          "p99": 0.6160702099178836,
+          "max": 0.7688290731327949,
+          "orders_over_1pct": 31,
+          "orders_over_10pct": 7,
+          "orders_over_100pct": 0
+        }
+      },
+      "2022": {
+        "orders": 56,
+        "observed_orders": 56,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 20410.467971917766,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 56,
+          "p50": 0.0332814958279468,
+          "p90": 0.20018782698433749,
+          "p99": 0.35749024618845415,
+          "max": 0.4516244516268012,
+          "orders_over_1pct": 50,
+          "orders_over_10pct": 11,
+          "orders_over_100pct": 0
+        }
+      },
+      "2023": {
+        "orders": 66,
+        "observed_orders": 65,
+        "source_coverage_pct": 98.48484848484848,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 20079.51464030777,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 65,
+          "p50": 0.013310815680539486,
+          "p90": 0.07707843725634587,
+          "p99": 1.5938852633074208,
+          "max": 3.4378999996562105,
+          "orders_over_1pct": 41,
+          "orders_over_10pct": 4,
+          "orders_over_100pct": 1
+        }
+      },
+      "2024": {
+        "orders": 86,
+        "observed_orders": 86,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 56862.87263687281,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 86,
+          "p50": 0.021230689290077206,
+          "p90": 0.08527168594205488,
+          "p99": 0.16440962325091,
+          "max": 0.17474424081501938,
+          "orders_over_1pct": 68,
+          "orders_over_10pct": 5,
+          "orders_over_100pct": 0
+        }
+      },
+      "2025": {
+        "orders": 83,
+        "observed_orders": 83,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 68007.56475444158,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 83,
+          "p50": 0.026805995048603176,
+          "p90": 0.17774984052004392,
+          "p99": 5.928659562832626,
+          "max": 31.249141836253337,
+          "orders_over_1pct": 64,
+          "orders_over_10pct": 14,
+          "orders_over_100pct": 1
+        }
+      },
+      "2026": {
+        "orders": 89,
+        "observed_orders": 89,
+        "source_coverage_pct": 100.0,
+        "zero_market_turnover_orders": 0,
+        "observed_actual_notional_usdt": 34965.63816384499,
+        "notional_to_full_minute_quote_turnover": {
+          "orders_with_positive_turnover": 89,
+          "p50": 0.0211423832604815,
+          "p90": 0.09586532450368491,
+          "p99": 2.942753579362468,
+          "max": 5.583132749259337,
+          "orders_over_1pct": 70,
+          "orders_over_10pct": 8,
+          "orders_over_100pct": 2
+        }
+      }
+    }
+  },
+  "limitations": [
+    "This is an ex-post diagnostic of actual simulated added-order USDT notional versus total historical quote turnover in the matching first minute. It does not alter entry selection, sizing, or fills.",
+    "The quote volume is the entire one-minute interval; much of it occurs after the modeled entry. It is not contemporaneous depth, executable liquidity, or a guaranteed fill-capacity measure.",
+    "The additions ledgers persist aggregate actual_notional rather than native base-unit quantities or individual subslot fills. price_implied_base_units_at_minute_open is only a notional/open-price conversion, not a separately observed execution quantity.",
+    "Scenario arms represent different hypothetical accounts; orders across arms are not simultaneous and must not be summed as a combined market order.",
+    "Only source windows whose 60 native 1m OHLC bars exactly reproduce the frozen H1 are marked observed. Missing, malformed, or conflicting windows remain unknown."
+  ]
+}

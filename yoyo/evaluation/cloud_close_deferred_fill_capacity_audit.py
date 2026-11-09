@@ -162,6 +162,35 @@ def _stats(frame):
     }
 
 
+def _source_provenance(receipts):
+    """Keep actual source URLs where returned, including API fallback for mismatches."""
+    enriched = receipts.copy()
+    price_urls, kinds, api_paths, archive_urls = [], [], [], []
+    for row in enriched.itertuples(index=False):
+        inst = f'{row.symbol}-USDT-SWAP'
+        day = pd.Timestamp(int(row.hour), unit='ms', tz='UTC').tz_convert('Asia/Shanghai').strftime('%Y-%m-%d')
+        archive_url = (f'https://static.okx.com/cdn/okex/traderecords/candlesticks/daily/{day.replace("-", "")}/'
+                       f'{inst}-candlesticks-{day}.zip')
+        api_path = minute.CACHE / inst / f'api-{int(row.hour)}.json'
+        raw_source = getattr(row, 'price_source', '')
+        if isinstance(raw_source, str) and raw_source.startswith('https://'):
+            price_urls.append(raw_source)
+            kinds.append('daily_archive' if 'static.okx.com' in raw_source else 'history_candles_api')
+        elif api_path.is_file():
+            price_urls.append('https://www.okx.com/api/v5/market/history-candles')
+            kinds.append('history_candles_api_cached')
+        else:
+            price_urls.append('')
+            kinds.append('source_url_not_recovered')
+        api_paths.append(str(api_path) if api_path.is_file() else '')
+        archive_urls.append(archive_url)
+    enriched['price_source_url'] = price_urls
+    enriched['price_source_kind'] = kinds
+    enriched['api_source_cache_path'] = api_paths
+    enriched['daily_archive_candidate_url'] = archive_urls
+    return enriched
+
+
 def summarize_existing(*, directory=EXP, orders=None, windows=None):
     """Rebuild the panel and summary from local source receipts, without downloads."""
     orders, windows = (orders, windows) if orders is not None else load_orders()
@@ -169,6 +198,7 @@ def summarize_existing(*, directory=EXP, orders=None, windows=None):
     if not receipts_path.is_file():
         raise FileNotFoundError(receipts_path)
     receipts = pd.read_csv(receipts_path, float_precision='round_trip')
+    receipts = _source_provenance(receipts)
     if receipts.window_id.duplicated().any() or set(receipts.window_id) != set(windows.window_id):
         raise ValueError('Saved minute receipts do not match current unique symbol/hour input set')
     frame = orders.merge(receipts, on=['window_id', 'symbol', 'hour'], how='left', validate='many_to_one')
@@ -191,6 +221,7 @@ def summarize_existing(*, directory=EXP, orders=None, windows=None):
         'unique_symbol_hour_windows': int(len(windows)),
         'unique_symbols': int(windows.symbol.nunique()),
         'minute_window_statuses': receipts.status.value_counts().to_dict(),
+        'minute_price_source_kinds': receipts.price_source_kind.value_counts().to_dict(),
         'windows_requiring_minute_source': int(len(windows)),
         'by_arm': {arm: _stats(group) for arm, group in frame.groupby('arm', sort=True)},
         'by_arm_and_year': {},
@@ -220,6 +251,7 @@ def run(*, directory=EXP, workers=4):
     if receipt_frame.window_id.duplicated().any() or set(receipt_frame.window_id) != set(windows.window_id):
         raise ValueError('Minute source acquisition lost or duplicated a unique symbol/hour')
     directory.mkdir(parents=True, exist_ok=True)
+    receipt_frame = _source_provenance(receipt_frame)
     receipt_frame.to_csv(directory / 'minute_windows.csv.gz', index=False)
     return summarize_existing(directory=directory, orders=orders, windows=windows)
 
