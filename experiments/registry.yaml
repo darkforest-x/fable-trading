@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-fvg-transfer-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "2d0a2877b2"
+    status: "inconclusive"
+    question: "Does the exact first-contact gap exclusion transfer to separate native Binance candle and contract histories?"
+    single_variable: "Transfer the same first-touch FVG overlap exclusion to native Binance 12H/H1 inputs and shared NAV/10 low-prior-ATR cash account."
+    result: "22,890 classified original keys; 3,714 overlaps. Baseline 5,438.08U vs 7,959.87U for outside (32.29% wins, monetary payoff 2.722, upper DD 32.91%); dev 4,869.79 vs 6,686.74. Extra 5bp per market fill returns 6,904.37U with upper DD 33.32%. Same-week matched original 8,551.66 vs later 2,933.73. 2026 to Sept returned -4.28%, wins 25.87%. No funding here; two venues share market exposures. Misses 1000x."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-fvg-transfer-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-8138-bbf2-f13a261eee6b."
+
   - experiment_id: exp-cloud-close-fvg-exclusion-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "b774d8b91d"
