@@ -91,17 +91,25 @@ def main():
     longs = parents[parents.side.eq(1)][['symbol', 'side', 'entry_ms', 'key_open_ms']]
     shorts = parents.index[parents.side.eq(-1)]
     print('Eligible inverse parents', len(longs), 'long', len(shorts), 'short', flush=True)
-    frame = features.build_features(longs.reset_index(), src).reindex(longs.index)
-    if not frame.index.is_unique or frame.prior_touches.isna().all() or frame.range_atr.isna().all():
+    frame = features.build_features(longs.reset_index(), src)
+    if set(frame.index) != set(longs.index) or not frame.index.is_unique:
+        raise ValueError('Entry factors must preserve the exact eligible OKX long event IDs')
+    if frame.prior_touches.isna().all() or frame.range_atr.isna().all():
         raise ValueError('Cannot reconstruct causal long-entry features')
     frame['primary'] = gate(frame, False)
     frame['strict'] = gate(frame, True)
     frame.to_csv(EXP / 'long_features.csv.gz')
     result = {}
     counts = {}
+    base_longs = actual[actual.side.eq(1)]
+    top = base_longs.nlargest(10, 'cash_pnl').index
+    losses = base_longs[base_longs.cash_pnl.lt(0)].index
     for name in ['primary', 'strict']:
         flags = frame[name]
-        counts[name] = dict(passed=int(flags.sum()), failed=int((~flags).sum()), unknown=int(flags.isna().sum()))
+        counts[name] = dict(passed=int(flags.sum()), failed=int((~flags).sum()), unknown=int(flags.isna().sum()),
+                            original_long_losses=len(losses), original_long_losses_passing=int(flags.loc[losses].sum()),
+                            original_long_top10_passing=int(flags.loc[top].sum()),
+                            original_long_top10_unknown=int(flags.loc[top].isna().sum()))
         result[name] = replay(name, shorts.union(flags.index[flags.fillna(False)]), plans, src, quotes, original_tape, original_ids)
         if flags.isna().any():
             label = name + '_allow_unknown'
