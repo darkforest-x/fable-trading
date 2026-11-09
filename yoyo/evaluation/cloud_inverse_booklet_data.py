@@ -144,8 +144,10 @@ def _draw_chart(record: dict[str, Any], frame: pd.DataFrame, ema: pd.DataFrame,
     n = len(expected)
     x = np.linspace(left, right, n) if n > 1 else np.array([left])
     values = []
-    for col in ("low", "high", "ema20", "ema50"):
+    for col in ("low", "high"):
         values.extend([float(v) for v in visible[col].dropna().to_numpy()])
+    for col in ("ema20", "ema50"):
+        values.extend([float(v) for v in visible_ema[col].dropna().to_numpy()])
     values.extend(float(r.fill_price) for r in fills.itertuples() if pd.notna(r.fill_price))
     rail = float(path.stop_price)
     if not values or min(values) <= 0:
