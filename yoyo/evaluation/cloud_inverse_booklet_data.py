@@ -96,6 +96,123 @@ def _format_reason(reason: str) -> str:
     }.get(reason, reason)
 
 
+def _market_frames(symbols: set[str], sources: dict[str, Any]):
+    bars_by_symbol: dict[str, pd.DataFrame] = {}
+    ema_by_symbol: dict[str, pd.DataFrame] = {}
+    hourly_by_symbol: dict[str, pd.DataFrame] = {}
+    for symbol in sorted(symbols):
+        if symbol not in sources:
+            continue
+        hourly, bars = examples.original.parent.repair.market.frames(sources[symbol])
+        bars = bars[["open", "high", "low", "close"]].astype(float).sort_index()
+        if bars.index.has_duplicates or not bars.index.is_monotonic_increasing:
+            raise ValueError(f"Invalid source 12H index for {symbol}")
+        ema = _ema_points_12h(bars.reset_index().to_dict("records"))
+        ema.index = bars.index
+        bars_by_symbol[symbol] = bars
+        ema_by_symbol[symbol] = ema[["ema20", "ema50", "count", "ready"]]
+        hourly_by_symbol[symbol] = hourly[["low", "high"]]
+    return bars_by_symbol, ema_by_symbol, hourly_by_symbol
+
+
+def _benchmark_return(bars_by_symbol: dict[str, pd.DataFrame], symbol: str,
+                      signal_ms: int) -> dict[str, Any]:
+    bars = bars_by_symbol.get(symbol)
+    if bars is None:
+        return {"available": False, "changePct": None, "reason": "benchmark_source_missing"}
+    start_ms = signal_ms - 60 * STEP
+    expected = np.arange(start_ms, signal_ms + STEP, STEP, dtype=np.int64)
+    closes = bars.close.reindex(pd.Index(expected))
+    missing = [int(t) for t in expected[closes.isna().to_numpy()]]
+    if missing:
+        return {"available": False, "changePct": None, "startMs": start_ms,
+                "endMs": signal_ms, "expectedIntervals": 60, "missingBars": len(missing),
+                "reason": "not_61_contiguous_12h_closes"}
+    return {"available": True, "changePct": float((closes.iat[-1] / closes.iat[0] - 1.) * 100.),
+            "startMs": start_ms, "endMs": signal_ms, "expectedIntervals": 60,
+            "startClose": float(closes.iat[0]), "endClose": float(closes.iat[-1]),
+            "reason": None}
+
+
+def _entry_evidence(event_id: str, symbol: str, side: int, entry_ms: int, path: pd.Series,
+                    tape: pd.DataFrame, bars_by_symbol: dict[str, pd.DataFrame],
+                    ema_by_symbol: dict[str, pd.DataFrame],
+                    hourly_by_symbol: dict[str, pd.DataFrame]) -> dict[str, Any]:
+    """Expose only frozen source bars completed by entry; return percentages use 60 exact 12H intervals."""
+    signal_ms = int(entry_ms) - STEP
+    bars, ema = bars_by_symbol.get(symbol), ema_by_symbol.get(symbol)
+    signal_exists = bars is not None and signal_ms in bars.index
+    signal = bars.loc[signal_ms] if signal_exists else None
+    ema_exists = ema is not None and signal_ms in ema.index
+    ema_row = ema.loc[signal_ms] if ema_exists else None
+    ema_ready = bool(ema_row.ready) if ema_exists else False
+    signal_ohlc = ({name: float(signal[name]) for name in ("open", "high", "low", "close")}
+                   if signal_exists else None)
+    ema20 = float(ema_row.ema20) if ema_exists else None
+    ema50 = float(ema_row.ema50) if ema_exists else None
+
+    week = week_window(signal_ms)
+    hourly = hourly_by_symbol.get(symbol)
+    monday = (hourly.loc[int(week["start"]):int(week["end"]) - 1]
+              if hourly is not None else pd.DataFrame(columns=["low", "high"]))
+    monday_count = int(len(monday))
+    rails = None
+    selected_rail = None
+    close_inside = wick_cross = stop_matches_rail = None
+    if monday_count == 24:
+        monday_low, monday_high = float(monday.low.min()), float(monday.high.max())
+        span = monday_high - monday_low
+        lower, upper = monday_low - .618 * span, monday_high + .618 * span
+        selected_rail = lower if int(side) == 1 else upper
+        rails = {"week": str(week["week"]), "mondayBarCount": monday_count,
+                 "lowerPrice": lower, "upperPrice": upper,
+                 "selectedSideRailPrice": selected_rail,
+                 "source": "24 observed hourly OHLC bars; no missing bar filled"}
+        if signal_exists:
+            close_inside = bool(lower < float(signal.close) < upper)
+            wick_cross = bool(float(signal.low) < lower if int(side) == 1 else float(signal.high) > upper)
+        fixed_stop = float(path.stop_price)
+        expected_stop = selected_rail * (1. - int(side) * stop_pct_for(symbol))
+        stop_matches_rail = bool(np.isclose(expected_stop, fixed_stop, rtol=1e-8, atol=1e-9))
+
+    ema_direction = (bool((ema20 - ema50) * int(side) > 0)
+                     if ema20 is not None and ema50 is not None else None)
+    fixed_stop = float(path.stop_price)
+    entry_price = float(path.entry_price)
+    two_r = entry_price + 2. * (entry_price - fixed_stop)
+    tp2 = tape[tape.event_id.eq(event_id) & tape.tp_r.eq(2)]
+    if len(tp2) != 1:
+        raise ValueError(f"Expected one tp_r=2 source path for entry evidence: {event_id}")
+    tp2 = tp2.iloc[0]
+    target_hit = str(tp2.exit_reason).startswith("take_profit")
+    two_r_source_check = (bool(np.isclose(two_r, float(tp2.exit_price), rtol=1e-8, atol=1e-9))
+                          if target_hit else None)
+    checks = {
+        "signalBarPresent": bool(signal_exists), "emaDirectionMatchesSide": ema_direction,
+        "signalCloseInsideRails": close_inside, "signalWickCrossesSideRail": wick_cross,
+        "fixedStopMatchesRail": stop_matches_rail,
+        "tp2ExitMatchesCalculatedPriceWhenHit": two_r_source_check,
+    }
+    direction_valid = bool(signal_exists and ema_ready and ema_direction is True and close_inside is True
+                           and wick_cross is True and stop_matches_rail is True)
+    return {
+        "timeframe": "12h", "signalBarOpenMs": signal_ms, "signalBarCloseMs": int(entry_ms),
+        "signalOhlc": signal_ohlc,
+        "ema": {"ema20": ema20, "ema50": ema50, "readyAtSignal": ema_ready,
+                "directionMatchesSide": ema_direction},
+        "rails": rails, "mondayBarCount": monday_count,
+        "fixedStopPrice": fixed_stop, "fixedStopPct": float(stop_pct_for(symbol)),
+        "twoRPrice": float(two_r), "twoRFormula": "entryPrice + 2 * (entryPrice - fixedStopPrice)",
+        "twoRReferencePath": {"exitReason": str(tp2.exit_reason), "exitPrice": float(tp2.exit_price),
+                              "targetHit": bool(target_hit), "priceMatchesWhenHit": two_r_source_check},
+        "benchmark30d": {"intervals": 60, "timeframe": "12h",
+                          "formula": "(close_at_signal / close_60_intervals_before - 1) * 100",
+                          "ETH": _benchmark_return(bars_by_symbol, "ETH", signal_ms),
+                          "BTC": _benchmark_return(bars_by_symbol, "BTC", signal_ms)},
+        "validation": {**checks, "sourceDirectionValid": direction_valid},
+    }
+
+
 def _native_fills(fills: pd.DataFrame, data: dict, funded: pd.DataFrame) -> pd.DataFrame:
     """Use the same receipt enrichment as the frozen four-example native callback."""
     if fills.empty:
@@ -336,19 +453,8 @@ def build() -> dict[str, Any]:
         raise ValueError("All 1252 funded rows must have native order receipts")
 
     # Load and cache real 12H candles; do not synthesize bars across gaps or source limits.
-    source_frames: dict[str, pd.DataFrame] = {}
-    source_ema: dict[str, pd.DataFrame] = {}
-    source_hourly: dict[str, pd.DataFrame] = {}
-    for symbol in sorted(funded.symbol.unique()):
-        hourly_bars, bars = examples.original.parent.repair.market.frames(sources[symbol])
-        bars = bars[["open", "high", "low", "close"]].astype(float).sort_index()
-        if bars.index.has_duplicates or not bars.index.is_monotonic_increasing:
-            raise ValueError(f"Invalid source 12H index for {symbol}")
-        ema = _ema_points_12h(bars.reset_index().rename(columns={"index": "time"}).to_dict("records"))
-        ema.index = bars.index
-        source_frames[symbol] = bars
-        source_ema[symbol] = ema[["ema20", "ema50", "count", "ready"]]
-        source_hourly[symbol] = hourly_bars[["low", "high"]]
+    source_frames, source_ema, source_hourly = _market_frames(
+        set(funded.symbol.unique()) | {"BTC", "ETH"}, sources)
 
     positions = funded.sort_values(["entry_ms"], kind="stable")
     # Use a deterministic tie-breaker even when two different symbols enter on one hour.
@@ -356,6 +462,7 @@ def build() -> dict[str, Any]:
     records: list[dict[str, Any]] = []
     event_payloads: list[tuple[str, dict[str, Any]]] = []
     chart_specs: list[tuple[dict[str, Any], pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.Series, pd.DataFrame]] = []
+    entry_evidence_summaries: list[dict[str, Any]] = []
     symbol_windows: dict[str, list[tuple[int, int]]] = {}
 
     for number, (event_id, position) in enumerate(positions.drop(columns="_event").iterrows(), 1):
@@ -451,6 +558,10 @@ def build() -> dict[str, Any]:
         record["nativeOrderCount"] = int(len(chart_fills))
         record["trimCount"] = int(chart_fills.action.eq("trim").sum())
         record["childExitCount"] = int(len(child_exits))
+        entry_evidence = _entry_evidence(event_id, symbol, int(position.side), entry_ms, path, tape,
+                                         source_frames, source_ema, source_hourly)
+        entry_evidence_summaries.append(entry_evidence)
+        record["entryEvidenceValid"] = bool(entry_evidence["validation"]["sourceDirectionValid"])
 
         # Requested timestamps include possible absent source bars; store actual OHLC only in shared symbol data.
         expected = np.arange(start, end + STEP, STEP, dtype=np.int64)
@@ -474,6 +585,7 @@ def build() -> dict[str, Any]:
                            "source": "exact hourly OHLC window; no gaps filled"},
             "sourcePathFlags": source_path_flags, "sameBarAmbiguous": same_bar_ambiguous,
             "sourceGapFlag": source_gap,
+            "entryEvidence": entry_evidence,
             "fills": _fill_rows(chart_fills), "childExits": child_exits,
             "costs": {"feeTotal": fees, "feeRows": int(len(chart_fills)),
                       "ratesFromFrozenPath": sorted(float(v) for v in tape.loc[tape.event_id.eq(event_id), "exit_fee_rate"].drop_duplicates())},
@@ -533,6 +645,13 @@ def build() -> dict[str, Any]:
                    "bars": "frozen OKX 12H OHLC sources; requested missing timestamps remain absent"},
         "chartWindow": {"timeframe": "12h", "beforeEntryBars": BEFORE, "afterFundedExitBars": AFTER,
                         "timezoneLabels": "Asia/Shanghai", "missingBars": "shown as empty shaded time; never forward-filled"},
+        "entryEvidenceSpec": {
+            "signalBar": "12H candle opening at entryMs minus 12 hours; values use its completed close",
+            "rails": "weekly 1.618 bands from 24 observed Monday H1 bars",
+            "benchmark30d": "exactly 60 consecutive 12H intervals, signal close divided by close 60 intervals earlier minus one; missing intervals yield null",
+            "twoR": "entryPrice + 2 * (entryPrice - fixedStopPrice); checked against tp_r=2 source exit when its target was hit",
+            "directionValidation": "EMA direction, signal close inside the rails, side-specific wick crossing, and stop-to-rail relation",
+        },
         "dataQuality": {
             "frozenSourcePathRows": int(len(tape)),
             "sameBarAmbiguousTrades": int(sum(bool(r["sameBarAmbiguous"]) for r in records)),
@@ -540,6 +659,11 @@ def build() -> dict[str, Any]:
             "incompleteMondayWindows": int(sum(int(r["mondayBarCount"]) != 24 for r in records)),
             "tradesWithMissing12hBars": int(sum(int(r["chartAudit"]["missingBars"]) > 0 for r in records)),
             "missing12hBars": int(sum(int(r["chartAudit"]["missingBars"]) for r in records)),
+            "entryEvidenceTrades": int(sum(bool(r["entryEvidenceValid"]) for r in records)),
+            "entryEvidenceDirectionFailures": int(sum(not bool(r["entryEvidenceValid"]) for r in records)),
+            "benchmark30dMissingTrades": int(sum(not (e["benchmark30d"]["BTC"]["available"]
+                                                       and e["benchmark30d"]["ETH"]["available"])
+                                                  for e in entry_evidence_summaries)),
         },
         "symbols": symbol_manifest, "records": records,
     }
@@ -551,5 +675,67 @@ def build() -> dict[str, Any]:
             "missingChartBars": int(sum(v["missingBars"] for v in chart_audits.values()))}
 
 
+def add_entry_evidence_to_existing_bundle() -> dict[str, Any]:
+    """Attach frozen signal evidence to generated event JSON without replaying any account decisions."""
+    manifest_path = OUT / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    funded = pd.read_csv(examples.BASE / "funded_inverse_1.5x.csv.gz", index_col="event_id",
+                         float_precision="round_trip")
+    tape = pd.read_csv(examples.BASE / "selected_paths.csv.gz", dtype={"symbol": str},
+                       float_precision="round_trip")
+    _, _, sources = examples.original.source.inputs()
+    symbols = set(funded.symbol.unique()) | {"BTC", "ETH"}
+    bars_by_symbol, ema_by_symbol, hourly_by_symbol = _market_frames(symbols, sources)
+    valid_count = 0
+    benchmark_missing = 0
+    tp2_checked = tp2_mismatch = 0
+    for record in manifest["records"]:
+        event_id = str(record["eventId"])
+        if event_id not in funded.index:
+            raise ValueError(f"Manifest event is not in the frozen funded file: {event_id}")
+        position = funded.loc[event_id]
+        path_rows = tape[tape.event_id.eq(event_id) & tape.tp_r.eq(0)]
+        if len(path_rows) != 1:
+            raise ValueError(f"Expected one primary frozen path for entry evidence: {event_id}")
+        evidence = _entry_evidence(event_id, str(position.symbol), int(position.side), int(position.entry_ms),
+                                   path_rows.iloc[0], tape, bars_by_symbol, ema_by_symbol, hourly_by_symbol)
+        event_path = OUT / record["dataUrl"]
+        with gzip.open(event_path, "rt", encoding="utf-8") as stream:
+            event = json.load(stream)
+        if event["id"] != record["id"] or event["eventId"] != event_id:
+            raise ValueError(f"Per-trade JSON identity mismatch: {record['id']}")
+        event["entryEvidence"] = evidence
+        _json_gzip(event_path, event)
+        record["entryEvidenceValid"] = bool(evidence["validation"]["sourceDirectionValid"])
+        valid_count += int(record["entryEvidenceValid"])
+        benchmark_missing += int(not (evidence["benchmark30d"]["BTC"]["available"]
+                                      and evidence["benchmark30d"]["ETH"]["available"]))
+        check = evidence["twoRReferencePath"]["priceMatchesWhenHit"]
+        if check is not None:
+            tp2_checked += 1
+            tp2_mismatch += int(not check)
+    manifest["entryEvidenceSpec"] = {
+        "signalBar": "12H candle opening at entryMs minus 12 hours; values use its completed close",
+        "rails": "weekly 1.618 bands from 24 observed Monday H1 bars",
+        "benchmark30d": "exactly 60 consecutive 12H intervals, signal close divided by close 60 intervals earlier minus one; missing intervals yield null",
+        "twoR": "entryPrice + 2 * (entryPrice - fixedStopPrice); checked against tp_r=2 source exit when its target was hit",
+        "directionValidation": "EMA direction, signal close inside the rails, side-specific wick crossing, and stop-to-rail relation",
+    }
+    quality = manifest.setdefault("dataQuality", {})
+    quality["entryEvidenceTrades"] = valid_count
+    quality["entryEvidenceDirectionFailures"] = len(manifest["records"]) - valid_count
+    quality["benchmark30dMissingTrades"] = benchmark_missing
+    quality["twoRSourceTargetChecks"] = tp2_checked
+    quality["twoRSourceTargetMismatches"] = tp2_mismatch
+    manifest["entryEvidenceUpdatedAt"] = pd.Timestamp.now(tz="UTC").isoformat()
+    _json_write(manifest_path, manifest)
+    return {"manifest": str(manifest_path), "entryEvidenceRows": len(manifest["records"]),
+            "directionValid": valid_count, "directionFailures": len(manifest["records"]) - valid_count,
+            "benchmark30dMissing": benchmark_missing, "tp2TargetChecks": tp2_checked,
+            "tp2TargetMismatches": tp2_mismatch}
+
+
 if __name__ == "__main__":
-    print(json.dumps(build(), ensure_ascii=False, indent=2))
+    import sys
+    result = add_entry_evidence_to_existing_bundle() if "--entry-evidence-only" in sys.argv else build()
+    print(json.dumps(result, ensure_ascii=False, indent=2))
