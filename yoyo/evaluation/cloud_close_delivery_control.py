@@ -91,7 +91,7 @@ def admitted(rows):
     return rows[rows.event_id.isin(chosen.event_id)].copy()
 
 
-def fund(rows, marks, mode):
+def fund(rows, marks, mode, *, slip=0.):
     forced = rows.delivery
     if rows.delivery_ambiguous.any():
         raise ValueError('A selected native exit competes with a mid-hour delivery; obtain intrahour evidence')
@@ -106,7 +106,7 @@ def fund(rows, marks, mode):
     if rows.exit_price.isna().any():
         raise ValueError('Missing native or settlement price at a funded exit')
     data = archive.native.prepare(rows)
-    metrics, pos, eq = study.tenth.split.simulate(data, 2 / 3, exposure=.9)
+    metrics, pos, eq = study.tenth.split.simulate(data, 2 / 3, slip=slip, exposure=.9)
     if not np.isclose(1000+pos.cash_pnl.sum(), eq.nav.iloc[-1], atol=1e-4, rtol=1.e-8):
         raise ValueError('Corrected wallet does not reconcile')
     return metrics, pos, eq
