@@ -1,0 +1,212 @@
+{
+  "id": "exp-cloud-close-hourly-trim-funding-20261109-v1",
+  "status": "complete",
+  "vectorbt_version": "1.2.0",
+  "additional_market_slippage": 0.0005,
+  "source_coverage": {
+    "child_windows_file": "experiments/active/exp-cloud-close-hourly-trim-funding-20261109-v1/child_windows.csv.gz",
+    "funding_tape_file": "experiments/active/exp-cloud-close-hourly-trim-funding-20261109-v1/funding_tape.csv.gz",
+    "source_coverage_file": "experiments/active/exp-cloud-close-hourly-trim-funding-20261109-v1/source_coverage.json",
+    "source_months_file": "experiments/active/exp-cloud-close-hourly-trim-funding-20261109-v1/source_months.csv.gz",
+    "positions": 1536,
+    "child_legs": 3072,
+    "symbols": 379,
+    "symbol_month_windows": 1961,
+    "market_settlements": 77949,
+    "exact_mark_rows": 1954,
+    "h1_proxy_mark_rows": 75995,
+    "range_coverage_complete": true
+  },
+  "account_input_audit": {
+    "native_preparer": "cloud_close_hourly_trim.tested.binance_inputs",
+    "priority_source": "native frozen child_windows.entry_order",
+    "parents_joined_by": "event_id",
+    "children_joined_by": [
+      "event_id",
+      "tp_r"
+    ],
+    "exact_child_clock_and_fee_match": true,
+    "frozen_positions": 1536,
+    "native_children": 3072
+  },
+  "native_hourly_review": {
+    "review_hours": 1,
+    "cap": 0.2,
+    "entry_exposure": 0.9,
+    "positions": 1536,
+    "child_legs": 3072
+  },
+  "boundary_scenarios": {
+    "include_boundary": {
+      "metrics": {
+        "all": {
+          "final_usdt": 7287.014325345321,
+          "multiple": 7.287014325345321,
+          "dd_mark_pct": 33.95154343441046,
+          "dd_bound_pct": 34.63242737224922,
+          "trades": 1536,
+          "win_pct": 33.3984375,
+          "payoff": 2.930716736206367,
+          "payoff_usdt": 2.686989906073745,
+          "median_net_pct": -3.368620220315847
+        },
+        "dev": {
+          "final_usdt": 3550.64033879812,
+          "multiple": 3.55064033879812,
+          "dd_mark_pct": 33.95154343441046,
+          "dd_bound_pct": 34.63242737224922,
+          "trades": 1195,
+          "win_pct": 32.30125523012553,
+          "payoff": 2.9764789580651327,
+          "payoff_usdt": 2.559789976625963,
+          "median_net_pct": -3.304746953037246
+        },
+        "2025": {
+          "final_usdt": 5074.388000349467,
+          "multiple": 1.42914728504074,
+          "dd_mark_pct": 29.911520725495656,
+          "dd_bound_pct": 34.35924637762262,
+          "trades": 194,
+          "win_pct": 32.47422680412371,
+          "payoff": 2.6374138123288344,
+          "payoff_usdt": 2.412518932577517,
+          "median_net_pct": -3.8104105839346927
+        },
+        "2026": {
+          "final_usdt": 7287.014325345321,
+          "multiple": 1.4360380650520759,
+          "dd_mark_pct": 29.102068557731698,
+          "dd_bound_pct": 30.159525286338663,
+          "trades": 129,
+          "win_pct": 37.2093023255814,
+          "payoff": 2.7206995473906037,
+          "payoff_usdt": 2.64889986725554,
+          "median_net_pct": -4.221240800948181
+        }
+      },
+      "audit": {
+        "scenario": "include_boundary",
+        "positions": 1536,
+        "child_legs": 3072,
+        "funding_rows_applied": 93104,
+        "funding_cashflow_usdt": -586.0822699996247,
+        "proxy_funding_rows_applied": 90546,
+        "exact_funding_rows_applied": 2558,
+        "boundary_rows_applied": 1632,
+        "boundary_rows_excluded": 0,
+        "trim_order_count": 207,
+        "trimmed_positions": 5,
+        "trim_turnover_usdt": 1772.030252324536,
+        "cash_from_orders_and_funding_usdt": 7287.014325345296,
+        "terminal_margin_funding_liability_usdt": 0.0,
+        "minimum_free_cash_usdt": 63.60835745270362,
+        "frozen_entry_priority": {
+          "native_preparer": "cloud_close_hourly_trim.tested.binance_inputs",
+          "priority_source": "native frozen child_windows.entry_order",
+          "parents_joined_by": "event_id",
+          "children_joined_by": [
+            "event_id",
+            "tp_r"
+          ],
+          "exact_child_clock_and_fee_match": true,
+          "frozen_positions": 1536,
+          "native_children": 3072
+        },
+        "stage_rows": 235968,
+        "h1_rows": 58992,
+        "cash_reconstruction_max_abs_error_usdt": 2.4556356947869062e-11,
+        "nav_reconstruction_max_abs_error_usdt": 2.7284841053187847e-11,
+        "raw_value_difference_matches_settlements": true,
+        "hourly_bounds_include_funding_cash_extremes": true,
+        "all_positions_closed": true
+      }
+    },
+    "exclude_boundary": {
+      "metrics": {
+        "all": {
+          "final_usdt": 7247.945633452503,
+          "multiple": 7.247945633452503,
+          "dd_mark_pct": 34.06104309291281,
+          "dd_bound_pct": 34.740764230719364,
+          "trades": 1536,
+          "win_pct": 33.3984375,
+          "payoff": 2.9277591889602315,
+          "payoff_usdt": 2.684974597406735,
+          "median_net_pct": -3.36883307462979
+        },
+        "dev": {
+          "final_usdt": 3527.09100973169,
+          "multiple": 3.52709100973169,
+          "dd_mark_pct": 34.06104309291281,
+          "dd_bound_pct": 34.740764230719364,
+          "trades": 1195,
+          "win_pct": 32.30125523012553,
+          "payoff": 2.9711042048033627,
+          "payoff_usdt": 2.555341530731991,
+          "median_net_pct": -3.3147575095811925
+        },
+        "2025": {
+          "final_usdt": 5046.337639782337,
+          "multiple": 1.4307364414070556,
+          "dd_mark_pct": 29.904707426612564,
+          "dd_bound_pct": 34.357277187680204,
+          "trades": 194,
+          "win_pct": 31.958762886597935,
+          "payoff": 2.7036889233975243,
+          "payoff_usdt": 2.4732975308755143,
+          "median_net_pct": -3.8051514412225083
+        },
+        "2026": {
+          "final_usdt": 7247.945633452503,
+          "multiple": 1.4362783766813367,
+          "dd_mark_pct": 29.098847554775443,
+          "dd_bound_pct": 30.156566223743162,
+          "trades": 129,
+          "win_pct": 37.98449612403101,
+          "payoff": 2.6330585274804856,
+          "payoff_usdt": 2.563693584374685,
+          "median_net_pct": -4.221240800948183
+        }
+      },
+      "audit": {
+        "scenario": "exclude_boundary",
+        "positions": 1536,
+        "child_legs": 3072,
+        "funding_rows_applied": 91472,
+        "funding_cashflow_usdt": -597.6881968753117,
+        "proxy_funding_rows_applied": 88954,
+        "exact_funding_rows_applied": 2518,
+        "boundary_rows_applied": 0,
+        "boundary_rows_excluded": 1632,
+        "trim_order_count": 207,
+        "trimmed_positions": 5,
+        "trim_turnover_usdt": 1763.8052776708205,
+        "cash_from_orders_and_funding_usdt": 7247.945633452489,
+        "terminal_margin_funding_liability_usdt": 0.0,
+        "minimum_free_cash_usdt": 63.53245405086598,
+        "frozen_entry_priority": {
+          "native_preparer": "cloud_close_hourly_trim.tested.binance_inputs",
+          "priority_source": "native frozen child_windows.entry_order",
+          "parents_joined_by": "event_id",
+          "children_joined_by": [
+            "event_id",
+            "tp_r"
+          ],
+          "exact_child_clock_and_fee_match": true,
+          "frozen_positions": 1536,
+          "native_children": 3072
+        },
+        "stage_rows": 235968,
+        "h1_rows": 58992,
+        "cash_reconstruction_max_abs_error_usdt": 1.546140993013978e-11,
+        "nav_reconstruction_max_abs_error_usdt": 1.6825651982799172e-11,
+        "raw_value_difference_matches_settlements": true,
+        "hourly_bounds_include_funding_cash_extremes": true,
+        "all_positions_closed": true
+      }
+    }
+  },
+  "drawdown_interpretation": "H1 stage NAV and conservative OHLC plus funding sign envelopes; not a proven intrabar path.",
+  "funding_marks": "1,954 exact Binance fundingRate markPrice rows and 75,995 official H1 mark-open proxies remain separately counted.",
+  "network_requests_started": false
+}

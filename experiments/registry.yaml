@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-hourly-trim-funding-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "38376b04ae"
+    status: "inconclusive"
+    question: "Does the scored 12H entry with hourly concentration management retain high payoff and stay under 35% portfolio drawdown after native funding and market slippage?"
+    single_variable: "Include native realized funding and revalue actual post-reduction units and subsequent entries for the frozen scored 12H account with a 1H single-name cap; exact execution-boundary sensitivity and 5bp adverse market-fill stress."
+    result: "1536 original funded parents, 379 Binance contracts, 1961 held contract-months fully sourced to 2026-09-24 UTC. 8327.72–8372.62U, 33.66–33.72% wins, monetary payoff 2.709–2.715, observed DD 32.40–32.51%, upper DD 34.34%. Extra 5bp adverse market slippage: 7247.95–7287.01U, 33.40% wins, monetary payoff 2.685–2.687, upper DD 34.63–34.74%. First naturally flat 306-position / 130 child-trim zero-funding prefix reconciles all six original hourly series within 0.000001U. Growth misses requested 1000x."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-hourly-trim-funding-20261109-v1/summary.json"
+    notes: "1000U shared VectorBT wallet, 5bp taker and 2bp maker. Binance funding timestamps/rates with 75,995 native H1 mark-open proxies and 1,954 exact settlement marks in tape. Intrabar high-low DD bound. Price paths end in Sep 2026, later 2025/26 scores retrospectively explored. No historic lot or depth proof. Notion 41388564-79af-8111-9ea5-fcadf34ae7d9."
+
   - experiment_id: exp-cloud-close-okx-funding-archives-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "38467f2ce8"
