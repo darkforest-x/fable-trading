@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-macro-control-medians-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "c1eb541709"
+    status: "rejected"
+    question: "分钟中位限仓下区分固定方向与宏观择时"
+    single_variable: "对三个已冻结的固定先多、先空、BTC五日优先组用完全一样的分钟中位成交额上限。"
+    result: "真实VIX优先42486U；固定先空40670U、现金盈亏比6.90、胜21.62%、回撤上界42.11%，二者仅差4.47%；固定先多25815U，BTC方向30785U。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-macro-control-medians-20261109-v1/summary.json"
+    notes: "Same corrected OKX parent account with prior 60-minute volume and first-minute sourcing; no funding or measured exit depth. Notion 41388564-79af-8189-a4e1-c35421f78963."
+
+  - experiment_id: exp-cloud-close-major-btc-reclaim-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "db7777afd3"
+    status: "rejected"
+    question: "九个主流币对BTC的相对云带能否提供足够交易次数"
+    single_variable: "固定ETH/BTC的全部规则，把信号覆盖扩展至九个预先列出的alt/BTC，仍只持一对，入出都用两条永续合约真实开盘价。"
+    result: "1265个确认信号实际213对，1671U、胜14.55%、现金盈亏比6.58、回撤上界73.97%；加5bp为1349U。相同时点只留半仓山寨腿为196U。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-major-btc-reclaim-20261109-v1/summary.json"
+    notes: "Fixed survivor-selected liquid-nine universe, hourly close ratios, native fills, fees and margin scenario. No funding or depth. Notion 41388564-79af-81b2-a186-f8df9d9e537c."
+
   - experiment_id: exp-cloud-close-eth-btc-reclaim-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "8e02339671"
