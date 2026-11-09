@@ -1,0 +1,171 @@
+{
+  "scope": "Source and as-of decision-state panel for the union of original fee-only / +5bp parents whose first funded notional actually bound the 10% original prior-60-minute median cap. No new order or account simulation.",
+  "source_checks": {
+    "funded_parents": 1585,
+    "native_runner_paths": 1618,
+    "original_source_rows": 1871,
+    "cap_bound_by_cost": {
+      "fee_only": 1064,
+      "stress_5bp": 1054
+    },
+    "cap_bound_union": 1064,
+    "fee_only_only": 10,
+    "stress_only": 0,
+    "bound_in_both": 1054,
+    "max_order_cash_reconciliation_error_usdt": {
+      "fee_only": 1.8189894035458565e-12,
+      "stress_5bp": 2.0463630789890885e-12
+    },
+    "max_final_residual_units": {
+      "fee_only": 4.76837158203125e-07,
+      "stress_5bp": 2.9802322387695312e-08
+    },
+    "max_entry_notional_reconciliation_error_usdt": {
+      "fee_only": 1.8189894035458565e-12,
+      "stress_5bp": 1.8189894035458565e-12
+    },
+    "original_capacity_status": {
+      "observed": 1585
+    }
+  },
+  "second_window": {
+    "candidate_parent_rows": 1064,
+    "unique_symbol_clock_windows": 1064,
+    "window_definition": "Exactly 60 confirmed native OKX 1m bars opening in [second_entry_ms - 60 minutes, second_entry_ms); native minute source validates against the H1 bar ending at second_entry_ms.",
+    "cache_reused_windows": 3,
+    "capacity_status_counts": {
+      "observed": 1056,
+      "native_minute_ohlc_differs_from_frozen_H1": 8
+    },
+    "combined_status_counts": {
+      "observed": 1056,
+      "native_minute_ohlc_differs_from_frozen_H1": 8
+    },
+    "decision_h1_close_status_counts": {
+      "observed": 1064
+    },
+    "second_h1_open_status_counts": {
+      "observed": 1064
+    },
+    "position_and_mark_state": {
+      "fee_only": {
+        "live_at_decision_close": 786,
+        "positive_net_pnl_after_costs": 474,
+        "live_and_positive": 473,
+        "flat_by_decision_close": 278
+      },
+      "stress_5bp": {
+        "live_at_decision_close": 786,
+        "positive_net_pnl_after_costs": 455,
+        "live_and_positive": 454,
+        "flat_by_decision_close": 278
+      }
+    },
+    "position_and_capacity_intersections": {
+      "fee_only": {
+        "live_positive_with_observed_capacity": 468,
+        "live_positive_capacity_unverified": 5,
+        "flat_by_decision_close": 278,
+        "positive_net_pnl_after_costs": 474
+      },
+      "stress_5bp": {
+        "live_positive_with_observed_capacity": 449,
+        "live_positive_capacity_unverified": 5,
+        "flat_by_decision_close": 278,
+        "positive_net_pnl_after_costs": 455
+      }
+    },
+    "capacity_unknown_parent_rows": [
+      {
+        "event_id": "signal-row-00054:signal",
+        "symbol": "ADA",
+        "second_entry_ms": 1591876800000,
+        "capacity_status": "native_minute_ohlc_differs_from_frozen_H1",
+        "fee_only_position_status": "live_at_decision_close",
+        "fee_only_net_positive_after_costs": false,
+        "stress_5bp_position_status": "live_at_decision_close",
+        "stress_5bp_net_positive_after_costs": false
+      },
+      {
+        "event_id": "signal-row-00525:signal",
+        "symbol": "BAT",
+        "second_entry_ms": 1619611200000,
+        "capacity_status": "native_minute_ohlc_differs_from_frozen_H1",
+        "fee_only_position_status": "live_at_decision_close",
+        "fee_only_net_positive_after_costs": true,
+        "stress_5bp_position_status": "live_at_decision_close",
+        "stress_5bp_net_positive_after_costs": true
+      },
+      {
+        "event_id": "signal-row-01301:signal",
+        "symbol": "GRT",
+        "second_entry_ms": 1645056000000,
+        "capacity_status": "native_minute_ohlc_differs_from_frozen_H1",
+        "fee_only_position_status": "flat_by_decision_close",
+        "fee_only_net_positive_after_costs": false,
+        "stress_5bp_position_status": "flat_by_decision_close",
+        "stress_5bp_net_positive_after_costs": false
+      },
+      {
+        "event_id": "signal-row-03490:signal",
+        "symbol": "TRX",
+        "second_entry_ms": 1696636800000,
+        "capacity_status": "native_minute_ohlc_differs_from_frozen_H1",
+        "fee_only_position_status": "live_at_decision_close",
+        "fee_only_net_positive_after_costs": true,
+        "stress_5bp_position_status": "live_at_decision_close",
+        "stress_5bp_net_positive_after_costs": true
+      },
+      {
+        "event_id": "signal-row-03495:signal",
+        "symbol": "CRO",
+        "second_entry_ms": 1697284800000,
+        "capacity_status": "native_minute_ohlc_differs_from_frozen_H1",
+        "fee_only_position_status": "live_at_decision_close",
+        "fee_only_net_positive_after_costs": true,
+        "stress_5bp_position_status": "live_at_decision_close",
+        "stress_5bp_net_positive_after_costs": true
+      },
+      {
+        "event_id": "signal-row-08347:signal",
+        "symbol": "GLM",
+        "second_entry_ms": 1765195200000,
+        "capacity_status": "native_minute_ohlc_differs_from_frozen_H1",
+        "fee_only_position_status": "live_at_decision_close",
+        "fee_only_net_positive_after_costs": true,
+        "stress_5bp_position_status": "live_at_decision_close",
+        "stress_5bp_net_positive_after_costs": true
+      },
+      {
+        "event_id": "signal-row-11047:signal",
+        "symbol": "JELLYJELLY",
+        "second_entry_ms": 1784548800000,
+        "capacity_status": "native_minute_ohlc_differs_from_frozen_H1",
+        "fee_only_position_status": "live_at_decision_close",
+        "fee_only_net_positive_after_costs": true,
+        "stress_5bp_position_status": "live_at_decision_close",
+        "stress_5bp_net_positive_after_costs": true
+      },
+      {
+        "event_id": "signal-row-11990:signal",
+        "symbol": "TRUTH",
+        "second_entry_ms": 1789948800000,
+        "capacity_status": "native_minute_ohlc_differs_from_frozen_H1",
+        "fee_only_position_status": "flat_by_decision_close",
+        "fee_only_net_positive_after_costs": false,
+        "stress_5bp_position_status": "flat_by_decision_close",
+        "stress_5bp_net_positive_after_costs": false
+      }
+    ]
+  },
+  "timing_policy": "The decision snapshot consumes fills through the H1 bar that closes at second_entry_ms. It does not consume fills at the following H1 open; downstream account logic must preserve its existing same-open sequence.",
+  "limitations": [
+    "Prior 60m quote volume is a turnover proxy, not order-book depth or guaranteed fill capacity.",
+    "The second open's price is read at its native H1 timestamp; it is not treated as a new event identity.",
+    "The saved source panel includes all cap-bound rows, including flat or nonpositive decision states. No later exit or outcome is used for candidate filtering."
+  ],
+  "artifacts": {
+    "candidate_panel": "experiments/active/exp-cloud-close-second-window-capacity-20261109-v1/second_window_capacity.csv.gz",
+    "unique_source_receipts": "experiments/active/exp-cloud-close-second-window-capacity-20261109-v1/source_receipts.csv"
+  }
+}

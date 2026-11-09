@@ -314,6 +314,57 @@ def preflight() -> dict:
     return result
 
 
+def rescore_existing() -> dict:
+    """Refresh capacity/position intersections from saved panel rows; do not refetch or replay."""
+    summary_path = EXP / "summary.json"
+    panel_path = EXP / "second_window_capacity.csv.gz"
+    receipt_path = EXP / "source_receipts.csv"
+    if not summary_path.is_file() or not panel_path.is_file() or not receipt_path.is_file():
+        raise FileNotFoundError("Frozen second-window result, receipts, and summary are all required")
+    summary = json.loads(summary_path.read_text())
+    frame = pd.read_csv(panel_path, dtype={"event_id": str, "symbol": str}, float_precision="round_trip")
+    receipts = pd.read_csv(receipt_path, dtype={"symbol": str}, float_precision="round_trip")
+    if (frame.event_id.duplicated().any() or len(frame) != summary["second_window"]["candidate_parent_rows"]
+            or receipts.duplicated(["symbol", "second_entry_ms"]).any()
+            or len(receipts) != summary["second_window"]["unique_symbol_clock_windows"]):
+        raise ValueError("Saved second-window panel or source receipt grain changed")
+    capacity_status = frame.capacity_status.fillna("missing_status").astype(str)
+    expected_status = capacity_status.value_counts().to_dict()
+    if {str(k): int(v) for k, v in expected_status.items()} != summary["second_window"]["capacity_status_counts"]:
+        raise ValueError("Saved capacity statuses differ from the frozen summary")
+    state, intersections = {}, {}
+    for label in ("fee_only", "stress_5bp"):
+        position = frame[f"{label}_position_status"].fillna("missing_status").astype(str)
+        positive = frame[f"{label}_net_positive_after_costs"].fillna(False).astype(bool)
+        live = position.eq("live_at_decision_close")
+        flat = position.eq("flat_by_decision_close")
+        live_positive = live & positive
+        observed = capacity_status.eq("observed")
+        state[label] = {
+            "live_at_decision_close": int(live.sum()),
+            "positive_net_pnl_after_costs": int(positive.sum()),
+            "live_and_positive": int(live_positive.sum()),
+            "flat_by_decision_close": int(flat.sum()),
+        }
+        intersections[label] = {
+            "live_positive_with_observed_capacity": int((live_positive & observed).sum()),
+            "live_positive_capacity_unverified": int((live_positive & ~observed).sum()),
+            "flat_by_decision_close": int(flat.sum()),
+            "positive_net_pnl_after_costs": int(positive.sum()),
+        }
+    non_observed = frame.loc[~capacity_status.eq("observed"), [
+        "event_id", "symbol", "second_entry_ms", "capacity_status",
+        "fee_only_position_status", "fee_only_net_positive_after_costs",
+        "stress_5bp_position_status", "stress_5bp_net_positive_after_costs",
+    ]].sort_values(["second_entry_ms", "symbol"])
+    summary["second_window"]["position_and_mark_state"] = state
+    summary["second_window"]["position_and_capacity_intersections"] = intersections
+    summary["second_window"]["capacity_unknown_parent_rows"] = non_observed.to_dict(orient="records")
+    summary["second_window"]["cache_reused_windows"] = int(receipts.capacity_cache_reused.fillna(False).astype(bool).sum())
+    summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2, allow_nan=False) + "\n")
+    return summary
+
+
 def run(workers: int = 4) -> dict:
     if workers < 1 or workers > 4:
         raise ValueError("Use at most four workers for the native archive cache")
@@ -441,10 +492,13 @@ def main() -> None:
     command = parser.add_mutually_exclusive_group(required=True)
     command.add_argument("--preflight", action="store_true")
     command.add_argument("--run", action="store_true")
+    command.add_argument("--rescore-existing", action="store_true")
     parser.add_argument("--workers", type=int, default=4)
     args = parser.parse_args()
     if args.preflight:
         preflight()
+    elif args.rescore_existing:
+        print(json.dumps(rescore_existing()["second_window"], ensure_ascii=False, indent=2))
     else:
         run(args.workers)
 
