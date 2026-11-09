@@ -20512,6 +20512,20 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'OKX listing fetched 2026-11-01 (prefix stripping is approximate). Breadth uses patterns3 events to 2026-09, so October live-wick trades have none. No paper account or service changed.'
+  - experiment_id: exp-spike-alert-forward-20261105-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5a3fc53757
+    status: complete
+    question: 'Owner 2026-11-05 "我们之前研究过全局报警相关的对吧，再把数据拿出来分析一下": after the five live >=25-coin alerts since 2026-10-27, did prices behave like the alarm-entry backtest?'
+    single_variable: 'None; descriptive forward look. Entry sets fixed before prices were read: (A) every later same-side live first touch within 30 minutes after an alert, from its 1.618 level (the exp-monday-limit-alarm-entry-20261029-v1 entry set); (B) the 25 alert coins from the first 5m open after the alert. Direction-adjusted closes at 30m/2h/6h/24h, 24h MAE/MFE; baselines BTC same window and same coin at every 5m open in the prior 7 days whose window holds no alert.'
+    result: 'OKX swap 5m (src.data.fetch_okx; FARTCOIN unavailable, 1 A and 1 B row missing); computed Monday 1.618 equals the logged level on all checked touches. A: 92 touches in 5 alerts; alert-mean +134 / +171 / +243 / +221bp at 30m/2h/6h/24h (touch-weighted +154 / +107 / -45 / +61 because the 10-30 04:42 crash alone had 62 later touches, -202bp at 6h); 6h positive share by alert 50 / 15 / 100 / 100 / 88 percent; 24h MAE alert-mean -331bp. B: 124 alert coins +97 / +124 / +188 / +431bp vs BTC +42 / +57 / +110 / +128; same-coin random baseline -1 to -28bp. Paper books in the same windows: 5m/60m accounts summed -4592 / -4250 net bp on the 10-30 04:42 alert.'
+    artifacts: []
+    canonical_report: experiments/active/exp-spike-alert-forward-20261105-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Five alerts are about four independent episodes (10-30 04:42 and 08:21 are 3.6 hours apart), so this neither confirms nor rejects the backtest. No fills, fees, exits or sizing (trade P&L belongs to NautilusTrader). The 11-04 23:05 alert had no full 24h yet. Candles stay local in data/okx_swap_5m_alert_forward_20261105 (not committed); paths.csv and summary.json are reproducible with analyze.py.'
   - experiment_id: exp-cloud-close-binance-relative-funding-20261109-v1
     source_repo: darkforest-x/fable-trading
     source_commit: dd595d35b2
@@ -20592,6 +20606,27 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: "Funding coverage: all 6,332 retained child legs and 2,000 required symbol-months; 181,135 settlements inside native holds; no uncovered months or unproven zero-settlement windows. Marks: official exact fundingRate API or official 1h mark-open proxy. Entry capacity exclusions: WAVES twice and XTZ once, retained empty in original slots. 2026 is partial through September 23. This is a historical simulation, not production approval."
+  - experiment_id: exp-cloud-close-binance-target-fraction-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: d2019c8db1
+    status: complete
+    question: "In the same frozen Binance V1.7 12H capacity/funding account, does changing only the quantity assigned to the existing 2R target improve funded results?"
+    single_variable: "Change the initial 2R-target fraction from the reused baseline 2/3 to 1/3 or 5/6. Preserve the 1,586 original parent roster, original H1 entry/exit paths, four native legs, 1x/2x map, nine slots, 10% prior-minute entry cap, 20% hourly single-contract trim, fees, archived funding, and both settlement-boundary cases; add the same separate +5bp execution stress."
+    result: "VectorBT 1.2.0, 1,583 funded parents / 6,332 child legs. Include-boundary: f=1/3 ends 41,609.24U, win 26.72%, cash payoff 4.841U, mark DD 37.47% / conservative DD bound 39.00%; reused f=2/3 baseline 19,643.73U, win 33.80%, cash payoff 2.992U, mark DD 30.61% / bound 39.10%; f=5/6 ends 12,077.00U, win 33.80%, cash payoff 2.743U, mark DD 27.86% / bound 39.73%. Development include-boundary NAV is 22,631.50 / 10,547.22 / 6,718.28U for f=1/3 / 2/3 / 5/6; 2025 is 30,908.50 / 15,225.81 / 9,456.54U; 2026 partial through 2026-09-24 00:00Z is 41,609.24 / 19,643.73 / 12,077.00U. Under +5bp stress, include-boundary final NAV / DD bound is 37,381.28U / 39.58% for f=1/3 and 10,166.53U / 40.44% for f=5/6; exclude-boundary is 37,191.83U / 39.60% and 10,096.34U / 40.36%. All candidate cash bridges reconcile within 8.1e-11U; actual per-leg units and notionals match configured weights within 1.2e-16."
+    artifacts:
+      - experiments/active/exp-cloud-close-binance-target-fraction-20261109-v1/config.json
+      - experiments/active/exp-cloud-close-binance-target-fraction-20261109-v1/summary.json
+      - experiments/active/exp-cloud-close-binance-target-fraction-20261109-v1/signal_source_audit.json
+      - experiments/active/exp-cloud-close-binance-target-fraction-20261109-v1/target_1_3/include_boundary/metrics.json
+      - experiments/active/exp-cloud-close-binance-target-fraction-20261109-v1/target_1_3/stress_include_boundary/metrics.json
+      - experiments/active/exp-cloud-close-binance-target-fraction-20261109-v1/target_5_6/include_boundary/metrics.json
+      - experiments/active/exp-cloud-close-binance-target-fraction-20261109-v1/target_5_6/stress_include_boundary/metrics.json
+    canonical_report: experiments/active/exp-cloud-close-binance-target-fraction-20261109-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: "The reused baseline is the original Binance capacity-funded account, not an unconditional alternative venue baseline; it is not the same trade sample as OKX. Three original parents with unknown 1m capacity remain skipped in their original slots. Archived per-symbol signals directly match 1,494/1,586 parents; the other 92 lack a local per-symbol row/file but remain in the frozen native/priority path set and are never filtered by outcome. Funding archive covers all 6,332 legs; 2026 ends flat at 2026-09-24 00:00Z and is partial. Results are historical simulation only; no strategy or production parameters changed."
   - experiment_id: exp-cloud-close-second-window-capacity-20261109-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 0a0d807af9

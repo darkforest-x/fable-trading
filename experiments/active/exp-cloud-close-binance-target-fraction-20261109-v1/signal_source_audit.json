@@ -1,0 +1,51 @@
+{
+  "source_event_key": "12H|symbolUSDT|confirmation_ms_as_ns|side",
+  "signal_to_capacity_join": "event_id == parent_id == archived signal_id; event key milliseconds equal source close_ns/1e6 and native H1 entry_ms.",
+  "original_parent_denominator": 1586,
+  "frozen_priority_roster_rows": 23262,
+  "all_parent_ids_in_frozen_priority_roster": true,
+  "native_original_two_leg_rows": 3172,
+  "native_original_parent_count": 1586,
+  "eligible_four_child_path_count": 1583,
+  "eligible_four_child_parent_clocks_match_native_signal_path": true,
+  "source_capacity_parent_ids_match": true,
+  "raw_signal_source_rows_directly_matched": 1494,
+  "raw_signal_source_rows_unresolved": 92,
+  "unresolved_direct_source_by_reason": {
+    "per_symbol_signal_file_missing": 85,
+    "signal_id_not_present_in_existing_per_symbol_file": 7
+  },
+  "symbols_with_missing_signal_file": [
+    "AERGO",
+    "AKRO",
+    "ANT",
+    "AUDIO",
+    "BTS",
+    "BTT",
+    "BZRX",
+    "DODO",
+    "EOS",
+    "GAL",
+    "HNT",
+    "KEEP",
+    "LUNA",
+    "MATIC",
+    "MBL",
+    "RNDR",
+    "SRM",
+    "SXP",
+    "TOMO",
+    "YFII"
+  ],
+  "direct_rows_all_12h": true,
+  "direct_rows_confirmation_clock_equals_entry": true,
+  "direct_rows_side_and_symbol_match": true,
+  "direct_rows_1_618_stop_matches_native_path": true,
+  "direct_rows_have_ny_week_monday_width_and_hours_since_monday": true,
+  "direct_rows_ny_week_matches_key_open_week": true,
+  "direct_signal_rows_are_source_audit_only_not_an_entry_filter": true,
+  "qualification_uses_only_frozen_prior_minute_capacity_status": {
+    "observed": 1583,
+    "missing_archive": 3
+  }
+}
