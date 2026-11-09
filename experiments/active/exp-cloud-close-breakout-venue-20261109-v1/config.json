@@ -1,0 +1,77 @@
+{
+  "experiment_id": "exp-cloud-close-breakout-venue-20261109-v1",
+  "question": "Across the same fixed ten major USDT perpetual contracts and common UTC cutoff, how does the first EMA-aligned 12H close beyond each venue's own completed New York Monday 1.618 band perform on OKX versus Binance, with immediate and one-12H-delayed entries?",
+  "single_variable": "Compare exchange-specific price histories for the same first weekly EMA-aligned close breakout; a separate prespecified timing arm enters exactly one additional completed 12H bar later. No signal threshold, stop percentage, exit rule, fee rate, slot count, or position sizing is tuned.",
+  "data": {
+    "symbols": ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "ADA", "LINK", "LTC", "AVAX"],
+    "okx_source_experiment": "exp-cloud-close-breakout-branch-20261109-v1",
+    "okx_source_config": "experiments/active/exp-cloud-close-breakout-branch-20261109-v1/config.json",
+    "okx_resolution": "Use each frozen source's native UTC H1 and 12H OHLC; stop all inputs at the common cutoff.",
+    "binance_source_experiment": "exp-cloud-close-binance-transfer-20261109-v1",
+    "binance_quote_archive": "experiments/active/exp-cloud-close-binance-transfer-20261109-v1/work/{symbol}USDT/quotes.npz",
+    "binance_official_repair_archive": "data/research/cloud_close_binance_feb2022_replay/{symbol}USDT/quotes.npz when the official repair exists",
+    "binance_resolution": "Use the frozen Binance UM complete H1 price archive; aggregate 12H from twelve contiguous UTC H1 bars only. The cache's H1 bars were aggregated from complete 5m source bars; an official repaired H1 archive takes precedence for affected symbols.",
+    "cutoff_utc_exclusive": "2026-09-23T04:00:00Z",
+    "cutoff_ms": 1790136000000,
+    "cutoff_rule": "Use the close of the last exact H1 opening timestamp jointly present across all ten symbols on both venues. Last common H1 open is 2026-09-23T03:00:00Z. Exclude all later rows from candidate/path pricing and close any remaining positions at that common H1 close.",
+    "full_history_start_utc": "2020-01-24T00:00:00Z",
+    "full_history_start_ms": 1579824000000,
+    "common_90d_account_start_utc": "2023-03-23T06:00:00Z",
+    "common_90d_account_start_ms": 1679551200000,
+    "common_90d_rule": "Additional same-name common-history sample only: include an event if both venues have the exact confirmation H1 open and 2,160 consecutive prior hourly opens ending immediately before that open for that symbol. The account begins at the earliest date with 90 days after every one of the ten symbol pairs first has common H1 coverage. This is a data-coverage screen, not a listing-date claim or a 90-day signal rank.",
+    "historical_bounds_note": "Input first/last timestamps describe available frozen market history, not official contract listing or delisting times. Binance coverage is shorter for BTC/ETH/SOL/BNB/XRP/DOGE than for ADA/LINK/LTC/AVAX. The ten selected symbols have no retired-contract rows in this fixed panel; timestamp gaps are preserved and recorded per symbol/venue."
+  },
+  "signal": {
+    "decision": "Completed UTC 12H bar close. Only bars fully closed by cutoff qualify. Use completed EMA20/EMA50 values from the same 12H close, with EMA state reset by the existing engine after missing 12H bars.",
+    "weekly_rule": "For each symbol and New York calendar week, take only the first valid strict 12H close above that symbol's upper Monday 1.618 extension with EMA20>EMA50 (long), or below its lower Monday 1.618 extension with EMA20<EMA50 (short). Long and short share one weekly lock; a signal without an executable immediate open still consumes the week.",
+    "monday_reference": "Rebuild the symbol's own New York Monday 00:00 through Tuesday 00:00 local-time range from exactly 24 observed H1 bars; upper=high+0.618*(high-low), lower=low-0.618*(high-low). An incomplete Monday is ineligible; do not fill gaps.",
+    "stop": "Immediate: original fixed_stop(symbol, side, crossed 1.618 reference), BTC/ETH 1.5%, all other symbols 3%; actual entry-to-stop distance is recomputed at executable H1 open. Reject an entry if the open is not beyond the anchored stop. Delayed: preserve the immediate parent's initial relative stop distance and re-anchor that distance at the scheduled delayed open, matching the existing fixed-delay convention.",
+    "fill": "Immediate market entry at the exact H1 open at 12H confirmation. Delayed arm schedules the exact H1 open one further 12H bar after confirmation; no future survival, price-direction, or outcome filter is applied. Missing exact open or fill at/after cutoff is recorded as no-entry.",
+    "exit": "Use the existing V1.7 native VectorBT H1 path callback: fixed stop and EMA20/50 direction reversal, with existing same-hour stop priority and first observable H1 gap/stale-12H exits. Source/account tail is closed at the last included H1 close. No partial profit target.",
+    "sample_construction": "Build new event paths from raw frozen OHLC on each venue. Do not filter, reprice, or transfer the already-traded OKX/Binance parent ledgers."
+  },
+  "account": {
+    "starting_usdt": 1000,
+    "slots": 9,
+    "sizing": "Each venue/mode/sample is an independent 1,000 USDT shared-cash, unlevered VectorBT account with nine equal slots, actual free-cash sizing, and one position per symbol. No transfers between venues or account variants.",
+    "samples": ["full_observable", "common_90d"],
+    "periods": {
+      "all": "From each sample account's stated start through 2026-09-23T04:00:00Z exclusive.",
+      "dev": "Each account start through 2025-01-01T00:00:00Z exclusive.",
+      "2025": "2025-01-01T00:00:00Z through 2026-01-01T00:00:00Z.",
+      "2026_ytd": "2026-01-01T00:00:00Z through common cutoff."
+    },
+    "metrics": "Report final marked USDT, cash payoff ratio, equal-notional net-return payoff ratio, win rate, trade count, observed mark drawdown and synchronized conservative hourly OHLC drawdown bound. Keep each venue's history and its common-90d sample separate.",
+    "controls": "This first causal account build has no random or matched controls. Add control arms only after the independently funded venue accounts are delivered and reviewed."
+  },
+  "fees": {
+    "market_taker_rate": 0.0005,
+    "okx_source": "Use verified OKX Lv1 5bp taker fee per market/stop fill.",
+    "binance_source": "No verified historical Binance account fee tier is available in these frozen public OHLC sources; map the same 5bp single-side taker rate for symmetric comparison and do not call it an actual Binance tier.",
+    "entry_exit_class": "All entries and stop/EMA/gap/tail exits are market taker fills; charge each fill separately.",
+    "maker_rate_unused": 0.0002,
+    "funding": "Omitted."
+  },
+  "execution": {
+    "path_engine": "Existing VectorBT 1.2.0 cloud_close_reward_paths._simulate_symbol with the frozen V1.7 order callback.",
+    "account_engine": "Existing VectorBT 1.2.0 cloud_close_reward_account.prepare/account; nine slots and cash sharing.",
+    "event_batch_size": 8,
+    "leverage": 1.0,
+    "extra_slippage": 0.0,
+    "funding": "Not modeled.",
+    "runtime": "/Users/zhangzc/.local/bin/vectorbt-python"
+  },
+  "outputs": {
+    "source_coverage_csv": "source_coverage.csv",
+    "candidate_audit_csv_gz": "candidate_audit.csv.gz",
+    "paths_csv_gz": "paths.csv.gz",
+    "account_metrics_csv": "account_metrics.csv",
+    "summary_json": "summary.json",
+    "funded_pattern": "funded_{venue}_{mode}_{sample}.csv.gz",
+    "hourly_pattern": "hourly_{venue}_{mode}_{sample}.csv.gz"
+  },
+  "commands": {
+    "preflight": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_breakout_venue --preflight",
+    "run": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_breakout_venue --run"
+  }
+}
