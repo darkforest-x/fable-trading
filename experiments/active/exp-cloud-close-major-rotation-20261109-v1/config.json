@@ -1,0 +1,7 @@
+{
+  "question": "Can a single unlevered account compound by moving between BTC, ETH and cash using their three 12H cloud states?",
+  "single_variable": "When only one USD asset has a bullish EMA20/50 cloud, own it. When neither is bullish, hold cash. When both are bullish, choose ETH for a bullish completed ETH/BTC close-ratio cloud and BTC otherwise. Controls reverse this relative tie-break or always prefer a specified coin in a tie. The native v1.7 EMA20/50 needs 50 complete 12H bars. Only change position when the target changes. No stops or shorts; leave at the first confirmed unfavorable cloud state unless the rule still selects the same asset.",
+  "execution": "Use the frozen common OKX BTC/ETH hourly and 12H UTC data in exp-cloud-close-major-cross-20261109-v1, from 2019-12-25 through 2026-11-08 12 UTC. Observe final closed 12H and trade the following H1 open. Start in cash with 1000U. Linear 1x funded longs, sell before buy at switches. Native market taker 5bp per fill and a separate 5bp adverse slippage stress. Mark every H1 wick of the one asset actually held, separately consider the previous asset at a same-open switch, force settlement at last H1 close.",
+  "scope": "Price-return study of two preselected surviving major perpetuals. No OKX funding or fill-depth assumption validated. Historical controls shared with other studies; chronological subsections are descriptive.",
+  "command": "vectorbt-python -m yoyo.evaluation.cloud_close_major_rotation"
+}
