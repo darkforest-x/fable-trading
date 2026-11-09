@@ -18,7 +18,7 @@ def account():
     return data,base.underlying(data,quotes),quotes
 
 
-def simulate(data,market,quotes,multiples,slip,directory,name):
+def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=None):
     native,previous,side,runners = market
     if set(multiples.index)!=set(runners.event_id) or not multiples.index.is_unique or multiples.isna().any():
         raise ValueError('Each occupied parent needs exactly one pre-entry multiplier')
@@ -49,10 +49,10 @@ def simulate(data,market,quotes,multiples,slip,directory,name):
     pf = base.build_portfolio(data,model,native*ratio_grid,previous*ratio_grid,side,1.,slip)
     funds,curve,trims = base.receipts(pf,data,model,multiples)
     funds['exposure'] = multiples
-    if (multiples==1.5).all():
+    if reference_dir is not None and (multiples==1.5).all():
         suffix = '_stress' if slip else ''
-        old = pd.read_csv(source.BASE/f'hourly_1.5x{suffix}.csv.gz',index_col=0)
-        old_trades = pd.read_csv(source.BASE/f'funded_1.5x{suffix}.csv.gz',index_col='event_id')
+        old = pd.read_csv(reference_dir/f'hourly_1.5x{suffix}.csv.gz',index_col=0)
+        old_trades = pd.read_csv(reference_dir/f'funded_1.5x{suffix}.csv.gz',index_col='event_id')
         if not np.allclose(curve[old.columns],old,atol=.0001,rtol=1.e-9) or not np.allclose(
                 funds.loc[old_trades.index,'cash_pnl'],old_trades.cash_pnl,atol=.0001,rtol=1.e-9):
             raise ValueError('Conditional adapter does not reproduce the corrected native reference')
@@ -71,7 +71,7 @@ def run(directory,policies):
     for key,weights in policies(parents).items():
         for slip in ([0.] if key=='reference' else [0.,.0005]):
             label = key+('_stress' if slip else '')
-            out[label] = simulate(data,market,quotes,weights,slip,directory,label)
+            out[label] = simulate(data,market,quotes,weights,slip,directory,label,reference_dir=source.BASE)
             print(label,out[label].get('metrics',{}).get('all'),flush=True)
             gc.collect()
     source.correction.archive.prices.safe_json(directory/'summary.json',dict(arms=out,
