@@ -11,7 +11,7 @@ from yoyo.evaluation import cloud_close_doubled_candle_low as stops
 EXP = funding.EXP.parent/'exp-cloud-close-binance-doubled-stop-transfer-20261109-v1'
 
 
-def scenario(prepared,data,no_settle,key,boundary,slip,*,directory=EXP):
+def scenario(prepared,data,no_settle,key,boundary,slip,*,directory=EXP,child_weights=None):
     folder = directory/key
     saved = folder/'result.json'
     if saved.exists():
@@ -22,10 +22,11 @@ def scenario(prepared,data,no_settle,key,boundary,slip,*,directory=EXP):
             raise ValueError('Stored funding scenario no longer reconciles to actual parent ledger')
         return recovered
     folder.mkdir(exist_ok=True)
+    weights = {} if child_weights is None else dict(child_weights=child_weights)
     children, parents, equity, flows, result = funding.relative._run_scenario(
         data,prepared['tape'],boundary,slip,prepared['multipliers'],prepared['previous_close'],
         prepared['native_open'],prepared['directions'],no_settle,hourly_cap_fraction=funding.HOURLY_CAP,
-        entry_limits=prepared['entry_matrix'])
+        entry_limits=prepared['entry_matrix'],**weights)
     result.pop('orders')
     audit = funding._cash_bridge(parents,flows,equity)
     reference = prepared['reference'].set_index('event_id')
