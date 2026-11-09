@@ -1,0 +1,6 @@
+{
+  "id": "exp-cloud-close-hourly-trim-20261109-v1",
+  "single_variable": "Review the fixed marked 20% single-contract weight cap every completed native H1 rather than every 12H. Confirmed 12H entries, cash budgets, ordinary exits and original order of execution stay frozen. At a completed H1 close use that close, prevailing quantity and closing portfolio NAV to decide the target quantity. Execute at the next actual H1 open after native open exits. Never use the bar high to trigger a reduction.",
+  "accounts": "Scored 680-contract Binance account with NAV/10 initial sizing and mixed partial/runner exits, and high-growth OKX NAV/9 expiring-target account. Compare within each venue to its frozen 12H-cap parent. Test motivated by the observed concentrated Binance ALPINE peak, making both historical comparisons exploratory.",
+  "costs": "Market and stop 5bp, resting 2R 2bp, 5bp for all reductions. No funding charge or market impact. Report parent reductions of less than 5U and their turnover as a tradability diagnostic, not a claim that 5U is a universal historical exchange minimum. Same market hours and native quote coverage as original capped accounts."
+}

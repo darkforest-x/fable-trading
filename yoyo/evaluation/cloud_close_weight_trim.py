@@ -49,13 +49,15 @@ def order(c, nav, actions, prices, fees, exposure, weights, reserve, slot_weight
     return w.account_order(c, nav, actions, prices, fees, 0., exposure, weights, reserve, 0, slot_weights)
 
 
-def trim_account(data, quote_loader, exposure, limit, leg_weights=(2/3,1/3)):
-    """Require twelve consecutive prior H1 observations and the exact next open for each trim."""
+def trim_account(data, quote_loader, exposure, limit, leg_weights=(2/3,1/3), *, review_hours=12):
+    """Require a full native review interval followed by the exact next open for each trim."""
     base = data['actions']
     hours, columns = base.shape[0]//3, base.shape[1]
     nlegs = len(leg_weights)
     if min(leg_weights)<=0 or not np.isclose(sum(leg_weights),1.) or columns % nlegs:
         raise ValueError('Invalid funded child reservations')
+    if review_hours not in (1,12):
+        raise ValueError('Only native H1 or confirmed 12H reviews are supported')
     eligible = np.zeros((hours, columns//nlegs), dtype=bool)
     runners = data['selected'].loc[data['selected'].slot.mod(nlegs).eq(nlegs-1)]
     if not runners.tp_r.eq(0).all() or runners.event_id.duplicated().any():
@@ -64,7 +66,9 @@ def trim_account(data, quote_loader, exposure, limit, leg_weights=(2/3,1/3)):
         clock = quote_loader(r.symbol)[0]
         i,j = clock.searchsorted([r.entry_ms, r.exit_bar_ms+w.HOUR])
         times = clock[i:j]
-        present = times[12:][(times[12:]-times[:-12] == 12*w.HOUR) & (times[12:] % (12*w.HOUR) == 0)]
+        next_bars = times[review_hours:]
+        span = review_hours*w.HOUR
+        present = next_bars[(next_bars-times[:-review_hours] == span) & (next_bars % span == 0)]
         eligible[(present-data['start'])//w.HOUR,r.slot//nlegs] = True
     def expand(field):
         return data[field].reshape(hours,3,columns)[:,[0,1,1,2],:].reshape(-1,columns).copy()
