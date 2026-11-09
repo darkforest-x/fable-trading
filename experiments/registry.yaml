@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-relative-cloud-leaders-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "c635873cdf"
+    status: "rejected"
+    question: "十个主流币按相对云带择强能否赚到更大涨幅"
+    single_variable: "用对其他主流币的相对价格云带逐一计票，做多美元云带向上且得票最高的一币。"
+    result: "择强50936U，对照最弱4029U，按币名字母顺序5360U。胜47.67%、现金盈亏比1.34，真实持仓最大回撤89.33%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-relative-cloud-leaders-20261109-v1/summary.json"
+    notes: "Ten named surviving markets only. No historical funding or measured depth. Notion 41388564-79af-8165-b168-de6a1c01df1a."
+
+  - experiment_id: exp-cloud-close-rotation-market-filter-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "3e4439b85a"
+    status: "rejected"
+    question: "BTC转熊就空仓能否压住强币轮动回撤"
+    single_variable: "仅在已收完的BTC 12H美元云带看涨时执行既有强币轮动，比较看跌和滞后30天。"
+    result: "共同覆盖无过滤35977U，BTC看涨54329U、回撤上界77.13%；看跌621U，滞后看涨62998U、回撤上界81.04%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-rotation-market-filter-20261109-v1/summary.json"
+    notes: "Gate tested after observing the 2021 to 2022 drawdown. Notion 41388564-79af-8198-860f-d504f018c2d4."
+
   - experiment_id: exp-cloud-close-major-rotation-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "f3dc1d2d1c"
