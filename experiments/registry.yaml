@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-ratio-risk-minutes-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "966608291d"
+    status: "inconclusive"
+    question: "同步原生分钟行情能否判定三仓配对的50%回撤线"
+    single_variable: "在四个可能的峰谷小时核对真实单位、净额合并同一BTC并用同步一分钟价格替换独立H1极值。"
+    result: "4/4小时原生成交价可对应。费用口径分钟观察49.61%、保守上界50.99%；加5bp 49.62%至51.00%。单看分钟收盘不足以判定50%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-ratio-risk-minutes-20261109-v1/summary.json"
+    notes: "Records intermediate minute bounds. Later extreme-witness experiment tightens lower bound without changing positions. Notion 41388564-79af-81d5-9efd-c7b1dd636448."
+
+  - experiment_id: exp-cloud-close-ratio-extreme-witness-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "37e98ac3ee"
+    status: "rejected"
+    question: "单币已到达的分钟极值可以证明组合回撤越线吗"
+    single_variable: "每个币碰到分钟极值时，把其他币都放到对该结论最不利的价格，并允许此前最后报价。只组合先前分钟的必到峰值与之后的必到谷值。"
+    result: "费用口径的回撤严格限于50.9340%至50.9909%；加5bp为50.9434%至51.0003%。在原生价格模型下三仓配对确实突破50%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-ratio-extreme-witness-20261109-v1/summary.json"
+    notes: "Four native-bar verified peak/trough hours on 2021-01-29 and 30. This bounds simulated traded-price drawdown; actual exchange marks and funding differ. Notion 41388564-79af-811d-8b25-d7548a9d0955."
+
   - experiment_id: exp-cloud-close-ratio-cross-margin-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "be56a98e81"
