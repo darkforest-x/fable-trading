@@ -1,0 +1,47 @@
+{
+  "exchange_dated_contracts": {
+    "expired_real_entries": 4,
+    "expired_control_entries": 7,
+    "market_gate_losses": 0,
+    "actual": {
+      "funded": 1635,
+      "possible_delivery_event_ids": [],
+      "same_parent_ids_as_frozen": true
+    },
+    "matched_actual": {
+      "funded": 1498,
+      "possible_delivery_event_ids": []
+    },
+    "control": {
+      "funded": 1995,
+      "possible_delivery_event_ids": [
+        "12H|STRAXUSDT|1709164800000000000|1:control",
+        "12H|OBOLUSDT|1760184000000000000|-1:control"
+      ]
+    }
+  },
+  "also_truncate_29_at_end_of_last_positive_volume_bar": {
+    "expired_real_entries": 4,
+    "expired_control_entries": 9,
+    "market_gate_losses": 0,
+    "actual": {
+      "funded": 1635,
+      "possible_delivery_event_ids": [],
+      "same_parent_ids_as_frozen": true
+    },
+    "matched_actual": {
+      "funded": 1493,
+      "possible_delivery_event_ids": [
+        "12H|BTTUSDT|1641427200000000000|-1"
+      ]
+    },
+    "control": {
+      "funded": 1995,
+      "possible_delivery_event_ids": [
+        "12H|STRAXUSDT|1709164800000000000|1:control",
+        "12H|OBOLUSDT|1760184000000000000|-1:control"
+      ]
+    }
+  },
+  "scope": "This is an admission/slot and custody-clock check. Last traded-bar close on the 29 older contracts is a sensitivity proxy. Control and matched returns are pending where an actual delivery price or event order is needed; no synthetic settlement fills."
+}
