@@ -392,6 +392,69 @@ def _account(events: pd.DataFrame, quotes: dict, venue: str,
     return metrics, funded, equity, meta
 
 
+def _verify_okx_frozen_parity(paths: pd.DataFrame, quotes: dict, cutoff: int) -> dict:
+    """Check immediate OKX signals/open/stops against the frozen breakout paths."""
+    source_path = breakout.EXP / "paths.csv.gz"
+    fields = ["arm", "is_control", "symbol", "week", "side", "tp_r", "key_open_ms",
+              "confirmation_ms", "status", "entry_ms", "entry_price", "stop_price", "exit_bar_ms"]
+    frozen = pd.read_csv(source_path, usecols=fields, dtype={"symbol": str, "week": str},
+                         float_precision="round_trip")
+    frozen = frozen[(frozen.arm == "breakout") & (~frozen.is_control.astype(bool))
+                    & frozen.tp_r.eq(0.0) & frozen.confirmation_ms.lt(cutoff)].copy()
+    current = paths[(paths["venue"] == "OKX") & (paths["mode"] == "immediate")
+                    & paths.confirmation_ms.lt(cutoff)].copy()
+    key = ["symbol", "week", "side", "key_open_ms", "confirmation_ms"]
+    if frozen.duplicated(key).any() or current.duplicated(key).any():
+        raise ValueError("Frozen OKX breakout parity has duplicate signal keys")
+    merged = current.merge(frozen, on=key, how="outer", suffixes=("_new", "_frozen"),
+                           indicator=True, validate="one_to_one")
+    unmatched = merged[merged._merge.ne("both")]
+    if len(unmatched):
+        raise ValueError(f"OKX first-breakout candidate identities differ from frozen paths: {len(unmatched)}")
+    executable = merged[merged.status_new.eq("executed") & merged.status_frozen.eq("executed")]
+    entry_clock_equal = executable.entry_ms_new.eq(executable.entry_ms_frozen).all()
+    entry_price_diff = (executable.entry_price_new - executable.entry_price_frozen).abs()
+    stop_diff = (executable.stop_price_new - executable.stop_price_frozen).abs()
+    if (not entry_clock_equal
+            or not np.allclose(executable.entry_price_new, executable.entry_price_frozen,
+                               rtol=1e-12, atol=1e-12)
+            or not np.allclose(executable.stop_price_new, executable.stop_price_frozen,
+                               rtol=1e-12, atol=1e-12)):
+        raise ValueError("OKX immediate entry clock/price or anchor stop differs from frozen source")
+    last_open = cutoff - HOUR
+    tail = current[current.exit_reason.eq("series_tail_close")]
+    close_match = 0
+    for row in tail.itertuples():
+        if int(row.exit_bar_ms) != last_open:
+            raise ValueError("Common-cutoff tail exit did not use the final shared H1 open")
+        clock, bars = quotes[("OKX", str(row.symbol))]
+        i = int(np.searchsorted(clock, last_open))
+        if i >= len(clock) or int(clock[i]) != last_open:
+            raise ValueError(f"Missing final OKX common close for tail position {row.event_id}")
+        if not np.isclose(float(row.exit_price), float(bars[i, 3]), rtol=1e-12, atol=1e-12):
+            raise ValueError(f"Cutoff tail exit differs from final OKX H1 close: {row.event_id}")
+        close_match += 1
+    frozen_by_key = frozen.set_index(key)
+    surviving = 0
+    for row in tail.itertuples():
+        k = (str(row.symbol), str(row.week), int(row.side), int(row.key_open_ms), int(row.confirmation_ms))
+        if int(frozen_by_key.loc[k, "exit_bar_ms"]) >= cutoff:
+            surviving += 1
+    if surviving != close_match:
+        raise ValueError(f"Frozen OKX paths imply {surviving} cutoff survivors; rebuilt {close_match}")
+    boundary = paths[(paths["venue"] == "OKX") & (paths["mode"] == "immediate")
+                     & paths.confirmation_ms.eq(cutoff)]
+    return {"frozen_source_paths": str(source_path.relative_to(ROOT)),
+            "matched_candidate_identities_pre_cutoff": int(len(merged)),
+            "executable_entry_clock_price_stop_exact_matches": int(len(executable)),
+            "max_abs_entry_price_difference": float(entry_price_diff.max()) if len(executable) else 0.0,
+            "max_abs_stop_difference": float(stop_diff.max()) if len(executable) else 0.0,
+            "cutoff_boundary_confirmation_events_no_entry": int(len(boundary)),
+            "cutoff_tail_closes": int(close_match),
+            "tail_close_price_matches_final_common_h1_close": int(close_match),
+            "frozen_paths_surviving_cutoff": int(surviving)}
+
+
 def _run_account_set(paths: pd.DataFrame, config: dict, quotes: dict) -> tuple[pd.DataFrame, dict]:
     full_start = int(config["data"]["full_history_start_ms"])
     common_start = int(config["data"]["common_90d_account_start_ms"])
@@ -400,8 +463,8 @@ def _run_account_set(paths: pd.DataFrame, config: dict, quotes: dict) -> tuple[p
     account_summary = {}
     for venue in VENUES:
         for mode in MODES:
-            pool = paths[(paths.venue == venue) & (paths.mode == mode)
-                         & paths.status.eq("executed")].copy()
+            pool = paths[(paths["venue"] == venue) & (paths["mode"] == mode)
+                         & paths["status"].eq("executed")].copy()
             for sample, start in (("full_observable", full_start), ("common_90d", common_start)):
                 selected = pool if sample == "full_observable" else pool[pool.common_90d_eligible.astype(bool)]
                 if (selected.entry_ms < start).any() or (selected.entry_ms >= end).any():
@@ -499,6 +562,7 @@ def run(config_path: Path = CONFIG_PATH) -> dict:
     candidates.to_csv(EXP / config["outputs"]["candidate_audit_csv_gz"], index=False,
                       compression="gzip")
 
+    parity_audit = _verify_okx_frozen_parity(paths, quotes, int(config["data"]["cutoff_ms"]))
     metrics, accounts = _run_account_set(paths, config, quotes)
     metrics.to_csv(EXP / config["outputs"]["account_metrics_csv"], index=False)
     summary = {
@@ -511,16 +575,16 @@ def run(config_path: Path = CONFIG_PATH) -> dict:
             venue: sum(v["first_weekly_breakout_events"] for k, v in signal_audit.items()
                        if k.startswith(venue + "/")) for venue in VENUES},
         "path_counts": {venue: {
-            mode: {"all_candidates": int(((paths.venue == venue) & (paths.mode == mode)).sum()),
-                   "executed": int(((paths.venue == venue) & (paths.mode == mode)
-                                    & paths.status.eq("executed")).sum()),
-                   "common_90d_executed": int(((paths.venue == venue) & (paths.mode == mode)
-                                                & paths.status.eq("executed")
+            mode: {"all_candidates": int(((paths["venue"] == venue) & (paths["mode"] == mode)).sum()),
+                   "executed": int(((paths["venue"] == venue) & (paths["mode"] == mode)
+                                    & paths["status"].eq("executed")).sum()),
+                   "common_90d_executed": int(((paths["venue"] == venue) & (paths["mode"] == mode)
+                                                & paths["status"].eq("executed")
                                                 & paths.common_90d_eligible.astype(bool)).sum()),
-                   "exit_reasons": paths[(paths.venue == venue) & (paths.mode == mode)
-                                         & paths.status.eq("executed")].exit_reason.value_counts().to_dict()}
+                   "exit_reasons": paths[(paths["venue"] == venue) & (paths["mode"] == mode)
+                                         & paths["status"].eq("executed")].exit_reason.value_counts().to_dict()}
             for mode in MODES} for venue in VENUES},
-        "accounts": accounts, "symbol_audit": signal_audit,
+        "accounts": accounts, "symbol_audit": signal_audit, "okx_frozen_parity": parity_audit,
         "limitations": [
             "The Binance cache stores complete H1 candles assembled from frozen 5m archives; 12H is aggregated only from complete consecutive H1 bars. OKX uses native 12H and H1 inputs.",
             "The 2026-09-23 04:00 UTC exclusive end is the last common observed H1 close across all ten symbols and both venues; later OKX and partial Binance bars are excluded.",
