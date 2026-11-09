@@ -52,7 +52,7 @@ def main():
             forced=taken[taken.delivery]
             forced[['event_id','symbol','tp_r','exit_bar_ms']].to_csv(EXP/f'delivery_{label}.csv',index=False)
             absent=set(forced.symbol+'USDT')-marks.keys()
-            if absent or forced.delivery_gap.eq(True).any():
+            if absent or taken.delivery_ambiguous.eq(True).any():
                 raise ValueError(f'Unresolved delivery source for {label}: {sorted(absent)}')
             paid=admin.resolve_settlements(taken.copy(),marks,'proxy')
             data=admin.archive.native.prepare(paid)
