@@ -12,7 +12,6 @@ import numpy as np
 import pandas as pd
 
 from yoyo.evaluation import cloud_close_inverse_examples as book
-from yoyo.monitor.cloud_signals import ema_points
 from yoyo.monitor.cloud_signal_plans import stop_pct_for
 from yoyo.monitor.monday_fib import week_window
 
@@ -51,8 +50,12 @@ def draw(position, path, fills, source, eth_btc_ret):
     is_long = position.side == 1
     boundary = lower if is_long else upper
     assert np.isclose(boundary*(1-position.side*stop_pct_for(position.symbol)), path.stop_price)
-    ema = pd.DataFrame(ema_points(bars.loc[:key].reset_index().to_dict("records"))).set_index("time")
-    hist = bars.loc[:key].tail(17).join(ema[["ema20","ema50"]])
+    past = bars.loc[:key].copy()
+    segment = past.index.to_series().diff().ne(STEP).cumsum()
+    for span in [20, 50]:
+        past[f"ema{span}"] = past.close.groupby(segment).transform(
+            lambda close: close.ewm(span=span, adjust=False, min_periods=50).mean())
+    hist = past.tail(17)
     current = hist.iloc[-1]
     assert current.low < lower if is_long else current.high > upper
     assert lower < current.close < upper and (current.ema20-current.ema50)*position.side > 0
