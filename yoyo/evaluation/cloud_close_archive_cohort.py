@@ -99,18 +99,25 @@ def aggregate(bars,hours):
     return frame
 
 
-def price(symbol):
+def price(symbol, *, onboard_ms=None):
     work=CACHE/'symbols'/symbol
     work.mkdir(parents=True,exist_ok=True)
     receipt=work/'complete.json'
     if receipt.exists():
-        return json.loads(receipt.read_text())
+        recorded = json.loads(receipt.read_text())
+        if recorded.get('regular_onboard_ms')!=onboard_ms:
+            raise ValueError('Cached archive has a different listing-time scope')
+        return recorded
     bars=input_frame(symbol,work)
+    if onboard_ms is not None:
+        bars = bars[bars.index.as_unit('ms').asi8 >= onboard_ms]
     events=keys.build_inputs(bars,symbol,None,key_timeframes=['12H'],source_minutes=15)[4].reset_index(drop=True)
     if events.empty:
         events=pd.DataFrame(columns=['tf','close_ns','signal_id','week','side','stop'])
     hours=bars[(bars.index.as_unit('ms').asi8>=venue.START)]
     stats=venue.price_frames(symbol,work,aggregate(hours,1),aggregate(hours,12),events)
+    if onboard_ms is not None:
+        stats['regular_onboard_ms'] = onboard_ms
     receipt.write_text(json.dumps(stats)+'\n')
     print(symbol,stats['source_signals'],flush=True)
     return stats

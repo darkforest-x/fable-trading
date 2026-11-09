@@ -8,6 +8,7 @@ built from it avoids survivorship bias. No parsing of candle content here.
 from __future__ import annotations
 import re
 import urllib.request
+from urllib.parse import urlencode
 
 INDEX = 'https://s3-ap-northeast-1.amazonaws.com/data.binance.vision'
 
@@ -15,7 +16,10 @@ INDEX = 'https://s3-ap-northeast-1.amazonaws.com/data.binance.vision'
 def _list(prefix):
     marker, out = '', []
     while True:
-        url = f'{INDEX}?delimiter=/&prefix={prefix}' + (f'&marker={marker}' if marker else '')
+        query = {'delimiter':'/', 'prefix':prefix}
+        if marker:
+            query['marker'] = marker
+        url = f'{INDEX}?{urlencode(query)}'
         with urllib.request.urlopen(url, timeout=60) as r:
             xml = r.read().decode()
         out += re.findall(r'<Prefix>([^<]+)</Prefix>', xml)[1:] + re.findall(r'<Key>([^<]+)</Key>', xml)
