@@ -1,0 +1,10 @@
+{
+  "experiment_id": "exp-cloud-close-breakout-fixed-delay-20261109-v1",
+  "source_experiment": "exp-cloud-close-breakout-branch-20261109-v1",
+  "single_variable": "Enter all ten-coin panel breakout parents one fixed 12H later rather than at confirmation, keeping each signal's original relative stop distance and direction.",
+  "delay_bars": 1,
+  "eligibility": "Take every original candidate with an executable open and valid original stop, regardless of subsequent market or volatility. Do not require same-week availability, any future non-breakout or favorable market state. Reject only clock or source bounds at the exact scheduled fill.",
+  "execution": "VectorBT actual market-on-open and native cloud exits with shared nine-slot 1000 USDT cash, no leverage. Use archived source experiment account as immediate entry reference.",
+  "fees": {"market_per_side": 0.0005, "maker_per_side_unused": 0.0002, "funding": "omitted", "extra_slippage": 0.0},
+  "sample": "Same ten OKX contracts, native history through 2026-11-08T12:00:00Z exclusive. Later years have already been inspected."
+}
