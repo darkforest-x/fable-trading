@@ -1,0 +1,6 @@
+{
+  "question": "When selecting three Wednesday 12H cloud breakouts, do newly rising names with the lowest prior 30-day returns fare better than chasing the already strongest names?",
+  "single_variable": "Reverse the direction of the existing weekly trailing 30-day return ranking. Choose up to the three lowest returns from the same contemporaneous bullish EMA20/50 cohort closing beyond its own completed NY Monday upper 1.618.",
+  "source": "exp-cloud-close-leader-rotation-20261109-v1",
+  "execution": "Reuse previously computed identical native path observations by symbol and UTC decision, price every missing selection with the same VectorBT fixed stop at the upper extension and native EMA exit. Keep shared 1000U, three slots, 5bp taker per side, no funding. Compare to existing strongest three and five fixed synchronous random controls. Direction chosen after inspecting the strongest group."
+}
