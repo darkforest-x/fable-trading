@@ -331,7 +331,7 @@ def collect_observations(parents: pd.DataFrame, quotes, workers: int) -> tuple[p
     if receipt.status.eq("missing").any():
         print(f"Binance official S3 daily archives unavailable for {int(receipt.status.eq('missing').sum())} required symbol-days; affected parents will remain unknown.", flush=True)
     records = []
-    for n, row in enumerate(parents.itertuples(), 1):
+    for n, row in enumerate(parents.reset_index().itertuples(index=False), 1):
         records.append(observe(row, quotes))
         if n % 100 == 0 or n == len(parents):
             print(f"Validated native Binance prior-volume windows {n}/{len(parents)}", flush=True)
