@@ -8,12 +8,12 @@ filters a previously funded trade list to create breakout entries.
 from __future__ import annotations
 
 import argparse
-from collections import Counter, defaultdict
-from datetime import datetime, timezone
 import json
 import math
-from pathlib import Path
 import zlib
+from collections import Counter
+from functools import lru_cache
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -23,10 +23,10 @@ from yoyo.evaluation import cloud_close_reward_paths as engine
 from yoyo.evaluation import cloud_close_second_reclaim_paths as reclaim
 from yoyo.monitor.cloud_signal_plans import fixed_stop
 
-
 ROOT = engine.ROOT
 EXP = ROOT / "experiments/active/exp-cloud-close-breakout-branch-20261109-v1"
 CONFIG_PATH = EXP / "config.json"
+HISTORICAL_EXP = ROOT / "experiments/active/exp-cloud-close-breakout-historical-20261109-v1"
 HOUR = engine.HOUR_MS
 STEP = engine.STEP_12H
 TAKER = engine.TAKER
@@ -67,23 +67,62 @@ def _ny_week_open(time_ms: int) -> dict:
     return engine._ny_week_window(int(time_ms))
 
 
-def _input_paths(symbol: str, config: dict) -> tuple[Path, Path, str]:
+def _input_paths(symbol: str, config: dict) -> tuple[Path | None, Path, str]:
     group = config["data"]["symbol_source_groups"][symbol]
+    if group == "retired_documented_h1":
+        source = config["data"]["retired_h1_sources"][symbol]
+        return None, ROOT / source["bars1h_path"], group
     base = ROOT / config["data"]["source_roots"][group] / symbol
     return base / "bars12h.csv.gz", base / "bars1h.csv.gz", group
 
 
-def _load_symbol(symbol: str, config: dict) -> tuple[pd.DataFrame, pd.DataFrame, str, str, str]:
+def _validate_frame(frame: pd.DataFrame, symbol: str, period: str) -> None:
+    fields = ["open", "high", "low", "close"]
+    if (not frame.index.is_unique or not frame.index.is_monotonic_increasing
+            or not set(fields).issubset(frame.columns)):
+        raise ValueError(f"Invalid {period} history schema for {symbol}")
+    values = frame[fields].to_numpy(dtype=float)
+    if (not np.isfinite(values).all() or np.any(values <= 0)
+            or np.any(values[:, 2] > values[:, [0, 1, 3]].min(axis=1))
+            or np.any(values[:, 1] < values[:, [0, 2, 3]].max(axis=1))):
+        raise ValueError(f"Invalid {period} OHLC values for {symbol}")
+
+
+@lru_cache(maxsize=69)
+def _retired_frames_cached(hour_path: str, end_ms: int) -> tuple[pd.DataFrame, pd.DataFrame]:
+    from yoyo.evaluation import cloud_close_weak_rally_branch as retired
+    return retired.frames((Path(hour_path), None, int(end_ms)))
+
+
+def _load_symbol(symbol: str, config: dict) -> tuple[pd.DataFrame, pd.DataFrame, str, str, str, int]:
     p12, p1, group = _input_paths(symbol, config)
-    bars12 = engine._load_bars(p12, "12h")
-    bars1 = engine._load_bars(p1, "1h")
+    data_end_ms = int(config["data"]["cutoff_ms"])
+    if group == "retired_documented_h1":
+        source = config["data"]["retired_h1_sources"][symbol]
+        p1 = ROOT / source["bars1h_path"]
+        data_end_ms = int(source["available_end_ms"])
+        bars1, bars12 = _retired_frames_cached(str(p1), data_end_ms)
+        p12 = f"12H aggregated by weak_rally_branch.frames from {source['bars1h_path']}"
+        bars1 = bars1[["open", "high", "low", "close"]].astype(float)
+        bars12 = bars12[["open", "high", "low", "close"]].astype(float)
+        if (not bars1.index.is_unique or not bars1.index.is_monotonic_increasing
+                or not bars12.index.is_unique or not bars12.index.is_monotonic_increasing):
+            raise ValueError(f"Invalid aggregated archived bars for {symbol}")
+        if not np.equal(bars12.index.to_numpy(dtype=np.int64) % STEP, 0).all():
+            raise ValueError(f"Aggregated 12H bars are not UTC aligned for {symbol}")
+        _validate_frame(bars1, symbol, "1H")
+        _validate_frame(bars12, symbol, "aggregated 12H")
+    else:
+        bars12 = engine._load_bars(p12, "12h")
+        bars1 = engine._load_bars(p1, "1h")
     if bars12.empty or bars1.empty:
         raise ValueError(f"Missing native OHLC input for {symbol}: {p12}, {p1}")
-    if int(bars12.index.max()) + STEP < int(config["data"]["cutoff_ms"]):
+    if group != "retired_documented_h1" and int(bars12.index.max()) + STEP < int(config["data"]["cutoff_ms"]):
         raise ValueError(f"12H input for {symbol} ends before frozen cutoff")
-    if int(bars1.index.max()) + HOUR < int(config["data"]["cutoff_ms"]):
+    if group != "retired_documented_h1" and int(bars1.index.max()) + HOUR < int(config["data"]["cutoff_ms"]):
         raise ValueError(f"1H input for {symbol} ends before frozen cutoff")
-    return bars12, bars1, group, str(p12.relative_to(ROOT)), str(p1.relative_to(ROOT))
+    p12_string = str(p12.relative_to(ROOT)) if isinstance(p12, Path) else str(p12)
+    return bars12, bars1, group, p12_string, str(p1.relative_to(ROOT)), data_end_ms
 
 
 def _valid_key(index: int, bars12: pd.DataFrame, features: dict,
@@ -245,7 +284,7 @@ def _signal_sets(symbol: str, bars12: pd.DataFrame,
     for arm, parents in by_arm.items():
         controls, match_stats = _match_controls(arm, parents, valid_keys,
                                                config, row_counter)
-        by_arm[arm].extend(controls)
+        parents.extend(controls)
         for parent in parents:
             if not parent.get("is_control"):
                 audits.append(_candidate_record(arm, parent))
@@ -358,16 +397,16 @@ def _event_paths(events: list[dict], q: np.ndarray,
     return rows, {**stats, "priced_events": len(executable), "source_tail_ms": int(bar_ms[-1])}
 
 
-def _account_scenario(label: str, events: pd.DataFrame) -> tuple[dict, pd.DataFrame, pd.DataFrame, dict]:
+def _account_scenario(label: str, events: pd.DataFrame, quote_loader) -> tuple[dict, pd.DataFrame, pd.DataFrame, dict]:
     if events.empty:
         raise ValueError(f"Cannot run empty account scenario {label}")
     data = wallet.prepare(events, slots=9, start=wallet.START, end=wallet.END,
-                          quote_loader=wallet.quotes)
+                          quote_loader=quote_loader)
     funded, equity = wallet.account(data, slip=0.0, exposure=1.0)
     metrics = {period: wallet.summarize(funded, equity, *bounds)
                for period, bounds in PERIODS.items()}
-    meta = {"input_executed_events": int(len(events)), "admitted": int(len(data["selected"])),
-            "funded": int(len(funded)), "rejected": data["skips"],
+    meta = {"input_executed_events": len(events), "admitted": len(data["selected"]),
+            "funded": len(funded), "rejected": data["skips"],
             "unquoted_position_hours": int(data["gap_marks"])}
     if not np.isclose(1000.0 + funded.cash_pnl.sum(), equity.nav.iloc[-1],
                       rtol=1e-8, atol=.005):
@@ -379,12 +418,33 @@ def _json_metrics(metrics: dict) -> dict:
     return {period: _json_safe(values) for period, values in metrics.items()}
 
 
+def _quote_loader(config: dict):
+    retired_sources = config["data"].get("retired_h1_sources", {})
+    if not retired_sources:
+        return wallet.quotes
+    @lru_cache(maxsize=len(retired_sources))
+    def quotes(symbol: str):
+        if symbol not in retired_sources:
+            return wallet.quotes(symbol)
+        source = retired_sources[symbol]
+        h1_path = ROOT / source["bars1h_path"]
+        hourly, _ = _retired_frames_cached(str(h1_path), int(source["available_end_ms"]))
+        return (hourly.index.to_numpy(dtype=np.int64),
+                hourly[["open", "high", "low", "close"]].to_numpy(dtype=float))
+
+    return quotes
+
+
 def _prepare_one_symbol(symbol: str, config: dict, row_counter: list[int]) -> tuple[dict, list[dict], dict]:
-    bars12, source_bars1, source_group, p12, p1 = _load_symbol(symbol, config)
+    bars12, source_bars1, source_group, p12, p1, source_end_ms = _load_symbol(symbol, config)
     cutoff = int(config["data"]["cutoff_ms"])
     bars1 = source_bars1.loc[source_bars1.index < cutoff]
-    if bars1.empty or int(bars1.index[-1]) + HOUR < cutoff:
+    if bars1.empty:
+        raise ValueError(f"No H1 observations through the available lifetime for {symbol}")
+    if source_group != "retired_documented_h1" and int(bars1.index[-1]) + HOUR < cutoff:
         raise ValueError(f"No complete H1 observations through the frozen cutoff for {symbol}")
+    if int(bars1.index[-1]) + HOUR > source_end_ms:
+        raise ValueError(f"H1 row extends past source availability for {symbol}")
     q, bar_ms, prepared = engine._prepare_symbol(bars12, bars1)
     features = prepared["features"]
     calendar = reclaim._anchors(bars1, bars12, symbol)
@@ -402,11 +462,32 @@ def _prepare_one_symbol(symbol: str, config: dict, row_counter: list[int]) -> tu
     total_12h_gap = int(np.count_nonzero(np.diff(bars12.index.to_numpy(dtype=np.int64)) != STEP))
     total_1h_gap = int(np.count_nonzero(np.diff(bar_ms) != HOUR))
     range_states = Counter(item["state"] for item in calendar.values())
+    retired_provenance = {}
+    if source_group == "retired_documented_h1":
+        source = config["data"]["retired_h1_sources"][symbol]
+        receipt_path = ROOT / source["source_receipt_path"]
+        months_path = ROOT / source["months_manifest_path"]
+        if not receipt_path.is_file() or not months_path.is_file():
+            raise FileNotFoundError(f"Retired OKX source receipt missing for {symbol}")
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        months = json.loads(months_path.read_text(encoding="utf-8"))
+        retired_provenance = {
+            "source_receipt_path": source["source_receipt_path"],
+            "months_manifest_path": source["months_manifest_path"],
+            "source_hours": int(receipt["hours"]),
+            "complete_native_minute_hours": int(receipt["from_complete_native_minutes"]),
+            "supplemental_local_h1_hours": int(receipt["supplemental_local_h1"]),
+            "overlap_hours": int(receipt["overlap_hours"]),
+            "overlap_disagreements": int(receipt["overlap_disagreements"]),
+            "month_status_counts": dict(Counter(row["status"] for row in months)),
+        }
     audit = {
         "symbol": symbol, "source_group": source_group,
         "bars12h_path": p12, "bars1h_path": p1,
-        "bars12h_rows": int(len(bars12)), "bars1h_rows_source": int(len(source_bars1)),
-        "bars1h_rows_used_pre_cutoff": int(len(bars1)),
+        "source_available_end_ms": source_end_ms,
+        "retired_source_provenance": retired_provenance,
+        "bars12h_rows": len(bars12), "bars1h_rows_source": len(source_bars1),
+        "bars1h_rows_used_pre_cutoff": len(bars1),
         "bars12h_first_open_ms": int(bars12.index[0]), "bars12h_last_open_ms": int(bars12.index[-1]),
         "bars1h_first_open_ms": int(bar_ms[0]), "bars1h_last_open_ms": int(bar_ms[-1]),
         "bars12h_gap_count": total_12h_gap, "bars1h_gap_count": total_1h_gap,
@@ -425,9 +506,11 @@ def _prepare_one_symbol(symbol: str, config: dict, row_counter: list[int]) -> tu
 
 def run(config_path: Path = CONFIG_PATH) -> dict:
     config = json.loads(config_path.read_text(encoding="utf-8"))
-    if config["experiment_id"] != EXP.name:
+    experiment_dir = config_path.parent
+    if config["experiment_id"] != experiment_dir.name:
         raise ValueError("Unexpected experiment_id")
-    if (EXP / "summary.json").exists():
+    output_dir = experiment_dir / config.get("output_subdir", ".")
+    if (output_dir / config["outputs"]["summary_json"]).exists():
         raise FileExistsError("Refusing to overwrite a completed breakout-branch run")
     if float(config["fees"]["taker_per_fill"]) != TAKER:
         raise ValueError("Frozen OKX taker rate must be 5bp per fill")
@@ -435,40 +518,89 @@ def run(config_path: Path = CONFIG_PATH) -> dict:
             or int(config["account"]["end_ms"]) != wallet.END
             or int(config["data"]["cutoff_ms"]) != wallet.END):
         raise ValueError("Config account bounds must match the frozen shared-wallet UTC window")
+    reuse = config.get("reuse_original_paths")
+    row_counter = [1_000_000] if reuse else [0]
     rows_by_arm = {"breakout": [], "reclaim": []}
     candidates, symbol_audits = [], {}
-    row_counter = [0]
-    for symbol in config["data"]["symbols"]:
+    run_symbols = config["data"]["symbols"]
+    for symbol_number, symbol in enumerate(run_symbols, start=1):
         path_rows, candidate_rows, audit = _prepare_one_symbol(symbol, config, row_counter)
-        for arm in rows_by_arm:
-            rows_by_arm[arm].extend(path_rows[arm])
+        for arm, arm_rows in rows_by_arm.items():
+            arm_rows.extend(path_rows[arm])
         candidates.extend(candidate_rows)
         symbol_audits[symbol] = audit
-        print(f"prepared {symbol}: breakout={audit['first_signal_counts']['breakout_first_weekly_keys']} "
+        print(f"prepared {symbol_number}/{len(run_symbols)} {symbol}: "
+              f"breakout={audit['first_signal_counts']['breakout_first_weekly_keys']} "
               f"reclaim={audit['first_signal_counts']['reclaim_first_weekly_keys']}", flush=True)
-    paths = pd.concat([pd.DataFrame(rows_by_arm[arm]) for arm in rows_by_arm], ignore_index=True)
+    incremental_paths = pd.concat([pd.DataFrame(rows_by_arm[arm]) for arm in rows_by_arm], ignore_index=True)
+    incremental_candidates = pd.DataFrame(candidates)
+    reused_path_rows = 0
+    reused_candidate_rows = 0
+    reused_symbols: list[str] = []
+    reused_symbol_audits = {}
+    if reuse:
+        reused_symbols = list(reuse["symbols"])
+        frozen_paths_path = ROOT / reuse["paths_csv_gz"]
+        frozen_candidates_path = ROOT / reuse["candidate_audit_csv_gz"]
+        frozen_audit_path = ROOT / reuse["audit_json"]
+        frozen_paths = pd.read_csv(frozen_paths_path, dtype={"symbol": str},
+                                   float_precision="round_trip", keep_default_na=False)
+        frozen_candidates = pd.read_csv(frozen_candidates_path, dtype={"symbol": str},
+                                        float_precision="round_trip", keep_default_na=False)
+        if set(frozen_paths.symbol.unique()) != set(reused_symbols):
+            raise ValueError("Frozen reuse paths do not match the explicitly preregistered ten-symbol panel")
+        if set(frozen_paths.arm.unique()) != {"breakout", "reclaim"}:
+            raise ValueError("Frozen ten-symbol reuse paths do not contain both prespecified arms")
+        frozen_audit = json.loads(frozen_audit_path.read_text(encoding="utf-8"))
+        reused_symbol_audits = frozen_audit["symbols"]
+        if set(reused_symbol_audits) != set(reused_symbols):
+            raise ValueError("Frozen ten-symbol audit does not match the preregistered reused panel")
+        if not (incremental_paths.symbol.isin(reused_symbols).sum() == 0):
+            raise ValueError("Incremental price run overlaps the frozen original ten symbols")
+        reused_path_rows, reused_candidate_rows = len(frozen_paths), len(frozen_candidates)
+        paths = pd.concat([frozen_paths, incremental_paths], ignore_index=True)
+        candidates_frame = pd.concat([frozen_candidates, incremental_candidates], ignore_index=True)
+    else:
+        paths = incremental_paths
+        candidates_frame = incremental_candidates
     if paths.duplicated(["arm", "event_id", "tp_r"]).any():
         raise ValueError("Duplicate native path row")
     if not paths.groupby(["arm", "event_id"]).size().eq(1).all():
         raise ValueError("Each strategy event must have one 0R native path")
-    paths_out = EXP / config["outputs"]["paths_csv_gz"]
-    candidate_out = EXP / config["outputs"]["candidate_audit_csv_gz"]
-    funded_out = EXP / config["outputs"]["funded_dir"]
+    paths_out = output_dir / config["outputs"]["paths_csv_gz"]
+    candidate_out = output_dir / config["outputs"]["candidate_audit_csv_gz"]
+    funded_out = output_dir / config["outputs"]["funded_dir"]
     funded_out.mkdir(parents=True, exist_ok=True)
     paths_out.parent.mkdir(parents=True, exist_ok=True)
     paths.to_csv(paths_out, index=False, compression="gzip")
-    pd.DataFrame(candidates).to_csv(candidate_out, index=False, compression="gzip")
+    candidates_frame.to_csv(candidate_out, index=False, compression="gzip")
+    if reuse:
+        incremental_paths.to_csv(output_dir / config["outputs"]["incremental_paths_csv_gz"],
+                                 index=False, compression="gzip")
+        incremental_candidates.to_csv(output_dir / config["outputs"]["incremental_candidate_audit_csv_gz"],
+                                      index=False, compression="gzip")
 
-    summary = {"experiment_id": EXP.name, "symbols": config["data"]["symbols"],
+    all_symbols = sorted(set(config["data"]["symbols"]) | set(reused_symbols))
+    summary = {"experiment_id": experiment_dir.name, "symbols": all_symbols,
+               "incremental_symbols": config["data"]["symbols"],
+               "reused_symbols": reused_symbols,
                "starting_usdt": 1000.0, "slots": 9,
                "input_paths": {arm: int((paths.arm == arm).sum()) for arm in rows_by_arm},
-               "candidate_events": {}, "accounts": {}, "symbol_audits": symbol_audits,
+               "incremental_path_rows": {arm: int((incremental_paths.arm == arm).sum()) for arm in rows_by_arm},
+               "reused_original_ten_path_rows": reused_path_rows,
+               "reused_original_ten_candidate_rows": reused_candidate_rows,
+               "universe_counts": config["data"].get(
+                   "history_counts", {"historical_source_names": len(all_symbols)}),
+               "candidate_events": {}, "accounts": {},
+               "symbol_audits": {**reused_symbol_audits, **symbol_audits},
                "source_config": str(config_path.relative_to(ROOT)),
                "fees": config["fees"], "periods": list(PERIODS)}
     metrics_rows = []
+    quote_loader = _quote_loader(config)
     executed = paths[paths.status.eq("executed") & paths.tp_r.eq(0.0)].copy()
     if not np.array_equal(executed.exit_fee_rate.to_numpy(), np.full(len(executed), TAKER)):
         raise ValueError("Only market exits are allowed; native fee rates must all be taker")
+    scenario_pools = {}
     for arm in ("breakout", "reclaim"):
         arm_rows = executed[executed.arm.eq(arm)].copy()
         real = arm_rows[~arm_rows.is_control].copy()
@@ -479,11 +611,11 @@ def run(config_path: Path = CONFIG_PATH) -> dict:
                      "matched_control": controls[controls.control_match_status.eq("matched")].copy()}
         summary["candidate_events"][arm] = {
             "signals": int((paths.arm.eq(arm) & ~paths.is_control).sum()),
-            "executable_actual_paths": int(len(real)),
-            "matched_controls": int(len(scenarios["matched_control"])),
+            "executable_actual_paths": len(real),
+            "matched_controls": len(scenarios["matched_control"]),
             "unmatched_controls": int((paths.arm.eq(arm) & paths.is_control &
                                        paths.control_match_status.eq("unmatched")).sum()),
-            "paired_real_parents": int(len(paired)),
+            "paired_real_parents": len(paired),
             "actual_no_entry_reasons": paths.loc[
                 paths.arm.eq(arm) & ~paths.is_control & paths.status.ne("executed"),
                 "exit_reason"].value_counts().to_dict(),
@@ -493,31 +625,41 @@ def run(config_path: Path = CONFIG_PATH) -> dict:
             "exit_reasons": real.exit_reason.value_counts().to_dict(),
         }
         summary["accounts"][arm] = {}
-        for name, sample in scenarios.items():
-            if sample.empty:
-                summary["accounts"][arm][name] = {"skipped": "no funded inputs"}
-                continue
-            metrics, funded, equity, meta = _account_scenario(f"{arm}_{name}", sample)
-            summary["accounts"][arm][name] = {
-                "metrics": _json_metrics(metrics), "admission": meta,
-                "funded_positions": int(len(funded)),
-                "exit_reasons": funded.exit_reason.value_counts().to_dict(),
-            }
-            funded.to_csv(funded_out / f"funded_{arm}_{name}.csv.gz", index=False, compression="gzip")
-            equity.to_csv(funded_out / f"hourly_{arm}_{name}.csv.gz", index_label="hour_end_utc",
-                          compression="gzip")
-            metrics_rows.extend(dict(arm=arm, scenario=name, period=period, **values)
-                                for period, values in metrics.items())
-    pd.DataFrame(metrics_rows).to_csv(EXP / config["outputs"]["account_metrics_csv"], index=False)
-    _write_json(EXP / config["outputs"]["audit_json"], {
+        scenario_pools[arm] = scenarios
+    # Fund both complete actual accounts before paired/control diagnostics so
+    # the primary two-branch result is available first on expanded runs.
+    scenario_order = [("breakout", "actual"), ("reclaim", "actual"),
+                      ("breakout", "paired_actual"), ("breakout", "matched_control"),
+                      ("reclaim", "paired_actual"), ("reclaim", "matched_control")]
+    for arm, name in scenario_order:
+        sample = scenario_pools[arm][name]
+        if sample.empty:
+            summary["accounts"][arm][name] = {"skipped": "no funded inputs"}
+            continue
+        metrics, funded, equity, meta = _account_scenario(f"{arm}_{name}", sample, quote_loader)
+        summary["accounts"][arm][name] = {
+            "metrics": _json_metrics(metrics), "admission": meta,
+            "funded_positions": len(funded),
+            "exit_reasons": funded.exit_reason.value_counts().to_dict(),
+        }
+        funded.to_csv(funded_out / f"funded_{arm}_{name}.csv.gz", index=False, compression="gzip")
+        equity.to_csv(funded_out / f"hourly_{arm}_{name}.csv.gz", index_label="hour_end_utc",
+                      compression="gzip")
+        metrics_rows.extend(dict(arm=arm, scenario=name, period=period, **values)
+                            for period, values in metrics.items())
+    pd.DataFrame(metrics_rows).to_csv(output_dir / config["outputs"]["account_metrics_csv"], index=False)
+    _write_json(output_dir / config["outputs"]["audit_json"], {
         "config": config, "source_contract": config["data"],
-        "symbols": symbol_audits,
+        "symbols": {**reused_symbol_audits, **symbol_audits},
         "paths_rows_by_arm": {arm: int((paths.arm == arm).sum()) for arm in rows_by_arm},
-        "candidate_rows": int(len(candidates)),
+        "incremental_paths_rows_by_arm": {arm: int((incremental_paths.arm == arm).sum()) for arm in rows_by_arm},
+        "incremental_candidate_rows": len(incremental_candidates),
+        "reused_frozen_paths": reuse,
+        "combined_candidate_rows": len(candidates_frame),
         "vectorbt_runtime": "local VectorBT 1.2.0; existing reward_paths._order_func and reward_account.account_order",
         "path_semantics": "One native independent VectorBT column per event; one actual shared-cash nine-slot account per arm/scenario.",
     })
-    _write_json(EXP / config["outputs"]["summary_json"], summary)
+    _write_json(output_dir / config["outputs"]["summary_json"], summary)
     print(json.dumps(_json_safe(summary), ensure_ascii=False, indent=2), flush=True)
     return summary
 
@@ -608,11 +750,14 @@ def main(argv=None) -> None:
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--mini-check", action="store_true")
     group.add_argument("--run", action="store_true")
+    group.add_argument("--run-expanded", action="store_true")
     args = parser.parse_args(argv)
     if args.mini_check:
         config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
         result = {"synthetic": mini_check(), "real_one_symbol": _real_smoke(config)}
         print(json.dumps(_json_safe(result), ensure_ascii=False, indent=2), flush=True)
+    elif args.run_expanded:
+        run(HISTORICAL_EXP / "config.json")
     else:
         run()
 
