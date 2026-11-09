@@ -1,0 +1,7 @@
+{
+  "id": "exp-cloud-close-weight-trim-20261109-v1",
+  "weight_cap": 0.2,
+  "only_change": "On each fully observed UTC 12H close where the marked absolute value of a single contract exceeds 20% of the prior closing account NAV, trim just the excess pro rata across surviving child legs at the next exact native H1 open. The original order book executes openings and open exits first. Prorate only if remaining contracts still exceed the preceding close's target quantity. No rebuy or new parent slots. Both long and short subject to the same marked notional cap. Every trim pays 5bp taker.",
+  "motivation": "Exploratory after observing concentration of 2025 marked drawdown on an ALPINE long in the scored Binance account. 20% is twice the parent's original 10% maximum starting notional; no cap search or symbol exclusions. Measure on the exact scored Binance account and on the independently sourced higher-growth OKX 12H-expiring TP account. Exchange entry/ranking/exit rules differ, so each comparison is with its own frozen parent. Later years previously observed.",
+  "costs": "Original market/stop 5bp, maker target 2bp each fill, before funding, lot rounding, depth and impact. Binance includes the prior ALPACA delisting index-price proxy. Native OHLC bounds on within-hour marked drawdown. No leverage."
+}
