@@ -28,7 +28,7 @@ def targets(loaded):
     return states
 
 
-def run(loaded,states,name,slip,*,symbols=SYMBOLS,directory=EXP,portfolio_builder=None,reference=None):
+def run(loaded,states,name,slip,*,symbols=SYMBOLS,directory=EXP,portfolio_builder=None,reference=None,fee_rate=source.TAKER):
     clock=loaded['BTC']['bars1'].index
     series=states[name].reindex(clock,method='ffill').fillna(-1).astype(int)
     current=series.to_numpy()
@@ -60,7 +60,7 @@ def run(loaded,states,name,slip,*,symbols=SYMBOLS,directory=EXP,portfolio_builde
         size[-1,current[-1]]=-np.inf
     if portfolio_builder is None:
         pf=source.wallet.vbt.Portfolio.from_orders(marks,size=size,price=marks,direction='longonly',
-            fees=source.TAKER,slippage=slip,init_cash=1000.,group_by=True,cash_sharing=True,call_seq=call_seq,
+            fees=fee_rate,slippage=slip,init_cash=1000.,group_by=True,cash_sharing=True,call_seq=call_seq,
             allow_partial=True,raise_reject=True)
     else:
         pf=portfolio_builder(marks,size,call_seq,slip)
@@ -69,7 +69,7 @@ def run(loaded,states,name,slip,*,symbols=SYMBOLS,directory=EXP,portfolio_builde
     if (positions>1e-10).sum(axis=1).max()>1 or not np.array_equal(current,actual):
         raise ValueError('Open positions differ from the chosen single asset')
     orders=pf.orders.records
-    if len(orders)!=np.count_nonzero(~np.isnan(size)) or not np.allclose(orders.fees,orders.price*orders['size']*source.TAKER):
+    if len(orders)!=np.count_nonzero(~np.isnan(size)) or not np.allclose(orders.fees,orders.price*orders['size']*fee_rate):
         raise ValueError('Native market order count or notional fee mismatch')
     trades=pf.trades.records.copy()
     if not trades.status.eq(1).all() or np.asarray(pf.assets())[-1].max()>1e-9:
