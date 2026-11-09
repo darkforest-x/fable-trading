@@ -1,0 +1,6 @@
+{
+  "additional_settlements": {},
+  "single_variable": "At an original Binance V1.7 confirmed 12H close, require the same perpetual contract's outstanding open interest quantity to have shrunk over the last 12h. Use the native daily metrics create_time and sum_open_interest at entry minus five minutes and exactly twelve hours earlier. No price weighting, minimum percentage or lookback search. A decrease is a positioning proxy; forced liquidations cannot be identified by these records.",
+  "sources": "Only required symbol-days from official Binance USD-M daily metrics archives, first reuse the registered twelve-symbol local archive. Retain 404 and missing exact/invalid observations as unknown. Raw source files and links are retained. No index forward fills.",
+  "account": "Observe all 23262 frozen original BTC/alt perpetual candidates. Compare covered, own-contract shrinking and a single matched-thinning control on the same fully observed candidate subset: identical 12h time/side/score-availability opportunity counts with predetermined 1029 seed. Original 1000U NAV/10 account, nine positions, 20% hourly name cap, fees 5bp taker/2bp maker. No trading prior to coverable timestamps in these arms. Report actual coverage; outcomes apply only there and do not establish a full-history result. Funding is separate."
+}
