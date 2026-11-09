@@ -19,7 +19,7 @@ WIDTHS = (1,2,3,4)
 
 @njit(cache=True)
 def trail_order(c, bars, times, start, end, sides, risk, widths, exit_px, phase,
-                peaks, why, exit_stage, fixed_profit, protect_peak):
+                peaks, why, exit_stage, fixed_profit, protect_peak, scheduled_levels=None):
     col = c.from_col
     s = sides[col]
     pos = start[col]+c.i
@@ -50,6 +50,9 @@ def trail_order(c, bars, times, start, end, sides, risk, widths, exit_px, phase,
             level = entry+s*fixed_profit*risk[col]
         else:
             level = peaks[col]-s*widths[col]*risk[col]
+        if scheduled_levels is not None:
+            level = scheduled_levels[c.i,col]
+            armed = np.isfinite(level)
         adverse = lo if s>0 else hi
         if armed and (op-level)*s<=0:
             px=op
