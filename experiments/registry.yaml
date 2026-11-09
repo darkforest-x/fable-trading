@@ -15,6 +15,51 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-liquid-balanced-breadth-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "2f9d3f6503"
+    status: "rejected"
+    question: "流动性和低波动等权的十八份资金是否优于九份"
+    single_variable: "固定资金总额和等权入场排序，仅将9份资金改作18份。"
+    result: "9份51957U、回撤上界42.36%；18份50033U、2909笔、实际盈亏比5.49、回撤上界46.92%，加5bp为45286U。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-liquid-balanced-breadth-20261109-v1/summary.json"
+    notes: "Prior-hour average entry volume cap and venue fee model; no funding or actual exit depth. Notion 41388564-79af-81ca-a45d-c381931c0f93."
+
+  - experiment_id: exp-cloud-close-liquid-queue-medians-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "0f10704daa"
+    status: "rejected"
+    question: "换成开仓前60分钟成交额中位数后能否保持排序优势"
+    single_variable: "固定两组已确定的九仓名单和资金上限比例，比较同覆盖样本中均值和中位数。"
+    result: "原ATR中位上限20991U，等权33108U、1559笔、胜21.55%、盈亏比6.21、回撤上界42.11%；后者加5bp为29738U。同覆盖均值分别32767U和50915U。等权13笔超过首分钟实成额。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-liquid-queue-medians-20261109-v1/summary.json"
+    notes: "Native OKX lookback volume scenario; missing and zero-cap slots reserved. No funding or exit depth. Notion 41388564-79af-819a-a3ab-f44ae2168090."
+
+  - experiment_id: exp-cloud-close-peer-confirmation-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "c1a6fde3aa"
+    status: "rejected"
+    question: "相关币的同步方向能否确认云带回收信号"
+    single_variable: "用前60根12H相对BTC收益识别五个最相关币，本根收盘要求至少三个相对BTC同向；与中等相关五币及全覆盖对照。"
+    result: "同覆盖41044U；五个近邻确认12221U，胜23.16%、盈亏比4.77、回撤上界43.98%；中等相关对照12568U。近邻确认没有提升收益。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-peer-confirmation-20261109-v1/summary.json"
+    notes: "Same OKX nine funded slots and prior-hour average entry cap; funding and actual exit depth unmodeled. Notion 41388564-79af-81d8-a231-f4ae03c74552."
+
   - experiment_id: exp-cloud-close-liquid-priority-history-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "d451b23171"
