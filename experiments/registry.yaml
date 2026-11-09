@@ -15,6 +15,81 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-okx-waves-trades-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "f43938bb80"
+    status: "inconclusive"
+    question: "WAVES 已退市合约逐笔成交补回历史"
+    single_variable: "从交易所原生逐笔成交恢复小时价格，并与完整分钟行情或连续成交ID相互核对。"
+    result: "29个月档、6,776.83万条成交。新增18,612根小时K，合计20,388小时。最长连续区间由1,488小时扩为5,571小时。9个小时跨源价格冲突，不靠冲突补值。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-okx-waves-trades-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-8132-b955-f7ca33e22614."
+
+  - experiment_id: exp-cloud-close-breadth-branch-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "84bdf3913d"
+    status: "rejected"
+    question: "独立方向：全市场恐慌后广度收复"
+    single_variable: "原OKX360合约同步至少三分之一收在周一同侧1.618外，下一根半数以上收回时交易BTC/ETH。"
+    result: "48个周信号、47笔交易，净终值1,859.54U、胜率51.06%、金额盈亏比1.43，回撤上界31.30%。42组可比信号，原入场1,686.07U，对照延后12H为1,614.13U；高盈亏比目标未达到。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-breadth-branch-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-818f-9896-e5ebbc55d22e."
+
+  - experiment_id: exp-cloud-close-weak-rally-branch-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "769acc9e3d"
+    status: "rejected"
+    question: "独立方向：弱于BTC的币反抽云带做空"
+    single_variable: "市场为360个OKX现行与历史合约。弱于BTC、空头EMA的币反抽20线，下一12H跌破反抽低点做空，止损置于两K高点。"
+    result: "731笔，终值1,441.49U，胜率24.21%、金额盈亏比3.56，回撤上界62.45%。匹配原入场1,507U、同周稍后入场974U。含3笔跨行情缺口和6笔提前结束的序列结算，证据限于初筛。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-weak-rally-branch-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81a8-a0e5-c4d49014c127."
+
+  - experiment_id: exp-cloud-close-strong-pullback-branch-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "dc8f5205f7"
+    status: "rejected"
+    question: "独立方向：强于BTC的币回踩云带做多"
+    single_variable: "360合约，沿用对称12H入场规则，强于BTC，回踩多头云带，下一根收过回踩高点做多。"
+    result: "888笔，终值3,119.62U，胜率17.23%、金额盈亏比5.15、回撤上界92.69%。匹配原入场4,331U，稍后对照1,874U。2021年11月已有12,593U高点；全期风险和胜率均不合格。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-strong-pullback-branch-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81a4-86d4-f810168648a3."
+
+  - experiment_id: exp-cloud-close-rally-regime-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "69f51041cd"
+    status: "rejected"
+    question: "BTC牛熊切换新的回踩/反抽入场方向"
+    single_variable: "使用先前已完成的BTC日收盘与200日SMA决定仅允许做多或做空，冻结其他交易与资金规则。"
+    result: "顺势组合1,310.21U、胜率18.32%、金额盈亏比4.51、回撤上界93.96%；不限定方向1,590.79U、回撤84.67%，反向许可1,006.15U。200日环境过滤未改善风险。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-rally-regime-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-8193-b94a-e62a02574a68."
+
   - experiment_id: exp-cloud-close-okx-retired-notices-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "e765ce214a"
