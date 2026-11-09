@@ -1,0 +1,6 @@
+{
+ "question":"Does the conservative 51.38% H1 drawdown bound for the funded three-pair relative portfolio actually cross 50%?",
+ "single_variable":"Keep the frozen cash account and all real legs. At every previously flagged possible 50% peak or trough, reconstruct the prior independent-leg extrema from actual signed quantity, then require any BTC legs of opposite sign at the same time to use one instantaneous common BTC price. If the upper bound still crosses 50%, reconstruct the remaining candidate peak/trough hours using 60 native minute bars per held asset matched to its frozen H1. Missing minute receipts preserve the original synchronized hour bound. Distinguish observed drawdown from a possible upper bound. Run both the fee and +5bp scenarios.",
+ "account":"Reads frozen per-leg cash and observed portfolio stages. This risk diagnostic places no new orders and changes no PnL. Shared margin model, funding and order-depth omissions unchanged.",
+ "command":"vectorbt-python -m yoyo.evaluation.cloud_close_ratio_risk_minutes"
+}
