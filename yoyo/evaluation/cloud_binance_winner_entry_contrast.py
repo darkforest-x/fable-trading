@@ -92,9 +92,15 @@ def evaluate(panel, rules):
         x = panel[field].replace([np.inf,-np.inf],np.nan)
         passed = OP[cmp](x,threshold) & x.notna()
         all_count = counts(panel,global_top,passed,x.notna())
+        # Unique loss parents, even if a pair of winners share a decision clock.
+        losses = panel[panel.loser]
+        twins = losses[losses.entry_ms.isin(panel.loc[panel.winner10,"entry_ms"])]
+        matched_cases = panel[panel.winner10 & panel.entry_ms.isin(twins.entry_ms)]
         p,expect = stratified_tail(panel,passed.where(x.notna()))
         screens.append(dict(rule=name,feature=field,comparison=cmp,threshold=threshold,**all_count,
-                            quarter_conditional_p=p,quarter_expected_hits=expect))
+                            quarter_conditional_p=p,quarter_expected_hits=expect,
+                            same_close_tails=len(matched_cases),same_close_tails_selected=int(passed[matched_cases.index].sum()),
+                            same_close_losses=len(twins),same_close_losses_selected=int(passed[twins.index].sum())))
         for part,tab,target in [("early_mature",early,train_top),("later",late,global_top)]:
             score = counts(tab,target,passed.loc[tab.index],x.notna().loc[tab.index])
             selection.append(dict(rule=name,period=part,**score))
