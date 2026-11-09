@@ -15,6 +15,7 @@ import gc
 import json
 from pathlib import Path
 import shutil
+from urllib.parse import quote
 from zipfile import BadZipFile
 
 import numpy as np
@@ -129,18 +130,23 @@ def required_daily_jobs(parents: pd.DataFrame) -> list[tuple[str, str]]:
 
 def _daily_path(symbol: str, day: str) -> tuple[Path, str]:
     name = f"{symbol}-1m-{day}.zip"
-    return CACHE / "klines" / symbol / name, name
+    # Binance's public symbol set contains UTF-8 contract names. Encode URL
+    # path components but use that same encoded basename in the local cache.
+    archive_name = quote(name, safe="")
+    return CACHE / "klines" / symbol / archive_name, archive_name
 
 
 def _fetch_daily(job: tuple[str, str]) -> dict:
     symbol, day = job
     path, name = _daily_path(symbol, day)
-    url = f"{VISION_BASE}/daily/klines/{symbol}/1m/{name}"
+    encoded_symbol = quote(symbol, safe="")
+    url = f"{VISION_BASE}/daily/klines/{encoded_symbol}/1m/{name}"
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.is_file() and path.stat().st_size:
         return dict(symbol=symbol, day=day, status="cached", url=url,
                     path=str(path.relative_to(ROOT)), size_bytes=path.stat().st_size)
-    reusable = REUSE_KLINES / symbol / name
+    decoded_name = f"{symbol}-1m-{day}.zip"
+    reusable = REUSE_KLINES / symbol / decoded_name
     if reusable.is_file() and reusable.stat().st_size:
         temporary = path.with_suffix(".copying")
         shutil.copyfile(reusable, temporary)
