@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-capital-restarts-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "743921a76d"
+    status: "inconclusive"
+    question: "后段复利放慢有多少来自账户资金规模"
+    single_variable: "每个年份用同一批新仓从空仓开始，对比1000U与该年初历史净值等效仓，成交额容量固定。"
+    result: "2025年同286笔，小账户+35.81%，36588U等效账户+23.39%；2026年至11月8日同223笔，小账户+13.00%，49705U等效账户+13.61%。资金规模不能单独解释2026年放缓。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-capital-restarts-20261109-v1/summary.json"
+    notes: "Fresh January-start matched books with linear currency normalization and positive funded identity checks. Uses mean entry cap, no funding or exit depth. Notion 41388564-79af-81b3-b4e0-f8a50b411bcc."
+
   - experiment_id: exp-cloud-close-vix-regime-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "6f21b930c3"
