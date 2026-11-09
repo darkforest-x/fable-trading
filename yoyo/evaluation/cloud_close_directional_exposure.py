@@ -12,7 +12,7 @@ base = repair.old.exposure
 EXP = repair.EXP.parent/'exp-cloud-close-directional-exposure-20261109-v1'
 
 
-def simulate(data,market,quotes,long_mult,short_mult,slip):
+def simulate(data,market,quotes,long_mult,short_mult,slip,*,directory=EXP):
     native,previous,side,runners = market
     model = dict(data,actions=data['actions'].copy())
     checks = {}
@@ -40,8 +40,8 @@ def simulate(data,market,quotes,long_mult,short_mult,slip):
                 not np.allclose(funds.loc[prev_funds.index,'cash_pnl'],prev_funds.cash_pnl,rtol=1e-8,atol=.005)):
             raise ValueError('Directional adapter does not reproduce the original full 1.5x account')
     else:
-        curve.to_csv(EXP/f'hourly_{name}.csv.gz',index_label='hour_end_utc')
-        funds.to_csv(EXP/f'funded_{name}.csv.gz')
+        curve.to_csv(directory/f'hourly_{name}.csv.gz',index_label='hour_end_utc')
+        funds.to_csv(directory/f'funded_{name}.csv.gz')
     return dict(metrics=base.parent.spot.hourly.tested.summarize(funds,curve),margin=checks,
                 trim_fills=trims,valid=True)
 
