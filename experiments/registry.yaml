@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-target-step-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "ea1ce145e9"
+    status: "rejected"
+    question: "Can replacing a late 2R limit with a wider 4R target preserve large winners without exceeding 35% drawdown or falling below 30% wins?"
+    single_variable: "At the next completed 12h boundary replace untouched 2R limit with 4R on the same hourly-capped NAV/9 account. Original full runner/protective exits remain native; compare persistent 2R/4R and cancellation."
+    result: "Same 1569 OKX entries. 1104 partial children alive at boundary, 268 ultimately sold at the new 4R, none at the switch open. Stepped terminal 14865U, win 25.88%, dollar payoff 3.90, witnessed DD 36.41%, upper 38.32%. Always-2R 9407U/33.14%/2.66/32.05% upper; always-4R 15843U/24.67%/4.17/37.30%. The prespecified success gate failed and additional probes were not activated. Fee-only."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-target-step-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81bd-9457-fb9672ba2d28."
+
   - experiment_id: exp-cloud-close-fvg-cap-funding-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "0bd9340c6a"
