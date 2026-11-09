@@ -1,0 +1,7 @@
+{
+  "question": "With the balanced quiet/volume ranking frozen, does splitting the same collateral across eighteen simultaneous independent symbols improve the account?",
+  "single_variable": "Nine maximum concurrent funded parents with NAV/9 collateral each versus eighteen with NAV/18. The weighted ranks, 10% of preceding hour average minute turnover entry cap, exits, costs, native cash and settlement rules match the completed balanced nine arm.",
+  "baseline": "exp-cloud-close-liquid-queue-20261109-v1/balanced; the original ATR eighteen arm in exp-cloud-close-liquid-breadth-20261109-v1 supplies a second fixed comparison.",
+  "command": "vectorbt-python -m yoyo.evaluation.cloud_close_liquid_queue --balanced-eighteen",
+  "limitations": "Historical outcome-informed follow-up. No funding or observed exit depth."
+}

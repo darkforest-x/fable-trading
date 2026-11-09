@@ -67,8 +67,14 @@ def main(*,experiment=EXP,slots=9,policies=None):
 if __name__=='__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--eighteen',action='store_true')
-    if parser.parse_args().eighteen:
+    variants = parser.add_mutually_exclusive_group()
+    variants.add_argument('--eighteen',action='store_true')
+    variants.add_argument('--balanced-eighteen',action='store_true')
+    args = parser.parse_args()
+    if args.balanced_eighteen:
+        main(experiment=EXP.parent/'exp-cloud-close-liquid-balanced-breadth-20261109-v1',slots=18,
+             policies=[('balanced','balanced')])
+    elif args.eighteen:
         main(experiment=EXP.parent/'exp-cloud-close-liquid-breadth-20261109-v1',slots=18,
              policies=[('original_atr','entry_order')])
     else:
