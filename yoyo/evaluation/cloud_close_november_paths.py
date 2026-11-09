@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
+import zipfile
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
@@ -11,6 +13,8 @@ import pandas as pd
 
 from yoyo.evaluation import cloud_close_archive_cohort as archive
 from yoyo.evaluation import signal_center_score as keys
+from yoyo.data import binance_um_vision_listing as listing
+from yoyo.data.binance_um_vision_fetch import fetch
 
 venue = archive.venue
 engine = venue.engine
@@ -19,13 +23,17 @@ EXP = venue.EXP.parent / 'exp-cloud-close-november-paths-20261109-v1'
 ROOT = venue.wallet.ROOT
 CACHE = ROOT / 'data/research/cloud_close_november_paths'
 SOURCE = ROOT / 'data/research/cloud_close_november_prices'
+SUPPLEMENTAL_EVIDENCE = ROOT / 'experiments/active/exp-cloud-close-archive-complete-20261109-v1/supplemental_contract_evidence.csv'
+SUPPLEMENTAL_CACHE = ROOT / 'data/research/cloud_close_november_supplemental'
+SUPPLEMENTAL_SYMBOLS = SUPPLEMENTAL_CACHE / 'symbols'
 END = pd.Timestamp(json.loads((EXP/'config.json').read_text())['end_exclusive_utc']).value // 1_000_000
+SUPPLEMENTAL_HISTORY_END = pd.Timestamp('2026-11-01T00:00:00Z').value // 1_000_000
 KEY_COLS = ['tf','close_ns','signal_id','week','side','stop']
 OHLC = venue.FIELDS
 
 
 def history_slot(ticker):
-    for parent in (archive.CACHE/'symbols',archive.native.WORK,venue.WORK):
+    for parent in (SUPPLEMENTAL_SYMBOLS,archive.CACHE/'symbols',archive.native.WORK,venue.WORK):
         if (parent/ticker/'quotes.npz').is_file():
             return parent/ticker
     raise FileNotFoundError(f'Missing frozen quote archive for {ticker}')
@@ -56,6 +64,133 @@ def keys_on_clock(ticker,frame,decimals):
     result = keys.build_inputs(utc_frame(frame),ticker,None,key_timeframes=['12H'],
                                source_minutes=60,price_decimals=decimals)[4]
     return result[KEY_COLS].reset_index(drop=True) if len(result) else pd.DataFrame(columns=KEY_COLS)
+
+
+def _monthly_prices(path):
+    """Read official Binance USD-M 1h monthly ZIP OHLCV without substituting another market."""
+    names = ['open_time_ms','open','high','low','close','volume']
+    with zipfile.ZipFile(path) as zf:
+        members = [name for name in zf.namelist() if name.endswith('.csv')]
+        if len(members) != 1:
+            raise ValueError(f'Expected one CSV in Binance archive {path}')
+        with zf.open(members[0]) as stream:
+            frame = pd.read_csv(stream, header=None, names=names, usecols=range(6))
+    parsed = pd.to_numeric(frame.open_time_ms, errors='coerce')
+    if parsed.isna().any():
+        if len(frame) and str(frame.open_time_ms.iloc[0]).lower() in ('open_time','open time','open time (ms)'):
+            frame = frame.iloc[1:].copy()
+            parsed = pd.to_numeric(frame.open_time_ms, errors='raise')
+        else:
+            raise ValueError(f'Non-numeric open clock in Binance archive {path}')
+    frame['open_time_ms'] = parsed.astype('int64')
+    frame = frame.set_index('open_time_ms')[['open','high','low','close']].apply(pd.to_numeric, errors='raise')
+    if (not frame.index.is_unique or not frame.index.is_monotonic_increasing or
+            (frame.index % HOUR).any() or not np.isfinite(frame.to_numpy()).all() or
+            (frame[OHLC] <= 0).any().any()):
+        raise ValueError(f'Invalid native 1h OHLC clocks/values in {path}')
+    if (frame.high < frame[['open','close','low']].max(axis=1)).any() or (frame.low > frame[['open','close','high']].min(axis=1)).any():
+        raise ValueError(f'Invalid OHLC envelope in {path}')
+    return frame
+
+
+def prepare_supplemental_history():
+    """Fetch official monthly 1h history for supplemental contracts missing frozen quote slots.
+
+    Supplementals are retained as unscored paths. This input provides actual listing-age,
+    90-day eligibility and contemporaneous raw-event counts; it does not alter the frozen
+    632-contract booster roster.
+    """
+    evidence = pd.read_csv(SUPPLEMENTAL_EVIDENCE, dtype={'symbol':str}).fillna('')
+    active = pd.read_csv(SOURCE/'coverage.csv.gz', dtype={'symbol':str,'contract_period_id':str}).fillna('')
+    ids = ['DATAIPUSDT','GRAMUSDT','GRVTUSDT','DOSUSDT','牛来USDT','MARSCOINUSDT','PONSUSDT','哈基米USDT']
+    rows = evidence[evidence.symbol.isin(ids)].set_index('symbol')
+    if set(rows.index) != set(ids) or len(rows) != len(ids):
+        raise ValueError('The frozen 8-contract supplemental evidence roster changed')
+    source_rows = active[active.symbol.isin(ids)].set_index('symbol')
+    if set(source_rows.index) != set(ids) or len(source_rows) != len(ids):
+        raise ValueError('Official H1 extension coverage does not include all 8 supplemental contracts')
+    records = []
+    for ticker in ids:
+        onboard = pd.Timestamp(rows.at[ticker,'onboardDate_utc']).value // 1_000_000
+        slot = SUPPLEMENTAL_SYMBOLS/ticker
+        cached_receipt = slot/'source_receipt.json'
+        if cached_receipt.is_file() and (slot/'quotes.npz').is_file() and (slot/'fills.csv.gz').is_file():
+            cached = json.loads(cached_receipt.read_text())
+            if (cached.get('symbol') != ticker or int(cached.get('onboard_ms',-1)) != onboard or
+                    cached.get('state') != 'complete'):
+                raise ValueError(f'Existing supplemental source receipt changed for {ticker}')
+            records.append(cached)
+            continue
+        first_month = pd.Timestamp(onboard, unit='ms', tz='UTC').strftime('%Y-%m')
+        expected_months = pd.period_range(first_month, '2026-10', freq='M').strftime('%Y-%m').tolist()
+        keys_by_month = {}
+        for key in listing.files(ticker, interval='1h'):
+            match = re.search(r'-1h-(\d{4}-\d{2})\.zip$', key)
+            if match and first_month <= match.group(1) <= '2026-10':
+                keys_by_month[match.group(1)] = key
+        missing_months = sorted(set(expected_months) - set(keys_by_month))
+        if missing_months:
+            records.append(dict(symbol=ticker,onboard_ms=onboard,state='official_month_key_missing',
+                                missing_months=missing_months,history_bars=0,raw_keys=0,source=''))
+            continue
+        frames, month_receipts = [], []
+        for month in expected_months:
+            key = keys_by_month[month]
+            status = fetch(SUPPLEMENTAL_CACHE, 'monthly_1h', ticker, f'https://data.binance.vision/{key}')[2]
+            raw_path = SUPPLEMENTAL_CACHE/'monthly_1h'/ticker/Path(key).name
+            if status not in ('fetched','cached') or not raw_path.is_file():
+                raise IOError(f'Official Binance monthly 1h history unavailable for {ticker} {month}: {status}')
+            part = _monthly_prices(raw_path)
+            part = part[(part.index >= onboard) & (part.index < SUPPLEMENTAL_HISTORY_END)]
+            frames.append(part)
+            month_receipts.append(dict(month=month,archive=key,status=status,rows=len(part),
+                                       bytes=raw_path.stat().st_size,
+                                       local_path=str(raw_path.relative_to(ROOT))))
+        history = pd.concat(frames).sort_index()
+        if history.empty or not history.index.is_unique or not history.index.is_monotonic_increasing:
+            raise ValueError(f'No valid official H1 history for supplemental contract {ticker}')
+        expected = pd.Index(np.arange(history.index[0], history.index[-1] + HOUR, HOUR), name='open_time_ms')
+        missing = expected.difference(history.index)
+        if len(missing):
+            raise ValueError(f'{ticker}: official monthly history has {len(missing)} missing H1 clocks')
+        row = source_rows.loc[ticker]
+        extension_path = SOURCE/'series'/(str(row.contract_period_id)+'.csv.gz')
+        extension = pd.read_csv(extension_path, usecols=['open_time_ms',*OHLC], dtype={'open_time_ms':'int64'},
+                                float_precision='round_trip').set_index('open_time_ms')[OHLC]
+        overlap = history.index.intersection(extension.index)
+        same = np.allclose(history.loc[overlap,OHLC], extension.loc[overlap,OHLC], rtol=2e-11, atol=1e-13) if len(overlap) else True
+        if not same:
+            raise ValueError(f'{ticker}: monthly official H1 and November source disagree on {len(overlap)} overlap bars')
+        if len(overlap) != len(extension[(extension.index >= history.index[0]) & (extension.index < history.index[-1] + HOUR)]):
+            raise ValueError(f'{ticker}: H1 source overlap is incomplete against the monthly archive')
+        slot.mkdir(parents=True, exist_ok=True)
+        if (slot/'quotes.npz').is_file() or (slot/'fills.csv.gz').is_file():
+            raise FileExistsError(f'Refusing to overwrite supplemental history paths for {ticker}')
+        cutoff = int(history.index[-1] + HOUR)
+        decimals = max(2,min(9,int(np.ceil(-np.log10(history.low.min())))+7))
+        joined = history.copy()
+        twelve = twelve_hour(joined)
+        signals, raw = keys.build_inputs(utc_frame(joined),ticker,None,key_timeframes=['12H'],
+                                        source_minutes=60,price_decimals=decimals)[4:6]
+        signals = signals[signals.close_ns < cutoff*1_000_000].copy() if len(signals) else signals
+        priced = venue.price_frames(ticker,slot,joined,twelve,signals,end=cutoff,save_quotes=True)
+        raw = raw[raw.close_ns < cutoff*1_000_000].copy() if len(raw) else raw
+        if len(raw):
+            raw.to_csv(slot/'raw_events.csv.gz',index=False)
+        receipt = dict(symbol=ticker,onboard_ms=onboard,history_cutoff_ms=cutoff,first_h1_ms=int(history.index[0]),
+                       last_h1_ms=int(history.index[-1]),history_bars=len(history),missing_h1_clocks=0,
+                       monthly_archive_bars=int(sum(x['rows'] for x in month_receipts)),source_months=month_receipts,
+                       source_period_id=str(row.contract_period_id),extension_overlap_bars=len(overlap),
+                       extension_overlap_ohlc_equal=bool(same),raw_keys=int(len(raw)),path_keys=int(len(signals)),
+                       source_signals=int(priced.get('source_signals',0)),price_decimals=decimals,
+                       mature_at_ms=onboard+90*24*HOUR,state='complete')
+        (slot/'source_receipt.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n')
+        records.append(receipt)
+        print(f"Prepared official warmup {ticker}: {len(history)} H1 bars, {len(signals)} V1.7 keys",flush=True)
+    (SUPPLEMENTAL_CACHE/'source_receipt.json').write_text(json.dumps(records,ensure_ascii=False,indent=2)+'\n')
+    if len(records) != len(ids) or any(r.get('state') not in (None,'complete') for r in records):
+        raise ValueError('Supplemental source collection is incomplete; unknown histories are not zero-signal')
+    return records
 
 
 def parity(ticker,signals,old,frame,cutoff,precision):
@@ -100,7 +235,11 @@ def extend(path,output,*,separate=False):
     before = suffix[suffix.index<cutoff]
     new = suffix[suffix.index>=cutoff]
     output.mkdir(parents=True,exist_ok=True)
+    supplemental_receipt = SUPPLEMENTAL_SYMBOLS/ticker/'source_receipt.json'
+    supplemental = json.loads(supplemental_receipt.read_text()) if supplemental_receipt.is_file() else {}
     meta = dict(symbol=ticker,period=path.stem.removesuffix('.csv'),separate_contract=separate,
+                supplemental_new_history=bool(supplemental),onboard_ms=int(supplemental.get('onboard_ms',0)),
+                supplemental_mature_at_ms=int(supplemental.get('mature_at_ms',0)),
                 frozen_bars=len(frozen),overlap_bars=len(overlap),old_interior_missing=len(before)-len(overlap),
                 frozen_cutoff_ms=int(cutoff),new_bars=len(new),matched_previous_keys=0,key_disagreements=[],
                 carried_events=0,changed_carry_legs=0,fresh_keys=0)
@@ -157,6 +296,7 @@ def main():
     args = parser.parse_args()
     if not (SOURCE/'manifest.json').is_file():
         raise FileNotFoundError('Official H1 extension collection has not finished')
+    prepare_supplemental_history()
     source = pd.read_csv(SOURCE/'coverage.csv.gz',dtype={'symbol':str,'contract_period_id':str})
     if not source.contract_period_id.is_unique:
         raise ValueError('Contract source contains duplicate period IDs')
@@ -183,7 +323,10 @@ def main():
     summary = dict(periods=len(results),source_symbols=source.symbol.nunique(),fresh_keys=int(coverage.fresh_keys.sum()),
                    carry_events=int(coverage.carried_events.sum()),changed_legs=int(coverage.changed_carry_legs.sum()),
                    earlier_parity_keys=int(coverage.matched_previous_keys.sum()),parity_differences=len(disagreements),
-                   old_interior_missing=int(coverage.old_interior_missing.sum()))
+                   old_interior_missing=int(coverage.old_interior_missing.sum()),
+                   supplemental_periods=int(coverage.supplemental_new_history.sum()),
+                   supplemental_mature_by_end=int((coverage.supplemental_new_history &
+                       (coverage.supplemental_mature_at_ms<=END)).sum()))
     (EXP/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
     print(json.dumps(summary,indent=2),flush=True)
 

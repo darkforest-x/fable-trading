@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 
 from yoyo.evaluation import signal_center_score as keys
+from yoyo.evaluation import cloud_close_november_paths as path
 from yoyo.evaluation.monday_limit_reclaim_inputs import jobs
 
 ROOT = keys.ROOT
@@ -154,6 +155,50 @@ def extract(args):
     return ticker,sig,raw
 
 
+def supplemental_activity():
+    """Return 8 supplemental symbols' real raw 12H events for contemporaneous counts.
+
+    Their events affect the simultaneous raw-signal feature, while the frozen model
+    still emits scores only for its original 632-name roster.
+    """
+    source = pd.read_csv(SOURCE/'coverage.csv.gz',dtype={'symbol':str,'contract_period_id':str}).fillna('')
+    ids = ['DATAIPUSDT','GRAMUSDT','GRVTUSDT','DOSUSDT','牛来USDT','MARSCOINUSDT','PONSUSDT','哈基米USDT']
+    meta = source[source.symbol.isin(ids)].set_index('symbol')
+    if set(meta.index) != set(ids) or len(meta) != len(ids):
+        raise ValueError('Supplemental raw-count source does not cover the frozen 8-symbol set')
+    parts = []
+    receipt_rows = []
+    for ticker in ids:
+        slot = path.SUPPLEMENTAL_SYMBOLS/ticker
+        receipt = json.loads((slot/'source_receipt.json').read_text())
+        if receipt.get('state') != 'complete':
+            raise ValueError(f'{ticker}: supplemental H1 source is not complete')
+        with np.load(slot/'quotes.npz') as data:
+            base = pd.DataFrame(data['prices'],columns=FIELDS,index=pd.Index(data['clock'],name='time'))
+        record = meta.loc[ticker]
+        suffix_path = SOURCE/'series'/(str(record.contract_period_id)+'.csv.gz')
+        suffix = pd.read_csv(suffix_path,usecols=['open_time_ms',*FIELDS],dtype={'open_time_ms':'int64'},
+                             float_precision='round_trip').set_index('open_time_ms')[FIELDS]
+        overlap = base.index.intersection(suffix.index)
+        if len(overlap) and not np.allclose(base.loc[overlap,FIELDS],suffix.loc[overlap,FIELDS],rtol=2e-11,atol=1e-13):
+            raise ValueError(f'{ticker}: supplemental score input conflicts with the official H1 extension')
+        joined = pd.concat([base,suffix[suffix.index>base.index[-1]]])
+        if not joined.index.is_unique or not joined.index.is_monotonic_increasing:
+            raise ValueError(f'{ticker}: supplemental H1 clocks are not unique and increasing')
+        frame = joined.copy()
+        frame.index = pd.to_datetime(frame.index,unit='ms',utc=True).as_unit('ns')
+        _,raw = keys.build_inputs(frame,ticker,None,key_timeframes=['12H'],source_minutes=60,
+                                  price_decimals=int(receipt['price_decimals']))[4:6]
+        raw = raw[raw.close_ns.ge(VERIFY*1_000_000)].copy() if len(raw) else raw
+        if len(raw):
+            parts.append(raw)
+        receipt_rows.append(dict(symbol=ticker,onboard_ms=int(receipt['onboard_ms']),
+                                 history_bars=int(receipt['history_bars']),extension_overlap_bars=len(overlap),
+                                 raw_keys_from_verify=int(len(raw)),source='official Binance USD-M monthly 1h + frozen H1 extension'))
+    combined = pd.concat(parts,ignore_index=True) if parts else pd.DataFrame(columns=['tf','close_ns','side'])
+    return combined,receipt_rows
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--workers',type=int,default=2)
@@ -184,25 +229,55 @@ def main():
             if n%80==0:
                 print(f'Built native features for {n}/{len(roster)} prior score contracts',flush=True)
     rows = pd.concat(predictions,ignore_index=True)
-    breadth = pd.concat(raw).groupby(['tf','close_ns','side']).size().rename('n_same_bar')
-    rows = rows.join(breadth,on=['tf','close_ns','side']).set_index('signal_id',verify_integrity=True)
+    breadth = pd.concat(raw).groupby(['tf','close_ns','side']).size().rename('n_same_bar_632')
+    rows = rows.join(breadth,on=['tf','close_ns','side'])
+    supplemental_raw,supplemental_receipts = supplemental_activity()
+    if len(supplemental_raw):
+        supplemental_breadth = supplemental_raw.groupby(['tf','close_ns','side']).size().rename('n_supplemental_raw')
+        rows = rows.join(supplemental_breadth,on=['tf','close_ns','side'])
+    else:
+        rows['n_supplemental_raw'] = 0
+    rows['n_supplemental_raw'] = rows.n_supplemental_raw.fillna(0).astype('int64')
+    rows['n_same_bar_640'] = rows.n_same_bar_632 + rows.n_supplemental_raw
+    rows['n_same_bar'] = rows.n_same_bar_632
+    rows = rows.set_index('signal_id',verify_integrity=True)
     booster = lgb.Booster(model_file=str(ROOT/CFG['booster']))
-    if list(keys.FEATURES)!=booster.feature_name() or rows.n_same_bar.isna().any():
+    if list(keys.FEATURES)!=booster.feature_name() or rows.n_same_bar_632.isna().any():
         raise ValueError('Frozen predictor or contemporaneous 632-contract signal count changed')
     ready = rows.supported & rows.btc_ret_24h.notna() & rows.btc_side.notna()
-    rows['score'] = np.nan
-    rows.loc[ready,'score'] = booster.predict(rows.loc[ready,booster.feature_name()],num_threads=1)
+    rows['score_632'] = np.nan
+    rows['score_640'] = np.nan
+    base_features = rows.loc[ready,booster.feature_name()].copy()
+    rows.loc[ready,'score_632'] = booster.predict(base_features,num_threads=1)
+    augmented_features = base_features.copy()
+    augmented_features['n_same_bar'] = rows.loc[ready,'n_same_bar_640'].to_numpy()
+    rows.loc[ready,'score_640'] = booster.predict(augmented_features,num_threads=1)
+    # Scores at/after the preregistered extension boundary use the 640-name raw
+    # event count. Earlier probabilities remain frozen to the published 632-name
+    # score so no previous account ordering is silently rewritten.
+    post_boundary = rows.close_ns.ge(UNTIL*1_000_000)
+    rows['n_same_bar'] = np.where(post_boundary,rows.n_same_bar_640,rows.n_same_bar_632)
+    rows['score'] = np.where(post_boundary,rows.score_640,rows.score_632)
     ref = pd.read_csv(MODEL/'scores_oos.csv.gz',usecols=['signal_id','tf','score'])
     ref = ref[ref.tf.eq('12H')].set_index('signal_id',verify_integrity=True)
     test = rows[rows.close_ns.lt(UNTIL*1_000_000)&ready].join(ref.score.rename('published'),how='inner')
     if len(test)==0:
         raise ValueError('No reconstructed probabilities to compare before the extension')
     diff = (test.score-test.published).abs()
-    test[['score','published','close_ns','n_same_bar']].assign(abs_difference=diff).to_csv(EXP/'score_parity.csv.gz')
-    rows[['score','close_ns','side','n_same_bar','supported']].to_csv(EXP/'scores.csv.gz')
+    test[['score','published','score_632','score_640','close_ns','n_same_bar','n_same_bar_632',
+          'n_supplemental_raw']].assign(abs_difference=diff).to_csv(EXP/'score_parity.csv.gz')
+    rows[['score','score_632','score_640','close_ns','side','n_same_bar','n_same_bar_632',
+          'n_same_bar_640','n_supplemental_raw','supported']].to_csv(EXP/'scores.csv.gz')
+    augmented_overlap = rows[rows.close_ns.lt(UNTIL*1_000_000)&ready]
+    hypothetical_shift = (augmented_overlap.score_640-augmented_overlap.score_632).abs()
     summary = dict(common_prefix=len(test),equal_probabilities=int(diff.le(1.e-10).sum()),
                    max_abs=float(diff.max()),post_overlap_keys=int(rows.close_ns.ge(UNTIL*1_000_000).sum()),
-                   unsupported_post_overlap=int((rows.close_ns.ge(UNTIL*1_000_000)&~ready).sum()),
+                   unsupported_post_overlap=int((post_boundary&~ready).sum()),
+                   supplemental_symbols=supplemental_receipts,
+                   supplemental_raw_events=int(len(supplemental_raw)),
+                   historical_rows_with_new_raw_events=int(augmented_overlap.n_supplemental_raw.gt(0).sum()),
+                   historical_hypothetical_score_changes=int(hypothetical_shift.gt(1.e-10).sum()),
+                   historical_scores_kept_frozen=True,post_boundary_uses_supplemental_raw=True,
                    same_calendar_booster=True)
     (EXP/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
     print(json.dumps(summary,indent=2),flush=True)

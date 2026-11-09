@@ -78,6 +78,21 @@ def market_inputs():
                 current['end_ms'] = record.delivery_ms
                 current['last_h1'] = json.loads(suffix.read_text())['last_added_ms']
                 frames.append(current)
+            # The eight newly restored contracts have no frozen pre-extension
+            # account roster. Keep their complete native pre-boundary fills,
+            # replacing any still-open child path with the extended version.
+            warm_path = path.SUPPLEMENTAL_SYMBOLS/record.symbol/'fills.csv.gz'
+            if warm_path.is_file():
+                warm = pd.read_csv(warm_path,dtype={'symbol':str},keep_default_na=False,float_precision='round_trip')
+                warm = warm[~warm.is_control].copy() if len(warm) else warm
+                if len(warm):
+                    replacement = set(current.event_id.astype(str)) if len(current) else set()
+                    warm = warm[~warm.event_id.astype(str).isin(replacement)].copy()
+                    if len(warm):
+                        warm['period'] = record.contract_period_id
+                        warm['end_ms'] = record.delivery_ms
+                        warm['last_h1'] = json.loads((path.SUPPLEMENTAL_SYMBOLS/record.symbol/'source_receipt.json').read_text())['last_h1_ms']
+                        frames.append(warm)
         elif record.complete_h1>0 and not suffix.is_file():
             raise ValueError(f'Missing contract-path receipt {record.contract_period_id}')
         unique = {int(x) for x in clocks if record.onboard_ms<=x<alive_to and CUTOFF<=x<path.END}
@@ -156,7 +171,9 @@ def main():
     # had ruled out. Never retrospectively admit one of those.
     periods = pd.read_csv(path.EXP/'periods.csv.gz').set_index('period')
     historical = raw.entry_ms.lt(raw.period.map(periods.frozen_cutoff_ms))
-    raw = raw[~historical | raw.event_id.isin(frozen_old_ids)]
+    supplemental_periods = set(periods.index[periods.supplemental_new_history.astype(bool)])
+    new_source_history = raw.period.isin(supplemental_periods)
+    raw = raw[~historical | raw.event_id.isin(frozen_old_ids) | new_source_history]
     amended = extend_deliveries(new_eligible(raw,frozen_old_ids,ranks))
     carries = frozen_old_ids & set(amended.event_id)
     if (old.event_id.isin(carries) & old.delivery).any():
@@ -188,10 +205,37 @@ def main():
     eq.to_csv(EXP/'hourly.csv.gz',index_label='hour_end_utc')
     trims.to_csv(EXP/'trims.csv.gz',index=False)
     new = ~order.event_id.isin(native.index)
+    supplemental_symbols = ['DATAIP','GRAM','GRVT','DOS','牛来','MARSCOIN','PONS','哈基米']
+    source_receipts = {str(r['symbol']):r for r in json.loads((path.SUPPLEMENTAL_CACHE/'source_receipt.json').read_text())}
+    raw_actual = raw[(~raw.is_control)&raw.tp_r.eq(0)]
+    amended_actual = amended[(~amended.is_control)&amended.tp_r.eq(0)]
+    chosen_actual = chosen[(~chosen.is_control)&chosen.tp_r.eq(0)]
+    funded_ids = set(pos.index.astype(str))
+    supplemental_audit = []
+    for base_symbol in supplemental_symbols:
+        ticker = base_symbol+'USDT'
+        receipt = source_receipts[ticker]
+        part = raw_actual[raw_actual.symbol.eq(base_symbol)]
+        eligible_age = part.eligible_at_own_time.astype(bool)
+        cross_section = part.entry_ms.map(ranks).fillna(0).ge(10)
+        eligible_ids = set(part.loc[eligible_age & cross_section,'event_id'].astype(str))
+        supplemental_audit.append(dict(
+            symbol=ticker,onboard_ms=int(receipt['onboard_ms']),mature_at_ms=int(receipt['mature_at_ms']),
+            age_days_at_account_end=round((path.END-int(receipt['onboard_ms']))/(24*path.HOUR),6),
+            source_status=receipt['state'],official_h1_rows=int(receipt['history_bars']),
+            raw_native_actual_signals=int(part.event_id.nunique()),
+            ever_90d_rank_eligible=int(part.loc[eligible_age,'event_id'].nunique()),
+            cross_section_eligible_signals=int(len(eligible_ids)),
+            eligible_paths_after_lifecycle_filter=int(amended_actual.loc[amended_actual.symbol.eq(base_symbol),'event_id'].nunique()),
+            selected_actual_signals=int(chosen_actual.loc[chosen_actual.symbol.eq(base_symbol),'event_id'].nunique()),
+            funded_actual_signals=int(len(eligible_ids & funded_ids)),
+            ninety_day_status_at_end=('matured' if int(receipt['mature_at_ms']) <= path.END else 'not_yet_90d'),
+        ))
     summary = dict(metrics=metrics,earlier_roster=len(native),new_eligible=int(new.sum()),
                    new_frozen_scores=int(order.loc[new,'score'].count()),previously_open_eligible=len(carries),
                    previously_open_funded=len(carries&set(pos.index)),prefix_equity_max_abs=float(divergence),
-                   new_funded=len(set(pos.index)-set(native.index)),fee_only=True)
+                   new_funded=len(set(pos.index)-set(native.index)),supplemental_8=supplemental_audit,
+                   supplemental_unscored=True,fee_only=True)
     (EXP/'summary.json').write_text(json.dumps(summary,indent=2,allow_nan=False)+'\n')
     print(json.dumps(summary,indent=2),flush=True)
 
