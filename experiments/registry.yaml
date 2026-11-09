@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-breakout-pullback-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "0fcd1cc9fe"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Require a directional 90-day closing breakout in the seven days before the V1.7 12H signal bar begins. Use identical complete-history coverage on both arms."
+    result: "OKX equal-history unfiltered 9515.71U versus screened 3921.80U; 35.92% wins, cash payoff 2.289, observed drawdown 29.40%. Fewer than a third of eligible opportunities admitted. Development criteria failed."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-breakout-pullback-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81fc-be96-ff993876c293."
+
   - experiment_id: exp-cloud-close-open-interest-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "f800ef65ee"
