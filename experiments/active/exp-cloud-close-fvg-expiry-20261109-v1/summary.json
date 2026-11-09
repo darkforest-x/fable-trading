@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "generated_at_utc": "2026-11-09T03:59:26.417365+00:00",
+  "generated_at_utc": "2026-11-09T04:02:42.118498+00:00",
   "source_commit": "828eb59fc9df7aefddb6ea60e826ef60cb18ab88",
   "summary_rebuilt_from_cached_ledgers": true,
-  "summary_rebuild_commit": "9213507cba44804167f62798502e059e2b2c692e",
+  "summary_rebuild_commit": "da701a28e7b8769ae8efd9398564b82fd7c66ae5",
   "vectorbt_version": "1.2.0",
   "tag_source": "experiments/active/exp-cloud-close-fvg-exclusion-20261109-v1/decisions.csv.gz",
   "frozen_full_account_reference": {
@@ -82,8 +82,13 @@
     "always_expire_12h": {
       "label": "Always expire unfilled 2R order at 12h",
       "funded": 1554,
-      "late_funded_targets_as_full_runner": 6217,
-      "target_fill_at_or_after_12h_cancelled": 6217,
+      "known_target_paths_as_full_runner": 6217,
+      "actual_target_paths_as_full_runner": 3392,
+      "control_target_paths_as_full_runner": 2825,
+      "funded_actual_target_paths_as_full_runner": 417,
+      "known_late_target_fills_cancelled": 6217,
+      "actual_late_target_fills_cancelled": 3392,
+      "funded_actual_late_target_fills_cancelled": 417,
       "metrics": {
         "all": {
           "final_usdt": 62649.13174382038,
@@ -135,8 +140,13 @@
     "always_persist_2r": {
       "label": "Keep original 2R order through native runner exit",
       "funded": 1554,
-      "late_funded_targets_as_full_runner": 0,
-      "target_fill_at_or_after_12h_cancelled": 0,
+      "known_target_paths_as_full_runner": 0,
+      "actual_target_paths_as_full_runner": 0,
+      "control_target_paths_as_full_runner": 0,
+      "funded_actual_target_paths_as_full_runner": 0,
+      "known_late_target_fills_cancelled": 0,
+      "actual_late_target_fills_cancelled": 0,
+      "funded_actual_late_target_fills_cancelled": 0,
       "metrics": {
         "all": {
           "final_usdt": 9797.10641304612,
@@ -188,8 +198,13 @@
     "outside_expire_overlap_persist": {
       "label": "Outside expires; overlap persists",
       "funded": 1554,
-      "late_funded_targets_as_full_runner": 5162,
-      "target_fill_at_or_after_12h_cancelled": 5162,
+      "known_target_paths_as_full_runner": 5162,
+      "actual_target_paths_as_full_runner": 2829,
+      "control_target_paths_as_full_runner": 2333,
+      "funded_actual_target_paths_as_full_runner": 334,
+      "known_late_target_fills_cancelled": 5162,
+      "actual_late_target_fills_cancelled": 2829,
+      "funded_actual_late_target_fills_cancelled": 334,
       "metrics": {
         "all": {
           "final_usdt": 59516.04788678463,
@@ -241,8 +256,13 @@
     "outside_persist_overlap_expire": {
       "label": "Reciprocal non-selecting map",
       "funded": 1554,
-      "late_funded_targets_as_full_runner": 1055,
-      "target_fill_at_or_after_12h_cancelled": 1055,
+      "known_target_paths_as_full_runner": 1055,
+      "actual_target_paths_as_full_runner": 563,
+      "control_target_paths_as_full_runner": 492,
+      "funded_actual_target_paths_as_full_runner": 83,
+      "known_late_target_fills_cancelled": 1055,
+      "actual_late_target_fills_cancelled": 563,
+      "funded_actual_late_target_fills_cancelled": 83,
       "metrics": {
         "all": {
           "final_usdt": 11181.754117061795,
