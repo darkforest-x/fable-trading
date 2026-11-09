@@ -233,7 +233,7 @@ def _build_signal_events(venue: str, symbol: str, bars12: pd.DataFrame,
     features = prepared["features"]
     calendar = reclaim._anchors(bars1, bars12, symbol)
     cutoff = int(config["data"]["cutoff_ms"])
-    start = int(config["account"]["full_history_start_ms"])
+    start = int(config["data"]["full_history_start_ms"])
     by_week: dict[str, dict] = {}
     trigger_bars = 0
     for i, row in enumerate(bars12.itertuples()):
@@ -393,7 +393,7 @@ def _account(events: pd.DataFrame, quotes: dict, venue: str,
 
 
 def _run_account_set(paths: pd.DataFrame, config: dict, quotes: dict) -> tuple[pd.DataFrame, dict]:
-    full_start = int(config["account"]["full_history_start_ms"])
+    full_start = int(config["data"]["full_history_start_ms"])
     common_start = int(config["data"]["common_90d_account_start_ms"])
     end = int(config["data"]["cutoff_ms"])
     metric_rows: list[dict] = []
