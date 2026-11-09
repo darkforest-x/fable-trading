@@ -64,16 +64,16 @@ def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=No
     return dict(metrics=base.parent.spot.hourly.tested.summarize(funds,curve),margin=audits,trim_fills=trims)
 
 
-def run(directory,policies):
+def run(directory,policies,*,account_loader=account,reference_dir=source.BASE):
     if (directory/'summary.json').exists():
         raise FileExistsError('Completed native exposure study')
-    data,market,quotes = account()
+    data,market,quotes = account_loader()
     parents = market[-1].set_index('event_id')
     out = {}
     for key,weights in policies(parents).items():
         for slip in ([0.] if key=='reference' else [0.,.0005]):
             label = key+('_stress' if slip else '')
-            out[label] = simulate(data,market,quotes,weights,slip,directory,label,reference_dir=source.BASE)
+            out[label] = simulate(data,market,quotes,weights,slip,directory,label,reference_dir=reference_dir)
             print(label,out[label].get('metrics',{}).get('all'),flush=True)
             gc.collect()
     source.correction.archive.prices.safe_json(directory/'summary.json',dict(arms=out,
