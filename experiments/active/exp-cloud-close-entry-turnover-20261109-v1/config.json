@@ -1,0 +1,5 @@
+{
+  "question": "At the actual account size in the leading stress-eligible OKX V1.7 account, how large is each opening market order relative to all quote turnover in its first trading minute?",
+  "source": "Reuse all 1570 fee-only funded parent notionals and the matching original entry opens. Opening quantity combines all child orders for that parent. Match complete native OKX 1m OHLC back to frozen H1 before admitting its first-minute vol_quote (ZIP) or volCcyQuote (API). USDT-SWAP quote volume is denominated in USDT. URL https://www.okx.com/docs-v5/en/#order-book-trading-market-data-get-candlesticks-history",
+  "evaluation": "This is an after-entry execution diagnostic. Preserve every parent, missing source and zero volume, parent outcome and per-year coverage. No entry may be screened or resized with its future minute volume. Print-order ratios 1%, 10% and 100% are descriptive only. Native minute prices and gross turnover do not measure opposing top-of-book depth or guarantee the opening fill. Look only at entries here."
+}
