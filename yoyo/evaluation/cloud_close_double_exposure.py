@@ -59,7 +59,7 @@ def underlying(data,quote_loader=wallet.quotes):
 
 
 @njit(cache=True)
-def mark_and_cap(c,multiple,previous_close,share_target,trim):
+def mark_and_cap(c,multiple,previous_close,share_target,trim,caps):
     phase = c.i%4
     if phase==0:
         previous_equity = nb.get_group_value_ctx_nb(c)
@@ -68,8 +68,9 @@ def mark_and_cap(c,multiple,previous_close,share_target,trim):
             share_target[slot] = -1.
             notional_per_share = multiple*previous_close[c.i//4,slot]
             shares = c.last_position[col:col+4].sum()
-            if notional_per_share>0 and shares*notional_per_share>previous_equity*.2:
-                share_target[slot] = previous_equity*.2/notional_per_share
+            cap = caps[0,0] if caps.size==1 else caps[c.i//4,slot]
+            if notional_per_share>0 and shares*notional_per_share>previous_equity*cap:
+                share_target[slot] = previous_equity*cap/notional_per_share
     if phase==2:
         for col in range(c.from_col,c.to_col,4):
             goal = share_target[col//4]
@@ -143,7 +144,7 @@ def receipts(pf, data, model, multiple):
     return positions,curve,int(fills.stage.eq(2).sum())
 
 
-def build_portfolio(data,model,native_open,previous_close,directions,multiple,slip):
+def build_portfolio(data,model,native_open,previous_close,directions,multiple,slip,*,caps=None):
     """Run four-stage native account orders with the supplied underlying quantities."""
     hours,cols = len(data['actions'])//3,data['actions'].shape[1]
     def expand(field):
@@ -151,9 +152,13 @@ def build_portfolio(data,model,native_open,previous_close,directions,multiple,sl
     actions = expand('actions')
     actions[2::4] = 0
     trim = np.zeros(cols//4)
+    if caps is None:
+        caps = np.array([[.2]])
+    elif caps.shape!=previous_close.shape or not ((caps>0)&(caps<=1)).all():
+        raise ValueError('Every real review needs an admissible notional cap')
     portfolio = wallet.vbt.Portfolio.from_order_func(expand('marks'),trade,actions,expand('prices'),expand('fees'),
         np.zeros(1),WEIGHTS,np.ones((1,1)),trim,native_open,directions,multiple,slip,
-        pre_segment_func_nb=mark_and_cap,pre_segment_args=(multiple,previous_close,np.full(cols//4,-1.),trim),
+        pre_segment_func_nb=mark_and_cap,pre_segment_args=(multiple,previous_close,np.full(cols//4,-1.),trim,caps),
         cash_sharing=True,group_by=True,init_cash=1000.,fill_pos_record=False,
         max_orders=int(np.count_nonzero(actions)+4*np.count_nonzero(previous_close)+1))
     return portfolio
