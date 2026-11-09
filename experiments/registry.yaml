@@ -15,6 +15,81 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-opening-price-limit-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "e16296a162"
+    status: "inconclusive"
+    question: "收盘时预设最高追价能否提高云带执行收益"
+    single_variable: "IOC限价用刚确认的12H收盘价或多给5bp，模型成交价超过限价取消，原仓位顺序不补。"
+    result: "严格限价29789U、1041笔、回撤上界27.88%；放宽5bp为41228U/36.16%，在额外5bp成交压力下降为27820U。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-opening-price-limit-20261109-v1/summary.json"
+    notes: "Historical opening trade is a fill proxy, not a depth observation. Notion 41388564-79af-8188-863d-d4c7ce5af862."
+
+  - experiment_id: exp-cloud-close-deferred-fill-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "ac255e8ce3"
+    status: "inconclusive"
+    question: "首笔成交量受限后在下一次收盘补原单能否赚更多"
+    single_variable: "最初确实触顶且在下一12H仍有持仓时，只完成原计划缺口；分别只补实际原账户浮盈或未盈利单。"
+    result: "原42486U；浮盈组462次补单、49488U、胜19.05%、现金盈亏7.21、回撤43.61%；未盈利组296次、49662U、胜21.64%、6.79、42.21%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-deferred-fill-20261109-v1/summary.json"
+    notes: "Real second-window capacity capped before execution. Funding and matching depth remain unverified. Notion 41388564-79af-81b4-b321-d3c28e4237e5."
+
+  - experiment_id: exp-cloud-close-complete-order-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "b12e1bbdda"
+    status: "rejected"
+    question: "放开第二窗口浮盈筛选能否提高全账户收益"
+    single_variable: "撤销补量的浮盈条件，两个分支放进同一个原生资金账户。"
+    result: "758次补量，终值61190U、现金盈亏比7.46、回撤上界43.71%，胜19.05%低于20%门槛；压力56087U、胜18.93%。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-complete-order-20261109-v1/summary.json"
+    notes: "Shared-cash result includes all competition for capital. Notion 41388564-79af-810b-a193-d88c3079d619."
+
+  - experiment_id: exp-cloud-close-deferred-price-limit-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "b1a870e4cf"
+    status: "inconclusive"
+    question: "原订单第二次机会坚持原价是否有效"
+    single_variable: "同张订单下一次补单要求原生立即成交价优于或等于最初入场价，其他执行约束完全相同。"
+    result: "273次补单，终值48851U、胜21.64%、现金盈亏6.77、回撤上界42.21%；额外5bp为44640U。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-deferred-price-limit-20261109-v1/summary.json"
+    notes: "All observed second windows belong to the union covered by the deferred fill audit. Notion 41388564-79af-81d2-a7bc-dfd33709f16f."
+
+  - experiment_id: exp-cloud-close-capacity-counterfactual-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "f85ee37bdc"
+    status: "inconclusive"
+    question: "假设第一单流动性无限，原班信号能否过1000倍"
+    single_variable: "保留同1585笔、相同现金/退出/杠杆和20%单币上限，只去掉第一分钟成交量预算。"
+    result: "110043U、现金盈亏4.62、胜21.70%、回撤上界47.89%；1187笔拟入场额超过原量上限；压力87399U。仍远低于1001000U。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-capacity-counterfactual-20261109-v1/summary.json"
+    notes: "Unlimited opening liquidity is an execution counterfactual, not a bound on other strategies. Notion 41388564-79af-81f6-bc8e-f6a1a901b4a9."
+
   - experiment_id: exp-cloud-close-rotation-entry-low-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "6d8c51c81a"
