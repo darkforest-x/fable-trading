@@ -1,0 +1,70 @@
+{
+  "id": "exp-cloud-close-failed-break-branch-20261109-v1",
+  "status": "builder_ready_for_owner_review",
+  "question": "On the ten liquid OKX contracts, does a completed 12H close outside its own frozen NY-Monday 1.618 extension followed by a later same-week close back inside produce a useful failed-break reversal?",
+  "symbols": ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "ADA", "LINK", "LTC", "AVAX"],
+  "sources": {
+    "allmarket_inputs_dir": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs",
+    "top20_inputs_dir": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs",
+    "frozen_v17_signals": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/signals.csv",
+    "source_contract": "Frozen OKX native H1 and UTC 12H OHLC; the ten symbols are read in the order above. Use all available instrument history through the frozen input cutoff 2026-11-08 12:00 UTC. No Binance bars, synthetic week proxies, or future trade outcomes.",
+    "monday_anchor": "For each symbol and NY Monday week independently, require exactly 24 contiguous H1 opens from Monday 00:00 New York to Tuesday 00:00 New York. The high and low are that symbol's own spotless native OKX H1 high/low extrema. lower=low-0.618*(high-low); upper=high+0.618*(high-low)."
+  },
+  "signal": {
+    "decision_bars": "Complete UTC-aligned 12H OHLC bars whose open is at or after the NY Tuesday 00:00 boundary and whose close is strictly before the next NY Monday 00:00 boundary. Require all 12 H1 opens for each decision bar.",
+    "long": "The first 12H close strictly below the frozen lower extension opens a long failed-break episode. Track the minimum 12H low while closes remain outside. The first later 12H close strictly between lower and upper confirms a long; include the reclaim bar's low in the stop extreme. A later outside close starts a new episode only after a prior inside reclaim reset.",
+    "short": "Symmetric: a 12H close strictly above upper opens the episode; track the maximum high; the first later close strictly between lower and upper confirms short and includes its high in the stop extreme.",
+    "multiple_sequences": "Distinct outside-to-inside episodes are retained; persistent outside closes do not create duplicate signals. Unresolved sequences at week end are right-censored and audited, not converted to trades.",
+    "entry": "Market at the exact H1 open whose timestamp equals the confirmation 12H close. Missing matching H1 open is retained as a no-entry audit row.",
+    "stop": "Actual same-symbol 12H extreme observed from first outside close through the confirmed inside bar, inclusive. If the entry opens through the stop, retain the event and VectorBT resolves it as an immediate open stop.",
+    "eligibility": "No 90-day rank/leadership gate; this is a separate ten-symbol signal census. No entry or sequence may use bars after its confirmation."
+  },
+  "target": {
+    "rule": "Long target is that NY week's own upper 1.618 extension; short target is that week's own lower 1.618 extension.",
+    "entry_gap": "If the next H1 open has already crossed the opposite extension, mark the event unplaceable instead of opening a position after the fixed target was passed.",
+    "time_exit": "If neither barrier fills, exit at the next NY Monday 00:00 H1 open, when this weekly reference expires. If price history ends first, close at the last observed H1 close and label the history-tail exit."
+  },
+  "execution": {
+    "framework": "VectorBT Portfolio.from_order_func native per-event H1 OHLC path, followed by the existing VectorBT cash-sharing wallet adapter.",
+    "capital": "1000 USDT initial shared cash, nine concurrent positions, one position per symbol. Full account uses low confirmation-bar prior ATR/close as tie priority and allows only funded entries.",
+    "fees": {
+      "entry_taker_per_fill": 0.0005,
+      "stop_or_time_exit_taker_per_fill": 0.0005,
+      "opposite_extension_limit_target_maker_per_fill": 0.0002,
+      "stress_slippage": "Optional separate 5bp per market fill; not included in the primary fee-only result."
+    },
+    "same_hour": "Stop takes priority if stop and target are both touched in one H1 bar. A later bar that opens through a resting target receives the better open price at maker fees. Entry open beyond the stop exits at that open with taker fees.",
+    "hourly_mark": "Use native OKX H1 OHLC for account marks; report realized USDT payoff and observed/conservative drawdown with the existing wallet summary fields.",
+    "event_batch_size": 128
+  },
+  "control_matching": {
+    "method": "For each actual event, choose the nearest unused inside-corridor 12H confirmation in the same symbol, NY week, and direction; limit absolute time distance to 24h and require then-known 12H ATR14/close within 25% of the signal value.",
+    "atr_relative_tolerance": 0.25,
+    "max_time_distance_hours": 24,
+    "one_to_one_without_replacement": true,
+    "tie_break_seed": 20261109,
+    "seed": 20261109,
+    "geometry": "For the diagnostic control only, transfer the actual signal's entry-to-stop risk fraction and opposite-extension target R to the control's own H1 entry. Do not use the control's future outcome to select it.",
+    "accounts": "Fund actuals, matched actuals, and matched controls as separate 1000U shared-cash portfolios. A control never competes with an actual in the primary actual portfolio."
+  },
+  "periods": ["full_available_history", "development_through_2024", "2025", "2026"],
+  "outputs": [
+    "candidate_audit.csv.gz",
+    "paths.csv.gz",
+    "coverage.csv",
+    "account_metrics.csv",
+    "funded_actual.csv.gz",
+    "hourly_actual.csv.gz",
+    "funded_paired_actual.csv.gz",
+    "hourly_paired_actual.csv.gz",
+    "funded_matched_control.csv.gz",
+    "hourly_matched_control.csv.gz",
+    "summary.json"
+  ],
+  "limitations": [
+    "The ten-coin scope does not establish all-market performance or capacity beyond the frozen source bars.",
+    "Same-hour OHLC does not reveal stop-versus-target ordering; stop-first is the conservative primary rule.",
+    "The research account does not include funding payments, market impact, contract-specific maintenance tiers, or live execution latency.",
+    "Time exit at the next NY Monday is part of this predeclared weekly-horizon branch; results do not describe an indefinitely held reversal."
+  ]
+}
