@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-direction-history-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "c3e03052ca"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Allow only the side with better realized cash return on the prior 90 days of completed baseline trades, lagged to before the native 12H key opens."
+    result: "OKX baseline 8850.52U. Selecting a single side gives 2230.43U, 1251 trades, 27.50% wins, cash payoff 2.947 and observed drawdown 61.42%. Development wealth and both risk screens failed. No transfer run."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-direction-history-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81a9-b956-e3da48bf8e36."
+
   - experiment_id: exp-cloud-close-breakout-expiry-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "fe95b9f188"
