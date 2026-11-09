@@ -1,0 +1,6 @@
+{
+ "question": "What does the post-doubling fixed-candle-low account actually realize when the 31 changed protective fills use the first verified trading minute that crossed the stop?",
+ "single_variable": "Replace only confirmed-double candle-low stop fill price by min(trigger-minute open, active stop) from the 31 complete reconciled OKX minute receipts. The pre-existing H1 clock, original V1.7 entry, chronological cash slot reservations, initial/historical funding assumptions and all remaining exits stay the same. For any intrahour gap through both new and original protection in the same hour, disentangle minute chronology before committing a cash result. No parameter selection.",
+ "audit": "A genuinely changed native account versus the registered hourly fixed-stop strategy; reprice all later position sizes in VectorBT and verify exact opening fractions, stop quantities and truncation. Attribute actual exited USDT notional and fees at each stop to the observed trigger minute. Compare to the entire observed minute turnover only as a necessary feasibility check, not assurance of availability at one price. Fixed genuine OKX published 5bp taker, 2bp resting fill; separate extra 5bp adverse market slippage. Funding and order-book impact unmodeled.",
+ "command": "vectorbt-python -m yoyo.evaluation.cloud_close_doubled_stop_gap_wallet"
+}
