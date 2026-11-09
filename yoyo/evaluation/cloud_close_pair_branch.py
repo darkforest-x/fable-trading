@@ -34,13 +34,13 @@ def asset_inputs(symbol,coverage):
     rows = []
     for t,close in bars.close.items():
         w = calendar._ny_week_window(int(t))
-        if not w['end']<=t<t+STEP<=w['expires'] or not np.isfinite(strength.at[t]):
+        if not w['monday_end']<=t<t+STEP<=w['expires'] or not np.isfinite(strength.at[t]):
             continue
         week = w['week']
         if week not in anchors:
-            start,stop = clock.searchsorted([w['start'],w['end']])
+            start,stop = clock.searchsorted([w['start'],w['monday_end']])
             observed = clock[start:stop]
-            if np.array_equal(observed,np.arange(w['start'],w['end'],wallet.HOUR)):
+            if np.array_equal(observed,np.arange(w['start'],w['monday_end'],wallet.HOUR)):
                 high,low = float(ohlc[start:stop,1].max()),float(ohlc[start:stop,2].min())
                 if high>low:
                     anchors[week] = (high,low)

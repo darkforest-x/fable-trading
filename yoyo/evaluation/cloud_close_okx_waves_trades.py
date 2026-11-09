@@ -1,5 +1,6 @@
 """Recover independently corroborated retired WAVES prices from native historical OKX transactions."""
 import json
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
@@ -22,7 +23,16 @@ def month(args):
     dest = CACHE/'raw'/file
     absent = dest.with_suffix('.404')
     if not dest.exists() and not absent.exists():
-        res = requests.get(url,timeout=(8,35))
+        for attempt in range(4):
+            try:
+                res = requests.get(url,timeout=(10,90))
+                if res.status_code!=404:
+                    res.raise_for_status()
+                break
+            except requests.RequestException:
+                if attempt==3:
+                    raise
+                time.sleep(2**attempt)
         if res.status_code==404:
             absent.write_text(url+'\n')
         else:
