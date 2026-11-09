@@ -103,13 +103,13 @@ def _load_common(config: dict) -> tuple[dict[str, dict], int, int, dict]:
         item["bars12"] = bars12
         item["bars1"] = bars1
         input_audit[symbol] = {
-            "native_12h_path": str(item["bars12_path"].relative_to(ROOT)),
+            "12h_ohlc_path": str(item["bars12_path"].relative_to(ROOT)),
             "native_1h_path": str(item["bars1_path"].relative_to(ROOT)),
             "source_receipt": str(item["receipt_path"].relative_to(ROOT)),
-            "native_12h_rows": len(bars12),
+            "common_12h_rows": len(bars12),
             "native_1h_rows": len(bars1),
-            "native_12h_first_open_ms": int(bars12.index[0]),
-            "native_12h_last_open_ms": int(bars12.index[-1]),
+            "common_12h_first_open_ms": int(bars12.index[0]),
+            "common_12h_last_open_ms": int(bars12.index[-1]),
             "native_1h_first_open_ms": int(bars1.index[0]),
             "native_1h_last_open_ms": int(bars1.index[-1]),
             "12h_source_counts": bars12.source.value_counts(dropna=False).to_dict()
@@ -244,7 +244,7 @@ def _bind_entry(event: dict, q: np.ndarray, bar_ms: np.ndarray,
         "cohort": "BTC_ETH_common_native_OKX_history",
         "is_current": True,
         "was_top20": True,
-        "bar_source": "frozen_native_OKX_12H_and_1H",
+        "bar_source": "frozen_OKX_native_12H_or_complete_1H_archive_and_native_1H",
         "entry_fee_class": "taker",
         "entry_fee_rate": TAKER,
         "control_match_status": "not_applicable",
@@ -267,6 +267,7 @@ def _account(paths: pd.DataFrame, quote_loader, start_ms: int, end_ms: int,
     data = wallet.prepare(executable, slots=slots, start=start_ms, end=end_ms,
                           quote_loader=quote_loader)
     funded, equity = wallet.account(data, slip=slip, exposure=1.0)
+    fill_audit = _attach_actual_fill_ledger(funded, slip)
     metrics = wallet.summarize(funded, equity)
     if not np.isclose(1000.0 + funded.cash_pnl.sum(), equity.nav.iloc[-1],
                       rtol=1e-8, atol=0.005):
@@ -300,8 +301,77 @@ def _account(paths: pd.DataFrame, quote_loader, start_ms: int, end_ms: int,
         "slots": slots,
         "fee_per_fill": TAKER,
         "slippage_per_market_fill": slip,
+        "actual_fill_ledger": fill_audit,
     }
     return metrics, funded, equity, metadata, missed_rows
+
+
+def _attach_actual_fill_ledger(funded: pd.DataFrame, slip: float) -> dict:
+    """Expose actual account-scale VectorBT fills and reconcile each cash PnL.
+
+    The inherited wallet returns its cash ledger from VectorBT, while its event
+    rows still carry one-unit path prices/fees. Retain those raw path prices and
+    replace the account-facing fill/fee columns with the exact taker-priced,
+    slippage-adjusted fills used by the framework orders.
+    """
+    if funded.empty:
+        return {"positions": 0, "entry_fee_usdt": 0.0, "exit_fee_usdt": 0.0,
+                "max_cash_pnl_residual_usdt": 0.0, "slippage_per_market_fill": slip}
+    side = funded.side.to_numpy(dtype=float)
+    quantity = funded.quantity.to_numpy(dtype=float)
+    path_entry = (funded.path_entry_price.to_numpy(dtype=float)
+                  if "path_entry_price" in funded else funded.entry_price.to_numpy(dtype=float))
+    path_exit = (funded.path_exit_price.to_numpy(dtype=float)
+                 if "path_exit_price" in funded else funded.exit_price.to_numpy(dtype=float))
+    actual_entry = path_entry * (1.0 + side * slip)
+    actual_exit = path_exit * (1.0 - side * slip)
+    entry_fees = np.abs(quantity * actual_entry) * TAKER
+    exit_fees = np.abs(quantity * actual_exit) * TAKER
+    gross = side * (actual_exit - actual_entry) * quantity
+    net = gross - entry_fees - exit_fees
+    cash_pnl = funded.cash_pnl.to_numpy(dtype=float)
+    residual = net - cash_pnl
+    if not np.allclose(residual, 0.0, rtol=1e-9, atol=1e-7):
+        raise ValueError(f"Per-position fee/slippage ledger differs from VectorBT cash PnL; max={np.max(np.abs(residual))}")
+    actual_notional = np.abs(quantity * actual_entry)
+    if not np.allclose(actual_notional, funded.notional.to_numpy(dtype=float),
+                       rtol=1e-10, atol=1e-7):
+        raise ValueError("Account fee ledger notional differs from VectorBT actual entry fills")
+
+    funded["path_entry_price"] = path_entry
+    funded["path_exit_price"] = path_exit
+    funded["entry_price"] = actual_entry
+    funded["exit_price"] = actual_exit
+    funded["entry_fee_class"] = "taker"
+    funded["exit_fee_class"] = "taker"
+    funded["entry_fee_rate"] = TAKER
+    funded["exit_fee_rate"] = TAKER
+    funded["entry_fee_amount"] = entry_fees
+    funded["exit_fee_amount"] = exit_fees
+    funded["gross_pnl"] = gross
+    funded["net_pnl"] = cash_pnl
+    funded["cash_pnl"] = cash_pnl
+    funded["notional"] = actual_notional
+    funded["net_return"] = cash_pnl / actual_notional
+    if "stop_price" in funded:
+        path_risk = (actual_entry - funded.stop_price.to_numpy(dtype=float)) * side
+        funded["risk_distance"] = path_risk
+        funded["risk_fraction"] = path_risk / actual_entry
+        funded["gross_r"] = np.divide(gross, path_risk,
+                                       out=np.full_like(gross, np.nan), where=path_risk > 0)
+        funded["net_r"] = np.divide(cash_pnl, path_risk,
+                                     out=np.full_like(cash_pnl, np.nan), where=path_risk > 0)
+    return {
+        "positions": len(funded),
+        "entry_fee_usdt": float(entry_fees.sum()),
+        "exit_fee_usdt": float(exit_fees.sum()),
+        "total_fee_usdt": float(entry_fees.sum() + exit_fees.sum()),
+        "gross_pnl_usdt": float(gross.sum()),
+        "cash_pnl_usdt": float(cash_pnl.sum()),
+        "max_cash_pnl_residual_usdt": float(np.max(np.abs(residual))),
+        "slippage_per_market_fill": float(slip),
+        "fill_price_rule": "entry=path_open*(1+side*slip); exit=path_exit*(1-side*slip), exactly reconciled to VectorBT cash_pnl",
+    }
 
 
 def _benchmark_events(loaded: dict[str, dict], start_ms: int, cutoff_ms: int) -> pd.DataFrame:
@@ -444,7 +514,7 @@ def run() -> dict:
     if cutoff_ms != int(config["data"]["cutoff_ms"]):
         raise ValueError("Frozen source cutoff differs from config")
 
-    events_by_symbol, flip_rows, source_features = {}, [], {}
+    flip_rows, source_features = [], {}
     path_rows, path_audit = [], {}
     for symbol in config["data"]["symbols"]:
         item = loaded[symbol]
@@ -462,7 +532,6 @@ def run() -> dict:
                    if event["flip_status"] == "eligible_flip_close_outside_cloud"]
         priced, audit = _price_events(entries, q, bar_ms,
                                       int(config["execution"]["vectorbt_path_batch_size"]))
-        events_by_symbol[symbol] = priced
         flip_rows.extend(bound)
         path_rows.extend(priced)
         source_features[symbol] = prepared["audit"]
@@ -530,7 +599,7 @@ def run() -> dict:
         "experiment_id": EXP.name,
         "source": {
             "venue": "OKX USDT perpetual",
-            "source_scope": "BTC and ETH only; native 12H and native 1H frozen top20 histories",
+            "source_scope": "BTC and ETH only; native 1H frozen top20 histories, native12Hutc plus complete_1H_archive 12H rows",
             "start_ms": start_ms,
             "start_utc": pd.Timestamp(start_ms, unit="ms", tz="UTC").isoformat(),
             "cutoff_ms_exclusive": cutoff_ms,
@@ -558,14 +627,63 @@ def run() -> dict:
     return summary
 
 
+def _repair_existing_ledgers() -> dict:
+    """Correct account-facing fill/fee columns without repricing or replaying."""
+    config = json.loads(CONFIG.read_text(encoding="utf-8"))
+    summary_path = EXP / config["outputs"]["summary_json"]
+    if not summary_path.is_file():
+        raise FileNotFoundError("No completed summary to reconcile")
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    result = {}
+    for name, relative in config["outputs"]["funded_files"].items():
+        path = EXP / relative
+        funded = pd.read_csv(path)
+        slip = (float(config["account"]["slippage_scenarios"]["stress_5bp_each_market_fill"])
+                if name.endswith("stress_5bp_each_market_fill") else
+                float(config["account"]["slippage_scenarios"]["fee_only"]))
+        audit = _attach_actual_fill_ledger(funded, slip)
+        temporary = path.with_suffix(path.suffix + ".tmp")
+        funded.to_csv(temporary, index=False, compression="gzip")
+        temporary.replace(path)
+        scenario = summary["account"]["scenarios"].get(name)
+        if scenario is None:
+            raise ValueError(f"Missing frozen account summary for {name}")
+        scenario["account"]["actual_fill_ledger"] = audit
+        result[name] = audit
+
+    source = summary["source"]
+    source["source_scope"] = (
+        "BTC and ETH only; native 1H frozen top20 histories, native12Hutc plus complete_1H_archive 12H rows"
+    )
+    for symbol_audit in source["input_audit"].values():
+        for old, new in (("native_12h_path", "12h_ohlc_path"),
+                         ("native_12h_rows", "common_12h_rows"),
+                         ("native_12h_first_open_ms", "common_12h_first_open_ms"),
+                         ("native_12h_last_open_ms", "common_12h_last_open_ms")):
+            if old in symbol_audit:
+                symbol_audit[new] = symbol_audit.pop(old)
+    path_file = EXP / config["outputs"]["native_paths_csv_gz"]
+    paths = pd.read_csv(path_file)
+    paths["bar_source"] = "frozen_OKX_native_12H_or_complete_1H_archive_and_native_1H"
+    temporary = path_file.with_suffix(path_file.suffix + ".tmp")
+    paths.to_csv(temporary, index=False, compression="gzip")
+    temporary.replace(path_file)
+    _write_json(summary_path, summary)
+    print(json.dumps(_json_safe(result), ensure_ascii=False, indent=2), flush=True)
+    return result
+
+
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--mini-check", action="store_true")
     group.add_argument("--run", action="store_true")
+    group.add_argument("--repair-existing-ledgers", action="store_true")
     args = parser.parse_args(argv)
     if args.mini_check:
         print(json.dumps(_json_safe(_mini_check()), ensure_ascii=False, indent=2), flush=True)
+    elif args.repair_existing_ledgers:
+        _repair_existing_ledgers()
     else:
         run()
 

@@ -18,7 +18,7 @@
     "bar_contract": "UTC open timestamps; use native 12H OHLC where the frozen receipt marks native12Hutc and the exact contiguous complete_1H_archive aggregate for the early common rows (BTC 14 rows, ETH 14 rows; the 17 earlier BTC archive rows precede the common start and are excluded); native 1H OHLC drives entry, intrabar V1.7 exits, account marks and drawdown bounds. Preserve source counts. No missing-bar fills or future-completeness filters."
   },
   "signal_rule": {
-    "ema": "Reuse cloud_close_reward_paths._ema_points_12h: alpha=2/(period+1), first completed close seed, 50 consecutive 12H bars required, reset after any 12H gap.",
+    "ema": "Reuse cloud_close_reward_paths._ema_points_12h on the completed 12H OHLC sequence: alpha=2/(period+1), first completed close seed, 50 consecutive 12H bars required, reset after any 12H gap. The 14 early common-window rows per symbol marked complete_1H_archive are exact aggregates of complete native OKX H1 rows; all later rows are native12Hutc.",
     "direction_flip": "A nonzero EMA20-EMA50 sign change from the last nonzero direction; equality is neutral and does not create a flip. The initial ready direction is not an entry because no prior direction exists.",
     "entry_filter": "At that exact flip's completed 12H close: long requires close>EMA20 and close>EMA50; short requires close<EMA20 and close<EMA50. Strict inequalities. If it fails, skip that flip and wait for a later opposite direction reversal.",
     "entry_execution": "Market at the exact H1 open timestamp equal to the completed 12H confirmation time. If no exact open exists, mark no entry; do not shift later.",
@@ -54,7 +54,8 @@
     "vectorbt_path_batch_size": 64,
     "reproduction": [
       "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_major_cross --mini-check",
-      "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_major_cross --run"
+      "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_major_cross --run",
+      "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_major_cross --repair-existing-ledgers"
     ]
   },
   "outputs": {
