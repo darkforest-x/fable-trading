@@ -18,7 +18,7 @@ def account():
     return data,base.underlying(data,quotes),quotes
 
 
-def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=None):
+def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=None,snapshot=None):
     native,previous,side,runners = market
     if set(multiples.index)!=set(runners.event_id) or not multiples.index.is_unique or multiples.isna().any():
         raise ValueError('Each occupied parent needs exactly one pre-entry multiplier')
@@ -49,7 +49,9 @@ def simulate(data,market,quotes,multiples,slip,directory,name,*,reference_dir=No
     pf = base.build_portfolio(data,model,native*ratio_grid,previous*ratio_grid,side,1.,slip)
     funds,curve,trims = base.receipts(pf,data,model,multiples)
     funds['exposure'] = multiples
-    if reference_dir is not None and (multiples==1.5).all():
+    if snapshot is not None:
+        snapshot(pf,data,funds,curve,multiples,slip)
+    elif reference_dir is not None and (multiples==1.5).all():
         suffix = '_stress' if slip else ''
         old = pd.read_csv(reference_dir/f'hourly_1.5x{suffix}.csv.gz',index_col=0)
         old_trades = pd.read_csv(reference_dir/f'funded_1.5x{suffix}.csv.gz',index_col='event_id')

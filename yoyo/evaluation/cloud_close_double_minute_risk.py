@@ -94,7 +94,8 @@ def snapshots(quotes,folder,account_dir=experiment.EXP,*,label='1.5x_stress'):
             idx = int((hour-data['start'])//HOUR*4+2)
             active = legs[legs.entry_ms.le(hour)&legs.exit_bar_ms.ge(hour)]
             for row in active.itertuples():
-                qty = assets[idx,row.slot]*multiple*row.side/row.entry_price
+                lev = multiple.at[row.event_id] if isinstance(multiple,pd.Series) else multiple
+                qty = assets[idx,row.slot]*lev*row.side/row.entry_price
                 if abs(qty)<1.e-13 or (hour==row.exit_bar_ms and row.exit_phase=='open'):
                     continue
                 clock,prices = quotes(row.symbol)
@@ -107,7 +108,7 @@ def snapshots(quotes,folder,account_dir=experiment.EXP,*,label='1.5x_stress'):
     return base,capture
 
 
-def ranges(group,row,hour,quotes):
+def ranges(group,row,hour,quotes,*,market_slip=.0005):
     """Envelope all other positions' extremes; preserve before/after paid price ambiguity within an exit minute."""
     low = np.full(60,row.post_trim_nav)
     high = low.copy()
@@ -127,7 +128,7 @@ def ranges(group,row,hour,quotes):
             low_c,high_c = close.copy(),close.copy()
             if r.exit_now:
                 market = r.exit_fee_rate>=wallet.TAKER
-                executed = r.exit_price*(1-r.side*(.0005 if market else 0.))
+                executed = r.exit_price*(1-r.side*(market_slip if market else 0.))
                 settled = (executed-r.open)*r.units-abs(r.units)*executed*r.exit_fee_rate
                 if r.exit_phase=='close':
                     first = last = 59
@@ -174,7 +175,7 @@ def main(directory=EXP,account_dir=experiment.EXP,input_loader=experiment.inputs
     refine(directory,equity,quotes,old)
 
 
-def refine(directory,equity,quotes,old,*,scope=None):
+def refine(directory,equity,quotes,old,*,scope=None,market_slip=.0005):
     """Bound the supplied native account from its conserved post-trim quantities."""
     held = pd.read_csv(directory/'post_trim_units.csv.gz',dtype={'symbol':str},float_precision='round_trip')
     upper,lower = equity.upper_nav.copy(),equity.lower_nav.copy()
@@ -183,7 +184,7 @@ def refine(directory,equity,quotes,old,*,scope=None):
     notes,used,observations = [],[],[]
     for end in targets(equity):
         hour = end.value//1_000_000-HOUR
-        bounded,meta = ranges(held[held.hour.eq(hour)],equity.loc[end],hour,quotes)
+        bounded,meta = ranges(held[held.hour.eq(hour)],equity.loc[end],hour,quotes,market_slip=market_slip)
         notes.extend(meta)
         if bounded is None:
             continue
