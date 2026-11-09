@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-funding-pressure-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "a8400763ad"
+    status: "accepted"
+    question: "Can causal realized funding pressure be reconstructed for the native 12H candidate roster?"
+    single_variable: "Measure directional funding change from the preceding causal eight days, before any candidate is ranked."
+    result: "23,125 of 23,262 native signals on 657 symbols had sufficient verified settlement cadence. All 14,999 required contract-month sources were resolved; 137 signals fail the within-archive interval check. Preserve those missing, including in downstream ranks."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-funding-pressure-20261109-v1/summary.json"
+    notes: "Accepted as a discrete historical feature source only. REST-only rates have no native interval field and can conceal short gaps. Notion 41388564-79af-81d3-b904-d24185747a2c."
+
+  - experiment_id: exp-cloud-close-funding-rank-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "a484abe509"
+    status: "rejected"
+    question: "Can the funded 12H V1.7 account exceed 1000x net profit within the prespecified risk and payoff limits?"
+    single_variable: "Rank simultaneous native keys by lagged directional funding change; unscored signals keep their rank."
+    result: "Full reference 5602.67U vs ranked 7924.12U, 1749 funded, 32.36% wins, cash payoff 2.692, observed DD 34.52%, conservative 35.12%. Development 4036.54U below 5290.02U. Not selected. Prior 12H entry unchanged, cash at risk starts at 1000U; receipt records exact DAR/FXS/IR/OXT lifetimes."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-funding-rank-20261109-v1/summary.json"
+    notes: "Native Binance archive; 5bp market and 2bp resting under the project fee convention. Rates used as a historical signal. Wallet excludes the actual funding cash flow and capacity. Notion 41388564-79af-81eb-b757-fb93810c0641."
+
   - experiment_id: exp-cloud-close-tail-expiry-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "a6fcaa4efd"

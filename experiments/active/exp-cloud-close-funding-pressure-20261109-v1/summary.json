@@ -1,0 +1,33 @@
+{
+  "availability_reasons": {
+    "complete_native_8d_window": 23125,
+    "native_interval_gap_in_monthly_archive": 137
+  },
+  "available_events": 23125,
+  "candidate_rows": 23262,
+  "causal_cutoff": "exclude full UTC minute containing entry; 8 exact 24h bins end at the open UTC minute boundary floor(entry_ms, 1 minute)",
+  "continuity": {
+    "max_native_gap_ms": 28920000,
+    "monthly_archive_interval_hours_check": "constant adjacent interval_hours segments are checked against interval + 120s",
+    "required_nonempty_24h_bins": 8,
+    "rest_fallback_limit": "fundingRate REST has no native interval field; an omitted 1h/4h record can evade the 8h maximum-gap guard",
+    "support_predecessor_max_gap_ms": 28920000
+  },
+  "experiment": "exp-cloud-close-funding-pressure-20261109-v1",
+  "feature_formula": "side * (sum of funding rates in latest causal 24h - mean of seven preceding causal 24h sums)",
+  "fetch": {
+    "monthly_zip_attempts": 9775,
+    "rest_errors": [],
+    "rest_fallback_keys": 10,
+    "rest_successes": 10
+  },
+  "generated_at_utc": "2026-11-09T02:27:27.659018+00:00",
+  "missing_month_keys": 0,
+  "output": "experiments/active/exp-cloud-close-funding-pressure-20261109-v1/signal_pressure.csv.gz",
+  "pressure_nonnull": 23125,
+  "required_support_symbol_months": 14999,
+  "source_audit": "experiments/active/exp-cloud-close-funding-pressure-20261109-v1/symbol_month_sources.csv",
+  "source_months_loaded": 14999,
+  "symbols": 657,
+  "unavailable_events": 137
+}
