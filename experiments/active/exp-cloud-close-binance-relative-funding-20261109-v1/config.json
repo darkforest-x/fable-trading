@@ -1,0 +1,68 @@
+{
+  "id": "exp-cloud-close-binance-relative-funding-20261109-v1",
+  "venue": "Binance USD-M",
+  "question": "How does the frozen contrarian_half 1x/2x Binance account change when actual historical funding is settled into cash and subsequent position sizes?",
+  "single_variable": "Add official historical Binance USD-M realized funding to the already priced contrarian_half account. Keep the 1,586 parent IDs, relative 1x/2x exposure map, four native child legs, fees, actual H1 prices, 20% single-contract H1 notional trim, nine slots, entry order, and exits fixed. Only exact same-hour funding ownership is bracketed as include/exclude; a separate +5bp market-fill stress is retained.",
+  "account": {
+    "initial_cash_usdt": 1000.0,
+    "slots": 9,
+    "expected_positions": 1586,
+    "expected_child_legs": 6344,
+    "new_order_exposure_fraction": 0.9,
+    "single_contract_weight_cap": 0.2,
+    "child_weights": [0.3333333333333333, 0.3333333333333333, 0.16666666666666666, 0.16666666666666666],
+    "relative_exposure_levels": [1.0, 2.0],
+    "entry_priority": "Frozen contrarian_half V1.7 parent event IDs and original entry_order; preserve the original wallet timestamp, entry_order, CRC32 symbol, symbol, event_id priority.",
+    "hourly_trim": "At each H1 open, set the position target from prior completed H1 NAV and prior close so each contract notional is at most 20% of that NAV; execute the VectorBT market reduction at the same H1 open stage with taker fee."
+  },
+  "fees": {
+    "taker": 0.0005,
+    "resting_maker": 0.0002,
+    "slippage_stress": 0.0005
+  },
+  "boundary_policy": {
+    "timestamp_resolution": "Use the exact fundingTime milliseconds from the frozen source tape; no time tolerance.",
+    "include_boundary": "Charge a settlement exactly at entry after the open entry; an exact open/close exit boundary uses the cached just-held quantity; a settlement inside an intrabar exit hour is applied before that hour's native exit.",
+    "exclude_boundary": "Exclude exact entry/open-exit/close-exit boundaries and settlements inside an intrabar exit hour; keep all strictly interior settlements.",
+    "account_order": "Exact H1-open settlements precede open orders. Non-exact H1 settlements are posted after the hourly cap reduction and before the native close/intrabar exit. Funding is deducted from available cash first; any amount beyond available cash is carried as a position-margin liability and is repaid from later credits or released collateral.",
+    "risk_limit": "The frozen minute-source audit proves both 2x stop-hour crossings strictly precede the corresponding liquidation boundary. This account adapter does not reconstruct historical exchange liquidation-tier changes."
+  },
+  "funding_source": {
+    "venue": "Binance USD-M",
+    "tape_rows": 78431,
+    "covered_positions": 1586,
+    "source_child_rows": 3172,
+    "covered_symbol_months": 2021,
+    "required_four_child_symbol_months": 2003,
+    "mark_sources": {
+      "binance_vision_mark_1h_open_proxy": 76844,
+      "binance_fundingRate_markPrice": 1587
+    },
+    "source_months_complete": true,
+    "missing_rate_rows": 0,
+    "missing_mark_rows": 0,
+    "four_child_settlement_rows_scanned_in_source_intervals": 181714,
+    "actual_four_child_settlement_rows_checked": 181393,
+    "boundary_sensitive_four_child_rows_checked": 3376,
+    "zero_settlement_receipt": "Use the donor source_months.csv.gz and verified_empty_windows logic. A symbol without tape rows may be skipped only when its complete query receipt proves the full child hold was inside a zero-settlement interval."
+  },
+  "inputs": {
+    "funded_parent_reference": "experiments/active/exp-cloud-close-binance-relative-minutes-20261109-v1/funded_contrarian_half.csv.gz",
+    "hourly_reference": "experiments/active/exp-cloud-close-binance-relative-minutes-20261109-v1/hourly_contrarian_half.csv.gz",
+    "minutes_receipt": "experiments/active/exp-cloud-close-binance-relative-minutes-20261109-v1/summary.json",
+    "native_children": "experiments/active/exp-cloud-close-fvg-priority-funding-20261109-v1/child_windows.csv.gz",
+    "funding_tape": "experiments/active/exp-cloud-close-fvg-priority-funding-20261109-v1/funding_tape.csv.gz",
+    "source_months": "experiments/active/exp-cloud-close-fvg-priority-funding-20261109-v1/source_months.csv.gz",
+    "source_coverage": "experiments/active/exp-cloud-close-fvg-priority-funding-20261109-v1/source_coverage.json",
+    "doubling_limits": "experiments/active/exp-cloud-close-double-limit-20261109-v1/doublings_Binance.csv"
+  },
+  "network_policy": "Offline replay only; no funding collection, archive download, or cross-venue prices",
+  "outputs": {
+    "scope": "experiments/active/exp-cloud-close-binance-relative-funding-20261109-v1/",
+    "zero_funding": "Persist the four-child VBT zero-funding reconstruction, parent cash ledger, full hourly NAV, orders and exact parity against the frozen contrarian_half account.",
+    "funding_scenarios": ["include_boundary", "exclude_boundary", "stress_include_boundary", "stress_exclude_boundary"],
+    "per_scenario": ["funded_legs.csv.gz", "funded_positions.csv.gz", "applied_funding.csv.gz", "hourly_equity.csv.gz", "orders.csv.gz", "metrics.json"]
+  },
+  "interpretation": "Funding rows use the actual VectorBT synthetic collateral share quantity converted to signed Binance base-asset quantity by exposure_multiple / entry_price at each settlement. Cashflow changes later available balance and therefore later VBT order sizes. Do not add aggregate funding to the old terminal NAV as a nominal correction.",
+  "status": "preregistered_frozen_inputs"
+}
