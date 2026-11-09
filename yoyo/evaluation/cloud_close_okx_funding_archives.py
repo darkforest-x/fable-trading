@@ -50,6 +50,9 @@ def archive(inst, month, filename):
     path = RAW / inst / filename
     if path.exists():
         return path.read_bytes()
+    not_found = path.with_suffix('.http404')
+    if not_found.is_file():
+        return None
     path.parent.mkdir(parents=True, exist_ok=True)
     url = f"{MONTHLY}/{month.replace('-','')}/{filename}"
     for attempt in range(4):
@@ -64,6 +67,7 @@ def archive(inst, month, filename):
             return data
         except HTTPError as exc:
             if exc.code == 404:
+                not_found.write_text('HTTP 404 observed in frozen 2026-11-09 research snapshot\n')
                 return None
             if exc.code not in (408,429,500,502,503,504) or attempt == 3:
                 raise
@@ -93,9 +97,7 @@ def decode(data, inst, month, filename):
 
 def read_month(key):
     inst, month = key
-    row = dict(instrument=inst, month=month, status='before_public_range', rows=0)
-    if month < '2022-03':
-        return row, None
+    row = dict(instrument=inst, month=month, rows=0)
     filename = f'{inst}-fundingrates-{month}.zip'
     data = archive(inst, month, filename)
     if data is None:
@@ -136,7 +138,9 @@ def main():
     clean = observed.status.eq('observed').groupby(observed.event_id).all()
     result = dict(funded_parents=len(parent), native_child_legs=len(windows[['event_id','tp_r']].drop_duplicates()),
                   instruments=windows.instrument.nunique(), required_exchange_month_keys=len(keys),
-                  source_status=receipts.status.value_counts().to_dict(), first_month=windows.month.min(),
+                  source_status=receipts.status.value_counts().to_dict(),
+                  pre_march_2022_source_status=receipts.loc[receipts.month.lt('2022-03'),'status'].value_counts().to_dict(),
+                  first_month=windows.month.min(),
                   last_month=windows.month.max(), native_monthly_records=len(tape), missing_rate_rows=int(tape.funding_rate.isna().sum()),
                   parents_with_all_held_month_files_free_of_null_rates=int(clean.sum()),
                   parents_with_all_held_month_files=int(parent.sum()),

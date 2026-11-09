@@ -1,10 +1,10 @@
 {
   "id": "exp-cloud-close-okx-funding-archives-20261109-v1",
   "question": "Which actually held portions of the 1569-position reference OKX V1.7 wallet have exchange-published realized funding archives?",
-  "source": "OKX historical market data, funding rates from March 2022. Monthly ZIPs are labeled in Asia/Shanghai. Use actual instrument IDs from the original OKX source manifest. Each CSV has instrument_name, funding_rate and funding_time with the exchange clock, including actual seconds offsets in early years.",
+  "source": "OKX historical market data. The download page generally describes rates from March 2022, but the exchange has also published individual earlier files, including September 2021 BTC-USDT-SWAP. Directly query every contract-month actually needed. Monthly ZIPs are labeled in Asia/Shanghai. CSV retains instrument_name, funding_rate and funding_time with observed seconds offsets.",
   "website": "https://www.okx.com/historical-data",
   "market_data_history": "https://www.okx.com/api/v5/public/market-data-history",
   "scope": "Both native runner and target legs of all frozen exp-cloud-close-tenth-sizing-20261109-v1 funded OKX parents. Retain published rates for each required local-calendar month. Endpoints padded by a minute solely for source visibility, not cash attribution. Boundaries between adjacent archived months may include a gap of almost eight hours.",
-  "coverage": "Report archive status, rows and any observed internal settlement gap exceeding eight hours plus two minutes. Raw observations are preserved without inferring an interval or replacing missing values by zero. Before the official published range, record the absent support. No settlement marks or compounded PnL are estimated here.",
+  "coverage": "Report archive status, rows and any observed internal settlement gap exceeding eight hours plus two minutes. Raw observations are preserved without inferring an interval or replacing missing values by zero. Record direct official archive HTTP 404 receipts irrespective of date and preserve null rates explicitly. No settlement marks or compounded PnL are estimated here.",
   "raw_cache": "data/research/cloud_close_okx_funding_20261109"
 }
