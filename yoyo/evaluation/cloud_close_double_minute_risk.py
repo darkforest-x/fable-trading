@@ -2,6 +2,7 @@
 import io
 import json
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 import numpy as np
 import pandas as pd
@@ -25,6 +26,17 @@ def targets(curve,threshold=50.):
     return sorted(peaks|set(troughs))
 
 
+def write_cache(path,payload):
+    with NamedTemporaryFile(dir=path.parent,delete=False) as fp:
+        tmp = Path(fp.name)
+        try:
+            fp.write(payload)
+            fp.flush()
+            tmp.replace(path)
+        finally:
+            tmp.unlink(missing_ok=True)
+
+
 def minute_quote(symbol,hour,quotes):
     """Use exact native time/price OHLC. A conflicting or absent H1 match leaves its bound intact."""
     inst = symbol+'-USDT-SWAP'
@@ -41,7 +53,7 @@ def minute_quote(symbol,hour,quotes):
             absent.write_text(url)
         else:
             res.raise_for_status()
-            file.write_bytes(res.content)
+            write_cache(file,res.content)
     def valid(x):
         return (np.array_equal(x.index,hour+np.arange(60)*60000) and np.isfinite(x[FIELDS]).all().all() and
                 x.low.gt(0).all() and x.low.le(x[['open','close']].min(axis=1)).all() and
@@ -61,7 +73,7 @@ def minute_quote(symbol,hour,quotes):
             body = res.json()
             if body.get('code') not in ('0','51001'):
                 raise ValueError(f'Unexpected OKX response {inst}: {body.get("code")}')
-            cache.write_text(json.dumps(body))
+            write_cache(cache,json.dumps(body).encode())
         body = json.loads(cache.read_text())
         if not body['data']:
             return None,'minute_archive_and_history_unavailable'
