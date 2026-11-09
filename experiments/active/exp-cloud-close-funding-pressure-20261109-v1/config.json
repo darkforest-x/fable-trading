@@ -1,0 +1,52 @@
+{
+  "id": "exp-cloud-close-funding-pressure-20261109-v1",
+  "status": "builder-prepared-awaiting-owner-commit",
+  "source": {
+    "venue": "Binance USD-M USDT perpetuals",
+    "candidate_file": "experiments/active/exp-cloud-close-score-priority-20261109-v1/candidate_order.csv.gz",
+    "candidate_rows": 23262,
+    "candidate_symbols": 657,
+    "selection": "Every frozen native 12H V1.7 confirmation candidate, independent of whether it was admitted, funded, or profitable.",
+    "identity": "event_id is the frozen source key. Parse side from the final event_id token and verify symbol and entry_ms against the encoded contract and nanosecond timestamp."
+  },
+  "feature": {
+    "single_variable": "Direction-signed change in realized funding pressure relative to the contract's preceding seven-day daily mean.",
+    "formula": "side * (sum(realized funding rates in latest causal 24h) - mean(sum(realized funding rates in each of the preceding seven causal 24h periods)))",
+    "decision_clock": "Frozen 12H entry_ms, UTC whole-hour close.",
+    "asof_cutoff": "Exclude all settlements in the full UTC minute containing entry_ms. The eight exact 24h bins end at the open boundary floor(entry_ms, 1 minute); no funding record at or after that boundary is used.",
+    "direction": "side is +1 long and -1 short; lower pressure is more favorable to that direction.",
+    "availability": "Require all eight 24h bins to contain native realized settlements, a predecessor within 8h+120s of the first bin, and no native settlement gap above 8h+120s through the cutoff. Monthly archives also check constant funding_interval_hours segments. No zero filling or interpolation."
+  },
+  "source_policy": {
+    "required_support": "Each event requires the eight feature days plus up to nine hours of predecessor support.",
+    "priority": [
+      "Existing Binance official monthly fundingRate ZIPs in the original 12-symbol archive",
+      "Existing Binance official monthly fundingRate ZIPs in the 2040-account archive",
+      "A verified local Binance fundingRate API cache whose manifest covers the full needed symbol-month query range",
+      "Fetch only needed monthly fundingRate ZIPs from data.binance.vision",
+      "If a needed monthly ZIP is unavailable, fetch the precise needed month range from official Binance USD-M GET /fapi/v1/fundingRate"
+    ],
+    "archive_pattern": "https://data.binance.vision/data/futures/um/monthly/fundingRate/{SYMBOL}/{SYMBOL}-fundingRate-YYYY-MM.zip",
+    "rest_endpoint": "https://fapi.binance.com/fapi/v1/fundingRate",
+    "fallback": "Preserve HTTP status/receipt and official REST request-range manifest. The REST client enforces its shared funding endpoint request budget and paginates at the documented 1000-row cap.",
+    "continuity_limitations": "Monthly Binance ZIP rows include funding_interval_hours and constant-interval runs are checked for missing settlements. REST fundingRate rows do not include that interval field, so REST-only coverage can enforce the requested 8h maximum gap but cannot detect every missing row in a native 1h or 4h segment if the remaining gap stays below 8h.",
+    "no_price_data": true
+  },
+  "outputs": {
+    "signal_panel": "experiments/active/exp-cloud-close-funding-pressure-20261109-v1/signal_pressure.csv.gz",
+    "required_columns": ["event_id", "entry_ms", "side", "pressure"],
+    "additional_coverage_columns": ["available", "availability_reason", "asof_funding_time_ms", "recent_24h_rate_sum", "prior_7d_mean_daily_rate", "source_months_json"],
+    "source_audit": "experiments/active/exp-cloud-close-funding-pressure-20261109-v1/symbol_month_sources.csv",
+    "summary": "experiments/active/exp-cloud-close-funding-pressure-20261109-v1/summary.json",
+    "download_cache": "data/research/cloud_close_funding_pressure_20261109/"
+  },
+  "execution": {
+    "builder": "yoyo/evaluation/cloud_close_funding_pressure.py",
+    "preflight": "python3 -m yoyo.evaluation.cloud_close_funding_pressure --preflight",
+    "self_check": "python3 -m yoyo.evaluation.cloud_close_funding_pressure --self-check",
+    "fetch_and_build": "python3 -m yoyo.evaluation.cloud_close_funding_pressure --fetch --workers 4",
+    "maximum_fetch_workers": 4,
+    "formal_collection_requires_committed_builder_and_config": true,
+    "account_simulation": false
+  }
+}
