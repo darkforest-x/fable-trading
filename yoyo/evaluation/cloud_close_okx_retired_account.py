@@ -49,16 +49,17 @@ def frozen_data():
     return paths,history
 
 
-def retired_symbol(symbol,end):
+def retired_symbol(symbol,end,*,hour_file=None):
     inst = symbol+'-USDT-SWAP'
     folder = prices.CACHE/'series'/inst
     if not (folder/'source.json').is_file():
         raise FileNotFoundError(f'No archived H1 source receipt for {inst}')
-    hour = pd.read_csv(folder/'bars1h.csv.gz',index_col='time',float_precision='round_trip')
+    hour_file = folder/'bars1h.csv.gz' if hour_file is None else hour_file
+    hour = pd.read_csv(hour_file,index_col='time',float_precision='round_trip')
     hour = hour.loc[hour.index<end]
     bars = native.twelve_hour(hour)
     ranks = leadership.trailing_return(bars.reset_index())
-    events = official_keys(symbol,folder/'bars1h.csv.gz',end)
+    events = official_keys(symbol,hour_file,end)
     if any(e['key_open_ms'] not in bars.index for e in events):
         raise ValueError(f'Original key outside complete native 12H bars for {symbol}')
     rows = []
