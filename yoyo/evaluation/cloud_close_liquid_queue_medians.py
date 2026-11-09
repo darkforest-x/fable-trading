@@ -17,8 +17,8 @@ EXP = queue.EXP.parent/'exp-cloud-close-liquid-queue-medians-20261109-v1'
 ARMS = ['original_atr','balanced']
 
 
-def inputs(tapes,quotes):
-    file = EXP/'source_rows.csv.gz'
+def inputs(tapes,quotes,directory):
+    file = directory/'source_rows.csv.gz'
     rows = pd.concat([f[f.tp_r.eq(0)][['event_id','symbol','entry_ms','entry_price']] for f in tapes.values()]).drop_duplicates()
     if not rows.event_id.is_unique:
         raise ValueError('Concurrent ranking arms differ on the same entry definition')
@@ -54,13 +54,13 @@ def inputs(tapes,quotes):
     return out
 
 
-def main():
-    if (EXP/'summary.json').exists():
+def main(*,experiment=EXP,source_dir=queue.EXP,arms=ARMS):
+    if (experiment/'summary.json').exists():
         raise FileExistsError('Completed mean/median ranking account sensitivity')
     quotes,src=queue.repair.checked_quotes()
     grid=pd.read_csv(queue.history.EXP/'opportunities.csv.gz',index_col='event_id').prior_turnover_usdt
-    tapes={s:pd.read_csv(queue.EXP/s/'selected_paths.csv.gz',dtype={'symbol':str},float_precision='round_trip') for s in ARMS}
-    sources=inputs(tapes,quotes)
+    tapes={s:pd.read_csv(source_dir/s/'selected_paths.csv.gz',dtype={'symbol':str},float_precision='round_trip') for s in arms}
+    sources=inputs(tapes,quotes,experiment)
     regime=queue.rank.reference.study.season.direction(src)
     results={}
     for arm,tape in tapes.items():
@@ -71,11 +71,11 @@ def main():
         amount_median=pts.prior_median.mul(.1).where(pts.prior_status.eq('observed'),0.).fillna(0)
         amount_mean=grid.reindex(parents.index)/600
         if (amount_mean.isna().any() or not parents.entry_ms.equals(pts.entry_ms) or
-                set(parents.index)!=set(pd.read_csv(queue.EXP/arm/'funded_fees.csv.gz').event_id)):
+                set(parents.index)!=set(pd.read_csv(source_dir/arm/'funded_fees.csv.gz').event_id)):
             raise ValueError('Unchanged roster mismatch in the capacity comparison')
         ok=amount_median.ge(1e-6)
         ratios=1.5-.5*parents.side*parents.entry_ms.map(regime)
-        folder=EXP/arm
+        folder=experiment/arm
         folder.mkdir(exist_ok=True)
         cases={}
         for label,caps in [('covered_mean',amount_mean.where(ok,0)),('median',amount_median.where(ok,0))]:
@@ -90,10 +90,17 @@ def main():
                     print(arm,key,cases[key]['metrics']['all'],flush=True)
                 gc.collect()
         results[arm]=cases
-    queue.repair.archive.prices.safe_json(EXP/'summary.json',dict(arms=results,unique_sources=len(sources),
+    queue.repair.archive.prices.safe_json(experiment/'summary.json',dict(arms=results,unique_sources=len(sources),
                  prior_status=sources.prior_status.value_counts().to_dict(),next_status=sources.next_status.value_counts().to_dict(),
                  caveat='Entry capacity scenario only; no funding or exit market depth modeling.'))
 
 
 if __name__=='__main__':
-    main()
+    import argparse
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--vix-priority',action='store_true')
+    if parser.parse_args().vix_priority:
+        main(experiment=EXP.parent/'exp-cloud-close-vix-priority-medians-20261109-v1',
+             source_dir=EXP.parent/'exp-cloud-close-vix-priority-20261109-v1',arms=['aligned','lagged'])
+    else:
+        main()

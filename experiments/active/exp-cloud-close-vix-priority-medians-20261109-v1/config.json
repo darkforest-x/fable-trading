@@ -1,0 +1,7 @@
+{
+  "question": "Does the VIX queue preference have the same advantage when single-minute spikes cannot inflate the opening budget?",
+  "single_variable": "Keep each of the already fixed aligned and 20-session-lagged nine-position VIX queues. Change the 10% mean last-hour turnover budget to 10% of the prior 60 minutes median turnover on positive, same-clock official source coverage. Calculate matched-coverage means and an extra 5bp market stress. Leave missing slots empty and do not backfill.",
+  "controls": "Aligned and lagged within each identical volume convention, plus the previously funded balanced-only result in exp-cloud-close-liquid-queue-medians-20261109-v1. Within-arm matched mean and median use the same opportunities. Ranking controls may have different rosters. No historic OKX funding or observed exit liquidity.",
+  "source": "Reuse the verified native OKX prior and entry-minute sources by exact symbol, event, open and timestamp, with the fixed 360-contract archive and separate Cboe regime source. Record how often order size still surpasses the actual future first minute.",
+  "command": "vectorbt-python -m yoyo.evaluation.cloud_close_liquid_queue_medians --vix-priority"
+}
