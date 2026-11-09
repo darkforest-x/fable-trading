@@ -136,6 +136,36 @@ def describe(panel, columns):
     return pd.DataFrame(summary),pd.DataFrame(paired)
 
 
+def shared_observations(panel):
+    """After seeing top10: unity volume/range thresholds and first touch, separately and jointly.
+
+    Volume uses the signal bar / median previous 20 completed 12H volumes; range uses
+    its (H-L) / current Wilder ATR14. A missing required input remains in the denominator.
+    """
+    top = panel.index[panel.winner10]
+    tests = {
+        "above_median_volume": {"log_vol_ratio": panel.log_vol_ratio.gt(0)},
+        "range_above_atr": {"range_atr": panel.range_atr.gt(1)},
+        "first_wick_of_week": {"prior_touches": panel.prior_touches.eq(0)},
+    }
+    tests["all_three_observed"] = {k:v for part in list(tests.values()) for k,v in part.items()}
+    losses = panel[panel.loser]
+    contemporaries = losses[losses.entry_ms.isin(panel.loc[top,"entry_ms"])]
+    cases = panel[panel.winner10 & panel.entry_ms.isin(contemporaries.entry_ms)]
+    out = []
+    for name, factors in tests.items():
+        columns = list(factors)
+        observed = panel[columns].apply(np.isfinite).all(axis=1)
+        passed = pd.DataFrame(factors).all(axis=1) & observed
+        for part, tab in [("all",panel),("before_2025",panel[panel.entry_ms<CUTOFF]),("later",panel[panel.entry_ms>=CUTOFF])]:
+            row = counts(tab,top,passed.loc[tab.index],observed.loc[tab.index])
+            out.append(dict(rule=name,period=part,**row))
+        out[-3].update(same_close_tails=len(cases),same_close_tails_selected=int(passed[cases.index].sum()),
+                       same_close_losses=len(contemporaries),same_close_losses_selected=int(passed[contemporaries.index].sum()),
+                       same_close_losses_missing=int((~observed[contemporaries.index]).sum()))
+    return pd.DataFrame(out)
+
+
 def main():
     from yoyo.evaluation.cloud_binance_winner_entry_features import build_features
     if (EXP/"summary.json").exists():
@@ -152,6 +182,7 @@ def main():
     columns = list(dict.fromkeys([r[1] for r in rules] + [k for k in (
         "pen_pct","close_pos","stop_dist_pct","rr_close","ret_24h","age_days","log_qv_7d","btc_ret_24h") if k in panel]))
     desc, matched = describe(panel,columns)
+    shared_observations(panel).to_csv(EXP/"posthoc_common_traits.csv",index=False)
     ten = panel[panel.winner10].sort_values("cash_pnl",ascending=False)
     panel.to_csv(EXP/"entry_rows.csv.gz")
     ten.to_csv(EXP/"top10.csv")
