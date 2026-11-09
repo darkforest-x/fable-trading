@@ -642,8 +642,10 @@ def _symbol_summary(position_rows: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def _write_scope(scope: str, config: dict, legs: pd.DataFrame, source_audit: dict) -> dict:
-    output_dir = EXP / scope
+def _write_scope(scope: str, config: dict, legs: pd.DataFrame, source_audit: dict, *,
+                 experiment_dir: Path = EXP, source_experiment: str | None = None,
+                 source_strategy: str | None = None) -> dict:
+    output_dir = experiment_dir / scope
     output_dir.mkdir(parents=True, exist_ok=True)
     audit_path = output_dir / "funding_audit.json"
     if audit_path.exists():
@@ -687,8 +689,8 @@ def _write_scope(scope: str, config: dict, legs: pd.DataFrame, source_audit: dic
     missing_months = [a for a in month_audit if not a.get("range_complete")]
     output = {
         "id": config["id"], "scope": scope, "venue": "Binance USD-M",
-        "source_experiment": "exp-cloud-close-efficient-trend-20261109-v1",
-        "source_strategy": "trend_efficiency actual funded positions; frozen leg paths and quantities",
+        "source_experiment": source_experiment or config["source_account"]["experiment"],
+        "source_strategy": source_strategy or "trend_efficiency actual funded positions; frozen leg paths and quantities",
         "source_reconciliation": source_audit,
         "cashflow_only_not_nav_replay": True,
         "funding_cashflow_sign": "-signed_quantity * funding_rate * mark_price; positive rate charges longs and credits shorts",
