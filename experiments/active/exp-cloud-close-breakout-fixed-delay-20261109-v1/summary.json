@@ -1,0 +1,144 @@
+{
+  "immediate": {
+    "metrics": {
+      "all": {
+        "final_usdt": 35753.46906517894,
+        "multiple": 35.75346906517894,
+        "dd_mark_pct": 47.96116110486752,
+        "dd_bound_pct": 48.591449506967734,
+        "trades": 752,
+        "win_pct": 25.132978723404253,
+        "payoff": 8.934447009157415,
+        "payoff_usdt": 5.344868634831871,
+        "median_net_pct": -3.621301061366491
+      },
+      "dev": {
+        "final_usdt": 21461.257818266633,
+        "multiple": 21.461257818266635,
+        "dd_mark_pct": 47.96116110486752,
+        "dd_bound_pct": 48.591449506967734,
+        "trades": 536,
+        "win_pct": 23.134328358208954,
+        "payoff": 10.870661473959888,
+        "payoff_usdt": 5.375013686944065,
+        "median_net_pct": -3.7670273200997153
+      },
+      "2025": {
+        "final_usdt": 27393.849251454598,
+        "multiple": 1.2764326063003852,
+        "dd_mark_pct": 23.60127847144964,
+        "dd_bound_pct": 24.54044633372966,
+        "trades": 99,
+        "win_pct": 21.21212121212121,
+        "payoff": 3.112929561519195,
+        "payoff_usdt": 3.1981981805355026,
+        "median_net_pct": -3.590381861244038
+      },
+      "2026": {
+        "final_usdt": 35753.46906517894,
+        "multiple": 1.3051641168420482,
+        "dd_mark_pct": 20.983142293530776,
+        "dd_bound_pct": 24.377300168338735,
+        "trades": 103,
+        "win_pct": 33.00970873786408,
+        "payoff": 4.647998599330121,
+        "payoff_usdt": 4.501334927357006,
+        "median_net_pct": -3.1667321576080725
+      }
+    },
+    "admission": {
+      "input_executed_events": 1410,
+      "admitted": 752,
+      "funded": 752,
+      "rejected": {
+        "same_contract": 620,
+        "all_slots_busy": 38
+      },
+      "unquoted_position_hours": 0
+    },
+    "funded_positions": 752,
+    "exit_reasons": {
+      "stop": 498,
+      "ema_flip_open": 142,
+      "ema_flip": 103,
+      "series_tail_close": 9
+    }
+  },
+  "delayed": {
+    "metrics": {
+      "all": {
+        "final_usdt": 43583.286256074294,
+        "multiple": 43.583286256074295,
+        "dd_mark_pct": 47.32706989487032,
+        "dd_bound_pct": 48.57124145430702,
+        "trades": 749,
+        "win_pct": 25.367156208277702,
+        "payoff": 9.23166105595179,
+        "payoff_usdt": 5.300235862075126,
+        "median_net_pct": -3.5655467962942007
+      },
+      "dev": {
+        "final_usdt": 26734.29804635232,
+        "multiple": 26.73429804635232,
+        "dd_mark_pct": 47.32706989487032,
+        "dd_bound_pct": 48.57124145430702,
+        "trades": 534,
+        "win_pct": 22.659176029962545,
+        "payoff": 11.800963436664903,
+        "payoff_usdt": 5.62225031182284,
+        "median_net_pct": -3.6524104868961347
+      },
+      "2025": {
+        "final_usdt": 33059.366391613745,
+        "multiple": 1.236590028819718,
+        "dd_mark_pct": 21.214174972324564,
+        "dd_bound_pct": 22.01442775726533,
+        "trades": 104,
+        "win_pct": 22.115384615384613,
+        "payoff": 3.043561493745726,
+        "payoff_usdt": 3.091049000604125,
+        "median_net_pct": -3.698961681141534
+      },
+      "2026": {
+        "final_usdt": 43583.286256074294,
+        "multiple": 1.318333985588126,
+        "dd_mark_pct": 17.424012870004447,
+        "dd_bound_pct": 21.199157411331303,
+        "trades": 97,
+        "win_pct": 37.11340206185567,
+        "payoff": 4.278933045391123,
+        "payoff_usdt": 4.164867521825793,
+        "median_net_pct": -2.908002871969708
+      }
+    },
+    "admission": {
+      "input_executed_events": 1410,
+      "admitted": 749,
+      "funded": 749,
+      "rejected": {
+        "same_contract": 631,
+        "all_slots_busy": 30
+      },
+      "unquoted_position_hours": 0
+    }
+  },
+  "parents": 1410,
+  "exact_later_opens": 1410,
+  "missing_scheduled_open": {},
+  "source_experiment": "exp-cloud-close-breakout-branch-20261109-v1",
+  "config": {
+    "experiment_id": "exp-cloud-close-breakout-fixed-delay-20261109-v1",
+    "source_experiment": "exp-cloud-close-breakout-branch-20261109-v1",
+    "single_variable": "Enter all ten-coin panel breakout parents one fixed 12H later rather than at confirmation, keeping each signal's original relative stop distance and direction.",
+    "delay_bars": 1,
+    "eligibility": "Take every original candidate with an executable open and valid original stop, regardless of subsequent market or volatility. Do not require same-week availability, any future non-breakout or favorable market state. Reject only clock or source bounds at the exact scheduled fill.",
+    "execution": "VectorBT actual market-on-open and native cloud exits with shared nine-slot 1000 USDT cash, no leverage. Use archived source experiment account as immediate entry reference.",
+    "fees": {
+      "market_per_side": 0.0005,
+      "maker_per_side_unused": 0.0002,
+      "funding": "omitted",
+      "extra_slippage": 0.0
+    },
+    "sample": "Same ten OKX contracts, native history through 2026-11-08T12:00:00Z exclusive. Later years have already been inspected."
+  }
+}

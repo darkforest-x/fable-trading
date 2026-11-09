@@ -1,0 +1,999 @@
+{
+  "experiment_id": "exp-cloud-close-breakout-branch-20261109-v1",
+  "symbols": [
+    "BTC",
+    "ETH",
+    "SOL",
+    "BNB",
+    "XRP",
+    "DOGE",
+    "ADA",
+    "LINK",
+    "LTC",
+    "AVAX"
+  ],
+  "starting_usdt": 1000.0,
+  "slots": 9,
+  "input_paths": {
+    "breakout": 2820,
+    "reclaim": 1974
+  },
+  "candidate_events": {
+    "breakout": {
+      "signals": 1410,
+      "executable_actual_paths": 1410,
+      "matched_controls": 574,
+      "unmatched_controls": 836,
+      "paired_real_parents": 574,
+      "actual_no_entry_reasons": {},
+      "unmatched_control_reasons": {
+        "no_later_same_week_direction_and_atr_candidate": 836
+      },
+      "exit_reasons": {
+        "stop": 1010,
+        "ema_flip_open": 230,
+        "ema_flip": 157,
+        "series_tail_close": 13
+      }
+    },
+    "reclaim": {
+      "signals": 987,
+      "executable_actual_paths": 987,
+      "matched_controls": 869,
+      "unmatched_controls": 118,
+      "paired_real_parents": 869,
+      "actual_no_entry_reasons": {},
+      "unmatched_control_reasons": {
+        "no_later_same_week_direction_and_atr_candidate": 118
+      },
+      "exit_reasons": {
+        "stop": 611,
+        "ema_flip_open": 210,
+        "ema_flip": 147,
+        "series_tail_close": 19
+      }
+    }
+  },
+  "accounts": {
+    "breakout": {
+      "actual": {
+        "metrics": {
+          "all": {
+            "final_usdt": 35753.46906517894,
+            "multiple": 35.75346906517894,
+            "dd_mark_pct": 47.96116110486752,
+            "dd_bound_pct": 48.591449506967734,
+            "trades": 752,
+            "win_pct": 25.132978723404253,
+            "payoff": 8.934447009157415,
+            "payoff_usdt": 5.344868634831871,
+            "median_net_pct": -3.621301061366491
+          },
+          "dev": {
+            "final_usdt": 21461.257818266633,
+            "multiple": 21.461257818266635,
+            "dd_mark_pct": 47.96116110486752,
+            "dd_bound_pct": 48.591449506967734,
+            "trades": 536,
+            "win_pct": 23.134328358208954,
+            "payoff": 10.870661473959888,
+            "payoff_usdt": 5.375013686944065,
+            "median_net_pct": -3.7670273200997153
+          },
+          "2025": {
+            "final_usdt": 27393.849251454598,
+            "multiple": 1.2764326063003852,
+            "dd_mark_pct": 23.60127847144964,
+            "dd_bound_pct": 24.54044633372966,
+            "trades": 99,
+            "win_pct": 21.21212121212121,
+            "payoff": 3.112929561519195,
+            "payoff_usdt": 3.1981981805355026,
+            "median_net_pct": -3.590381861244038
+          },
+          "2026": {
+            "final_usdt": 35753.46906517894,
+            "multiple": 1.3051641168420482,
+            "dd_mark_pct": 20.983142293530776,
+            "dd_bound_pct": 24.377300168338735,
+            "trades": 103,
+            "win_pct": 33.00970873786408,
+            "payoff": 4.647998599330121,
+            "payoff_usdt": 4.501334927357006,
+            "median_net_pct": -3.1667321576080725
+          }
+        },
+        "admission": {
+          "input_executed_events": 1410,
+          "admitted": 752,
+          "funded": 752,
+          "rejected": {
+            "same_contract": 620,
+            "all_slots_busy": 38
+          },
+          "unquoted_position_hours": 0
+        },
+        "funded_positions": 752,
+        "exit_reasons": {
+          "stop": 498,
+          "ema_flip_open": 142,
+          "ema_flip": 103,
+          "series_tail_close": 9
+        }
+      },
+      "paired_actual": {
+        "metrics": {
+          "all": {
+            "final_usdt": 223.60006042825205,
+            "multiple": 0.22360006042825206,
+            "dd_mark_pct": 79.1958467305193,
+            "dd_bound_pct": 79.46066822389459,
+            "trades": 522,
+            "win_pct": 7.088122605363985,
+            "payoff": 4.776147783116754,
+            "payoff_usdt": 4.2941318328638465,
+            "median_net_pct": -3.7334521765874413
+          },
+          "dev": {
+            "final_usdt": 345.8251306910991,
+            "multiple": 0.3458251306910991,
+            "dd_mark_pct": 66.19968387067968,
+            "dd_bound_pct": 66.5728218628376,
+            "trades": 353,
+            "win_pct": 5.382436260623229,
+            "payoff": 6.18410936505829,
+            "payoff_usdt": 5.666038243114398,
+            "median_net_pct": -3.7378716834261034
+          },
+          "2025": {
+            "final_usdt": 271.4877290697778,
+            "multiple": 0.7850433787944647,
+            "dd_mark_pct": 30.193143484541316,
+            "dd_bound_pct": 30.465372152730662,
+            "trades": 80,
+            "win_pct": 2.5,
+            "payoff": 2.99400562200107,
+            "payoff_usdt": 3.327355561162828,
+            "median_net_pct": -4.2522982505568
+          },
+          "2026": {
+            "final_usdt": 223.60006042825205,
+            "multiple": 0.8236101911286839,
+            "dd_mark_pct": 23.25457535050035,
+            "dd_bound_pct": 23.4535705857844,
+            "trades": 82,
+            "win_pct": 14.634146341463413,
+            "payoff": 3.700497554848589,
+            "payoff_usdt": 3.5795179583964924,
+            "median_net_pct": -3.4958725276981237
+          }
+        },
+        "admission": {
+          "input_executed_events": 574,
+          "admitted": 522,
+          "funded": 522,
+          "rejected": {
+            "same_contract": 52,
+            "all_slots_busy": 0
+          },
+          "unquoted_position_hours": 0
+        },
+        "funded_positions": 522,
+        "exit_reasons": {
+          "stop": 478,
+          "ema_flip_open": 25,
+          "ema_flip": 14,
+          "series_tail_close": 5
+        }
+      },
+      "matched_control": {
+        "metrics": {
+          "all": {
+            "final_usdt": 10247.354005422409,
+            "multiple": 10.247354005422409,
+            "dd_mark_pct": 40.04246491055731,
+            "dd_bound_pct": 48.58692297163289,
+            "trades": 438,
+            "win_pct": 23.972602739726025,
+            "payoff": 9.857882809002092,
+            "payoff_usdt": 7.325189701523286,
+            "median_net_pct": -3.272699922893532
+          },
+          "dev": {
+            "final_usdt": 7741.48466993345,
+            "multiple": 7.74148466993345,
+            "dd_mark_pct": 40.04246491055731,
+            "dd_bound_pct": 48.58692297163289,
+            "trades": 297,
+            "win_pct": 20.2020202020202,
+            "payoff": 14.526053967831858,
+            "payoff_usdt": 10.836954323678953,
+            "median_net_pct": -3.2895737107204024
+          },
+          "2025": {
+            "final_usdt": 8252.616776635237,
+            "multiple": 1.0660250750979245,
+            "dd_mark_pct": 21.90972226235691,
+            "dd_bound_pct": 22.2372479295465,
+            "trades": 70,
+            "win_pct": 15.714285714285714,
+            "payoff": 2.738335642475908,
+            "payoff_usdt": 2.7342460281721612,
+            "median_net_pct": -3.641566050538185
+          },
+          "2026": {
+            "final_usdt": 10247.354005422409,
+            "multiple": 1.2417096640709964,
+            "dd_mark_pct": 10.189616851716888,
+            "dd_bound_pct": 12.585743114644632,
+            "trades": 63,
+            "win_pct": 42.857142857142854,
+            "payoff": 4.430857071818264,
+            "payoff_usdt": 4.4360900377095795,
+            "median_net_pct": -1.1817099567099496
+          }
+        },
+        "admission": {
+          "input_executed_events": 574,
+          "admitted": 438,
+          "funded": 438,
+          "rejected": {
+            "same_contract": 135,
+            "all_slots_busy": 1
+          },
+          "unquoted_position_hours": 0
+        },
+        "funded_positions": 438,
+        "exit_reasons": {
+          "stop": 290,
+          "ema_flip_open": 78,
+          "ema_flip": 63,
+          "series_tail_close": 6,
+          "stop_gap_open": 1
+        }
+      }
+    },
+    "reclaim": {
+      "actual": {
+        "metrics": {
+          "all": {
+            "final_usdt": 12398.229606918549,
+            "multiple": 12.398229606918548,
+            "dd_mark_pct": 46.21365988898979,
+            "dd_bound_pct": 49.62941400172749,
+            "trades": 665,
+            "win_pct": 22.25563909774436,
+            "payoff": 10.501548366474609,
+            "payoff_usdt": 6.019830841368219,
+            "median_net_pct": -3.271441222242857
+          },
+          "dev": {
+            "final_usdt": 9486.42732813651,
+            "multiple": 9.486427328136509,
+            "dd_mark_pct": 46.21365988898979,
+            "dd_bound_pct": 49.62941400172749,
+            "trades": 470,
+            "win_pct": 21.06382978723404,
+            "payoff": 13.09356729384082,
+            "payoff_usdt": 6.792227184970261,
+            "median_net_pct": -3.4064565739507335
+          },
+          "2025": {
+            "final_usdt": 10796.115502347813,
+            "multiple": 1.1380591585123727,
+            "dd_mark_pct": 17.238728066990138,
+            "dd_bound_pct": 17.9866824943253,
+            "trades": 92,
+            "win_pct": 15.217391304347828,
+            "payoff": 4.608357829087516,
+            "payoff_usdt": 4.716349575463916,
+            "median_net_pct": -3.4776138882081815
+          },
+          "2026": {
+            "final_usdt": 12398.229606918549,
+            "multiple": 1.148397273465843,
+            "dd_mark_pct": 16.38895461105765,
+            "dd_bound_pct": 18.000839689238866,
+            "trades": 94,
+            "win_pct": 29.78723404255319,
+            "payoff": 4.965219362954789,
+            "payoff_usdt": 4.94053535850893,
+            "median_net_pct": -2.4871477033704616
+          }
+        },
+        "admission": {
+          "input_executed_events": 987,
+          "admitted": 665,
+          "funded": 665,
+          "rejected": {
+            "same_contract": 317,
+            "all_slots_busy": 5
+          },
+          "unquoted_position_hours": 0
+        },
+        "funded_positions": 665,
+        "exit_reasons": {
+          "stop": 387,
+          "ema_flip_open": 154,
+          "ema_flip": 115,
+          "series_tail_close": 9
+        }
+      },
+      "paired_actual": {
+        "metrics": {
+          "all": {
+            "final_usdt": 11387.95117489554,
+            "multiple": 11.387951174895539,
+            "dd_mark_pct": 46.13489467496306,
+            "dd_bound_pct": 49.54746289131876,
+            "trades": 592,
+            "win_pct": 23.31081081081081,
+            "payoff": 10.27641324688431,
+            "payoff_usdt": 5.598765265658786,
+            "median_net_pct": -3.379524167892055
+          },
+          "dev": {
+            "final_usdt": 9562.35457146694,
+            "multiple": 9.56235457146694,
+            "dd_mark_pct": 46.13489467496306,
+            "dd_bound_pct": 49.54746289131876,
+            "trades": 416,
+            "win_pct": 21.634615384615387,
+            "payoff": 13.4417898335181,
+            "payoff_usdt": 6.750032959890385,
+            "median_net_pct": -3.4804038591602913
+          },
+          "2025": {
+            "final_usdt": 10251.941766754142,
+            "multiple": 1.0721147903618695,
+            "dd_mark_pct": 17.52983910034591,
+            "dd_bound_pct": 18.057259070772712,
+            "trades": 83,
+            "win_pct": 16.867469879518072,
+            "payoff": 3.895363711291348,
+            "payoff_usdt": 3.9713279854229175,
+            "median_net_pct": -3.639653892684237
+          },
+          "2026": {
+            "final_usdt": 11387.95117489554,
+            "multiple": 1.1108091943933338,
+            "dd_mark_pct": 18.4154244790263,
+            "dd_bound_pct": 19.909044870069504,
+            "trades": 84,
+            "win_pct": 33.33333333333333,
+            "payoff": 4.208296859398136,
+            "payoff_usdt": 4.162617757239516,
+            "median_net_pct": -2.487147703370461
+          }
+        },
+        "admission": {
+          "input_executed_events": 869,
+          "admitted": 592,
+          "funded": 592,
+          "rejected": {
+            "same_contract": 274,
+            "all_slots_busy": 3
+          },
+          "unquoted_position_hours": 0
+        },
+        "funded_positions": 592,
+        "exit_reasons": {
+          "stop": 366,
+          "ema_flip_open": 119,
+          "ema_flip": 98,
+          "series_tail_close": 9
+        }
+      },
+      "matched_control": {
+        "metrics": {
+          "all": {
+            "final_usdt": 9212.826047861143,
+            "multiple": 9.212826047861142,
+            "dd_mark_pct": 48.0535298623062,
+            "dd_bound_pct": 51.49003932574996,
+            "trades": 628,
+            "win_pct": 20.382165605095544,
+            "payoff": 11.206131770457885,
+            "payoff_usdt": 6.524852680117255,
+            "median_net_pct": -3.247679857571302
+          },
+          "dev": {
+            "final_usdt": 8344.120285103885,
+            "multiple": 8.344120285103886,
+            "dd_mark_pct": 48.0535298623062,
+            "dd_bound_pct": 51.49003932574996,
+            "trades": 440,
+            "win_pct": 19.545454545454547,
+            "payoff": 14.26938286551378,
+            "payoff_usdt": 8.019934249437306,
+            "median_net_pct": -3.3477829657581575
+          },
+          "2025": {
+            "final_usdt": 9419.40516791993,
+            "multiple": 1.1288673755980805,
+            "dd_mark_pct": 19.02549082819476,
+            "dd_bound_pct": 19.786438560457643,
+            "trades": 85,
+            "win_pct": 17.647058823529413,
+            "payoff": 4.791307243504706,
+            "payoff_usdt": 4.750121765458267,
+            "median_net_pct": -3.011266639310927
+          },
+          "2026": {
+            "final_usdt": 9212.826047861143,
+            "multiple": 0.9780687722445212,
+            "dd_mark_pct": 22.059070291637152,
+            "dd_bound_pct": 24.250756892914083,
+            "trades": 95,
+            "win_pct": 25.263157894736842,
+            "payoff": 3.8256953666180222,
+            "payoff_usdt": 3.7656460330721617,
+            "median_net_pct": -2.33096486665273
+          }
+        },
+        "admission": {
+          "input_executed_events": 869,
+          "admitted": 628,
+          "funded": 628,
+          "rejected": {
+            "same_contract": 236,
+            "all_slots_busy": 5
+          },
+          "unquoted_position_hours": 0
+        },
+        "funded_positions": 628,
+        "exit_reasons": {
+          "stop": 357,
+          "ema_flip_open": 159,
+          "ema_flip": 103,
+          "series_tail_close": 9
+        }
+      }
+    }
+  },
+  "symbol_audits": {
+    "BTC": {
+      "symbol": "BTC",
+      "source_group": "frozen_top20",
+      "bars12h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BTC/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BTC/bars1h.csv.gz",
+      "bars12h_rows": 5038,
+      "bars1h_rows_source": 60462,
+      "bars1h_rows_used_pre_cutoff": 60462,
+      "bars12h_first_open_ms": 1576497600000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1576476000000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "native12Hutc": 5007,
+        "complete_1H_archive": 31
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 359
+      },
+      "ema_ready_12h": 4989,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_reclaim_trigger_bars": 193,
+        "reclaim_first_weekly_keys": 104,
+        "all_breakout_trigger_bars": 828,
+        "breakout_first_weekly_keys": 147,
+        "breakout_matched_controls": 57,
+        "breakout_unmatched_controls": 90,
+        "reclaim_matched_controls": 94,
+        "reclaim_unmatched_controls": 10
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 204,
+          "orders": 408,
+          "trades": 204,
+          "priced_events": 204,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 198,
+          "orders": 396,
+          "trades": 198,
+          "priced_events": 198,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "ETH": {
+      "symbol": "ETH",
+      "source_group": "frozen_top20",
+      "bars12h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ETH/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ETH/bars1h.csv.gz",
+      "bars12h_rows": 5021,
+      "bars1h_rows_source": 60252,
+      "bars1h_rows_used_pre_cutoff": 60252,
+      "bars12h_first_open_ms": 1577232000000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1577232000000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "native12Hutc": 5007,
+        "complete_1H_archive": 14
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 358
+      },
+      "ema_ready_12h": 4972,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_reclaim_trigger_bars": 187,
+        "reclaim_first_weekly_keys": 97,
+        "all_breakout_trigger_bars": 803,
+        "breakout_first_weekly_keys": 148,
+        "breakout_matched_controls": 54,
+        "breakout_unmatched_controls": 94,
+        "reclaim_matched_controls": 87,
+        "reclaim_unmatched_controls": 10
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 202,
+          "orders": 404,
+          "trades": 202,
+          "priced_events": 202,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 184,
+          "orders": 368,
+          "trades": 184,
+          "priced_events": 184,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "SOL": {
+      "symbol": "SOL",
+      "source_group": "frozen_top20",
+      "bars12h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/SOL/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/SOL/bars1h.csv.gz",
+      "bars12h_rows": 4232,
+      "bars1h_rows_source": 50790,
+      "bars1h_rows_used_pre_cutoff": 50790,
+      "bars12h_first_open_ms": 1611316800000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1611295200000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "native12Hutc": 4232
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 302
+      },
+      "ema_ready_12h": 4183,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_breakout_trigger_bars": 720,
+        "breakout_first_weekly_keys": 136,
+        "all_reclaim_trigger_bars": 171,
+        "reclaim_first_weekly_keys": 91,
+        "breakout_matched_controls": 44,
+        "breakout_unmatched_controls": 92,
+        "reclaim_matched_controls": 78,
+        "reclaim_unmatched_controls": 13
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 180,
+          "orders": 360,
+          "trades": 180,
+          "priced_events": 180,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 169,
+          "orders": 338,
+          "trades": 169,
+          "priced_events": 169,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "BNB": {
+      "symbol": "BNB",
+      "source_group": "frozen_top20",
+      "bars12h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BNB/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BNB/bars1h.csv.gz",
+      "bars12h_rows": 2833,
+      "bars1h_rows_source": 33990,
+      "bars1h_rows_used_pre_cutoff": 33990,
+      "bars12h_first_open_ms": 1671753600000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1671775200000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "native12Hutc": 2833
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 202
+      },
+      "ema_ready_12h": 2784,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_reclaim_trigger_bars": 125,
+        "reclaim_first_weekly_keys": 64,
+        "all_breakout_trigger_bars": 421,
+        "breakout_first_weekly_keys": 84,
+        "breakout_matched_controls": 31,
+        "breakout_unmatched_controls": 53,
+        "reclaim_matched_controls": 57,
+        "reclaim_unmatched_controls": 7
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 115,
+          "orders": 230,
+          "trades": 115,
+          "priced_events": 115,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 121,
+          "orders": 242,
+          "trades": 121,
+          "priced_events": 121,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "XRP": {
+      "symbol": "XRP",
+      "source_group": "frozen_top20",
+      "bars12h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/XRP/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/XRP/bars1h.csv.gz",
+      "bars12h_rows": 5009,
+      "bars1h_rows_source": 60108,
+      "bars1h_rows_used_pre_cutoff": 60108,
+      "bars12h_first_open_ms": 1577750400000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1577750400000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "native12Hutc": 5007,
+        "complete_1H_archive": 2
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 357
+      },
+      "ema_ready_12h": 4960,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_breakout_trigger_bars": 736,
+        "breakout_first_weekly_keys": 146,
+        "all_reclaim_trigger_bars": 214,
+        "reclaim_first_weekly_keys": 109,
+        "breakout_matched_controls": 64,
+        "breakout_unmatched_controls": 82,
+        "reclaim_matched_controls": 93,
+        "reclaim_unmatched_controls": 16
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 210,
+          "orders": 420,
+          "trades": 210,
+          "priced_events": 210,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 202,
+          "orders": 404,
+          "trades": 202,
+          "priced_events": 202,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "DOGE": {
+      "symbol": "DOGE",
+      "source_group": "frozen_top20",
+      "bars12h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/DOGE/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/DOGE/bars1h.csv.gz",
+      "bars12h_rows": 4624,
+      "bars1h_rows_source": 55497,
+      "bars1h_rows_used_pre_cutoff": 55497,
+      "bars12h_first_open_ms": 1594382400000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1594350000000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "native12Hutc": 4624
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 330
+      },
+      "ema_ready_12h": 4575,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_breakout_trigger_bars": 670,
+        "breakout_first_weekly_keys": 137,
+        "all_reclaim_trigger_bars": 190,
+        "reclaim_first_weekly_keys": 101,
+        "breakout_matched_controls": 61,
+        "breakout_unmatched_controls": 76,
+        "reclaim_matched_controls": 91,
+        "reclaim_unmatched_controls": 10
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 198,
+          "orders": 396,
+          "trades": 198,
+          "priced_events": 198,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 192,
+          "orders": 384,
+          "trades": 192,
+          "priced_events": 192,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "ADA": {
+      "symbol": "ADA",
+      "source_group": "allmarket_okx",
+      "bars12h_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ADA/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ADA/bars1h.csv.gz",
+      "bars12h_rows": 4868,
+      "bars1h_rows_source": 58419,
+      "bars1h_rows_used_pre_cutoff": 58419,
+      "bars12h_first_open_ms": 1583841600000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1583830800000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "OKX_history_12Hutc": 4556,
+        "shared_OKX_cache_12Hutc": 312
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "empty_range": 7,
+        "ready": 340
+      },
+      "ema_ready_12h": 4819,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_reclaim_trigger_bars": 179,
+        "reclaim_first_weekly_keys": 99,
+        "all_breakout_trigger_bars": 810,
+        "breakout_first_weekly_keys": 157,
+        "breakout_matched_controls": 65,
+        "breakout_unmatched_controls": 92,
+        "reclaim_matched_controls": 85,
+        "reclaim_unmatched_controls": 14
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 222,
+          "orders": 444,
+          "trades": 222,
+          "priced_events": 222,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 184,
+          "orders": 368,
+          "trades": 184,
+          "priced_events": 184,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "LINK": {
+      "symbol": "LINK",
+      "source_group": "allmarket_okx",
+      "bars12h_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LINK/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LINK/bars1h.csv.gz",
+      "bars12h_rows": 4876,
+      "bars1h_rows_source": 58513,
+      "bars1h_rows_used_pre_cutoff": 58513,
+      "bars12h_first_open_ms": 1583496000000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1583492400000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "OKX_history_12Hutc": 4564,
+        "shared_OKX_cache_12Hutc": 312
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 348
+      },
+      "ema_ready_12h": 4827,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_reclaim_trigger_bars": 186,
+        "reclaim_first_weekly_keys": 103,
+        "all_breakout_trigger_bars": 773,
+        "breakout_first_weekly_keys": 158,
+        "breakout_matched_controls": 71,
+        "breakout_unmatched_controls": 87,
+        "reclaim_matched_controls": 88,
+        "reclaim_unmatched_controls": 15
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 229,
+          "orders": 458,
+          "trades": 229,
+          "priced_events": 229,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 191,
+          "orders": 382,
+          "trades": 191,
+          "priced_events": 191,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "LTC": {
+      "symbol": "LTC",
+      "source_group": "allmarket_okx",
+      "bars12h_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LTC/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LTC/bars1h.csv.gz",
+      "bars12h_rows": 5015,
+      "bars1h_rows_source": 60180,
+      "bars1h_rows_used_pre_cutoff": 60180,
+      "bars12h_first_open_ms": 1577491200000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1577491200000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "OKX_history_12Hutc": 4695,
+        "shared_OKX_cache_12Hutc": 312,
+        "complete_1H_aggregation": 8
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 358
+      },
+      "ema_ready_12h": 4966,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_reclaim_trigger_bars": 211,
+        "reclaim_first_weekly_keys": 114,
+        "all_breakout_trigger_bars": 727,
+        "breakout_first_weekly_keys": 154,
+        "breakout_matched_controls": 68,
+        "breakout_unmatched_controls": 86,
+        "reclaim_matched_controls": 104,
+        "reclaim_unmatched_controls": 10
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 222,
+          "orders": 444,
+          "trades": 222,
+          "priced_events": 222,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 218,
+          "orders": 436,
+          "trades": 218,
+          "priced_events": 218,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "AVAX": {
+      "symbol": "AVAX",
+      "source_group": "allmarket_okx",
+      "bars12h_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AVAX/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AVAX/bars1h.csv.gz",
+      "bars12h_rows": 4474,
+      "bars1h_rows_source": 53694,
+      "bars1h_rows_used_pre_cutoff": 53694,
+      "bars12h_first_open_ms": 1600862400000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1600840800000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "OKX_history_12Hutc": 4162,
+        "shared_OKX_cache_12Hutc": 312
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 319
+      },
+      "ema_ready_12h": 4425,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_reclaim_trigger_bars": 200,
+        "reclaim_first_weekly_keys": 105,
+        "all_breakout_trigger_bars": 727,
+        "breakout_first_weekly_keys": 143,
+        "breakout_matched_controls": 59,
+        "breakout_unmatched_controls": 84,
+        "reclaim_matched_controls": 92,
+        "reclaim_unmatched_controls": 13
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 202,
+          "orders": 404,
+          "trades": 202,
+          "priced_events": 202,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 197,
+          "orders": 394,
+          "trades": 197,
+          "priced_events": 197,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    }
+  },
+  "source_config": "experiments/active/exp-cloud-close-breakout-branch-20261109-v1/config.json",
+  "fees": {
+    "taker_per_fill": 0.0005,
+    "entry_fill_class": "taker market",
+    "exit_fill_class": "taker market/stop/EMA/gap/tail",
+    "maker_per_fill": 0.0002,
+    "maker_usage": "No resting limit orders in either arm."
+  },
+  "periods": [
+    "all",
+    "dev",
+    "2025",
+    "2026"
+  ]
+}

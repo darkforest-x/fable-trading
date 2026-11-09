@@ -1,0 +1,268 @@
+{
+  "engine": "VectorBT Portfolio.from_order_func independent native OHLC paths + cash-sharing funded wallet",
+  "vbt_version": "1.2.0",
+  "starting_usdt": 1000,
+  "events": 1257,
+  "matched_controls": 956,
+  "control_audit": {
+    "matched": 956,
+    "unmatched": 300,
+    "parent_atr_unavailable": 1
+  },
+  "coverage": [
+    {
+      "symbol": "BTC",
+      "source_path_12h": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BTC/bars12h.csv.gz",
+      "source_path_1h": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BTC/bars1h.csv.gz",
+      "rows_12h": 5038,
+      "rows_1h": 60462,
+      "first_12h_ms": 1576497600000,
+      "last_12h_open_ms": 1794096000000,
+      "first_1h_ms": 1576476000000,
+      "last_1h_open_ms": 1794135600000,
+      "gaps_12h": 0,
+      "gaps_1h": 0,
+      "complete_12h_bars": 5038,
+      "counts": {
+        "incomplete_monday_h1_range": 1,
+        "confirmed_executable": 134,
+        "right_censored_week_end_without_reclaim": 139
+      }
+    },
+    {
+      "symbol": "ETH",
+      "source_path_12h": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ETH/bars12h.csv.gz",
+      "source_path_1h": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ETH/bars1h.csv.gz",
+      "rows_12h": 5021,
+      "rows_1h": 60252,
+      "first_12h_ms": 1577232000000,
+      "last_12h_open_ms": 1794096000000,
+      "first_1h_ms": 1577232000000,
+      "last_1h_open_ms": 1794135600000,
+      "gaps_12h": 0,
+      "gaps_1h": 0,
+      "complete_12h_bars": 5021,
+      "counts": {
+        "incomplete_monday_h1_range": 1,
+        "confirmed_executable": 118,
+        "right_censored_week_end_without_reclaim": 147
+      }
+    },
+    {
+      "symbol": "SOL",
+      "source_path_12h": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/SOL/bars12h.csv.gz",
+      "source_path_1h": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/SOL/bars1h.csv.gz",
+      "rows_12h": 4232,
+      "rows_1h": 50790,
+      "first_12h_ms": 1611316800000,
+      "last_12h_open_ms": 1794096000000,
+      "first_1h_ms": 1611295200000,
+      "last_1h_open_ms": 1794135600000,
+      "gaps_12h": 0,
+      "gaps_1h": 0,
+      "complete_12h_bars": 4232,
+      "counts": {
+        "incomplete_monday_h1_range": 1,
+        "confirmed_executable": 112,
+        "right_censored_week_end_without_reclaim": 138
+      }
+    },
+    {
+      "symbol": "BNB",
+      "source_path_12h": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BNB/bars12h.csv.gz",
+      "source_path_1h": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BNB/bars1h.csv.gz",
+      "rows_12h": 2833,
+      "rows_1h": 33990,
+      "first_12h_ms": 1671753600000,
+      "last_12h_open_ms": 1794096000000,
+      "first_1h_ms": 1671775200000,
+      "last_1h_open_ms": 1794135600000,
+      "gaps_12h": 0,
+      "gaps_1h": 0,
+      "complete_12h_bars": 2832,
+      "counts": {
+        "incomplete_12h_bar_skipped": 1,
+        "incomplete_monday_h1_range": 1,
+        "confirmed_executable": 78,
+        "right_censored_week_end_without_reclaim": 83
+      }
+    },
+    {
+      "symbol": "XRP",
+      "source_path_12h": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/XRP/bars12h.csv.gz",
+      "source_path_1h": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/XRP/bars1h.csv.gz",
+      "rows_12h": 5009,
+      "rows_1h": 60108,
+      "first_12h_ms": 1577750400000,
+      "last_12h_open_ms": 1794096000000,
+      "first_1h_ms": 1577750400000,
+      "last_1h_open_ms": 1794135600000,
+      "gaps_12h": 0,
+      "gaps_1h": 0,
+      "complete_12h_bars": 5009,
+      "counts": {
+        "incomplete_monday_h1_range": 1,
+        "confirmed_executable": 141,
+        "right_censored_week_end_without_reclaim": 137,
+        "right_censored_history_end_without_reclaim": 2
+      }
+    },
+    {
+      "symbol": "DOGE",
+      "source_path_12h": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/DOGE/bars12h.csv.gz",
+      "source_path_1h": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/DOGE/bars1h.csv.gz",
+      "rows_12h": 4624,
+      "rows_1h": 55497,
+      "first_12h_ms": 1594382400000,
+      "last_12h_open_ms": 1794096000000,
+      "first_1h_ms": 1594350000000,
+      "last_1h_open_ms": 1794135600000,
+      "gaps_12h": 0,
+      "gaps_1h": 0,
+      "complete_12h_bars": 4624,
+      "counts": {
+        "incomplete_monday_h1_range": 1,
+        "confirmed_executable": 112,
+        "right_censored_week_end_without_reclaim": 129,
+        "right_censored_history_end_without_reclaim": 1
+      }
+    },
+    {
+      "symbol": "ADA",
+      "source_path_12h": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ADA/bars12h.csv.gz",
+      "source_path_1h": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ADA/bars1h.csv.gz",
+      "rows_12h": 4868,
+      "rows_1h": 58419,
+      "first_12h_ms": 1583841600000,
+      "last_12h_open_ms": 1794096000000,
+      "first_1h_ms": 1583830800000,
+      "last_1h_open_ms": 1794135600000,
+      "gaps_12h": 0,
+      "gaps_1h": 0,
+      "complete_12h_bars": 4868,
+      "counts": {
+        "incomplete_monday_h1_range": 1,
+        "invalid_monday_range": 7,
+        "confirmed_executable": 148,
+        "right_censored_week_end_without_reclaim": 145,
+        "right_censored_history_end_without_reclaim": 1
+      }
+    },
+    {
+      "symbol": "LINK",
+      "source_path_12h": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LINK/bars12h.csv.gz",
+      "source_path_1h": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LINK/bars1h.csv.gz",
+      "rows_12h": 4876,
+      "rows_1h": 58513,
+      "first_12h_ms": 1583496000000,
+      "last_12h_open_ms": 1794096000000,
+      "first_1h_ms": 1583492400000,
+      "last_1h_open_ms": 1794135600000,
+      "gaps_12h": 0,
+      "gaps_1h": 0,
+      "complete_12h_bars": 4876,
+      "counts": {
+        "incomplete_monday_h1_range": 1,
+        "confirmed_executable": 138,
+        "right_censored_week_end_without_reclaim": 145
+      }
+    },
+    {
+      "symbol": "LTC",
+      "source_path_12h": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LTC/bars12h.csv.gz",
+      "source_path_1h": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LTC/bars1h.csv.gz",
+      "rows_12h": 5015,
+      "rows_1h": 60180,
+      "first_12h_ms": 1577491200000,
+      "last_12h_open_ms": 1794096000000,
+      "first_1h_ms": 1577491200000,
+      "last_1h_open_ms": 1794135600000,
+      "gaps_12h": 0,
+      "gaps_1h": 0,
+      "complete_12h_bars": 5015,
+      "counts": {
+        "incomplete_monday_h1_range": 1,
+        "confirmed_executable": 144,
+        "right_censored_week_end_without_reclaim": 147
+      }
+    },
+    {
+      "symbol": "AVAX",
+      "source_path_12h": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AVAX/bars12h.csv.gz",
+      "source_path_1h": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AVAX/bars1h.csv.gz",
+      "rows_12h": 4474,
+      "rows_1h": 53694,
+      "first_12h_ms": 1600862400000,
+      "last_12h_open_ms": 1794096000000,
+      "first_1h_ms": 1600840800000,
+      "last_1h_open_ms": 1794135600000,
+      "gaps_12h": 0,
+      "gaps_1h": 0,
+      "complete_12h_bars": 4474,
+      "counts": {
+        "incomplete_monday_h1_range": 1,
+        "confirmed_executable": 132,
+        "right_censored_week_end_without_reclaim": 134
+      }
+    }
+  ],
+  "frozen_anchor_audit": {
+    "frozen_v17_signal_rows_in_scope": 987,
+    "fully_anchored_rows": 987,
+    "missing_monday_h1_rows": 0,
+    "geometry_mismatch_rows": 0,
+    "max_lower_abs_difference": 0.0,
+    "max_upper_abs_difference": 0.0,
+    "identity_only_input": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/signals.csv"
+  },
+  "admission": {
+    "actual": {
+      "opportunities": 1257,
+      "admitted": 1125,
+      "funded": 1125,
+      "unquoted_position_hours": 0,
+      "same_contract": 132,
+      "all_slots_busy": 0
+    },
+    "paired_actual": {
+      "opportunities": 956,
+      "admitted": 899,
+      "funded": 899,
+      "unquoted_position_hours": 0,
+      "same_contract": 57,
+      "all_slots_busy": 0
+    },
+    "matched_control": {
+      "opportunities": 956,
+      "admitted": 900,
+      "funded": 900,
+      "unquoted_position_hours": 0,
+      "same_contract": 56,
+      "all_slots_busy": 0
+    }
+  },
+  "source_limitations": [
+    "The ten-coin scope does not establish all-market performance or capacity beyond the frozen source bars.",
+    "Same-hour OHLC does not reveal stop-versus-target ordering; stop-first is the conservative primary rule.",
+    "The research account does not include funding payments, market impact, contract-specific maintenance tiers, or live execution latency.",
+    "Time exit at the next NY Monday is part of this predeclared weekly-horizon branch; results do not describe an indefinitely held reversal."
+  ],
+  "path_assumptions": {
+    "framework": "VectorBT Portfolio.from_order_func native per-event H1 OHLC path, followed by the existing VectorBT cash-sharing wallet adapter.",
+    "capital": "1000 USDT initial shared cash, nine concurrent positions, one position per symbol. Full account uses low confirmation-bar prior ATR/close as tie priority and allows only funded entries.",
+    "fees": {
+      "entry_taker_per_fill": 0.0005,
+      "stop_or_time_exit_taker_per_fill": 0.0005,
+      "opposite_extension_limit_target_maker_per_fill": 0.0002,
+      "stress_slippage": "Optional separate 5bp per market fill; not included in the primary fee-only result."
+    },
+    "same_hour": "Stop takes priority if stop and target are both touched in one H1 bar. A later bar that opens through a resting target receives the better open price at maker fees. Entry open beyond the stop exits at that open with taker fees.",
+    "hourly_mark": "Use native OKX H1 OHLC for account marks; report realized USDT payoff and observed/conservative drawdown with the existing wallet summary fields.",
+    "event_batch_size": 128
+  },
+  "target_rule": {
+    "rule": "Long target is that NY week's own upper 1.618 extension; short target is that week's own lower 1.618 extension.",
+    "entry_gap": "If the next H1 open has already crossed the opposite extension, mark the event unplaceable instead of opening a position after the fixed target was passed.",
+    "time_exit": "If neither barrier fills, exit at the next NY Monday 00:00 H1 open, when this weekly reference expires. If price history ends first, close at the last observed H1 close and label the history-tail exit."
+  }
+}

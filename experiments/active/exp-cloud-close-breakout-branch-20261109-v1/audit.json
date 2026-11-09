@@ -1,0 +1,688 @@
+{
+  "config": {
+    "experiment_id": "exp-cloud-close-breakout-branch-20261109-v1",
+    "question": "On a fixed ten-coin OKX panel, does following the first EMA-aligned 12H close outside the completed NY Monday 1.618 band improve on the original V1.7 wick-and-close reclaim?",
+    "single_variable": "Replace the V1.7 same-week first wick-through/reclaim close rule with a same-week first strict close beyond the upper/lower 1.618 band in the aligned EMA20/50 direction. Use next exact 1H open for both arms. Keep the fixed stop reference anchor, native EMA exit, nine-slot shared-cash account, and fees consistent.",
+    "data": {
+      "venue": "OKX USDT perpetual native 12H and 1H OHLC",
+      "symbols": [
+        "BTC",
+        "ETH",
+        "SOL",
+        "BNB",
+        "XRP",
+        "DOGE",
+        "ADA",
+        "LINK",
+        "LTC",
+        "AVAX"
+      ],
+      "source_roots": {
+        "frozen_top20": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs",
+        "allmarket_okx": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs"
+      },
+      "symbol_source_groups": {
+        "BTC": "frozen_top20",
+        "ETH": "frozen_top20",
+        "SOL": "frozen_top20",
+        "BNB": "frozen_top20",
+        "XRP": "frozen_top20",
+        "DOGE": "frozen_top20",
+        "ADA": "allmarket_okx",
+        "LINK": "allmarket_okx",
+        "LTC": "allmarket_okx",
+        "AVAX": "allmarket_okx"
+      },
+      "cutoff_utc_exclusive": "2026-11-08T12:00:00Z",
+      "cutoff_ms": 1794139200000,
+      "candidate_bars": "Complete native UTC 12H bars whose key-open and confirmation lie in the same New York Monday week, after a complete Monday 1H range, with V1.7 EMA20/EMA50 warmup complete. EMA state resets on any missing 12H bar.",
+      "monday_anchor": "Rebuild per-symbol NY Monday 00:00-to-Tuesday 00:00 local-time extrema from exactly 24 observed H1 rows; upper = high + 0.618 * (high-low); lower = low - 0.618 * (high-low). Incomplete Monday is ineligible and never filled.",
+      "breakout_rule": "Within each symbol/NY week, use only the first valid 12H close strictly above upper with EMA20>EMA50 (long) or strictly below lower with EMA20<EMA50 (short); long/short share one weekly signal lock. A qualifying signal without the exact next H1 open remains a no-entry event and still consumes that week's lock.",
+      "original_reclaim_comparator": "Within each symbol/NY week, use the first native V1.7 reclaim from cloud_close_second_reclaim_paths._signal_at: long low<lower<close<upper and EMA20>EMA50; short lower<close<upper<high and EMA20<EMA50. This is rebuilt from native bars, not filtered from an already-funded parent list.",
+      "entry": "Market at the exact H1 open whose UTC timestamp equals completed 12H confirmation; missing exact open or confirmation at/after account cutoff is no-entry.",
+      "stop": "For breakout, use the actual crossed band as the source fixed_stop anchor: upper band for long and lower band for short. For the original reclaim comparator, retain the V1.7 touched-side anchor: lower band for long and upper band for short. Source fixed_stop(symbol, side, reference_anchor) keeps BTC/ETH 1.5% and others 3%; actual entry-to-stop distance is recomputed from the exact H1 open. Reject if the entry is not on the adverse side of its anchored stop.",
+      "original_exit": "Use the existing V1.7 native 12H EMA-cross path callback and unchanged stop. First observed hourly gap open, earliest stale-12H observation, and true account/source tail close retain existing explicit exit behavior. No future completeness or outcome filtering.",
+      "data_quality": "Retain actual source counts and 1H/12H gap counts per symbol. Inputs are already frozen OKX history; no downloads, gap filling, or post-cutoff H1 rows in path pricing."
+    },
+    "controls": {
+      "method": "For each signal, sample one non-signal completed 12H confirmation from the same symbol, same NY week, same direction, and same EMA alignment, strictly after parent confirmation; require prior confirmed 12H ATR14/previous close within 25% relative difference.",
+      "atr_relative_tolerance": 0.25,
+      "seed": 20261109,
+      "exclude_signal_bars": "Exclude every bar that independently qualifies either the frozen breakout or original reclaim trigger.",
+      "stop": "Inherit the parent actual-entry-to-fixed-stop risk fraction at the control's exact next H1 open.",
+      "without_replacement": "One control per parent and without replacement within each arm/symbol/week.",
+      "unmatched": "Keep a corresponding explicit unmatched control row with reason. Never match to a confirmation at or before parent confirmation."
+    },
+    "account": {
+      "starting_usdt": 1000,
+      "start_ms": 1579824000000,
+      "end_ms": 1794139200000,
+      "positions": "One nine-slot shared-cash VectorBT account per arm and diagnostic scenario, fully collateralized and unlevered; at most one position per symbol. Entry priority is the existing wallet CRC32(symbol), symbol, event_id order. Existing open positions are not resized.",
+      "costs": "OKX Lv1 taker 0.0005 each entry and market/stop/EMA exit. No limit exits. No extra slippage, funding, impact, maintenance-tier, or lot rounding in this experiment.",
+      "diagnostics": [
+        "breakout actual",
+        "breakout paired actual parents",
+        "breakout matched-control account",
+        "original-reclaim actual",
+        "original-reclaim paired actual parents",
+        "original-reclaim matched-control account"
+      ],
+      "periods": {
+        "all": "2020-01-24T00:00:00Z through 2026-11-08T12:00:00Z exclusive",
+        "development": "from account start through 2025-01-01T00:00:00Z exclusive",
+        "2025": "2025-01-01T00:00:00Z through 2026-01-01T00:00:00Z exclusive",
+        "2026_ytd": "2026-01-01T00:00:00Z through the account cutoff exclusive"
+      },
+      "drawdown": "Report VectorBT close/open NAV and synchronized conservative hourly intrabar upper drawdown bound; OHLC cannot establish exact within-hour high/low ordering.",
+      "trade_metrics": "Report actual realized USDT payoff as well as equal-notional net-return payoff; wins and trade counts use closed funded positions within each period."
+    },
+    "fees": {
+      "taker_per_fill": 0.0005,
+      "entry_fill_class": "taker market",
+      "exit_fill_class": "taker market/stop/EMA/gap/tail",
+      "maker_per_fill": 0.0002,
+      "maker_usage": "No resting limit orders in either arm."
+    },
+    "execution": {
+      "path_engine": "Existing VectorBT 1.2.0 Portfolio.from_order_func in cloud_close_reward_paths._simulate_symbol using the frozen V1.7 native order callback; independent one-unit path is only a fill price source.",
+      "account_engine": "Existing VectorBT 1.2.0 shared-cash account in cloud_close_reward_account.account, with actual finite slot/cash sizing.",
+      "runtime": "/Users/zhangzc/.local/bin/vectorbt-python",
+      "event_batch_size": 8,
+      "no_trade_engine": "No hand-written bar-by-bar fill or PnL simulator; candidate construction is separate from VectorBT execution."
+    },
+    "outputs": {
+      "paths_csv_gz": "paths.csv.gz",
+      "candidate_audit_csv_gz": "candidate_audit.csv.gz",
+      "account_metrics_csv": "account_metrics.csv",
+      "funded_dir": "funded",
+      "audit_json": "audit.json",
+      "summary_json": "summary.json"
+    },
+    "mini_check": {
+      "real_symbol": "BTC",
+      "commands": [
+        "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_breakout_branch --mini-check",
+        "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_breakout_branch --run"
+      ]
+    }
+  },
+  "source_contract": {
+    "venue": "OKX USDT perpetual native 12H and 1H OHLC",
+    "symbols": [
+      "BTC",
+      "ETH",
+      "SOL",
+      "BNB",
+      "XRP",
+      "DOGE",
+      "ADA",
+      "LINK",
+      "LTC",
+      "AVAX"
+    ],
+    "source_roots": {
+      "frozen_top20": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs",
+      "allmarket_okx": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs"
+    },
+    "symbol_source_groups": {
+      "BTC": "frozen_top20",
+      "ETH": "frozen_top20",
+      "SOL": "frozen_top20",
+      "BNB": "frozen_top20",
+      "XRP": "frozen_top20",
+      "DOGE": "frozen_top20",
+      "ADA": "allmarket_okx",
+      "LINK": "allmarket_okx",
+      "LTC": "allmarket_okx",
+      "AVAX": "allmarket_okx"
+    },
+    "cutoff_utc_exclusive": "2026-11-08T12:00:00Z",
+    "cutoff_ms": 1794139200000,
+    "candidate_bars": "Complete native UTC 12H bars whose key-open and confirmation lie in the same New York Monday week, after a complete Monday 1H range, with V1.7 EMA20/EMA50 warmup complete. EMA state resets on any missing 12H bar.",
+    "monday_anchor": "Rebuild per-symbol NY Monday 00:00-to-Tuesday 00:00 local-time extrema from exactly 24 observed H1 rows; upper = high + 0.618 * (high-low); lower = low - 0.618 * (high-low). Incomplete Monday is ineligible and never filled.",
+    "breakout_rule": "Within each symbol/NY week, use only the first valid 12H close strictly above upper with EMA20>EMA50 (long) or strictly below lower with EMA20<EMA50 (short); long/short share one weekly signal lock. A qualifying signal without the exact next H1 open remains a no-entry event and still consumes that week's lock.",
+    "original_reclaim_comparator": "Within each symbol/NY week, use the first native V1.7 reclaim from cloud_close_second_reclaim_paths._signal_at: long low<lower<close<upper and EMA20>EMA50; short lower<close<upper<high and EMA20<EMA50. This is rebuilt from native bars, not filtered from an already-funded parent list.",
+    "entry": "Market at the exact H1 open whose UTC timestamp equals completed 12H confirmation; missing exact open or confirmation at/after account cutoff is no-entry.",
+    "stop": "For breakout, use the actual crossed band as the source fixed_stop anchor: upper band for long and lower band for short. For the original reclaim comparator, retain the V1.7 touched-side anchor: lower band for long and upper band for short. Source fixed_stop(symbol, side, reference_anchor) keeps BTC/ETH 1.5% and others 3%; actual entry-to-stop distance is recomputed from the exact H1 open. Reject if the entry is not on the adverse side of its anchored stop.",
+    "original_exit": "Use the existing V1.7 native 12H EMA-cross path callback and unchanged stop. First observed hourly gap open, earliest stale-12H observation, and true account/source tail close retain existing explicit exit behavior. No future completeness or outcome filtering.",
+    "data_quality": "Retain actual source counts and 1H/12H gap counts per symbol. Inputs are already frozen OKX history; no downloads, gap filling, or post-cutoff H1 rows in path pricing."
+  },
+  "symbols": {
+    "BTC": {
+      "symbol": "BTC",
+      "source_group": "frozen_top20",
+      "bars12h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BTC/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BTC/bars1h.csv.gz",
+      "bars12h_rows": 5038,
+      "bars1h_rows_source": 60462,
+      "bars1h_rows_used_pre_cutoff": 60462,
+      "bars12h_first_open_ms": 1576497600000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1576476000000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "native12Hutc": 5007,
+        "complete_1H_archive": 31
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 359
+      },
+      "ema_ready_12h": 4989,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_reclaim_trigger_bars": 193,
+        "reclaim_first_weekly_keys": 104,
+        "all_breakout_trigger_bars": 828,
+        "breakout_first_weekly_keys": 147,
+        "breakout_matched_controls": 57,
+        "breakout_unmatched_controls": 90,
+        "reclaim_matched_controls": 94,
+        "reclaim_unmatched_controls": 10
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 204,
+          "orders": 408,
+          "trades": 204,
+          "priced_events": 204,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 198,
+          "orders": 396,
+          "trades": 198,
+          "priced_events": 198,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "ETH": {
+      "symbol": "ETH",
+      "source_group": "frozen_top20",
+      "bars12h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ETH/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ETH/bars1h.csv.gz",
+      "bars12h_rows": 5021,
+      "bars1h_rows_source": 60252,
+      "bars1h_rows_used_pre_cutoff": 60252,
+      "bars12h_first_open_ms": 1577232000000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1577232000000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "native12Hutc": 5007,
+        "complete_1H_archive": 14
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 358
+      },
+      "ema_ready_12h": 4972,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_reclaim_trigger_bars": 187,
+        "reclaim_first_weekly_keys": 97,
+        "all_breakout_trigger_bars": 803,
+        "breakout_first_weekly_keys": 148,
+        "breakout_matched_controls": 54,
+        "breakout_unmatched_controls": 94,
+        "reclaim_matched_controls": 87,
+        "reclaim_unmatched_controls": 10
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 202,
+          "orders": 404,
+          "trades": 202,
+          "priced_events": 202,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 184,
+          "orders": 368,
+          "trades": 184,
+          "priced_events": 184,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "SOL": {
+      "symbol": "SOL",
+      "source_group": "frozen_top20",
+      "bars12h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/SOL/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/SOL/bars1h.csv.gz",
+      "bars12h_rows": 4232,
+      "bars1h_rows_source": 50790,
+      "bars1h_rows_used_pre_cutoff": 50790,
+      "bars12h_first_open_ms": 1611316800000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1611295200000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "native12Hutc": 4232
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 302
+      },
+      "ema_ready_12h": 4183,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_breakout_trigger_bars": 720,
+        "breakout_first_weekly_keys": 136,
+        "all_reclaim_trigger_bars": 171,
+        "reclaim_first_weekly_keys": 91,
+        "breakout_matched_controls": 44,
+        "breakout_unmatched_controls": 92,
+        "reclaim_matched_controls": 78,
+        "reclaim_unmatched_controls": 13
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 180,
+          "orders": 360,
+          "trades": 180,
+          "priced_events": 180,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 169,
+          "orders": 338,
+          "trades": 169,
+          "priced_events": 169,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "BNB": {
+      "symbol": "BNB",
+      "source_group": "frozen_top20",
+      "bars12h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BNB/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/BNB/bars1h.csv.gz",
+      "bars12h_rows": 2833,
+      "bars1h_rows_source": 33990,
+      "bars1h_rows_used_pre_cutoff": 33990,
+      "bars12h_first_open_ms": 1671753600000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1671775200000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "native12Hutc": 2833
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 202
+      },
+      "ema_ready_12h": 2784,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_reclaim_trigger_bars": 125,
+        "reclaim_first_weekly_keys": 64,
+        "all_breakout_trigger_bars": 421,
+        "breakout_first_weekly_keys": 84,
+        "breakout_matched_controls": 31,
+        "breakout_unmatched_controls": 53,
+        "reclaim_matched_controls": 57,
+        "reclaim_unmatched_controls": 7
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 115,
+          "orders": 230,
+          "trades": 115,
+          "priced_events": 115,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 121,
+          "orders": 242,
+          "trades": 121,
+          "priced_events": 121,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "XRP": {
+      "symbol": "XRP",
+      "source_group": "frozen_top20",
+      "bars12h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/XRP/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/XRP/bars1h.csv.gz",
+      "bars12h_rows": 5009,
+      "bars1h_rows_source": 60108,
+      "bars1h_rows_used_pre_cutoff": 60108,
+      "bars12h_first_open_ms": 1577750400000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1577750400000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "native12Hutc": 5007,
+        "complete_1H_archive": 2
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 357
+      },
+      "ema_ready_12h": 4960,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_breakout_trigger_bars": 736,
+        "breakout_first_weekly_keys": 146,
+        "all_reclaim_trigger_bars": 214,
+        "reclaim_first_weekly_keys": 109,
+        "breakout_matched_controls": 64,
+        "breakout_unmatched_controls": 82,
+        "reclaim_matched_controls": 93,
+        "reclaim_unmatched_controls": 16
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 210,
+          "orders": 420,
+          "trades": 210,
+          "priced_events": 210,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 202,
+          "orders": 404,
+          "trades": 202,
+          "priced_events": 202,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "DOGE": {
+      "symbol": "DOGE",
+      "source_group": "frozen_top20",
+      "bars12h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/DOGE/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/DOGE/bars1h.csv.gz",
+      "bars12h_rows": 4624,
+      "bars1h_rows_source": 55497,
+      "bars1h_rows_used_pre_cutoff": 55497,
+      "bars12h_first_open_ms": 1594382400000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1594350000000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "native12Hutc": 4624
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 330
+      },
+      "ema_ready_12h": 4575,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_breakout_trigger_bars": 670,
+        "breakout_first_weekly_keys": 137,
+        "all_reclaim_trigger_bars": 190,
+        "reclaim_first_weekly_keys": 101,
+        "breakout_matched_controls": 61,
+        "breakout_unmatched_controls": 76,
+        "reclaim_matched_controls": 91,
+        "reclaim_unmatched_controls": 10
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 198,
+          "orders": 396,
+          "trades": 198,
+          "priced_events": 198,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 192,
+          "orders": 384,
+          "trades": 192,
+          "priced_events": 192,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "ADA": {
+      "symbol": "ADA",
+      "source_group": "allmarket_okx",
+      "bars12h_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ADA/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ADA/bars1h.csv.gz",
+      "bars12h_rows": 4868,
+      "bars1h_rows_source": 58419,
+      "bars1h_rows_used_pre_cutoff": 58419,
+      "bars12h_first_open_ms": 1583841600000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1583830800000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "OKX_history_12Hutc": 4556,
+        "shared_OKX_cache_12Hutc": 312
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "empty_range": 7,
+        "ready": 340
+      },
+      "ema_ready_12h": 4819,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_reclaim_trigger_bars": 179,
+        "reclaim_first_weekly_keys": 99,
+        "all_breakout_trigger_bars": 810,
+        "breakout_first_weekly_keys": 157,
+        "breakout_matched_controls": 65,
+        "breakout_unmatched_controls": 92,
+        "reclaim_matched_controls": 85,
+        "reclaim_unmatched_controls": 14
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 222,
+          "orders": 444,
+          "trades": 222,
+          "priced_events": 222,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 184,
+          "orders": 368,
+          "trades": 184,
+          "priced_events": 184,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "LINK": {
+      "symbol": "LINK",
+      "source_group": "allmarket_okx",
+      "bars12h_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LINK/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LINK/bars1h.csv.gz",
+      "bars12h_rows": 4876,
+      "bars1h_rows_source": 58513,
+      "bars1h_rows_used_pre_cutoff": 58513,
+      "bars12h_first_open_ms": 1583496000000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1583492400000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "OKX_history_12Hutc": 4564,
+        "shared_OKX_cache_12Hutc": 312
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 348
+      },
+      "ema_ready_12h": 4827,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_reclaim_trigger_bars": 186,
+        "reclaim_first_weekly_keys": 103,
+        "all_breakout_trigger_bars": 773,
+        "breakout_first_weekly_keys": 158,
+        "breakout_matched_controls": 71,
+        "breakout_unmatched_controls": 87,
+        "reclaim_matched_controls": 88,
+        "reclaim_unmatched_controls": 15
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 229,
+          "orders": 458,
+          "trades": 229,
+          "priced_events": 229,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 191,
+          "orders": 382,
+          "trades": 191,
+          "priced_events": 191,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "LTC": {
+      "symbol": "LTC",
+      "source_group": "allmarket_okx",
+      "bars12h_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LTC/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/LTC/bars1h.csv.gz",
+      "bars12h_rows": 5015,
+      "bars1h_rows_source": 60180,
+      "bars1h_rows_used_pre_cutoff": 60180,
+      "bars12h_first_open_ms": 1577491200000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1577491200000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "OKX_history_12Hutc": 4695,
+        "shared_OKX_cache_12Hutc": 312,
+        "complete_1H_aggregation": 8
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 358
+      },
+      "ema_ready_12h": 4966,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_reclaim_trigger_bars": 211,
+        "reclaim_first_weekly_keys": 114,
+        "all_breakout_trigger_bars": 727,
+        "breakout_first_weekly_keys": 154,
+        "breakout_matched_controls": 68,
+        "breakout_unmatched_controls": 86,
+        "reclaim_matched_controls": 104,
+        "reclaim_unmatched_controls": 10
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 222,
+          "orders": 444,
+          "trades": 222,
+          "priced_events": 222,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 218,
+          "orders": 436,
+          "trades": 218,
+          "priced_events": 218,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    },
+    "AVAX": {
+      "symbol": "AVAX",
+      "source_group": "allmarket_okx",
+      "bars12h_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AVAX/bars12h.csv.gz",
+      "bars1h_path": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/AVAX/bars1h.csv.gz",
+      "bars12h_rows": 4474,
+      "bars1h_rows_source": 53694,
+      "bars1h_rows_used_pre_cutoff": 53694,
+      "bars12h_first_open_ms": 1600862400000,
+      "bars12h_last_open_ms": 1794096000000,
+      "bars1h_first_open_ms": 1600840800000,
+      "bars1h_last_open_ms": 1794135600000,
+      "bars12h_gap_count": 0,
+      "bars1h_gap_count": 0,
+      "bars12h_sources": {
+        "OKX_history_12Hutc": 4162,
+        "shared_OKX_cache_12Hutc": 312
+      },
+      "range_weeks_by_state": {
+        "missing_hours": 1,
+        "ready": 319
+      },
+      "ema_ready_12h": 4425,
+      "missing_12h_period_count": 1,
+      "stale_12h_trigger_count": 0,
+      "missing_12h_with_contiguous_h1_count": 0,
+      "first_signal_counts": {
+        "all_reclaim_trigger_bars": 200,
+        "reclaim_first_weekly_keys": 105,
+        "all_breakout_trigger_bars": 727,
+        "breakout_first_weekly_keys": 143,
+        "breakout_matched_controls": 59,
+        "breakout_unmatched_controls": 84,
+        "reclaim_matched_controls": 92,
+        "reclaim_unmatched_controls": 13
+      },
+      "vectorbt_paths": {
+        "breakout": {
+          "columns": 202,
+          "orders": 404,
+          "trades": 202,
+          "priced_events": 202,
+          "source_tail_ms": 1794135600000
+        },
+        "reclaim": {
+          "columns": 197,
+          "orders": 394,
+          "trades": 197,
+          "priced_events": 197,
+          "source_tail_ms": 1794135600000
+        }
+      }
+    }
+  },
+  "paths_rows_by_arm": {
+    "breakout": 2820,
+    "reclaim": 1974
+  },
+  "candidate_rows": 4794,
+  "vectorbt_runtime": "local VectorBT 1.2.0; existing reward_paths._order_func and reward_account.account_order",
+  "path_semantics": "One native independent VectorBT column per event; one actual shared-cash nine-slot account per arm/scenario."
+}

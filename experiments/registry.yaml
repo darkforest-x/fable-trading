@@ -15,6 +15,51 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-breakout-branch-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "f958a2c9d2"
+    status: "inconclusive"
+    question: "十币周一云带首次顺势突破"
+    single_variable: "固定十币，12H首次顺EMA方向收在已完成周一1.618外，止损按突破一侧边界，原云带退出。"
+    result: "突破35,753U，752笔，胜率25.13%、金额盈亏比5.34、回撤上界48.59%；同池刺破收回12,398U。只看后续有合格对照的574个事件，原入场224U、晚入对照10,247U，该子集按信号后行情选择。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-breakout-branch-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-8129-9a3c-fb3de522db2e."
+
+  - experiment_id: exp-cloud-close-failed-break-branch-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "edde74d033"
+    status: "rejected"
+    question: "十币假突破后的反向入场"
+    single_variable: "固定十币，12H先收出已完成周一边界，后同周收回时反向，止损设失败段极值，另一侧边界止盈或周末结算。"
+    result: "1,125笔，终值723.82U，胜率43.64%、金额盈亏比1.12、回撤上界37.24%。配对子集原入场1,252U，对照636U；完整可交易账户仍亏损。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-failed-break-branch-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-8181-a466-c7f8264a53f3."
+
+  - experiment_id: exp-cloud-close-breakout-fixed-delay-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "ebf758fde3"
+    status: "inconclusive"
+    question: "十币突破统一延后一根12H的全机会对照"
+    single_variable: "十币突破的全部1,410个原始可开机会均固定推迟12H，以推迟时的实际开盘价保持原相对止损距离，继续采用云带退出。"
+    result: "全部1,410个预定时点均有报价。即时入场35,753U，固定晚12H为43,583U，749笔，胜率25.37%，金额盈亏比5.30，回撤上界48.57%；优势来自跨期趋势的解释与结果相容，精确抢第一根未体现优势。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-breakout-fixed-delay-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81f0-8f8e-dd8d0a294e7e."
+
   - experiment_id: exp-cloud-close-okx-waves-trades-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "f43938bb80"
