@@ -1,5 +1,6 @@
 """Measure the effect of predeclared, documented retired crypto names on the V1.7 wallet."""
 import json
+import subprocess
 from functools import lru_cache
 
 import numpy as np
@@ -9,8 +10,6 @@ from yoyo.evaluation import cloud_close_leadership as leadership
 from yoyo.evaluation import cloud_close_november_paths as native
 from yoyo.evaluation import cloud_close_okx_retired_prices as prices
 from yoyo.evaluation import cloud_close_owner_risk as risk
-from yoyo.evaluation import cloud_peak10_census as census
-from yoyo.monitor import cloud_signals
 
 wallet = leadership.wallet
 EXP = risk.EXP.parent/'exp-cloud-close-okx-retired-account-20261109-v1'
@@ -18,28 +17,12 @@ FIELDS = native.OHLC
 GAP_REASONS = ['data_gap_markout','series_tail_close','stale_12h_markout']
 
 
-def signal_keys(symbol, hour, bars):
-    """Original signal OHLC/EMA20/50 and NY Monday range; ATR14 comes from the preceding closed 12H."""
-    inst = symbol+'-USDT-SWAP'
-    calendar = census.anchors(hour,bars,inst)
-    records = bars[FIELDS].reset_index().to_dict('records')
-    ema = cloud_signals.ema_points(records)
-    atr = census.atr_points(records)
-    seen = set()
-    keys = []
-    for i,bar in enumerate(records):
-        anchor = calendar[census.week_window(bar['time'])['week']]
-        if anchor['week'] in seen:
-            continue
-        key = cloud_signals.signal(inst,bar,ema[i],anchor,wallet.END)
-        if key is None:
-            continue
-        seen.add(key['week'])
-        prior = atr[i-1]
-        keys.append(dict(key_open_ms=key['signal_open_ms'],entry_ms=key['confirmed_ms'],
-                   symbol=symbol,side=key['side'],week=key['week'],event_id=key['id'],
-                   stop_price=key['stop'],entry_order=100*prior['atr14']/prior['close']))
-    return keys
+def official_keys(symbol,hour_file,end,native_12=None):
+    cmd = [str(wallet.ROOT/'.venv/bin/python'),'-m','yoyo.evaluation.cloud_close_okx_retired_keys',
+           symbol,str(hour_file),str(end)]
+    if native_12:
+        cmd.extend(['--native12',str(native_12)])
+    return json.loads(subprocess.check_output(cmd,text=True))
 
 
 def frozen_data():
@@ -52,8 +35,7 @@ def frozen_data():
         frame = pd.read_csv(folder/'bars12h.csv.gz',float_precision='round_trip')
         history[row.symbol] = leadership.trailing_return(frame)
         if row.symbol=='BTC':
-            hours = pd.read_csv(folder/'bars1h.csv.gz',index_col='time',float_precision='round_trip')
-            rebuilt = pd.DataFrame(signal_keys(row.symbol,hours,frame.set_index('time'))).sort_values('entry_ms')
+            rebuilt = pd.DataFrame(official_keys(row.symbol,folder/'bars1h.csv.gz',wallet.END,folder/'bars12h.csv.gz')).sort_values('entry_ms')
             old = raw[raw.symbol.eq('BTC')].copy()
             old['entry_ms'] = pd.to_datetime(old.confirmed_bjt,utc=True).astype('datetime64[ms, UTC]').astype('int64')
             old = old.sort_values('entry_ms')
@@ -76,7 +58,9 @@ def retired_symbol(symbol,end):
     hour = hour.loc[hour.index<end]
     bars = native.twelve_hour(hour)
     ranks = leadership.trailing_return(bars.reset_index())
-    events = signal_keys(symbol,hour,bars)
+    events = official_keys(symbol,folder/'bars1h.csv.gz',end)
+    if any(e['key_open_ms'] not in bars.index for e in events):
+        raise ValueError(f'Original key outside complete native 12H bars for {symbol}')
     rows = []
     missing = 0
     if events:
