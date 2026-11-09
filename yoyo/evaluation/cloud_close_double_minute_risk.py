@@ -174,7 +174,7 @@ def main(directory=EXP,account_dir=experiment.EXP,input_loader=experiment.inputs
     refine(directory,equity,quotes,old)
 
 
-def refine(directory,equity,quotes,old):
+def refine(directory,equity,quotes,old,*,scope=None):
     """Bound the supplied native account from its conserved post-trim quantities."""
     held = pd.read_csv(directory/'post_trim_units.csv.gz',dtype={'symbol':str},float_precision='round_trip')
     upper,lower = equity.upper_nav.copy(),equity.lower_nav.copy()
@@ -207,7 +207,7 @@ def refine(directory,equity,quotes,old):
     obj = dict(original_upper_pct=old['dd_bound_pct'],original_observed_pct=old['dd_mark_pct'],
         refined_lower_pct=witness,refined_upper_pct=result.max(),fully_refined=used,
         targeted_hours=len(targets(equity)),remaining_potential_breach_hours=int(result.ge(50).sum()),
-        scope='This bounds traded-price drawdown for the frozen 5bp-slippage 360-name account, including its published CVC gap exit. Historical funding and unobserved margin marks remain unresolved.')
+        scope=scope or 'This bounds traded-price drawdown for the frozen 5bp-slippage 360-name account, including its published CVC gap exit. Historical funding and unobserved margin marks remain unresolved.')
     (directory/'summary.json').write_text(json.dumps(obj,indent=2,allow_nan=False)+'\n')
     print(obj,flush=True)
 
