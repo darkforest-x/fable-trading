@@ -483,7 +483,7 @@ def build_features(parents: pd.DataFrame) -> pd.DataFrame:
             source_frame["close_volume_sum_5m"] = np.nan
 
         rebuilt = pd.DataFrame()
-        rounded, _, _, _, rebuilt = score.build_inputs(
+        rounded, _, _, _, rebuilt, _, _, _ = score.build_inputs(
             source_frame, ticker, ctx, key_timeframes=["12H"], source_minutes=source_minutes,
             feature_start_ns=int(source_frame.index.asi8[0]),
         )
