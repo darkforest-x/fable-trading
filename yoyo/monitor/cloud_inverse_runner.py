@@ -12,7 +12,8 @@ import sys
 import threading
 import time
 
-from .cloud_inverse_account import CloudInversePaper
+from .cloud_inverse_account import STEP_12H_MS, CloudInversePaper
+from .monday_fib import week_window
 
 ROOT = Path(__file__).resolve().parents[2]
 RUNTIME = Path(os.environ.get("FABLE_IMPULSE_RUNTIME", Path.home() / "Library/Application Support/Fable/ImpulseMonitor"))
@@ -30,6 +31,18 @@ def publish(path, snapshot):
     tmp = path.with_suffix(".tmp")
     tmp.write_text(json.dumps(snapshot, ensure_ascii=False, separators=(",", ":"), allow_nan=False))
     os.replace(tmp, path)
+
+
+def next_eligible_close(now):
+    """First future UTC 12H close whose entire candle uses a finished NY Monday."""
+    first_open = now // STEP_12H_MS * STEP_12H_MS
+    for i in range(15):
+        opening = first_open + i * STEP_12H_MS
+        close = opening + STEP_12H_MS
+        week = week_window(opening)
+        if week["end"] <= opening and close <= week["expires"]:
+            return close
+    raise ValueError("No eligible 12h bar within a full New York week")
 
 
 def install(runtime, public):
@@ -94,6 +107,7 @@ def cycle(feed, account):
         "boundary_ms","source_boundary_ms","expected_symbols","completed_symbols","rankable_count","source_complete",
         "rankable_minimum","rankable_threshold_count","observed_at_ms","last_signal_close_ms",
     ) if k in feed.market_state}
+    market["next_eligible_close_ms"] = next_eligible_close(feed.clock())
     late = (market.get("source_complete") is False and feed.clock() - market.get("boundary_ms",0) >
             (health.get("signal_batch_max_delay_ms") or 900000))
     if late:

@@ -78,7 +78,8 @@ async function forward() {
     ].join('')+'</div><div class="panel"><div class="bar"><h3>运行记录</h3><span>'+esc(status)+'</span></div>' +
     '<div class="facts"><span>账户启用 <b>'+beijing(start)+'</b></span><span>最近心跳 <b>'+beijing(d.heartbeat_ms)+'</b></span>'+
     (quotes?'<span>行情确认时钟 <b>'+beijing(quotes)+'</b></span>':'')+
-    (Number.isFinite(count)?'<span>覆盖 90 天的合约 <b>'+count+'</b></span>':'')+'</div>'+
+    (Number.isFinite(count)?'<span>覆盖 90 天的合约 <b>'+count+'</b></span>':'')+
+    (market.next_eligible_close_ms?'<span>下一次可判定收盘 <b>'+beijing(market.next_eligible_close_ms)+'</b></span>':'')+'</div>'+
     (d.error?'<p class="state-error">'+esc(d.error)+'</p>':'')+
     '<p>北京时间 08:00、20:00 收盘后检查信号。前向采用当时可观察的公开买卖报价，买入取卖一、卖出取买一。超时信号记作错过。</p></div>'+
     '<div class="panel"><h3>当前持仓</h3>'+positions(d.positions || [])+'</div>'+
