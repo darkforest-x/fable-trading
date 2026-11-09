@@ -161,7 +161,7 @@ def _run() -> None:
     events = pd.DataFrame(findings, columns=ACTIVATION_COLUMNS)
     if not events.empty and events.duplicated(["event_id", "mode"]).any():
         raise ValueError("A parent has more than one fixed first-confirmed-candle stop")
-    fixed = events.loc[events.mode.eq("fixed")].copy() if not events.empty else events.copy()
+    fixed = events.loc[events["mode"].eq("fixed")].copy() if not events.empty else events.copy()
     fixed.to_csv(EXP / "fixed_stop_activations.csv.gz", index=False, compression={"method": "gzip", "mtime": 0})
     changes = fixed.loc[fixed.changed].set_index("event_id", verify_integrity=True)
     if not changes.empty and (changes.exit_bar_ms < changes.activation_ms).any():
