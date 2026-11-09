@@ -1,6 +1,6 @@
 {
   "id": "exp-cloud-close-current-funding-20261109-v1",
-  "status": "offline_adapter_pending_owner_commit",
+  "status": "committed_research_adapter",
   "venue": "Binance USD-M",
   "question": "Prepare realized-funding attribution for the frozen 680-contract NAV-tenth account without changing its historical orders or NAV.",
   "network_policy": "preflight and mini are local-read-only; only explicit --collect may fetch sources",
@@ -53,11 +53,28 @@
     "entry_fee_class": "taker",
     "exit_fee_class_source": "native per-leg exit_fee_rate; 0.0002=resting_maker, 0.0005=taker",
     "cash_reconciliation_tolerance_usdt": 0.0001,
-    "notional_reconciliation_tolerance_usdt": 0.000001,
+    "notional_reconciliation_tolerance_usdt": 1e-06,
     "preserved_fields": [
-      "symbol", "event_id", "parent_id", "is_control", "side", "tp_r", "entry_ms", "entry_price",
-      "entry_fee_rate", "entry_fee_class", "exit_bar_ms", "exit_phase", "exit_price", "exit_fee_rate",
-      "exit_fee_class", "exit_reason", "stop_price", "same_bar_ambiguous", "signed_size", "notional_usdt"
+      "symbol",
+      "event_id",
+      "parent_id",
+      "is_control",
+      "side",
+      "tp_r",
+      "entry_ms",
+      "entry_price",
+      "entry_fee_rate",
+      "entry_fee_class",
+      "exit_bar_ms",
+      "exit_phase",
+      "exit_price",
+      "exit_fee_rate",
+      "exit_fee_class",
+      "exit_reason",
+      "stop_price",
+      "same_bar_ambiguous",
+      "signed_size",
+      "notional_usdt"
     ]
   },
   "funding_adapter": {
@@ -72,7 +89,10 @@
   "outputs": {
     "scope_directory": "experiments/active/exp-cloud-close-current-funding-20261109-v1/current/",
     "execution_legs": "experiments/active/exp-cloud-close-current-funding-20261109-v1/current/execution_legs.csv.gz",
-    "execution_leg_join_key": ["event_id", "tp_r"],
+    "execution_leg_join_key": [
+      "event_id",
+      "tp_r"
+    ],
     "preflight": "In-memory path join, fee-class, parent-notional and cash-PnL checks only; writes no artifacts.",
     "mini": "Synthetic 2/3 child sizing, maker/taker cash reconciliation and phase-aware window check; writes no artifacts.",
     "collect": "After commit checks, atomically writes independent execution_legs.csv.gz, then invokes the shared funding writer to generate current settlement outputs and its final audit receipt."
@@ -87,5 +107,7 @@
     "No API request, archive download, funding cashflow calculation or persistent output is performed by preflight or mini. Collection is a separate explicit network operation.",
     "The eight supplemental contracts without a complete 90-day native history remain excluded from funded events under the frozen eligibility policy.",
     "The independent execution-leg table is the authoritative join for entry/exit prices, phases, fees, size, stop and same-bar ambiguity; settlement outputs are joined by event_id and tp_r without post-write mutation."
-  ]
+  ],
+  "funding_collection": "official_monthly_archives",
+  "funding_source_note": "Read the official USD-M monthly fundingRate archive and markPriceKlines archives, reusing local exact funding API marks when their original settlement timestamp matches. The earlier API pass returned repeated HTTP 403 for most held windows; the independent official bulk files were verified available in 2020, 2022, 2025 and 2026. Do not repeat failed per-window REST calls."
 }

@@ -13,6 +13,7 @@ import argparse
 import json
 import subprocess
 import zipfile
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import numpy as np
@@ -213,6 +214,8 @@ def _normalized_sources(symbol: str, month: str, start_ms: int, end_ms: int) -> 
     """Read existing exact API-normalized local history and its range receipts."""
     records, audits = [], []
     candidates = [
+        (CACHE / "funding_api" / f"{symbol}USDT" / month / "normalized/binance" / f"{symbol}USDT_funding.csv.gz",
+         "cloud_close_cached_api_history"),
         (BASE_DATA / "funding_months" / month / "normalized/binance" / f"{symbol}USDT_funding.csv.gz",
          "monday_breadth_funding_months"),
         (BASE_DATA / "funding_history/normalized/binance" / f"{symbol}USDT_funding.csv.gz",
@@ -381,6 +384,7 @@ def _window_history(
     client: FundingClient,
     *,
     allow_api: bool,
+    bulk_archives: bool = False,
 ) -> tuple[pd.DataFrame, dict]:
     start_ms, end_ms = int(window["start_ms"]), int(window["end_ms"])
     normalized, normalized_audits = _normalized_sources(symbol, month, start_ms, end_ms)
@@ -437,8 +441,15 @@ def _window_history(
     if selected_base.empty and archive_complete:
         selected_base = archive_rows
         base_source = "binance_vision_monthly_fundingRate"
-    elif not selected_base.empty and not archive_rows.empty:
+    elif not selected_base.empty and not archive_rows.empty and selected_base is not archive_rows:
         selected_base = _merge_history([selected_base, archive_rows])
+
+    if bulk_archives and archive_complete and not exact_local_cover and not normalized.empty and not selected_base.empty:
+        # Keep the official monthly event roster intact. A matching cached API
+        # event can supply the exact mark; never add an extra near-duplicate fee.
+        match = normalized[normalized.funding_time_ms.isin(selected_base.funding_time_ms) & normalized.mark_price.notna()]
+        if not match.empty:
+            selected_base = _merge_history([selected_base, match])
 
     selected_base = selected_base.copy()
     if not selected_base.empty:
@@ -652,11 +663,20 @@ def _write_scope(scope: str, config: dict, legs: pd.DataFrame, source_audit: dic
         raise FileExistsError(f"Funding scope output already exists: {audit_path}")
     windows = _month_windows(legs)
     client = FundingClient("binance", CACHE / "funding_api")
+    bulk_archives = config.get("funding_collection") == "official_monthly_archives"
+    if bulk_archives:
+        def cache_month(key):
+            symbol, month = key
+            archive_funding.archive_month(symbol + "USDT", month, local_only=False)
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            for count, _ in enumerate(executor.map(cache_month, sorted(windows)), 1):
+                if count % 100 == 0:
+                    print(f"Monthly funding and mark archives {scope}: {count}/{len(windows)}", flush=True)
     histories: dict[tuple[str, str], pd.DataFrame] = {}
     month_audits: dict[tuple[str, str], dict] = {}
     for i, (key, window) in enumerate(sorted(windows.items()), 1):
         symbol, month = key
-        frame, audit = _window_history(symbol, month, window, client, allow_api=True)
+        frame, audit = _window_history(symbol, month, window, client, allow_api=not bulk_archives, bulk_archives=bulk_archives)
         histories[key] = frame
         month_audits[key] = audit
         if i % 100 == 0:
