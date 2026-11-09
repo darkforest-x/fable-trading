@@ -1,0 +1,35 @@
+{
+  "id": "exp-cloud-close-spot-repair-20261109-v1",
+  "purpose": "Repair only the row-level coverage loss in the frozen Binance Spot 1h input panel. Reuse the frozen 12H candidates, exact BASEUSDT pair rule, official archived monthly CSVs, and the original event geometry. Keep verifiable original bars; never synthesize or shift timestamps, fill gaps, or replay an account.",
+  "inputs": {
+    "source_config": "experiments/active/exp-cloud-close-spot-reclaim-20261109-v1/source_config.json",
+    "original_panel": "data/research/cloud_close_spot_reclaim_20261109/event_panel.csv.gz",
+    "original_summary": "data/research/cloud_close_spot_reclaim_20261109/summary.json",
+    "cache_root": "data/research/cloud_close_spot_reclaim_20261109",
+    "candidate_identity": "The same unique frozen candidate_order.csv.gz rows and source-week resolution as the original input builder; no outcome selection.",
+    "archive_source": "Existing official Binance Spot monthly 1h ZIPs only, under cache_root/raw; official pair and month index files under cache_root/index. This repair never downloads and never modifies the source cache."
+  },
+  "row_policy": {
+    "timestamps": "Detect ms/us from each original open_time magnitude and normalize for validation only. Keep the row only if the original close_time normalizes exactly to open_ms + 3,599,999, the open is an exact UTC H1 boundary in the named month, and the remaining original OHLCV/trade-count checks pass.",
+    "bad_row": "Exclude only the malformed source row and record its source row number, original normalized open/close, delta, and reason. Do not alter either timestamp or infer a replacement close_time.",
+    "duplicates": "Exclude every row sharing a duplicate open timestamp and record all source row numbers; do not pick a winner.",
+    "missing": "The original event geometry requires every exact UTC H1 open from NY Monday through the signal close. Any rejected/missing required hour stays unknown; no forward fill, interpolation, synthetic bars, or cross-month stitching.",
+    "zero_trade": "Preserve valid rows with zero volume and zero trade count, matching the original input semantics; inconsistent zero/trade count remains invalid.",
+    "unicode_or_unreadable": "An exact pair/month whose cached ZIP is absent or unreadable stays unknown with a distinct reason; no alias and no network fetch."
+  },
+  "outputs": {
+    "event_panel": "experiments/active/exp-cloud-close-spot-repair-20261109-v1/event_panel.csv.gz",
+    "row_quality": "experiments/active/exp-cloud-close-spot-repair-20261109-v1/row_quality.csv.gz",
+    "archive_audit": "experiments/active/exp-cloud-close-spot-repair-20261109-v1/archive_audit.csv.gz",
+    "source_receipt": "experiments/active/exp-cloud-close-spot-repair-20261109-v1/source_receipt.json",
+    "summary": "experiments/active/exp-cloud-close-spot-repair-20261109-v1/summary.json"
+  },
+  "checks": {
+    "preserve_original_covered": "Every event covered in the frozen panel must remain covered with identical signal-side reclaim and price geometry.",
+    "lineage": "Output event IDs must exactly equal the frozen candidate IDs once each.",
+    "no_source_mutation": "Read-only source cache and frozen panel; all generated files stay in this experiment directory.",
+    "account_replay": false
+  },
+  "runner": "python3 -m yoyo.evaluation.cloud_close_spot_reclaim_repair --run",
+  "mini_runner": "python3 -m yoyo.evaluation.cloud_close_spot_reclaim_repair --mini-check"
+}
