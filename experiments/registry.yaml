@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-spot-launch-universe-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "812916811f"
+    status: "inconclusive"
+    question: "重建币安首年历史现货市场"
+    single_variable: "从历史全目录逐一验776个USDT交易对，用2017年正成交查首年名单，同时保留下线项目。"
+    result: "六个市场含BCC；原生558个H1月档，244份已有，收到市场历史逐小时快照。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-spot-launch-universe-20261109-v1/summary.json"
+    notes: "Source census only, not an account. Notion 41388564-79af-8110-bc31-c7dbd1eac702."
+
+  - experiment_id: exp-cloud-close-launch-spot-wallet-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "88b4826ab2"
+    status: "rejected"
+    question: "完整首年现货币池能否复现高收益"
+    single_variable: "同一首年币池、三槽无杠杆与双边各10bp，比较收盘立即与延后12H仍有效的回收信号。"
+    result: "原时点199笔、1934.27U、胜22.11%、金额盈亏比4.42、观测回撤上界46.51%；延后143笔2306.69U、胜27.97%、比3.50、44.37%；2025、2026均亏。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-launch-spot-wallet-20261109-v1/summary.json"
+    notes: "54/52 missing held hours; no final retirement write-off involved either arm. Fees assume regular historical base with no promotions. Notion 41388564-79af-81d1-ba11-c9bb959c9d5c."
+
   - experiment_id: exp-cloud-close-weekday-anchor-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "37b0effb59"
