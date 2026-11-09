@@ -51,6 +51,7 @@
   "execution": {
     "path_engine": "Existing cloud_close_reward_paths VectorBT from_order_func, one independent zero-TP path per eligible cross event.",
     "account_engine": "Existing cloud_close_reward_account VectorBT shared-cash two-slot wallet.",
+    "vectorbt_path_batch_size": 64,
     "reproduction": [
       "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_major_cross --mini-check",
       "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_major_cross --run"

@@ -114,9 +114,18 @@ def _load_common(config: dict) -> tuple[dict[str, dict], int, int, dict]:
             "native_1h_last_open_ms": int(bars1.index[-1]),
             "12h_source_counts": bars12.source.value_counts(dropna=False).to_dict()
                 if "source" in bars12 else {"source_not_recorded": len(bars12)},
+            "12h_source_receipt_counts": item["receipt"]["native12h"],
+            "1h_source_receipt_counts": item["receipt"]["hour"],
+            "archive_12h_rows_outside_common_scope": int(
+                (item["bars12_full"].source.eq("complete_1H_archive")).sum()
+                - bars12.source.eq("complete_1H_archive").sum()
+            ),
             "hourly_gaps": int(np.count_nonzero(np.diff(bars1.index.to_numpy()) != HOUR_MS)),
             "native_12h_gaps": int(np.count_nonzero(np.diff(bars12.index.to_numpy()) != STEP_12H)),
         }
+        if (len(bars12) != int(data_config["expected_common_12h_rows_per_symbol"])
+                or len(bars1) != int(data_config["expected_common_1h_rows_per_symbol"])):
+            raise ValueError(f"Unexpected common OHLC row count for {symbol}")
     symbols = data_config["symbols"]
     if not loaded[symbols[0]]["bars12"].index.equals(loaded[symbols[1]]["bars12"].index):
         raise ValueError("The BTC/ETH common native 12H indexes differ")
@@ -514,6 +523,8 @@ def run() -> dict:
             flips_frame.entry_status.eq("slow_ema_fixed_stop_not_adverse_from_entry").sum()),
         "long_entries_candidate": int(paths[(paths.side == 1) & paths.status.eq("executed")].shape[0]),
         "short_entries_candidate": int(paths[(paths.side == -1) & paths.status.eq("executed")].shape[0]),
+        "short_entry_candidates_disabled_by_long_only_variant": int(
+            paths[(paths.side == -1) & paths.status.eq("executed")].shape[0]),
     }
     summary = {
         "experiment_id": EXP.name,
