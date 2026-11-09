@@ -1,0 +1,7 @@
+{
+  "additional_settlements": {},
+  "question": "When an original perpetual 12H signal confirms, does a stronger same-direction move in its contemporaneous spot market select larger persistent winners?",
+  "single_variable": "At the original confirmed futures 12H decision use each instrument's closed 12H last traded close divided by its own completed NY Monday high/low midpoint. Keep the signal if the spot ratio exceeds the perpetual ratio for a long, or is lower for a short. Strict signed log difference above zero; no fitted threshold. This is a within-week relative price move, not the outright funding premium. No requirement that spot itself sweeps the level and no use of the subsequent market fill.",
+  "coverage": "Use the same exact BASEUSDT native spot and futures pair. Require the original spot source coverage, actual activity in each H1 of the spot key and Monday, original futures Monday H1 grid and last confirming H1. Ratio within each market is independent of a constant token multiplier. Failed observability remains unknown in all arms.",
+  "account": "Preserve the scored nine-slot shared 1000U Binance portfolio, NAV/10 entries, original runner/partial, and hourly 20% cap. Maker 2bp, taker 5bp. Compare all covered, spot leads and a fixed-count/time/direction/score-availability placebo with fixed seed 1029. First comparison before funding; years 2025/26 previously studied."
+}
