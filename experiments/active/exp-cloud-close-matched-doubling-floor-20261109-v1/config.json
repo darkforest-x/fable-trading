@@ -1,0 +1,65 @@
+{
+  "id": "exp-cloud-close-matched-doubling-floor-20261109-v1",
+  "venue": "Binance USD-M",
+  "question": "On the latest matched Binance hold_doubling account, does a fixed low stop from the first completed UTC 12H candle closing at or above 2x entry improve the same funded account after the original 2R order expires at 12 hours?",
+  "single_variable": "Use the registered matched-target-clock hold_doubling arm unchanged: preserve the 2R child if filled before 12 hours, otherwise expire that target after the first 12 hours and continue the same original runner exits without a sale at 2x entry. Add only one stop, at the low of the first fully completed native UTC 12H candle closing at or above twice entry, effective at the following Binance H1 open. The stop stays fixed. Do not replace earlier original exits, do not alter admissions or slot reservations, and do not refill slots released by exits.",
+  "source": "Reuse the registered native Binance capacity/funding account, matched 12H 2R lifetime adapter, no-doubling-sale child route, native H1 OHLC stop adapter, and cash-sharing VectorBT account. Compare to the already completed matched-target-clock hold_doubling runs. Preserve the 1,583 positive-capacity parent roster, original entry order and nine slots, four child legs, causal prior 60-minute turnover cap, 20% hourly single-contract trim, frozen 1x/2x exposure, native fee schedule, actual funding tape, and both funding-boundary policies.",
+  "account": {
+    "initial_cash_usdt": 1000.0,
+    "expected_positions": 1583,
+    "expected_child_legs": 6332,
+    "slots": 9,
+    "child_weights": [0.3333333333333333, 0.3333333333333333, 0.16666666666666666, 0.16666666666666666],
+    "entry_capacity_fraction": 0.1,
+    "hourly_single_contract_cap_fraction": 0.2,
+    "relative_exposure_levels": [1.0, 2.0],
+    "period_end_utc": "2026-09-23T23:00:00Z"
+  },
+  "rule": {
+    "original_2r_validity_hours": 12,
+    "double_confirmation": "The completed native UTC 12H candle close is at or above 2.0 times the original entry price.",
+    "stop_price": "Low of that first qualifying completed native UTC 12H candle; fixed thereafter.",
+    "activation": "Only at the next native Binance H1 open after the confirming candle closes; the formation candle cannot trigger the stop.",
+    "market_gap_fill": "For a long, if the next or later H1 open is below the stop, fill at that traded open; otherwise an intrabar stop fill uses the stop level.",
+    "doubling_sale": "None; use the registered hold_doubling route.",
+    "early_2r_fill": "Preserve an original 2R fill completed before the 12-hour expiry."
+  },
+  "fees": {
+    "taker": 0.0005,
+    "resting_maker": 0.0002,
+    "additional_market_slippage_stress": 0.0005
+  },
+  "funding": {
+    "venue": "Binance USD-M",
+    "boundary_scenarios": ["include_boundary", "exclude_boundary"],
+    "accounting": "Post the actual historical funding cashflows at source marks to shared cash; funding changes later funded quantity. Do not add funding to terminal NAV a second time."
+  },
+  "inputs": {
+    "funding_account_config": "experiments/active/exp-cloud-close-binance-capacity-funding-20261109-v1/config.json",
+    "matched_clock_baseline": "experiments/active/exp-cloud-close-binance-matched-target-clock-20261109-v1/summary.json",
+    "longer_clock_stop_transfer_reference": "experiments/active/exp-cloud-close-binance-doubled-stop-transfer-20261109-v1/summary.json"
+  },
+  "scenarios": [
+    "matched hold_doubling baseline, include funding boundary",
+    "fixed first-confirming-candle-low stop, include funding boundary",
+    "matched hold_doubling baseline, exclude funding boundary",
+    "fixed first-confirming-candle-low stop, exclude funding boundary",
+    "matched hold_doubling baseline +5bp market stress, include funding boundary",
+    "fixed first-confirming-candle-low stop +5bp market stress, include funding boundary",
+    "matched hold_doubling baseline +5bp market stress, exclude funding boundary",
+    "fixed first-confirming-candle-low stop +5bp market stress, exclude funding boundary"
+  ],
+  "execution": {
+    "framework": "Local VectorBT 1.2.0 cash-sharing from_order_func for funded account execution, funding, market fills, and hourly size updates; existing VectorBT trail_order stop adapter for causal stop fills.",
+    "network_policy": "Offline replay only; no data collection, download, alternate venue, or substitute price source.",
+    "market_slippage_stress": "Apply an additional adverse 5bp only to market fills, separately from the 5bp taker fee.",
+    "reproduction_command": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_matched_doubling_floor"
+  },
+  "outputs": {
+    "scope": "experiments/active/exp-cloud-close-matched-doubling-floor-20261109-v1/",
+    "per_candidate_scenario": ["parents.csv.gz", "hourly.csv.gz", "funding.csv.gz", "result.json"],
+    "stop_path_evidence": "fixed_stop_activations.csv.gz",
+    "summary": "summary.json"
+  },
+  "status": "preregistered_frozen_inputs"
+}
