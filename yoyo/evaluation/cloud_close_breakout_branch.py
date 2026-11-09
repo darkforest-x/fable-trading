@@ -8,6 +8,7 @@ filters a previously funded trade list to create breakout entries.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import zlib
@@ -31,6 +32,7 @@ HOUR = engine.HOUR_MS
 STEP = engine.STEP_12H
 TAKER = engine.TAKER
 DEFAULT_SEED = 20261109
+CACHE_FORMAT_VERSION = 1
 PERIODS = {
     "all": (None, None),
     "dev": (None, "2025-01-01T00:00:00Z"),
@@ -61,6 +63,82 @@ def _write_json(path: Path, value: dict) -> None:
     temporary.write_text(json.dumps(_json_safe(value), ensure_ascii=False,
                                     indent=2, allow_nan=False) + "\n", encoding="utf-8")
     temporary.replace(path)
+
+
+def _cache_source_signatures(symbol: str, config: dict) -> dict[str, dict[str, int]]:
+    p12, p1, source_group = _input_paths(symbol, config)
+    source_paths = [p1] if source_group == "retired_documented_h1" else [p12, p1]
+    if source_group == "retired_documented_h1":
+        source = config["data"]["retired_h1_sources"][symbol]
+        source_paths.extend((ROOT / source["source_receipt_path"],
+                             ROOT / source["months_manifest_path"]))
+    signatures = {}
+    for path in source_paths:
+        stat = path.stat()
+        signatures[str(path.relative_to(ROOT))] = {
+            "size_bytes": int(stat.st_size), "mtime_ns": int(stat.st_mtime_ns),
+        }
+    return signatures
+
+
+def _cache_contract(symbol: str, config: dict, config_sha256: str,
+                    code_sha256: str) -> dict:
+    return {
+        "format_version": CACHE_FORMAT_VERSION,
+        "symbol": symbol,
+        "config_sha256": config_sha256,
+        "code_sha256": code_sha256,
+        "source_files": _cache_source_signatures(symbol, config),
+    }
+
+
+def _load_symbol_cache(cache_dir: Path, contract: dict) -> tuple[list[dict], list[dict], dict] | None:
+    symbol_dir = cache_dir / contract["symbol"]
+    manifest_path = symbol_dir / "manifest.json"
+    if not manifest_path.is_file():
+        return None
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not manifest.get("complete"):
+        return None
+    if any(manifest.get(key) != value for key, value in contract.items()):
+        return None
+    paths_path = symbol_dir / "paths.csv.gz"
+    candidates_path = symbol_dir / "candidates.csv.gz"
+    audit_path = symbol_dir / "audit.json"
+    if not all(path.is_file() for path in (paths_path, candidates_path, audit_path)):
+        return None
+    paths = (pd.read_csv(paths_path, dtype={"symbol": str}, float_precision="round_trip",
+                         keep_default_na=False) if manifest["path_count"] else pd.DataFrame())
+    candidates = (pd.read_csv(candidates_path, dtype={"symbol": str}, float_precision="round_trip",
+                              keep_default_na=False) if manifest["candidate_count"] else pd.DataFrame())
+    if len(paths) != manifest["path_count"] or len(candidates) != manifest["candidate_count"]:
+        return None
+    if len(paths) and (set(paths.symbol.unique()) != {contract["symbol"]}
+                       or set(paths.arm.unique()) != {"breakout", "reclaim"}):
+        return None
+    audit = json.loads(audit_path.read_text(encoding="utf-8"))
+    if audit.get("symbol") != contract["symbol"]:
+        return None
+    return paths.to_dict("records"), candidates.to_dict("records"), audit
+
+
+def _save_symbol_cache(cache_dir: Path, contract: dict, path_rows: list[dict],
+                       candidate_rows: list[dict], audit: dict) -> None:
+    symbol_dir = cache_dir / contract["symbol"]
+    symbol_dir.mkdir(parents=True, exist_ok=True)
+    (symbol_dir / "manifest.json").unlink(missing_ok=True)
+    for name, records in (("paths.csv.gz", path_rows), ("candidates.csv.gz", candidate_rows)):
+        target = symbol_dir / name
+        temporary = target.with_suffix(target.suffix + ".tmp")
+        pd.DataFrame(records).to_csv(temporary, index=False, compression="gzip")
+        temporary.replace(target)
+    _write_json(symbol_dir / "audit.json", audit)
+    _write_json(symbol_dir / "manifest.json", {
+        **contract,
+        "path_count": len(path_rows),
+        "candidate_count": len(candidate_rows),
+        "complete": True,
+    })
 
 
 def _ny_week_open(time_ms: int) -> dict:
@@ -293,6 +371,8 @@ def _signal_sets(symbol: str, bars12: pd.DataFrame,
                 audits.append(_candidate_record(arm, control))
         counts[f"{arm}_matched_controls"] = int(match_stats["matched"])
         counts[f"{arm}_unmatched_controls"] = int(match_stats["unmatched"])
+    counts.setdefault("breakout_first_weekly_keys", 0)
+    counts.setdefault("reclaim_first_weekly_keys", 0)
     return by_arm, audits, dict(counts)
 
 
@@ -520,16 +600,36 @@ def run(config_path: Path = CONFIG_PATH) -> dict:
         raise ValueError("Config account bounds must match the frozen shared-wallet UTC window")
     reuse = config.get("reuse_original_paths")
     row_counter = [1_000_000] if reuse else [0]
+    cache_dir = output_dir / config["outputs"].get("symbol_cache_dir", "symbol_cache")
+    config_sha256 = hashlib.sha256(json.dumps(
+        config, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    code_sha256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     rows_by_arm = {"breakout": [], "reclaim": []}
     candidates, symbol_audits = [], {}
+    cache_reused_symbols, newly_priced_symbols = [], []
     run_symbols = config["data"]["symbols"]
     for symbol_number, symbol in enumerate(run_symbols, start=1):
-        path_rows, candidate_rows, audit = _prepare_one_symbol(symbol, config, row_counter)
+        contract = _cache_contract(symbol, config, config_sha256, code_sha256)
+        cached = _load_symbol_cache(cache_dir, contract)
+        if cached is None:
+            prepared_paths, candidate_rows, audit = _prepare_one_symbol(symbol, config, row_counter)
+            path_rows = [row for arm_rows in prepared_paths.values() for row in arm_rows]
+            _save_symbol_cache(cache_dir, contract, path_rows, candidate_rows, audit)
+            cache_status = "prepared"
+            newly_priced_symbols.append(symbol)
+        else:
+            path_rows, candidate_rows, audit = cached
+            source_numbers = [int(row["source_row_number"]) for row in path_rows
+                              if row.get("source_row_number") not in (None, "")]
+            if source_numbers:
+                row_counter[0] = max(row_counter[0], max(source_numbers))
+            cache_status = "reused"
+            cache_reused_symbols.append(symbol)
         for arm, arm_rows in rows_by_arm.items():
-            arm_rows.extend(path_rows[arm])
+            arm_rows.extend(row for row in path_rows if row["arm"] == arm)
         candidates.extend(candidate_rows)
         symbol_audits[symbol] = audit
-        print(f"prepared {symbol_number}/{len(run_symbols)} {symbol}: "
+        print(f"{cache_status} {symbol_number}/{len(run_symbols)} {symbol}: "
               f"breakout={audit['first_signal_counts']['breakout_first_weekly_keys']} "
               f"reclaim={audit['first_signal_counts']['reclaim_first_weekly_keys']}", flush=True)
     incremental_paths = pd.concat([pd.DataFrame(rows_by_arm[arm]) for arm in rows_by_arm], ignore_index=True)
@@ -591,6 +691,14 @@ def run(config_path: Path = CONFIG_PATH) -> dict:
                "reused_original_ten_candidate_rows": reused_candidate_rows,
                "universe_counts": config["data"].get(
                    "history_counts", {"historical_source_names": len(all_symbols)}),
+               "symbol_cache": {
+                   "directory": str(cache_dir.relative_to(ROOT)),
+                   "format_version": CACHE_FORMAT_VERSION,
+                   "code_sha256": code_sha256,
+                   "config_sha256": config_sha256,
+                   "reused_symbols": cache_reused_symbols,
+                   "newly_priced_symbols": newly_priced_symbols,
+               },
                "candidate_events": {}, "accounts": {},
                "symbol_audits": {**reused_symbol_audits, **symbol_audits},
                "source_config": str(config_path.relative_to(ROOT)),
@@ -655,6 +763,7 @@ def run(config_path: Path = CONFIG_PATH) -> dict:
         "incremental_paths_rows_by_arm": {arm: int((incremental_paths.arm == arm).sum()) for arm in rows_by_arm},
         "incremental_candidate_rows": len(incremental_candidates),
         "reused_frozen_paths": reuse,
+        "symbol_cache": summary["symbol_cache"],
         "combined_candidate_rows": len(candidates_frame),
         "vectorbt_runtime": "local VectorBT 1.2.0; existing reward_paths._order_func and reward_account.account_order",
         "path_semantics": "One native independent VectorBT column per event; one actual shared-cash nine-slot account per arm/scenario.",
