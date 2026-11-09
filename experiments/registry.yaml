@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-slower-breaks-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "3ff3e816e6"
+    status: "rejected"
+    question: "同一周三突破池买近30日涨幅较小的三币"
+    single_variable: "每周三同只做多的360币突破候选，唯一变化为按已收盘30日涨幅从低到高，选择最多三币。"
+    result: "238笔，终值1,584.59U，胜率15.55%、金额盈亏比5.96、回撤上界69.76%。同期最高动量组587.71U，五个随机组中4个低于本组、1个高于；这个方向是在检查追高失败后补测，仍不合风险及胜率门槛。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-slower-breaks-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-81f3-b1cc-e2737d03e394."
+
   - experiment_id: exp-cloud-close-breakout-blend-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "db01e7ae2f"
