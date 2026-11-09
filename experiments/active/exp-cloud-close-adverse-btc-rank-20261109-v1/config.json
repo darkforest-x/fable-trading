@@ -1,0 +1,8 @@
+{
+  "question": "Can the resilience rule in the historical Bitlanglang position-one study select more persistent V1.7 trades when concurrent applicants compete for capital?",
+  "single_variable": "Change only the order of simultaneous eligible native entries. Positive score is mean side-adjusted daily excess return versus BTC on BTC moves adverse to the proposed direction by at least 2%, in the last 30 completed UTC days. Longs look at BTC down days and shorts at BTC up days. The thresholds and horizon come from the pre-existing Bitlanglang filter. The short rule mirrors the documented long rule.",
+  "clock": "Use UTC daily returns only when both adjacent days have 24 observed native H1 candles. Require all 30 daily returns for both BTC and the coin. At 00 UTC the just finished day is observable. With no adverse BTC day use neutral zero. Incomplete lookbacks sort last, with coverage reported. Prior ATR then pinned hash tie breaker.",
+  "arms": ["prefer_resilient", "prefer_fragile", "clock_hash_61"],
+  "benchmark": "Cached canonical 1570-trade corrected CVC ETH/BTC 1x/2x account, same 1000 USDT nine slots, compound sizing, parent stops, first 12H 2R partial, doubling limit, 20% hourly trims, market 5bp / resting 2bp, and separately extra market 5bp. Do not rerun identical trades. Require parity of reference event identities before changing sort. Keep all admitted names and both sides subject to the original protections.",
+  "evaluation": "2020 to 2024 development, 2025 and 2026 previously seen. Compare cash, realized payoff, interval drawdown and count actually displaced parents. Historical funding and market capacity excluded. A missing delivery or unresolved order of liquidation prevents a validated account claim."
+}
