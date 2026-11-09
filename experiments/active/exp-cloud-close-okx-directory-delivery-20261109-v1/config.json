@@ -1,0 +1,35 @@
+{
+  "question": "How do documented one-hour delivery prices change the 69-name extension?",
+  "single_variable": "Replace all funded retirement-price markouts with the documented one-hour native index mean. Keep the separate CVC history-gap exit in the frozen input and explicitly identify it.",
+  "source": "https://www.okx.com/api/v5/market/history-index-candles",
+  "minutes": 60,
+  "deliveries": {
+    "ARC": {
+      "delivery_utc": "2025-09-26T08:00:00+00:00",
+      "notice": "https://www.okx.com/help/okx-to-delist-several-perpetual-futures-20250922",
+      "fee_confirmed_zero": false
+    },
+    "CATI": {
+      "delivery_utc": "2026-01-24T16:00Z",
+      "notice": "https://www.okx.com/en-us/help/okx-to-delist-perpetual-futures",
+      "fee_confirmed_zero": true
+    },
+    "CETUS": {
+      "delivery_utc": "2025-12-26T08:00:00+00:00",
+      "notice": "https://www.okx.com/help/okx-to-delist-several-perpetual-futures-20251224",
+      "fee_confirmed_zero": false
+    },
+    "CVC": {
+      "delivery_utc": "2025-11-14T08:00:00+00:00",
+      "notice": "https://www.okx.com/help/okx-to-delist-several-perpetual-futures-20251112",
+      "fee_confirmed_zero": false
+    },
+    "TREE": {
+      "delivery_utc": "2026-01-24T16:00Z",
+      "notice": "https://www.okx.com/en-us/help/okx-to-delist-perpetual-futures",
+      "fee_confirmed_zero": true
+    }
+  },
+  "costs": "Known zero delivery fees for CATI/TREE. The three 2025 notices do not specify a delivery fee. Use zero to 5bp on those deliveries as a sensitivity; no market slippage at delivery. Fee-only low/high index marks and an additional 5bp market-slippage case. No funding.",
+  "scope": "Native minute index OHLC prices approximate the published one-hour mean. The venue retains discretion to adjust the settlement. One unresolved CVC October 2022 projection from the native candle gap remains in all scenarios."
+}
