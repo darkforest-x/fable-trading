@@ -37,6 +37,7 @@
     "exit_quantity": "absolute value of native net_units on each closing fill",
     "entry_basis_allocation": "Allocate each child's signed opening underlying_cash, including its opening fee, to every closing fill in proportion to that fill's closed units / the child's initial units",
     "realized_net_cash_pnl": "closing underlying_cash (already net of its fee) + proportional signed opening underlying_cash; trim fills and terminal exits are reported separately",
+    "quantity_fraction_aggregation": "Per order and child output retain the actual native-symbol units and closed fraction. Cross-symbol summaries do not sum raw token units: they report equal-weight mean parent-level exited units / initial units and a parent-notional-weighted mean of the same fraction.",
     "absolute_doubling_target": "A routed long child whose actual selected terminal path is a take-profit exactly at 2 * actual entry_price; report target-origin and runner-origin children separately. Determine this from the assembled current native child path plus actual native order fill, not by filtering with a saved route roster",
     "relative_2R_target": "A target-origin child whose actual selected terminal take-profit is exactly entry_price + side * 2 * abs(entry_price - fixed_stop_price)",
     "cash_reconciliation": "All child realized net cash must sum to frozen parent cash_pnl; native fill cash must also sum to the frozen parent cash_pnl",
@@ -51,6 +52,10 @@
     "child_origin_summary.csv",
     "top10_cash_winners.csv.gz"
   ],
+  "reproduction": {
+    "new_outputs": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_target_leg_attribution --run",
+    "refresh_existing_summary_and_attributions_without_running_a_wallet": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.cloud_close_target_leg_attribution --refresh-existing"
+  },
   "limits": [
     "This is a retrospective accounting attribution of actual frozen fills, not a separate account or a hypothetical cash simulation.",
     "No funding payments, additional market impact, or unrecorded exit depth are added.",

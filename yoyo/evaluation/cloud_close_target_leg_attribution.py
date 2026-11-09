@@ -299,12 +299,15 @@ def _parent_reconciliation(funded, attr, child):
     opened = child.groupby("event_id", sort=False).initial_units.sum().reindex(funded.index)
     closed = child.groupby("event_id", sort=False).closed_units.sum().reindex(funded.index)
     residual = child.groupby("event_id", sort=False).remaining_units.sum().reindex(funded.index)
+    child_notional = child.groupby("event_id", sort=False).initial_notional_usdt.sum().reindex(funded.index)
     rows = pd.DataFrame(index=funded.index)
     rows["parent_id"] = funded.parent_id if "parent_id" in funded else funded.index.to_series().str.split(":").str[0]
     rows["symbol"] = funded.symbol if "symbol" in funded else None
     rows["side"] = funded.side if "side" in funded else None
     rows["entry_ms"] = pd.to_numeric(funded.entry_ms, errors="raise").astype("int64")
     rows["funded_notional_usdt"] = pd.to_numeric(funded.notional, errors="raise")
+    rows["native_child_initial_notional_usdt"] = child_notional
+    rows["initial_notional_error_usdt"] = child_notional - rows["funded_notional_usdt"]
     rows["funded_cash_pnl_usdt"] = pd.to_numeric(funded.cash_pnl, errors="raise")
     rows["order_cash_usdt"] = order_cash
     rows["allocated_realized_net_pnl_usdt"] = realized
@@ -346,19 +349,27 @@ def _summaries(parents, attr, child):
         p = parents.loc[sorted(ids)]
         f = attr[attr.event_id.isin(ids) & attr.net_units.lt(0)]
         c = child[child.event_id.isin(ids)]
-        denom_units = float(c.initial_units.sum())
+        initial_units_by_parent = c.groupby("event_id", sort=False).initial_units.sum().reindex(p.index)
+        total_parent_notional = float(p.notional.sum())
         if set(p.index) != ids:
             raise ValueError(f"Cohort parent set changed for {cohort}")
         category_summary = {}
         for typ, group in f.groupby("exit_type", sort=True):
+            category_units_by_parent = group.groupby("event_id", sort=False).fill_units.sum().reindex(p.index, fill_value=0.0)
+            parent_fraction = category_units_by_parent / initial_units_by_parent
+            mean_parent_fraction = float(parent_fraction.mean())
+            notional_weighted_parent_fraction = (
+                float((parent_fraction * p.notional).sum() / total_parent_notional)
+                if total_parent_notional else 0.0
+            )
             vals = {
                 "cohort": cohort,
                 "exit_type": typ,
                 "funded_parents": int(len(ids)),
                 "parents_with_exit_type": int(group.event_id.nunique()),
                 "exit_fills": int(len(group)),
-                "closed_units": float(group.fill_units.sum()),
-                "share_of_initial_units": float(group.fill_units.sum() / denom_units) if denom_units else 0.0,
+                "mean_parent_fraction_of_initial_units": mean_parent_fraction,
+                "entry_notional_weighted_parent_fraction_of_initial_units": notional_weighted_parent_fraction,
                 "exit_notional_usdt": float(group.fill_notional.sum()),
                 "allocated_entry_fees_usdt": float(group.allocated_entry_fee.sum()),
                 "exit_fees_usdt": float(group.fees.sum()),
@@ -369,8 +380,10 @@ def _summaries(parents, attr, child):
             category_summary[typ] = {
                 "parents": vals["parents_with_exit_type"],
                 "fills": vals["exit_fills"],
-                "closed_units": vals["closed_units"],
-                "share_of_initial_units": vals["share_of_initial_units"],
+                "mean_parent_fraction_of_initial_units": vals["mean_parent_fraction_of_initial_units"],
+                "entry_notional_weighted_parent_fraction_of_initial_units": vals[
+                    "entry_notional_weighted_parent_fraction_of_initial_units"
+                ],
                 "realized_net_pnl_usdt": vals["realized_net_pnl_usdt"],
                 "realized_gross_pnl_usdt": vals["realized_gross_pnl_usdt"],
                 "allocated_entry_fees_usdt": vals["allocated_entry_fees_usdt"],
@@ -381,17 +394,30 @@ def _summaries(parents, attr, child):
             "frozen_parent_cash_pnl_usdt": float(p.cash_pnl.sum()),
             "allocated_realized_net_pnl_usdt": float(f.realized_net_pnl.sum()),
             "initial_notional_usdt": float(p.notional.sum()),
-            "initial_units": denom_units,
             "exit_types": category_summary,
         }
         for origin, group in c.groupby("child_origin", sort=True):
+            trim_fraction = group.trimmed_units / group.initial_units
+            terminal_fraction = group.terminal_units / group.initial_units
+            total_closed_fraction = group.closed_units / group.initial_units
+            origin_notional = float(group.initial_notional_usdt.sum())
             origin_rows.append({
                 "cohort": cohort,
                 "child_origin": origin,
                 "child_positions": int(len(group)),
-                "initial_units": float(group.initial_units.sum()),
-                "trimmed_units": float(group.trimmed_units.sum()),
-                "terminal_units": float(group.terminal_units.sum()),
+                "initial_notional_usdt": origin_notional,
+                "mean_child_trim_fraction": float(trim_fraction.mean()),
+                "mean_child_terminal_exit_fraction": float(terminal_fraction.mean()),
+                "mean_child_total_closed_fraction": float(total_closed_fraction.mean()),
+                "entry_notional_weighted_child_trim_fraction": float(
+                    (trim_fraction * group.initial_notional_usdt).sum() / origin_notional
+                ) if origin_notional else 0.0,
+                "entry_notional_weighted_child_terminal_exit_fraction": float(
+                    (terminal_fraction * group.initial_notional_usdt).sum() / origin_notional
+                ) if origin_notional else 0.0,
+                "entry_notional_weighted_child_total_closed_fraction": float(
+                    (total_closed_fraction * group.initial_notional_usdt).sum() / origin_notional
+                ) if origin_notional else 0.0,
                 "realized_net_pnl_usdt": float(group.realized_net_pnl_usdt.sum()),
                 "realized_gross_pnl_usdt": float(group.realized_gross_pnl_usdt.sum()),
             })
@@ -474,10 +500,11 @@ def analyze(*, smoke=False):
     pnl_abs = float(parent.allocation_error_usdt.abs().max())
     units_abs = float(parent.remaining_units.abs().max())
     units_rel = float((parent.remaining_units.abs() / parent.initial_units).max())
-    if cash_abs > 1e-6 or pnl_abs > 1e-6 or units_rel > 1e-8:
+    notional_abs = float(parent.initial_notional_error_usdt.abs().max())
+    if cash_abs > 1e-6 or pnl_abs > 1e-6 or units_rel > 1e-8 or notional_abs > 1e-6:
         raise ValueError(
             f"Parent reconciliation failed: cash={cash_abs}, pnl={pnl_abs}, "
-            f"units_abs={units_abs}, units_rel={units_rel}"
+            f"units_abs={units_abs}, units_rel={units_rel}, notional={notional_abs}"
         )
     actual_log_final = 1000.0 + float(parent.funded_cash_pnl_usdt.sum())
     if not np.isclose(actual_log_final, float(hourly.nav.iloc[-1]), rtol=1e-9, atol=0.001):
@@ -486,6 +513,11 @@ def analyze(*, smoke=False):
     if not np.isclose(all_category_pnl, float(parent.funded_cash_pnl_usdt.sum()),
                       rtol=1e-10, atol=1e-6):
         raise ValueError("Mutually exclusive category realized PnL does not sum to parent cash")
+    fraction_sums = category.groupby("cohort")[
+        ["mean_parent_fraction_of_initial_units", "entry_notional_weighted_parent_fraction_of_initial_units"]
+    ].sum()
+    if not np.allclose(fraction_sums.to_numpy(), 1.0, rtol=1e-8, atol=1e-8):
+        raise ValueError(f"Exit-category quantity fractions do not reconcile to fully closed positions: {fraction_sums}")
     if len(open_rows) != 4 * len(funded) or len(terminal_rows) != 4 * len(funded):
         raise ValueError("Expected four opening and four terminal child fills for each funded parent")
     if len(trim_rows) + len(open_rows) + len(terminal_rows) != len(orders):
@@ -523,6 +555,7 @@ def analyze(*, smoke=False):
             "maximum_parent_allocated_realized_cash_error_usdt": pnl_abs,
             "maximum_parent_remaining_units_abs": units_abs,
             "maximum_parent_remaining_units_fraction": units_rel,
+            "maximum_parent_initial_notional_error_usdt": notional_abs,
             "orders_match_frozen_cash_pnl": bool(cash_abs <= 1e-6),
             "allocated_exit_cash_matches_frozen_cash_pnl": bool(pnl_abs <= 1e-6),
             "1000u_plus_frozen_cash_pnl_usdt": actual_log_final,
@@ -530,6 +563,7 @@ def analyze(*, smoke=False):
             "hourly_terminal_nav_error_usdt": actual_log_final - float(hourly.nav.iloc[-1]),
             "sum_of_all_cohort_category_realized_net_pnl_usdt": all_category_pnl,
             "sum_of_frozen_parent_cash_pnl_usdt": float(parent.funded_cash_pnl_usdt.sum()),
+            "exit_quantity_fraction_sums_by_cohort": fraction_sums.to_dict(orient="index"),
         },
         "periods": totals,
         "top10_cash_winners": {
@@ -574,17 +608,20 @@ def _write_csv(frame, path):
     tmp.replace(path)
 
 
-def main(*, smoke=False, run=False):
+def main(*, smoke=False, run=False, refresh_existing=False):
     if not CONFIG.is_file():
         raise FileNotFoundError(CONFIG)
-    if smoke == run:
-        raise ValueError("Choose exactly one of --smoke or --run")
+    if sum((bool(smoke), bool(run), bool(refresh_existing))) != 1:
+        raise ValueError("Choose exactly one of --smoke, --run or --refresh-existing")
     stats, attr, child, parent, category, origin, winners = analyze(smoke=smoke)
     if smoke:
         print(json.dumps(stats["smoke"], indent=2))
         return
-    if (EXP / "summary.json").exists():
+    summary_path = EXP / "summary.json"
+    if run and summary_path.exists():
         raise FileExistsError("Target-leg attribution outputs already exist")
+    if refresh_existing and not summary_path.exists():
+        raise FileNotFoundError("Cannot refresh target-leg attribution without existing outputs")
     EXP.mkdir(parents=True, exist_ok=True)
     _write_csv(attr, EXP / "order_attribution.csv.gz")
     _write_csv(child, EXP / "child_attribution.csv.gz")
@@ -608,5 +645,6 @@ if __name__ == "__main__":
     modes = parser.add_mutually_exclusive_group(required=True)
     modes.add_argument("--smoke", action="store_true")
     modes.add_argument("--run", action="store_true")
+    modes.add_argument("--refresh-existing", action="store_true")
     args = parser.parse_args()
-    main(smoke=args.smoke, run=args.run)
+    main(smoke=args.smoke, run=args.run, refresh_existing=args.refresh_existing)
