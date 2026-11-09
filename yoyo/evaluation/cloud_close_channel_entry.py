@@ -40,13 +40,14 @@ def signals(bars,*,reclaim=False):
     return pd.DataFrame(dict(side=raw.loc[first],anchor=anchor.loc[first]))
 
 
-def price_symbol(sym,src,*,reclaim=False):
+def price_symbol(sym,src,*,reclaim=False,signal_builder=None):
     h,bars = source.correction.parent.repair.market.frames(src)
     if len(bars)<=180:
         return pd.DataFrame()
     q,clock,_ = engine._prepare_symbol(bars,h)
     events = []
-    for key,signal in signals(bars,reclaim=reclaim).iterrows():
+    keys = signals(bars,reclaim=reclaim) if signal_builder is None else signal_builder(bars)
+    for key,signal in keys.iterrows():
         side = int(signal.side)
         entry = key+STEP
         i = int(clock.searchsorted(entry))
@@ -77,15 +78,19 @@ def price_symbol(sym,src,*,reclaim=False):
 def main(*,reclaim=False):
     directory = EXP.parent/'exp-cloud-close-channel-reclaim-20261109-v1' if reclaim else EXP
     cache = CACHE.parent/'cloud_close_channel_reclaim' if reclaim else CACHE
-    if (directory/'summary.json').exists():
-        raise FileExistsError('Completed full 20-day channel study')
     _,quotes,src = source.inputs()
+    run(directory,cache,quotes,src,reclaim=reclaim)
+
+
+def run(directory,cache,quotes,src,*,reclaim=False,signal_builder=None):
+    if (directory/'summary.json').exists():
+        raise FileExistsError(f'Completed native 12H opportunity study {directory.name}')
     cache.mkdir(exist_ok=True,parents=True)
     books = []
     for n,(sym,s) in enumerate(sorted(src.items())):
         path = cache/(sym+'.csv.gz')
         if not path.exists() and not path.with_suffix('.empty').exists():
-            rows = price_symbol(sym,s,reclaim=reclaim)
+            rows = price_symbol(sym,s,reclaim=reclaim,signal_builder=signal_builder)
             if rows.empty:
                 path.with_suffix('.empty').touch()
             else:
@@ -110,7 +115,7 @@ def main(*,reclaim=False):
             key = name+('_stress' if slip else '')
             funds,curve = wallet.account(data,slip=slip)
             if not np.isclose(1000+funds.cash_pnl.sum(),curve.nav.iat[-1],atol=.001):
-                raise ValueError('Native 20-day channel cash failed to reconcile')
+                raise ValueError('Native 12H opportunity cash failed to reconcile')
             funds.to_csv(directory/f'funded_{key}.csv.gz',index=False)
             if key in ['full','full_stress']:
                 curve.to_csv(directory/f'hourly_{key}.csv.gz',index_label='hour_end_utc')
