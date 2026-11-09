@@ -1,0 +1,68 @@
+{
+  "id": "exp-cloud-close-leader-rotation-20261109-v1",
+  "status": "builder_ready_for_owner_review",
+  "question": "At each UTC Wednesday 00:00 close, does a three-position shared-cash portfolio of the strongest eligible coins outperform five same-clock random selections from the same 360-contract eligible pool?",
+  "single_variable": "Select the top three by their own trailing 30-day simple return from the same cross-sectional eligibility pool. Signal schedule, entry, stop, cloud exit, position slots and costs are identical across all controls.",
+  "sources": {
+    "universe_builder": "yoyo.evaluation.cloud_close_weak_rally_branch.sources() and frames(); frozen original directory inputs plus the same 69 documented retired OKX USDT swaps.",
+    "historical_contract_count": 360,
+    "retired_contract_count": 69,
+    "retirement_deadlines": "Use the exact delivery_from_utc values in exp-cloud-close-okx-directory-account-20261109-v1/config.json. Clip 1H/12H prices at those deadlines. Require entry_ms strictly before contract expiry; a close at or after delivery is audited but cannot be funded.",
+    "cutoff_utc": "2026-11-08T12:00:00Z",
+    "price_basis": "Original frozen OKX H1/12H OHLC inputs; retired contract 12H bars are aggregated from the same official archived H1 history by the existing native adapter. No new download or alias inference."
+  },
+  "decision_and_eligibility": {
+    "clock": "Only a complete UTC 12H bar closing Wednesday 00:00 UTC is evaluated; enter at the exact H1 open at the same close timestamp.",
+    "ny_monday_range": "Require exactly 24 observed H1 bars from that contract's NY Monday 00:00 to Tuesday 00:00. upper=Monday high+0.618*(Monday high-Monday low).",
+    "long_cloud": "EMA20 > EMA50 on completed 12H closes with at least 50 contiguous warm-up bars since the latest gap.",
+    "price_condition": "The decision 12H close must be strictly above its own completed NY Monday upper 1.618 extension.",
+    "ranking": "Simple 30-day 12H close return = decision close / close exactly 60 consecutive 12H intervals earlier - 1. The current decision close is included. Require all 60 intervals contiguous and the exact H1 opening quote available before ranking.",
+    "selected": "Take the three greatest returns cross-sectionally each Wednesday; ties sort by symbol ascending. This selection is made before checking whether one of the three is already held.",
+    "held_position": "If a selected symbol is already open, reject the new same-symbol event; do not add. Do not replace it with rank four or use other-week vacancies. New candidate selection occurs only at the next scheduled Wednesday.",
+    "invalid_or_missing": "Incomplete Monday/H12 history, unavailable 60-interval return, absent exact H1 open, or entry at/after a retired contract's delivery is retained in audit counts and excluded before the eligible ranking pool."
+  },
+  "execution": {
+    "framework": "Existing native VectorBT Portfolio.from_order_func 1H event paths plus the existing VectorBT cash-sharing wallet adapter.",
+    "account": "Each actual/control account starts at 1000 USDT, uses three equal collateral slots, no leverage, and holds positions until fixed stop, confirmed EMA cloud reversal, observed data gap, source end, or historical cutoff.",
+    "stop": "Existing V1.7 fixed stop anchored to the coin's frozen Monday upper 1.618 extension: 1.5% below that upper reference for BTC/ETH, 3% below for other contracts. Record actual H1 entry-to-stop distance separately. If the H1 entry is at/below that stop, retain the selected event as unfillable and do not backfill rank four or another random candidate.",
+    "exit": "Original EMA20/EMA50 cloud reversal path and native stop/data-gap/tape-tail ordering via cloud_close_reward_paths._simulate_symbol; no take-profit.",
+    "fees": {"market_entry_exit_taker": 0.0005},
+    "priority": "Actual top-three rows use descending momentum return when simultaneous slots compete. Controls use their seeded draw order at that same timestamp.",
+    "event_batch_size": 96,
+    "slippage": "Not added in this study; exchange taker fee is charged on every entry/exit. Funding, impact and live latency remain unmodeled."
+  },
+  "controls": {
+    "method": "At each same UTC Wednesday close, uniformly sample up to three distinct symbols without replacement from the exact same eligible candidate pool before ranking. Do not backfill after busy-symbol or full-slot admission rejection.",
+    "fixed_seeds": [20261109, 20261110, 20261111, 20261112, 20261113],
+    "accounts": "Run five independent 1000U, three-slot portfolios. Each seed keeps its own positions and admission state."
+  },
+  "reporting_periods": ["all", "development_through_2024", "2025", "2026"],
+  "outputs": [
+    "candidate_audit.csv.gz",
+    "candidate_pool.csv.gz",
+    "selected_events.csv.gz",
+    "unfilled_events.csv.gz",
+    "native_paths.csv.gz",
+    "source_coverage.csv",
+    "account_metrics.csv",
+    "funded_actual.csv.gz",
+    "hourly_actual.csv.gz",
+    "funded_control_seed20261109.csv.gz",
+    "hourly_control_seed20261109.csv.gz",
+    "funded_control_seed20261110.csv.gz",
+    "hourly_control_seed20261110.csv.gz",
+    "funded_control_seed20261111.csv.gz",
+    "hourly_control_seed20261111.csv.gz",
+    "funded_control_seed20261112.csv.gz",
+    "hourly_control_seed20261112.csv.gz",
+    "funded_control_seed20261113.csv.gz",
+    "hourly_control_seed20261113.csv.gz",
+    "summary.json"
+  ],
+  "limitations": [
+    "The study is a historical 360-contract cross-section with selective availability determined by the frozen original archive and 69 lifecycle notices.",
+    "Funding rates, market impact, contract maintenance tiers and live execution latency are not modeled.",
+    "H1 OHLC cannot reveal stop-versus-cloud intrabar order; the existing VectorBT native path callback defines the same priority for all arms.",
+    "Retired contracts are cut off at their official delivery timestamps; tail closes at those deadlines are administrative source exits, not ordinary cloud reversals."
+  ]
+}
