@@ -33,6 +33,7 @@ CACHE = ROOT / "data/research/cloud_close_funding_ledger_20261109"
 HOUR_MS = 3_600_000
 FIVE_MIN_MS = 300_000
 ENTRY_BOUNDARY_TOLERANCE_MS = 1_000
+API_QUERY_ALIGNMENT_PAD_MS = 1_000
 INTERVAL_HOURS = (1, 4, 8)
 FUNDING_RATE_LIMIT = 1_000
 API_MIN_INTERVAL_SECONDS = 0.8
@@ -62,12 +63,20 @@ def _source_legs() -> tuple[pd.DataFrame, dict]:
         raise ValueError("Expected exactly two actual funding legs per frozen funded position")
     if legs["is_control"].astype(bool).any():
         raise ValueError("Funding ledger scope accepts funded actual positions only")
+    by_event_notional = (legs.assign(child_notional=legs.signed_size.abs() * legs.entry_price)
+                         .groupby("event_id", sort=False)
+                         .agg(child_notional=("child_notional", "sum"), parent_notional=("notional", "first")))
+    if not np.allclose(by_event_notional.child_notional, by_event_notional.parent_notional,
+                       rtol=1e-9, atol=1e-6):
+        raise ValueError("Child quantity × entry price does not reconcile once to the funded parent notional")
     return legs.copy(), audit
 
 
 def _validate_config(config: dict) -> None:
     if config["venue"] != "Binance" or int(config["funding_source"]["limit"]) != FUNDING_RATE_LIMIT:
         raise ValueError("Funding-ledger configuration differs from its frozen Binance source contract")
+    if int(config["funding_source"]["api_alignment_overfetch_ms"]) != API_QUERY_ALIGNMENT_PAD_MS:
+        raise ValueError("Funding API alignment padding differs from the frozen query contract")
     if int(config["cashflow"]["entry_exit_boundary_tolerance_ms"]) != ENTRY_BOUNDARY_TOLERANCE_MS:
         raise ValueError("Funding boundary tolerance differs from the frozen attribution logic")
     if set(config["scopes"]) != {"ada", "all"}:
@@ -154,29 +163,46 @@ def _epoch_ms(value: object) -> int:
     return int(stamp.value // 1_000_000)
 
 
+def _leg_funding_window(entry_ms: int, exit_bar_ms: int, exit_phase: str) -> tuple[int, int, int]:
+    """Return search start, exclusive search end, and phase-specific exit bound."""
+    if exit_phase == "open":
+        exit_bound = int(exit_bar_ms)
+    elif exit_phase in ("close", "intrabar"):
+        exit_bound = int(exit_bar_ms) + HOUR_MS
+    else:
+        raise ValueError(f"Unknown native exit phase: {exit_phase}")
+    start = int(entry_ms) - ENTRY_BOUNDARY_TOLERANCE_MS
+    # collect() requires second-aligned API windows. Fetch one aligned second
+    # past the inclusive attribution tolerance, then trim those extra rows below.
+    end_exclusive = exit_bound + ENTRY_BOUNDARY_TOLERANCE_MS + API_QUERY_ALIGNMENT_PAD_MS
+    return start, end_exclusive, exit_bound
+
+
 def _month_windows(legs: pd.DataFrame) -> dict[tuple[str, str], dict]:
     """Construct one bounded query interval for each actually held symbol-month."""
     windows: dict[tuple[str, str], dict] = {}
     for row in legs.itertuples(index=False):
         entry = int(row.entry_ms)
-        exit_ms = int(row.exit_bar_ms)
-        entry_month = pd.Timestamp(entry, unit="ms", tz=UTC).strftime("%Y-%m")
-        exit_month = pd.Timestamp(exit_ms, unit="ms", tz=UTC).strftime("%Y-%m")
-        for period in pd.period_range(entry_month, exit_month, freq="M"):
+        exit_bar = int(row.exit_bar_ms)
+        query_start, query_end, _ = _leg_funding_window(entry, exit_bar, str(row.exit_phase))
+        first_month = pd.Timestamp(query_start, unit="ms", tz=UTC).strftime("%Y-%m")
+        last_month = pd.Timestamp(query_end - 1, unit="ms", tz=UTC).strftime("%Y-%m")
+        for period in pd.period_range(first_month, last_month, freq="M"):
             month = str(period)
             month_start = _epoch_ms(f"{month}-01T00:00:00Z")
             next_month = str(period + 1)
             month_end = _epoch_ms(f"{next_month}-01T00:00:00Z")
-            start = max(month_start, entry - ENTRY_BOUNDARY_TOLERANCE_MS)
-            # Include the complete ±1s boundary window; end is exclusive.
-            end = min(month_end, max(start + 1_000, exit_ms + ENTRY_BOUNDARY_TOLERANCE_MS + 1_000))
+            start = max(month_start, query_start)
+            end = min(month_end, query_end)
             if start >= end:
                 continue
             key = (str(row.symbol), month)
-            current = windows.setdefault(key, {"start_ms": start, "end_ms": end, "position_ids": set()})
+            current = windows.setdefault(key, {"start_ms": start, "end_ms": end,
+                                               "position_ids": set(), "exit_phases": set()})
             current["start_ms"] = min(current["start_ms"], start)
             current["end_ms"] = max(current["end_ms"], end)
             current["position_ids"].add(str(row.event_id))
+            current["exit_phases"].add(str(row.exit_phase))
     for info in windows.values():
         if info["start_ms"] % 1_000 or info["end_ms"] % 1_000:
             raise ValueError("Funding API windows must remain second-aligned")
@@ -429,7 +455,8 @@ def _window_history(
     )
     audit = {
         "symbol": symbol + "USDT", "month": month, "query_start_ms": start_ms, "query_end_exclusive_ms": end_ms,
-        "position_ids": sorted(window["position_ids"]), "source": base_source,
+        "position_ids": sorted(window["position_ids"]), "exit_phases": sorted(window["exit_phases"]),
+        "source": base_source,
         "normalized_sources": normalized_audits, "monthly_rate_archive": str(local_archive_path.relative_to(ROOT)) if local_archive_path and local_archive_path.is_relative_to(ROOT) else str(local_archive_path) if local_archive_path else None,
         "monthly_mark_1h_archive": str(_mark_archive_path(symbol, month).relative_to(ROOT)) if _mark_archive_path(symbol, month).is_relative_to(ROOT) else str(_mark_archive_path(symbol, month)),
         "monthly_mark_1h_archive_exists": _mark_archive_path(symbol, month).is_file(),
@@ -450,9 +477,12 @@ def _funding_attribution(legs: pd.DataFrame, histories: dict[tuple[str, str], pd
     position_rows: list[dict] = []
     for leg in legs.itertuples(index=False):
         start_ms, exit_ms = int(leg.entry_ms), int(leg.exit_bar_ms)
+        query_start_ms, query_end_ms, exit_bound_ms = _leg_funding_window(
+            start_ms, exit_ms, str(leg.exit_phase),
+        )
         months = [str(m) for m in pd.period_range(
-            pd.Timestamp(start_ms, unit="ms", tz=UTC).strftime("%Y-%m"),
-            pd.Timestamp(exit_ms, unit="ms", tz=UTC).strftime("%Y-%m"), freq="M")]
+            pd.Timestamp(query_start_ms, unit="ms", tz=UTC).strftime("%Y-%m"),
+            pd.Timestamp(query_end_ms - 1, unit="ms", tz=UTC).strftime("%Y-%m"), freq="M")]
         missing_months = []
         event_frames = []
         for month in months:
@@ -464,8 +494,8 @@ def _funding_attribution(legs: pd.DataFrame, histories: dict[tuple[str, str], pd
             if history.empty:
                 continue
             hit = history.loc[
-                (history.funding_time_ms >= start_ms - ENTRY_BOUNDARY_TOLERANCE_MS)
-                & (history.funding_time_ms <= exit_ms + ENTRY_BOUNDARY_TOLERANCE_MS)
+                (history.funding_time_ms >= query_start_ms)
+                & (history.funding_time_ms <= exit_bound_ms + ENTRY_BOUNDARY_TOLERANCE_MS)
             ].copy()
             if not hit.empty:
                 event_frames.append(hit)
@@ -484,10 +514,18 @@ def _funding_attribution(legs: pd.DataFrame, histories: dict[tuple[str, str], pd
                 funding_time = int(event.funding_time_ms)
                 has_rate = pd.notna(event.funding_rate)
                 has_mark = pd.notna(event.mark_price) and float(event.mark_price) > 0
-                boundary = (
-                    abs(funding_time - start_ms) <= ENTRY_BOUNDARY_TOLERANCE_MS
-                    or abs(funding_time - exit_ms) <= ENTRY_BOUNDARY_TOLERANCE_MS
-                )
+                entry_boundary = abs(funding_time - start_ms) <= ENTRY_BOUNDARY_TOLERANCE_MS
+                phase = str(leg.exit_phase)
+                if phase == "open":
+                    exit_boundary = abs(funding_time - exit_ms) <= ENTRY_BOUNDARY_TOLERANCE_MS
+                elif phase == "close":
+                    exit_boundary = abs(funding_time - exit_bound_ms) <= ENTRY_BOUNDARY_TOLERANCE_MS
+                else:
+                    # Exit occurs at an unknown instant in this H1 bar. A settlement
+                    # anywhere from its open through close may precede or follow it.
+                    exit_boundary = (exit_ms - ENTRY_BOUNDARY_TOLERANCE_MS
+                                     <= funding_time <= exit_bound_ms + ENTRY_BOUNDARY_TOLERANCE_MS)
+                boundary = entry_boundary or exit_boundary
                 cashflow = (-float(leg.signed_size) * float(event.mark_price) * float(event.funding_rate)
                             if has_rate and has_mark else np.nan)
                 if not np.isfinite(cashflow):
@@ -516,8 +554,10 @@ def _funding_attribution(legs: pd.DataFrame, histories: dict[tuple[str, str], pd
                     "cashflow_low_usdt": min(0.0, cashflow) if boundary and np.isfinite(cashflow) else cashflow,
                     "cashflow_high_usdt": max(0.0, cashflow) if boundary and np.isfinite(cashflow) else cashflow,
                     "boundary_ambiguous": bool(boundary),
-                    "boundary_reason": ("entry_settlement_coincidence" if abs(funding_time - start_ms) <= ENTRY_BOUNDARY_TOLERANCE_MS
-                                        else "exit_settlement_coincidence" if boundary else "interior"),
+                    "boundary_reason": ("entry_and_exit_settlement_window" if entry_boundary and exit_boundary
+                                        else "entry_settlement_coincidence" if entry_boundary
+                                        else "intrabar_exit_hour_order_unknown" if phase == "intrabar" and exit_boundary
+                                        else "exit_settlement_coincidence" if exit_boundary else "interior"),
                     "cashflow_known": bool(np.isfinite(cashflow)),
                 })
         complete = not missing_months and unknown_mark == 0
@@ -526,9 +566,12 @@ def _funding_attribution(legs: pd.DataFrame, histories: dict[tuple[str, str], pd
         position_rows.append({
             "event_id": str(leg.event_id), "parent_id": str(leg.parent_id), "symbol": str(leg.symbol),
             "tp_r": float(leg.tp_r), "side": int(leg.side), "signed_quantity": float(leg.signed_size),
-            "quantity_abs": abs(float(leg.signed_size)), "notional_usdt": float(leg.notional),
+            "quantity_abs": abs(float(leg.signed_size)),
+            "notional_usdt": abs(float(leg.signed_size)) * float(leg.entry_price),
             "entry_ms": start_ms, "entry_time_utc": pd.Timestamp(start_ms, unit="ms", tz=UTC).isoformat(),
-            "exit_bar_ms": exit_ms, "exit_time_utc": pd.Timestamp(exit_ms, unit="ms", tz=UTC).isoformat(),
+            "exit_bar_ms": exit_ms, "exit_bar_open_utc": pd.Timestamp(exit_ms, unit="ms", tz=UTC).isoformat(),
+            "exit_window_end_ms": exit_bound_ms,
+            "exit_window_end_utc": pd.Timestamp(exit_bound_ms, unit="ms", tz=UTC).isoformat(),
             "exit_phase": str(leg.exit_phase), "exit_reason": str(leg.exit_reason),
             "funding_months": "|".join(months), "missing_months": "|".join(missing_months),
             "settlement_count": int(len(settlement_rows)), "known_settlement_count": known_events,
@@ -549,7 +592,9 @@ def _funding_attribution(legs: pd.DataFrame, histories: dict[tuple[str, str], pd
         events.append({
             "event_id": event_id, "parent_id": row.parent_id, "symbol": row.symbol,
             "side": int(row.side), "entry_ms": int(row.entry_ms), "exit_bar_ms": int(row.exit_bar_ms),
-            "exit_phase": row.exit_phase, "child_legs": int(len(group)),
+            "exit_phase": row.exit_phase, "exit_window_end_ms": int(row.exit_window_end_ms),
+            "child_legs": int(len(group)),
+            "funded_notional_usdt": float(group.notional_usdt.sum()),
             "settlement_count": int(group.settlement_count.sum()),
             "known_cashflow_usdt": float(group.known_cashflow_usdt.sum()),
             "known_cashflow_lower_usdt": float(group.known_cashflow_lower_usdt.sum()),
@@ -583,7 +628,7 @@ def _symbol_summary(position_rows: pd.DataFrame) -> pd.DataFrame:
         complete = bool(group.funding_complete_for_observed_source.all())
         rows.append({
             "symbol": symbol, "funded_events": int(group.event_id.nunique()), "child_legs": int(len(group)),
-            "gross_notional_usdt_sum": float(group.notional_usdt.sum()),
+            "funded_notional_usdt_sum": float(group.notional_usdt.sum()),
             "signed_quantity_abs_sum": float(group.quantity_abs.sum()),
             "settlement_rows": int(group.settlement_count.sum()),
             "boundary_settlements": int(group.boundary_settlement_count.sum()),
@@ -647,7 +692,7 @@ def _write_scope(scope: str, config: dict, legs: pd.DataFrame, source_audit: dic
         "source_reconciliation": source_audit,
         "cashflow_only_not_nav_replay": True,
         "funding_cashflow_sign": "-signed_quantity * funding_rate * mark_price; positive rate charges longs and credits shorts",
-        "range_boundary_policy": "If a fundingTime is within 1s of entry or exit-bar open, lower/upper cashflow allow exclude/include, ordered by sign. Exact observed interior settlements are deterministic.",
+        "range_boundary_policy": "Entry and open-exit ±1s coincidences are bounded by include/exclude; close exits use bar-close time, and intrabar exits bound settlements across the full H1 exit bar.",
         "mark_price_policy": "Use fundingRate.markPrice if present; else official Binance markPriceKlines 1h open as a proxy; missing rates or prices remain unknown, never zero-filled.",
         "schedule_policy": "Use observed fundingTime rows; no fixed 1h/4h/8h schedule is assumed. Interval diagnostics are reported per symbol-month.",
         "source_legs": int(len(legs)), "funded_positions": int(legs.event_id.nunique()),
@@ -704,13 +749,17 @@ def mini_check() -> None:
         raise AssertionError("Focal ADA actual VectorBT leg identity/phase did not match")
     if not np.isclose(ada.signed_size.abs().sum(), 931.238492, atol=1e-5):
         raise AssertionError("Focal ADA child quantities changed")
+    child_notional = float((ada.signed_size.abs() * ada.entry_price).sum())
+    if not np.isclose(child_notional, float(config["scopes"]["ada"]["expected_funded_notional_usdt"]), atol=1e-6):
+        raise AssertionError("Child-leg notional must aggregate once to the funded parent notional")
     ada_windows = _month_windows(ada)
     if len(ada_windows) != 6:
         raise AssertionError("Focal ADA holding should resolve to six actual funding month windows")
     first_month = ada_windows[("ADA", "2020-11")]
     last_month = ada_windows[("ADA", "2021-04")]
     if (first_month["start_ms"] != int(ada.entry_ms.iloc[0]) - ENTRY_BOUNDARY_TOLERANCE_MS
-            or last_month["end_ms"] != int(ada.exit_bar_ms.iloc[0]) + ENTRY_BOUNDARY_TOLERANCE_MS + 1_000):
+            or last_month["end_ms"] != int(ada.exit_bar_ms.iloc[0]) + HOUR_MS
+            + ENTRY_BOUNDARY_TOLERANCE_MS + API_QUERY_ALIGNMENT_PAD_MS):
         raise AssertionError("Funding queries must include the full ±1s settlement boundary range")
     intervals = pd.DataFrame([
         {"signed_size": 2.0, "rate": 0.001, "mark": 100.0, "entry": 1_000, "exit": 3_000},
@@ -723,7 +772,7 @@ def mini_check() -> None:
     exit_ms = entry_ms + 16 * HOUR_MS
     synthetic_leg = pd.DataFrame([{
         "event_id": "mini", "parent_id": "mini-parent", "symbol": "ADA", "tp_r": 0.0,
-        "side": 1, "signed_size": 2.0, "notional": 100.0, "entry_ms": entry_ms,
+        "side": 1, "signed_size": 2.0, "notional": 100.0, "entry_price": 50.0, "entry_ms": entry_ms,
         "exit_bar_ms": exit_ms, "exit_phase": "open", "exit_reason": "forced_open",
     }])
     timestamps = [entry_ms, entry_ms + 8 * HOUR_MS, exit_ms]
@@ -735,7 +784,7 @@ def mini_check() -> None:
         "source_complete": [True] * 3,
     })
     key = ("ADA", "2024-01")
-    audit = {key: {"range_complete": True}}
+    audit = {key: {"range_complete": True}, ("ADA", "2023-12"): {"range_complete": True}}
     detail, pos, event_rows = _funding_attribution(synthetic_leg, {key: synthetic_history}, audit)
     expected = pos.iloc[0]
     if (len(detail) != 3 or expected.settlement_count != 3 or expected.boundary_settlement_count != 2
@@ -748,6 +797,51 @@ def mini_check() -> None:
     _, missing_pos, _ = _funding_attribution(synthetic_leg, {key: missing_history}, audit)
     if bool(missing_pos.iloc[0].funding_complete_for_observed_source) or pd.notna(missing_pos.iloc[0].funding_cashflow_lower_usdt):
         raise AssertionError("Missing settlement marks must remain unknown rather than become zero")
+
+    jan_entry = _epoch_ms("2024-01-31T22:00:00Z")
+    jan_exit_bar = _epoch_ms("2024-01-31T23:00:00Z")
+    cross_close_leg = pd.DataFrame([{
+        "event_id": "month-close", "parent_id": "month-close", "symbol": "ADA", "tp_r": 0.0,
+        "side": 1, "signed_size": 2.0, "notional": 100.0, "entry_price": 50.0, "entry_ms": jan_entry,
+        "exit_bar_ms": jan_exit_bar, "exit_phase": "close", "exit_reason": "ema_flip",
+    }])
+    close_windows = _month_windows(cross_close_leg)
+    if set(close_windows) != {("ADA", "2024-01"), ("ADA", "2024-02")}:
+        raise AssertionError("Close-phase exit must enumerate the month containing the actual H1 close")
+    feb_settlement = _epoch_ms("2024-02-01T00:00:00Z") + 5
+    feb_history = pd.DataFrame([{
+        "funding_time_ms": feb_settlement, "funding_rate": 0.001, "mark_price": 100.0,
+        "rate_source": "mini", "mark_source": "binance_fundingRate_markPrice", "source_complete": True,
+    }, {
+        # In the second-aligned API fetch envelope, but beyond the actual ±1s
+        # close tolerance; attribution must discard it.
+        "funding_time_ms": feb_settlement + 1_500, "funding_rate": 0.001, "mark_price": 100.0,
+        "rate_source": "mini", "mark_source": "binance_fundingRate_markPrice", "source_complete": True,
+    }])
+    _, close_pos, _ = _funding_attribution(
+        cross_close_leg, {("ADA", "2024-01"): pd.DataFrame(), ("ADA", "2024-02"): feb_history},
+        {key: {"range_complete": True} for key in close_windows},
+    )
+    if (close_pos.iloc[0].settlement_count != 1 or close_pos.iloc[0].boundary_settlement_count != 1
+            or not np.isclose(close_pos.iloc[0].funding_cashflow_lower_usdt, -0.2)):
+        raise AssertionError("Close-phase month-boundary settlement was not included conservatively")
+
+    intrabar_leg = cross_close_leg.assign(exit_phase="intrabar")
+    intrabar_event = jan_exit_bar + 2_000
+    intrabar_history = pd.DataFrame([{
+        "funding_time_ms": intrabar_event, "funding_rate": 0.001, "mark_price": 100.0,
+        "rate_source": "mini", "mark_source": "binance_fundingRate_markPrice", "source_complete": True,
+    }, {
+        "funding_time_ms": feb_settlement + 1_500, "funding_rate": 0.001, "mark_price": 100.0,
+        "rate_source": "mini", "mark_source": "binance_fundingRate_markPrice", "source_complete": True,
+    }])
+    _, intrabar_pos, _ = _funding_attribution(
+        intrabar_leg, {("ADA", "2024-01"): intrabar_history, ("ADA", "2024-02"): feb_history},
+        {key: {"range_complete": True} for key in _month_windows(intrabar_leg)},
+    )
+    if (intrabar_pos.iloc[0].settlement_count != 2 or intrabar_pos.iloc[0].boundary_settlement_count != 2
+            or not np.isclose(intrabar_pos.iloc[0].funding_cashflow_lower_usdt, -0.4)):
+        raise AssertionError("Intrabar exit must bound settlements throughout its H1 bar")
     print("Binance efficient-trend funding-ledger mini-check: PASS")
 
 

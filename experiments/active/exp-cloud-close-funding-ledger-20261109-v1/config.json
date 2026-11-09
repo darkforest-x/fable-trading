@@ -31,21 +31,23 @@
     }
   },
   "local_inventory_preflight": {
-    "required_symbol_month_windows": 2015,
+    "required_symbol_month_windows": 2030,
     "symbols": 331,
     "calendar_months": 77,
     "position_window": "2020-05 through 2026-09 UTC",
-    "local_monthly_funding_archive_keys": 197,
-    "shared_flow_funding_archive_keys": 183,
+    "monthly_funding_archive_keys_union": 388,
+    "shared_flow_funding_archive_keys": 184,
     "local_normalized_funding_keys": 49,
-    "local_mark_1h_archive_keys": 209,
-    "local_rate_and_price_keys": 250,
+    "local_funding_rate_keys_union": 404,
+    "missing_local_funding_rate_keys": 1626,
+    "local_mark_1h_archive_keys": 216,
+    "local_rate_and_price_keys": 257,
     "local_exact_mark_keys": 41,
-    "estimated_public_funding_api_calls_if_41_exact_keys_are_complete": 1974,
-    "public_funding_api_call_upper_bound": 2015,
-    "estimated_api_wall_seconds_at_budget_if_41_exact_keys_are_complete": 1579.2,
-    "estimated_api_wall_minutes_at_budget_if_41_exact_keys_are_complete": 26.32,
-    "conditional_mark_archive_keys_missing_locally": 1806
+    "estimated_public_funding_api_calls_if_41_exact_keys_are_complete": 1989,
+    "public_funding_api_call_upper_bound": 2030,
+    "estimated_api_wall_seconds_at_budget_if_41_exact_keys_are_complete": 1591.2,
+    "estimated_api_wall_minutes_at_budget_if_41_exact_keys_are_complete": 26.52,
+    "conditional_mark_archive_keys_missing_locally": 1773
   },
   "funding_source": {
     "api_base": "https://fapi.binance.com",
@@ -53,7 +55,8 @@
     "request_fields": ["symbol", "startTime", "endTime", "limit"],
     "response_fields": ["fundingTime", "fundingRate", "markPrice"],
     "limit": 1000,
-    "query_unit": "one bounded actual-held window per symbol-month; paginate by observed fundingTime until the API returns an empty page",
+    "query_unit": "one actual-held window per symbol-month, expanded for the phase-specific exit boundary and entry/exit tolerance; API fetch endpoints stay second-aligned, then rows outside the exact attribution bounds are discarded",
+    "api_alignment_overfetch_ms": 1000,
     "minimum_seconds_between_requests": 0.8,
     "api_cache_root": "data/research/cloud_close_funding_ledger_20261109/funding_api/",
     "exact_source_priority": [
@@ -68,10 +71,16 @@
     "formula_usdt": "-signed_quantity * funding_rate * settlement_mark_price",
     "positive_rate_effect": "Longs pay; shorts receive.",
     "entry_exit_boundary_tolerance_ms": 1000,
-    "boundary_rule": "When fundingTime is within one second of entry_ms or exit_bar_ms, report an include/exclude cashflow interval ordered by sign. Interior settlement rows are deterministic. Preserve actual exit_phase on every child leg.",
+    "boundary_rule": "Entry settlements within ±1s are include/exclude intervals. Open-phase exits occur at exit_bar_ms and use ±1s; close-phase exits occur at exit_bar_ms+1h, with earlier settlements in the bar deterministic and close coincidence bounded; intrabar exits have unknown ordering throughout [exit_bar_ms−1s, exit_bar_ms+1h+1s], so all settlements in that exit-hour interval are included/excluded by sign. API fetches over-read an additional second to preserve aligned request endpoints, but attribution discards every settlement outside the exact inclusive ±1s bounds.",
+    "exit_phase_semantics": {
+      "open": "Exit at exit_bar_ms.",
+      "close": "Position is held through the close at exit_bar_ms + 1 hour.",
+      "intrabar": "Exit time is unknown within the H1 bar; settlements anywhere from its open through close are timing-ambiguous."
+    },
     "mark_proxy": "Official Binance USD-M markPriceKlines 1h open at the fundingTime hour; set mark_source=binance_vision_mark_1h_open_proxy.",
     "schedule": "Use observed fundingTime timestamps and report 1h/4h/8h/other interval counts per symbol-month. Never assume a fixed cadence.",
-    "unknowns": "If any required symbol-month lacks a complete rate range or any observed settlement lacks rate/mark, report known subtotal but null complete lower/upper totals."
+    "unknowns": "If any required symbol-month lacks a complete rate range or any observed settlement lacks rate/mark, report known subtotal but null complete lower/upper totals.",
+    "notional_attribution": "Per child leg use abs(signed_quantity) * entry_price; aggregate the two child quantities once to the funded parent notional. Never repeat parent notional on each child."
   },
   "outputs": {
     "scope_directories": {
