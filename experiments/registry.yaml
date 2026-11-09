@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-close-fvg-cap-filter-20261109-v1
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "b454683890"
+    status: "inconclusive"
+    question: "Does the causal first-touch gap filter improve the shared scored, hourly-capped wallet beyond thinning simultaneous opportunities?"
+    single_variable: "At the original scored 12H close exclude first-touch same-side gap overlap; retain the hourly 20% cap; compare known labels and one matched scarcity draw."
+    result: "Of 23262 signals, 22890 covered, 19176 outside. Known wallet 7260.25U vs outside 11620.79U, 1547 closed, 33.29% wins, monetary payoff 2.747, DD upper 33.63%. Development 6338.30 vs 4500.00U; 2025/26 ratios 1.322/1.387. Same-time, same-side, score-availability-matched single random draw ended 13811.53U, 34.72% wins, payoff 2.681, DD upper 36.16%. Growth improvement is not demonstrably gap-specific. Trading fees included; funding unresolved."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: "experiments/active/exp-cloud-close-fvg-cap-filter-20261109-v1/summary.json"
+    notes: "Development through 2024; later years previously used. OKX market 5bp / resting TP 2bp. No funding or capacity modeling. Notion 41388564-79af-815f-a314-c20738f8210f."
+
   - experiment_id: exp-cloud-close-double-limit-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "efe81cf894"
