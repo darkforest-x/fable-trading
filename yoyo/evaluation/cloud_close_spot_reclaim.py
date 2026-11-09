@@ -14,12 +14,12 @@ EXP = rank.EXP.parent/'exp-cloud-close-spot-reclaim-20261109-v1'
 PANEL = admin.archive.native.wallet.ROOT/'data/research/cloud_close_spot_reclaim_20261109/event_panel.csv.gz'
 
 
-def sample_placebo(candidates):
+def sample_placebo(candidates, signal_column):
     sample = pd.Series(False,index=candidates.index)
     rng = np.random.default_rng(1029)
     movable = 0
     for _,part in candidates.sort_index().groupby(['entry_ms','side','has_score'],sort=True):
-        count = int(part.spot_reclaim.sum())
+        count = int(part[signal_column].sum())
         if 0<count<len(part):
             movable += count
         if count:
@@ -27,17 +27,18 @@ def sample_placebo(candidates):
     return sample,movable
 
 
-def main():
-    if (EXP/'summary.json').exists():
-        raise FileExistsError('Completed same-market spot reclaim test')
+def compare_filter(panel, signal_column, directory, settlement_sources):
+    if (directory/'summary.json').exists():
+        raise FileExistsError(f'Completed filter comparison in {directory}')
     source = pd.read_csv(rank.scores.EXP/'candidate_order.csv.gz',usecols=['event_id','entry_ms','score']).set_index('event_id',verify_integrity=True)
-    panel = pd.read_csv(PANEL,usecols=['event_id','covered','spot_reclaim'],dtype={'covered':'boolean','spot_reclaim':'boolean'}).set_index('event_id',verify_integrity=True)
-    if set(panel.index)!=set(source.index) or panel.covered.isna().any() or not panel.covered.equals(panel.spot_reclaim.notna().astype('boolean')):
-        raise ValueError('Every frozen candidate must have exactly one covered or unknown spot observation')
+    confirmed = panel[signal_column]
+    if (not panel.index.is_unique or set(panel.index)!=set(source.index) or panel.covered.isna().any()
+            or not panel.covered.equals(confirmed.notna().astype('boolean'))):
+        raise ValueError('Each frozen candidate must have exactly one observed or unknown filter decision')
     extra = set(json.loads((admin.archive.EXP/'summary.json').read_text())['archived_additions'])
     extra.update(json.loads((admin.study.EXP/'summary.json').read_text())['new_archive_cohorts']['priced'])
-    spec,marks = rank.market_spec(EXP)
-    for source_dir in (vwap.EXP,timing.EXP):
+    spec,marks = rank.market_spec(directory)
+    for source_dir in settlement_sources:
         spec.update(json.loads((source_dir/'config.json').read_text())['additional_settlements'])
         marks.update(pd.read_csv(source_dir/'settlement_index_1m.csv').groupby('symbol')[['low','close','high']].mean().to_dict('index'))
     paths = admin.archive.pool(extra)
@@ -50,12 +51,12 @@ def main():
         candidates = candidates[['entry_ms','side','symbol']].join(panel).join(source.score)
         candidates['has_score'] = candidates.score.notna()
         observed = candidates[candidates.covered].copy()
-        observed['placebo'],movable = sample_placebo(observed)
-        if int(observed.placebo.sum())!=int(observed.spot_reclaim.sum()):
+        observed['placebo'],movable = sample_placebo(observed,signal_column)
+        if int(observed.placebo.sum())!=int(observed[signal_column].sum()):
             raise ValueError('Observability-matched placebo changed contemporaneous cohort sizes')
-        observed[['entry_ms','side','symbol','spot_reclaim','has_score','placebo']].to_csv(EXP/'observed_candidates.csv.gz')
+        observed[['entry_ms','side','symbol',signal_column,'has_score','placebo']].to_csv(directory/'observed_candidates.csv.gz')
         results,rosters = {},{}
-        for name,part in [('covered',observed),('confirmed',observed[observed.spot_reclaim]),
+        for name,part in [('covered',observed),('confirmed',observed[observed[signal_column]]),
                            ('placebo',observed[observed.placebo])]:
             if part.empty:
                 raise ValueError(f'{name} has no eligible opportunities')
@@ -64,7 +65,7 @@ def main():
             rosters[name] = admin.admitted(ranked)
         settlements = pd.concat([v.loc[v.delivery,['symbol','event_id','exit_bar_ms','tp_r']].assign(arm=k)
                                  for k,v in rosters.items()],ignore_index=True)
-        settlements.to_csv(EXP/'selected_deliveries.csv',index=False)
+        settlements.to_csv(directory/'selected_deliveries.csv',index=False)
         absent = sorted({s+'USDT' for s in settlements.symbol}-marks.keys())
         if absent:
             raise ValueError(f'Official settlement inputs required for {absent}')
@@ -73,15 +74,21 @@ def main():
             metrics,parents,equity,trims = hourly.tested.trim_account(data,admin.archive.native.quotes,.9,.2,review_hours=1)
             if not np.isclose(1000+parents.cash_pnl.sum(),equity.nav.iloc[-1],rtol=1.e-8,atol=.001):
                 raise ValueError('Funded positions do not reconcile to final account equity')
-            parents.to_csv(EXP/f'funded_{label}.csv.gz')
-            equity.to_csv(EXP/f'hourly_{label}.csv.gz',index_label='hour_end_utc')
+            parents.to_csv(directory/f'funded_{label}.csv.gz')
+            equity.to_csv(directory/f'hourly_{label}.csv.gz',index_label='hour_end_utc')
             results[label] = dict(metrics=metrics,trimmed_positions=trims.event_id.nunique())
     summary = dict(full_roster_no_filter=json.loads((hourly.EXP/'summary.json').read_text())['Binance']['metrics'],
                    results=results,original_candidates=len(candidates),covered_candidates=len(observed),
-                   confirmed_candidates=int(observed.spot_reclaim.sum()),unknown_candidates=len(candidates)-len(observed),
-                   controls_with_multiple_choices=movable,seeded_placebo_overlap=int((observed.placebo&observed.spot_reclaim).sum()))
-    (EXP/'summary.json').write_text(json.dumps(summary,indent=2,allow_nan=False)+'\n')
+                   confirmed_candidates=int(observed[signal_column].sum()),unknown_candidates=len(candidates)-len(observed),
+                   controls_with_multiple_choices=movable,seeded_placebo_overlap=int((observed.placebo&observed[signal_column]).sum()))
+    (directory/'summary.json').write_text(json.dumps(summary,indent=2,allow_nan=False)+'\n')
     print(json.dumps(summary,indent=2),flush=True)
+
+
+def main():
+    panel = pd.read_csv(PANEL,usecols=['event_id','covered','spot_reclaim'],dtype={'covered':'boolean','spot_reclaim':'boolean'}).set_index('event_id',verify_integrity=True)
+    fvg_directory = EXP.parent / 'exp-cloud-close-fvg-transfer-20261109-v1'
+    compare_filter(panel, 'spot_reclaim', EXP, (vwap.EXP,timing.EXP,fvg_directory))
 
 
 if __name__=='__main__':
