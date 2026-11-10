@@ -109,7 +109,10 @@ def run_path(ohlc,stamps,order,row,static_ambiguous):
     activated=None
     first_target=max(target,trigger)
     i,x,reason=fixed_exit(points,opening,0,stop,first_target,'stop')
-    if (reason=='target' and target < trigger*(1-EPS)
+    if reason=='target' and opening[i] and points[i,0] <= target*(1+EPS):
+        # An opening gap through both bands executes the already resting TP.
+        x=target
+    elif (reason=='target' and target < trigger*(1-EPS)
             and not (row.exit_reason=='timeout' and stamps[source[i]]==row.exit_time)):
         activated=stamps[source[i]]
         i,x,reason=fixed_exit(points,opening,i,be,target,'breakeven')
@@ -268,6 +271,9 @@ def main():
     public=ledger.loc[~ledger.is_control,['symbol','entry_time','entry_fill','target_price','activation_time',
         'old_reason','old_net_pct','exit_time','exit_reason','exit_price','net_pct','delta_pp',
         'mfe_pct','mfe_time','float_min','float_max','mae_pct','mae_time','adverse_min','adverse_max','delta_min','delta_max']].copy()
+    exits={'stop':'原止损','target':'止盈','timeout':'到期','breakeven':'保本止损'}
+    for col in ('exit_reason','old_reason'):
+        public[col]=public[col].map(exits)
     public.columns=['合约','入场时间UTC','入场价','目标价','浮盈2%首次触发UTC','原退出原因','原净盈亏%',
         '新退出时间UTC','新退出原因','新退出价','新净盈亏%','净盈亏差_百分点','实际持仓最大浮盈%',
         '浮盈峰值UTC','最大浮盈下界%','最大浮盈上界%','实际持仓最大浮亏%','浮亏峰值UTC','最大浮亏幅度下界%','最大浮亏幅度上界%','路径差下限_百分点','路径差上限_百分点']

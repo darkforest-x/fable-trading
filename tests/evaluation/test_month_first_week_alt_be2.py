@@ -40,3 +40,8 @@ def test_near_target_and_open_gap():
 def test_timeout_open_has_no_new_activation():
     rs=trial([[100,101,99,99.2],[97.5,97.5,97.5,97.5]],old='timeout',old_price=97.5)
     assert rs[0]['exit_reason']=='timeout' and rs[0]['activation_time'] is None
+
+
+def test_resting_target_executes_on_gap_through_trigger():
+    rs=trial([[100,101,99,99.5],[94,106,93,99]])
+    assert all(r['exit_reason']=='target' and r['exit_price']==96 and r['activation_time'] is None for r in rs)
