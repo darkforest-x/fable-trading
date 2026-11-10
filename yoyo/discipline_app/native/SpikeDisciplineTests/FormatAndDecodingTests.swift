@@ -36,5 +36,21 @@ final class FormatAndDecodingTests: XCTestCase {
         XCTAssertEqual(n.events.map(\.kind), ["alarm", "fib"])
         XCTAssertEqual(n.channels.fib.barkSent, 7)
         XCTAssertEqual(Fmt.pushStatus(n.events[1]), "已推送")
+
+        let monthTouch = #"{"now_ms":1793958680127,"events":[{"id":"month_first_week_touch:2026-11|BTC-USDT-SWAP|upper","kind":"month_first_week_touch","type":"month_first_week_touch","event_id":"2026-11|BTC-USDT-SWAP|upper","month":"2026-11","symbol":"BTC-USDT-SWAP","side":"upper","level":100.0,"price":101.0,"at_ms":1793958600000,"occurred_ms":1793958600000,"fresh_until_ms":1793958690000,"source":"live","touch_confirmed":true,"candle_confirmed":false,"pushed":false,"apns_status":"not_subscribed"}],"channels":{"fib":{"bark":true,"bark_configured":true,"bark_sent":7,"telegram":true,"min_score":0.4},"alarm":{"bark":false,"telegram":true,"threshold":25,"window_minutes":5},"month_first_week_touch":{"bark":true,"bark_configured":true,"bark_sent":3,"apns_configured":false,"apns_status":{"counts":{"sent":1},"cursor":2}}}}"#
+        let monthly = try API.decoder.decode(NotificationSnapshot.self, from: Data(monthTouch.utf8))
+        XCTAssertEqual(monthly.events[0].kind, "month_first_week_touch")
+        XCTAssertEqual(monthly.events[0].eventId, "2026-11|BTC-USDT-SWAP|upper")
+        XCTAssertEqual(monthly.events[0].apnsStatus, "not_subscribed")
+        XCTAssertTrue(monthly.channels.monthFirstWeekTouch?.bark == true)
+        XCTAssertEqual(monthly.channels.monthFirstWeekTouch?.barkSent, 3)
+        XCTAssertEqual(monthly.channels.monthFirstWeekTouch?.apnsStatus?.counts?["sent"], 1)
+
+        let snapshot = #"{"schema":"month_first_week_1618.v1","now_ms":1793958680127,"timezone":"America/New_York","month":"2026-11","window":{"month":"2026-11","start_ms":1793505600000,"ready_ms":1793512800000,"expires_ms":1794103200000,"complete":true},"coverage":{"universe_size":240,"ready_symbols":239,"incomplete_symbols":1,"pending_symbols":0,"expected_1h_bars":12,"source":"okx"},"stream":{"connected":true,"last_message_ms":1793958680120,"error":null},"worker":{"alive":true,"last_cycle_ms":1793958680000,"error":null,"symbol_count":240,"ready_count":239,"incomplete_count":1,"pending_count":0},"items":[{"symbol":"BTC-USDT-SWAP","state":"ready","high":100,"low":90,"upper":106.18,"lower":83.82,"updated_ms":1793958680000}],"touches":[{"id":1,"event_id":"2026-11|BTC-USDT-SWAP|upper","type":"month_first_week_touch","month":"2026-11","symbol":"BTC-USDT-SWAP","side":"upper","level":106.18,"price":106.2,"candle_extreme":106.2,"occurred_ms":1793958600000,"candle_ms":1793958560000,"created_ms":1793958600010,"expires_ms":1794103200000,"fresh_until_ms":1793958690000,"source":"live","touch_confirmed":true,"candle_confirmed":false}]}"#
+        let monthlySnapshot = try API.decoder.decode(MonthFirstWeekSnapshot.self, from: Data(snapshot.utf8))
+        XCTAssertTrue(monthlySnapshot.window.complete)
+        XCTAssertEqual(monthlySnapshot.month, "2026-11")
+        XCTAssertEqual(monthlySnapshot.coverage.readySymbols, 239)
+        XCTAssertEqual(monthlySnapshot.touches.first?.eventId, "2026-11|BTC-USDT-SWAP|upper")
     }
 }

@@ -218,16 +218,108 @@ struct NotificationEvent: Codable, Identifiable, Hashable {
     let active: Bool?
     let test: Bool?
     let acknowledged: Bool?
+    // Additive monthly 1.618 contract. APNs status is separate from TG/Bark receipts.
+    var type: String? = nil
+    var eventId: String? = nil
+    var month: String? = nil
+    var occurredMs: Double? = nil
+    var candleMs: Double? = nil
+    var createdMs: Double? = nil
+    var expiresMs: Double? = nil
+    var freshUntilMs: Double? = nil
+    var source: String? = nil
+    var touchConfirmed: Bool? = nil
+    var candleConfirmed: Bool? = nil
+    var apnsStatus: String? = nil
 }
 
 struct NotificationSnapshot: Codable {
     struct Channels: Codable {
         struct Fib: Codable { let bark: Bool; let barkConfigured: Bool; let barkSent: Int; let telegram: Bool; let minScore: Double? }
         struct AlarmChannel: Codable { let bark: Bool; let telegram: Bool; let threshold: Int?; let windowMinutes: Int? }
+        struct MonthFirstWeekTouch: Codable {
+            let bark: Bool
+            let barkConfigured: Bool
+            let barkSent: Int
+            let apnsConfigured: Bool
+            let apnsStatus: DeliveryStatus?
+            struct DeliveryStatus: Codable { let counts: [String: Int]?; let cursor: Int? }
+        }
         let fib: Fib
         let alarm: AlarmChannel
+        var monthFirstWeekTouch: MonthFirstWeekTouch? = nil
     }
     let nowMs: Double
     let events: [NotificationEvent]
     let channels: Channels
+}
+
+struct MonthFirstWeekTouch: Codable, Identifiable, Hashable {
+    let id: Int
+    let eventId: String
+    let type: String
+    let month: String
+    let symbol: String
+    let side: Edge
+    let level: Double
+    let price: Double
+    let candleExtreme: Double
+    let occurredMs: Double
+    let candleMs: Double
+    let createdMs: Double
+    let expiresMs: Double
+    let freshUntilMs: Double
+    let source: String
+    let touchConfirmed: Bool
+    let candleConfirmed: Bool
+}
+
+struct MonthFirstWeekItem: Codable, Identifiable, Hashable {
+    var id: String { symbol }
+    let symbol: String
+    let state: String
+    let high: Double?
+    let low: Double?
+    let upper: Double?
+    let lower: Double?
+    let updatedMs: Double?
+    let historyGaps: Int?
+}
+
+struct MonthFirstWeekSnapshot: Codable {
+    struct Window: Codable {
+        let month: String
+        let startMs: Double
+        let readyMs: Double?
+        let expiresMs: Double
+        let complete: Bool
+    }
+    struct Coverage: Codable {
+        let universeSize: Int
+        let readySymbols: Int
+        let incompleteSymbols: Int
+        let pendingSymbols: Int
+        let expected1hBars: Int?
+        let source: String?
+    }
+    struct Stream: Codable { let connected: Bool; let lastMessageMs: Double?; let error: String? }
+    struct Worker: Codable {
+        let alive: Bool
+        let lastCycleMs: Double?
+        let error: String?
+        let symbolCount: Int?
+        let readyCount: Int?
+        let incompleteCount: Int?
+        let pendingCount: Int?
+    }
+    let schema: String
+    let nowMs: Double
+    let timezone: String
+    let month: String
+    let window: Window
+    let coverage: Coverage
+    let stream: Stream
+    let worker: Worker
+    let items: [MonthFirstWeekItem]
+    let touches: [MonthFirstWeekTouch]
 }

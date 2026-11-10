@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {monitorPath,signedPercent,priceText,tone,groupByDay,dayLabel,signalStatus,reasonText,MONITOR_PATHS,freshAlerts,parseAlertPrefs,pushStatusText,FIB_ALERT_WINDOW_MS} from '../../yoyo/discipline_app/mobile/src/monitorFormat.ts';
+import {monitorPath,signedPercent,priceText,tone,groupByDay,dayLabel,signalStatus,reasonText,MONITOR_PATHS,freshAlerts,parseAlertPrefs,pushStatusText,FIB_ALERT_WINDOW_MS,notificationDestination} from '../../yoyo/discipline_app/mobile/src/monitorFormat.ts';
 
 const source=(name:string)=>readFileSync(new URL(`../../yoyo/discipline_app/mobile/src/${name}`,import.meta.url),'utf8');
 
@@ -9,6 +9,7 @@ test('monitor client only builds fixed read-only /v1/monitor paths with whitelis
  assert.equal(monitorPath('paper',{track:'live-wick6x3'}),'/v1/monitor/paper?track=live-wick6x3');
  assert.equal(monitorPath('alerts'),'/v1/monitor/alerts');
  assert.equal(monitorPath('cloud',{side:'short',scope:'all'}),'/v1/monitor/cloud?side=short&scope=all');
+ assert.equal(monitorPath('monthFirstWeek'),'/v1/monitor/month-first-week-1618');
  assert.ok(Object.values(MONITOR_PATHS).every(p=>p.startsWith('/v1/monitor/')));
  for(const [segment,query] of [['paper',{track:'../orders'}],['paper',{symbol:'BTC'}],['alerts',{ack:'1'}],['cloud',{side:'up'}],['cloud',{scope:'history'}]] as const)
   assert.throws(()=>monitorPath(segment as never,query as never));
@@ -45,22 +46,29 @@ test('display helpers keep sign, precision and Beijing day grouping honest',()=>
  assert.equal(reasonText('unexpected'),'已平仓');
 });
 
-test('in-app alerts: first snapshot only seeds, then one new alarm or one fresh 1.618 push',()=>{
+test('in-app alerts: first snapshot only seeds, then one new alarm, monthly touch or fresh 1.618 push',()=>{
  const prefs=parseAlertPrefs(null),now=1_000_000_000;
  const fib=(id:string,at:number,pushed=true)=>({id,kind:'fib' as const,side:'lower' as const,at_ms:at,pushed,symbol:'SUI-USDT-SWAP',status:pushed?'pushed' as const:'below_threshold' as const});
  const alarm=(id:string,extra={})=>({id,kind:'alarm' as const,side:'upper' as const,at_ms:now,pushed:true,n:29,symbols:[],active:true,acknowledged:false,test:false,...extra});
- const seeded=freshAlerts([alarm('alarm:1'),fib('fib:a',now)],null,now,prefs);
- assert.deepEqual(seeded.alerts,[]);assert.ok(seeded.seen.has('alarm:1')&&seeded.seen.has('fib:a'));
+ const month=(id:string,extra={})=>({id,kind:'month_first_week_touch' as const,type:'month_first_week_touch' as const,side:'upper' as const,at_ms:now,occurred_ms:now,fresh_until_ms:now+90_000,pushed:false,source:'live' as const,touch_confirmed:true,month:'2026-11',event_id:'2026-11|BTC-USDT-SWAP|upper',symbol:'BTC-USDT-SWAP',...extra});
+ const seeded=freshAlerts([alarm('alarm:1'),fib('fib:a',now),month('month:a')],null,now,prefs);
+ assert.deepEqual(seeded.alerts,[]);assert.ok(seeded.seen.has('alarm:1')&&seeded.seen.has('fib:a')&&seeded.seen.has('month:a'));
  const next=freshAlerts([fib('fib:b',now),alarm('alarm:2'),fib('fib:c',now-60_000),alarm('alarm:1')],seeded.seen,now,prefs);
  assert.deepEqual(next.alerts.map(e=>e.id),['alarm:2']);
  assert.deepEqual(freshAlerts([fib('fib:d',now)],next.seen,now,prefs).alerts.map(e=>e.id),['fib:d']);
+ const monthNext=freshAlerts([month('month:b')],next.seen,now,prefs);
+ assert.deepEqual(monthNext.alerts.map(e=>e.id),['month:b']);
+ assert.deepEqual(freshAlerts([month('month:history',{source:'history'})],next.seen,now,prefs).alerts,[]);
+ assert.deepEqual(freshAlerts([month('month:unconfirmed',{touch_confirmed:false})],next.seen,now,prefs).alerts,[]);
+ assert.deepEqual(freshAlerts([month('month:expired',{fresh_until_ms:now-1})],next.seen,now,prefs).alerts,[]);
  assert.deepEqual(freshAlerts([fib('fib:e',now-FIB_ALERT_WINDOW_MS-1)],next.seen,now,prefs).alerts,[]);
  assert.deepEqual(freshAlerts([fib('fib:f',now,false)],next.seen,now,prefs).alerts,[]);
  assert.deepEqual(freshAlerts([alarm('alarm:3',{acknowledged:true}),alarm('alarm:4',{active:false})],next.seen,now,prefs).alerts,[]);
- const off={...prefs,popup:false,fib:false};
- assert.deepEqual(freshAlerts([alarm('alarm:5'),fib('fib:g',now)],next.seen,now,off).alerts,[]);
- assert.deepEqual(parseAlertPrefs('{"sound":false}'),{popup:true,sound:false,fib:true});
- assert.deepEqual(parseAlertPrefs('not json'),{popup:true,sound:true,fib:true});
+ const off={...prefs,popup:false,fib:false,monthFirstWeekTouch:false};
+ assert.deepEqual(freshAlerts([alarm('alarm:5'),fib('fib:g',now),month('month:off')],next.seen,now,off).alerts,[]);
+ assert.deepEqual(parseAlertPrefs('{"sound":false}'),{popup:true,sound:false,fib:true,monthFirstWeekTouch:true});
+ assert.deepEqual(parseAlertPrefs('not json'),{popup:true,sound:true,fib:true,monthFirstWeekTouch:true});
+ assert.deepEqual(notificationDestination(month('month:route')),{tab:'monitor',segment:'touches',source:'month',month:'2026-11',eventId:'2026-11|BTC-USDT-SWAP|upper',symbol:'BTC-USDT-SWAP'});
  assert.equal(pushStatusText(fib('fib:h',now,false)),'未达推送阈值');
 });
 

@@ -5,6 +5,7 @@ boundary: notification receipts, alarm text, model features and mutation routes 
 never cross into the discipline service, and reading them never touches the ledger.
 """
 from pathlib import Path
+from io import BytesIO
 import pytest
 from fastapi.testclient import TestClient
 from yoyo.discipline_app.api import create_app
@@ -12,6 +13,7 @@ from yoyo.discipline_app.book import Book
 from yoyo.discipline_app.monitor_feed import (MonitorFeed, MonitorUnavailable, TRACKS, project_alerts,
                                               project_cloud, project_notifications, project_paper,
                                               project_paper_history, project_touch_scores)
+from yoyo.discipline_app import monitor_feed as monitor_feed_module
 from yoyo.discipline_app.strategy_book import (BookUnavailable, downsample, project_breadth_ema20,
                                                project_cloud_backtest, project_cloud_booklet,
                                                project_cloud_candles, project_history)
@@ -185,6 +187,23 @@ def cloud_event_raw():
                             fillPrice=11.0, netUnits=-.5)],
                 entryEvidence=dict(fixedStopPrice=9.0, twoRPrice=12.0,
                                    rails=dict(selectedSideRailPrice=9.5)))
+
+
+def test_month_first_week_bark_proxy_uses_its_scoped_same_origin_action(monkeypatch):
+    captured = []
+
+    def fake_urlopen(request, timeout):
+        captured.append((request, timeout))
+        return BytesIO(b'{"enabled":true,"configured":true}')
+
+    monkeypatch.setattr(monitor_feed_module, 'urlopen', fake_urlopen)
+    result = monitor_feed_module._http('/api/month-first-week-1618/bark', dict(enabled=True))
+    request, timeout = captured[0]
+    assert result == dict(enabled=True, configured=True)
+    assert timeout == 6 and request.get_method() == 'PUT'
+    assert request.get_header('X-spike-action') == 'update-month-first-week-1618-bark'
+    assert request.get_header('Origin') == 'http://127.0.0.1:8766'
+    assert request.get_header('Sec-fetch-site') == 'same-origin'
 
 
 def cloud_symbol_raw():
@@ -378,9 +397,10 @@ def test_monitor_routes_need_token_are_get_only_and_never_touch_the_ledger(clien
         assert http.get(path, headers=AUTH).status_code == 200
         assert http.post(path, headers=AUTH, json={}).status_code == 405
     monitor_routes = [r for r in app.routes if getattr(r, 'path', '').startswith('/v1/monitor')]
-    # Read-only except the single owner-approved 1.618 Bark switch.
+    # Read-only except the existing Monday switch and the new monthly-touch Bark switch.
     assert {(r.path, frozenset(r.methods)) for r in monitor_routes if r.methods != {'GET'}} == {
-        ('/v1/monitor/fib-bark', frozenset({'POST'}))}
+        ('/v1/monitor/fib-bark', frozenset({'POST'})),
+        ('/v1/monitor/month-first-week-1618/bark', frozenset({'POST'}))}
     assert http.get('/v1/monitor/paper?track=../x', headers=AUTH).status_code == 422
     assert http.get('/v1/monitor/paper?track=unknown', headers=AUTH).status_code == 503
     assert http.get('/v1/monitor/cloud?side=short', headers=AUTH).status_code == 200

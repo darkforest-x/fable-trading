@@ -81,3 +81,10 @@ enum BarkSwitch {
         try await API.post("/v1/monitor/fib-bark", body: ["enabled": enabled], connection: connection)
     }
 }
+
+/// Monthly touches use the monitor's independent outbox and activation cutover.
+enum MonthFirstWeekBarkSwitch {
+    static func set(_ enabled: Bool, connection: Connection) async throws -> NotificationSnapshot {
+        try await API.post("/v1/monitor/month-first-week-1618/bark", body: ["enabled": enabled], connection: connection)
+    }
+}

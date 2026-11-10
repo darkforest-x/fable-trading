@@ -11,4 +11,4 @@ export function monitorGet<T>(connection:Connection,segment:MonitorSegment,query
  return api<T>(connection,monitorPath(segment,query),undefined,signal);
 }
 /** Poll cadence per module, matched to how fast the monitor itself refreshes. */
-export const MONITOR_POLL_MS:Record<MonitorSegment,number>={paper:10000,alerts:8000,cloud:60000,notifications:8000};
+export const MONITOR_POLL_MS:Record<MonitorSegment,number>={paper:10000,alerts:8000,cloud:60000,notifications:8000,monthFirstWeek:10000};

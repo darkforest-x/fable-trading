@@ -16,11 +16,13 @@ final class NotificationStore {
     init() {
         let d = UserDefaults.standard
         if d.object(forKey: "notify.popup") != nil {
-            prefs = AlertPrefs(popup: d.bool(forKey: "notify.popup"), sound: d.bool(forKey: "notify.sound"), fib: d.bool(forKey: "notify.fib"))
+            prefs = AlertPrefs(popup: d.bool(forKey: "notify.popup"), sound: d.bool(forKey: "notify.sound"),
+                               fib: d.bool(forKey: "notify.fib"),
+                               monthFirstWeekTouch: d.object(forKey: "notify.monthFirstWeekTouch") as? Bool ?? true)
         }
     }
 
-    var unread: Int { data?.events.filter { $0.pushed && ($0.atMs ?? 0) > openedAt }.count ?? 0 }
+    var unread: Int { data?.events.filter { ($0.pushed || $0.kind == "month_first_week_touch") && ($0.atMs ?? 0) > openedAt }.count ?? 0 }
 
     func poll(connection: Connection, session: SessionStore) async {
         while !Task.isCancelled {
@@ -31,7 +33,14 @@ final class NotificationStore {
 
     func load(connection: Connection, session: SessionStore) async {
         do {
-            let next: NotificationSnapshot = try await API.get("/v1/monitor/notifications", connection: connection)
+            let next: NotificationSnapshot
+            do {
+                next = try await API.get("/v1/notifications", connection: connection)
+            } catch let failure as APIError where failure.status == 404 {
+                // A native App may be newer than its discipline service. Keep existing notices
+                // working until the additive unified inbox route has been deployed.
+                next = try await API.get("/v1/monitor/notifications", connection: connection)
+            }
             let first = seen == nil
             let result = AlertLogic.fresh(next.events, seen: seen, now: next.nowMs, prefs: prefs)
             seen = result.seen
@@ -62,5 +71,6 @@ final class NotificationStore {
     private func savePrefs() {
         let d = UserDefaults.standard
         d.set(prefs.popup, forKey: "notify.popup"); d.set(prefs.sound, forKey: "notify.sound"); d.set(prefs.fib, forKey: "notify.fib")
+        d.set(prefs.monthFirstWeekTouch, forKey: "notify.monthFirstWeekTouch")
     }
 }

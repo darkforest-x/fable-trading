@@ -18,10 +18,14 @@ final class PushRegistry: NSObject, UNUserNotificationCenterDelegate {
     private(set) var serverOutdated = false
     private(set) var error: String?
     /// A tapped notification asks the root view to open this page / coin.
-    var openRequest: (kind: String, symbol: String?)?
+    var openRequest: (kind: String, symbol: String?, eventId: String?, month: String?, side: String?)?
+    var openRequestKey: String? {
+        guard let request = openRequest else { return nil }
+        return [request.kind, request.eventId ?? "", request.month ?? "", request.symbol ?? "", request.side ?? ""].joined(separator: "|")
+    }
 
     private var connection: Connection?
-    private var prefs = (fib: true, alarm: true)
+    private var prefs = (fib: true, alarm: true, monthFirstWeekTouch: true)
 
     /// Debug device builds are signed for the APNs sandbox; release builds for production.
     nonisolated static var environment: String {
@@ -41,9 +45,9 @@ final class PushRegistry: NSObject, UNUserNotificationCenterDelegate {
         #endif
     }
 
-    func start(connection: Connection?, fib: Bool, alarm: Bool) async {
+    func start(connection: Connection?, fib: Bool, alarm: Bool, monthFirstWeekTouch: Bool? = nil) async {
         self.connection = connection
-        prefs = (fib, alarm)
+        prefs = (fib, alarm, monthFirstWeekTouch ?? Self.monthTouchPreference())
         guard Self.available else { return }
         let center = UNUserNotificationCenter.current()
         center.delegate = self
@@ -65,20 +69,39 @@ final class PushRegistry: NSObject, UNUserNotificationCenterDelegate {
 
     func failed(_ message: String) { error = message }
 
-    func update(fib: Bool, alarm: Bool) {
-        prefs = (fib, alarm)
+    func update(fib: Bool, alarm: Bool, monthFirstWeekTouch: Bool? = nil) {
+        prefs = (fib, alarm, monthFirstWeekTouch ?? Self.monthTouchPreference())
         guard Self.available else { return }
-        Task { await upload() }
+        Task { await updatePreferences() }
+    }
+
+    private static func monthTouchPreference() -> Bool {
+        UserDefaults.standard.object(forKey: "notify.monthFirstWeekTouch") as? Bool ?? true
     }
 
     private func upload() async {
         guard let token, let connection else { return }
         do {
             let status: PushStatus = try await API.post("/v1/push/device", body: [
-                "token": token, "environment": Self.environment, "fib": prefs.fib, "alarm": prefs.alarm], connection: connection)
+                "token": token, "environment": Self.environment, "fib": prefs.fib, "alarm": prefs.alarm,
+                "month_first_week_touch": prefs.monthFirstWeekTouch], connection: connection)
             serverConfigured = status.configured
         } catch let failure as APIError where failure.status == 404 {
             serverOutdated = true   // service not updated yet
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+
+    private func updatePreferences() async {
+        guard let token, let connection else { return }
+        do {
+            let status: PushStatus = try await API.post("/v1/push/preferences", body: [
+                "token": token, "fib": prefs.fib, "alarm": prefs.alarm,
+                "month_first_week_touch": prefs.monthFirstWeekTouch], connection: connection)
+            serverConfigured = status.configured
+        } catch let failure as APIError where failure.status == 404 {
+            serverOutdated = true
         } catch {
             self.error = error.localizedDescription
         }
@@ -109,8 +132,12 @@ final class PushRegistry: NSObject, UNUserNotificationCenterDelegate {
 
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         let info = response.notification.request.content.userInfo
-        let kind = info["kind"] as? String ?? "fib", symbol = info["symbol"] as? String
-        await MainActor.run { openRequest = (kind, symbol) }
+        let kind = info["kind"] as? String ?? info["type"] as? String ?? "fib"
+        let symbol = info["symbol"] as? String
+        let eventId = info["event_id"] as? String
+        let month = info["month"] as? String
+        let side = info["side"] as? String
+        await MainActor.run { openRequest = (kind, symbol, eventId, month, side) }
     }
 }
 

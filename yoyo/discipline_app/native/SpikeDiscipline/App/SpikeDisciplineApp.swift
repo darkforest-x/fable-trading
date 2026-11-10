@@ -181,9 +181,14 @@ struct RootView: View {
             guard url.scheme == "spike", let page = AppTab(rawValue: url.host() ?? "") else { return }
             withAnimation(.snappy) { tab = page }
         }
-        .onChange(of: PushRegistry.shared.openRequest?.kind) { _, _ in
+        .onChange(of: PushRegistry.shared.openRequestKey) { _, _ in
             guard let request = PushRegistry.shared.openRequest else { return }
             PushRegistry.shared.openRequest = nil
+            if request.kind == "month_first_week_touch" {
+                focusMonthFirstWeekTouch(eventId: request.eventId, month: request.month)
+                withAnimation(.snappy) { tab = .monitor }
+                return
+            }
             if request.kind == "alarm" { UserDefaults.standard.set(MonitorSegment.alerts.rawValue, forKey: "monitor.segment") }
             if request.kind != "alarm", let symbol = request.symbol { fib.focus(symbol) }
             withAnimation(.snappy) { tab = request.kind == "alarm" ? .monitor : .fib }
@@ -208,7 +213,9 @@ struct RootView: View {
         }
         .task(id: session.connection?.token.hashValue ?? 0) {
             guard session.connection != nil else { return }
-            await PushRegistry.shared.start(connection: session.connection, fib: notices.prefs.fib, alarm: notices.prefs.popup)
+            await PushRegistry.shared.start(connection: session.connection, fib: notices.prefs.fib,
+                                            alarm: notices.prefs.popup,
+                                            monthFirstWeekTouch: notices.prefs.monthFirstWeekTouch)
         }
         .task(id: pollKey) {
             account.attach(session.connection)
@@ -252,9 +259,21 @@ struct RootView: View {
 
     private func open(_ event: NotificationEvent) {
         withAnimation(.snappy) { notices.banner = nil }
+        if event.kind == "month_first_week_touch" {
+            focusMonthFirstWeekTouch(eventId: event.eventId, month: event.month)
+            withAnimation(.snappy) { tab = .monitor }
+            return
+        }
         if event.kind == "alarm" { UserDefaults.standard.set(MonitorSegment.alerts.rawValue, forKey: "monitor.segment") }
         if event.kind != "alarm", let symbol = event.symbol { fib.symbol = symbol }
         withAnimation(.snappy) { tab = event.kind == "alarm" ? .monitor : .fib }
+    }
+
+    private func focusMonthFirstWeekTouch(eventId: String?, month: String?) {
+        UserDefaults.standard.set("month", forKey: "touch.source")
+        UserDefaults.standard.set(MonitorSegment.touches.rawValue, forKey: "monitor.segment")
+        if let eventId { UserDefaults.standard.set(eventId, forKey: "touch.month.focus") }
+        if let month { UserDefaults.standard.set(month, forKey: "touch.month") }
     }
 
     private func applyQA() {

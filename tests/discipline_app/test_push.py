@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 from yoyo.discipline_app.api import create_app
 from yoyo.discipline_app.book import Book
 from yoyo.discipline_app.push import Apns, PushService, activity_state, alert_for, der_to_raw
+from yoyo.discipline_app.notification_journal import MONTH_TOUCH_TYPE, valid_month_touch
 from test_discipline_service import Clock, market
 
 TOKEN = 'push-fixture-token-not-a-secret-0123456789abc'
@@ -77,6 +78,48 @@ class Monitor:
         return dict(scores=[dict(symbol='AAA-USDT-SWAP', side='upper', score=.82)])
 
 
+def month_touch(identity, *, source='live', created_ms=1_700_000_000_000, occurred_ms=1_700_000_000_000,
+                touch_confirmed=True, candle_confirmed=False, symbol='AAA-USDT-SWAP', side='upper'):
+    return dict(id=identity, event_id=f'2026-11|{symbol}|{side}', type=MONTH_TOUCH_TYPE,
+                month='2026-11', symbol=symbol, side=side, level=100.0, price=101.0,
+                candle_extreme=101.0, occurred_ms=occurred_ms, candle_ms=occurred_ms - 1000,
+                created_ms=created_ms, expires_ms=1_700_600_000_000, fresh_until_ms=occurred_ms + 90_000,
+                source=source, touch_confirmed=touch_confirmed, candle_confirmed=candle_confirmed)
+
+
+class MonthMonitor(Monitor):
+    def __init__(self):
+        super().__init__()
+        self.touches = []
+        self.month_bark_enabled = False
+
+    def month_first_week_1618(self):
+        return dict(schema='month_first_week_1618.v1', now_ms=1_700_000_000_000,
+                    timezone='America/New_York', month='2026-11',
+                    window=dict(month='2026-11', start_ms=1, ready_ms=2, expires_ms=3, complete=True),
+                    coverage=dict(universe_size=1, ready_symbols=1, incomplete_symbols=0, pending_symbols=0,
+                                  expected_1h_bars=12, source='okx'),
+                    stream=dict(connected=True, last_message_ms=1, error=None),
+                    worker=dict(alive=True, last_cycle_ms=1, error=None, symbol_count=1, ready_count=1,
+                                incomplete_count=0, pending_count=0),
+                    items=[], touches=list(self.touches),
+                    channels=dict(bark=dict(enabled=self.month_bark_enabled, configured=True,
+                                             counts=dict(pending=0, sent=int(self.month_bark_enabled), failed=0,
+                                                         unknown=0, skipped=0))))
+
+    def month_first_week_1618_events(self, after_id=0, limit=500):
+        return [event for event in self.touches if event['id'] > after_id][:limit]
+
+    def set_month_first_week_bark(self, enabled):
+        self.month_bark_enabled = enabled
+        return self.month_first_week_1618()
+
+
+class MutableClock:
+    def __init__(self, value): self.value = value
+    def __call__(self): return self.value
+
+
 def test_sender_starts_from_now_sends_fresh_events_and_drops_dead_devices(tmp_path):
     keyed(tmp_path)
     run, monitor = Recorder(), Monitor()
@@ -122,5 +165,116 @@ def test_activity_state_and_routes_need_the_token(tmp_path):
     assert http.post('/v1/push/device', headers=AUTH, json=dict(token=DEVICE, environment='staging')).status_code == 422
     body = http.post('/v1/push/device', headers=AUTH, json=dict(token=DEVICE, environment='development', fib=False)).json()
     assert body == dict(configured=False, devices=1, activities=0)
+    prefs = http.post('/v1/push/preferences', headers=AUTH,
+                      json=dict(token=DEVICE, fib=False, alarm=True, month_first_week_touch=False)).json()
+    assert prefs['preferences'] == dict(fib=False, alarm=True, month_first_week_touch=False)
+    assert http.post('/v1/push/preferences', headers=AUTH,
+                     json=dict(token='cd' * 32, month_first_week_touch=False)).status_code == 409
     assert http.post('/v1/push/activity', headers=AUTH, json=dict(token=DEVICE, environment='development', position_id='p1')).json()['activities'] == 1
     assert http.post('/v1/push/device/remove', headers=AUTH, json=dict(token=DEVICE)).json() == dict(configured=False, devices=0, activities=0)
+
+
+def test_month_first_week_snapshot_and_notifications_are_additive_and_legacy_feed_stays_unchanged(tmp_path):
+    source = MonthMonitor()
+    source.touches = [dict(month_touch(1, source='history'),
+                           channels=dict(bark=dict(status='sent', error=None, attempts=1)))]
+    book = Book(Path(tmp_path) / 'paper.sqlite3', Clock())
+    market(book)
+    http = TestClient(create_app(book, TOKEN, market_enabled=False, monitor_feed=source))
+    headers = AUTH
+    assert http.get('/v1/monitor/month-first-week-1618', headers=headers).status_code == 200
+    snapshot = http.get('/v1/monitor/month-first-week-1618', headers=headers).json()
+    assert snapshot['schema'] == 'month_first_week_1618.v1'
+    assert 'coverage' in snapshot and 'window' in snapshot and snapshot['touches'][0]['source'] == 'history'
+    legacy = http.get('/v1/monitor/notifications', headers=headers).json()
+    assert all(event.get('kind') != MONTH_TOUCH_TYPE for event in legacy['events'])
+    unified = http.get('/v1/notifications', headers=headers).json()
+    assert any(event.get('kind') == MONTH_TOUCH_TYPE and event['source'] == 'history' for event in unified['events'])
+    event = next(event for event in unified['events'] if event.get('kind') == MONTH_TOUCH_TYPE)
+    assert event['apns_status'] == 'not_subscribed' and event['channels']['bark']['status'] == 'sent'
+
+
+def test_month_first_week_bark_switch_is_authenticated_and_independent(tmp_path):
+    source = MonthMonitor()
+    book = Book(Path(tmp_path) / 'paper.sqlite3', Clock())
+    market(book)
+    http = TestClient(create_app(book, TOKEN, market_enabled=False, monitor_feed=source))
+    path = '/v1/monitor/month-first-week-1618/bark'
+    assert http.post(path, json=dict(enabled=True)).status_code == 401
+    response = http.post(path, headers=AUTH, json=dict(enabled=True))
+    assert response.status_code == 200
+    monthly = response.json()['channels']['month_first_week_touch']
+    assert source.month_bark_enabled is True
+    assert monthly['bark'] is True and monthly['bark_configured'] is True and monthly['bark_sent'] == 1
+    assert monthly['apns_configured'] is False
+    assert http.get('/v1/monitor/notifications', headers=AUTH).status_code == 200  # old phone route remains
+
+
+def test_month_touch_apns_only_new_live_fresh_touch_confirmed_rows_send_once(tmp_path):
+    now = 1_700_000_000.0
+    clock = MutableClock(now)
+    keyed(tmp_path)
+    recorder, monitor = Recorder(), MonthMonitor()
+    service = PushService(tmp_path, monitor, lambda _: None, apns=Apns(tmp_path, run=recorder), clock=clock)
+    service.register(DEVICE, 'development', month_first_week_touch=True)
+    # The initial snapshot seeds a cursor and never sends its history/backlog.
+    monitor.touches = [month_touch(1, source='live', created_ms=int(now * 1000) - 1000,
+                                   occurred_ms=int(now * 1000) - 1000)]
+    service.tick()
+    assert recorder.calls == []
+
+    # A live touch is generated after startup and is pushable even while its 1m candle is open.
+    clock.value += 1
+    event = month_touch(2, created_ms=int(clock.value * 1000), occurred_ms=int(clock.value * 1000),
+                        candle_confirmed=False, symbol='BBB-USDT-SWAP')
+    monitor.touches.append(event)
+    service.tick()
+    assert len(recorder.calls) == 1
+    body = recorder.calls[0]['body']
+    assert body['kind'] == body['type'] == MONTH_TOUCH_TYPE
+    assert body['event_id'] == event['event_id'] and body['symbol'] == event['symbol']
+    assert body['aps']['alert']['title'] == '月首周 1.618 触价 · BBB'
+    assert service.month_journal.delivery_status(event['event_id'])['apns'] == 'sent'
+    assert service.month_journal.delivery_statuses([event['event_id'], 'missing']) == {
+        event['event_id']: {'apns': 'sent', 'apns_counts': {'sent': 1}},
+        'missing': {'apns': 'not_subscribed', 'apns_counts': {}}}
+    service.tick()
+    assert len(recorder.calls) == 1
+
+
+def test_month_touch_apns_preferences_expiry_and_ambiguous_delivery_do_not_replay(tmp_path):
+    now = 1_700_000_000.0
+    clock = MutableClock(now)
+    monitor = MonthMonitor()
+    old = month_touch(1, source='live', created_ms=int(now * 1000) - 1_000, occurred_ms=int(now * 1000) - 1_000)
+    assert valid_month_touch(old)
+    assert valid_month_touch({**old, 'source': 'history'})  # valid fact, but source history cannot enqueue
+    assert not valid_month_touch({**old, 'touch_confirmed': False})
+
+    # Disable the phone before the next source row is ingested; no monthly delivery is queued.
+    keyed(tmp_path)
+    recorder = Recorder(status=0)
+    service = PushService(tmp_path, monitor, lambda _: None, apns=Apns(tmp_path, run=recorder), clock=clock)
+    service.register(DEVICE, 'development', month_first_week_touch=True)
+    monitor.touches = [old]
+    service.tick()  # first snapshot watermark
+    service.set_preferences(DEVICE, fib=True, alarm=True, month_first_week_touch=False)
+    clock.value += 1
+    disabled = month_touch(2, created_ms=int(clock.value * 1000), occurred_ms=int(clock.value * 1000),
+                           symbol='BBB-USDT-SWAP')
+    monitor.touches.append(disabled)
+    service.tick()
+    assert recorder.calls == []
+    assert service.month_journal.delivery_status(disabled['event_id'])['apns'] == 'not_subscribed'
+
+    # A newly enabled subscription sends a new touch once; an ambiguous result becomes terminal unknown.
+    service.set_preferences(DEVICE, fib=True, alarm=True, month_first_week_touch=True)
+    clock.value += 1
+    uncertain = month_touch(3, created_ms=int(clock.value * 1000), occurred_ms=int(clock.value * 1000),
+                            symbol='CCC-USDT-SWAP')
+    monitor.touches.append(uncertain)
+    service.tick()
+    assert len(recorder.calls) == 1
+    assert service.month_journal.delivery_status(uncertain['event_id'])['apns'] == 'unknown'
+    service.tick()
+    assert len(recorder.calls) == 1

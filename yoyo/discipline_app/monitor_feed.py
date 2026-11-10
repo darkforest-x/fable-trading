@@ -378,9 +378,11 @@ def _http(path, body=None):
             return json.load(response)
     # The monitor guards its switch with a same-origin check meant for browsers on the public
     # tunnel; this authenticated loopback service is a trusted same-host client.
+    action = ('update-month-first-week-1618-bark'
+              if path == '/api/month-first-week-1618/bark' else 'update-monday-fib-bark')
     request = Request(SOURCE + path, data=json.dumps(body).encode(), method='PUT', headers={
         'Content-Type': 'application/json', 'Origin': SOURCE, 'Sec-Fetch-Site': 'same-origin',
-        'X-Spike-Action': 'update-monday-fib-bark'})
+        'X-Spike-Action': action})
     with urlopen(request, timeout=6) as response:
         return json.load(response)
 
@@ -421,6 +423,41 @@ class MonitorFeed:
         # Raw snapshot (5 s) shared by the account projection and the booklet's rule facts.
         path = '/api/monday-reclaim-paper?' + urlencode(dict(list_period='today', track=track))
         return self._read('raw:' + path, None, lambda: self._fetch(path))
+
+    @staticmethod
+    def _month_first_week_snapshot(raw):
+        """Validate and pass through the monitor's complete monthly-touch snapshot unchanged."""
+        if (not isinstance(raw, dict) or raw.get('schema') != 'month_first_week_1618.v1'
+                or not isinstance(raw.get('window'), dict)
+                or not isinstance(raw.get('coverage'), dict)
+                or not isinstance(raw.get('stream'), dict)
+                or not isinstance(raw.get('worker'), dict)
+                or not isinstance(raw.get('items'), list)
+                or not isinstance(raw.get('touches'), list)
+                or not isinstance(raw.get('month'), str)
+                or _ms(raw.get('now_ms')) is None):
+            raise MonitorUnavailable('月首周 1.618 数据格式无效')
+        # Keep the upstream snapshot keys and status fields intact; the App's monitor page needs
+        # the same coverage/worker state as the monitor workbench, not a lossy event projection.
+        return raw
+
+    def month_first_week_1618(self):
+        return self._read('month-first-week-1618', self._month_first_week_snapshot,
+                          load=lambda: self._fetch('/api/month-first-week-1618'), ttl=1)
+
+    def month_first_week_1618_events(self, after_id=0, limit=500):
+        """Read the monitor's durable source cursor for APNs; this is not the UI snapshot."""
+        if type(after_id) is not int or after_id < 0 or type(limit) is not int or not 1 <= limit <= 500:
+            raise MonitorUnavailable('月首周 1.618 游标无效')
+        path = '/api/month-first-week-1618/events?' + urlencode({'after_id': after_id, 'limit': limit})
+        try:
+            raw = self._fetch(path)
+        except (OSError, ValueError) as error:
+            raise MonitorUnavailable('月首周 1.618 事件暂不可用') from error
+        if (not isinstance(raw, dict) or raw.get('schema') != 'month_first_week_1618.events.v1'
+                or not isinstance(raw.get('events'), list)):
+            raise MonitorUnavailable('月首周 1.618 事件格式无效')
+        return raw['events']
 
     def _asset(self, path):
         """Read one published JSON or gzip JSON asset through the injectable monitor source."""
@@ -660,3 +697,20 @@ class MonitorFeed:
         with self._lock:
             self._cache.pop('notifications', None)
         return self.notifications()
+
+    def set_month_first_week_bark(self, enabled):
+        """Proxy the monthly-only Bark switch; the monitor owns its outbox and activation cutover."""
+        try:
+            self._fetch('/api/month-first-week-1618/bark', dict(enabled=bool(enabled)))
+        except HTTPError as error:
+            detail = '监控拒绝了月首周 Bark 开关'
+            try:
+                detail = str(json.load(error).get('detail') or detail)[:80]
+            except (ValueError, AttributeError, OSError):
+                pass
+            raise MonitorUnavailable(detail) from None
+        except (OSError, ValueError) as error:
+            raise MonitorUnavailable('月首周 Bark 开关暂未生效，请稍后重试') from error
+        with self._lock:
+            self._cache.pop('month-first-week-1618', None)
+        return self.month_first_week_1618()

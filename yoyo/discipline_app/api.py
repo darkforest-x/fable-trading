@@ -66,6 +66,15 @@ class PushDevice(BaseModel):
     environment: Literal['development', 'production']
     fib: StrictBool = True
     alarm: StrictBool = True
+    month_first_week_touch: StrictBool = True
+
+
+class PushPreferences(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    token: str = Field(pattern=r'^[0-9a-f]{64,200}$')
+    fib: StrictBool = True
+    alarm: StrictBool = True
+    month_first_week_touch: StrictBool = True
 
 
 class PushRemove(BaseModel):
@@ -276,9 +285,18 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
     @app.post('/v1/push/device', dependencies=[Depends(auth)])
     def push_device(body: PushDevice):
         try:
-            return app.state.push.register(body.token, body.environment, body.fib, body.alarm)
+            return app.state.push.register(body.token, body.environment, body.fib, body.alarm,
+                                           body.month_first_week_touch)
         except PushUnavailable as error:
             raise HTTPException(422, str(error)) from None
+
+    @app.post('/v1/push/preferences', dependencies=[Depends(auth)])
+    def push_preferences(body: PushPreferences):
+        """Update this phone's notification permissions without re-registering its APNs token."""
+        try:
+            return app.state.push.set_preferences(body.token, body.fib, body.alarm, body.month_first_week_touch)
+        except PushUnavailable as error:
+            raise HTTPException(409, str(error)) from None
 
     @app.post('/v1/push/device/remove', dependencies=[Depends(auth)])
     def push_remove(body: PushRemove):
@@ -304,6 +322,37 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
             return app.state.monitor.notifications()
         except MonitorUnavailable as error:
             raise HTTPException(503, str(error)) from None
+
+    @app.get('/v1/notifications', dependencies=[Depends(auth)])
+    def unified_notifications():
+        """New-client inbox; the legacy monitor route intentionally remains byte-compatible."""
+        try:
+            snapshot = app.state.monitor.notifications()
+        except MonitorUnavailable as error:
+            raise HTTPException(503, str(error)) from None
+        try:
+            month_snapshot = app.state.monitor.month_first_week_1618()
+        except (MonitorUnavailable, AttributeError):
+            # Existing alarms and weekly touches remain available while the additive monthly source starts.
+            return snapshot
+        return app.state.push.enrich_notifications(snapshot, month_snapshot)
+
+    @app.get('/v1/monitor/month-first-week-1618', dependencies=[Depends(auth)])
+    def monitor_month_first_week_1618():
+        try:
+            return app.state.monitor.month_first_week_1618()
+        except MonitorUnavailable as error:
+            raise HTTPException(503, str(error)) from None
+
+    @app.post('/v1/monitor/month-first-week-1618/bark', dependencies=[Depends(auth)])
+    def monitor_month_first_week_bark(body: BarkSwitch):
+        """Change only the monthly-touch Bark switch; the loopback monitor owns delivery and dedupe."""
+        try:
+            month_snapshot = app.state.monitor.set_month_first_week_bark(body.enabled)
+            snapshot = app.state.monitor.notifications()
+            return app.state.push.enrich_notifications(snapshot, month_snapshot)
+        except MonitorUnavailable as error:
+            raise HTTPException(409, str(error)) from None
 
     # The single monitor write (owner 2026-11-06): switch 1.618 Bark pushes. No order or ledger effect.
     @app.post('/v1/monitor/fib-bark', dependencies=[Depends(auth)])
