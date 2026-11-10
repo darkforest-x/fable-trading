@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-alt-month-first-week-quarter-reclaim-20261110-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 784255fc1b
+    status: inconclusive
+    question: Does the first 15-minute close back below the monthly upper extension improve on waiting for one hourly close?
+    single_variable: Change the reclaim clock on identical recorded upper touches with full local quarter-hour coverage. Both arms enter at next open and use 15-minute OHLC, the original near target capped at 4%, original 5% stop and 168-hour timeout.
+    result: Of 2767 recorded upper touches 629 qualified across 52 names through June 2026. Later 217 opportunities, all 205 quarter-hour trades average +0.17445% versus all 194 hourly trades +0.21787%. In the 194 shared entries +0.38882% versus +0.21787%; the 11 quarter-only trades average -3.60639% with nine stops. Early 21 quarter-only average -3.57875%. Do not use later hourly eligibility to filter an earlier fill.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-alt-month-first-week-quarter-reclaim-20261110-v1/summary.json
+    notes: Later stress with adverse 5bp per market fill +0.10462% (15m) and +0.19255% (H1). Paired later difference +0.17095pp, 95% NY-month bootstrap interval -0.29310 to +0.45628; per-trade independent returns, funding excluded. Notion 4148856479af8174a908e1e6388cc6ba.
+
   - experiment_id: exp-alt-month-first-week-be2-20261110-v1
     source_repo: darkforest-x/fable-trading
     source_commit: d00d55fbb2
