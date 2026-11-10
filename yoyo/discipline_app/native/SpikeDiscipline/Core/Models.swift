@@ -34,12 +34,23 @@ struct PaperAccount: Codable, Identifiable, Hashable {
     var title: String? = nil
     var kind: String? = nil
     var pnl: Double? = nil
+    var unrealizedPnl: Double? = nil
+    var markedEquity: Double? = nil
+    var markedPnl: Double? = nil
+    var markedReturnPct: Double? = nil
     var refilled: Bool? = nil
     var openCount: Int? = nil
+    var slotCount: Int? = nil
+    var phase: String? = nil
+    var heartbeatMs: Double? = nil
     var breadthRule: BreadthRule? = nil
     var hold: Hold? = nil
     var id: String { key }
     var isBreadth: Bool { kind == "breadth" }
+    var isCloud: Bool { kind == "cloud" || key == "live-cloud-v17" }
+    var displayEquity: Double? { isCloud ? markedEquity ?? equity : equity }
+    var displayPnl: Double? { isCloud ? markedPnl ?? pnl : pnl }
+    var displayReturnPct: Double? { isCloud ? markedReturnPct ?? returnPct : returnPct }
     var subtitle: String { title ?? "" }
 }
 
@@ -109,12 +120,26 @@ struct PaperSnapshot: Codable {
         let closed: [PaperPosition]
         var touches: [PaperSignal]? = nil
         var breadthSignals: [BreadthSignal]? = nil
+        var cloudEvents: [CloudEvent]? = nil
     }
     let nowMs: Double
     let accounts: [PaperAccount]
     let detail: Detail
     let signals: [PaperSignal]
     var research: [ResearchStrategy]? = nil
+    var equityBasis: String? = nil
+}
+
+/// Read-only signal-filter outcome from the independent cloud-v17 paper account.
+struct CloudEvent: Codable, Hashable, Identifiable {
+    let id: Double?
+    let symbol: String
+    let side: Side
+    let status: String
+    let reason: String?
+    let timeMs: Double?
+    let entryPrice: Double?
+    var rowId: String { "\(Int(id ?? timeMs ?? 0))-\(symbol)-\(status)" }
 }
 
 /// Older records of one account (before today), 50 per page.

@@ -227,9 +227,10 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
             raise HTTPException(503, str(error)) from None
 
     @app.get('/v1/monitor/booklet', dependencies=[Depends(auth)])
-    def monitor_booklet(track: str = Query(pattern=r'^[a-z0-9-]{1,20}$')):
+    def monitor_booklet(track: str = Query(pattern=r'^[a-z0-9-]{1,20}$'),
+                        view: Literal['legacy', 'native-v2'] = 'legacy'):
         try:
-            return app.state.monitor.booklet(track)
+            return app.state.monitor.booklet(track, view=view)
         except MonitorUnavailable as error:
             raise HTTPException(503, str(error)) from None
 
@@ -243,7 +244,11 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
 
     @app.get('/v1/monitor/backtest/candles', dependencies=[Depends(auth)])
     def monitor_backtest_candles(track: str = Query(pattern=r'^[a-z0-9-]{1,20}$'), trade: int = Query(gt=0, lt=10_000_000_000),
-                                 period: Literal['5m', '15m', '1H', '4H'] = '1H'):
+                                 period: Literal['5m', '15m', '1H', '4H', '12H'] = '1H'):
+        if track == 'live-cloud-v17' and period != '12H':
+            raise HTTPException(422, '云带历史仅提供原始 12H K 线')
+        if track != 'live-cloud-v17' and period == '12H':
+            raise HTTPException(422, '这个策略没有 12H 回放数据')
         try:
             return app.state.monitor.backtest_candles(track, trade, period)
         except MonitorUnavailable as error:

@@ -12,7 +12,9 @@ from yoyo.discipline_app.book import Book
 from yoyo.discipline_app.monitor_feed import (MonitorFeed, MonitorUnavailable, TRACKS, project_alerts,
                                               project_cloud, project_notifications, project_paper,
                                               project_paper_history, project_touch_scores)
-from yoyo.discipline_app.strategy_book import downsample, project_breadth_ema20
+from yoyo.discipline_app.strategy_book import (BookUnavailable, downsample, project_breadth_ema20,
+                                               project_cloud_backtest, project_cloud_booklet,
+                                               project_cloud_candles, project_history)
 from test_discipline_service import Clock, market
 
 TOKEN = 'monitor-fixture-token-not-a-secret-0123456789'
@@ -115,6 +117,77 @@ def booklet_history_raw():
                 max_drawdown_pct=4.0, win_pct=60.0, trades=40, profit_factor=1.5, profit_factor_state='finite'),
                 distribution=dict(labels=[], values=[]), holding=dict(labels=[], values=[]), sides=[['做多', 20, 60.0, 100.0]],
                 recent=[], source_commit='deadbeef')
+
+
+def cloud_forward_raw():
+    return dict(schema_version='live-cloud-v17.v1', strategy_id='live-cloud-v17', mode='paper', phase='running',
+                heartbeat_ms=1_790_000_200_000, started_ms=1_790_000_000_000,
+                rule={'private_or_order_api': True, 'secret': 'discard'}, health={'error': 'discard'},
+                account=dict(start_equity=1000.0, equity=1025.0, realized_pnl=5.0, unrealized_pnl=20.0,
+                             net_pnl=25.0, return_pct=2.5, open_position_count=1, slot_count=9),
+                positions=[dict(event_id='private-event', symbol='AAA-USDT-SWAP', side=1, status='open',
+                                entry_ms=1_790_000_100_000, entry_price=10.0, mark_price=12.0, remaining_qty=10.0,
+                                initial_notional_usdt=2000.0, stop_price=9.0, target_2r_expiry_ms=1_790_100_000_000,
+                                private='discard')],
+                recent_trades=[dict(symbol='BBB-USDT-SWAP', side=-1, status='closed', entry_ms=1_790_000_000_000,
+                                    entry_price=2.0, exit_price=1.9, exit_ms=1_790_000_100_000,
+                                    initial_notional_usdt=1000.0, realized_pnl=12.0, exit_reason='take_profit')],
+                recent_decisions=[dict(symbol='AAA-USDT-SWAP', side=1, status='opened', reason='accepted',
+                                       confirmed_ms=1_790_000_090_000, first_observed_ms=1_790_000_095_000,
+                                       entry_price=10.0, secret='discard')], recent_fills=[{'secret': 'discard'}])
+
+
+def cloud_guide_raw():
+    return dict(title='云带 v1.7 · 12H 逆向', intro='先检查趋势与周一轨道。',
+                facts=[dict(label='同时持仓', value='9', unit='个币')],
+                flow=[dict(title='等收盘', text='12H 收盘确认。')],
+                direction=dict(headers=['检查', '做多', '做空'], rows=[['EMA', 'EMA20 > EMA50', 'EMA20 < EMA50']]),
+                cases=[dict(id='cloud-v17-000001', title='示例案例', text='案例说明全文。')],
+                risk=['风险口径全文。'], sources=['OKX 12H 来源说明。'])
+
+
+def cloud_history_raw():
+    points = [[1_700_000_000_000 + i * 3_600_000, 1000.0 + i, float(i), -57.8293 if i == 501 else -float(i % 7), 1000.0]
+              for i in range(1000)]
+    return dict(schema=1, meta=dict(track='live-cloud-v17', basis='hourly_marked',
+                                  note='OKX 12H hourly marked source.'), refilled=False, points=points,
+                summary=dict(start=1000.0, end=1999.0, pnl=999.0, return_pct=99.9, max_drawdown_pct=57.8293,
+                             win_pct=21.0, trades=1252, profit_factor=1.4235, profit_factor_state='finite'),
+                yearly=[['2026', 20.0]], monthly=[['2026-11', 3.0]], sides=[['做多', 600, 21.0, 100.0]])
+
+
+def cloud_overview_raw():
+    return dict(metrics=dict(final_usdt=147590.50, payoff_usdt=5.35, grossProfitFactor=1.4235,
+                             dd_mark_pct=57.8293, dd_bound_pct=58.54, trades=1252, win_pct=21.0))
+
+
+def cloud_manifest_raw():
+    return dict(schemaVersion=1, strategyId='cloud-v17-history', tradeCount=1,
+                account=dict(netPnl=146590.5), source={}, chartWindow={'timeframe': '12h'},
+                dataQuality={'tradesWithMissing12hBars': 1}, records=[dict(
+                    id='cloud-v17-000001', symbol='AAA', side=1, entryMs=1_700_000_000_000,
+                    exitMs=1_700_086_400_000, entryPrice=10.0, exitPrice=11.0,
+                    netPnl=30.0, netReturnPct=3.0, exitReason='take_profit', exitReasonLabel='止盈',
+                    dataUrl='events/cloud-v17-000001.json.gz')])
+
+
+def cloud_event_raw():
+    start, end = 1_700_000_000_000, 1_700_086_400_000
+    return dict(schemaVersion=1, id='cloud-v17-000001', symbol='AAA', side=1,
+                symbolDataUrl='../symbols/AAA.json.gz', entryMs=1_700_000_000_000, entryPrice=10.0,
+                exitMs=1_700_086_400_000, exitPrice=11.0,
+                window=dict(timeframe='12h', startMs=start, endMs=end, expectedBars=3, availableBars=3, missingBars=0),
+                entryEvidence=dict(fixedStopPrice=9.0, twoRPrice=12.0,
+                                   rails=dict(selectedSideRailPrice=9.5)))
+
+
+def cloud_symbol_raw():
+    start = 1_700_000_000_000
+    return dict(schemaVersion=1, symbol='AAA', timeframe='12h',
+                columns=['timeMs', 'open', 'high', 'low', 'close', 'ema20', 'ema50', 'emaCount', 'emaReady'],
+                rows=[[start, 10.0, 11.0, 9.0, 10.5, 10.1, 10.2, 100, True],
+                      [start + 43_200_000, 10.5, 12.0, 10.0, 11.0, 10.3, 10.3, 101, True],
+                      [start + 86_400_000, 11.0, 12.0, 10.5, 11.5, 10.5, 10.4, 102, True]])
 
 
 def backtest_raw():
@@ -394,6 +467,84 @@ def test_strategy_frame_routes_project_booklet_backtest_and_candles_without_inte
     assert any(isinstance(c, str) and 'history?' in c and 'tab=events' in c and 'scope=all' in c for c in calls)
     after = book.snapshot()
     assert before['positions'] == after['positions'] and before['pending'] == after['pending']
+
+
+def test_cloud_forward_projection_keeps_legacy_realized_fields_and_adds_marked_values():
+    payload = cloud_forward_raw()
+    calls = []
+    def fetch(path, body=None):
+        calls.append(path)
+        if path == '/static/strategy-booklet/live-cloud-v17-forward.json':
+            return payload
+        raise KeyError(path)
+
+    feed = MonitorFeed(fetch, ttl=60)
+    snapshot = feed.paper('live-cloud-v17')
+    account = snapshot['accounts'][0]
+    assert snapshot['equity_basis'] == 'realized'
+    assert (account['equity'], account['pnl'], account['return_pct']) == (1005.0, 5.0, .5)
+    assert (account['marked_equity'], account['marked_pnl'], account['unrealized_pnl']) == (1025.0, 25.0, 20.0)
+    assert account['open_count'] == 1 and snapshot['detail']['open'][0]['unrealized_bp'] == 100.0
+    assert snapshot['detail']['closed'][0]['reason'] == 'take_profit'
+    assert snapshot['detail']['cloud_events'][0]['status'] == 'opened'
+    assert not set(walk(snapshot)) & {'private', 'private_or_order_api', 'recent_fills', 'secret', 'rule', 'health'}
+    assert calls == ['/static/strategy-booklet/live-cloud-v17-forward.json']
+
+
+def test_missing_cloud_asset_does_not_break_existing_paper_accounts():
+    def fetch(path, body=None):
+        if path.startswith('/api/monday-reclaim-paper?'):
+            return paper_raw()
+        if path == '/static/strategy-booklet/live-cloud-v17-forward.json':
+            raise OSError('404')
+        raise KeyError(path)
+
+    snapshot = MonitorFeed(fetch, ttl=60).paper('live-wick6x3')
+    assert snapshot['detail']['key'] == 'live-wick6x3'
+    assert snapshot['equity_basis'] == 'realized'
+    assert not any(a['key'] == 'live-cloud-v17' for a in snapshot['accounts'])
+
+
+def test_cloud_booklet_is_hourly_marked_and_legacy_view_withholds_misleading_curve():
+    history = cloud_history_raw()
+    guide, overview = cloud_guide_raw(), cloud_overview_raw()
+    current = project_cloud_booklet(guide, overview, history)
+    assert current['history']['drawdown_basis'] == 'hourly_marked'
+    assert current['history']['summary']['max_drawdown_pct'] == 57.8293
+    assert current['history']['summary']['max_drawdown_bound_pct'] == 58.54
+    assert max(len(current['history']['points']), 0) <= 480
+    assert min(p[2] for p in current['history']['points']) == -57.829
+    assert next(f for f in current['facts'] if f['label'] == '金额盈亏比')['value'] == '5.35'
+    assert current['research']['table']['headers'] == ['检查', '做多', '做空']
+    assert current['research']['risk'] == guide['risk'] and current['research']['sources'] == guide['sources']
+
+    old = project_cloud_booklet(guide, overview, history, include_hourly_curve=False)
+    assert old['history'] is None and '升级' in old['history_error'] and '12H' in old['history_error']
+    assert old['research']['table']['headers'] == ['历史指标', '值']
+    assert any(section['title'] == '入场条件 · 多空方向' for section in old['research']['sections'])
+    assert old['flow'] == current['flow']
+
+
+def test_cloud_backtest_and_12h_chart_keep_original_timestamps_columns_and_price_levels():
+    manifest = cloud_manifest_raw()
+    overview = cloud_overview_raw()
+    page = project_cloud_backtest(manifest, 'live-cloud-v17', overview=overview)
+    assert page['total'] == 1 and page['rows'][0]['id'] == 1
+    assert page['rows'][0]['side'] == 'long' and page['rows'][0]['exit_reason_label'] == '止盈'
+    assert '58.54%' in page['meta']['limitation']
+
+    event, symbol = cloud_event_raw(), cloud_symbol_raw()
+    chart = project_cloud_candles(event, symbol, manifest['records'][0], 'live-cloud-v17', 1)
+    assert chart['bar'] == '12H' and len(chart['candles']) == 3
+    assert chart['candles'][-1]['time'] == event['window']['endMs']  # endMs is inclusive
+    assert chart['candles'][1]['ema20'] == 10.3
+    assert chart['expected_bars'] == chart['available_bars'] == 3 and chart['missing_bars'] == 0
+    assert [x['title'] for x in chart['references']] == ['入场', '退出', '固定止损', '2R', '信号侧周一轨道']
+
+    malformed = dict(symbol, columns=list(symbol['columns']))
+    malformed['columns'][5] = 'ema21'
+    with pytest.raises(BookUnavailable, match='字段'):
+        project_cloud_candles(event, malformed, manifest['records'][0], 'live-cloud-v17', 1)
 
 
 def test_alarm_projection_keeps_every_coin_and_the_trigger_count():

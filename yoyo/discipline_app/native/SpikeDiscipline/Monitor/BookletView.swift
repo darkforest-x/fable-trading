@@ -63,7 +63,9 @@ struct BookletView: View {
         .toolbar { if showsClose { ToolbarItem(placement: .topBarTrailing) { CloseButton { dismiss() } }.sharedBackgroundVisibility(.hidden) } }
         .task(id: attempt) {
             do {
-                let value: Booklet = try await API.get("/v1/monitor/booklet", query: [URLQueryItem(name: "track", value: key)], connection: connection)
+                var query = [URLQueryItem(name: "track", value: key)]
+                if key == "live-cloud-v17" { query.append(URLQueryItem(name: "view", value: "native-v2")) }
+                let value: Booklet = try await API.get("/v1/monitor/booklet", query: query, connection: connection)
                 withAnimation(.snappy) { data = value; error = nil }
             } catch is CancellationError {
             } catch { self.error = error.localizedDescription }
@@ -173,8 +175,17 @@ struct BookletView: View {
                 SoftSegment(selection: $span, options: Span.allCases.map { ($0, $0.title) }, height: 32)
                 equityChart(h)
                 if let note = h.note { Text(note).font(.caption2).foregroundStyle(Color.muted).fixedSize(horizontal: false, vertical: true) }
-                Text(h.drawdownBasis == "marked" ? "曲线按平仓结算；上方最大回撤按每 5 分钟盯市。" : "曲线按平仓结算，不含持仓浮盈亏；回撤为相对历史高点的已实现回撤。")
-                    .font(.caption2).foregroundStyle(Color.muted)
+                if h.drawdownBasis == "hourly_marked" {
+                    Text("净值含浮盈亏，回撤按小时内可重建的最深阶段。")
+                        .font(.caption2).foregroundStyle(Color.muted)
+                    if let bound = h.summary.maxDrawdownBoundPct {
+                        Text("小时高低价估值回撤上界 \(StrategyFmt.number(bound))%。")
+                            .font(.caption2).foregroundStyle(Color.muted)
+                    }
+                } else {
+                    Text(h.drawdownBasis == "marked" ? "曲线按平仓结算；上方最大回撤按每 5 分钟盯市。" : "曲线按平仓结算，不含持仓浮盈亏；回撤为相对历史高点的已实现回撤。")
+                        .font(.caption2).foregroundStyle(Color.muted)
+                }
                 if !h.yearly.isEmpty { yearly(h) }
                 if let sides = h.sides { ResearchTableView(table: ResearchTable(title: h.drawdownBasis == "marked" ? "分支表现" : "多空表现", headers: sides.headers, rows: sides.rows)) }
             } else {
@@ -186,13 +197,16 @@ struct BookletView: View {
 
     private func metrics(_ h: Booklet.History) -> some View {
         let s = h.summary
-        let items: [(String, String, Color)] = [
+        var items: [(String, String, Color)] = [
             (h.refilled ? "交易净盈亏" : "累计净收益", h.refilled ? StrategyFmt.signedMoney(s.pnl) + " U" : Fmt.signedPercent(s.returnPct, digits: 1), Fmt.tone(h.refilled ? s.pnl : s.returnPct).color),
-            (h.drawdownBasis == "marked" ? "盯市回撤" : "最大回撤", s.maxDrawdownPct.map { StrategyFmt.number($0) + "%" } ?? "—", .down),
+            (h.drawdownBasis == "hourly_marked" ? "小时阶段回撤" : h.drawdownBasis == "marked" ? "盯市回撤" : "最大回撤", s.maxDrawdownPct.map { StrategyFmt.number($0) + "%" } ?? "—", .down),
             ("胜率", s.winPct.map { StrategyFmt.number($0) + "%" } ?? "—", .ink),
             ("已平仓", s.trades.map { "\(Int($0)) 笔" } ?? "—", .ink),
             ("盈利因子", s.noLosses == true ? "∞" : s.profitFactor.map { StrategyFmt.number($0, digits: 2) } ?? "—", .ink),
             ("期末资金", s.end.map { Fmt.money($0) + " U" } ?? "—", .ink)]
+        if h.drawdownBasis == "hourly_marked", let bound = s.maxDrawdownBoundPct {
+            items.insert(("回撤上界", StrategyFmt.number(bound) + "%", .down), at: 2)
+        }
         return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
             ForEach(items, id: \.0) { item in
                 VStack(alignment: .leading, spacing: 3) {
@@ -298,6 +312,13 @@ struct BookletView: View {
                 if let detail = r.detail { Text(detail).font(.caption2).foregroundStyle(Color.muted).fixedSize(horizontal: false, vertical: true) }
                 if let controls = r.controls { ResearchTableView(table: ResearchTable(title: "同条件随机入场对照", note: controls.note, headers: controls.headers, rows: controls.rows)) }
                 ForEach(Array(r.sections.enumerated()), id: \.offset) { _, section in ResearchTableView(table: section) }
+                if let cases = r.cases, !cases.isEmpty {
+                    ForEach(Array(cases.enumerated()), id: \.offset) { _, item in
+                        BookletTextCard(title: item.title, text: item.text)
+                    }
+                }
+                if let risks = r.risk, !risks.isEmpty { BookletTextList(title: "风险与边界", items: risks) }
+                if let sources = r.sources, !sources.isEmpty { BookletTextList(title: "数据来源与口径", items: sources) }
                 if let m = r.methodology { Text(m).font(.caption2).foregroundStyle(Color.muted).fixedSize(horizontal: false, vertical: true) }
                 if let p = r.periodNote { Text(p).font(.caption2).foregroundStyle(Color.muted).fixedSize(horizontal: false, vertical: true) }
             } else {
@@ -314,6 +335,35 @@ struct BookletView: View {
             }
             .buttonStyle(.pill(.tinted(.accentColor), height: 44))
         }
+    }
+}
+
+private struct BookletTextCard: View {
+    let title: String
+    let text: String
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(Color.ink)
+            Text(text).font(.footnote).foregroundStyle(Color.muted).fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading).padding(12)
+        .background(Color.field.opacity(0.7), in: .rect(cornerRadius: 14))
+    }
+}
+
+private struct BookletTextList: View {
+    let title: String
+    let items: [String]
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(Color.ink)
+            ForEach(Array(items.enumerated()), id: \.offset) { index, text in
+                Text(text).font(.footnote).foregroundStyle(Color.muted).fixedSize(horizontal: false, vertical: true)
+                if index < items.count - 1 { Divider() }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading).padding(12)
+        .background(Color.field.opacity(0.7), in: .rect(cornerRadius: 14))
     }
 }
 

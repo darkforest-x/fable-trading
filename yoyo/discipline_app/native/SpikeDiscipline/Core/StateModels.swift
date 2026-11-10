@@ -253,6 +253,10 @@ struct Candle: Hashable, Identifiable {
     let close: Double
     let volume: Double
     let confirmed: Bool
+    /// Frozen OKX cloud-v17 source values; nil for ordinary live-market candles.
+    var ema20: Double? = nil
+    var ema50: Double? = nil
+    var emaReady: Bool? = nil
     var id: Double { time }
 
     static let maxCount = 2000

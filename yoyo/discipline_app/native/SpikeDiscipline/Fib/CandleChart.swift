@@ -740,6 +740,14 @@ enum Indicators {
     static func cloud(_ bars: [Candle], step: Double) -> [(a: Double, b: Double)?] {
         var out: [(a: Double, b: Double)?] = [], a = 0.0, b = 0.0, last: Double?
         for bar in bars {
+            if bar.emaReady == false {
+                out.append(nil); a = 0; b = 0; last = bar.time
+                continue
+            }
+            if let ema20 = bar.ema20, let ema50 = bar.ema50, ema20.isFinite, ema50.isFinite {
+                out.append((ema20, ema50)); a = ema20; b = ema50; last = bar.time
+                continue
+            }
             if last.map({ bar.time - $0 != step }) ?? true { a = bar.close; b = bar.close }
             a += (bar.close - a) * 2 / 21; b += (bar.close - b) * 2 / 51; last = bar.time
             out.append((a, b))

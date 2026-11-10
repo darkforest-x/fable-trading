@@ -18,6 +18,7 @@ Boundary rules (enforced here, not in the client):
   signal: cloud signals were rejected as a score on all timeframes (2026-11-05)
   and are shown for observation only.
 """
+import gzip
 import json
 import math
 import re
@@ -27,7 +28,8 @@ from urllib.parse import urlencode
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from .strategy_book import (BookUnavailable, project_backtest, project_booklet, project_breadth_ema20,
-                            project_candles, project_history)
+                            project_candles, project_cloud_backtest, project_cloud_booklet, project_cloud_candles,
+                            project_history)
 
 SOURCE = 'http://127.0.0.1:8766'
 SYMBOL = re.compile(r'[A-Z0-9]{1,40}-USDT-SWAP')
@@ -39,11 +41,13 @@ TRACK_KEY = re.compile(r'[a-z0-9][a-z0-9-]{0,19}')
 LIVE_TRACKS = ('live-breadth', 'live-allin3', 'live-wick6x3', 'live-wick6x3mid', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far')
 REPLICA_TRACKS = ('spike', 'v3add20', 'allin3', '60', '5', 'v3', 'v3add', 'v3lock')
 TRACKS = LIVE_TRACKS + REPLICA_TRACKS
+CLOUD_TRACK = 'live-cloud-v17'
 LABELS = {'60': '60m', '5': '5m', 'breadth-ema20': '全市场下轨反弹'}
 # Subtitles copied from reclaim-strategy-book.js TITLES (display text only).
 TITLES = {'live-breadth': '全市场宽度信号 · SOL 计资金', 'live-wick6x3': '插针收盘 · 6份3倍', 'live-wick3x3': '插针收盘 · 3份3倍',
           'live-wick6x3mid': '浅穿中点 · 6份3倍', 'live-wick6x3hi': '插针收盘 · 6份3倍 · 高分加仓', 'live-wick3x3far': '插针收盘 · 3份3倍 · 离1.618≥1.5%',
           'live-allin3': '触价前评分 · 模拟运行', '60': '等待回收', '5': '快速确认', 'v3': '分数决定目标', 'v3add': '逆向分步加仓',
+          'live-cloud-v17': '云带 v1.7 · 12H 逆向',
           'spike': '排列过滤插针', 'v3lock': '回收后锁住利润', 'allin3': '单仓 · 梭哈3倍', 'v3add20': '20份动态保证金 · 3倍加仓'}
 # Strategies with a research booklet but no forward paper account (owner 2026-11-09: “也要能看小册”).
 RESEARCH = (dict(key='breadth-ema20', label='全市场下轨反弹', title='BTC + 山寨篮子 · 只有研究小册，无前向账户'),)
@@ -188,10 +192,15 @@ def _keep(row, breadth):
     return breadth and row.get('note') == 'comparison'
 
 
-def project_paper(raw, track):
+def project_paper(raw, track, cloud=None):
     try:
         tracks = raw['tracks']
         accounts = [_account(key, tracks[key], raw.get(key)) for key in ordered_tracks(tracks)]
+        if isinstance(cloud, dict) and not any(a['key'] == 'live-cloud-v17' for a in accounts):
+            accounts.append({k: v for k, v in cloud.items() if k not in ('positions', 'closed', 'decisions')})
+            rank = {key: float(i) for i, key in enumerate(TRACKS)}
+            rank[CLOUD_TRACK] = rank.get('live-breadth', 0) + 0.5
+            accounts.sort(key=lambda a: rank.get(a['key'], len(rank)))
         if not accounts:
             raise ValueError('no paper accounts')
         if track not in tracks or not isinstance(tracks[track], dict):
@@ -211,7 +220,7 @@ def project_paper(raw, track):
         signals = [b for b in (_breadth_signal(r) for r in config.get('signals') or []) if b] if breadth else []
         signals.sort(key=lambda s: -(s['candle_ms'] or 0))
         # Monitor equity excludes floating P&L (monday-reclaim-paper.js header note).
-        return dict(now_ms=_ms(raw['now_ms']), paper_only=True, equity_basis='realized', accounts=accounts,
+        return dict(now_ms=_ms(raw['now_ms']), paper_only=True, equity_basis='mixed' if isinstance(cloud, dict) else 'realized', accounts=accounts,
                     research=[dict(r) for r in RESEARCH],
                     detail=dict(key=track, open=rows('open', False), closed=rows('closed', True),
                                 touches=[] if breadth else own[:MAX_ROWS], breadth_signals=signals[:MAX_ROWS]),
@@ -364,6 +373,8 @@ def _http(path, body=None):
         # Saved backtest K-lines and the frozen breadth ledger are slow first reads on the monitor.
         slow = path.startswith('/api/strategy-backtest') or path.startswith('/static/')
         with urlopen(SOURCE + path, timeout=30 if slow else 4) as response:
+            if path.endswith('.json.gz'):
+                return json.loads(gzip.decompress(response.read()))
             return json.load(response)
     # The monitor guards its switch with a same-origin check meant for browsers on the public
     # tunnel; this authenticated loopback service is a trusted same-host client.
@@ -411,11 +422,100 @@ class MonitorFeed:
         path = '/api/monday-reclaim-paper?' + urlencode(dict(list_period='today', track=track))
         return self._read('raw:' + path, None, lambda: self._fetch(path))
 
+    def _asset(self, path):
+        """Read one published JSON or gzip JSON asset through the injectable monitor source."""
+        value = self._fetch(path)
+        if isinstance(value, (bytes, bytearray)):
+            payload = gzip.decompress(value) if path.endswith('.json.gz') else bytes(value)
+            return json.loads(payload)
+        if not isinstance(value, dict):
+            raise MonitorUnavailable('策略数据文件格式无效')
+        return value
+
+    @staticmethod
+    def _cloud_account(raw):
+        if (not isinstance(raw, dict) or raw.get('schema_version') != 'live-cloud-v17.v1' or
+                raw.get('strategy_id') != 'live-cloud-v17' or raw.get('mode') != 'paper'):
+            raise MonitorUnavailable('云带模拟账户版本不匹配')
+        account = raw.get('account') if isinstance(raw.get('account'), dict) else {}
+        marked_equity, start = _num(account.get('equity')), _num(account.get('start_equity'))
+        marked_pnl, realized, floating = (_num(account.get('net_pnl')), _num(account.get('realized_pnl')),
+                                          _num(account.get('unrealized_pnl')))
+        if marked_equity is None or start is None or start <= 0 or marked_pnl is None or realized is None or floating is None:
+            raise MonitorUnavailable('云带模拟净值暂不可用')
+        opened = [p for p in (raw.get('positions') or []) if isinstance(p, dict) and p.get('status') == 'open']
+        closed = [p for p in (raw.get('recent_trades') or []) if isinstance(p, dict) and p.get('status') == 'closed']
+        decisions = [d for d in (raw.get('recent_decisions') or []) if isinstance(d, dict)]
+        return dict(key='live-cloud-v17', label='live-cloud-v17', title='云带 v1.7 · 12H 逆向',
+                    group='live', kind='cloud', equity=start + realized, start_equity=start, pnl=realized,
+                    return_pct=100 * realized / start, marked_equity=marked_equity, marked_pnl=marked_pnl,
+                    marked_return_pct=_num(account.get('return_pct')), unrealized_pnl=floating,
+                    started_ms=_ms(raw.get('started_ms')), heartbeat_ms=_ms(raw.get('heartbeat_ms')),
+                    phase=raw.get('phase') if raw.get('phase') in ('running', 'watching', 'paused', 'degraded', 'stopped') else 'unknown',
+                    open_count=_ms(account.get('open_position_count')) or 0, slot_count=_ms(account.get('slot_count')),
+                    stats=dict(closed=None, wins=None, mean_net_bp=None, win_pct=None),
+                    positions=opened[:MAX_ROWS], closed=closed[:MAX_ROWS], decisions=decisions[:MAX_ROWS])
+
+    @staticmethod
+    def _cloud_position(row, closed=False):
+        symbol, side = _symbol(row.get('symbol')), _side(row.get('side'))
+        entry_ms = _ms(row.get('entry_ms'))
+        entry, mark = _num(row.get('entry_price')), _num(row.get('mark_price'))
+        if not symbol or not side or entry_ms is None or entry is None:
+            return None
+        notional = _num(row.get('initial_notional_usdt'))
+        remaining = _num(row.get('remaining_qty'))
+        pnl = _num(row.get('realized_pnl'))
+        if closed:
+            exit_price, exit_ms = _num(row.get('exit_price')), _ms(row.get('exit_ms'))
+            return dict(id=entry_ms, symbol=symbol, side=side, entry=entry, target=None, stage='closed', funded=True,
+                        notional=notional, fill_ms=entry_ms, score=None, exit_price=exit_price, exit_ms=exit_ms,
+                        reason=str(row.get('exit_reason') or '')[:40],
+                        net_bp=pnl / notional * 10_000 if pnl is not None and notional and notional > 0 else None,
+                        pnl=pnl)
+        unrealized = (1 if side == 'long' else -1) * (mark - entry) * remaining if mark is not None and remaining is not None else None
+        return dict(id=entry_ms, symbol=symbol, side=side, entry=entry, target=None, stage='open', funded=True,
+                    notional=notional, fill_ms=entry_ms, score=None, mark=mark,
+                    unrealized_bp=unrealized / notional * 10_000 if unrealized is not None and notional and notional > 0 else None,
+                    remaining_notional=mark * remaining if mark is not None and remaining is not None else None,
+                    stop=_num(row.get('stop_price')), due_ms=_ms(row.get('target_2r_expiry_ms')))
+
+    @classmethod
+    def _cloud_paper_snapshot(cls, raw):
+        account = cls._cloud_account(raw)
+        opened = [p for p in (cls._cloud_position(r) for r in account.pop('positions')) if p]
+        closed = [p for p in (cls._cloud_position(r, True) for r in account.pop('closed')) if p]
+        decisions = []
+        for row in account.pop('decisions'):
+            symbol, side = _symbol(row.get('symbol')), _side(row.get('side'))
+            when = _ms(row.get('first_observed_ms') or row.get('confirmed_ms'))
+            if symbol and side and when:
+                decisions.append(dict(id=when, symbol=symbol, side=side,
+                                      status=str(row.get('status') or 'unknown')[:32],
+                                      reason=str(row.get('reason') or '')[:80] or None,
+                                      time_ms=when, entry_price=_num(row.get('entry_price'))))
+        now = _ms(raw.get('heartbeat_ms')) or _ms(raw.get('started_ms')) or 0
+        return dict(now_ms=now, paper_only=True, equity_basis='realized', accounts=[account], research=[],
+                    detail=dict(key='live-cloud-v17', open=opened, closed=closed, touches=[], breadth_signals=[],
+                                cloud_events=decisions), signals=[])
+
     def paper(self, track):
         if not TRACK_KEY.fullmatch(track or ''):
             raise MonitorUnavailable('未知模拟账户')
+        if track == 'live-cloud-v17':
+            return self._read('cloud-paper', None, lambda: self._cloud_paper_snapshot(
+                self._asset('/static/strategy-booklet/live-cloud-v17-forward.json')))
         # Validated against the monitor's own tracks inside the projection (unknown → 503).
-        return self._read('paper:' + track, None, lambda: project_paper(self._raw_paper(track), track))
+        def load():
+            raw = self._raw_paper(track)
+            cloud = None
+            try:
+                cloud = self._cloud_account(self._asset('/static/strategy-booklet/live-cloud-v17-forward.json'))
+            except (MonitorUnavailable, OSError, ValueError, KeyError):
+                # A missing cloud asset must not take the existing 1.618 monitor off-line.
+                pass
+            return project_paper(raw, track, cloud)
+        return self._read('paper:' + track, None, load)
 
     def _breadth(self, track):
         raw = self._raw_paper(track)
@@ -427,17 +527,29 @@ class MonitorFeed:
         """Records before today (closed trades or touches/signals), newest first, 50 per page."""
         if not TRACK_KEY.fullmatch(track or '') or tab not in ('closed', 'events'):
             raise MonitorUnavailable('未知模拟账户')
+        if track == 'live-cloud-v17':
+            # The live snapshot deliberately publishes only the latest 30 fills and 20 decisions;
+            # the complete frozen 1,252-trade history is served by the booklet's backtest route.
+            return dict(track=track, tab=tab, total=0, has_more=False, now_ms=None, count=0,
+                        positions=[], touches=[], breadth_signals=[], cloud_events=[])
         breadth = self._breadth(track)
         scope = 'all' if tab == 'events' or breadth else 'funded'
         query = urlencode(dict(track=track, tab=tab, scope=scope, sort='time_desc', limit=50, offset=int(offset)))
         return self._read('/api/monday-reclaim-paper/history?' + query,
                           lambda raw: project_paper_history(raw, track, tab, breadth), ttl=30)
 
-    def booklet(self, track):
+    def booklet(self, track, view='legacy'):
         """Strategy booklet: overview facts, rules, saved equity path and the original research tables."""
         if track == 'breadth-ema20':
             return self._read('booklet:' + track, None, lambda: project_breadth_ema20(
                 self._fetch('/static/strategy-booklet/breadth-ema20-data.json')), ttl=600)
+        if track == 'live-cloud-v17':
+            def load_cloud_booklet():
+                guide = self._asset('/static/strategy-booklet/cloud-v17/guide.json')
+                overview = self._asset('/static/strategy-booklet/cloud-v17/overview.json')
+                history_raw = self._asset('/static/strategy-booklet/live-cloud-v17-history.json')
+                return project_cloud_booklet(guide, overview, history_raw, include_hourly_curve=view == 'native-v2')
+            return self._read('booklet:' + track + ':' + view, None, load_cloud_booklet, ttl=600)
         if not TRACK_KEY.fullmatch(track or ''):
             raise MonitorUnavailable('未知策略')
 
@@ -458,12 +570,41 @@ class MonitorFeed:
     def backtest(self, track, sort, direction, offset):
         if not TRACK_KEY.fullmatch(track or '') or sort not in ('time', 'pnl') or direction not in ('asc', 'desc'):
             raise MonitorUnavailable('未知策略')
+        if track == 'live-cloud-v17':
+            path = '/static/strategy-booklet/cloud-v17-history/manifest.json'
+            def project_cloud_page(value):
+                overview = self._asset('/static/strategy-booklet/cloud-v17/overview.json')
+                return project_cloud_backtest(value, track, sort, direction, offset, overview=overview)
+            return self._read(f'cloud-backtest:{sort}:{direction}:{offset}',
+                              project_cloud_page,
+                              load=lambda: project_cloud_page(self._asset(path)),
+                              ttl=600)
         query = urlencode(dict(track=track, sort=sort, direction=direction, offset=int(offset), limit=50))
         return self._read('/api/strategy-backtest?' + query, lambda v: project_backtest(v, track), ttl=300)
 
     def backtest_candles(self, track, trade, period):
-        if not TRACK_KEY.fullmatch(track or '') or period not in ('5m', '15m', '1H', '4H'):
+        if not TRACK_KEY.fullmatch(track or '') or (track == 'live-cloud-v17' and period != '12H') or (track != 'live-cloud-v17' and period not in ('5m', '15m', '1H', '4H')):
             raise MonitorUnavailable('未知策略')
+        if track == 'live-cloud-v17':
+            def load_cloud_chart():
+                base = '/static/strategy-booklet/cloud-v17-history'
+                manifest = self._asset(base + '/manifest.json')
+                records = manifest.get('records') if isinstance(manifest, dict) else None
+                record = next((r for r in records or [] if isinstance(r, dict) and r.get('id') == f'cloud-v17-{trade:06d}'), None)
+                if record is None:
+                    raise BookUnavailable('未找到这笔云带历史交易')
+                event_url = record.get('dataUrl')
+                if not isinstance(event_url, str) or not re.fullmatch(r'events/cloud-v17-[0-9]{6}\.json\.gz', event_url):
+                    raise BookUnavailable('云带交易事件引用无效')
+                event = self._read('cloud-event:' + event_url, lambda v: v,
+                                   load=lambda: self._asset(base + '/' + event_url), ttl=3600)
+                symbol = record.get('symbol')
+                if not isinstance(symbol, str) or not re.fullmatch(r'[A-Z0-9]{1,32}', symbol):
+                    raise BookUnavailable('云带交易币种无效')
+                symbol_data = self._read('cloud-symbol:' + symbol, lambda v: v,
+                                         load=lambda: self._asset(base + '/symbols/' + symbol + '.json.gz'), ttl=3600)
+                return project_cloud_candles(event, symbol_data, record, track, trade)
+            return self._read(f'cloud-candles:{trade}', None, load_cloud_chart, ttl=3600)
         query = urlencode(dict(track=track, trade=int(trade), period=period))
         return self._read('/api/strategy-backtest/candles?' + query,
                           lambda v: project_candles(v, track, int(trade)), ttl=600)

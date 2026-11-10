@@ -50,6 +50,7 @@ struct Booklet: Decodable {
     struct Summary: Decodable, Hashable {
         let start: Double?, end: Double?, pnl: Double?, returnPct: Double?, maxDrawdownPct: Double?, winPct: Double?
         let trades: Double?, profitFactor: Double?, noLosses: Bool?, cashAdded: Double?, avgWin: Double?, avgLoss: Double?
+        var maxDrawdownBoundPct: Double? = nil
     }
     struct History: Decodable {
         let startMs: Double
@@ -66,6 +67,7 @@ struct Booklet: Decodable {
         let sides: ResearchTable?
     }
     struct Research: Decodable {
+        struct TextItem: Decodable, Hashable { let title: String; let text: String }
         let status: String?
         let note: String?
         let detail: String?
@@ -75,6 +77,9 @@ struct Booklet: Decodable {
         let sections: [ResearchTable]
         let methodology: String?
         let periodNote: String?
+        var cases: [TextItem]? = nil
+        var risk: [String]? = nil
+        var sources: [String]? = nil
     }
     let key: String
     let label: String
@@ -100,6 +105,7 @@ struct BacktestTrade: Decodable, Hashable, Identifiable {
     let pnl: Double?
     let returnPct: Double?
     let exitReason: String?
+    var exitReasonLabel: String? = nil
     let score: Double?
     let count: Double?
     let newCoins: Double?
@@ -132,7 +138,14 @@ struct BacktestPage: Decodable {
 }
 
 struct BacktestChartData: Decodable {
-    struct Bar: Decodable { let time: Double; let open: Double; let high: Double; let low: Double; let close: Double; let volume: Double }
+    struct Bar: Decodable {
+        let time: Double; let open: Double; let high: Double; let low: Double; let close: Double
+        var volume: Double? = nil
+        var ema20: Double? = nil
+        var ema50: Double? = nil
+        var emaReady: Bool? = nil
+    }
+    struct Reference: Decodable, Hashable { let price: Double; let title: String; let color: String }
     struct Week: Decodable {
         let week: String?
         let startMs: Double
@@ -150,6 +163,10 @@ struct BacktestChartData: Decodable {
     let note: String?
     let candles: [Bar]
     let weeklyRanges: [Week]
+    var references: [Reference]? = nil
+    var expectedBars: Int? = nil
+    var availableBars: Int? = nil
+    var missingBars: Int? = nil
 }
 
 /// Pages pushed inside the account / booklet sheet.

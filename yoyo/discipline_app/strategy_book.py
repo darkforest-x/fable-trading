@@ -44,6 +44,10 @@ def _ms(value):
     return int(value) if value is not None and value > 0 else None
 
 
+def _side(value):
+    return 'long' if not isinstance(value, bool) and value == 1 else 'short' if not isinstance(value, bool) and value == -1 else None
+
+
 def _text(value, limit=400):
     return value[:limit] if isinstance(value, str) else None
 
@@ -158,19 +162,162 @@ def project_history(value, track):
     s = value.get('summary') or {}
     meta = value.get('meta') or {}
     refilled = bool(value.get('refilled'))
+    basis = meta.get('basis')
+    marked = basis in ('marked', 'hourly_marked')
+    end = _num(s.get('end')) if _num(s.get('end')) is not None else points[-1][1]
+    start = _num(s.get('start')) if _num(s.get('start')) is not None else points[0][1]
+    drawdown = _num(s.get('max_drawdown_pct'))
+    if drawdown is None and marked:
+        drawdown = abs(min((p[2] for p in points), default=0.0))
     pair = lambda rows: [[r[0][:7], _num(r[1])] for r in rows if isinstance(r, list) and len(r) >= 2 and isinstance(r[0], str)]
     sides = _table(['方向', '成交笔数', '胜率 %', '净盈亏 USDT'], value.get('sides') or [], 4)
+    curve_limit = MAX_POINTS - 1 if basis == 'hourly_marked' else MAX_POINTS
+    sampled = downsample(points, curve_limit)
+    if basis == 'hourly_marked':
+        worst = min(points, key=lambda p: p[2])
+        if not any(p[0] == worst[0] for p in sampled):
+            sampled = sorted(sampled + [worst], key=lambda p: p[0])
     return dict(start_ms=points[0][0], end_ms=points[-1][0], note=_text(meta.get('note')), refilled=refilled,
                 unit='USDT' if refilled else '%',
-                summary=dict(start=_num(s.get('start')), end=_num(s.get('end')), pnl=_num(s.get('pnl')),
-                             return_pct=_num(s.get('return_pct')), max_drawdown_pct=_num(s.get('max_drawdown_pct')),
+                summary=dict(start=start, end=end, pnl=_num(s.get('pnl')) if _num(s.get('pnl')) is not None else end-start,
+                             return_pct=_num(s.get('return_pct')) if _num(s.get('return_pct')) is not None else (end/start-1)*100 if start else None,
+                             max_drawdown_pct=drawdown,
                              win_pct=_num(s.get('win_pct')), trades=_num(s.get('trades')),
                              profit_factor=None if s.get('profit_factor_state') == 'no_losses' else _num(s.get('profit_factor')),
                              no_losses=s.get('profit_factor_state') == 'no_losses', cash_added=_num(s.get('cash_added')),
                              avg_win=_num(s.get('avg_win')), avg_loss=_num(s.get('avg_loss'))),
-                drawdown_basis='realized',
-                points=[[p[0], round(p[1], 4), round(p[2], 3)] + ([round(p[3], 2)] if refilled else []) for p in downsample(points)],
+                drawdown_basis='hourly_marked' if basis == 'hourly_marked' else 'marked' if marked else 'realized',
+                points=[[p[0], round(p[1], 4), round(p[2], 3)] + ([round(p[3], 2)] if refilled else []) for p in sampled],
                 yearly=pair(value.get('yearly') or []), monthly=pair(value.get('monthly') or [])[-120:], sides=sides)
+
+
+def _cloud_record_trade(record):
+    """Project one frozen cloud-v17 manifest row into the native strategy-frame trade shape."""
+    if not isinstance(record, dict):
+        return None
+    symbol = record.get('symbol')
+    side = _side(record.get('side'))
+    trade_id = record.get('id')
+    if (not isinstance(symbol, str) or not re.fullmatch(r'[A-Z0-9]{1,32}', symbol) or not side or
+            not isinstance(trade_id, str) or not re.fullmatch(r'cloud-v17-[0-9]{6}', trade_id)):
+        return None
+    entry, exit_price = _num(record.get('entryPrice')), _num(record.get('exitPrice'))
+    if entry is None or exit_price is None:
+        return None
+    return dict(id=int(trade_id[-6:]), symbol=symbol + 'USDT', coin=symbol, side=side,
+                entry_ms=_ms(record.get('entryMs')), exit_ms=_ms(record.get('exitMs')),
+                pnl=_num(record.get('netPnl')), return_pct=_num(record.get('netReturnPct')),
+                exit_reason=_text(record.get('exitReason'), 40), exit_reason_label=_text(record.get('exitReasonLabel'), 80),
+                score=None, count=None, new_coins=None, kind='cloud-v17', entry_price=entry, exit_price=exit_price,
+                entry_start_ms=_ms(record.get('entryMs')), entry_end_ms=_ms(record.get('entryMs')),
+                exit_start_ms=_ms(record.get('exitMs')), exit_end_ms=_ms(record.get('exitMs')))
+
+
+def project_cloud_backtest(value, track, sort='time', direction='desc', offset=0, limit=50, overview=None):
+    """Stable, paged projection of the 1,252 frozen cloud-v17 account trades."""
+    if (track != 'live-cloud-v17' or not isinstance(value, dict) or value.get('schemaVersion') != 1 or
+            value.get('strategyId') != 'cloud-v17-history' or not isinstance(value.get('records'), list)):
+        raise BookUnavailable('云带历史账本版本不匹配')
+    records = value['records']
+    total = _ms(value.get('tradeCount')) or 0
+    if total != len(records) or not total:
+        raise BookUnavailable('云带历史账本笔数不完整')
+    rows = [trade for trade in (_cloud_record_trade(r) for r in records) if trade is not None]
+    if len(rows) != total or len({r['id'] for r in rows}) != total:
+        raise BookUnavailable('云带历史账本交易行不完整')
+    key = (lambda r: (r['entry_ms'] or 0, r['id'])) if sort == 'time' else (lambda r: (r['pnl'] or 0, r['id']))
+    rows.sort(key=key, reverse=direction == 'desc')
+    account = value.get('account') if isinstance(value.get('account'), dict) else {}
+    source = value.get('source') if isinstance(value.get('source'), dict) else {}
+    chart = value.get('chartWindow') if isinstance(value.get('chartWindow'), dict) else {}
+    quality = value.get('dataQuality') if isinstance(value.get('dataQuality'), dict) else {}
+    first, last = min(rows, key=lambda r: r['entry_ms'] or 0), max(rows, key=lambda r: r['entry_ms'] or 0)
+    start = first['entry_ms']
+    end = last['entry_ms']
+    fmt = lambda ms: datetime.fromtimestamp(ms / 1000, timezone.utc).strftime('%Y-%m-%d') if ms else None
+    overview_metrics = overview.get('metrics') if isinstance(overview, dict) and isinstance(overview.get('metrics'), dict) else {}
+    bound = _num(overview_metrics.get('dd_bound_pct'))
+    limitation = f"历史回撤估值上界 {bound:.2f}%；12H 原始 K 线缺失时保持空档、不补值；{_ms(quality.get('tradesWithMissing12hBars')) or 0} 笔存在缺失 12H K 线。" if bound is not None else f"12H 原始 K 线缺失时保持空档、不补值；{_ms(quality.get('tradesWithMissing12hBars')) or 0} 笔存在缺失 12H K 线。"
+    return dict(track=track, total=total, offset=offset, has_more=offset + limit < total, sort=sort, direction=direction,
+                meta=dict(trades=total, pnl=_num(account.get('netPnl')), start=fmt(start), end=fmt(end), source='OKX',
+                          note='历史资金单：1,252 笔',
+                          basis='每笔按冻结成交回执扣费；无额外手续费或滑点；未计资金费。',
+                          limitation=limitation),
+                rows=rows[offset:offset+limit])
+
+
+def _cloud_reference(price, title, color):
+    price = _num(price)
+    return dict(price=price, title=title, color=color) if price is not None else None
+
+
+def project_cloud_candles(event, symbol_data, manifest_record, track, trade):
+    """Project the event's exact 12H source bars; missing rows are deliberately never synthesized."""
+    if track != 'live-cloud-v17' or not isinstance(event, dict) or event.get('schemaVersion') != 1:
+        raise BookUnavailable('云带K线来源不匹配')
+    if not isinstance(manifest_record, dict) or manifest_record.get('id') != f'cloud-v17-{trade:06d}':
+        raise BookUnavailable('云带交易编号不匹配')
+    symbol, side = event.get('symbol'), _side(event.get('side'))
+    window = event.get('window') if isinstance(event.get('window'), dict) else {}
+    start, end = _ms(window.get('startMs')), _ms(window.get('endMs'))
+    if (event.get('id') != manifest_record.get('id') or symbol != manifest_record.get('symbol') or
+            event.get('side') != manifest_record.get('side') or
+            event.get('entryMs') != manifest_record.get('entryMs') or event.get('exitMs') != manifest_record.get('exitMs') or
+            not isinstance(symbol, str) or not re.fullmatch(r'[A-Z0-9]{1,32}', symbol) or side is None or
+            window.get('timeframe') != '12h' or start is None or end is None or end <= start):
+        raise BookUnavailable('云带事件窗口或币种不完整')
+    for event_key, manifest_key in (('entryPrice', 'entryPrice'), ('exitPrice', 'exitPrice')):
+        left, right = _num(event.get(event_key)), _num(manifest_record.get(manifest_key))
+        if left is None or right is None or not math.isclose(left, right, rel_tol=1e-12, abs_tol=0.0):
+            raise BookUnavailable('云带事件成交价与历史账本不匹配')
+    url = event.get('symbolDataUrl')
+    if not isinstance(url, str) or not re.fullmatch(r'\.\./symbols/[A-Z0-9]{1,32}\.json\.gz', url) or url.rsplit('/', 1)[-1] != symbol + '.json.gz':
+        raise BookUnavailable('云带K线币种引用无效')
+    expected_columns = ['timeMs', 'open', 'high', 'low', 'close', 'ema20', 'ema50', 'emaCount', 'emaReady']
+    if (not isinstance(symbol_data, dict) or symbol_data.get('schemaVersion') != 1 or symbol_data.get('symbol') != symbol or
+            symbol_data.get('timeframe') != '12h' or symbol_data.get('columns') != expected_columns or
+            not isinstance(symbol_data.get('rows'), list)):
+        raise BookUnavailable('云带 12H 行情字段不匹配')
+    candles = []
+    last_ms = None
+    for row in symbol_data['rows']:
+        if not isinstance(row, list) or len(row) != 9:
+            raise BookUnavailable('云带 12H 行情行不完整')
+        time_ms = _ms(row[0])
+        # The frozen chart contract treats endMs as the opening timestamp of the final included bar.
+        if time_ms is None or time_ms < start or time_ms > end:
+            continue
+        if last_ms is not None and time_ms <= last_ms:
+            raise BookUnavailable('云带 12H 行情时间顺序无效')
+        nums = [_num(row[i]) for i in range(1, 7)]
+        if any(v is None for v in nums) or _num(row[7]) is None or not isinstance(row[8], bool):
+            raise BookUnavailable('云带 12H 行情价格或云带值无效')
+        opening, high, low, close, ema20, ema50 = nums
+        if min(opening, high, low, close) <= 0 or high < max(opening, close) or low > min(opening, close):
+            raise BookUnavailable('云带 12H OHLC 结构无效')
+        candles.append(dict(time=time_ms, open=opening, high=high, low=low, close=close, volume=None,
+                            ema20=ema20, ema50=ema50, ema_ready=row[8]))
+        last_ms = time_ms
+    if not candles:
+        raise BookUnavailable('这段云带 12H 行情暂不可读')
+    available = _ms(window.get('availableBars'))
+    if available is None or available != len(candles):
+        raise BookUnavailable('云带 12H 行情与冻结窗口根数不一致')
+    evidence = event.get('entryEvidence') if isinstance(event.get('entryEvidence'), dict) else {}
+    rails = evidence.get('rails') if isinstance(evidence.get('rails'), dict) else {}
+    lines = [item for item in (
+        _cloud_reference(event.get('entryPrice'), '入场', 'up' if side == 'long' else 'down'),
+        _cloud_reference(event.get('exitPrice'), '退出', 'accent'),
+        _cloud_reference(evidence.get('fixedStopPrice'), '固定止损', 'down'),
+        _cloud_reference(evidence.get('twoRPrice'), '2R', 'up'),
+        _cloud_reference(rails.get('selectedSideRailPrice'), '信号侧周一轨道', 'cloud'),
+    ) if item]
+    expected = _ms(window.get('expectedBars')) or 0
+    missing = max(0, expected - available)
+    note = f"OKX 原始 12H K 线 · 北京时间 · 窗口 {available}/{expected} 根可用；缺少的K线保留为空档，不补值。"
+    return dict(track=track, trade=_cloud_record_trade(manifest_record), bar='12H', source='OKX', note=note,
+                candles=candles, weekly_ranges=[], references=lines, missing_ranges=window.get('missingRanges') or [],
+                expected_bars=expected, available_bars=available, missing_bars=missing)
 
 
 def project_research(data, track):
@@ -201,6 +348,70 @@ def project_booklet(track, label, title, paper_raw, research, history, history_e
                 paper=has_account, facts=facts(track, raw), flow=flow(track),
                 history=history, history_error=history_error, research=project_research(research, track),
                 backtest=True, notes=['历史为币安回测，前向为 OKX 模拟；路径差异须保留说明，不代表实盘收益。'])
+
+
+def project_cloud_booklet(guide, overview, history_raw, include_hourly_curve=True):
+    if not isinstance(guide, dict) or not isinstance(overview, dict) or not isinstance(overview.get('metrics'), dict):
+        raise BookUnavailable('云带小册内容暂不可用')
+    history = project_history(history_raw, 'live-cloud-v17')
+    metrics = overview['metrics']
+    max_bound = _num(metrics.get('dd_bound_pct'))
+    if max_bound is not None:
+        history['summary']['max_drawdown_bound_pct'] = max_bound
+    intro = _text(guide.get('intro'), 1800)
+    facts = []
+    for item in guide.get('facts') or []:
+        if not isinstance(item, dict) or not isinstance(item.get('label'), str):
+            continue
+        facts.append(_fact(item['label'][:80], str(item.get('value', '—'))[:80], _text(item.get('unit'), 40) or ''))
+    # The amount payoff ratio and gross profit factor answer different questions; never merge them.
+    amount_payoff = _num(metrics.get('payoff_usdt'))
+    if amount_payoff is not None:
+        facts.append(_fact('金额盈亏比', f'{amount_payoff:.2f}', '倍'))
+    steps = [dict(title=_text(x.get('title'), 80) or '', text=_text(x.get('text'), 1800) or '')
+             for x in guide.get('flow') or [] if isinstance(x, dict)]
+    direction = guide.get('direction') if isinstance(guide.get('direction'), dict) else {}
+    table = _table(direction.get('headers'), direction.get('rows'), 20)
+    cases = [dict(title=_text(x.get('title'), 100) or '', text=_text(x.get('text'), 1800) or '')
+             for x in guide.get('cases') or [] if isinstance(x, dict)]
+    risks = [_text(x, 1800) for x in guide.get('risk') or [] if isinstance(x, str)]
+    sources = [_text(x, 1800) for x in guide.get('sources') or [] if isinstance(x, str)]
+    research = dict(status='OKX 12H 历史与前向模拟', note=intro, detail=None, table=table,
+                    capital=None, controls=None, sections=[], methodology=None, period_note=None,
+                    cases=cases, risk=risks, sources=sources)
+    history_error = None
+    if not include_hourly_curve:
+        # Clients predating the hourly-marked curve contract render every curve as realized P&L.
+        # Give them the same historical facts and rules, but withhold the chart until they can label it honestly.
+        summary = history['summary']
+        summary_rows = [
+            ['期末资金', _num(metrics.get('final_usdt'))],
+            ['历史净收益', _num(summary.get('pnl'))],
+            ['小时阶段最大回撤', _num(metrics.get('dd_mark_pct'))],
+            ['高低价估值回撤上界', _num(metrics.get('dd_bound_pct'))],
+            ['金额盈亏比', _num(metrics.get('payoff_usdt'))],
+            ['盈利因子', _num(summary.get('profit_factor'))],
+            ['交易数', _num(metrics.get('trades'))],
+            ['胜率 %', _num(metrics.get('win_pct'))],
+        ]
+        case_rows = [[item['title'], item['text']] for item in cases]
+        research['table'] = dict(headers=['历史指标', '值'], rows=summary_rows)
+        legacy_sections = []
+        if table:
+            legacy_sections.append(dict(title='入场条件 · 多空方向', headers=table['headers'], rows=table['rows']))
+        legacy_sections.extend([
+            dict(title='典型交易', headers=['案例', '说明'], rows=case_rows),
+            dict(title='风险与边界', headers=['说明'], rows=[[line] for line in risks]),
+            dict(title='数据来源与口径', headers=['说明'], rows=[[line] for line in sources]),
+        ])
+        research['sections'] = legacy_sections
+        research['detail'] = '；'.join(risks)
+        history = None
+        history_error = '此版 App 暂不支持小时含浮盈亏曲线与原始 12H K 线回放；升级新版后可查看。历史汇总与完整规则见本页。'
+    return dict(key='live-cloud-v17', label='live-cloud-v17', title=_text(guide.get('title'), 120) or '云带 v1.7 · 12H 逆向',
+                kind='cloud', paper=True, facts=facts, flow=steps, history=history,
+                research=research, history_error=history_error, backtest=True,
+                notes=['实时账户独立从 1,000U 起步，不注入历史收益。', '云带信号只作观察，模拟账户不下单。'])
 
 
 # ---- breadth-ema20 research booklet (breadth-booklet.js / breadth-book-history.js) -----------------------------

@@ -30,11 +30,11 @@ struct AccountDetailView: View {
                 if let detail {
                     SoftSegment(selection: $tab, options: [(.open, "持仓 \(detail.open.count)"),
                                                            (.closed, "已结束 \(closedRows(detail).count)"),
-                                                           (.events, (a.isBreadth ? "信号 " : "触价 ") + "\(eventCount(detail, breadth: a.isBreadth))")])
+                                                           (.events, (a.isCloud ? "决策 " : a.isBreadth ? "信号 " : "触价 ") + "\(eventCount(detail, breadth: a.isBreadth, cloud: a.isCloud))")])
                     switch tab {
                     case .open: openList(detail.open, breadth: a.isBreadth)
                     case .closed: closedList(detail, breadth: a.isBreadth)
-                    case .events: eventList(detail, breadth: a.isBreadth)
+                    case .events: eventList(detail, breadth: a.isBreadth, cloud: a.isCloud)
                     }
                 }
             }
@@ -61,21 +61,31 @@ struct AccountDetailView: View {
                 Pill(text: "模拟", color: .accentColor)
             }
             HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text(Fmt.money(a.equity)).font(.scaled(size: 40, weight: .semibold, design: .rounded)).monospacedDigit()
+                Text(Fmt.money(a.displayEquity)).font(.scaled(size: 40, weight: .semibold, design: .rounded)).monospacedDigit()
                     .foregroundStyle(Color.ink).lineLimit(1).minimumScaleFactor(0.6)
-                    .contentTransition(.numericText(value: a.equity ?? 0))
+                    .contentTransition(.numericText(value: a.displayEquity ?? 0))
                 Text("U").font(.title3).foregroundStyle(Color.muted)
                 Spacer(minLength: 4)
-                ChangeCapsule(value: a.returnPct)
+                ChangeCapsule(value: a.displayReturnPct)
             }
-            Text("已实现盈亏 \(StrategyFmt.signedMoney(a.pnl)) U · 起始 \(Fmt.money(a.startEquity)) U" + (a.startedMs.map { " · \(Fmt.clock($0, now: now)) 起" } ?? "") + (a.refilled == true ? " · 含补充本金" : ""))
+            Text(cloudPnlText(a) + " · 起始 \(Fmt.money(a.startEquity)) U" + (a.startedMs.map { " · \(Fmt.clock($0, now: now)) 起" } ?? "") + (a.refilled == true ? " · 含补充本金" : ""))
                 .font(.caption).foregroundStyle(Color.muted).monospacedDigit().lineLimit(2)
             HStack(spacing: 0) {
-                stat("胜率", a.stats.winPct.map { "\(StrategyFmt.number($0, digits: 0))%" } ?? "—")
-                Divider().frame(height: 26)
-                stat("已平", "\(Int(a.stats.closed ?? 0)) 笔")
-                Divider().frame(height: 26)
-                stat("平均", a.stats.meanNetBp.map { String(format: "%+.0fbp", $0) } ?? "—", tone: Fmt.tone(a.stats.meanNetBp).color)
+                if a.isCloud {
+                    stat("已实现", StrategyFmt.signedMoney(a.pnl), tone: Fmt.tone(a.pnl).color)
+                    Divider().frame(height: 26)
+                    stat("浮动", StrategyFmt.signedMoney(a.unrealizedPnl), tone: Fmt.tone(a.unrealizedPnl).color)
+                    Divider().frame(height: 26)
+                    stat("已占槽", "\(a.openCount ?? 0)/\(a.slotCount ?? 9)", tone: .accentColor)
+                    Divider().frame(height: 26)
+                    stat("状态", cloudPhase(a.phase))
+                } else {
+                    stat("胜率", a.stats.winPct.map { "\(StrategyFmt.number($0, digits: 0))%" } ?? "—")
+                    Divider().frame(height: 26)
+                    stat("已平", "\(Int(a.stats.closed ?? 0)) 笔")
+                    Divider().frame(height: 26)
+                    stat("平均", a.stats.meanNetBp.map { String(format: "%+.0fbp", $0) } ?? "—", tone: Fmt.tone(a.stats.meanNetBp).color)
+                }
                 Divider().frame(height: 26)
                 stat("持仓", "\(a.openCount ?? detail?.open.filter(\.funded).count ?? 0)", tone: .accentColor)
             }
@@ -84,6 +94,22 @@ struct AccountDetailView: View {
             if a.isBreadth, let rule = a.breadthRule { breadthRule(rule) }
         }
         .padding(16).glassCard(cornerRadius: 26)
+    }
+
+    private func cloudPnlText(_ a: PaperAccount) -> String {
+        guard a.isCloud else { return "已实现盈亏 \(StrategyFmt.signedMoney(a.pnl)) U" }
+        return "盯市净盈亏 \(StrategyFmt.signedMoney(a.markedPnl ?? a.pnl)) U · 已实现 \(StrategyFmt.signedMoney(a.pnl)) U · 浮动 \(StrategyFmt.signedMoney(a.unrealizedPnl)) U"
+    }
+
+    private func cloudPhase(_ phase: String?) -> String {
+        switch phase {
+        case "running": return "运行中"
+        case "watching": return "观察中"
+        case "paused": return "暂停"
+        case "degraded": return "数据受限"
+        case "stopped": return "已停止"
+        default: return "—"
+        }
     }
 
     private func stat(_ label: String, _ value: String, tone: Color = .ink) -> some View {
@@ -134,8 +160,9 @@ struct AccountDetailView: View {
         (d.closed + older.positions).uniqued(by: \.rowKey)
     }
 
-    private func eventCount(_ d: PaperSnapshot.Detail, breadth: Bool) -> Int {
-        breadth ? ((d.breadthSignals ?? []) + older.signals).uniqued(by: \.rowId).count
+    private func eventCount(_ d: PaperSnapshot.Detail, breadth: Bool, cloud: Bool) -> Int {
+        if cloud { return d.cloudEvents?.count ?? 0 }
+        return breadth ? ((d.breadthSignals ?? []) + older.signals).uniqued(by: \.rowId).count
             : ((d.touches ?? []) + older.touches).uniqued(by: \.rowId).count
     }
 
@@ -153,7 +180,13 @@ struct AccountDetailView: View {
                 if index < rows.count - 1 { Divider().padding(.leading, 54) }
             }
         }
-        if !breadth { Text("参考浮动收益未扣费；策略净值包含已减仓盈亏，不包含余仓浮盈。").font(.caption2).foregroundStyle(Color.muted).padding(.horizontal, 4) }
+        if account.isCloud {
+            Text("盯市净值含持仓浮盈亏；持仓金额按公开行情估值。")
+                .font(.caption2).foregroundStyle(Color.muted).padding(.horizontal, 4)
+        } else if !breadth {
+            Text("参考浮动收益未扣费；策略净值包含已减仓盈亏，不包含余仓浮盈。")
+                .font(.caption2).foregroundStyle(Color.muted).padding(.horizontal, 4)
+        }
     }
 
     @ViewBuilder private func closedList(_ d: PaperSnapshot.Detail, breadth: Bool) -> some View {
@@ -171,12 +204,12 @@ struct AccountDetailView: View {
                 if index < rows.count - 1 { Divider().padding(.leading, 54) }
             }
         }
-        loadMore(tab: "closed")
-        Text(breadth ? "SOL 净收益已扣双边手续费；BTC/ETH 对照只看收益率，不计入资金。" : "净收益已扣手续费；滑点情景仅供对照，不重复扣入策略净值。")
+        if !account.isCloud { loadMore(tab: "closed") }
+        Text(account.isCloud ? "账户快照保留最近结束交易；完整 1,252 笔冻结历史见“历史开单”。" : breadth ? "SOL 净收益已扣双边手续费；BTC/ETH 对照只看收益率，不计入资金。" : "净收益已扣手续费；滑点情景仅供对照，不重复扣入策略净值。")
             .font(.caption2).foregroundStyle(Color.muted).padding(.horizontal, 4)
     }
 
-    @ViewBuilder private func eventList(_ d: PaperSnapshot.Detail, breadth: Bool) -> some View {
+    @ViewBuilder private func eventList(_ d: PaperSnapshot.Detail, breadth: Bool, cloud: Bool) -> some View {
         if breadth {
             let rows = ((d.breadthSignals ?? []) + older.signals).uniqued(by: \.rowId)
             card(empty: rows.isEmpty && !older.loading ? "还没有信号" : nil) {
@@ -187,6 +220,16 @@ struct AccountDetailView: View {
             }
             loadMore(tab: "events")
             Text("同一根5分钟K 31–62 个 OKX 币首次碰周一下轨、之后30分钟无新币才开仓；31–62 是币安 50–99 的近似换算。")
+                .font(.caption2).foregroundStyle(Color.muted).padding(.horizontal, 4)
+        } else if cloud {
+            let rows = d.cloudEvents ?? []
+            card(empty: rows.isEmpty ? "暂时没有云带筛选记录" : nil) {
+                ForEach(Array(rows.enumerated()), id: \.element.rowId) { index, event in
+                    CloudEventRow(event: event, now: now).padding(.horizontal, 12).padding(.vertical, 10)
+                    if index < rows.count - 1 { Divider().padding(.leading, 54) }
+                }
+            }
+            Text("此处是云带模拟账户近期筛选结果；信号只作观察，账户不下单。")
                 .font(.caption2).foregroundStyle(Color.muted).padding(.horizontal, 4)
         } else {
             let rows = ((d.touches ?? []) + older.touches).uniqued(by: \.rowId)
@@ -360,6 +403,51 @@ struct TouchRow: View {
                     .foregroundStyle((signal.score ?? 0) > 0.5 ? Color.orange : Color.ink)
                 Text(Fmt.signalStatus(signal)).font(.caption2).foregroundStyle(Color.muted)
             }
+        }
+    }
+}
+
+struct CloudEventRow: View {
+    let event: CloudEvent
+    let now: Double
+    var body: some View {
+        HStack(spacing: 11) {
+            CoinLogo(coin: Fmt.coin(event.symbol), size: 30)
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 6) { Text(Fmt.coin(event.symbol)).font(.subheadline.weight(.semibold)); SidePill(side: event.side) }
+                Text("确认 \(Fmt.clock(event.timeMs, now: now)) · \(Fmt.price(event.entryPrice)) U")
+                    .font(.caption2).foregroundStyle(Color.muted).lineLimit(1)
+            }
+            Spacer(minLength: 4)
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(status).font(.caption.weight(.semibold)).foregroundStyle(statusColor)
+                if let reason = event.reason, !reason.isEmpty {
+                    Text(reasonLabel(reason)).font(.caption2).foregroundStyle(Color.muted).lineLimit(1)
+                }
+            }
+        }
+    }
+
+    private var status: String {
+        switch event.status {
+        case "opened": "已开仓"
+        case "skipped", "missed": "未开仓"
+        case "queued": "排队中"
+        default: "已筛选"
+        }
+    }
+
+    private var statusColor: Color { event.status == "opened" ? .up : event.status == "queued" ? .accentColor : .muted }
+
+    private func reasonLabel(_ reason: String) -> String {
+        switch reason {
+        case "duplicate_symbol": "已有同币持仓"
+        case "no_free_slot": "没有空槽"
+        case "insufficient_cash": "可用资金不足"
+        case "stale_quote": "行情过期"
+        case "invalid_quote": "行情无效"
+        case "rankable_universe_too_small": "可排名币种不足"
+        default: reason.replacingOccurrences(of: "_", with: " ")
         }
     }
 }

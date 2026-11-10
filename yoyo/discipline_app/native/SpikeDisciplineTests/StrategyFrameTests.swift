@@ -53,6 +53,45 @@ final class StrategyFrameTests: XCTestCase {
         XCTAssertEqual(c.weeklyRanges.first?.upper, 1.2)
     }
 
+    func testCloudAccountKeepsLegacyRealizedFieldsAndUsesMarkedValuesWhenAvailable() throws {
+        let json = #"{"now_ms":1794000000000,"paper_only":true,"equity_basis":"realized","accounts":[{"key":"live-cloud-v17","label":"live-cloud-v17","title":"云带 v1.7 · 12H 逆向","group":"live","kind":"cloud","equity":1005.0,"start_equity":1000.0,"pnl":5.0,"return_pct":0.5,"marked_equity":1025.0,"marked_pnl":25.0,"marked_return_pct":2.5,"unrealized_pnl":20.0,"refilled":false,"open_count":1,"slot_count":9,"phase":"running","heartbeat_ms":1794000000000,"stats":{"closed":null,"wins":null,"mean_net_bp":null,"win_pct":null}}],"detail":{"key":"live-cloud-v17","open":[],"closed":[],"touches":[],"breadth_signals":[],"cloud_events":[{"id":1794000000000,"symbol":"AAA-USDT-SWAP","side":"long","status":"opened","reason":"accepted","time_ms":1794000000000,"entry_price":10.0}]},"signals":[],"research":[]}"#
+        let p = try API.decoder.decode(PaperSnapshot.self, from: Data(json.utf8))
+        let account = try XCTUnwrap(p.accounts.first)
+        XCTAssertTrue(account.isCloud)
+        XCTAssertEqual(account.equity, 1005)
+        XCTAssertEqual(account.pnl, 5)
+        XCTAssertEqual(account.displayEquity, 1025)
+        XCTAssertEqual(account.displayPnl, 25)
+        XCTAssertEqual(account.displayReturnPct, 2.5)
+        XCTAssertEqual(account.unrealizedPnl, 20)
+        XCTAssertEqual(p.detail.cloudEvents?.first?.status, "opened")
+
+        // Old server payloads have no additive marked fields and still decode through the 2.7.x model.
+        let old = #"{"key":"live-cloud-v17","label":"live-cloud-v17","group":"live","equity":1005.0,"start_equity":1000.0,"pnl":5.0,"return_pct":0.5,"kind":"cloud","stats":{"closed":null,"wins":null,"mean_net_bp":null}}"#
+        let legacyAccount = try API.decoder.decode(PaperAccount.self, from: Data(old.utf8))
+        XCTAssertEqual(legacyAccount.displayEquity, 1005)
+        XCTAssertEqual(legacyAccount.displayPnl, 5)
+    }
+
+    func testCloudBookletAndChartDecodeHourlyBasisAndOriginal12HCandles() throws {
+        let booklet = #"{"key":"live-cloud-v17","label":"live-cloud-v17","title":"云带 v1.7 · 12H 逆向","kind":"cloud","paper":true,"facts":[{"label":"金额盈亏比","value":"5.35","unit":"倍"}],"flow":[{"title":"等收盘","text":"按 12H 收盘确认。"}],"history":{"start_ms":1579824000000,"end_ms":1794139200000,"note":"OKX · 小时收盘净值含浮盈亏。","refilled":false,"unit":"%","summary":{"start":1000.0,"end":147590.5,"pnl":146590.5,"return_pct":14659.05,"max_drawdown_pct":57.8293,"max_drawdown_bound_pct":58.54,"win_pct":21.0,"trades":1252,"profit_factor":1.4235,"no_losses":false,"cash_added":0.0},"drawdown_basis":"hourly_marked","points":[[1579824000000,1000.0,0.0],[1794139200000,147590.5,-57.829]],"yearly":[["2026",51.1]],"monthly":[],"sides":{"headers":["方向","成交笔数"],"rows":[["做多",618]]}},"history_error":null,"research":{"status":"OKX 12H","note":"先检查云带与轨道。","detail":null,"table":{"headers":["检查","做多","做空"],"rows":[["EMA","EMA20 > EMA50","EMA20 < EMA50"]]},"capital":null,"controls":null,"sections":[],"methodology":null,"period_note":null,"cases":[{"title":"止损案例","text":"完整案例文字。"}],"risk":["回撤上界 58.54%。"],"sources":["OKX 12H 原始K线。"]},"backtest":true,"notes":["实时账户从 1,000U 起步。"]}"#
+        let b = try API.decoder.decode(Booklet.self, from: Data(booklet.utf8))
+        XCTAssertEqual(b.history?.drawdownBasis, "hourly_marked")
+        XCTAssertEqual(b.history?.summary.profitFactor, 1.4235)
+        XCTAssertEqual(b.history?.summary.maxDrawdownBoundPct, 58.54)
+        XCTAssertEqual(b.facts.first?.value, "5.35")
+        XCTAssertEqual(b.research?.cases?.first?.title, "止损案例")
+        XCTAssertEqual(b.research?.risk?.first, "回撤上界 58.54%。")
+
+        let chart = #"{"track":"live-cloud-v17","trade":{"id":1082,"symbol":"BEATUSDT","coin":"BEAT","side":"long","entry_ms":1790000000000,"exit_ms":1791000000000,"pnl":55392.05,"return_pct":37.8,"exit_reason":"ema_flip","exit_reason_label":"云层翻转平仓","entry_price":0.5434,"exit_price":1.73172},"bar":"12H","source":"OKX","note":"缺失时段留空","candles":[{"time":1790000000000,"open":0.54,"high":0.6,"low":0.5,"close":0.58,"ema20":0.55,"ema50":0.53,"ema_ready":true}],"weekly_ranges":[],"references":[{"price":0.5434,"title":"入场","color":"up"},{"price":0.5,"title":"固定止损","color":"down"}],"expected_bars":80,"available_bars":78,"missing_bars":2}"#
+        let c = try API.decoder.decode(BacktestChartData.self, from: Data(chart.utf8))
+        XCTAssertEqual(c.bar, "12H")
+        XCTAssertNil(c.candles.first?.volume)
+        XCTAssertEqual(c.candles.first?.ema20, 0.55)
+        XCTAssertEqual(c.references?.count, 2)
+        XCTAssertEqual(c.trade.exitReasonLabel, "云层翻转平仓")
+    }
+
     func testSpanAndDecimals() {
         XCTAssertEqual(StrategyFmt.span(2 * 86_400_000 + 4 * 3_600_000), "2天4小时")
         XCTAssertEqual(StrategyFmt.span(12 * 60_000), "12分")

@@ -1,4 +1,5 @@
 import SwiftUI
+import SafariServices
 
 /// 历史开单 (2.7.0, Stitch native-2.7.0 backtest-list 04710b28…): the saved backtest trades of one
 /// strategy, 50 per page, newest / oldest / by P&L. Same ledger as the web booklet; Binance history,
@@ -140,6 +141,7 @@ struct BacktestTradeRow: View {
         .padding(.horizontal, 12).padding(.vertical, 10).contentShape(.rect)
     }
     private var detail: String {
+        if let label = trade.exitReasonLabel { return label }
         if let count = trade.count { return "\(Int(count)) 个币" + (trade.exitReason == "time_6d" ? " · 6天到期" : "") }
         if let score = trade.score { return String(format: "评分 %.4f", score) + (trade.kind == "add5" ? " · 加仓" : "") }
         return trade.kind == "add5" ? "加仓" : "评分未留存"
@@ -158,13 +160,14 @@ struct BacktestChartView: View {
     @State private var data: BacktestChartData?
     @State private var error: String?
     @State private var generation = 0
-    private static let periods: [CandlePeriod] = [.m5, .m15, .h1, .h4]
+    @State private var showOriginal = false
+    private var periods: [CandlePeriod] { key == "live-cloud-v17" ? [.h12] : [.m5, .m15, .h1, .h4] }
 
     init(key: String, trade: BacktestTrade, connection: Connection) {
         self.key = key; self.trade = trade; self.connection = connection
         // Open on a period where the whole holding span fits the default zoom (~45 bars).
         let hold = (trade.exitMs ?? 0) - (trade.entryMs ?? 0)
-        _period = State(initialValue: hold > 2 * 86_400_000 ? .h4 : hold > 12 * 3_600_000 ? .h1 : hold > 3 * 3_600_000 ? .m15 : .m5)
+        _period = State(initialValue: key == "live-cloud-v17" ? .h12 : hold > 2 * 86_400_000 ? .h4 : hold > 12 * 3_600_000 ? .h1 : hold > 3 * 3_600_000 ? .m15 : .m5)
     }
 
     var body: some View {
@@ -174,12 +177,13 @@ struct BacktestChartView: View {
                 if let data, !data.candles.isEmpty {
                     // The chart opens at its right edge: end the bars a few periods after the exit so the
                     // trade itself is on screen (earlier history stays a drag away).
-                    let last = ((trade.exitMs ?? .infinity) / 1000) + period.seconds * 8
+                    let last = key == "live-cloud-v17" ? (data.candles.last?.time ?? .infinity) : ((trade.exitMs ?? .infinity) / 1000) + period.seconds * 8
                     let bars = data.candles.filter { $0.time / 1000 <= last }.map {
-                        Candle(time: $0.time / 1000, open: $0.open, high: $0.high, low: $0.low, close: $0.close, volume: $0.volume, confirmed: true)
+                        Candle(time: $0.time / 1000, open: $0.open, high: $0.high, low: $0.low, close: $0.close,
+                               volume: $0.volume ?? 0, confirmed: true, ema20: $0.ema20, ema50: $0.ema50, emaReady: $0.emaReady)
                     }
                     CandleChart(bars: bars, generation: generation, period: period, decimals: StrategyFmt.decimals(trade.entryPrice ?? data.candles.last?.close),
-                                range: ranges(data).current, history: ranges(data).past, lines: lines,
+                                range: ranges(data).current, history: ranges(data).past, cloud: key == "live-cloud-v17", lines: lines,
                                 watermark: trade.coin + "USDT")
                 } else if let error {
                     VStack(spacing: 8) {
@@ -200,6 +204,9 @@ struct BacktestChartView: View {
         .navigationTitle("\(trade.coin) \(trade.side == .long ? "做多" : "做空") · 历史开单")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { CloseButton { dismiss() } }.sharedBackgroundVisibility(.hidden) }
+        .sheet(isPresented: $showOriginal) {
+            if let url = originalChartURL { OriginalChartSheet(url: url).ignoresSafeArea() }
+        }
         .task(id: period) { await load() }
     }
 
@@ -211,7 +218,7 @@ struct BacktestChartView: View {
                 Text(StrategyFmt.signedMoney(trade.pnl) + " U · " + Fmt.signedPercent(trade.returnPct))
                     .font(.subheadline.weight(.bold)).monospacedDigit().foregroundStyle(Fmt.tone(trade.pnl).color)
             }
-            Text("\(StrategyFmt.utcTime(trade.entryMs)) — \(StrategyFmt.utcShortTime(trade.exitMs)) UTC" + (trade.exitReason == "time_6d" ? " · 6天到期" : trade.score.map { String(format: " · 评分 %.4f", $0) } ?? ""))
+            Text("\(StrategyFmt.utcTime(trade.entryMs)) — \(StrategyFmt.utcShortTime(trade.exitMs)) UTC" + (trade.exitReasonLabel.map { " · \($0)" } ?? (trade.exitReason == "time_6d" ? " · 6天到期" : trade.score.map { String(format: " · 评分 %.4f", $0) } ?? "")))
                 .font(.system(.caption2, design: .monospaced)).foregroundStyle(Color.muted)
         }
         .padding(.horizontal, 14).padding(.vertical, 10)
@@ -221,7 +228,7 @@ struct BacktestChartView: View {
     private var dock: some View {
         VStack(spacing: 6) {
             HStack(spacing: 4) {
-                ForEach(Self.periods) { p in
+                ForEach(periods) { p in
                     let on = p == period
                     Button { guard !on else { return }; Haptics.select(); period = p } label: {
                         Text(p.rawValue).font(.footnote.weight(on ? .bold : .medium)).foregroundStyle(on ? Color.accentColor : Color.ink)
@@ -232,16 +239,41 @@ struct BacktestChartView: View {
                 }
             }
             .padding(4).frosted(Capsule(), veil: 0.8)
-            Text("币安历史行情 · 图中时间为北京时间 · 双指缩放 · 线为原回测成交价").font(.caption2).foregroundStyle(Color.muted)
+            HStack(spacing: 8) {
+                Text(key == "live-cloud-v17" ? (data?.note ?? "OKX 原始 12H K 线 · 缺失时段留空") : "币安历史行情 · 图中时间为北京时间 · 双指缩放 · 线为原回测成交价")
+                    .font(.caption2).foregroundStyle(Color.muted).lineLimit(2).frame(maxWidth: .infinity, alignment: .leading)
+                if let originalChartURL {
+                    Button { showOriginal = true } label: { Label("查看原图", systemImage: "doc.viewfinder").font(.caption.weight(.semibold)) }
+                        .buttonStyle(.pill(.soft, height: 32))
+                }
+            }
         }
     }
 
     private var lines: [ChartLine] {
+        if key == "live-cloud-v17" {
+            return (data?.references ?? []).map { ref in
+                let color: Color = switch ref.color {
+                case "up": ChartPalette.up
+                case "down": ChartPalette.down
+                case "cloud": ChartPalette.reference
+                default: ChartPalette.accent
+                }
+                return ChartLine(price: ref.price, title: ref.title, color: color, dashed: true)
+            }
+        }
         var out: [ChartLine] = []
         // CandleChart prints the price after the title itself.
         if let p = trade.entryPrice { out.append(ChartLine(price: p, title: trade.side == .long ? "买" : "卖", color: ChartPalette.up, dashed: true)) }
         if let p = trade.exitPrice { out.append(ChartLine(price: p, title: "平", color: ChartPalette.accent, dashed: true)) }
         return out
+    }
+
+    private var originalChartURL: URL? {
+        guard key == "live-cloud-v17", trade.id.isFinite, trade.id.rounded() == trade.id,
+              trade.id >= 1, trade.id <= 1252 else { return nil }
+        let suffix = String(format: "%06d", Int(trade.id))
+        return URL(string: "https://spikeok.com/static/strategy-booklet/cloud-v17-history/charts/cloud-v17-\(suffix).svg")
     }
 
     private func ranges(_ data: BacktestChartData) -> (current: FibRange?, past: [FibRange]) {
@@ -263,4 +295,10 @@ struct BacktestChartView: View {
         } catch is CancellationError {
         } catch { self.error = error.localizedDescription }
     }
+}
+
+private struct OriginalChartSheet: UIViewControllerRepresentable {
+    let url: URL
+    func makeUIViewController(context: Context) -> SFSafariViewController { SFSafariViewController(url: url) }
+    func updateUIViewController(_ controller: SFSafariViewController, context: Context) {}
 }

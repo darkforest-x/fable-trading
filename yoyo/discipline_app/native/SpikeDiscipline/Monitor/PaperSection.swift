@@ -20,7 +20,8 @@ struct PaperSection: View {
             if let data {
                 HStack(spacing: 6) {
                     Circle().fill(Color.up).frame(width: 6, height: 6)
-                    Text("\(data.accounts.count) 个模拟账户 · 只模拟，不下单 · 已实现净值")
+                    Text("\(data.accounts.count) 个模拟账户 · 只模拟，不下单 · " +
+                         (data.equityBasis == "realized" ? "已实现净值；云带卡片含浮盈亏" : data.equityBasis == "mixed" ? "净值口径见各账户" : "已实现净值"))
                         .font(.caption).foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.85)
                 }
                 .padding(.horizontal, 4)
@@ -131,18 +132,19 @@ struct AccountTile: View {
                         .lineLimit(1).minimumScaleFactor(0.7)
                     Spacer(minLength: 2)
                     if account.isBreadth { BreadthTag(account: account) }
+                    else if account.isCloud { CloudTag() }
                     else { Circle().fill(Fmt.tone(account.pnl).color).frame(width: 6, height: 6) }
                 }
                 Text(account.subtitle.isEmpty ? " " : account.subtitle).font(.caption2).foregroundStyle(Color.muted).lineLimit(1)
-                if account.isBreadth { breadthState } else { fibState }
+                if account.isBreadth { breadthState } else if account.isCloud { cloudState } else { fibState }
                 HStack(alignment: .firstTextBaseline, spacing: 3) {
-                    Text(Fmt.money(account.equity)).font(.scaled(size: 21, weight: .semibold, design: .rounded)).monospacedDigit()
+                    Text(Fmt.money(account.displayEquity)).font(.scaled(size: 21, weight: .semibold, design: .rounded)).monospacedDigit()
                         .foregroundStyle(Color.ink).lineLimit(1).minimumScaleFactor(0.7)
-                        .contentTransition(.numericText(value: account.equity ?? 0))
+                        .contentTransition(.numericText(value: account.displayEquity ?? 0))
                     Text("U").font(.caption2).foregroundStyle(Color.muted)
                     Spacer(minLength: 2)
-                    Text(Fmt.signedPercent(account.returnPct)).font(.caption2.weight(.bold)).monospacedDigit()
-                        .foregroundStyle(Fmt.tone(account.returnPct).color).lineLimit(1)
+                    Text(Fmt.signedPercent(account.displayReturnPct)).font(.caption2.weight(.bold)).monospacedDigit()
+                        .foregroundStyle(Fmt.tone(account.displayReturnPct).color).lineLimit(1)
                 }
                 .padding(.top, 2)
                 Text(foot).font(.caption2).foregroundStyle(Color.muted).monospacedDigit().lineLimit(1)
@@ -153,7 +155,16 @@ struct AccountTile: View {
         .buttonStyle(CardPressStyle())
         .glassCard(cornerRadius: 20)
         .scrollReveal()
-        .accessibilityLabel("\(account.label)，净值 \(Fmt.money(account.equity)) U，\(Fmt.signedPercent(account.returnPct))")
+        .accessibilityLabel("\(account.label)，\(account.isCloud ? "含浮盈亏" : "净值") \(Fmt.money(account.displayEquity)) U，\(Fmt.signedPercent(account.displayReturnPct))")
+    }
+
+    @ViewBuilder private var cloudState: some View {
+        let open = account.openCount ?? 0
+        HStack(spacing: 5) {
+            Text(open > 0 ? "持仓 \(open)/\(account.slotCount ?? 9) 槽" : "空仓 · 等待信号")
+            if let phase = account.phase { Text("· \(phase == "running" ? "运行中" : phase == "watching" ? "观察中" : "暂停")") }
+        }
+        .font(.caption2.weight(.medium)).foregroundStyle(open > 0 ? Color.accentColor : Color.muted).lineLimit(1)
     }
 
     @ViewBuilder private var breadthState: some View {
@@ -176,8 +187,20 @@ struct AccountTile: View {
     }
 
     private var foot: String {
+        if account.isCloud {
+            return "已实现 \(StrategyFmt.signedMoney(account.pnl)) · 浮动 \(StrategyFmt.signedMoney(account.unrealizedPnl)) U"
+        }
         let win = account.stats.winPct.map { "胜率 \(Int($0.rounded()))%" } ?? "胜率 —"
         return "\(win) · 已平 \(Int(account.stats.closed ?? 0))"
+    }
+}
+
+struct CloudTag: View {
+    var body: some View {
+        Text("云带 · 12H")
+            .font(.system(size: 10, weight: .bold)).foregroundStyle(.white)
+            .padding(.horizontal, 6).padding(.vertical, 2)
+            .background(Color.accentColor, in: .capsule)
     }
 }
 
