@@ -23,10 +23,11 @@ struct LandscapeChart: View {
     var body: some View {
         GeometryReader { proxy in
             let row = fib.current?.items.first { $0.symbol == symbol }
+            let currentRange = row.flatMap { fib.range(for: $0) } ?? history.currentRange(for: symbol)
             let insets = proxy.safeAreaInsets
             ZStack {
                 CandleChart(bars: candles.bars, generation: candles.generation, period: period, decimals: decimals(row),
-                            range: row.flatMap { fib.range(for: $0) }, history: style.showHistory ? (history.ranges[symbol] ?? []) : [],
+                            range: currentRange, history: style.showHistory ? (history.ranges[symbol] ?? []) : [],
                             innerLines: fib.showInternal, averages: fib.showAverages, cloud: fib.showCloud, lines: lines,
                             markers: touches.markers(row), markHistory: true, colors: style.colors,
                             watermark: symbol.isEmpty ? nil : Fmt.coin(symbol) + "USDT", followToken: follow, wallpaper: true,
@@ -51,6 +52,10 @@ struct LandscapeChart: View {
         .task(id: "\(symbol)|\(style.showHistory)|\(Int((candles.bars.first?.time ?? 0) / 86_400))|\(session.connection?.token.hashValue ?? 0)") {
             guard style.showHistory else { return }
             await history.load(symbol, from: candles.bars.first?.time, connection: session.connection)
+        }
+        .task(id: "\(symbol)|\(session.connection?.token.hashValue ?? 0)") {
+            guard let connection = session.connection else { return }
+            await history.watchCurrent(symbol, connection: connection)
         }
         .task(id: session.connection?.token.hashValue ?? 0) {
             guard let connection = session.connection else { return }

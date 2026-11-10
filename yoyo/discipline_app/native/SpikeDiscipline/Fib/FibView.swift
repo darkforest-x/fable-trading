@@ -54,6 +54,10 @@ struct FibView: View {
             guard active, let connection = session.connection else { return }
             await touches.watch(connection: connection, session: session)
         }
+        .task(id: "\(fib.chartSymbol)|\(active)|\(session.connection?.token.hashValue ?? 0)") {
+            guard active, let connection = session.connection else { return }
+            await history.watchCurrent(fib.chartSymbol, connection: connection)
+        }
         // Full history (owner 2026-11-09): weeks back to the oldest loaded bar; older bars → older weeks.
         .task(id: "\(fib.chartSymbol)|\(style.showHistory)|\(active)|\(Int((candles.bars.first?.time ?? 0) / 86_400))|\(session.connection?.token.hashValue ?? 0)") {
             guard active, style.showHistory else { return }
@@ -95,10 +99,11 @@ struct FibView: View {
 
     private func chart(top: CGFloat, bottom: CGFloat) -> some View {
         let row = fib.selected, symbol = fib.chartSymbol
+        let currentRange = row.flatMap { fib.range(for: $0) } ?? history.currentRange(for: symbol)
         let past = style.showHistory ? (history.ranges[symbol] ?? []) : []
         return ZStack {
             CandleChart(bars: candles.bars, generation: candles.generation, period: fib.period, decimals: decimals(symbol),
-                        range: row.flatMap { fib.range(for: $0) }, history: past, innerLines: fib.showInternal, averages: fib.showAverages,
+                        range: currentRange, history: past, innerLines: fib.showInternal, averages: fib.showAverages,
                         cloud: fib.showCloud, markers: touches.markers(row), markHistory: true, colors: style.colors,
                         watermark: symbol.isEmpty ? nil : Fmt.coin(symbol) + "USDT", followToken: follow, wallpaper: true,
                         topInset: top + 58, bottomOverlay: bottom + 78 + 50,

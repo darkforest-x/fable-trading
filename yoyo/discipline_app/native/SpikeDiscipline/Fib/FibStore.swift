@@ -120,7 +120,7 @@ final class FibStore {
     /// The charted coin: the chosen one, else the newest touch.
     var chartSymbol: String { symbol.isEmpty ? (rows.first?.symbol ?? "") : symbol }
 
-    /// Open any coin (monitor rows, alarm coins); the range shows only if it touched this week.
+    /// Open any coin (monitor rows, alarm coins).
     func focus(_ next: String) { symbol = next }
     var live: Bool {
         guard fresh, error == nil, let s = current, s.connected, let last = s.lastMessageMs else { return false }

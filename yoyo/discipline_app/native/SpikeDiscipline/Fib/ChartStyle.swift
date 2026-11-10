@@ -83,10 +83,55 @@ final class MondayHistory {
     private var listed: [String: Bool] = [:]                   // walked back to the listing
     private var wanted: [String: Double] = [:]
     private var busy: Set<String> = []
+    private var currentBusy: Set<String> = []
+    private var publishedWeekStart: [String: Double] = [:]
 
     private static let calendar: Calendar = {
         var c = Calendar(identifier: .gregorian); c.timeZone = TimeZone(identifier: "America/New_York")!; c.firstWeekday = 2; return c
     }()
+
+    /// Watch the active NY week for a fully closed Monday, retrying transient gaps and failures.
+    /// Reuses the ordinary public hourly-candle page and stores the immutable result in the same
+    /// per-host cache as historical ranges. The current week is independent of the history toggle.
+    func watchCurrent(_ symbol: String, connection: Connection?) async {
+        guard !symbol.isEmpty, let connection else { return }
+        if weeks[symbol] == nil { restore(symbol) }
+        while !Task.isCancelled {
+            let now = Date()
+            guard let week = Self.calendar.dateInterval(of: .weekOfYear, for: now),
+                  let tuesday = Self.calendar.date(byAdding: .day, value: 1, to: week.start) else { return }
+            let weekStart = week.start.timeIntervalSince1970
+            if publishedWeekStart[symbol] != weekStart { publish(symbol) }
+            if now >= tuesday, weeks[symbol]?[tuesday.timeIntervalSince1970] == nil {
+                await fetchCurrent(symbol, week: week, tuesday: tuesday, connection: connection)
+            }
+            try? await Task.sleep(for: .seconds(30))
+        }
+    }
+
+    /// Current Monday's range after all 24 confirmed NY hourly bars have closed.
+    /// A previous cache entry is available immediately after Tuesday 00:00 NY.
+    func currentRange(for symbol: String, now: Date = Date()) -> FibRange? {
+        guard !symbol.isEmpty,
+              let week = Self.calendar.dateInterval(of: .weekOfYear, for: now),
+              let tuesday = Self.calendar.date(byAdding: .day, value: 1, to: week.start),
+              now >= tuesday else { return nil }
+        return weeks[symbol]?[tuesday.timeIntervalSince1970]
+    }
+
+    private func fetchCurrent(_ symbol: String, week: DateInterval, tuesday: Date, connection: Connection) async {
+        let key = "\(symbol)|\(tuesday.timeIntervalSince1970)"
+        guard !currentBusy.contains(key) else { return }
+        currentBusy.insert(key)
+        defer { currentBusy.remove(key) }
+        guard let bars = try? await CandleStore.page(symbol: symbol, period: .h1,
+                                                     before: Int(tuesday.timeIntervalSince1970), connection: connection),
+              !Task.isCancelled,
+              let range = Self.completedMondayRange(bars, week: week) else { return }
+        weeks[symbol, default: [:]][range.start] = range
+        publish(symbol)
+        save(symbol)
+    }
 
     /// Fill completed Mondays back to `from` (epoch seconds; default ~5 weeks).
     func load(_ symbol: String, from: Double? = nil, connection: Connection?) async {
@@ -124,7 +169,15 @@ final class MondayHistory {
     }
 
     private func publish(_ symbol: String) {
-        ranges[symbol] = (weeks[symbol] ?? [:]).values.sorted { $0.start < $1.start }
+        guard let current = Self.calendar.dateInterval(of: .weekOfYear, for: Date()),
+              let currentTuesday = Self.calendar.date(byAdding: .day, value: 1, to: current.start) else {
+            ranges[symbol] = (weeks[symbol] ?? [:]).values.sorted { $0.start < $1.start }
+            return
+        }
+        publishedWeekStart[symbol] = current.start.timeIntervalSince1970
+        ranges[symbol] = (weeks[symbol] ?? [:]).values
+            .filter { $0.start < currentTuesday.timeIntervalSince1970 }
+            .sorted { $0.start < $1.start }
     }
 
     // MARK: disk (completed weeks only; keyed by service host so fixture and production never mix)
@@ -177,5 +230,24 @@ final class MondayHistory {
             week = calendar.dateInterval(of: .weekOfYear, for: w.end.addingTimeInterval(3600))
         }
         return out
+    }
+
+    /// Compute the just-completed NY Monday from exactly 24 contiguous, confirmed 1H candles.
+    /// OHLC columns are the public OKX display candles; no account, signal, or execution data is read.
+    static func completedMondayRange(_ bars: [Candle], week: DateInterval) -> FibRange? {
+        let monday = week.start.timeIntervalSince1970
+        guard Self.calendar.component(.weekday, from: week.start) == 2,
+              let tuesday = Self.calendar.date(byAdding: .day, value: 1, to: week.start) else { return nil }
+        let day = bars.filter { $0.time >= monday && $0.time < tuesday.timeIntervalSince1970 }
+            .sorted { $0.time < $1.time }
+        guard day.count == 24,
+              day.enumerated().allSatisfy({ item in
+                  item.element.valid && item.element.confirmed
+                      && item.element.time == monday + Double(item.offset) * 3_600
+              }),
+              let high = day.map(\.high).max(), let low = day.map(\.low).min(), high > low else { return nil }
+        let span = high - low
+        return FibRange(high: high, low: low, upper: high + 0.618 * span, lower: low - 0.618 * span,
+                        start: tuesday.timeIntervalSince1970, end: week.end.timeIntervalSince1970)
     }
 }

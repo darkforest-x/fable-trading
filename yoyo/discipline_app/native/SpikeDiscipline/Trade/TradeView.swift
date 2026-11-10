@@ -79,6 +79,10 @@ struct TradeView: View {
             guard active, style.showHistory else { return }
             await history.load(ticket.symbol, from: candles.bars.first?.time, connection: session.connection)
         }
+        .task(id: "\(ticket.symbol)|\(active)|\(session.connection?.token.hashValue ?? 0)") {
+            guard active, let connection = session.connection else { return }
+            await history.watchCurrent(ticket.symbol, connection: connection)
+        }
         .onChange(of: reselect) { _, _ in follow += 1 }   // tab tapped again → back to the latest bar
         .task(id: active) {
             guard active else { candles.stopAndSave(); return }
@@ -114,6 +118,7 @@ struct TradeView: View {
     private func chart(existing: Position?, top: CGFloat, bottom: CGFloat) -> some View {
         let symbol = ticket.symbol
         let row = fib.current?.items.first { $0.symbol == symbol }
+        let currentRange = row.flatMap { fib.range(for: $0) } ?? history.currentRange(for: symbol)
         var lines: [ChartLine] = []
         if let e = existing {
             lines = [ChartLine(price: Double(e.entry) ?? 0, title: "开仓", color: ChartPalette.accent),
@@ -123,7 +128,7 @@ struct TradeView: View {
         }
         return ZStack {
             CandleChart(bars: candles.bars, generation: candles.generation, period: period, decimals: Fmt.decimals(tick: tick),
-                        range: row.flatMap { fib.range(for: $0) }, history: style.showHistory ? (history.ranges[symbol] ?? []) : [],
+                        range: currentRange, history: style.showHistory ? (history.ranges[symbol] ?? []) : [],
                         innerLines: fib.showInternal, averages: fib.showAverages, cloud: fib.showCloud,
                         lines: lines, markers: touches.markers(row), markHistory: true,
                         colors: style.colors, watermark: Fmt.coin(symbol) + "USDT", followToken: follow, wallpaper: true,
