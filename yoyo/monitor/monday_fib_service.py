@@ -151,7 +151,7 @@ class MondayFibService:
         if not 0 <= now - stamp <= 2 * MINUTE:
             return
         quote = {"price": float(row[4]), "high": float(row[2]), "low": float(row[3]),
-                 "candle_ms": stamp, "received_ms": now}
+                 "candle_ms": stamp, "received_ms": now, "candle_confirmed": row[8] == "1"}
         with self.lock:
             if symbol not in self.symbols:
                 return

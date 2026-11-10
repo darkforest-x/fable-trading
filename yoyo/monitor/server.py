@@ -83,6 +83,12 @@ def create_app(runtime=None, start_monitor=True):
     vidya_retest = VidyaRetestService(runtime)
     from yoyo.monitor.monday_fib_service import MondayFibService, install as install_monday_fib
     monday_fib = MondayFibService(runtime)
+    from yoyo.monitor.month_first_week_1618_service import (MonthFirstWeek1618Service,
+        install as install_month_first_week_1618)
+    # Share MondayFib's confirmed OKX universe, open candle client, public
+    # CandleHub and existing candle1m business websocket.
+    month_first_week_1618 = MonthFirstWeek1618Service(runtime, quote_source=monday_fib,
+                                                       client=monday_fib.client)
     from yoyo.monitor.monday_reclaim_paper import ReclaimPaper, install as install_reclaim_paper
     reclaim_paper = ReclaimPaper(runtime, monday_fib, enable_live_allin3=True, enable_live_wick=True)
     monday_fib.listeners.append(reclaim_paper)
@@ -113,6 +119,7 @@ def create_app(runtime=None, start_monitor=True):
                 altcoin_leaders.start()
                 vidya_retest.start()
                 monday_fib.start()
+                month_first_week_1618.start()
                 reclaim_paper.start()
                 spike_alert.start()
                 breadth_paper.start()
@@ -137,6 +144,7 @@ def create_app(runtime=None, start_monitor=True):
             reclaim_paper.close()
             spike_alert.close()
             breadth_paper.close()
+            month_first_week_1618.close()
             monday_fib.close()
             market_context.close()
             market_sync.close()
@@ -164,6 +172,7 @@ def create_app(runtime=None, start_monitor=True):
     from yoyo.monitor.vidya_retest_api import install as install_vidya_retest
     install_vidya_retest(app, runtime, vidya_retest)
     install_monday_fib(app, monday_fib)
+    install_month_first_week_1618(app, month_first_week_1618)
     install_reclaim_paper(app, reclaim_paper)
     install_spike_alert(app, spike_alert)
     install_breadth_paper(app, breadth_paper)
