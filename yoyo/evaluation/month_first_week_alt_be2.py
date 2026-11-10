@@ -229,6 +229,11 @@ def main():
     parent=pd.read_csv(PARENT/'trades.csv.gz',dtype={'cap':str},parse_dates=['entry_time','exit_time'])
     parent=parent[(parent.cap=='4') & (parent.side=='upper')].copy()
     minute=pd.read_csv(EXP/'refined_minutes.csv.gz',parse_dates=['hour','time'])
+    receipt=json.loads((EXP/'minute_receipt.json').read_text())
+    if receipt['status']!='complete' or len(minute)!=receipt['progress']['validated_minutes']:
+        raise ValueError('Minute refinement is incomplete')
+    if minute.duplicated(['symbol','time']).any() or not minute.groupby(['symbol','hour']).size().eq(60).all():
+        raise ValueError('Expected 60 unique, reconciled 1m bars per refined hour')
     minute=minute.set_index('time').sort_index()
     by_symbol={symbol:dict(tuple(f.groupby('hour'))) for symbol,f in minute.groupby('symbol')}
     sources=universe().set_index('symbol',drop=False)
