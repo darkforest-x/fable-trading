@@ -1,0 +1,64 @@
+{
+  "input": {
+    "cap": "4",
+    "controls": 2423,
+    "exit_reasons": {
+      "stop": 2148,
+      "target": 2671,
+      "timeout": 27
+    },
+    "path": "experiments/active/exp-alt-month-first-week-near-target-20261110-v1/trades.csv.gz",
+    "selected_trades": 4846,
+    "side": "upper / SHORT",
+    "signals": 2423,
+    "symbols": 331
+  },
+  "plan": {
+    "activation_order_trade_hours": 1795,
+    "controls": 2423,
+    "fee_be_target_trade_hours": 498,
+    "first_hour": "2022-02-26T16:00:00+00:00",
+    "last_hour": "2026-10-31T04:00:00+00:00",
+    "multi_role_windows": 382,
+    "original_dual_trade_hours": 20,
+    "role_windows": {
+      "activation_vs_fee_be": 1795,
+      "fee_be_vs_target": 498,
+      "original_dual_sl_tp": 20
+    },
+    "signals": 2423,
+    "symbols": 331,
+    "trades": 4846,
+    "unique_symbol_hours": 1915
+  },
+  "progress": {
+    "cache_hits": 0,
+    "permanent_symbol_failures": 55,
+    "permanent_window_skips": 130,
+    "planned_windows": 1915,
+    "processed_windows": 1915,
+    "request_count": 1785,
+    "validated_minutes": 103680,
+    "validated_windows": 1728
+  },
+  "rule": {
+    "ambiguity_conditions": [
+      "first trigger H1 open > trigger and high >= fee breakeven",
+      "after activation through original exit candidate: H1 high >= fee breakeven and low <= original target",
+      "original dual stop/target H1 hours"
+    ],
+    "favorable_trigger_pct": 2.0,
+    "fee_assumption": "0.05% taker on entry and fee-breakeven stop exit",
+    "fee_be_price": "entry * (1 - 0.0005) / (1 + 0.0005)",
+    "purpose": "minute path evidence only; no trade replay",
+    "timeout": "final timeout H1 open only; final timeout hour extrema excluded",
+    "trigger_condition": "target farther than 2%; first held H1 low <= trigger"
+  },
+  "source": {
+    "bounded_workers": 8,
+    "min_request_interval_seconds": 0.14285714285714285,
+    "offline": false,
+    "provider": "OKX public API; shared request_window helper"
+  },
+  "status": "complete"
+}
