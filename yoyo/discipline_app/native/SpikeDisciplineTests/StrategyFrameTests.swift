@@ -90,6 +90,12 @@ final class StrategyFrameTests: XCTestCase {
         XCTAssertEqual(c.candles.first?.ema20, 0.55)
         XCTAssertEqual(c.references?.count, 2)
         XCTAssertEqual(c.trade.exitReasonLabel, "云层翻转平仓")
+
+        let executions = #"{"track":"live-cloud-v17","trade":{"id":1,"symbol":"AAAUSDT","coin":"AAA","side":"long"},"candles":[],"weekly_ranges":[],"execution_legs":[{"time_ms":1790000000000,"start_ms":1790000000000,"end_ms":1790000000000,"price":10.0,"label":"开仓","action":"entry","quantity":2.0,"share":1.0,"phase":"open"},{"time_ms":1790003600000,"start_ms":1790003600000,"end_ms":1790007200000,"price":12.0,"label":"止盈","action":"take_profit","quantity":1.0,"share":0.5,"phase":"intrabar"}]}"#
+        let replay = try API.decoder.decode(BacktestChartData.self, from: Data(executions.utf8))
+        XCTAssertEqual(replay.executionLegs?.count, 2)
+        XCTAssertEqual(replay.executionLegs?.last?.action, "take_profit")
+        XCTAssertEqual(replay.executionLegs?.last?.share, 0.5)
     }
 
     func testSpanAndDecimals() {

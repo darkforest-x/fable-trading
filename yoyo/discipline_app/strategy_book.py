@@ -305,6 +305,19 @@ def project_cloud_candles(event, symbol_data, manifest_record, track, trade):
         raise BookUnavailable('云带 12H 行情与冻结窗口根数不一致')
     evidence = event.get('entryEvidence') if isinstance(event.get('entryEvidence'), dict) else {}
     rails = evidence.get('rails') if isinstance(evidence.get('rails'), dict) else {}
+    # The cloud ledger groups four funded child slots into one history row. Keep
+    # the exact frozen fills alongside that summary so native replay can show
+    # the entry and every actual partial/final exit on the source candles.
+    try:
+        from yoyo.monitor.strategy_live_cloud import exit_legs
+        exits = exit_legs(event)
+    except (KeyError, TypeError, ValueError, OverflowError) as exc:
+        raise BookUnavailable('云带冻结成交流水不完整') from exc
+    opening_quantity = math.fsum(leg['quantity'] for leg in exits)
+    executions = [dict(time_ms=_ms(event.get('entryMs')), start_ms=_ms(event.get('entryMs')),
+                       end_ms=_ms(event.get('entryMs')), price=_num(event.get('entryPrice')),
+                       label='开仓', action='entry', phase='open', quantity=opening_quantity, share=1.0)]
+    executions.extend(exits)
     lines = [item for item in (
         _cloud_reference(event.get('entryPrice'), '入场', 'up' if side == 'long' else 'down'),
         _cloud_reference(event.get('exitPrice'), '退出', 'accent'),
@@ -317,7 +330,8 @@ def project_cloud_candles(event, symbol_data, manifest_record, track, trade):
     note = f"OKX 原始 12H K 线 · 北京时间 · 窗口 {available}/{expected} 根可用；缺少的K线保留为空档，不补值。"
     return dict(track=track, trade=_cloud_record_trade(manifest_record), bar='12H', source='OKX', note=note,
                 candles=candles, weekly_ranges=[], references=lines, missing_ranges=window.get('missingRanges') or [],
-                expected_bars=expected, available_bars=available, missing_bars=missing)
+                expected_bars=expected, available_bars=available, missing_bars=missing,
+                execution_legs=executions)
 
 
 def project_research(data, track):

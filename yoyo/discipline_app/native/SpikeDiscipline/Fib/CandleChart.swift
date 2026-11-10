@@ -61,6 +61,27 @@ struct ChartMarker: Equatable, Identifiable {
     var id: String { "\(edge.rawValue)-\(Int(time))" }
 }
 
+/// A frozen opening or close fill placed on its source candle. Cloud history can contain many real
+/// trim fills; each marker remains tappable so its exact hour, price and original-size share are clear.
+struct ExecutionMarker: Equatable, Identifiable {
+    let time: Double      // epoch seconds
+    let price: Double
+    let label: String
+    let action: String
+    let quantity: Double
+    let share: Double
+    let phase: String
+    var id: String { "\(action)-\(Int(time))-\(price)" }
+    var color: Color {
+        switch action {
+        case "entry": ChartPalette.up
+        case "trim": ChartPalette.hex(0xD97706)
+        case "take_profit", "take_profit_open": ChartPalette.accent
+        default: ChartPalette.down
+        }
+    }
+}
+
 struct CandleChart: View {
     let bars: [Candle]
     let generation: Int
@@ -73,6 +94,9 @@ struct CandleChart: View {
     var cloud = false
     var lines: [ChartLine] = []
     var markers: [ChartMarker] = []
+    var executionMarkers: [ExecutionMarker] = []
+    /// Optional trade span to fit on first appearance. Historical replay sets this; live charts stay at the edge.
+    var focusRange: ClosedRange<Double>? = nil
     /// Also mark the first 1.618 touch of each previous week in `history` (found from the bars).
     var markHistory = false
     var colors: ChartColors = .classic
@@ -100,6 +124,7 @@ struct CandleChart: View {
     @State private var crossHaptic = -1
     @State private var memo = IndicatorMemo()
     @State private var picked: String?
+    @State private var pickedExecutions: [ExecutionMarker] = []
     @AppStorage("touch.highScore") private var highScore = 0.5
 
     private let axisWidth: CGFloat = 58
@@ -129,7 +154,12 @@ struct CandleChart: View {
                     ChartFrameProbe.shared.drawn(CACurrentMediaTime() - started)
                     #endif
                 }
-                if let picked, let hit = markerPoints(layout).first(where: { $0.marker.id == picked }) {
+                if let picked, let hit = executionPoints(layout).first(where: { $0.marker.id == picked }) {
+                    ExecutionCallout(markers: pickedExecutions.isEmpty ? [hit.marker] : pickedExecutions)
+                        .position(x: min(max(hit.point.x, plot.minX + 112), plot.maxX - 112),
+                                  y: hit.point.y < plot.midY ? hit.point.y + 94 : hit.point.y - 94)
+                        .transition(.scale(scale: 0.9).combined(with: .opacity))
+                } else if let picked, let hit = markerPoints(layout).first(where: { $0.marker.id == picked }) {
                     MarkerCallout(marker: hit.marker, price: groupedPrice(hit.marker.price))
                         .position(x: min(max(hit.point.x, plot.minX + 112), plot.maxX - 112),
                                   y: hit.marker.edge == .upper ? hit.point.y + 72 : hit.point.y - 72)
@@ -146,11 +176,13 @@ struct CandleChart: View {
             .contentShape(.rect)
             .highPriorityGesture(pan(layout))
             .simultaneousGesture(zoom)
-            .simultaneousGesture(SpatialTapGesture(count: 2).onEnded { _ in reset() })
+            .simultaneousGesture(SpatialTapGesture(count: 2).onEnded { _ in reset(in: plot) })
             .simultaneousGesture(SpatialTapGesture(count: 1).onEnded { value in tap(value.location, layout: layout) })
             .onChange(of: layout.firstVisible) { _, first in
                 if first < 12 && bars.count >= 55 { onNeedOlder() }
             }
+            .onAppear { resetForGeneration(in: plot) }
+            .onChange(of: generation) { _, _ in resetForGeneration(in: plot) }
         }
         }
         // Commit the glide's resting offset when it has decayed (or hit the edge); a new touch cancels it first.
@@ -164,7 +196,6 @@ struct CandleChart: View {
             ChartFrameProbe.shared.end()
             #endif
         }
-        .onChange(of: generation) { _, _ in glide = nil; offset = 0; spacing = 7; yShift = 0; yZoom = 1; cross = nil; picked = nil }
         .onChange(of: followToken) { _, _ in reset() }
         .onChange(of: bars.last?.time) { old, new in
             guard let old, let new, new > old else { return }
@@ -183,7 +214,34 @@ struct CandleChart: View {
     private func reset() {
         Haptics.tap()
         glide = nil
-        withAnimation(.snappy(duration: 0.35)) { offset = 0; yShift = 0; yZoom = 1; cross = nil }
+        withAnimation(.snappy(duration: 0.35)) { offset = 0; yShift = 0; yZoom = 1; cross = nil; picked = nil; pickedExecutions = [] }
+    }
+
+    private func reset(in plot: CGRect) {
+        guard let focusRange else { reset(); return }
+        Haptics.tap()
+        glide = nil
+        withAnimation(.snappy(duration: 0.35)) {
+            spacing = 7; yShift = 0; yZoom = 1; cross = nil; picked = nil; pickedExecutions = []
+            applyFocus(focusRange, in: plot)
+        }
+    }
+
+    private func resetForGeneration(in plot: CGRect) {
+        glide = nil; offset = 0; spacing = 7; yShift = 0; yZoom = 1; cross = nil; picked = nil; pickedExecutions = []
+        if let focusRange { applyFocus(focusRange, in: plot) }
+    }
+
+    /// Fit the trade plus three source bars of context on both sides, retaining normal pan and pinch gestures.
+    private func applyFocus(_ range: ClosedRange<Double>, in plot: CGRect) {
+        guard plot.width > 0, let firstTrade = barIndex(range.lowerBound), let lastTrade = barIndex(range.upperBound) else { return }
+        let first = max(0, firstTrade - 3), last = min(bars.count - 1, lastTrade + 3)
+        let visibleBars = CGFloat(max(1, last - first + 1))
+        spacing = min(7, max(1.6, plot.width / visibleBars))
+        let rightIndex = CGFloat(last) + 3
+        offset = CGFloat(bars.count - 1) + rightPad - rightIndex
+        let visible = plot.width / spacing
+        offset = min(max(offset, -visible * 0.6), max(0, CGFloat(bars.count) - visible * 0.3))
     }
 
     /// A touch stops a gliding chart where it is (UIScrollView behaviour). Returns true if it was gliding.
@@ -203,11 +261,22 @@ struct CandleChart: View {
         guard point.x <= layout.plot.maxX else { return }
         // A tap on a gliding chart only stops it (no crosshair), like a scroll view.
         if stopGlide() { return }
-        if picked != nil { withAnimation(.easeOut(duration: 0.15)) { picked = nil }; return }
+        if picked != nil { withAnimation(.easeOut(duration: 0.15)) { picked = nil; pickedExecutions = [] }; return }
         if cross != nil { withAnimation(.easeOut(duration: 0.15)) { cross = nil }; return }
+        let executionHits = executionPoints(layout).filter { hypot($0.point.x - point.x, $0.point.y - point.y) < 22 }
+        if let hit = executionHits.min(by: {
+            hypot($0.point.x - point.x, $0.point.y - point.y) < hypot($1.point.x - point.x, $1.point.y - point.y)
+        }) {
+            Haptics.select()
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                picked = hit.marker.id
+                pickedExecutions = executionHits.map(\.marker).sorted { $0.time < $1.time }
+            }
+            return
+        }
         if let hit = markerPoints(layout).first(where: { hypot($0.point.x - point.x, $0.point.y - point.y) < 22 }) {
             Haptics.select()
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { picked = hit.marker.id }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { picked = hit.marker.id; pickedExecutions = [] }
             return
         }
         Haptics.select()
@@ -479,6 +548,7 @@ struct CandleChart: View {
         }
 
         drawMarkers(&clipped, layout: layout)
+        drawExecutions(&clipped, layout: layout)
 
         if let last = layout.bars.last {
             let y = layout.y(last.close), color = last.close >= last.open ? ChartPalette.up : ChartPalette.down
@@ -601,6 +671,20 @@ struct CandleChart: View {
         }
     }
 
+    /// Execution stamps are H1 precise while the cloud plot is 12H. Plot within the containing source
+    /// candle's horizontal interval; a missing source candle never gets a synthetic marker.
+    private func executionPoints(_ layout: Layout) -> [(marker: ExecutionMarker, point: CGPoint)] {
+        executionMarkers.compactMap { marker in
+            guard let index = barIndex(marker.time), index >= layout.firstVisible, index <= layout.lastVisible,
+                  index < bars.count, marker.time < bars[index].time + period.seconds else { return nil }
+            let fraction = min(max((marker.time - bars[index].time) / period.seconds, 0), 0.999)
+            let point = CGPoint(x: layout.x(CGFloat(index) + CGFloat(fraction)), y: layout.y(marker.price))
+            guard point.x >= layout.plot.minX, point.x <= layout.plot.maxX,
+                  point.y > layout.plot.minY, point.y < layout.plot.maxY else { return nil }
+            return (marker, point)
+        }
+    }
+
     private func drawMarkers(_ context: inout GraphicsContext, layout: Layout) {
         for (marker, point) in markerPoints(layout) {
             let alpha = marker.faded ? 0.4 : 1, color = marker.edge == .upper ? ChartPalette.down : ChartPalette.up
@@ -621,6 +705,37 @@ struct CandleChart: View {
                 context.fill(shape, with: .color(ChartPalette.hex(0x9CA3AF).opacity(alpha)))
             }
             context.draw(text, at: CGPoint(x: rect.midX, y: rect.midY))
+        }
+    }
+
+    private func drawExecutions(_ context: inout GraphicsContext, layout: Layout) {
+        for (marker, point) in executionPoints(layout) {
+            let color = marker.color, selected = marker.id == picked
+            if selected {
+                context.fill(Path(ellipseIn: CGRect(x: point.x - 9, y: point.y - 9, width: 18, height: 18)),
+                             with: .color(color.opacity(0.22)))
+            }
+            if marker.action == "entry" {
+                let diamond = Path { path in
+                    path.move(to: CGPoint(x: point.x, y: point.y - 5))
+                    path.addLine(to: CGPoint(x: point.x + 5, y: point.y))
+                    path.addLine(to: CGPoint(x: point.x, y: point.y + 5))
+                    path.addLine(to: CGPoint(x: point.x - 5, y: point.y))
+                    path.closeSubpath()
+                }
+                let center = Path { path in
+                    path.move(to: CGPoint(x: point.x, y: point.y - 3.2))
+                    path.addLine(to: CGPoint(x: point.x + 3.2, y: point.y))
+                    path.addLine(to: CGPoint(x: point.x, y: point.y + 3.2))
+                    path.addLine(to: CGPoint(x: point.x - 3.2, y: point.y))
+                    path.closeSubpath()
+                }
+                context.fill(diamond, with: .color(.white))
+                context.fill(center, with: .color(color))
+            } else {
+                context.fill(Path(ellipseIn: CGRect(x: point.x - 4.5, y: point.y - 4.5, width: 9, height: 9)), with: .color(.white))
+                context.fill(Path(ellipseIn: CGRect(x: point.x - 3.1, y: point.y - 3.1, width: 6.2, height: 6.2)), with: .color(color))
+            }
         }
     }
 
@@ -855,6 +970,50 @@ private struct MarkerCallout: View {
         }
         .padding(12)
         .frame(width: 214)
+        .frosted(RoundedRectangle(cornerRadius: 16, style: .continuous), veil: 0.9)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// Read-only details for a frozen strategy fill. A tap exposes the native H1 time, fill price and
+/// the share of the original position, including repeated trims that share a 12H candle.
+private struct ExecutionCallout: View {
+    let markers: [ExecutionMarker]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Text(markers.count == 1 ? "成交流水" : "附近 \(markers.count) 笔成交")
+                .font(.system(size: 13, weight: .bold)).foregroundStyle(Color.ink)
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 6) {
+                    ForEach(markers) { marker in
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack(spacing: 5) {
+                                Circle().fill(marker.color).frame(width: 6, height: 6)
+                                Text(marker.label).font(.system(size: 11, weight: .semibold)).foregroundStyle(Color.ink)
+                                Spacer(minLength: 4)
+                                Text(CandleChart.fullTime(marker.time)).font(.system(size: 10).monospacedDigit()).foregroundStyle(Color.muted)
+                            }
+                            HStack(spacing: 8) {
+                                Text("价 \(marker.price.formatted(.number.precision(.fractionLength(0...10)).grouping(.never)))")
+                                Text("占初始 \((marker.share * 100).formatted(.number.precision(.fractionLength(0...2))))%")
+                                Spacer(minLength: 2)
+                                Text(marker.quantity.formatted(.number.precision(.fractionLength(0...8)).grouping(.automatic)))
+                            }
+                            .font(.system(size: 10).monospacedDigit()).foregroundStyle(Color.muted)
+                            Text(marker.phase == "intrabar" ? "原始小时盘中成交" : "K线开盘成交")
+                                .font(.system(size: 9)).foregroundStyle(Color.muted)
+                        }
+                        .padding(.vertical, 4)
+                        if marker.id != markers.last?.id { Divider() }
+                    }
+                }
+            }
+            .frame(maxHeight: 180)
+            .scrollIndicators(.hidden)
+        }
+        .padding(11)
+        .frame(width: 250)
         .frosted(RoundedRectangle(cornerRadius: 16, style: .continuous), veil: 0.9)
         .accessibilityElement(children: .combine)
     }

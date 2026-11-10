@@ -182,9 +182,13 @@ struct BacktestChartView: View {
                         Candle(time: $0.time / 1000, open: $0.open, high: $0.high, low: $0.low, close: $0.close,
                                volume: $0.volume ?? 0, confirmed: true, ema20: $0.ema20, ema50: $0.ema50, emaReady: $0.emaReady)
                     }
+                    let executions = key == "live-cloud-v17" ? (data.executionLegs ?? []).map {
+                        ExecutionMarker(time: $0.timeMs / 1000, price: $0.price, label: $0.label, action: $0.action,
+                                        quantity: $0.quantity, share: $0.share, phase: $0.phase)
+                    } : []
                     CandleChart(bars: bars, generation: generation, period: period, decimals: StrategyFmt.decimals(trade.entryPrice ?? data.candles.last?.close),
                                 range: ranges(data).current, history: ranges(data).past, cloud: key == "live-cloud-v17", lines: lines,
-                                watermark: trade.coin + "USDT")
+                                executionMarkers: executions, focusRange: focusRange, watermark: trade.coin + "USDT")
                 } else if let error {
                     VStack(spacing: 8) {
                         Label(error, systemImage: "exclamationmark.arrow.triangle.2.circlepath").font(.footnote).foregroundStyle(Color.amber)
@@ -240,7 +244,7 @@ struct BacktestChartView: View {
             }
             .padding(4).frosted(Capsule(), veil: 0.8)
             HStack(spacing: 8) {
-                Text(key == "live-cloud-v17" ? (data?.note ?? "OKX 原始 12H K 线 · 缺失时段留空") : "币安历史行情 · 图中时间为北京时间 · 双指缩放 · 线为原回测成交价")
+                Text(chartNote)
                     .font(.caption2).foregroundStyle(Color.muted).lineLimit(2).frame(maxWidth: .infinity, alignment: .leading)
                 if let originalChartURL {
                     Button { showOriginal = true } label: { Label("查看原图", systemImage: "doc.viewfinder").font(.caption.weight(.semibold)) }
@@ -248,6 +252,19 @@ struct BacktestChartView: View {
                 }
             }
         }
+    }
+
+    private var chartNote: String {
+        guard key == "live-cloud-v17" else { return "币安历史行情 · 图中时间为北京时间 · 双指缩放 · 线为原回测成交价" }
+        let source = data?.note ?? "OKX 原始 12H K 线 · 缺失时段留空"
+        return source + (data?.executionLegs?.isEmpty == false ? " · 菱形开仓、圆点为实际出场/减仓；点按查看 H1 成交" : "")
+    }
+
+    /// Fit the saved holding interval on first load; this is only passed by historical details.
+    private var focusRange: ClosedRange<Double>? {
+        guard let entry = trade.entryMs, let exit = trade.exitMs,
+              entry.isFinite, exit.isFinite, exit >= entry else { return nil }
+        return (entry / 1000)...(exit / 1000)
     }
 
     private var lines: [ChartLine] {

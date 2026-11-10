@@ -177,6 +177,12 @@ def cloud_event_raw():
                 symbolDataUrl='../symbols/AAA.json.gz', entryMs=1_700_000_000_000, entryPrice=10.0,
                 exitMs=1_700_086_400_000, exitPrice=11.0,
                 window=dict(timeframe='12h', startMs=start, endMs=end, expectedBars=3, availableBars=3, missingBars=0),
+                fills=[dict(hourMs=start, phase='open', action='entry', childSlot=0, fillPrice=10.0, netUnits=.5),
+                       dict(hourMs=start, phase='open', action='entry', childSlot=1, fillPrice=10.0, netUnits=.5),
+                       dict(hourMs=start + 43_200_000, phase='intrabar', action='take_profit', childSlot=0,
+                            fillPrice=12.0, netUnits=-.5),
+                       dict(hourMs=end, phase='intrabar', action='ema_flip', childSlot=1,
+                            fillPrice=11.0, netUnits=-.5)],
                 entryEvidence=dict(fixedStopPrice=9.0, twoRPrice=12.0,
                                    rails=dict(selectedSideRailPrice=9.5)))
 
@@ -540,6 +546,10 @@ def test_cloud_backtest_and_12h_chart_keep_original_timestamps_columns_and_price
     assert chart['candles'][1]['ema20'] == 10.3
     assert chart['expected_bars'] == chart['available_bars'] == 3 and chart['missing_bars'] == 0
     assert [x['title'] for x in chart['references']] == ['入场', '退出', '固定止损', '2R', '信号侧周一轨道']
+    assert [(x['action'], x['label'], x['share']) for x in chart['execution_legs']] == [
+        ('entry', '开仓', 1.0), ('take_profit', '止盈', .5), ('ema_flip', '云带反转', .5)]
+    assert [x['time_ms'] for x in chart['execution_legs']] == [
+        event['entryMs'], event['window']['startMs'] + 43_200_000, event['window']['endMs']]
 
     malformed = dict(symbol, columns=list(symbol['columns']))
     malformed['columns'][5] = 'ema21'

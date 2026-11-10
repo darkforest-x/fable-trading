@@ -156,6 +156,18 @@ struct BacktestChartData: Decodable {
         let upper: Double
         let lower: Double
     }
+    struct Execution: Decodable, Hashable, Identifiable {
+        let timeMs: Double
+        let startMs: Double
+        let endMs: Double
+        let price: Double
+        let label: String
+        let action: String
+        let quantity: Double
+        let share: Double
+        let phase: String
+        var id: String { "\(action)-\(timeMs)-\(price)" }
+    }
     let track: String
     let trade: BacktestTrade
     let bar: String?
@@ -164,6 +176,8 @@ struct BacktestChartData: Decodable {
     let candles: [Bar]
     let weeklyRanges: [Week]
     var references: [Reference]? = nil
+    /// Exact frozen cloud fills. Older services and other strategies omit this additive field.
+    var executionLegs: [Execution]? = nil
     var expectedBars: Int? = nil
     var availableBars: Int? = nil
     var missingBars: Int? = nil
