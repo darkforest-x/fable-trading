@@ -1,0 +1,13 @@
+{
+  "initial_usdt": 1000,
+  "slots": 5,
+  "per_trade_fraction": [0.05, 0.10, 0.15, 0.20],
+  "start": "2022-02-01T00:00:00Z",
+  "split": "2025-01-01T00:00:00Z",
+  "end": "2026-11-03T00:00:00Z",
+  "model": "Compound from shared open-marked NAV. One position per symbol and one five-way slot reservation per admitted signal. No borrowing. Keep original orders from upper cap4 with 1h reclaim, using the corrected common-path fixed-stop fills.",
+  "capacity_rule": "Do not reuse an occupied slot until the hour after exit. For simultaneous signals use frozen CRC32(symbol) priority.",
+  "selection": "Choose the largest size whose pre-2025 hourly intrabar upper drawdown estimate does not exceed 25% under fees alone AND with additional 5bp per market fill. Report subsequent and continuous-history drawdowns against 30% without reselection.",
+  "costs": "Market entry, stop and timeout 5bp, limit target 2bp. Separate same-order slippage overlay 5bp per market fill. Excludes funding and lot-size rounding.",
+  "float": "Hourly marks including unrealized PnL. Conservative upper drawdown range uses simultaneous unfavorable extrema following favorable extrema and also reserves market slip and exit fees for intrabar closures."
+}
