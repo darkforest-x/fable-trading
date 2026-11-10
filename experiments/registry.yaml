@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-alt-month-first-week-account-20261110-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 47868db4a7
+    status: inconclusive
+    question: How does a shared 1000 USDT monthly upper-reclaim wallet perform under a 30% maximum drawdown constraint?
+    single_variable: Per-trade notional fraction of opening marked NAV (5%, 10%, 15%, 20%), up to five segregated and unlevered positions. Select the largest early size with conservative intrabar drawdown at most 25% under both costs. Keep H1 upper-reclaim clocks, 4% cap, 5% stop and corrected exits fixed.
+    result: Of 2423 real signals, 1613 funded and 810 missed on capacity. At the early-selected 10% size, full fees-only wallet 1000 to 1260.03U, marked DD 19.52%, intrabar bound 19.83%. At additional 5bp per market fill 1122.82U, upper DD 22.94%. Later from 1000 equivalent 1164.49U and 1098.17U. 15% weight stressed upper DD 32.80%. Fixed matched random clock account 410.54U in base costs, 1800 funded.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-alt-month-first-week-account-20261110-v1/summary.json
+    notes: 2022-02..2026-10 signals in 331 OKX swaps. VectorBT shared cash verified to match exact frozen baseline net returns at zero slippage. Fees 2bp maker/5bp taker. Unknown historical funding excluded. Historical drawdown criterion, no real money or future risk guarantee. Notion 4148856479af81939f90f194ae36c58d.
+
   - experiment_id: exp-alt-month-first-week-quarter-reclaim-20261110-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 784255fc1b
