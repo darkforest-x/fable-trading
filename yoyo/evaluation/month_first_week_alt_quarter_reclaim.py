@@ -91,7 +91,7 @@ def _read_15m(symbol):
         return None, None, 'no_15m_file' if not matches else 'ambiguous_15m_files'
     path = matches[0]
     f = pd.read_csv(path, usecols=['ts', 'open', 'high', 'low', 'close'])
-    f.index = pd.DatetimeIndex(pd.to_datetime(f.pop('ts'), unit='ms', utc=True), name='time')
+    f.index = pd.DatetimeIndex(pd.to_datetime(f.pop('ts'), unit='ms', utc=True), name='time').as_unit('ns')
     if not f.index.is_monotonic_increasing or not f.index.is_unique:
         return None, path, 'invalid_15m_clock'
     x = f[['open', 'high', 'low', 'close']].to_numpy(float)
@@ -108,7 +108,7 @@ def _read_h1(source_row):
     if not path.is_file():
         return None, path
     f = pd.read_csv(path, usecols=['time', 'open', 'high', 'low', 'close'])
-    f.index = pd.DatetimeIndex(pd.to_datetime(f.pop('time'), unit='ms', utc=True), name='time')
+    f.index = pd.DatetimeIndex(pd.to_datetime(f.pop('time'), unit='ms', utc=True), name='time').as_unit('ns')
     f = f.loc[f.index + HOUR <= source_row.cutoff]
     if not f.index.is_monotonic_increasing or not f.index.is_unique:
         raise ValueError(f'Invalid cached H1 clock for {source_row.symbol}')
