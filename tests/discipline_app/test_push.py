@@ -176,6 +176,7 @@ def test_activity_state_and_routes_need_the_token(tmp_path):
 
 def test_month_first_week_snapshot_and_notifications_are_additive_and_legacy_feed_stays_unchanged(tmp_path):
     source = MonthMonitor()
+    source.events = [dict(id=f'weekly-{i}', kind='fib', at_ms=1_700_000_000_001 + i) for i in range(120)]
     source.touches = [dict(month_touch(1, source='history'),
                            channels=dict(bark=dict(status='sent', error=None, attempts=1)))]
     book = Book(Path(tmp_path) / 'paper.sqlite3', Clock())

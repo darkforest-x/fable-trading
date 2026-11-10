@@ -381,7 +381,9 @@ class PushService:
                                pushed=delivery['apns'] == 'sent', apns_status=delivery['apns'],
                                channels=event_channels))
         events.sort(key=lambda e: -(e.get('at_ms') or 0))
-        result['events'] = events[:120]
+        # The monthly source is bounded to one row per symbol, side and calendar month.
+        # A burst of weekly notices must not empty the monthly inbox filter.
+        result['events'] = events
         channels = dict(result.get('channels') or {})
         month_channel = dict(apns_configured=self.apns.configured,
                              apns_status=self.month_journal.status())
