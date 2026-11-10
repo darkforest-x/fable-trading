@@ -21,8 +21,7 @@ enum AlertLogic {
             guard seen != nil else { continue }
             if e.kind == "alarm", prefs.popup, e.active == true, e.acknowledged != true { alerts.append(e) }
             if e.kind == "fib", prefs.fib, e.pushed, let at = e.atMs, now - at <= fibWindowMs { alerts.append(e) }
-            if e.kind == "month_first_week_touch", prefs.monthFirstWeekTouch,
-               e.source == "live", e.touchConfirmed == true, let until = e.freshUntilMs,
+            if e.isLiveMonthTouch, prefs.monthFirstWeekTouch, let until = e.freshUntilMs,
                now >= (e.occurredMs ?? .greatestFiniteMagnitude), now <= until,
                until - (e.occurredMs ?? until) <= monthTouchWindowMs { alerts.append(e) }
         }

@@ -231,6 +231,8 @@ struct NotificationEvent: Codable, Identifiable, Hashable {
     var touchConfirmed: Bool? = nil
     var candleConfirmed: Bool? = nil
     var apnsStatus: String? = nil
+
+    var isLiveMonthTouch: Bool { kind == "month_first_week_touch" && source == "live" && touchConfirmed == true }
 }
 
 struct NotificationSnapshot: Codable {

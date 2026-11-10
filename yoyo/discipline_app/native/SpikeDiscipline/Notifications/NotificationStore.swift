@@ -22,7 +22,7 @@ final class NotificationStore {
         }
     }
 
-    var unread: Int { data?.events.filter { ($0.pushed || $0.kind == "month_first_week_touch") && ($0.atMs ?? 0) > openedAt }.count ?? 0 }
+    var unread: Int { data?.events.filter { ($0.pushed || $0.isLiveMonthTouch) && ($0.atMs ?? 0) > openedAt }.count ?? 0 }
 
     func poll(connection: Connection, session: SessionStore) async {
         while !Task.isCancelled {

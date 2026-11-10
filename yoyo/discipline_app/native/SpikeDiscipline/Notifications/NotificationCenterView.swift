@@ -9,7 +9,7 @@ struct NotificationCenterView: View {
     @State private var showUnpushed = false
 
     private var rows: [NotificationEvent] {
-        (notices.data?.events ?? []).uniqued { $0.id }.filter { (filter == "all" || $0.kind == filter) && (showUnpushed || $0.pushed || ($0.kind == MonthTouchStyle.kind && $0.source == "live") || $0.kind == "alarm") }
+        (notices.data?.events ?? []).uniqued { $0.id }.filter { (filter == "all" || $0.kind == filter) && (showUnpushed || $0.pushed || $0.isLiveMonthTouch || $0.kind == "alarm") }
     }
 
     var body: some View {

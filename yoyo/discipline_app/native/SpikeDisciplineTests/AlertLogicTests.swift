@@ -49,6 +49,8 @@ final class AlertLogicTests: XCTestCase {
     func testMonthTouchForegroundAlertIsIndependentOfApnsReceiptAndRequiresLiveFreshFact() {
         let seen: Set<String> = []
         let touch = monthTouch("month:live")
+        XCTAssertTrue(touch.isLiveMonthTouch)
+        XCTAssertFalse(monthTouch("month:history", source: "history").isLiveMonthTouch)
         XCTAssertEqual(AlertLogic.fresh([touch], seen: seen, now: now, prefs: AlertPrefs()).alerts.map(\.id), ["month:live"])
         XCTAssertTrue(AlertLogic.fresh([monthTouch("month:history", source: "history")], seen: seen, now: now, prefs: AlertPrefs()).alerts.isEmpty)
         XCTAssertTrue(AlertLogic.fresh([monthTouch("month:uncertain", touchConfirmed: false)], seen: seen, now: now, prefs: AlertPrefs()).alerts.isEmpty)
