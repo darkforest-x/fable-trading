@@ -115,6 +115,9 @@
 /* WebKit does not reliably sample the page through a transparent modal host.
  * Blur only its read-only background while the independent sheet is open. */
 body.rs-book-open.rs-book-webkit :is(#monday-reclaim-paper,#spike-alarm-dock){filter:blur(10px);}
+/* The mobile sheet fills the viewport. Fixed workspace actions underneath would
+   otherwise show through WebKit's glass header on top of its title and close icon. */
+@media(max-width:700px){body.rs-book-open :is(#spike-navigation,[data-theme-toggle]){visibility:hidden;}}
 /* Stitch 3db5c4dc931244f8a1ea859d4acb8d49: time-series first tear sheet. */
 .rs-history-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 14px;font-size:10px;color:var(--book-muted);margin:0 0 7px;}
 .rs-backtest-metrics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;padding:10px 0 12px;border-bottom:1px solid var(--book-line);margin-bottom:8px;}

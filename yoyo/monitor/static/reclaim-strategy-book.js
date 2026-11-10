@@ -59,6 +59,8 @@
   }
   function pickerHTML(tracks){return tracks.map(t=>`<div class="rs-account-row" data-account-row="${esc(t)}"><button type="button" data-account-drag="${esc(t)}" aria-label="拖动调整 ${esc(label(t))} 顺序" aria-description="拖动排序或移入移出常用；Alt 加上下键排序，Alt 加左键移入常用、右键收入更多" title="拖动排序或移入移出常用 · Alt + ↑/↓ 排序 · Alt + ←/→ 分组"><svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" aria-hidden="true"><circle cx="4" cy="5" r="1.2"/><circle cx="10" cy="5" r="1.2"/><circle cx="4" cy="10" r="1.2"/><circle cx="10" cy="10" r="1.2"/><circle cx="4" cy="15" r="1.2"/><circle cx="10" cy="15" r="1.2"/></svg></button><button type="button" data-strategy-select="${esc(t)}" aria-pressed="false"><span>${esc(label(t))}${t===LIVE_BREADTH?'<em class="rs-account-tag">宽度·SOL</em>':t==='live-wick6x3mid'?'<em class="rs-account-tag">浅穿中点</em>':''}</span>${t===CLOUD?'<strong data-cloud-pnl title="读取模拟账户已实现盈亏">—</strong>':t===BREADTH?'<small title="查看前向模拟账户">模拟</small>':`<strong data-account-pnl="${esc(t)}">—</strong>`}<i aria-hidden="true">✓</i></button><button type="button" data-strategy-book="${esc(t)}" aria-label="查看 ${esc(label(t))} 策略小册" title="策略小册">${BOOK}</button><button type="button" data-strategy-backtest="${esc(t)}" aria-label="查看 ${esc(label(t))} 回测交易" title="回测交易">${BACKTEST}</button></div>`).join('');}
   function tableHTML(headers,rows){return `<div class="rs-table-wrap"><table><thead><tr>${headers.map(h=>`<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map((v,i)=>i?`<td>${typeof v==='number'?num(v):esc(v??'—')}</td>`:`<th scope="row">${esc(v)}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;}
+  const hourlyMarked = h => h?.meta?.basis === 'hourly_marked';
+  const equityName = h => hourlyMarked(h) ? '盯市净值' : '已实现资金';
   const historyDate=ms=>new Date(ms).toISOString().slice(0,10);
   function validateHistory(h,track){
     if(h?.schema!==1||h.meta?.track!==track||!h.summary||!Array.isArray(h.points)||h.points.length<2||!h.points.every((p,i)=>Array.isArray(p)&&p.length===5&&p.every(Number.isFinite)&&p[1]>=0&&(!i||p[0]>=h.points[i-1][0]))||!['monthly','yearly','sides','recent'].every(k=>Array.isArray(h[k]))||!h.distribution||!h.holding)throw Error('历史曲线的数据或策略不匹配');
@@ -82,21 +84,21 @@
     const [year,month]=key.split('-').map(Number),first=h.points[0],last=h.points.at(-1);
     const begin=Date.UTC(year,month-1,1),end=Date.UTC(year,month,1),dayMs=86400000;
     let index=1,previous=first;
-    while(index<h.points.length&&h.points[index][0]<begin)previous=h.points[index++];
+    while(index<h.points.length&&h.points[index][0]<begin+(hourlyMarked(h)?1:0))previous=h.points[index++];
     const days=[];
     for(let time=begin;time<end;time+=dayMs){
       const date=historyDate(time),covered=date>=historyDate(first[0])&&date<=historyDate(last[0]);
       const start=previous[1];let pnl=0,changed=false;
-      while(index<h.points.length&&h.points[index][0]<time+dayMs){
+      while(index<h.points.length&&h.points[index][0]<time+dayMs+(hourlyMarked(h)?1:0)){
         const p=h.points[index++],delta=p[1]-previous[1]-(p[4]-previous[4]);
         pnl+=delta;changed||=Math.abs(delta)>1e-8;previous=p;
       }
       if(Math.abs(pnl)<1e-8)pnl=0;
-      days.push({date,day:days.length+1,covered,pnl:covered?pnl:null,changed,
+      days.push({marked:hourlyMarked(h),endNav:previous[1],date,day:days.length+1,covered,pnl:covered?pnl:null,changed:hourlyMarked(h)?Math.abs(pnl)>1e-8:changed,
         returnPct:covered&&!h.refilled&&start>0?100*(previous[1]/start-1):null});
     }
     const months=h.monthly.map(p=>p[0]),at=months.indexOf(key);
-    return {key,title:`${year}年${month}月`,days,offset:(new Date(begin).getUTCDay()+6)%7,
+    return {key,marked:hourlyMarked(h),title:`${year}年${month}月`,days,offset:(new Date(begin).getUTCDay()+6)%7,
       pnl:days.reduce((sum,d)=>sum+(d.pnl||0),0),returnPct:h.refilled?null:h.monthly[at][1],refilled:h.refilled,
       previous:months[at-1]||null,next:months[at+1]||null,firstMs:first[0],lastMs:last[0]};
   }
@@ -106,7 +108,7 @@
     const scale=Math.abs(v)>=1e6?1e6:1e3;
     return (v<0?'−':'+')+num(Math.abs(v)/scale,1)+(scale===1e6?'m':'k');
   }
-  function calendarDayLabel(d){return `${d.date} · ${d.covered?`${signed(d.pnl)} USDT${d.returnPct==null?'':` · 日收益 ${signed(d.returnPct)}%`}${d.changed?'':' · 无已实现盈亏'}`:'未覆盖'}`;}
+  function calendarDayLabel(d){return `${d.date} · ${d.covered?`${signed(d.pnl)} USDT${d.returnPct==null?'':` · 日收益 ${signed(d.returnPct)}%`}${d.changed?'':d.marked?' · 净值无变化':' · 无已实现盈亏'}`:'未覆盖'}`;}
   const closeAmount=(a,b)=>Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=Math.max(1e-6,Math.abs(b)*1e-9);
   function validateDayPage(p,q,offset,validRow){
     if(p?.schema!==1||p.track!==q.track||p.date!==q.date||p.timezone!=='UTC'||p.source!=='Binance'||p.offset!==offset||!Array.isArray(p.rows)||!p.rows.every(r=>validRow(r)&&historyDate(r.exit_ms)===q.date)||new Set(p.rows.map(r=>r.id)).size!==p.rows.length||!Number.isInteger(p.total)||p.total<offset+p.rows.length||p.has_more!==(offset+p.rows.length<p.total)||(p.has_more&&!p.rows.length))throw Error('当日交易数据不完整，请重试');
@@ -146,7 +148,7 @@
   function calendarHTML(m){
     const cells=m.days.map(d=>`<button type="button" class="rs-calendar-day ${!d.covered?'is-uncovered':d.pnl>0?'is-gain':d.pnl<0?'is-loss':'is-flat'}" data-calendar-day="${d.day}" ${!d.covered?'disabled':''} aria-label="${esc(calendarDayLabel(d))}" title="${esc(calendarDayLabel(d))}"><time datetime="${d.date}">${d.day}</time><b>${d.changed&&d.covered?compactPnl(d.pnl):'—'}</b><small>${!d.covered?'未覆盖':d.changed&&d.returnPct!=null?signed(d.returnPct)+'%':''}</small></button>`);
     const blanks=n=>'<span class="rs-calendar-blank" aria-hidden="true"></span>'.repeat(n);
-    return `<header class="rs-calendar-header"><div><strong id="rs-calendar-title" tabindex="-1">${m.title}</strong><small>每日已实现盈亏 · USDT · UTC</small></div><div class="rs-calendar-nav"><button type="button" data-calendar-nav="previous" aria-label="上一月" ${m.previous?'':'disabled'}>‹</button><button type="button" data-calendar-nav="next" aria-label="下一月" ${m.next?'':'disabled'}>›</button><button type="button" data-calendar-close aria-label="关闭每日盈亏日历">×</button></div></header><div class="rs-calendar-summary"><div><small>月度净盈亏 / USDT</small><strong class="${pnlView(m.pnl).tone}">${signed(m.pnl)}</strong></div>${m.refilled?'':`<div><small>月收益率</small><strong class="${pnlView(m.returnPct).tone}">${signed(m.returnPct)}${m.returnPct==null?'':'%'}</strong></div>`}</div><div class="rs-calendar-week" aria-hidden="true">${['一','二','三','四','五','六','日'].map(d=>`<span>${d}</span>`).join('')}</div><div class="rs-calendar-grid" role="group" aria-label="${m.title}每日盈亏">${blanks(m.offset)}${cells.join('')}${blanks((7-(m.offset+cells.length)%7)%7)}</div><div class="rs-calendar-detail" role="status">点日期查看当天交易 · — 无已实现盈亏</div><footer>按结算日统计 · 不含浮盈亏${m.refilled?' · 补充本金不计收益':''}<br>数据截至 ${new Date(m.lastMs).toISOString().slice(0,16).replace('T',' ')} UTC</footer>`;
+    return `<header class="rs-calendar-header"><div><strong id="rs-calendar-title" tabindex="-1">${m.title}</strong><small>${m.marked?'每日净值变动':'每日已实现盈亏'} · USDT · UTC</small></div><div class="rs-calendar-nav"><button type="button" data-calendar-nav="previous" aria-label="上一月" ${m.previous?'':'disabled'}>‹</button><button type="button" data-calendar-nav="next" aria-label="下一月" ${m.next?'':'disabled'}>›</button><button type="button" data-calendar-close aria-label="关闭每日盈亏日历">×</button></div></header><div class="rs-calendar-summary"><div><small>月度净盈亏 / USDT</small><strong class="${pnlView(m.pnl).tone}">${signed(m.pnl)}</strong></div>${m.refilled?'':`<div><small>月收益率</small><strong class="${pnlView(m.returnPct).tone}">${signed(m.returnPct)}${m.returnPct==null?'':'%'}</strong></div>`}</div><div class="rs-calendar-week" aria-hidden="true">${['一','二','三','四','五','六','日'].map(d=>`<span>${d}</span>`).join('')}</div><div class="rs-calendar-grid" role="group" aria-label="${m.title}每日盈亏">${blanks(m.offset)}${cells.join('')}${blanks((7-(m.offset+cells.length)%7)%7)}</div><div class="rs-calendar-detail" role="status">${m.marked?'点日期查看期末净值 · — 净值无变化':'点日期查看当天交易 · — 无已实现盈亏'}</div><footer>${m.marked?'按 UTC 小时收盘净值 · 含浮盈亏':'按结算日统计 · 不含浮盈亏'}${m.refilled?' · 补充本金不计收益':''}<br>数据截至 ${new Date(m.lastMs).toISOString().slice(0,16).replace('T',' ')} UTC</footer>`;
   }
   const DAY=86400000;
   function historyWindow(h,period='all',anchor=h.points.at(-1)[0]){
@@ -185,20 +187,20 @@
     const start=historyDate(view.start),end=historyDate(view.end);
     return start===end?start:`${start} — ${end}`;
   }
-  function historyToolbar(){
-    return `<div class="rs-timeline-toolbar"><div class="rs-chart-modes rs-time-modes" role="group" aria-label="资金曲线时间范围">${[['all','全部'],['month','月度'],['day','日度']].map(([k,v])=>`<button type="button" data-history-range="${k}" aria-pressed="${k==='all'}">${v}</button>`).join('')}</div><div class="rs-time-nav"><button type="button" data-history-step="-1" aria-label="上一时间段">‹</button><span data-history-window aria-live="polite"></span><button type="button" data-history-step="1" aria-label="下一时间段">›</button><button type="button" data-history-latest>最新</button></div></div><div class="rs-chart-legend"><span><i></i>已实现资金</span><span><i></i>历史高点回撤</span><small>UTC · 左右拖动 · 双指缩放</small></div>`;
+  function historyToolbar(h){
+    return `<div class="rs-timeline-toolbar"><div class="rs-chart-modes rs-time-modes" role="group" aria-label="资金曲线时间范围">${[['all','全部'],['month','月度'],['day','日度']].map(([k,v])=>`<button type="button" data-history-range="${k}" aria-pressed="${k==='all'}">${v}</button>`).join('')}</div><div class="rs-time-nav"><button type="button" data-history-step="-1" aria-label="上一时间段">‹</button><span data-history-window aria-live="polite"></span><button type="button" data-history-step="1" aria-label="下一时间段">›</button><button type="button" data-history-latest>最新</button></div></div><div class="rs-chart-legend"><span><i></i>${equityName(h)}</span><span><i></i>历史高点回撤</span><small>UTC · 左右拖动 · 双指缩放</small></div>`;
   }
   function historyHTML(h){
     const s=h.summary,pf=s.profit_factor_state==='no_losses'?'∞':num(s.profit_factor),unit=h.refilled?'USDT':'%';
-    const metrics=[[h.refilled?'交易净盈亏':'累计净收益',num(h.refilled?s.pnl:s.return_pct)+(h.refilled?' USDT':'%')],['最大已实现回撤',num(s.max_drawdown_pct)+'%'],['资金成交胜率',num(s.win_pct,1)+'%'],['已平仓笔数',num(s.trades,0)],['盈利因子',pf],['期末资金',num(s.end)+' USDT']];
-    return `<div class="rs-history-meta"><span>${historyDate(h.points[0][0])} — ${historyDate(h.points.at(-1)[0])} · UTC</span><span>1000 USDT 起步 · 已实现净值</span></div><p class="rs-research-note">${esc(h.meta.note)}</p><div class="rs-backtest-metrics">${metrics.map(([k,v])=>`<div><small>${k}</small><strong>${v}</strong></div>`).join('')}</div><figure class="rs-primary-figure"><figcaption><b>资金路径与回撤</b><div class="rs-chart-modes" role="group" aria-label="历史曲线显示"><button type="button" data-history-mode="equity" aria-pressed="true">资金 USDT</button><button type="button" data-history-mode="returns" aria-pressed="false">${h.refilled?'交易净盈亏':'累计收益 %'}</button></div></figcaption>${historyToolbar()}<div class="rs-history-chart" tabindex="0" role="region" aria-label="历史资金与回撤曲线，左右方向键平移，Home 查看全部"></div><p class="rs-muted">${h.refilled?'灰线为累计净投入；补充本金不计入交易收益。回撤按每轮本金计算，补充本金重置高水位。':'蓝线为已实现资金／累计净收益，红色为相对历史高点的回撤。'} ${h.meta.track===BREADTH?'曲线按平仓结算，不含持仓浮盈亏；上方最大盯市回撤按每 5 分钟估值。':'曲线保留每笔结算，不含持仓浮盈亏；同一时刻的先亏损后补款也保留。'}</p></figure><div class="rs-period-grid"><figure><figcaption>${h.refilled?'月度交易净盈亏':'月度收益热力图'} <small>/ ${unit}</small></figcaption>${heatmapHTML(h)}</figure><figure><figcaption>${h.refilled?'年度交易净盈亏':'年度收益'} <small>/ ${unit}</small></figcaption><div class="rs-bar-chart" data-history-chart="yearly" role="img" aria-label="年度收益柱状图"></div></figure></div><div class="rs-chart-grid"><figure><figcaption>单笔净收益分布 <small>/ 名义本金收益 % · 纵轴笔数</small></figcaption><div class="rs-bar-chart" data-history-chart="distribution" role="img" aria-label="单笔净收益分布"></div></figure><figure><figcaption>持仓时长分布 <small>/ 笔</small></figcaption><div class="rs-bar-chart" data-history-chart="holding" role="img" aria-label="持仓时长分布"></div></figure></div><div class="rs-sides"><h3>多空表现</h3>${tableHTML(['方向','成交笔数','胜率 %','净盈亏 USDT'],h.sides)}</div><details class="rs-detail-table"><summary>逐笔成交 · 最近 ${h.recent.length} 笔 / 共 ${s.trades} 笔</summary>${tableHTML(['币种','开仓 UTC','平仓 UTC','方向','净盈亏 USDT','净收益 %'],h.recent.map(r=>[r[0],new Date(r[1]).toISOString().slice(0,16).replace('T',' '),new Date(r[2]).toISOString().slice(0,16).replace('T',' '),...r.slice(3)]))}</details>`;
+    const metrics=[[h.refilled?'交易净盈亏':'累计净收益',num(h.refilled?s.pnl:s.return_pct)+(h.refilled?' USDT':'%')],[hourlyMarked(h)?'最大账面回撤':'最大已实现回撤',num(s.max_drawdown_pct)+'%'],['资金成交胜率',num(s.win_pct,1)+'%'],['已平仓笔数',num(s.trades,0)],['盈利因子',pf],['期末资金',num(s.end)+' USDT']];
+    return `<div class="rs-history-meta"><span>${historyDate(h.points[0][0])} — ${historyDate(h.points.at(-1)[0])} · UTC</span><span>1000 USDT 起步 · ${hourlyMarked(h)?'小时盯市净值':'已实现净值'}</span></div><p class="rs-research-note">${esc(h.meta.note)}</p><div class="rs-backtest-metrics">${metrics.map(([k,v])=>`<div><small>${k}</small><strong>${v}</strong></div>`).join('')}</div><figure class="rs-primary-figure"><figcaption><b>资金路径与回撤</b><div class="rs-chart-modes" role="group" aria-label="历史曲线显示"><button type="button" data-history-mode="equity" aria-pressed="true">资金 USDT</button><button type="button" data-history-mode="returns" aria-pressed="false">${h.refilled?'交易净盈亏':'累计收益 %'}</button></div></figcaption>${historyToolbar(h)}<div class="rs-history-chart" tabindex="0" role="region" aria-label="历史资金与回撤曲线，左右方向键平移，Home 查看全部"></div><p class="rs-muted">${hourlyMarked(h)?'蓝线为小时收盘净值（或累计收益）；红线为小时内各估值阶段的最深回撤。':h.refilled?'灰线为累计净投入；补充本金不计入交易收益。回撤按每轮本金计算，补充本金重置高水位。':'蓝线为已实现资金／累计净收益，红色为相对历史高点的回撤。'} ${hourlyMarked(h)?'两条曲线都包含持仓浮盈亏。':h.meta.track===BREADTH?'曲线按平仓结算，不含持仓浮盈亏；上方最大盯市回撤按每 5 分钟估值。':'曲线保留每笔结算，不含持仓浮盈亏；同一时刻的先亏损后补款也保留。'}</p></figure><div class="rs-period-grid"><figure><figcaption>${h.refilled?'月度交易净盈亏':'月度收益热力图'} <small>/ ${unit}</small></figcaption>${heatmapHTML(h)}</figure><figure><figcaption>${h.refilled?'年度交易净盈亏':'年度收益'} <small>/ ${unit}</small></figcaption><div class="rs-bar-chart" data-history-chart="yearly" role="img" aria-label="年度收益柱状图"></div></figure></div><div class="rs-chart-grid"><figure><figcaption>单笔净收益分布 <small>/ 名义本金收益 % · 纵轴笔数</small></figcaption><div class="rs-bar-chart" data-history-chart="distribution" role="img" aria-label="单笔净收益分布"></div></figure><figure><figcaption>持仓时长分布 <small>/ 笔</small></figcaption><div class="rs-bar-chart" data-history-chart="holding" role="img" aria-label="持仓时长分布"></div></figure></div><div class="rs-sides"><h3>多空表现</h3>${tableHTML(['方向','成交笔数','胜率 %','净盈亏 USDT'],h.sides)}</div><details class="rs-detail-table"><summary>逐笔成交 · 最近 ${h.recent.length} 笔 / 共 ${s.trades} 笔</summary>${tableHTML(['币种','开仓 UTC','平仓 UTC','方向','净盈亏 USDT','净收益 %'],h.recent.map(r=>[r[0],new Date(r[1]).toISOString().slice(0,16).replace('T',' '),new Date(r[2]).toISOString().slice(0,16).replace('T',' '),...r.slice(3)]))}</details>`;
   }
   function equityOptions(h,mode='equity',dark=false,view=historyWindow(h)){
     const c=dark?'#abb8c5':'#607382',gridColor=dark?'#ffffff12':'#7184941c',returns=mode==='returns';
-    const name=returns?(h.refilled?'累计交易净盈亏':'累计净收益'):'已实现资金',unit=returns&&!h.refilled?'%':' USDT',bounds=historyAxes(h,mode,view);
+    const name=returns?(h.refilled?'累计交易净盈亏':'累计净收益'):equityName(h),unit=returns&&!h.refilled?'%':' USDT',bounds=historyAxes(h,mode,view);
     const axis=i=>({gridIndex:i,type:'time',min:h.points[0][0],max:Math.max(h.points[0][0]+1,h.points.at(-1)[0]),boundaryGap:false,splitNumber:4,axisLine:{show:false},axisTick:{show:false},axisLabel:{show:i===1,color:c,fontSize:10,hideOverlap:true},splitLine:{show:false}});
     const series=[{name,type:'line',step:'end',showSymbol:false,smooth:false,xAxisIndex:0,yAxisIndex:0,data:h.points.map(p=>[p[0],p[returns?2:1]]),lineStyle:{color:'#2586e7',width:2},itemStyle:{color:'#2586e7'},areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'#2586e728'},{offset:1,color:'#2586e703'}]}}},
-      {name:h.refilled?'本轮本金回撤':'已实现回撤',type:'line',step:'end',showSymbol:false,smooth:false,xAxisIndex:1,yAxisIndex:1,data:h.points.map(p=>[p[0],p[3]]),lineStyle:{color:'#e04b66',width:1.4},itemStyle:{color:'#e04b66'},areaStyle:{color:'#e04b66',opacity:.12}}];
+      {name:hourlyMarked(h)?'账面回撤':h.refilled?'本轮本金回撤':'已实现回撤',type:'line',step:'end',showSymbol:false,smooth:false,xAxisIndex:1,yAxisIndex:1,data:h.points.map(p=>[p[0],p[3]]),lineStyle:{color:'#e04b66',width:1.4},itemStyle:{color:'#e04b66'},areaStyle:{color:'#e04b66',opacity:.12}}];
     if(h.refilled&&!returns)series.push({name:'累计净投入',type:'line',step:'end',showSymbol:false,data:h.points.map(p=>[p[0],p[4]]),lineStyle:{color:'#8897a6',type:'dashed',width:1.2},itemStyle:{color:'#8897a6'}});
     const zoom={xAxisIndex:[0,1],filterMode:'none',startValue:view.start,endValue:view.end,minValueSpan:60000,throttle:40};
     return {animation:false,useUTC:true,grid:[{left:54,right:16,top:28,height:'46%'},{left:54,right:16,top:'64%',height:'18%'}],axisPointer:{link:[{xAxisIndex:'all'}],lineStyle:{color:dark?'#ffffff45':'#71849455',type:'dashed'}},tooltip:{trigger:'axis',confine:true,backgroundColor:dark?'#1c222c':'#fff',borderColor:gridColor,padding:[10,14],textStyle:{color:dark?'#e8edf4':'#182b39',fontSize:11},extraCssText:'max-width:calc(100% - 8px);white-space:normal;overflow-wrap:anywhere;border-radius:12px;box-shadow:0 8px 24px #071b301a;',formatter:items=>items.length?`${utcTime(items[0].value[0])} UTC<br>`+items.map(v=>`${esc(v.seriesName)}: ${num(v.value[1])}${v.seriesIndex===1?'%':unit}`).join('<br>'):''},xAxis:[axis(0),axis(1)],yAxis:[{...bounds[0],type:'value',scale:true,name:unit.trim(),splitNumber:4,nameTextStyle:{color:c,fontSize:10},axisLabel:{...bounds[0].axisLabel,color:c,fontSize:10},splitLine:{lineStyle:{color:gridColor,type:'dashed'}}},{...bounds[1],gridIndex:1,type:'value',splitNumber:3,name:'回撤 %',nameTextStyle:{color:c,fontSize:10},axisLabel:{color:c,fontSize:10,formatter:v=>num(v,1)+'%'},splitLine:{lineStyle:{color:gridColor}}}],dataZoom:[{...zoom,id:'history-inside',type:'inside',zoomOnMouseWheel:'ctrl',moveOnMouseWheel:'shift',moveOnMouseMove:true,preventDefaultMouseMove:false},{...zoom,id:'history-slider',type:'slider',left:54,right:16,bottom:8,height:24,showDetail:false,brushSelect:false,borderColor:'transparent',backgroundColor:dark?'#ffffff08':'#7184940c',fillerColor:'#2586e724',handleSize:'110%',handleStyle:{color:dark?'#1c222c':'#fff',borderColor:'#2586e7',borderWidth:1.5},dataBackground:{lineStyle:{color:'#2586e7',opacity:.35},areaStyle:{color:'#2586e7',opacity:.05}},selectedDataBackground:{lineStyle:{color:'#2586e7',opacity:.7},areaStyle:{color:'#2586e7',opacity:.12}}}],series};
@@ -295,7 +297,7 @@
       el('[data-history-step="-1"]').disabled=historyView.start<=first;
       el('[data-history-step="1"]').disabled=historyView.end>=last;
       el('[data-history-latest]').disabled=historyView.end>=last;
-      el('.rs-chart-legend span:first-child').lastChild.textContent=historyMode==='equity'?'已实现资金':history.refilled?'累计交易净盈亏':'累计收益';
+      el('.rs-chart-legend span:first-child').lastChild.textContent=historyMode==='equity'?equityName(history):history.refilled?'累计交易净盈亏':'累计收益';
       el('.rs-chart-legend span:nth-child(2)').lastChild.textContent=history.refilled?'本轮本金回撤':'历史高点回撤';
     }
     function setHistoryView(view){
@@ -329,7 +331,10 @@
     function showDay(number){
       const d=calendarMonth?.days[number-1];if(!d?.covered)return;
       calendarDay=number;dayView=true;
-      if(track===BREADTH){
+      if(hourlyMarked(history)){
+        calendar.innerHTML='<header class="rs-calendar-header"><button type="button" data-calendar-back aria-label="返回月历">‹</button><strong id="rs-calendar-title" tabindex="-1">'+esc(d.date)+'</strong><button type="button" data-calendar-close aria-label="关闭每日盈亏日历">×</button></header><div class="rs-calendar-summary"><div><small>期末净值 / USDT</small><strong>'+num(d.endNav)+'</strong></div><div><small>净值变动 / USDT</small><strong>'+signed(d.pnl)+'</strong></div></div><footer>按当日最后可得小时收盘估值，含持仓浮盈亏。</footer>';
+        calendar.classList.add('is-day-view');positionCalendar();
+      }else if(track===BREADTH){
         const rows=(history.dayRows[d.date]||[]).map((r,i)=>({...r,side:1,id:i+1}));
         renderDay({date:d.date,expectedPnl:d.pnl,data:{total:rows.length},rows});
       }else dayModel.select(track,d.date,d.pnl);
@@ -423,7 +428,7 @@
     picker.addEventListener('click',event=>{if(event.detail!==0&&Date.now()<blockedUntil){event.preventDefault();event.stopPropagation();return;}const b=event.target.closest('button');if(!b)return;if(b.hasAttribute('data-account-more')){setMore(groups.more.hidden);return;}if([b.dataset.strategySelect,b.dataset.strategyBook,b.dataset.strategyBacktest].includes(CLOUD)){
         picker.hidePopover();
         const chapter=b.dataset.strategySelect?'forward':b.dataset.strategyBacktest?'history':'overview';
-        location.assign('/static/strategy-booklet/cloud-v17/index.html#'+chapter);
+        show(CLOUD,{chapter});
         return;
       }
       if(b.dataset.strategySelect===BREADTH){picker.hidePopover();show(BREADTH);return;}if(b.dataset.strategySelect){onSelect(b.dataset.strategySelect);sync();picker.hidePopover();trigger.focus({preventScroll:true});}if(b.dataset.strategyBook){picker.hidePopover();show(b.dataset.strategyBook);}if(b.dataset.strategyBacktest){picker.hidePopover();if(b.dataset.strategyBacktest===BREADTH)openBreadthReplay({});else onBacktest?.(b.dataset.strategyBacktest);}});
@@ -432,6 +437,8 @@
       closeCalendar();
       if(!open&&!dialog.open)return;open=false;epoch++;requests.cancel();analytics?.setActive(false);stopCharts();dialog.classList.remove('is-open');clearTimeout(closing);
       if(track===BREADTH)clearBookLocation();
+      if(track===CLOUD)window.SpikeCloudBookRoute.write(null);
+      clearCloud();
       clearTimeout(breadthForwardTimer);breadthData=null;breadthPending=null;
       const finish=()=>{dialog.close();document.body.classList.remove('rs-book-open','rs-book-webkit');trigger.focus({preventScroll:true});};
       if(immediate||matchReduced())finish();else closing=setTimeout(finish,280);
@@ -458,7 +465,7 @@
       el('.rs-forward-status').textContent=error?`读取失败：${error}${data?' · 保留上次统计':''}`:data?`更新于 ${new Date(data.now_ms).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai'})} 北京时间`:'正在读取完整账本…';
       el('[data-book-refresh]').disabled=busy;
       if(!data)return;chartData=data;const s=data.summary;
-      el('.rs-forward-metrics').innerHTML=[['已实现净盈亏',num(s.realized_pnl)+' USDT'],['已完全平仓',num(s.closed_count,0)+' 笔'],['最大已实现回撤',num(s.max_drawdown_pct)+'%']].map(([k,v])=>`<div><small>${k}</small><strong>${v}</strong></div>`).join('');
+      el('.rs-forward-metrics').innerHTML=[['已实现净盈亏',num(s.realized_pnl)+' USDT'],['已完全平仓',num(s.closed_count,0)+' 笔'],[hourlyMarked(h)?'最大账面回撤':'最大已实现回撤',num(s.max_drawdown_pct)+'%']].map(([k,v])=>`<div><small>${k}</small><strong>${v}</strong></div>`).join('');
       const pair=data.paired_wick;
       const pairedNote=pair?` 同信号已结清 ${pair.pairs} 对，原版盈亏比 ${num(pair.original.payoff)}，浅穿中点版 ${num(pair.midpoint.payoff)}。`:'';
       el('.rs-forward-note').textContent=window.SpikeReclaimAnalytics.curveNote(data)+' 不含浮动盈亏。'+pairedNote+window.SpikeReclaimAnalytics.coverageNote(data.coverage);queueCharts();
@@ -502,6 +509,26 @@
       }
       if(open&&epoch===token)breadthForwardTimer=setTimeout(()=>pollBreadthForward(token),30000);
     }
+    let cloudReader=null;
+    function clearCloud(){cloudReader?.dispose();cloudReader=null;}
+    async function showCloud(token,options){
+      const isCurrent=()=>open&&track===CLOUD&&epoch===token;
+      window.SpikeCloudBookRoute.write(options);
+      try{
+        const [module]=await Promise.all([import('/static/strategy-booklet/cloud-v17/sheet.js'),window.SpikeModules.ensure('cloud-booklet')]);
+        if(!isCurrent())return;
+        cloudReader=module.cloudSheet({el,isCurrent,esc,tableHTML,write:window.SpikeCloudBookRoute.write,
+          fetchJSON:url=>requests.json(url),
+          setupHistory:path=>{
+            history=validateHistory(path,CLOUD);
+            el('[data-cloud-history]').innerHTML=historyHTML(history);
+            observeCharts();queueCharts();
+          }});
+        await cloudReader.show(options);
+      }catch(error){
+        if(isCurrent())el('#rs-research').innerHTML='<p class="rs-warning">小册暂时无法完整载入：'+esc(error.message)+'</p><button type="button" data-book-retry>重试读取</button>';
+      }
+    }
     async function showBreadth(token,options){
       window.SpikeBreadthBookRoute?.write(options);
       try{
@@ -519,19 +546,22 @@
       closeCalendar();
       if(!catalog.includes(next))return;
       if(track===BREADTH&&next!==track)clearBookLocation();
+      if(track===CLOUD&&next!==track)window.SpikeCloudBookRoute.write(null);
+      clearCloud();
       clearTimeout(breadthForwardTimer);breadthData=null;breadthPending=next===BREADTH?options:null;
       clearTimeout(closing);epoch++;const token=epoch;track=next;open=true;chartData=null;research=null;history=null;historyView=null;historyMode='equity';analytics?.setActive(false);requests.cancel();requests=window.SpikeRuntime.createRequests();stopCharts();
       analytics=null;
       el('[data-book-label]').textContent=label(track);
-      el('#rs-forward').innerHTML=track===BREADTH?'<div class="rs-section-title"><h2>前向资金</h2></div><p>正在读取模拟账户…</p>':forwardTemplate;
+      el('#rs-forward').innerHTML=(track===BREADTH||track===CLOUD)?'<div class="rs-section-title"><h2>前向资金</h2></div><p>正在读取模拟账户…</p>':forwardTemplate;
       if(track===BREADTH){
         el('#rs-overview').innerHTML='<div class="rs-section-title"><h1>全市场下轨反弹<em>普通 BTC · 4H EMA20 过滤</em></h1></div><div class="rs-facts"><div><small>方向</small><b>做多</b></div><div><small>交易标的</small><b>BTC / 山寨篮子</b></div><div><small>信号</small><b>周一下轨首触</b></div></div>';
         el('#rs-rules').innerHTML='';
-      }else rules();
+      }else if(track===CLOUD){el('#rs-overview').textContent='正在读取策略小册…';el('#rs-rules').replaceChildren();}else rules();
       reading.scrollTo({top:0,behavior:'instant'});
       el('#rs-research').innerHTML='<p class="rs-muted">正在读取回测资料…</p>';el('#rs-sources').innerHTML='';
       document.body.classList.add('rs-book-open');document.body.classList.toggle('rs-book-webkit',/AppleWebKit\//.test(navigator.userAgent)&&!/(Chrome|Chromium|Edg)\//.test(navigator.userAgent));if(!dialog.open)dialog.showModal();el('.rs-sheet').getBoundingClientRect();requestAnimationFrame(()=>{if(open&&token===epoch)dialog.classList.add('is-open');});el('[data-book-label]').focus({preventScroll:true});
       const selected=track;
+      if(selected===CLOUD){await showCloud(token,options);return;}
       if(selected===BREADTH){void pollBreadthForward(token);await showBreadth(token,options);return;}
       analytics=createFeed({read:()=>requests.json(`/api/monday-reclaim-paper/analytics?track=${selected}&days=0`),validateData:d=>window.SpikeReclaimAnalytics.validate(d,selected,0),cancel:()=>{},change:renderForward});
       try{
@@ -550,7 +580,7 @@
     dialog.addEventListener('click',e=>{
       if(e.target===dialog||e.target.closest('[data-book-close]'))close();
       if(e.target.closest('[data-book-refresh]')){analytics?.refresh();queueCharts();}
-      if(e.target.closest('[data-book-retry]'))show(track,breadthPending||{});
+      if(e.target.closest('[data-book-retry]'))show(track,(track===CLOUD?window.SpikeCloudBookRoute.read(location.search):breadthPending)||{});
       const scope=e.target.closest('[data-breadth-scope]'),jump=e.target.closest('[data-breadth-jump]');
       if(scope&&breadthData&&scope.dataset.breadthScope!==breadthScope){renderBreadthScope(scope.dataset.breadthScope);window.SpikeBreadthBookRoute?.write({chapter:'research',scope:breadthScope});}
       if(jump)jumpBreadth(jump.dataset.breadthJump);
@@ -570,7 +600,7 @@
         if(historyView.period==='custom'){const end=history.points.at(-1)[0];setHistoryView({period:'custom',start:Math.max(history.points[0][0],end-(historyView.end-historyView.start)),end});}
         else setHistoryView(historyWindow(history,historyView.period));
       }
-      const chapter=e.target.closest('[data-book-chapter]');if(chapter&&track===BREADTH)window.SpikeBreadthBookRoute?.write({chapter:chapter.dataset.bookChapter,scope:breadthScope});if(chapter)el('#rs-'+chapter.dataset.bookChapter).scrollIntoView({behavior:matchReduced()?'instant':'smooth',block:'start'});
+      const chapter=e.target.closest('[data-book-chapter]');if(chapter&&track===CLOUD)window.SpikeCloudBookRoute.write({chapter:chapter.dataset.bookChapter});if(chapter&&track===BREADTH)window.SpikeBreadthBookRoute?.write({chapter:chapter.dataset.bookChapter,scope:breadthScope});if(chapter)el('#rs-'+chapter.dataset.bookChapter).scrollIntoView({behavior:matchReduced()?'instant':'smooth',block:'start'});
     });
     dialog.addEventListener('keydown',e=>{
       if(!e.target.matches('.rs-history-chart')||!history)return;
@@ -580,7 +610,7 @@
     new MutationObserver(()=>{if(open)queueCharts();}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
     window.addEventListener('resize',()=>{if(picker.matches(':popover-open'))positionPicker();positionCalendar();});
     document.addEventListener('visibilitychange',()=>{analytics?.setActive(active&&open&&!document.hidden&&visibleCharts.has(el('.rs-forward-chart')));if(!document.hidden)queueCharts();});
-    sync();return {sync,close,show,getOrder:()=>[...layout.main,...layout.more].filter(t=>tracks.includes(t)),setActive(value){active=value;if(value&&!open){const dest=window.SpikeBreadthBookRoute?.read(location.search);if(dest?.chapter==='replay'){if(!replayRouteHandled)openBreadthReplay(dest);}else{replayRouteHandled=false;if(dest)show(BREADTH,dest);}}if(!value){if(picker.matches(':popover-open'))picker.hidePopover();close(true);}}};
+    sync();return {sync,close,show,getOrder:()=>[...layout.main,...layout.more].filter(t=>tracks.includes(t)),setActive(value){active=value;if(value&&!open){const cloud=window.SpikeCloudBookRoute?.read(location.search);if(cloud){show(CLOUD,cloud);return;}const dest=window.SpikeBreadthBookRoute?.read(location.search);if(dest?.chapter==='replay'){if(!replayRouteHandled)openBreadthReplay(dest);}else{replayRouteHandled=false;if(dest)show(BREADTH,dest);}}if(!value){if(picker.matches(':popover-open'))picker.hidePopover();close(true);}}};
   }
   window.SpikeStrategyBook={...api,create};
 })();

@@ -259,3 +259,18 @@ test('day pagination retains rows on failure, retries the same offset and reconc
  m.load();await flush();assert.equal(req[2].q.offset,1);req[2].resolve(dayPage(req[2].q,[dayRow(2,-1)],2,1));await flush();assert.equal(m.getState().rows.length,2);assert.equal(m.getState().error,'');
  m.select('spike','2024-02-29',1);await flush();req[3].resolve(dayPage(req[3].q,[dayRow(1,2)],1,1));await flush();assert.match(m.getState().error,/合计不一致/);assert.equal(m.getState().rows.length,0);
 });
+
+test('cloud monthly NAV includes the hour ending at midnight and keeps intrahour drawdown', () => {
+  const track = 'live-cloud-v17';
+  const h = ui.validateHistory(require('../../yoyo/monitor/static/strategy-booklet/live-cloud-v17-history.json'), track);
+  const october = ui.monthCalendar(h, '2024-10');
+  const closeAt = time => h.points.findLast(p => p[0] <= time)[1];
+  const start = closeAt(Date.UTC(2024, 9, 1));
+  const end = closeAt(Date.UTC(2024, 10, 1));
+  assert.ok(Math.abs(october.pnl - (end - start)) < 0.00001);
+  assert.ok(Math.abs(october.returnPct - (end / start - 1) * 100) < 0.00001);
+  assert.equal(october.days[3].endNav, closeAt(Date.UTC(2024, 9, 5)));
+  assert.ok(Math.abs(h.summary.max_drawdown_pct + Math.min(...h.points.map(p=>p[3]))) < 0.000001);
+  assert.equal(ui.equityOptions(h).series[0].name, '盯市净值');
+  assert.doesNotMatch(ui.calendarHTML(october), /已实现盈亏|不含浮盈亏/);
+});
