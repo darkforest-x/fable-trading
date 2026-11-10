@@ -173,5 +173,33 @@ def main():
     print('orders',audit,'actual split',rows[0],flush=True)
 
 
+def export_excursions():
+    from yoyo.evaluation.month_first_week_split_excursion import measure
+
+    positions = pd.read_csv(EXP/'signal_10_0bp_positions.csv.gz')
+    paths = measure(positions, baseline.market_loader())
+    detail = positions.merge(paths, on='event_id', validate='1:1')
+    if len(detail) != len(positions):
+        raise ValueError('Missing marked excursion bounds for funded positions')
+    detail['entry_utc'] = pd.to_datetime(detail.entry_ms, unit='ms', utc=True)
+    detail['last_exit_hour_utc'] = pd.to_datetime(detail.near_exit_ms, unit='ms', utc=True)
+    columns = {'event_id':'交易编号','symbol':'币种','entry_utc':'进场时间UTC',
+               'last_exit_hour_utc':'余仓退出小时UTC','entry_price':'进场价',
+               'cap_exit_price':'首半仓平仓价','near_exit_price':'余仓平仓价',
+               'cap_cash_pnl':'首半仓净盈亏U','near_cash_pnl':'余仓净盈亏U',
+               'cash_pnl':'整笔净盈亏U','retaining_half_delta_usdt':'等量余仓相比首目标多赚U',
+               'gross_mfe_pct_lower_bound':'持仓毛浮盈峰值下界%',
+               'gross_mfe_pct_upper_bound':'持仓毛浮盈峰值上界%',
+               'gross_max_float_loss_pct_lower_bound':'持仓毛浮亏幅度下界%',
+               'gross_max_float_loss_pct_upper_bound':'持仓毛浮亏幅度上界%'}
+    detail[list(columns)].rename(columns=columns).to_csv(EXP/'分批止盈逐笔复盘.csv',
+                                                         index=False,encoding='utf-8-sig',float_format='%.9g')
+
+
 if __name__ == '__main__':
-    main()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--excursions-only', action='store_true')
+    if not parser.parse_args().excursions_only:
+        main()
+    export_excursions()
