@@ -54,9 +54,20 @@
     // Stitch edc75895cf3640c090680fdeb1e1fd18: old weeks keep their lines only.
     // Label the API-selected display range, including Monday's prior-week fallback.
     const values=[...ranges.values()],labelWeek=anchors?.week||week;
-    return {...value,levels:values.flatMap(w=>levels(w,w).map(l=>({...l,end_ms:w.expires_ms,historical:w.week!==week,week:w.week,
+    return {...value,levels:values.flatMap(w=>levels(w,w).map(l=>({...l,start_ms:finite(l.start_ms)?l.start_ms:w.end_ms,end_ms:w.expires_ms,historical:w.week!==week,week:w.week,
       inlinePriceVisible:w.week===labelWeek,inlineNameVisible:w.week===labelWeek}))),
       level_window:{start_ms:Math.min(...values.map(w=>w.start_ms)),end_ms:Math.max(...values.map(w=>w.expires_ms))}};
+  }
+  function cloudReplayFrame(value){
+    const step=PERIODS['12H'],w=value.window,byTime=new Map(value.candles.map(b=>[b.time,b]));
+    if(value.bar!=='12H'||!w||!finite(w.startMs)||!finite(w.endMs)||
+        w.endMs<w.startMs||(w.endMs-w.startMs)/step+1!==w.expectedBars||
+        w.expectedBars>5000||byTime.size!==w.availableBars||value.candles.length!==w.availableBars)
+      throw Error('云带 12H 窗口与原始行情不符');
+    const candles=[];
+    for(let t=w.startMs;t<=w.endMs;t+=step) candles.push(byTime.get(t)||{time:t,gap:true});
+    if(candles.filter(b=>!b.gap).length!==w.availableBars)throw Error('云带 K 线超出冻结窗口');
+    return {...value,candles,backtestSource:'live-cloud-v17'};
   }
   // The display contains closed candles. Refresh at their next close, using
   // server time so a user's clock cannot postpone updates. Lagging tails retry.
@@ -156,7 +167,7 @@
     if(!target?.replay||controller||paused)return;
     const current=target,token=version,c=new AbortController();controller=c;
     const timeout=setTimeout(()=>c.abort(),30000);message('正在读取原始回测 K 线…',{busy:true});
-    const paper=current.paper,trade=current.replay,breadth=current.replaySource==='breadth-ema20';
+    const paper=current.paper,trade=current.replay,breadth=current.replaySource==='breadth-ema20',cloud=!paper&&current.track==='live-cloud-v17';
     const eventId=current.replayOptions?.event_id||trade.event_id;
     const url=breadth?'/api/breadth-replay/candles?'+new URLSearchParams({event_id:eventId,symbol:trade.symbol,period:current.period})
       :paper?'/api/monday-fib/trade-candles?'+new URLSearchParams({symbol:trade.symbol,entry_ms:trade.fill_ms,exit_ms:trade.exit_ms,period:current.period})
@@ -172,11 +183,16 @@
       if(value.schema!==1||value.symbol!==current.row.symbol||value.bar!==current.period||!value.candles?.length||(breadth
         ?value.source!=='Binance'||value.event_id!==eventId||value.entry_ms!==trade.entry_ms||value.exit_ms!==trade.exit_ms
         :paper?value.source!=='OKX'||value.entry_ms!==trade.fill_ms||value.exit_ms!==trade.exit_ms||value.paperHistory!==true
-        :value.track!==current.track||value.trade_id!==trade.id||value.source!=='Binance'))throw Error('历史 K 线与所选交易不匹配');
-      let last=0;for(const b of value.candles){const volumeOK=breadth?b.volume===null||finite(b.volume):finite(b.volume);
+        :value.track!==current.track||value.trade_id!==trade.id||value.source!==(cloud?'OKX':'Binance')))throw Error('历史 K 线与所选交易不匹配');
+      let last=0;for(const b of value.candles){const volumeOK=breadth||cloud?b.volume===null||finite(b.volume):finite(b.volume);
         if(![b.time,b.open,b.high,b.low,b.close].every(finite)||!volumeOK||b.time<=last||b.time%PERIODS[current.period]
           ||b.high<Math.max(b.open,b.close,b.low)||b.low>Math.min(b.open,b.close))throw Error('回测 K 线数据不完整');last=b.time;}
-      if(breadth){
+      if(cloud){
+        if(value.backtestTrade?.id!==trade.id||value.backtestTrade?.entry_ms!==trade.entry_ms||
+           value.backtestTrade?.exit_ms!==trade.exit_ms)throw Error('云带成交记录不匹配');
+        value=cloudReplayFrame(value);
+        current.week=value.weekly_ranges?.[0]?.week;
+      }else if(breadth){
         if(!finite(value.now_ms)||!finite(value.last_close_ms))throw Error('历史 K 线收盘边界缺失');
         value={...value,track:current.track,backtestSource:'breadth-ema20',
           backtestScope:current.replayOptions?.scope||trade.scope||'',backtestEventId:eventId,backtestTrade:trade};

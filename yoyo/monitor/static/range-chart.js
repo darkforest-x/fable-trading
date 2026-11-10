@@ -62,8 +62,8 @@
     for(let i=0;i<common;i++)if(!samePoint(a[i],b[i]))return i;
     return common;
   }
-  const candlePoint=(r,color,custom)=>({time:r.time,open:r.open,high:r.high,low:r.low,close:r.close,...(custom?{color,wickColor:color,borderColor:color}:{})});
-  const volumePoint=(r,color,custom,T)=>({time:r.time,value:r.volume||0,color:custom?color+'38':r.close>=r.open?T.colors.volumeUp:T.colors.volumeDown});
+  const candlePoint=(r,color,custom)=>r.gap?{time:r.time}:({time:r.time,open:r.open,high:r.high,low:r.low,close:r.close,...(custom?{color,wickColor:color,borderColor:color}:{})});
+  const volumePoint=(r,color,custom,T)=>r.gap||r.volume===null?{time:r.time}:({time:r.time,value:r.volume||0,color:custom?color+'38':r.close>=r.open?T.colors.volumeUp:T.colors.volumeDown});
   function rowMin(row){
     let min=Infinity;
     for(const value of [row.low??row.l,row.high??row.h,row.close??row.c])if(fin(value)&&value>0)min=Math.min(min,value);

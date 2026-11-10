@@ -28,9 +28,6 @@ OUT = ROOT / "yoyo/monitor/static/strategy-booklet/cloud-v17-history"
 HOUR_MS = 3_600_000
 STEP = 12 * HOUR_MS
 BEFORE, AFTER = 64, 16
-INK, GRAY = "#223343", "#5e6c79"
-UP, DOWN = "#00877c", "#cf555a"
-FAST, SLOW, RAIL = "#397cb2", "#ba801f", "#70578c"
 
 
 def _json_write(path: Path, value: Any) -> None:
@@ -55,17 +52,8 @@ def _utc(ms: int) -> str:
     return pd.Timestamp(int(ms), unit="ms", tz="UTC").isoformat().replace("+00:00", "Z")
 
 
-def _bjt(ms: int, fmt: str = "%m/%d") -> str:
-    return pd.Timestamp(int(ms), unit="ms", tz="UTC").tz_convert("Asia/Shanghai").strftime(fmt)
-
-
 def _safe_symbol(symbol: str) -> str:
     return re.sub(r"[^A-Za-z0-9._-]", "_", symbol)
-
-
-def _xml(value: Any) -> str:
-    return (str(value).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            .replace('"', "&quot;").replace("'", "&apos;"))
 
 
 def _missing_ranges(expected: np.ndarray, available: set[int]) -> list[dict[str, int]]:
@@ -244,169 +232,6 @@ def _fill_rows(group: pd.DataFrame) -> list[dict[str, Any]]:
     return rows
 
 
-def _draw_chart(record: dict[str, Any], frame: pd.DataFrame, ema: pd.DataFrame,
-                fills: pd.DataFrame, rail: float,
-                dest: Path) -> dict[str, Any]:
-    """Write one standalone SVG, leaving each missing 12H candle as empty time."""
-    start, end = int(record["windowStartMs"]), int(record["windowEndMs"])
-    expected = np.arange(start, end + STEP, STEP, dtype=np.int64)
-    ix = pd.Index(expected)
-    visible = frame.reindex(ix)
-    visible_ema = ema.reindex(ix)
-    have = {int(t) for t in frame.index if start <= int(t) <= end}
-    gaps = _missing_ranges(expected, have)
-
-    width, height = 1280, 560
-    left, right, top, bottom = 72., 1156., 118., 492.
-    n = len(expected)
-    x = np.linspace(left, right, n) if n > 1 else np.array([left])
-    values = []
-    for col in ("low", "high"):
-        values.extend([float(v) for v in visible[col].dropna().to_numpy()])
-    for col in ("ema20", "ema50"):
-        values.extend([float(v) for v in visible_ema[col].dropna().to_numpy()])
-    values.extend(float(r.fill_price) for r in fills.itertuples() if pd.notna(r.fill_price))
-    if not values or min(values) <= 0:
-        raise ValueError(f"No positive chart prices for {record['id']}")
-    lo, hi = min(values + [rail]), max(values + [rail])
-    use_log = hi / lo > 8
-    if use_log:
-        low_t, high_t = math.log(lo), math.log(hi)
-        pad = max((high_t - low_t) * .12, .04)
-        low_t, high_t = low_t - pad, high_t + pad
-        y = lambda value: bottom - (math.log(float(value)) - low_t) / (high_t - low_t) * (bottom - top)
-    else:
-        pad = max((hi - lo) * .13, hi * .002)
-        low_t, high_t = lo - pad, hi + pad
-        y = lambda value: bottom - (float(value) - low_t) / (high_t - low_t) * (bottom - top)
-
-    is_long = int(record["side"]) == 1
-    color = lambda i: UP if float(visible.close.iat[i]) >= float(visible.open.iat[i]) else DOWN
-    parts = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
-        '<rect width="100%" height="100%" fill="#fff"/>',
-        f'<text x="34" y="43" font-size="25" font-weight="650" fill="{INK}">{_xml(record["symbol"])} / USDT</text>',
-        f'<text x="34" y="72" font-size="13" fill="{GRAY}">OKX 永续 · 12H · {"多单" if is_long else "空单"} · {pd.Timestamp(int(record["entryMs"]), unit="ms", tz="UTC").year} 年 · event {record["id"]}</text>',
-        f'<text x="1244" y="43" text-anchor="end" font-size="22" font-weight="600" fill="{UP if record["netPnl"] >= 0 else DOWN}">{record["netPnl"]:+,.2f} U</text>',
-        f'<text x="1244" y="70" text-anchor="end" font-size="12" fill="{GRAY}">本笔资金净盈亏 · 1.5×</text>',
-    ]
-
-    # Missing timestamps keep their normal x position; shaded bands make source gaps visible.
-    for g in gaps:
-        first = (g["startMs"] - start) // STEP
-        last = (g["endMs"] - start) // STEP
-        gx0 = x[first] - 4
-        gx1 = x[last] + 4
-        parts.append(f'<rect x="{gx0:.1f}" y="{top}" width="{max(gx1-gx0,5):.1f}" height="{bottom-top}" fill="#f4f5f6"/>')
-        if gx1 - gx0 > 32:
-            parts.append(f'<text x="{(gx0+gx1)/2:.1f}" y="{top+18}" text-anchor="middle" font-size="9" fill="#77828b">缺K×{g["count"]}</text>')
-
-    # Horizontal price grid and right-side labels.
-    for frac in np.linspace(0, 1, 6):
-        yy = top + frac * (bottom - top)
-        value = math.exp(high_t - frac * (high_t - low_t)) if use_log else high_t - frac * (high_t - low_t)
-        parts.append(f'<path d="M {left} {yy:.1f} H {right}" stroke="#e9edef" stroke-width="1"/>')
-        parts.append(f'<text x="{right+12}" y="{yy+4:.1f}" font-size="11" fill="{GRAY}">{value:.5g}</text>')
-
-    # Historical frozen stop/1.618 rail. It is drawn only across the original signal week.
-    entry_key = int(record["entryMs"]) - STEP
-    week = week_window(entry_key)
-    rx1 = (int(week["end"]) - start) / STEP
-    rx2 = (int(week["expires"]) - start) / STEP
-    if rx2 >= 0 and rx1 <= n - 1:
-        xa = float(np.interp(max(0., rx1), np.arange(n), x))
-        xb = float(np.interp(min(n - 1., rx2), np.arange(n), x))
-        parts.append(f'<path d="M {xa:.1f} {y(rail):.1f} H {xb:.1f}" stroke="{RAIL}" stroke-width="1.5" stroke-dasharray="7 5"/>')
-        rail_label = "当周 1.618 外轨" if int(record["mondayBarCount"]) == 24 else "冻结止损价（周一K线有缺）"
-        parts.append(f'<text x="{min(xb, right-4):.1f}" y="{y(rail)-6:.1f}" text-anchor="end" font-size="10" fill="{RAIL}">{rail_label} {rail:.5g}</text>')
-
-    # EMA lines break at missing data and across a reset. No forward-filled prices are drawn.
-    for field, stroke in (("ema20", FAST), ("ema50", SLOW)):
-        line = []
-        for i, value in enumerate(visible_ema[field].to_numpy()):
-            if pd.notna(value) and pd.notna(visible.close.iat[i]):
-                line.append(f"{x[i]:.1f},{y(value):.1f}")
-            elif len(line) > 1:
-                parts.append(f'<polyline points="{" ".join(line)}" fill="none" stroke="{stroke}" stroke-width="1.4"/>')
-                line = []
-            else:
-                line = []
-        if len(line) > 1:
-            parts.append(f'<polyline points="{" ".join(line)}" fill="none" stroke="{stroke}" stroke-width="1.4"/>')
-
-    # One wick and one real body per available 12H candle.
-    bar_width = min(7.0, max(1.8, (right - left) / max(n, 1) * .62))
-    for i in range(n):
-        if pd.isna(visible.open.iat[i]):
-            continue
-        c = color(i)
-        xx = x[i]
-        yo, yc = y(visible.open.iat[i]), y(visible.close.iat[i])
-        yh, yl = y(visible.high.iat[i]), y(visible.low.iat[i])
-        parts.append(f'<path d="M {xx:.1f} {yh:.1f} V {yl:.1f}" stroke="{c}" stroke-width="1.15"/>')
-        body_top, body_bottom = min(yo, yc), max(yo, yc)
-        if body_bottom - body_top < 1.25:
-            parts.append(f'<path d="M {xx-bar_width/2:.1f} {yo:.1f} H {xx+bar_width/2:.1f}" stroke="{c}" stroke-width="1.7"/>')
-        else:
-            parts.append(f'<rect x="{xx-bar_width/2:.1f}" y="{body_top:.1f}" width="{bar_width:.1f}" height="{body_bottom-body_top:.1f}" fill="{c}" stroke="{c}" stroke-width=".7"/>')
-
-    # Collapse only identical same-hour/action receipts for display; every raw order remains in event JSON.
-    non_trim = fills[fills.action.ne("trim")]
-    plotted = non_trim.groupby(["hour_ms", "action"], sort=True).fill_price
-    low_prices, high_prices = plotted.min(), plotted.max()
-    if not np.allclose(low_prices.to_numpy(), high_prices.to_numpy(), rtol=1e-9, atol=1e-12):
-        raise ValueError(f"Native fills disagree within a chart marker group for {record['id']}")
-    visible_fills = plotted.first().reset_index()
-    trims = (fills[fills.action.eq("trim")].groupby(["hour_ms", "action", "fill_price"], as_index=False)
-             .size()[["hour_ms", "action", "fill_price"]])
-    visible_fills = pd.concat([visible_fills, trims], ignore_index=True).sort_values("hour_ms", kind="stable")
-    label_rows = []
-    for num, r in enumerate(visible_fills.itertuples(index=False)):
-        stamp = int(r.hour_ms) // STEP * STEP
-        if stamp < start or stamp > end:
-            continue
-        bar_idx = int((stamp - start) // STEP)
-        xx, yy = float(x[bar_idx]), y(r.fill_price)
-        action = str(r.action)
-        if action == "entry":
-            label = "开多" if is_long else "开空"
-            c = "#185a8b"
-        elif action == "trim":
-            parts.append(f'<circle cx="{xx:.1f}" cy="{yy:.1f}" r="2" fill="{RAIL}" opacity=".65"><title>敞口减仓 {r.fill_price:.6g}</title></circle>')
-            continue
-        elif action.startswith("take_profit"):
-            label = "翻倍止盈" if np.isclose(r.fill_price, 2 * record["entryPrice"]) and is_long else "2R 止盈"
-            c = "#986311"
-        elif action.startswith("stop"):
-            label, c = "止损", "#a23742"
-        elif action.startswith("ema_flip"):
-            label, c = "余仓平仓", INK
-        else:
-            label, c = _format_reason(action), INK
-        dx = 10 if xx < (left + right) / 2 else -10
-        dy = -20 if (num % 2 == 0) else 24
-        anchor = "start" if dx > 0 else "end"
-        parts.append(f'<circle cx="{xx:.1f}" cy="{yy:.1f}" r="4.1" fill="{c}" stroke="#fff" stroke-width="1.4"/>')
-        label_rows.append((xx, yy, dx, dy, anchor, c, label, float(r.fill_price)))
-    for xx, yy, dx, dy, anchor, c, label, price in label_rows:
-        lx, ly = xx + dx, yy + dy
-        parts.append(f'<path d="M {xx:.1f} {yy:.1f} L {lx:.1f} {ly:.1f}" stroke="{c}" stroke-width=".8"/>')
-        parts.append(f'<text x="{lx:.1f}" y="{ly-3:.1f}" text-anchor="{anchor}" font-size="10" fill="{c}" stroke="#fff" stroke-width="3" paint-order="stroke">{_xml(label)} {price:.5g}</text>')
-
-    # Requested window positions include missing slots. X labels are BJT, matching the existing 12H booklet.
-    tick_idx = np.unique(np.linspace(0, n - 1, 7, dtype=int))
-    for i in tick_idx:
-        parts.append(f'<path d="M {x[i]:.1f} {bottom} v 5" stroke="#aab4bb"/>')
-        parts.append(f'<text x="{x[i]:.1f}" y="{bottom+23}" text-anchor="middle" font-size="11" fill="{GRAY}">{_bjt(int(expected[i]))}</text>')
-    parts.append(f'<text x="{left}" y="{height-18}" font-size="10" fill="{GRAY}">UTC+8 日期 · 可见K线 {len(have)}/{n} · 缺失K线 {n-len(have)}{(" · 对数轴" if use_log else "")}</text>')
-    parts.append(f'<path d="M {left} {bottom} H {right}" stroke="#aab4bb" stroke-width=".8"/>')
-    parts.append('</svg>')
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text("".join(parts) + "\n")
-    return {"expectedBars": int(n), "availableBars": int(len(have)), "missingBars": int(n - len(have)),
-            "missingRanges": gaps, "logScale": bool(use_log)}
-
-
 def build() -> dict[str, Any]:
     OUT.mkdir(parents=True, exist_ok=True)
     funded = pd.read_csv(examples.BASE / "funded_inverse_1.5x.csv.gz", index_col="event_id",
@@ -461,7 +286,6 @@ def build() -> dict[str, Any]:
     positions = positions.assign(_event=positions.index.astype(str)).sort_values(["entry_ms", "_event"], kind="stable")
     records: list[dict[str, Any]] = []
     event_payloads: list[tuple[str, dict[str, Any]]] = []
-    chart_specs: list[tuple[dict[str, Any], pd.DataFrame, pd.DataFrame, pd.DataFrame, float]] = []
     entry_evidence_summaries: list[dict[str, Any]] = []
     symbol_windows: dict[str, list[tuple[int, int]]] = {}
 
@@ -473,7 +297,6 @@ def build() -> dict[str, Any]:
         start = entry_ms - BEFORE * STEP
         end = (exit_ms // STEP) * STEP + AFTER * STEP
         bars = source_frames[symbol]
-        ema = source_ema[symbol]
         chart_fills = fills[fills.event_id.eq(event_id)].copy()
         if chart_fills.empty:
             raise ValueError(f"Missing native actual order rows for {event_id}")
@@ -591,7 +414,7 @@ def build() -> dict[str, Any]:
                       "ratesFromFrozenPath": sorted(float(v) for v in tape.loc[tape.event_id.eq(event_id), "exit_fee_rate"].drop_duplicates())},
         }
         event_payloads.append((event_url, event))
-        chart_specs.append((record, bars, ema, chart_fills, float(rail)))
+        record["chartAudit"] = {key: event["window"][key] for key in ("expectedBars", "availableBars", "missingBars", "missingRanges")}
 
     # Source files are scoped to the union of requested chart windows for each symbol.
     symbol_manifest: dict[str, Any] = {}
@@ -618,13 +441,6 @@ def build() -> dict[str, Any]:
     for url, event in event_payloads:
         _json_gzip(OUT / url, event)
 
-    chart_audits = {}
-    for record, bars, ema, chart_fills, rail in chart_specs:
-        # Chart coverage is built from the real 12H source only, with a visible empty slot for every gap.
-        meta = _draw_chart(record, bars, ema, chart_fills, rail, OUT / record["chartUrl"])
-        record["chartAudit"] = meta
-        chart_audits[record["id"]] = meta
-
     fees = float(fills.fees.sum())
     if not np.isclose(float(funded.cash_pnl.sum()), native_cash.sum(), rtol=1e-9, atol=1e-6):
         raise ValueError("Full funded cash does not equal all native fill cash")
@@ -644,7 +460,7 @@ def build() -> dict[str, Any]:
                    "fills": "native VectorBT receipts from cloud_close_inverse_examples receipt callback",
                    "bars": "frozen OKX 12H OHLC sources; requested missing timestamps remain absent"},
         "chartWindow": {"timeframe": "12h", "beforeEntryBars": BEFORE, "afterFundedExitBars": AFTER,
-                        "timezoneLabels": "Asia/Shanghai", "missingBars": "shown as empty shaded time; never forward-filled"},
+                        "timezoneLabels": "Asia/Shanghai", "missingBars": "empty time slots; never forward-filled"},
         "entryEvidenceSpec": {
             "signalBar": "12H candle opening at entryMs minus 12 hours; values use its completed close",
             "rails": "weekly 1.618 bands from 24 observed Monday H1 bars",
@@ -668,11 +484,12 @@ def build() -> dict[str, Any]:
         "symbols": symbol_manifest, "records": records,
     }
     _json_write(OUT / "manifest.json", manifest)
+    redraw_saved_charts()
     return {"manifest": str(OUT / "manifest.json"), "tradeCount": len(records),
-            "nativeOrderRows": len(fills), "charts": len(chart_specs),
+            "nativeOrderRows": len(fills), "charts": len(records),
             "nativeCashPnl": float(native_cash.sum()), "fees": fees,
             "endingBalance": float(1000. + native_cash.sum()),
-            "missingChartBars": int(sum(v["missingBars"] for v in chart_audits.values()))}
+            "missingChartBars": int(sum(r["chartAudit"]["missingBars"] for r in records))}
 
 
 def add_entry_evidence_to_existing_bundle() -> dict[str, Any]:
@@ -736,22 +553,16 @@ def add_entry_evidence_to_existing_bundle() -> dict[str, Any]:
 
 
 def redraw_saved_charts():
-    """Re-render charts from published candles and fills without replaying the account."""
-    manifest = json.loads((OUT / "manifest.json").read_text())
-    frames = {}
-    for symbol, source in manifest["symbols"].items():
-        with gzip.open(OUT / source["dataUrl"], "rt") as stream:
-            bars = json.load(stream)
-        frames[symbol] = pd.DataFrame(bars["rows"], columns=bars["columns"]).set_index("timeMs")
-    for record in manifest["records"]:
-        with gzip.open(OUT / record["dataUrl"], "rt") as stream:
-            event = json.load(stream)
-        source = frames[record["symbol"]]
-        fills = pd.DataFrame(event["fills"]).rename(columns={"hourMs": "hour_ms", "fillPrice": "fill_price"})
-        audit = _draw_chart(record, source, source, fills, event["mondayRail"]["level"], OUT / record["chartUrl"])
-        if audit != record["chartAudit"]:
-            raise ValueError(f"Saved chart window changed for {record['id']}")
-    return {"charts": len(manifest["records"])}
+    """Capture the shared replay renderer and package its images without rerunning the backtest."""
+    import os
+    import subprocess
+    import tempfile
+    from yoyo.evaluation.cloud_replay_exports import publish
+    origin = os.environ.get("FABLE_REPLAY_ORIGIN", "http://127.0.0.1:8766")
+    with tempfile.TemporaryDirectory(prefix="spike-replay-export-") as directory:
+        subprocess.run(["node", str(ROOT / "scripts/export_cloud_replay.cjs"), origin, directory], check=True)
+        publish(Path(directory))
+    return {"charts": len(json.loads((OUT / "manifest.json").read_text())["records"])}
 
 
 if __name__ == "__main__":

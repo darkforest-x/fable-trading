@@ -174,3 +174,26 @@ def test_live_wick_october_trade_charts_read_the_extension_bars():
     times = [c['time'] for c in value['candles']]
     assert times[0] <= october[0]['entry_ms'] and times[-1] >= october[0]['exit_ms'] - 900000
 
+
+
+def test_cloud_shared_replay_uses_frozen_okx_window_and_all_source_exits():
+    app = FastAPI()
+    api.install(app)
+    client = TestClient(app)
+    base = '/api/strategy-backtest'
+    track = 'live-cloud-v17'
+    page = client.get(base, params=dict(track=track, trade=171, limit=1)).json()
+    assert page['total'] == 1252 and page['focus']['symbol'] == 'SANDUSDT'
+    assert page['focus']['id'] != page['rows'][0]['id']
+    chart = client.get(base+'/candles', params=dict(track=track, trade=171, period='12H')).json()
+    legs = chart['backtestTrade']['fills']['exit_legs']
+    assert chart['source'] == 'OKX' and len(chart['candles']) == chart['window']['availableBars']
+    assert chart['candles'][0]['volume'] is None
+    assert legs[0]['price'] == pytest.approx(1.51654) and legs[0]['share'] == pytest.approx(.5)
+    assert legs[0]['end_ms'] == legs[0]['start_ms'] + 3600000
+    assert legs[-1]['start_ms'] == legs[-1]['end_ms'] == page['focus']['exit_ms']
+    assert sum(leg['share'] for leg in legs if leg['action']=='trim') == pytest.approx(.17181, abs=1e-5)
+    assert sum(leg['share'] for leg in legs) == pytest.approx(1)
+    day = client.get(base+'/day',params=dict(track=track,date='2021-12-17')).json()
+    assert day['source']=='OKX' and 171 in [r['id'] for r in day['rows']]
+    assert client.get(base+'/candles',params=dict(track=track,trade=171,period='1m')).status_code==422

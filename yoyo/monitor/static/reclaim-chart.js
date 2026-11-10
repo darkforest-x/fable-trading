@@ -41,13 +41,38 @@
     if(f.exit_legs?.length){
       f.exit_legs.forEach((leg,i)=>{
         const time=leg?.time_ms??leg?.exit_ms;
-        const label=leg?.label||(f.exit_legs.length===1?'② 平仓':`② 出场 ${i+1}/${f.exit_legs.length}`);
-        add('exit_leg',label,time,time,leg?.price);
+        const cloud=trade.kind==='cloud-v17';
+        const label=cloud ? i===f.exit_legs.length-1?'② 平仓':leg.action==='trim'?'':(leg.label||'分批平仓')
+          :leg?.label||(f.exit_legs.length===1?'② 平仓':`② 出场 ${i+1}/${f.exit_legs.length}`);
+        add('exit_leg',label,leg.start_ms??time,leg.end_ms??time,leg?.price);
       });
     }else{
       add('exit','② 平仓',f.exit_start_ms,f.exit_end_ms,f.exit_price);
     }
     return marks;
+  }
+  // Frozen EMA values carry the warmup preceding each window. A separate line
+  // per continuous run prevents the library from bridging a missing 12H bar.
+  function frozenCloudLines(instance,data){
+    const key=data.backtestSource==='live-cloud-v17'?data.trade_id:null;
+    if(instance.cloudLineKey===key)return;
+    for(const series of instance.cloudLines||[])instance.chart.removeSeries(series);
+    instance.cloudLines=[];instance.cloudLineKey=key;
+    if(key==null)return;
+    for(const [field,color] of [['ema20','#397cb2'],['ema50','#ba801f']]){
+      let points=[];
+      const finish=()=>{
+        if(!points.length)return;
+        const line=instance.chart.addLineSeries({color,lineWidth:1,priceLineVisible:false,lastValueVisible:false,
+          crosshairMarkerVisible:false,autoscaleInfoProvider:()=>null});
+        line.setData(points);instance.cloudLines.push(line);points=[];
+      };
+      for(const b of data.candles){
+        if(!b.gap&&b.ema_ready&&fin(b[field]))points.push({time:b.time/1000,value:b[field]});
+        else finish();
+      }
+      finish();
+    }
   }
   function replayScore(trade,rows,step){
     const rules=trade?.entry_rules,close=trade?.fills?.score_close_ms;
@@ -203,6 +228,7 @@
     let active=true,request=null,epoch=0,desired=null,anchor=null,received=0,pinnedFocus='',appearance=null;
     const shared=window.SpikePublicChartCache;
     const chart=window.SpikeMondayFibChart.create({decorate:(instance,data)=>{
+      frozenCloudLines(instance,data);
       drawings?.attach(instance,data);
       const p=data.paperTrade,step=periods[data.bar],historical=data.paperHistory&&p?.stage==='closed';
       if(!instance.paperInteractionReady){
@@ -221,7 +247,7 @@
       if(data.backtestTrade||historical){
         const t=historical?paperReplayTrade(p):data.backtestTrade;
         const breadth=data.backtestSource==='breadth-ema20';
-        const g=historical?(instance.rows.length?{from:-.5,to:instance.rows.length-.5}:null):replayRange(t,instance.rows,step,host.clientWidth<700?25:45),
+        const g=historical||data.backtestSource==='live-cloud-v17'?(instance.rows.length?{from:-.5,to:instance.rows.length-.5}:null):replayRange(t,instance.rows,step,host.clientWidth<700?25:45),
           key=breadth?`breadth|${data.backtestScope||''}|${data.backtestEventId||t.event_id}|${t.symbol}|${data.bar}`:(historical?'paper-history|':'backtest|')+(data.track||desired?.track)+'|'+t.id+'|'+data.bar;
         if(!historical)onReplay(t,data.track);
         instance.series.setMarkers([]);

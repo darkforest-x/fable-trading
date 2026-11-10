@@ -15,10 +15,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from threading import BoundedSemaphore
 from functools import lru_cache
+from typing import Optional
 
 from fastapi import HTTPException, Query
 from starlette.responses import JSONResponse
 from . import strategy_backtest_evidence as evidence
+from . import strategy_live_cloud as cloud
 
 ROOT = Path(__file__).resolve().parents[2]
 LEDGERS = ROOT / 'experiments/active/exp-strategy-booklet-paths-20261027-v1'
@@ -27,7 +29,7 @@ IDENTITIES = ROOT / 'experiments/active/exp-monday-limit-reclaim-20261024-v1/sym
 # paths that continue past it; read only, appended after the identity's own files.
 EXTENSION = ROOT / 'experiments/active/exp-monday-limit-live-october-20261101-v1/symbols'
 EXTENDED = ('live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far', 'live-wick6x3mid')
-TRACKS = ('60', '5', 'v3', 'v3add', 'spike', 'v3lock', 'allin3', 'v3add20', 'live-allin3', 'live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far', 'live-wick6x3mid', 'live-breadth')
+TRACKS = ('60', '5', 'v3', 'v3add', 'spike', 'v3lock', 'allin3', 'v3add20', 'live-allin3', 'live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far', 'live-wick6x3mid', 'live-breadth', cloud.TRACK)
 SAVED_FILLS = ('live-allin3', 'live-wick6x3', 'live-wick3x3', 'live-wick6x3hi', 'live-wick3x3far', 'live-wick6x3mid', 'live-breadth')
 PERIODS = {'1m': 60000, '2m': 120000, '3m': 180000, '5m': 300000, '15m': 900000, '1H': 3600000, '4H': 14400000,
            '12H': 43200000, '1D': 86400000}
@@ -35,6 +37,8 @@ SLOTS = BoundedSemaphore(2)
 
 
 def ledger(track, directory=LEDGERS):
+    if track == cloud.TRACK:
+        return cloud.ledger()
     if track == 'live-allin3':
         from .strategy_live_allin3 import ledger as live_ledger
         return live_ledger()
@@ -87,9 +91,18 @@ def _ledger(track, directory, stamp, evidence_stamp):
     return dict(meta=meta, rows=rows, ranking=ranking)
 
 
-def page(track, *, sort='time', direction='desc', symbol='', offset=0, limit=50, directory=LEDGERS):
+def page(track, *, sort='time', direction='desc', symbol='', offset=0, limit=50, directory=LEDGERS,
+         trade=None, entry_from='', entry_until='', side='', outcome='', query=''):
     value = ledger(track, directory)
     rows = [r for r in value['rows'] if not symbol or r['symbol'] == symbol]
+    if track == cloud.TRACK:
+        start = day_bounds(entry_from)[0] - 8*3600000 if entry_from else -math.inf
+        end = day_bounds(entry_until)[1] - 8*3600000 if entry_until else math.inf
+        needle = query.strip().upper().removesuffix('-SWAP').removesuffix('USDT').rstrip('-/')
+        rows = [r for r in rows if start <= r['entry_ms'] < end
+                and (not side or r['side'] == (1 if side in ('long', '1') else -1))
+                and (not outcome or (r['pnl'] > 0 if outcome == 'win' else r['pnl'] < 0))
+                and (not needle or needle in r['symbol'][:-4] or needle in f"CLOUD-V17-{r['id']:06d}")]
     if sort == 'score':
         # Saved entry score; rows without one sort last in descending order.
         score = lambda r: (r.get('entry_rules') or {}).get('score')
@@ -101,6 +114,12 @@ def page(track, *, sort='time', direction='desc', symbol='', offset=0, limit=50,
     top = value['ranking'][0]['symbol'] if value['ranking'] else None
     focus = max((r for r in value['rows'] if r['symbol'] == top),
                 key=lambda r: (r['entry_ms'], r['id']), default=None)
+    if trade is not None:
+        focus = next((r for r in value['rows'] if r['id'] == trade), None)
+        if focus is None:
+            raise KeyError('trade_not_found')
+    elif track == cloud.TRACK and (entry_from or entry_until or side or outcome or query or symbol):
+        focus = next(iter(rows), None)
     return dict(schema=1, track=track, meta=value['meta'], ranking=value['ranking'], focus=focus,
                 rows=rows[offset:offset + limit], total=len(rows), offset=offset,
                 has_more=offset + limit < len(rows), sort=sort, direction=direction, symbol=symbol)
@@ -121,7 +140,7 @@ def day_page(track, day, *, offset=0, limit=50, directory=LEDGERS):
     # IDs are the same ones accepted by /candles. Never renumber a filtered day.
     rows = sorted((r for r in ledger(track, directory)['rows'] if start <= r['exit_ms'] < end),
                   key=lambda r: (r['exit_ms'], r['id']))
-    return dict(schema=1, track=track, date=day, timezone='UTC', source='Binance',
+    return dict(schema=1, track=track, date=day, timezone='UTC', source='OKX' if track == cloud.TRACK else 'Binance',
                 rows=rows[offset:offset + limit], total=len(rows), offset=offset,
                 has_more=offset + limit < len(rows), pnl=sum(r['pnl'] for r in rows))
 
@@ -195,6 +214,10 @@ def _candles(identity_path, identity_stamp, source_stamps, start, end, period, e
 
 
 def candles(track, trade, period, *, directory=LEDGERS, identities=IDENTITIES):
+    if track == cloud.TRACK:
+        if period != '12H':
+            raise ValueError('cloud_requires_frozen_12h')
+        return cloud.candles(trade)
     row = next((r for r in ledger(track, directory)['rows'] if r['id'] == trade), None)
     if row is None:
         raise KeyError('trade_not_found')
@@ -265,15 +288,34 @@ def install(app):
                 sort: str = Query('time', pattern='^(time|pnl|score)$'),
                 direction: str = Query('desc', pattern='^(asc|desc)$'),
                 symbol: str = Query('', pattern=r'^([A-Z0-9]{1,32}USDT)?$'),
+                trade: Optional[int] = Query(None, gt=0),
+                entry_from: str = Query('', alias='from', pattern=r'^(|\d{4}-\d{2}-\d{2})$'),
+                entry_until: str = Query('', alias='until', pattern=r'^(|\d{4}-\d{2}-\d{2})$'),
+                side: str = Query('', pattern='^(|long|short|1|-1)$'),
+                outcome: str = Query('', pattern='^(|win|loss)$'), query: str = Query('', max_length=100),
                 offset: int = Query(0, ge=0, le=100000), limit: int = Query(50, ge=1, le=100)):
         try:
-            return JSONResponse(page(track, sort=sort, direction=direction, symbol=symbol, offset=offset, limit=limit))
-        except (OSError, ValueError, KeyError):
+            for date in (entry_from, entry_until):
+                if date:
+                    try:
+                        day_bounds(date)
+                    except ValueError:
+                        raise HTTPException(422, '入场日期无效') from None
+            return JSONResponse(page(track, sort=sort, direction=direction, symbol=symbol, offset=offset, limit=limit,
+                                     trade=trade, entry_from=entry_from, entry_until=entry_until, side=side,
+                                     outcome=outcome, query=query))
+        except KeyError as exc:
+            if exc.args == ('trade_not_found',):
+                raise HTTPException(404, '没有找到这笔回测交易') from None
+            raise HTTPException(503, '历史回测账本暂不可读，请重试') from None
+        except (OSError, ValueError):
             raise HTTPException(503, '历史回测账本暂不可读，请重试') from None
 
     @app.get('/api/strategy-backtest/candles')
     def chart(track: str = Query(..., pattern='^(' + '|'.join(TRACKS) + ')$'),
               trade: int = Query(..., gt=0), period: str = Query('15m', pattern='^(' + '|'.join(PERIODS) + ')$')):
+        if track == cloud.TRACK and period != '12H':
+            raise HTTPException(422, '云带回测使用原始 12H K 线')
         if not SLOTS.acquire(False):
             raise HTTPException(503, '历史行情正在读取，请稍后重试')
         try:
