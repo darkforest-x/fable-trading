@@ -125,8 +125,25 @@ def run_path(ohlc,stamps,order,row,static_ambiguous):
     # The final fill replaces the remaining source segment on which it occurred.
     visible=np.r_[points[:i,0],x]
     favorable=int(np.argmin(visible));adverse=int(np.argmax(visible))
+    final_bar=source[i]
+    before=ohlc[:final_bar]
+    # Bounds exclude the part of the exit candle occurring after liquidation.
+    known_fav=min(entry,x,before[:,2].min() if len(before) else entry)
+    known_adv=max(entry,x,before[:,1].max() if len(before) else entry)
+    fav_max=known_fav
+    adv_max=known_adv
+    if not opening[i]:
+        known_fav=min(known_fav,ohlc[final_bar,0])
+        known_adv=max(known_adv,ohlc[final_bar,0])
+        if activated is not None:
+            known_fav=min(known_fav,trigger)
+        fav_max=min(known_fav,max(target,ohlc[final_bar,2]))
+        adv_cap=be if activated is not None and activated<stamps[final_bar] else stop
+        adv_max=max(known_adv,min(adv_cap,ohlc[final_bar,1]))
     return dict(exit_price=x,exit_reason=reason,exit_time=stamps[source[i]],activation_time=activated,
-        old_price=old_price,old_reason=old_reason,mfe_pct=max(0.,100*(1-visible[favorable]/entry)),
+        old_price=old_price,old_reason=old_reason,
+        mfe_lower=max(0.,100*(1-known_fav/entry)),mfe_upper=max(0.,100*(1-fav_max/entry)),
+        mae_lower=max(0.,100*(known_adv/entry-1)),mae_upper=max(0.,100*(adv_max/entry-1)),mfe_pct=max(0.,100*(1-visible[favorable]/entry)),
         mae_pct=max(0.,100*(visible[adverse]/entry-1)),mfe_time=stamps[source[favorable]],
         mae_time=stamps[source[adverse]])
 
@@ -232,7 +249,9 @@ def main():
     if len(dual):
         trial.loc[dual.index,'old_net_pct']=cash(dual.entry.to_numpy(),dual.old_price.to_numpy(),dual.old_reason)
     trial['delta_pp']=trial.net_pct-trial.old_net_pct
-    bounds=trial.groupby('trade_id').delta_pp.agg(delta_min='min',delta_max='max')
+    bounds=trial.groupby('trade_id').agg(delta_min=('delta_pp','min'),delta_max=('delta_pp','max'),
+        float_min=('mfe_lower','min'),float_max=('mfe_upper','max'),
+        adverse_min=('mae_lower','min'),adverse_max=('mae_upper','max'))
     primary=trial[trial.branch==0].drop(columns=['entry','frozen','old_ambiguous','branch'])
     ledger=pd.DataFrame(positions).merge(primary,on='trade_id',validate='1:1').join(bounds,on='trade_id')
     for stem,name in [('', 'stress_pct'),('old_','old_stress_pct')]:
@@ -243,13 +262,15 @@ def main():
     unaffected=ledger[~ledger.exit_reason.eq('breakeven')]
     if not np.allclose(unaffected.net_pct,unaffected.old_net_pct,atol=1e-8,rtol=0):
         raise AssertionError('An unchanged exit has a different net return on the identical price path')
+    for field,lo,hi in [('mfe_pct','float_min','float_max'),('mae_pct','adverse_min','adverse_max')]:
+        assert ((ledger[field]>=ledger[lo]-1e-8)&(ledger[field]<=ledger[hi]+1e-8)).all()
     ledger.to_csv(EXP/'positions.csv.gz',index=False)
     public=ledger.loc[~ledger.is_control,['symbol','entry_time','entry_fill','target_price','activation_time',
         'old_reason','old_net_pct','exit_time','exit_reason','exit_price','net_pct','delta_pp',
-        'mfe_pct','mfe_time','mae_pct','mae_time','delta_min','delta_max']].copy()
+        'mfe_pct','mfe_time','float_min','float_max','mae_pct','mae_time','adverse_min','adverse_max','delta_min','delta_max']].copy()
     public.columns=['合约','入场时间UTC','入场价','目标价','浮盈2%首次触发UTC','原退出原因','原净盈亏%',
         '新退出时间UTC','新退出原因','新退出价','新净盈亏%','净盈亏差_百分点','实际持仓最大浮盈%',
-        '浮盈峰值UTC','实际持仓最大浮亏%','浮亏峰值UTC','路径差下限_百分点','路径差上限_百分点']
+        '浮盈峰值UTC','最大浮盈下界%','最大浮盈上界%','实际持仓最大浮亏%','浮亏峰值UTC','最大浮亏幅度下界%','最大浮亏幅度上界%','路径差下限_百分点','路径差上限_百分点']
     public.to_csv(EXP/'逐笔保本对照.csv',index=False,encoding='utf-8-sig',float_format='%.9g')
     summary(ledger)
 
