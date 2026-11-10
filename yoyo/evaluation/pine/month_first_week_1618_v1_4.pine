@@ -1,0 +1,281 @@
+//@version=6
+// Owner 2026-11-02: first COMPLETE Monday-Sunday of each month, not days 1-7.
+// V1.1: align line/box starts to the chart candle containing the NY start.
+// V1.2: force all price drawings onto the main price scale; uniform thin bright lines.
+// V1.3: identify months on the chart and look up one month by its calendar key.
+// V1.4: draw every available month in view; calendar candle palette from cloud V1.7.
+// Visual reference only. Fixed 60m source; confirmed time/time_close/high/low.
+// Final levels are drawn back across their source week for visual context;
+// they are only known at readyAt. Developing levels are dashed and may change.
+// https://www.tradingview.com/pine-script-docs/concepts/other-timeframes-and-data/
+// https://www.tradingview.com/pine-script-docs/concepts/time/
+indicator("月首周区间 · 1.618 V1.4", shorttitle="月首周 1.618 V1.4", overlay=true, behind_chart=false,
+     max_lines_count=500, max_labels_count=500, max_boxes_count=500)
+
+string mode = input.string("随图浏览", "复盘方式", options=["随图浏览", "指定年月"], group="历史复盘", display=display.none,
+     tooltip="随图浏览：每个区间标出年月。指定年月：只画该月，并在右下角显示日期和价位；不改变图表位置。")
+bool focus = mode == "指定年月"
+int reviewYear = input.int(2026, "年", minval=1970, maxval=2100, inline="ym", group="历史复盘", active=focus, display=display.none)
+int reviewMonth = input.int(10, "月", minval=1, maxval=12, inline="ym", group="历史复盘", active=focus, display=display.none)
+bool showMonths = input.bool(true, "标注区间年月", group="历史复盘", display=display.none)
+string tz = input.string("America/New_York", "区间时区", options=["America/New_York", "UTC", "Asia/Shanghai"],
+     tooltip="当月第一个周一00:00至下周一00:00，包含周日。默认纽约时间，自动处理夏令时；与图表显示时区无关。", display=display.none)
+bool preview = input.bool(true, "显示形成中的首周", tooltip="虚线只使用已收盘的1小时数据；首周结束后固定。", display=display.none)
+bool showLabels = input.bool(true, "显示右侧价格", display=display.none)
+bool shade = input.bool(true, "区间淡色填充", display=display.none)
+int fade = input.int(20, "历史淡化", minval=0, maxval=90, display=display.none)
+color edgeColor = input.color(#69C7FF, "首周高低点", display=display.none)
+color upperColor = input.color(#FF7CA8, "上 1.618", display=display.none)
+color lowerColor = input.color(#49E3C2, "下 1.618", display=display.none)
+bool diagnostic = input.bool(false, "输出核对日志", display=display.none)
+bool colorCandles = input.bool(true, "周一绿，其余灰", group="K 线颜色", display=display.none,
+     tooltip="沿用云带 V1.7：按每根图表 K 线开盘时的纽约星期着色，与区间时区独立。关闭可恢复图表原色。")
+color mondayColor = input.color(#30D158, "纽约周一", group="K 线颜色", inline="ink", active=colorCandles, display=display.none)
+color otherColor = input.color(#8B9099, "其他日期", group="K 线颜色", inline="ink", active=colorCandles, display=display.none)
+color candleInk = dayofweek(time, "America/New_York") == dayofweek.monday ? mondayColor : otherColor
+barcolor(colorCandles ? candleInk : na, title="K 线颜色")
+plotcandle(colorCandles ? open : na, high, low, close, title="影线颜色",
+     color=na, wickcolor=candleInk, bordercolor=na, display=display.pane)
+
+int seconds = int(timeframe.in_seconds())
+bool supported = chart.is_standard and seconds >= 60 and seconds <= 604800 and
+     (seconds < 3600 ? 3600 % seconds == 0 : seconds % 3600 == 0)
+if barstate.isfirst and not supported
+    runtime.error("请使用标准时间K线：1小时的整除分钟周期，或1小时整数倍至1周。")
+
+// Calendar arithmetic, not fixed millisecond weeks: DST weeks can be 167/169h.
+monthBounds(int stamp, string zone) =>
+    int y = year(stamp, zone)
+    int m = month(stamp, zone)
+    int first = timestamp(zone, y, m, 1, 0, 0)
+    int mondayDate = 1 + (dayofweek.monday - dayofweek(first, zone) + 7) % 7
+    [timestamp(zone, y, m, mondayDate, 0, 0),
+     timestamp(zone, y, m, mondayDate + 7, 0, 0),
+     timestamp(zone, y, m + 1, 1, 0, 0)]
+
+// Runs on EVERY source candle before sampling, independent of display timeframe.
+// Only the selected month's first complete week contributes; missing 60m bars
+// invalidate that month (24/7 crypto feed). No chart-OHLC fallback is permitted.
+calendarFirstWeek(int sourceAt, int sourceEnd, float sourceHigh, float sourceLow, string zone) =>
+    var int start = na
+    var int finish = na
+    var int expires = na
+    var int expected = na
+    var float hi = na
+    var float lo = na
+    var bool complete = true
+    if na(expires) or sourceAt >= expires
+        [st, fn, ex] = monthBounds(sourceAt, zone)
+        start := st
+        finish := fn
+        expires := ex
+        expected := st
+        hi := na
+        lo := na
+        complete := true
+    if sourceAt >= start and sourceAt < finish
+        complete := complete and sourceAt == expected and sourceEnd <= finish and
+             sourceEnd - sourceAt == 3600000 and not na(sourceHigh) and not na(sourceLow)
+        hi := na(hi) ? sourceHigh : math.max(hi, sourceHigh)
+        lo := na(lo) ? sourceLow : math.min(lo, sourceLow)
+        expected := sourceEnd
+    [sourceEnd, start, finish, expires, hi, lo, complete, expected == finish]
+
+type MonthRange
+    int closeAt
+    int startAt
+    int readyAt
+    int expiresAt
+    float hi
+    float lo
+    bool complete
+    bool full
+
+var int selectedDate = timestamp(tz, reviewYear, reviewMonth, 1, 0, 0)
+[selectedStart, selectedReady, selectedExpiry] = monthBounds(selectedDate, tz)
+
+// Keep the chosen month in the hourly context, so it can still be queried when
+// the chart's loaded bars all come AFTER it. Do not substitute a nearby month.
+reviewFeed() =>
+    [at, st, fn, ex, h, l, ok, full] = calendarFirstWeek(time, time_close, high, low, tz)
+    var MonthRange pick = MonthRange.new()
+    if focus and st == selectedStart
+        pick.closeAt := at
+        pick.startAt := st
+        pick.readyAt := fn
+        pick.expiresAt := ex
+        pick.hi := h
+        pick.lo := l
+        pick.complete := ok
+        pick.full := full
+    if focus
+        [pick.closeAt, pick.startAt, pick.readyAt, pick.expiresAt, pick.hi, pick.lo, pick.complete, pick.full]
+    else
+        [at, st, fn, ex, h, l, ok, full]
+
+confirmedWeek() =>
+    [at, st, fn, ex, h, l, ok, full] = reviewFeed()
+    [at[1], st[1], fn[1], ex[1], h[1], l[1], ok[1], full[1]]
+
+weekPair() =>
+    [at, st, fn, ex, h, l, ok, full] = reviewFeed()
+    [at, st, fn, ex, h, l, ok, full, at[1], st[1], fn[1], ex[1], h[1], l[1], ok[1], full[1]]
+
+int observedAt = barstate.isrealtime ? timenow : time_close
+MonthRange snapshot = na
+if supported
+    if seconds < 3600
+        [at, st, fn, ex, h, l, ok, full] = request.security(syminfo.tickerid, "60", confirmedWeek(),
+             lookahead=barmerge.lookahead_on, calc_bars_count=200000)
+        snapshot := MonthRange.new(at, st, fn, ex, h, l, ok, full)
+    else
+        [at, st, fn, ex, h, l, ok, full, pat, pst, pfn, pex, ph, pl, pok, pfull] = request.security(syminfo.tickerid, "60", weekPair(),
+             lookahead=barmerge.lookahead_off, calc_bars_count=200000)
+        snapshot := at <= observedAt ? MonthRange.new(at, st, fn, ex, h, l, ok, full) : MonthRange.new(pat, pst, pfn, pex, ph, pl, pok, pfull)
+
+var array<MonthRange> history = array.new<MonthRange>()
+if not na(snapshot) and not na(snapshot.startAt) and not na(snapshot.hi) and snapshot.closeAt <= observedAt
+    if history.size() == 0 or history.last().startAt != snapshot.startAt
+        history.push(snapshot)
+    else
+        history.set(history.size() - 1, snapshot)
+
+// Display coordinates only. Keep NY source windows and all prices unchanged.
+// A timestamp inside a chart candle must start at that candle's open, otherwise
+// TradingView can attach the drawing to the next candle on higher timeframes.
+var array<int> chartOpens = array.new_int()
+var array<int> chartCloses = array.new_int()
+if chartOpens.size() >= 100000
+    chartOpens.shift()
+    chartCloses.shift()
+chartOpens.push(time)
+chartCloses.push(time_close)
+
+containingBarOpen(int anchor, array<int> opens, array<int> closes) =>
+    int aligned = anchor
+    if opens.size() > 0
+        int i = opens.binary_search_leftmost(anchor)
+        if i >= 0 and i < opens.size()
+            if opens.get(i) <= anchor and anchor < closes.get(i)
+                aligned := opens.get(i)
+    aligned
+
+var array<line> lines = array.new<line>()
+var array<label> labels = array.new<label>()
+var array<box> boxes = array.new<box>()
+int left = chart.left_visible_bar_time
+int right = chart.right_visible_bar_time
+[currentStart, currentReady, currentExpires] = monthBounds(observedAt, tz)
+
+drawLevel(MonthRange r, int from, float price, string title, color base, bool forming, bool labelled) =>
+    bool old = r.startAt < currentStart
+    color ink = color.new(base, old ? fade : 0)
+    string stroke = forming ? line.style_dashed : line.style_solid
+    if lines.size() < 500
+        lines.push(line.new(from, price, r.expiresAt, price, xloc=xloc.bar_time, color=ink,
+             width=1, style=stroke, force_overlay=true))
+    else
+        // A zero-height box is also a horizontal stroke. Use the second pool
+        // rather than dropping month 126 when the native line IDs run out.
+        boxes.push(box.new(from, price, r.expiresAt, price, xloc=xloc.bar_time, border_color=ink,
+             border_width=1, border_style=stroke, bgcolor=na, force_overlay=true))
+    if labelled and showLabels
+        string tip = str.format_time(r.startAt, "yyyy-MM-dd", tz) + " → " + str.format_time(r.readyAt, "yyyy-MM-dd", tz) +
+             " · " + tz + "\n" + (forming ? "形成中：只使用已收盘1小时K线" : "首周结束后确认；向左回画仅供复盘，不表示当时已知最终价位")
+        labels.push(label.new(math.min(right, r.expiresAt), price,
+             title + "  " + str.tostring(price, format.mintick), xloc=xloc.bar_time,
+             style=label.style_label_lower_right, textalign=text.align_right,
+             color=color.new(base, 100), textcolor=color.new(base, old ? 20 : 0), size=size.small, tooltip=tip, force_overlay=true))
+
+isForming(MonthRange r) => r.startAt == currentStart and observedAt < r.readyAt
+isDrawable(MonthRange r) => r.complete and r.hi > r.lo and (isForming(r) ? preview : r.full)
+asPrice(float v) => str.tostring(v, format.mintick)
+
+var table status = table.new(position.bottom_center, 1, 1)
+var table card = table.new(position.bottom_right, 1, 1)
+if barstate.islast
+    while lines.size() > 0
+        line.delete(lines.pop())
+    while labels.size() > 0
+        label.delete(labels.pop())
+    while boxes.size() > 0
+        box.delete(boxes.pop())
+    int shown = 0
+    int skipped = 0
+    bool dense = false
+    if history.size() > 0
+        for j = 0 to history.size() - 1
+            MonthRange r = history.get(history.size() - 1 - j)
+            if r.expiresAt <= left
+                break
+            int drawStart = containingBarOpen(r.startAt, chartOpens, chartCloses)
+            bool intersects = r.expiresAt > left and drawStart <= right
+            bool forming = isForming(r)
+            if intersects and isDrawable(r)
+                // Reserve a whole range before drawing. Never let Pine garbage-
+                // collect a newer month's levels while visiting older months.
+                int boxesNeeded = math.max(0, 4 - (500 - lines.size())) + (shade ? 1 : 0)
+                if boxes.size() + boxesNeeded > 500
+                    dense := true
+                    break
+                float span = r.hi - r.lo
+                bool labelled = shown == 0
+                int from = math.max(left, drawStart)
+                drawLevel(r, from, r.hi, "首周高", edgeColor, forming, labelled)
+                drawLevel(r, from, r.lo, "首周低", edgeColor, forming, labelled)
+                drawLevel(r, from, r.hi + 0.618 * span, "上 1.618", upperColor, forming, labelled)
+                drawLevel(r, from, r.lo - 0.618 * span, "下 1.618", lowerColor, forming, labelled)
+                if showMonths
+                    labels.push(label.new(from, r.lo, str.format_time(r.startAt, "yyyy-MM", tz), xloc=xloc.bar_time,
+                         style=label.style_label_upper_left, color=color.new(chart.bg_color, 100),
+                         textcolor=color.new(chart.fg_color, 28), size=size.small, force_overlay=true))
+                if shade
+                    boxes.push(box.new(from, r.hi, r.expiresAt, r.lo,
+                         xloc=xloc.bar_time, border_color=na, bgcolor=color.new(edgeColor, r.startAt < currentStart ? 97 : 94), force_overlay=true))
+                shown += 1
+            if intersects and not r.complete
+                skipped += 1
+    string message = dense ? "当前视窗已用完绘图对象，放大或平移可查看其他月份" :
+         observedAt < currentStart and right >= time ? "本月首周尚未开始" :
+         observedAt < currentReady and right >= currentStart ? (preview ? "月首周 · 形成中" : "等待首周收盘") :
+         shown == 0 ? "当前窗口无完整首周数据" : skipped > 0 ? "部分月份数据不全，已跳过" : ""
+    if not focus
+        if diagnostic
+            message := "当前视窗已绘 " + str.tostring(shown) + " 个月" + (message == "" ? "" : " · " + message)
+        table.cell(status, 0, 0, message, text_color=color.new(chart.fg_color, 35), text_size=size.tiny,
+             bgcolor=color.new(chart.bg_color, 100))
+    else
+        MonthRange pick = history.size() > 0 ? history.last() : na
+        string key = str.format_time(selectedDate, "yyyy-MM", tz)
+        string startDay = str.format_time(selectedStart, "yyyy-MM-dd", tz)
+        string dates = "首周 " + str.format_time(selectedStart, "MM-dd", tz) + " 至 " +
+             str.format_time(selectedReady - 1, "MM-dd", tz) + "  ·  " + tz
+        string detail = ""
+        if observedAt < selectedStart
+            detail := "该月首周尚未开始"
+        else if na(pick)
+            detail := observedAt < selectedStart + 3600000 ? "等待首根 1 小时收盘" : "已加载数据中无该月首周记录"
+        else if not pick.complete or (observedAt >= selectedReady and not pick.full)
+            detail := "首周 1 小时数据不全，无确认价位"
+        else if isForming(pick) and not preview
+            detail := "等待首周收盘（形成中预览已关闭）"
+        else if isDrawable(pick)
+            float span = pick.hi - pick.lo
+            detail := (isForming(pick) ? "形成中 · 临时价位" : "已确认") +
+                 "\n首周高  " + asPrice(pick.hi) + "    低  " + asPrice(pick.lo) +
+                 "\n上 1.618  " + asPrice(pick.hi + 0.618 * span) +
+                 "\n下 1.618  " + asPrice(pick.lo - 0.618 * span)
+        else
+            detail := "首周尚无有效价差"
+        string jump = (right < containingBarOpen(selectedStart, chartOpens, chartCloses) or left >= selectedExpiry) and observedAt >= selectedStart ?
+             "\n查看原图：前往日期 " + startDay : ""
+        table.cell(card, 0, 0, key + "  ·  月首周\n" + dates + "\n" + detail + jump,
+             text_halign=text.align_left, text_color=chart.fg_color, text_size=size.small, bgcolor=color.new(chart.bg_color, 10))
+
+if diagnostic and barstate.islastconfirmedhistory and history.size() > 0
+    for j = math.max(0, history.size() - 3) to history.size() - 1
+        MonthRange r = history.get(j)
+        log.info("MONTH_FIRST_WEEK {0} tz={1} high={2} low={3} upper={4} lower={5} complete={6} ready={7}",
+             str.format_time(r.startAt, "yyyy-MM-dd", tz), tz, r.hi, r.lo,
+             r.hi + 0.618 * (r.hi-r.lo), r.lo - 0.618 * (r.hi-r.lo), r.complete and r.full,
+             str.format_time(r.readyAt, "yyyy-MM-dd HH:mm", tz))
