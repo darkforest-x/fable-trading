@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-alt-month-first-week-split-target-20261110-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4409f3c3a3
+    status: rejected
+    question: For monthly upper-reclaim shorts, does taking half at the 4% capped target and half at the original first-week boundary improve a shared 1000 USDT account within a 30% historical drawdown limit?
+    single_variable: Replace the full capped exit with 50/50 capped target and original boundary. Same opening clocks, whole parent allocation of 10%, five occupied slots until the final child exits, fixed 5% stop and original 168-hour timeout. Fees 2/5bp with a separate adverse 5bp on market fills.
+    result: 1373 split trades vs 1613 baseline. Base 1213.28U and 22.52% conservative max drawdown vs 1260.03U and 19.83%; with slip 1092.76U and 25.14% vs 1122.82U and 22.94%. On the 707 funded positions where a partial payout left an open or further-targeted remainder, 466 gained 1202.99U and 241 lost 1208.73U relative to paying both legs at the cap. 229 ended net negative after the remainder stopped. 278 baseline-only vs 38 split-only trades. Decline as default.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-alt-month-first-week-split-target-20261110-v1/summary.json
+    notes: 2022-02..2026-10 entry months. 7 fixed-stop and original-boundary same-hour touches checked against minute data, none had unresolved first touch within a minute. Later split from 1000 equivalent 1088.78U/1032.36U, baseline 1164.49U/1098.17U. Random matched clocks formed a separate shared account. Funding and contract rounding excluded. Notion 4148856479af81caa856e1934232acbb.
+
   - experiment_id: exp-alt-month-first-week-account-20261110-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 47868db4a7
