@@ -1,5 +1,9 @@
 const historyRoot = new URL('../cloud-v17-history/', import.meta.url);
+
+// Resolve static resources from this module so mounting is independent of the document URL.
+export const bookAsset = path => new URL(path, import.meta.url).href;
 export const historyAsset = path => new URL(path, historyRoot).href;
+
 export const amount = (value, digits = 2) => Number.isFinite(value)
   ? value.toLocaleString('en-US', {maximumFractionDigits: digits, minimumFractionDigits: digits}) : '—';
 export const price = value => Number.isFinite(value)
@@ -7,9 +11,19 @@ export const price = value => Number.isFinite(value)
 export const signed = value => Number.isFinite(value) ? (value > 0 ? '+' : '') + amount(value) : '—';
 export const beijing = ms => Number.isFinite(ms) && ms > 0
   ? new Date(ms + 28800000).toISOString().slice(0, 16).replace('T', ' ') : '—';
+export const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, c => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+}[c]));
+
+export const tableHTML = (head, rows, className = '') =>
+  '<div class="rs-table-wrap rs-cloud-table-wrap ' + escapeHTML(className) + '"><table><thead><tr>' +
+  head.map(cell => '<th scope="col">' + escapeHTML(cell) + '</th>').join('') + '</tr></thead><tbody>' +
+  rows.map(row => '<tr>' + row.map(cell => '<td>' + cell + '</td>').join('') + '</tr>').join('') +
+  '</tbody></table></div>';
 
 export async function read(path, options = {}) {
-  const response = await fetch(path, options);
+  const url = path instanceof URL ? path : new URL(String(path), import.meta.url);
+  const response = await fetch(url, options);
   if (!response.ok) throw new Error('读取失败（HTTP ' + response.status + '）');
   return response.json();
 }
@@ -20,9 +34,10 @@ export async function readTrade(row) {
   if (!response.ok) throw new Error('未能读取逐笔流水');
   const bytes = new Uint8Array(await response.arrayBuffer());
   const stream = new Blob([bytes]).stream();
-  const body = bytes[0] === 0x1f && bytes[1] === 0x8b ? stream.pipeThrough(new DecompressionStream('gzip')) : stream;
+  const body = bytes[0] === 0x1f && bytes[1] === 0x8b
+    ? stream.pipeThrough(new DecompressionStream('gzip')) : stream;
   const trade = await new Response(body).json();
-  if (trade.id !== row.id || trade.eventId !== row.eventId || trade.fills.length !== row.nativeOrderCount)
+  if (trade.id !== row.id || trade.eventId !== row.eventId || !Array.isArray(trade.fills) || trade.fills.length !== row.nativeOrderCount)
     throw new Error('逐笔流水与交易编号不符');
   return trade;
 }
