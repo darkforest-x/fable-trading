@@ -1,0 +1,10 @@
+{
+  "parent": "exp-alt-month-first-week-entries-20261110-v1",
+  "axis": "Target distance only. Same selected one-hour reclaim clock, same entries and identical matched random clocks, 5 percent stop and max 168 hours.",
+  "target_distance_caps_pct": [2, 4],
+  "baseline": "Reuse original near edge without cap. Only move targets inward when farther away than cap.",
+  "selection": "Choose best by early mean net PnL from the two caps and unchanged baseline, show all post-2024 results. Cap choices informed by pooled exploratory MFE and are not prospective validation.",
+  "funding": "excluded",
+  "fees": "0.05 percent taker on entry/stop/timeout, 0.02 percent maker on target; stress adds 5bp to each market fill",
+  "production_eligible": false
+}

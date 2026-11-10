@@ -60,7 +60,7 @@ def summarize(trades):
     readable=fills.loc[~fills.is_control,list(headings)].copy()
     readable['side']=readable.side.map({'upper':'上轨做空','lower':'下轨做多'})
     readable['entry_rule']=readable.entry_rule.map(dict(zip(RULES,['触价后直接进','触价小时收内','触价小时收外',
-        '等一根小时线收回','等连续两根小时线收回','等4小时收回','等日线收回'],strict=True)))
+        '等一根小时线收回','等连续两根小时线收回','等4小时收回','等日线收回'])))
     readable.sort_values(['entry_time','symbol','entry_rule']).rename(columns=headings).to_csv(
         DEST/'逐笔浮盈与盈亏.csv',index=False,float_format='%.8g',encoding='utf-8-sig')
     done=fills[fills.status.eq('closed')]
@@ -80,6 +80,20 @@ def summarize(trades):
     pairs=actual.merge(done[done.is_control][['paired_id','net_return_pct','period']],
                        on='paired_id',suffixes=('','_random'),validate='1:1')
     pairs['delta']=pairs.net_return_pct-pairs.net_return_pct_random
+    # Each UTC touch hour gets equal weight, even when many coins moved together.
+    sizes=events.groupby(['touch','side']).symbol.nunique().rename('cluster_n').reset_index()
+    sizes['touch']=pd.to_datetime(sizes.touch,utc=True)
+    baseline=pairs[pairs.entry_rule.eq(CONFIG['baseline'])].merge(sizes,on=['touch','side'],validate='m:1')
+    hourly=baseline.groupby(['touch','side','cluster_n','period'],as_index=False).agg(
+        traded=('trade_id','size'),net=('net_return_pct','mean'),random_net=('net_return_pct_random','mean'))
+    hourly['size_band']=pd.cut(hourly.cluster_n,[0,1,4,9,np.inf],labels=['1','2-4','5-9','10+'])
+    cluster_rows=[]
+    for period,frame in [('all',hourly),('later',hourly[hourly.period=='later'])]:
+        for (side,band),g in frame.groupby(['side','size_band'],observed=True):
+            cluster_rows.append(dict(period=period,side=side,band=band,distinct_hours=len(g),
+                constituent_trades=int(g.traded.sum()),mean_cluster_net_pct=g.net.mean(),
+                mean_random_pct=g.random_net.mean(),mean_paired_excess_pp=(g.net-g.random_net).mean()))
+    pd.DataFrame(cluster_rows).to_csv(DEST/'hourly_cluster_trade_metrics.csv',index=False)
     comparisons=[]
     for period in ['all','early','later']:
         sub=pairs if period=='all' else pairs[(pairs.period==period)&(pairs.period_random==period)]
