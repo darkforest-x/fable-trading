@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>天才交易员 · SPIKE | 让策略，自动执行。</title>
+  <!-- Google Fonts & Tailwind CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              black: '#000000',
+              obsidian: '#070709',
+              graphite: '#111115',
+              surface: '#17171d',
+              border: '#23232b',
+              borderLight: '#2e2e38',
+              pearl: '#f5f5f7',
+              muted: '#86868b',
+              dim: '#52525c',
+              cyan: '#38bdf8',
+              cyanDim: 'rgba(56, 189, 248, 0.12)',
+              amber: '#f59e0b',
+              amberDim: 'rgba(245, 158, 11, 0.15)',
+            }
+          },
+          fontFamily: {
+            sans: ['Manrope', 'Noto Sans SC', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Menlo', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #000000;
+      color: #f5f5f7;
+      font-family: 'Manrope', 'Noto Sans SC', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      touch-action: pan-y;
+    }
+    
+    /* Subtle titanium hairline highlights */
+    .titanium-border {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%);
+    }
+
+    /* 3D Phone Perspective Container */
+    .phone-perspective {
+      perspective: 1200px;
+      perspective-origin: 50% 45%;
+    }
+    .phone-body {
+      transform-style: preserve-3d;
+      transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1);
+      box-shadow: 
+        -18px 25px 60px -10px rgba(0, 0, 0, 0.95),
+        0 0 0 1.5px rgba(255, 255, 255, 0.14),
+        0 0 45px -5px rgba(56, 189, 248, 0.07);
+    }
+
+    /* Glow base under phone */
+    .radial-glow {
+      background: radial-gradient(ellipse 70% 35% at 50% 60%, rgba(56, 189, 248, 0.14), rgba(0, 0, 0, 0) 75%);
+    }
+
+    /* Range touch/cursor adjustments */
+    input[type=range] {
+      accent-color: #38bdf8;
+    }
+
+    /* Hide scrollbars */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="selection:bg-brand-cyan/20 selection:text-brand-cyan">
+
+  <!-- 1. Apple-style Minimal Navigation -->
+  <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/75 border-b border-brand-border/40 transition-all duration-300">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 h-14 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2.5 group">
+        <span class="w-2.5 h-2.5 rounded-full bg-brand-pearl group-hover:bg-brand-cyan transition-colors duration-200"></span>
+        <div class="flex items-baseline gap-1.5">
+          <span class="text-sm font-semibold tracking-tight text-brand-pearl">天才交易员</span>
+          <span class="text-xs font-mono font-medium tracking-widest text-brand-muted uppercase">SPIKE</span>
+        </div>
+      </a>
+      
+      <div class="flex items-center gap-3">
+        <span class="text-[11px] font-mono text-brand-dim px-2 py-0.5 rounded border border-brand-border/60 hidden sm:inline-block">原生引擎 · v3.2</span>
+        <a href="#backtest" class="text-xs font-medium text-brand-muted hover:text-brand-pearl transition-colors px-3 py-1.5">回测表现</a>
+        <a href="#testflight" class="text-xs font-medium bg-brand-pearl text-brand-black hover:bg-white active:scale-95 transition-all px-3.5 py-1.5 rounded-full font-mono">
+          获取内测
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. Hero Section: 390px Optimized First & Adaptive Desktop -->
+  <main class="pt-24 pb-16 sm:pt-32 sm:pb-24 overflow-hidden">
+    <section class="max-w-6xl mx-auto px-5 sm:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+        
+        <!-- Left: Restrained, Pure Typography & Value Proposition -->
+        <div class="lg:col-span-6 flex flex-col items-start z-10">
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-brand-graphite border border-brand-border mb-6">
+            <span class="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse"></span>
+            <span class="text-[11px] font-mono tracking-wider text-brand-muted uppercase">SPIKE FOR IPHONE</span>
+          </div>
+
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-brand-pearl leading-[1.1] mb-6">
+            让策略，<br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-pearl via-brand-pearl to-brand-muted">自动执行。</span>
+          </h1>
+
+          <p class="text-base sm:text-lg text-brand-muted max-w-md font-light leading-relaxed mb-8">
+            专为严谨量化策略设计的移动执行中枢。支持策略本地接入、毫秒级纪律委托与全量历时回测。
+          </p>
+
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 w-full sm:w-auto">
+            <a href="#backtest" class="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-brand-pearl text-brand-black font-semibold text-sm hover:bg-white active:scale-98 transition-transform shadow-[0_0_24px_rgba(255,255,255,0.2)]">
+              <span>看回测表现</span>
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </a>
+            <a href="#core-flow" class="inline-flex items-center justify-center px-6 py-3.5 rounded-full border border-brand-border text-brand-muted text-sm font-medium hover:text-brand-pearl hover:border-brand-borderLight transition-colors">
+              三项核心能力
+            </a>
+          </div>
+
+          <!-- Micro specs / Architecture indicators -->
+          <div class="mt-10 sm:mt-14 pt-8 border-t border-brand-border/40 grid grid-cols-3 gap-4 w-full">
+            <div>
+              <div class="text-[11px] font-mono text-brand-dim uppercase tracking-wider mb-1">执行架构</div>
+              <div class="text-sm font-semibold text-brand-pearl">端侧隔离</div>
+            </div>
+            <div>
+              <div class="text-[11px] font-mono text-brand-dim uppercase tracking-wider mb-1">策略接入</div>
+              <div class="text-sm font-semibold text-brand-pearl">标准协议</div>
+            </div>
+            <div>
+              <div class="text-[11px] font-mono text-brand-dim uppercase tracking-wider mb-1">历时回测</div>
+              <div class="text-sm font-semibold text-brand-pearl">Tick 级逼真</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: 3D Black Titanium iPhone with Interactive Strategy Screen -->
+        <div class="lg:col-span-6 flex flex-col items-center justify-center relative select-none">
+          <!-- Background Ambient Glow -->
+          <div class="absolute -inset-4 sm:-inset-10 radial-glow pointer-events-none opacity-80"></div>
+
+          <!-- Interactive Drag Controller / 3D Canvas -->
+          <div id="phone-container" class="phone-perspective w-[300px] sm:w-[325px] h-[610px] sm:h-[650px] relative cursor-grab active:cursor-grabbing flex items-center justify-center">
+            
+            <!-- 3D Phone Body -->
+            <div id="phone-body" class="phone-body w-full h-full rounded-[48px] p-[10px] bg-gradient-to-b from-[#2d2d34] via-[#1a1a20] to-[#121216] relative flex flex-col" style="transform: rotateX(12deg) rotateY(-18deg) rotateZ(3deg);">
+              
+              <!-- Hardware Titanium Rim & Buttons simulated -->
+              <div class="absolute -left-[3px] top-[110px] w-[3px] h-[26px] bg-[#3a3a42] rounded-l-sm"></div>
+              <div class="absolute -left-[3px] top-[148px] w-[3px] h-[48px] bg-[#3a3a42] rounded-l-sm"></div>
+              <div class="absolute -left-[3px] top-[204px] w-[3px] h-[48px] bg-[#3a3a42] rounded-l-sm"></div>
+              <div class="absolute -right-[3px] top-[160px] w-[3px] h-[72px] bg-[#3a3a42] rounded-r-sm"></div>
+
+              <!-- Bezel & Inner OLED Glass -->
+              <div class="w-full h-full rounded-[38px] bg-black overflow-hidden flex flex-col relative border border-white/10">
+                
+                <!-- Dynamic Island / Speaker notch -->
+                <div class="absolute top-2.5 left-1/2 -translate-x-1/2 w-[88px] h-[22px] bg-[#101014] rounded-full z-30 flex items-center justify-end px-2.5">
+                  <div class="w-2.5 h-2.5 rounded-full bg-[#1b1b22] border border-white/5"></div>
+                </div>
+
+                <!-- Status Bar -->
+                <div class="pt-3 px-6 pb-2 flex justify-between items-center text-[10px] font-mono text-brand-dim z-20">
+                  <span>09:41</span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></span>
+                    <span class="text-[9px]">LIVE</span>
+                  </div>
+                </div>
+
+                <!-- Phone Content: Strategy Equity + Drawdown Window -->
+                <div class="flex-1 px-4 py-2 flex flex-col justify-between overflow-hidden">
+                  
+                  <!-- Strategy Mini Header -->
+                  <div>
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-[11px] font-mono text-brand-muted">ALPHA-01 趋势增强</span>
+                      <span class="text-[10px] font-mono text-brand-cyan bg-brand-cyan/10 px-1.5 py-0.5 rounded">运行中</span>
+                    </div>
+                    <div class="text-2xl font-bold font-mono text-brand-pearl tracking-tight">
+                      +148.2<span class="text-xs text-brand-muted font-normal ml-0.5">%</span>
+                    </div>
+                    <div class="text-[10px] font-mono text-brand-dim mt-0.5">净值 2.482 · 最大回撤 7.8%</div>
+                  </div>
+
+                  <!-- High Precision Equity Curve SVG in Phone Screen -->
+                  <div class="relative my-2 h-[190px] w-full flex flex-col justify-center">
+                    <svg viewBox="0 0 280 160" class="w-full h-full overflow-visible">
+                      <defs>
+                        <linearGradient id="phoneEquityGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25"/>
+                          <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.0"/>
+                        </linearGradient>
+                      </defs>
+                      <!-- Subdued Gridlines -->
+                      <line x1="0" y1="30" x2="280" y2="30" stroke="#1d1d24" stroke-width="0.75" stroke-dasharray="2 3"/>
+                      <line x1="0" y1="80" x2="280" y2="80" stroke="#1d1d24" stroke-width="0.75" stroke-dasharray="2 3"/>
+                      <line x1="0" y1="130" x2="280" y2="130" stroke="#1d1d24" stroke-width="0.75" stroke-dasharray="2 3"/>
+
+                      <!-- Area Fill under curve -->
+                      <path d="M 0 145 C 30 140, 50 135, 70 120 C 95 105, 110 115, 130 92 C 155 65, 175 80, 200 52 C 225 24, 255 35, 280 18 L 280 150 L 0 150 Z" fill="url(#phoneEquityGrad)"/>
+
+                      <!-- Thin Cyan Equity Line -->
+                      <path d="M 0 145 C 30 140, 50 135, 70 120 C 95 105, 110 115, 130 92 C 155 65, 175 80, 200 52 C 225 24, 255 35, 280 18" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+
+                      <!-- Live pulse endpoint -->
+                      <circle cx="280" cy="18" r="3.5" fill="#38bdf8"/>
+                      <circle cx="280" cy="18" r="7" fill="#38bdf8" opacity="0.3" class="animate-ping"/>
+                    </svg>
+
+                    <div class="flex justify-between items-center text-[9px] font-mono text-brand-dim mt-1">
+                      <span>2022.01</span>
+                      <span>2023.06</span>
+                      <span>2024.12</span>
+                    </div>
+                  </div>
+
+                  <!-- Drawdown Mini Window -->
+                  <div class="bg-brand-obsidian border border-brand-border/60 rounded-xl p-2.5 mb-2">
+                    <div class="flex items-center justify-between text-[10px] font-mono mb-1.5">
+                      <span class="text-brand-muted">动态回撤监控</span>
+                      <span class="text-brand-amber font-medium">-7.8% 峰值</span>
+                    </div>
+                    <!-- Drawdown inverted area -->
+                    <div class="h-10 w-full relative">
+                      <svg viewBox="0 0 250 40" class="w-full h-full">
+                        <defs>
+                          <linearGradient id="phoneDdGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.0"/>
+                            <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.35"/>
+                          </linearGradient>
+                        </defs>
+                        <!-- Zero line -->
+                        <line x1="0" y1="4" x2="250" y2="4" stroke="#2a2a35" stroke-width="1"/>
+                        <!-- Drawdown profile -->
+                        <path d="M 0 4 L 35 4 L 45 16 L 65 6 L 80 4 L 115 4 L 130 24 L 150 14 L 170 4 L 210 4 L 225 32 L 240 10 L 250 4 L 250 4 L 0 4 Z" fill="url(#phoneDdGrad)"/>
+                        <path d="M 0 4 L 35 4 L 45 16 L 65 6 L 80 4 L 115 4 L 130 24 L 150 14 L 170 4 L 210 4 L 225 32 L 240 10 L 250 4" fill="none" stroke="#f59e0b" stroke-width="1.2" stroke-linecap="round"/>
+                      </svg>
+                    </div>
+                  </div>
+
+                  <!-- Bottom Execution Card -->
+                  <div class="border-t border-brand-border/50 pt-2 flex items-center justify-between text-[10px] font-mono text-brand-dim pb-1">
+                    <span>守护中 · 严格仓位控制</span>
+                    <span class="text-brand-pearl">0 异常脱轨</span>
+                  </div>
+
+                </div>
+
+                <!-- Bottom home bar -->
+                <div class="w-24 h-1 bg-white/20 rounded-full mx-auto mb-2"></div>
+              </div>
+
+            </div>
+
+            <!-- Soft Elliptical Ground Glow -->
+            <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 w-48 h-8 bg-brand-cyan/15 blur-xl rounded-full pointer-events-none"></div>
+          </div>
+
+          <!-- Drag Hint for users -->
+          <div class="mt-4 flex items-center gap-2 text-[11px] font-mono text-brand-dim">
+            <svg class="w-3.5 h-3.5 text-brand-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+            </svg>
+            <span>按住拖动以旋转 3D 视角</span>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 3. Section Two: Three Pillars — Instant Comprehension -->
+    <section id="core-flow" class="py-20 sm:py-28 border-t border-brand-border/40 bg-brand-obsidian">
+      <div class="max-w-6xl mx-auto px-5 sm:px-8">
+        
+        <div class="max-w-2xl mb-14">
+          <div class="text-xs font-mono tracking-widest text-brand-cyan uppercase mb-3">CORE ARCHITECTURE</div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-brand-pearl tracking-tight">
+            三步闭环，严守确定性。
+          </h2>
+          <p class="text-sm sm:text-base text-brand-muted mt-3">
+            没有复杂的衍生功能，去除无意义的干扰项。从策略对接到实际落单，一切围绕纪律构建。
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          <!-- Pillar 1: Strategy Ingestion -->
+          <div class="titanium-border rounded-2xl p-6 sm:p-7 relative group hover:border-brand-borderLight transition-all">
+            <div class="w-8 h-8 rounded-lg bg-brand-graphite border border-brand-border flex items-center justify-center font-mono text-xs font-bold text-brand-cyan mb-5">
+              01
+            </div>
+            <h3 class="text-lg font-semibold text-brand-pearl mb-2.5">策略接入</h3>
+            <p class="text-sm text-brand-muted leading-relaxed mb-6 font-light">
+              支持通过轻量协议或量化脚本无缝载入个人策略逻辑。纯本地内存运算，无需上传私钥或向第三方服务器托管逻辑。
+            </p>
+            <div class="pt-4 border-t border-brand-border/40 text-xs font-mono text-brand-dim flex items-center justify-between">
+              <span>协议支持</span>
+              <span class="text-brand-pearl">WebSocket / IPC</span>
+            </div>
+          </div>
+
+          <!-- Pillar 2: Automated Execution -->
+          <div class="titanium-border rounded-2xl p-6 sm:p-7 relative group hover:border-brand-borderLight transition-all">
+            <div class="w-8 h-8 rounded-lg bg-brand-graphite border border-brand-border flex items-center justify-center font-mono text-xs font-bold text-brand-pearl mb-5">
+              02
+            </div>
+            <h3 class="text-lg font-semibold text-brand-pearl mb-2.5">自动交易</h3>
+            <p class="text-sm text-brand-muted leading-relaxed mb-6 font-light">
+              毫秒级本地条件触发，将主观情绪完全阻隔于执行链条之外。预设止损、阶梯分批减仓均严格自动上报交易所。
+            </p>
+            <div class="pt-4 border-t border-brand-border/40 text-xs font-mono text-brand-dim flex items-center justify-between">
+              <span>执行阻断</span>
+              <span class="text-brand-pearl">硬件本地驱动</span>
+            </div>
+          </div>
+
+          <!-- Pillar 3: Historical Backtesting -->
+          <div class="titanium-border rounded-2xl p-6 sm:p-7 relative group hover:border-brand-borderLight transition-all">
+            <div class="w-8 h-8 rounded-lg bg-brand-graphite border border-brand-border flex items-center justify-center font-mono text-xs font-bold text-brand-amber mb-5">
+              03
+            </div>
+            <h3 class="text-lg font-semibold text-brand-pearl mb-2.5">历史回测</h3>
+            <p class="text-sm text-brand-muted leading-relaxed mb-6 font-light">
+              在手机端直接调用历经极端牛熊的多年 Tick 级样本。直观还原滑点与手续费影响，拒绝过度拟合的假象。
+            </p>
+            <div class="pt-4 border-t border-brand-border/40 text-xs font-mono text-brand-dim flex items-center justify-between">
+              <span>回测跨度</span>
+              <span class="text-brand-pearl">2021 — 至今全景</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 4. Section Three: Visual Core — Strategy Backtest Showcase (Interactive Touch) -->
+    <section id="backtest" class="py-20 sm:py-28 relative">
+      <div class="max-w-6xl mx-auto px-5 sm:px-8">
+        
+        <!-- Section Title & Restrained Header -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+          <div>
+            <div class="text-xs font-mono tracking-widest text-brand-cyan uppercase mb-3">HISTORICAL PERFORMANCE</div>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-brand-pearl tracking-tight">
+              策略回测表现
+            </h2>
+            <p class="text-xs sm:text-sm text-brand-dim mt-2 font-mono">
+              * 展示数据为预设样本设计占位，仅作界面交互展示，不构成任何收益承诺或投资结论。
+            </p>
+          </div>
+
+          <!-- 3 Strategy Segmented Control Tabs (No decorative fluff) -->
+          <div class="inline-flex p-1 rounded-xl bg-brand-graphite border border-brand-border self-start md:self-auto" id="strategy-tabs">
+            <button onclick="switchStrategy(0)" id="tab-0" class="strategy-tab-btn active px-4 py-2 rounded-lg text-xs font-mono font-medium transition-all bg-brand-surface text-brand-pearl shadow-sm">
+              策略 A · 动量突破
+            </button>
+            <button onclick="switchStrategy(1)" id="tab-1" class="strategy-tab-btn px-4 py-2 rounded-lg text-xs font-mono font-medium transition-all text-brand-muted hover:text-brand-pearl">
+              策略 B · 均值回归
+            </button>
+            <button onclick="switchStrategy(2)" id="tab-2" class="strategy-tab-btn px-4 py-2 rounded-lg text-xs font-mono font-medium transition-all text-brand-muted hover:text-brand-pearl">
+              策略 C · 波动率套利
+            </button>
+          </div>
+        </div>
+
+        <!-- Strategy Backtest Container: Unified Dark System -->
+        <div class="titanium-border rounded-2xl p-5 sm:p-8 bg-brand-obsidian/90 relative">
+          
+          <!-- Key Metrics Trio: Pearl White & Subdued Amber -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 pb-8 border-b border-brand-border/60">
+            <div>
+              <div class="text-xs font-mono text-brand-muted mb-1.5">累计收益 (收益率占位)</div>
+              <div id="stat-return" class="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-mono text-brand-pearl tracking-tight">
+                +148.2%
+              </div>
+              <div class="text-[11px] font-mono text-brand-cyan mt-1">基准收益比 3.12x</div>
+            </div>
+
+            <div>
+              <div class="text-xs font-mono text-brand-muted mb-1.5">最大回撤 (Max DD)</div>
+              <div id="stat-drawdown" class="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-mono text-brand-amber tracking-tight">
+                -7.8%
+              </div>
+              <div class="text-[11px] font-mono text-brand-dim mt-1">持续期 14 个交易日</div>
+            </div>
+
+            <div>
+              <div class="text-xs font-mono text-brand-muted mb-1.5">测试周期</div>
+              <div id="stat-dates" class="text-base sm:text-xl font-bold font-mono text-brand-pearl tracking-tight mt-1 sm:mt-2">
+                2022.01 - 2024.12
+              </div>
+              <div class="text-[11px] font-mono text-brand-dim mt-1">36 个月历时样本</div>
+            </div>
+
+            <div>
+              <div class="text-xs font-mono text-brand-muted mb-1.5">夏普比率 / 盈亏比</div>
+              <div id="stat-sharpe" class="text-base sm:text-xl font-bold font-mono text-brand-pearl tracking-tight mt-1 sm:mt-2">
+                2.46 / 2.85:1
+              </div>
+              <div class="text-[11px] font-mono text-brand-dim mt-1">胜率 58.4% · 142 笔执行</div>
+            </div>
+          </div>
+
+          <!-- Main Interactive Chart: Upper Equity Curve & Lower Amber Drawdown -->
+          <div class="pt-6 relative">
+            
+            <div class="flex items-center justify-between text-xs font-mono text-brand-dim mb-3">
+              <span class="flex items-center gap-2">
+                <span class="w-2.5 h-0.5 bg-brand-cyan"></span>
+                <span class="text-brand-pearl">净值增长曲线 (Normalized Equity)</span>
+              </span>
+              <span id="chart-cursor-info" class="text-brand-cyan bg-brand-cyan/10 px-2 py-0.5 rounded text-[11px]">
+                点击或触摸曲线查看对应时间节点数值
+              </span>
+            </div>
+
+            <!-- SVG Unified Chart Viewport with Touch Crosshair -->
+            <div class="relative w-full h-[260px] sm:h-[320px] select-none touch-none" id="chart-wrapper">
+              
+              <svg id="main-chart-svg" viewBox="0 0 900 320" preserveAspectRatio="none" class="w-full h-full overflow-visible">
+                <defs>
+                  <!-- Cyan gradient for equity -->
+                  <linearGradient id="equityGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.18"/>
+                    <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.0"/>
+                  </linearGradient>
+                  <!-- Amber gradient for drawdown -->
+                  <linearGradient id="drawdownGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.0"/>
+                    <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.25"/>
+                  </linearGradient>
+                </defs>
+
+                <!-- Gridlines & Reference Zero-Lines -->
+                <line x1="0" y1="40" x2="900" y2="40" stroke="#1c1c24" stroke-width="1" stroke-dasharray="3 4"/>
+                <line x1="0" y1="100" x2="900" y2="100" stroke="#1c1c24" stroke-width="1" stroke-dasharray="3 4"/>
+                <line x1="0" y1="160" x2="900" y2="160" stroke="#1c1c24" stroke-width="1" stroke-dasharray="3 4"/>
+
+                <!-- Middle Partition Zero Line separating Equity and Drawdown -->
+                <line x1="0" y1="210" x2="900" y2="210" stroke="#2a2a35" stroke-width="1.5"/>
+                <text x="12" y="204" fill="#666675" font-size="10" font-family="monospace">回撤分界 0.0%</text>
+
+                <!-- Upper: Cyan Equity Curve Area & Path -->
+                <path id="svg-equity-area" d="" fill="url(#equityGrad)" class="transition-all duration-300"/>
+                <path id="svg-equity-line" d="" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="transition-all duration-300"/>
+
+                <!-- Lower: Amber Drawdown Area & Path -->
+                <path id="svg-drawdown-area" d="" fill="url(#drawdownGrad)" class="transition-all duration-300"/>
+                <path id="svg-drawdown-line" d="" fill="none" stroke="#f59e0b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="transition-all duration-300"/>
+
+                <!-- Interactive Crosshair (hidden by default) -->
+                <g id="svg-crosshair" class="opacity-0 transition-opacity duration-150">
+                  <line id="crosshair-x" x1="0" y1="0" x2="0" y2="300" stroke="#ffffff" stroke-width="1" stroke-dasharray="3 3" opacity="0.4"/>
+                  <circle id="crosshair-dot-eq" cx="0" cy="0" r="4.5" fill="#38bdf8" stroke="#ffffff" stroke-width="1.5"/>
+                  <circle id="crosshair-dot-dd" cx="0" cy="0" r="3.5" fill="#f59e0b"/>
+                </g>
+              </svg>
+
+              <!-- Floating Tooltip Box -->
+              <div id="chart-tooltip" class="absolute pointer-events-none opacity-0 transition-opacity duration-150 bg-[#16161d] border border-brand-border px-3 py-2 rounded-lg shadow-xl text-xs font-mono z-30">
+                <div id="tooltip-date" class="text-brand-muted text-[10px] mb-1">2023.08</div>
+                <div class="flex items-center gap-3">
+                  <span class="text-brand-cyan">净值: <span id="tooltip-eq" class="font-bold text-white">+118.4%</span></span>
+                  <span class="text-brand-amber">回撤: <span id="tooltip-dd" class="font-bold">-4.2%</span></span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- X-Axis Timeline Indicators (No overflow, fully readable on 390px) -->
+            <div class="flex justify-between items-center text-[10px] sm:text-xs font-mono text-brand-dim mt-2 px-1">
+              <span>2022-Q1</span>
+              <span>2022-Q4</span>
+              <span>2023-Q3</span>
+              <span>2024-Q2</span>
+              <span>2024-Q4 (最新)</span>
+            </div>
+
+          </div>
+
+          <!-- Bottom Sub-Row: Annual Returns Positive/Negative Mini Columns -->
+          <div class="mt-8 pt-6 border-t border-brand-border/60">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-mono text-brand-muted">历年收益分布 (公历年样本表现)</span>
+              <span class="text-[11px] font-mono text-brand-dim">单位: 百分比 (%)</span>
+            </div>
+
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-3" id="annual-returns-grid">
+              <!-- Cards populated via JS -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 5. Section Four: Restrained TestFlight Status (No false downloads) -->
+    <section id="testflight" class="py-16 sm:py-24 border-t border-brand-border/40 bg-brand-obsidian">
+      <div class="max-w-4xl mx-auto px-5 sm:px-8">
+        
+        <div class="text-center max-w-xl mx-auto mb-10">
+          <div class="text-xs font-mono tracking-widest text-brand-dim uppercase mb-2">DEPLOYMENT STATUS</div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-brand-pearl tracking-tight">
+            获取与安装状态
+          </h2>
+          <p class="text-xs sm:text-sm text-brand-muted mt-2">
+            恪守 Apple 官方发布规范。目前处于小规模闭门测试阶段，未向公众全面开放。
+          </p>
+        </div>
+
+        <div class="titanium-border rounded-2xl divide-y divide-brand-border/60 overflow-hidden">
+          
+          <!-- TestFlight Line Item -->
+          <div class="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-xl bg-brand-graphite border border-brand-border flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-brand-pearl" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+              </div>
+              <div>
+                <div class="flex items-center gap-2.5">
+                  <h3 class="text-sm font-semibold text-brand-pearl">Apple TestFlight 封闭内测</h3>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-brand-amber/10 text-brand-amber border border-brand-amber/20">
+                    第一批筹备中
+                  </span>
+                </div>
+                <p class="text-xs text-brand-muted mt-1 font-light leading-relaxed">
+                  通过 Apple 官方 TestFlight 分发。首批内测资格将在技术验证后向定向专业用户开放。
+                </p>
+              </div>
+            </div>
+            <div class="sm:text-right shrink-0">
+              <span class="inline-block text-xs font-mono text-brand-dim border border-brand-border/80 px-3 py-1.5 rounded-lg bg-brand-black/40">
+                暂未开放公测申请
+              </span>
+            </div>
+          </div>
+
+          <!-- App Store Line Item -->
+          <div class="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-xl bg-brand-graphite border border-brand-border flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-brand-dim" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              </div>
+              <div>
+                <div class="flex items-center gap-2.5">
+                  <h3 class="text-sm font-semibold text-brand-muted">App Store 正式版</h3>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-brand-graphite text-brand-dim border border-brand-border">
+                    待版本提审
+                  </span>
+                </div>
+                <p class="text-xs text-brand-dim mt-1 font-light leading-relaxed">
+                  待内测稳定性与安全审计全部完成之后，递交 App Store 官方渠道正式上架。
+                </p>
+              </div>
+            </div>
+            <div class="sm:text-right shrink-0">
+              <span class="inline-block text-xs font-mono text-brand-dim">
+                预计后续阶段
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Compliance & Security Disclaimer -->
+        <div class="mt-8 text-center text-[11px] font-mono text-brand-dim leading-relaxed">
+          <p>免责与合规声明：本应用仅提供本地策略接入环境与回测分析界面，不代理任何托管账户，不设资金池，不构成投资建议与保本承诺。</p>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- 6. Footer -->
+  <footer class="border-t border-brand-border/40 py-10 bg-black text-brand-dim text-xs font-mono">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        © 2025 天才交易员 · SPIKE. 保留所有权利。
+      </div>
+      <div class="flex items-center gap-6">
+        <span>极简黑色硬件级工程</span>
+        <span>本地纯净演算</span>
+        <span>iOS Native</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Interactivity Scripts: 3D Drag Rotation & Multi-strategy Data Switch -->
+  <script>
+    // 1. 3D Titanium iPhone Drag / Touch Rotation Physics
+    (function init3DPhone() {
+      const container = document.getElementById('phone-container');
+      const phone = document.getElementById('phone-body');
+      if (!container || !phone) return;
+
+      let isDragging = false;
+      let startX = 0, startY = 0;
+      let currentRotX = 12;
+      let currentRotY = -18;
+      let targetRotX = 12;
+      let targetRotY = -18;
+
+      function updateTransform() {
+        phone.style.transform = `rotateX(${currentRotX}deg) rotateY(${currentRotY}deg) rotateZ(3deg)`;
+      }
+
+      function handleStart(clientX, clientY) {
+        isDragging = true;
+        startX = clientX;
+        startY = clientY;
+      }
+
+      function handleMove(clientX, clientY) {
+        if (!isDragging) return;
+        const deltaX = clientX - startX;
+        const deltaY = clientY - startY;
+
+        // Dampened rotation ranges
+        targetRotY = Math.max(-38, Math.min(22, targetRotY + deltaX * 0.18));
+        targetRotX = Math.max(-10, Math.min(28, targetRotX - deltaY * 0.18));
+
+        currentRotX = targetRotX;
+        currentRotY = targetRotY;
+        updateTransform();
+
+        startX = clientX;
+        startY = clientY;
+      }
+
+      function handleEnd() {
+        isDragging = false;
+      }
+
+      container.addEventListener('mousedown', (e) => handleStart(e.clientX, e.clientY));
+      window.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
+      window.addEventListener('mouseup', handleEnd);
+
+      container.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          handleStart(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchmove', (e) => {
+        if (isDragging && e.touches.length === 1) {
+          handleMove(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchend', handleEnd);
+    })();
+
+    // 2. Multi-Strategy Dataset & Backtest Interactive Chart
+    const STRATEGIES = [
+      {
+        name: "策略 A · 动量突破",
+        totalReturn: "+148.2%",
+        maxDd: "-7.8%",
+        dates: "2022.01 - 2024.12",
+        sharpe: "2.46 / 2.85:1",
+        years: [
+          { year: '2022', val: '+38.4%' },
+          { year: '2023', val: '+52.1%' },
+          { year: '2024', val: '+41.8%' },
+          { year: '最长回撤期', val: '14天' },
+          { year: '胜率', val: '58.4%' },
+          { year: '盈亏比', val: '2.85' }
+        ],
+        // 12 points for normalized equity (x: 0..900, y: inverted 180..30)
+        equityPoints: [
+          { x: 0, y: 175, ret: '+0.0%', dd: '0.0%' },
+          { x: 80, y: 160, ret: '+14.2%', dd: '-2.1%' },
+          { x: 160, y: 135, ret: '+38.4%', dd: '-1.8%' },
+          { x: 240, y: 145, ret: '+28.9%', dd: '-6.4%' },
+          { x: 320, y: 110, ret: '+62.3%', dd: '-3.2%' },
+          { x: 400, y: 85, ret: '+90.5%', dd: '-1.5%' },
+          { x: 500, y: 95, ret: '+82.1%', dd: '-7.8%' },
+          { x: 600, y: 65, ret: '+114.8%', dd: '-2.4%' },
+          { x: 700, y: 55, ret: '+128.0%', dd: '-1.9%' },
+          { x: 780, y: 40, ret: '+142.5%', dd: '-1.2%' },
+          { x: 850, y: 35, ret: '+146.0%', dd: '-0.8%' },
+          { x: 900, y: 30, ret: '+148.2%', dd: '-0.4%' }
+        ],
+        // Drawdown profiles (y: 210..290)
+        ddPoints: [
+          { x: 0, y: 210 },
+          { x: 80, y: 220 },
+          { x: 160, y: 218 },
+          { x: 240, y: 252 },
+          { x: 320, y: 225 },
+          { x: 400, y: 218 },
+          { x: 500, y: 275 }, // Peak Max DD -7.8%
+          { x: 600, y: 224 },
+          { x: 700, y: 220 },
+          { x: 780, y: 216 },
+          { x: 850, y: 214 },
+          { x: 900, y: 212 }
+        ]
+      },
+      {
+        name: "策略 B · 均值回归",
+        totalReturn: "+96.4%",
+        maxDd: "-4.2%",
+        dates: "2022.01 - 2024.12",
+        sharpe: "3.10 / 2.10:1",
+        years: [
+          { year: '2022', val: '+28.2%' },
+          { year: '2023', val: '+34.5%' },
+          { year: '2024', val: '+26.8%' },
+          { year: '最长回撤期', val: '8天' },
+          { year: '胜率', val: '69.2%' },
+          { year: '盈亏比', val: '2.10' }
+        ],
+        equityPoints: [
+          { x: 0, y: 175, ret: '+0.0%', dd: '0.0%' },
+          { x: 100, y: 155, ret: '+18.1%', dd: '-1.2%' },
+          { x: 200, y: 142, ret: '+32.4%', dd: '-2.1%' },
+          { x: 300, y: 125, ret: '+48.0%', dd: '-1.5%' },
+          { x: 420, y: 110, ret: '+63.2%', dd: '-3.8%' },
+          { x: 550, y: 95, ret: '+76.4%', dd: '-4.2%' },
+          { x: 680, y: 82, ret: '+86.9%', dd: '-1.8%' },
+          { x: 800, y: 72, ret: '+92.1%', dd: '-0.9%' },
+          { x: 900, y: 65, ret: '+96.4%', dd: '-0.5%' }
+        ],
+        ddPoints: [
+          { x: 0, y: 210 },
+          { x: 100, y: 218 },
+          { x: 200, y: 224 },
+          { x: 300, y: 220 },
+          { x: 420, y: 236 },
+          { x: 550, y: 248 }, // Max DD -4.2%
+          { x: 680, y: 222 },
+          { x: 800, y: 215 },
+          { x: 900, y: 212 }
+        ]
+      },
+      {
+        name: "策略 C · 波动率套利",
+        totalReturn: "+214.6%",
+        maxDd: "-11.5%",
+        dates: "2022.01 - 2024.12",
+        sharpe: "2.18 / 3.40:1",
+        years: [
+          { year: '2022', val: '+46.0%' },
+          { year: '2023', val: '+78.5%' },
+          { year: '2024', val: '+52.4%' },
+          { year: '最长回撤期', val: '22天' },
+          { year: '胜率', val: '52.1%' },
+          { year: '盈亏比', val: '3.40' }
+        ],
+        equityPoints: [
+          { x: 0, y: 180, ret: '+0.0%', dd: '0.0%' },
+          { x: 120, y: 150, ret: '+26.0%', dd: '-4.2%' },
+          { x: 220, y: 165, ret: '+14.5%', dd: '-11.5%' },
+          { x: 340, y: 115, ret: '+68.2%', dd: '-5.1%' },
+          { x: 480, y: 80, ret: '+118.0%', dd: '-7.4%' },
+          { x: 620, y: 60, ret: '+154.2%', dd: '-3.8%' },
+          { x: 740, y: 35, ret: '+188.0%', dd: '-2.1%' },
+          { x: 900, y: 18, ret: '+214.6%', dd: '-1.0%' }
+        ],
+        ddPoints: [
+          { x: 0, y: 210 },
+          { x: 120, y: 238 },
+          { x: 220, y: 288 }, // Max DD -11.5%
+          { x: 340, y: 245 },
+          { x: 480, y: 258 },
+          { x: 620, y: 235 },
+          { x: 740, y: 224 },
+          { x: 900, y: 215 }
+        ]
+      }
+    ];
+
+    let currentStrategyIndex = 0;
+
+    function buildSmoothPath(points) {
+      if (!points || points.length === 0) return '';
+      let d = `M ${points[0].x} ${points[0].y}`;
+      for (let i = 1; i < points.length; i++) {
+        const prev = points[i - 1];
+        const curr = points[i];
+        const cp1x = prev.x + (curr.x - prev.x) / 2;
+        const cp1y = prev.y;
+        const cp2x = prev.x + (curr.x - prev.x) / 2;
+        const cp2y = curr.y;
+        d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${curr.x} ${curr.y}`;
+      }
+      return d;
+    }
+
+    function renderStrategy(index) {
+      currentStrategyIndex = index;
+      const strat = STRATEGIES[index];
+
+      // Update text metrics
+      document.getElementById('stat-return').textContent = strat.totalReturn;
+      document.getElementById('stat-drawdown').textContent = strat.maxDd;
+      document.getElementById('stat-dates').textContent = strat.dates;
+      document.getElementById('stat-sharpe').textContent = strat.sharpe;
+
+      // Update Tab Styles
+      for (let i = 0; i < 3; i++) {
+        const tab = document.getElementById(`tab-${i}`);
+        if (i === index) {
+          tab.className = "strategy-tab-btn px-4 py-2 rounded-lg text-xs font-mono font-medium transition-all bg-brand-surface text-brand-pearl shadow-sm";
+        } else {
+          tab.className = "strategy-tab-btn px-4 py-2 rounded-lg text-xs font-mono font-medium transition-all text-brand-muted hover:text-brand-pearl";
+        }
+      }
+
+      // Generate Equity Curve Path
+      const eqLinePath = buildSmoothPath(strat.equityPoints);
+      document.getElementById('svg-equity-line').setAttribute('d', eqLinePath);
+
+      // Area under Equity Curve down to zero line (y: 210)
+      const lastEq = strat.equityPoints[strat.equityPoints.length - 1];
+      const eqAreaPath = `${eqLinePath} L ${lastEq.x} 210 L 0 210 Z`;
+      document.getElementById('svg-equity-area').setAttribute('d', eqAreaPath);
+
+      // Generate Drawdown Profile Path
+      const ddLinePath = buildSmoothPath(strat.ddPoints);
+      document.getElementById('svg-drawdown-line').setAttribute('d', ddLinePath);
+
+      // Area under Drawdown from zero line (y: 210) to dd curve
+      const lastDd = strat.ddPoints[strat.ddPoints.length - 1];
+      const ddAreaPath = `M 0 210 L ${strat.ddPoints[0].x} ${strat.ddPoints[0].y} ` + 
+                         ddLinePath.substring(1) + 
+                         ` L ${lastDd.x} 210 Z`;
+      document.getElementById('svg-drawdown-area').setAttribute('d', ddAreaPath);
+
+      // Populate Annual Returns Mini Grid
+      const grid = document.getElementById('annual-returns-grid');
+      grid.innerHTML = strat.years.map(item => `
+        <div class="bg-brand-graphite/60 border border-brand-border/60 rounded-xl p-3 text-center">
+          <div class="text-[10px] font-mono text-brand-dim mb-1">${item.year}</div>
+          <div class="text-sm font-mono font-bold ${item.val.startsWith('+') ? 'text-brand-pearl' : (item.val.startsWith('-') ? 'text-brand-amber' : 'text-brand-pearl')}">${item.val}</div>
+        </div>
+      `).join('');
+    }
+
+    function switchStrategy(index) {
+      renderStrategy(index);
+    }
+
+    // Interactive Touch & Hover crosshair readouts on SVG
+    (function initChartCrosshair() {
+      const wrapper = document.getElementById('chart-wrapper');
+      const crosshair = document.getElementById('svg-crosshair');
+      const crosshairLine = document.getElementById('crosshair-x');
+      const dotEq = document.getElementById('crosshair-dot-eq');
+      const dotDd = document.getElementById('crosshair-dot-dd');
+      const tooltip = document.getElementById('chart-tooltip');
+      const tipEq = document.getElementById('tooltip-eq');
+      const tipDd = document.getElementById('tooltip-dd');
+      const tipDate = document.getElementById('tooltip-date');
+
+      if (!wrapper) return;
+
+      function updateHover(clientX) {
+        const rect = wrapper.getBoundingClientRect();
+        const offsetX = Math.max(0, Math.min(rect.width, clientX - rect.left));
+        const normX = (offsetX / rect.width) * 900;
+
+        const strat = STRATEGIES[currentStrategyIndex];
+        // Find closest point
+        let closest = strat.equityPoints[0];
+        let minDiff = 9999;
+        strat.equityPoints.forEach(p => {
+          const diff = Math.abs(p.x - normX);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closest = p;
+          }
+        });
+
+        // Find corresponding DD
+        const correspondingDd = strat.ddPoints.find(d => d.x === closest.x) || { y: 220, dd: '-2.0%' };
+
+        // Position SVG Elements
+        crosshair.style.opacity = '1';
+        crosshairLine.setAttribute('x1', closest.x);
+        crosshairLine.setAttribute('x2', closest.x);
+
+        dotEq.setAttribute('cx', closest.x);
+        dotEq.setAttribute('cy', closest.y);
+
+        dotDd.setAttribute('cx', closest.x);
+        dotDd.setAttribute('cy', correspondingDd.y);
+
+        // Position Tooltip
+        const tipX = (closest.x / 900) * rect.width;
+        tooltip.style.opacity = '1';
+        tooltip.style.left = `${Math.min(rect.width - 160, Math.max(10, tipX - 70))}px`;
+        tooltip.style.top = `15px`;
+
+        tipEq.textContent = closest.ret;
+        tipDd.textContent = closest.dd;
+        tipDate.textContent = `历时节点 (${Math.round((closest.x / 900) * 36)} 个月)`;
+      }
+
+      function hideHover() {
+        crosshair.style.opacity = '0';
+        tooltip.style.opacity = '0';
+      }
+
+      wrapper.addEventListener('mousemove', (e) => updateHover(e.clientX));
+      wrapper.addEventListener('mouseleave', hideHover);
+
+      wrapper.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 0) {
+          updateHover(e.touches[0].clientX);
+        }
+      }, { passive: true });
+
+      wrapper.addEventListener('touchend', hideHover);
+    })();
+
+    // Initial render on load
+    renderStrategy(0);
+  </script>
+
+</body>
+</html>
