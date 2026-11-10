@@ -38,6 +38,7 @@ async function run(){
         const chartArea=document.querySelector('[data-rp=chart]'),summary=document.querySelector('.bt-summary');
         window.exportReplay=window.SpikeReclaimChart.create(chartArea,msg=>{window.exportMessage=msg;},null,row=>{
           summary.innerHTML=window.SpikeStrategyBacktest.summaryHTML(row,{source:'OKX',mode:'历史回测 · 12H',costNote:'已扣手续费'});
+          summary.querySelector('.bt-executions')?.remove(); // A downloaded image has no expandable controls.
           summary.parentNode.style.setProperty('--bt-summary-height',summary.offsetHeight+'px');
           window.renderedTrade=row.id;
         });

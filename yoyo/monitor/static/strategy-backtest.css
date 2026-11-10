@@ -158,3 +158,23 @@ body:has(#monday-reclaim-paper.is-replay:not([hidden])) #spike-alarm-dock{displa
   #monday-reclaim-paper.is-replay .bt-mode{padding-right:60px}
   #monday-reclaim-paper.is-replay .bt-mode select{flex:0 1 74px;min-width:35px}
 }
+
+/* Optional cloud filters use the shared control row; the ledger stays full width. */
+#monday-reclaim-paper .bt-controls:has(>.bt-cloud-filters:not([hidden])){display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:5px;}
+#monday-reclaim-paper .bt-controls>.bt-sort,
+#monday-reclaim-paper .bt-controls>small,
+#monday-reclaim-paper .bt-cloud-filters[open]{grid-column:1/-1;}
+#monday-reclaim-paper .bt-cloud-filters>summary,
+#monday-reclaim-paper .bt-executions>summary{cursor:pointer;color:var(--rp-blue);font-size:11px;line-height:1.5;padding:5px 0;}
+#monday-reclaim-paper .bt-cloud-filter-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 8px;max-height:24dvh;overflow:auto;overscroll-behavior:contain;padding:2px 1px 5px;}
+#monday-reclaim-paper .bt-cloud-filter-fields label{display:grid;gap:3px;min-width:0;font-size:10px;color:var(--rp-muted);}
+#monday-reclaim-paper .bt-cloud-filter-fields .bt-cloud-query{grid-column:1/-1;}
+#monday-reclaim-paper .bt-cloud-filter-fields :is(input,select){box-sizing:border-box;width:100%;min-width:0;min-height:32px;padding:3px 6px;border:1px solid var(--rp-edge,#71849425);border-radius:8px;color:var(--rp-ink);background:var(--rp-recessed);font:inherit;font-size:12px;}
+#monday-reclaim-paper .bt-cloud-filter-fields button{justify-self:start;color:var(--rp-blue);font-size:11px;min-height:28px;}
+#monday-reclaim-paper .bt-executions{grid-column:1/-1;min-width:0;}
+#monday-reclaim-paper .bt-executions-scroll{max-height:min(26dvh,210px);overflow:auto;overscroll-behavior:contain;}
+#monday-reclaim-paper .bt-executions table{width:100%;border-collapse:collapse;white-space:nowrap;text-align:right;font-size:11px;font-variant-numeric:tabular-nums;}
+#monday-reclaim-paper .bt-executions :is(th,td){padding:4px 7px;border-bottom:1px solid var(--rp-edge,#71849425);}
+#monday-reclaim-paper .bt-executions :is(th,td):first-child,
+#monday-reclaim-paper .bt-executions :is(th,td):nth-child(2){text-align:left;}
+#monday-reclaim-paper .bt-executions th{font-weight:500;color:var(--rp-muted);}

@@ -41,10 +41,11 @@
     .filter(p=>funded(p)&&['pending_confirm','breakeven'].includes(p.stage)&&p.fill_ms>0&&p.entry>0&&(p.remaining_notional??p.notional)>0)
     .map(p=>p.signal_id));
   const TRACKS = ['60','5','v3','v3add','spike','v3lock','allin3','v3add20','live-allin3','live-wick6x3','live-wick6x3mid','live-wick3x3','live-wick6x3hi','live-wick3x3far','live-breadth'];
-  const BACKTEST_TRACKS = [...TRACKS,'breadth-ema20'];
+  const CLOUD='live-cloud-v17';
+  const BACKTEST_TRACKS = [...TRACKS,'breadth-ema20',CLOUD];
   const SORTS = {score:'评分优先',time_desc:'时间：最新优先',time_asc:'时间：最早优先'};
   const recordSort = value => Object.hasOwn(SORTS,value) ? value : 'score';
-  const trackLabel = key => ({60:'60m',5:'5m',v3:'v3',v3add:'v3add',spike:'spike',v3lock:'v3lock',allin3:'allin3',v3add20:'v3add20','live-allin3':'live-allin3','live-wick6x3':'live-wick6x3','live-wick6x3mid':'live-wick6x3mid','live-wick3x3':'live-wick3x3','live-wick6x3hi':'live-wick6x3hi','live-wick3x3far':'live-wick3x3far','live-breadth':'live-breadth','breadth-ema20':'全市场下轨反弹'}[key] || '未知策略');
+  const trackLabel = key => ({60:'60m',5:'5m',v3:'v3',v3add:'v3add',spike:'spike',v3lock:'v3lock',allin3:'allin3',v3add20:'v3add20','live-allin3':'live-allin3','live-wick6x3':'live-wick6x3','live-wick6x3mid':'live-wick6x3mid','live-wick3x3':'live-wick3x3','live-wick6x3hi':'live-wick6x3hi','live-wick3x3far':'live-wick3x3far','live-breadth':'live-breadth','breadth-ema20':'全市场下轨反弹',[CLOUD]:'云带 v1.7 · 12H 逆向'}[key] || '未知策略');
   const isAllinTrack = key => ['allin3','live-allin3'].includes(key);
   const isWickTrack = key => ['live-wick6x3','live-wick6x3mid','live-wick3x3','live-wick6x3hi','live-wick3x3far'].includes(key);
   // Owner 2026-11-08, Stitch 2762455ffefe4f5a9784c2e2e0fd4db5: the breadth account is booked by breadth_paper.py
@@ -388,7 +389,7 @@
     }});
     book=window.SpikeStrategyBook.create({root,tracks:TRACKS,getTrack:()=>state.track,getSnapshot:()=>feed.getState().data,getPnl:t=>summary(feed.getState().data?.tracks?.[t],t).pnl,renderRules:rulesHTML,createFeed,onSelect:selectTrack,onBacktest:(track,row,options)=>{focus?.reset();backtest.open(track,row,options);}});
     el('backtest-track').addEventListener('change',event=>{if(root.classList.contains('is-paper-history')){selectTrack(event.target.value);setRecords(true);}else backtest.open(event.target.value);});
-    el('period').addEventListener('change',event=>{state.period=event.target.value;sync();render(feed.getState());});
+    el('period').addEventListener('change',event=>{state.period=replay?.track===CLOUD?'12H':event.target.value;sync();render(feed.getState());});
     quick=window.SpikeHomeTicket.create({root,context:()=>root.classList.contains('is-replay')?null:({symbol:chartSymbol,timeframe:state.period})});
     focus=window.SpikeChartFocus.bind(root);
     root.addEventListener('keydown',event=>{if(event.key!=='Escape'||event.defaultPrevented||document.querySelector('dialog[open], [popover]:popover-open'))return;if(recordsOpen&&root.querySelector('.rp-ledger-heading').classList.contains('is-searching')){event.preventDefault();event.stopPropagation();setSearch(false);}else if(indicatorsOpen){event.preventDefault();event.stopPropagation();setIndicators(false,true);}else if(recordsOpen){event.preventDefault();event.stopPropagation();setRecords(false);}});
@@ -399,7 +400,7 @@
       if(record&&!event.target.closest('a,button,input,select,.rp-row-detail')){record.querySelector('.rp-row-select').click();return;}
       const signalLink=event.target.closest('[data-rp=signal-link]');if(signalLink){event.preventDefault();setCloudLayout(true);return;}
       const button=event.target.closest('button');if(!button)return;
-      if(button.dataset.rpPeriod){state.period=button.dataset.rpPeriod;sync();render(feed.getState());return;}
+      if(button.dataset.rpPeriod){state.period=replay?.track===CLOUD?'12H':button.dataset.rpPeriod;sync();render(feed.getState());return;}
       if(button.dataset.rpDetail){const detail=document.getElementById(button.getAttribute('aria-controls'));detail.hidden=!detail.hidden;button.setAttribute('aria-expanded',String(!detail.hidden));return;}
       if(button.dataset.rpFavorite){preferences.toggle(button.dataset.rpFavorite);watch?.refreshPreferences();render(feed.getState());return;}
       if(button.dataset.rpSymbol){leaveBacktest(false);state.symbol=button.dataset.rpSymbol;state.trade='';pinned=null;chart.resetFocus();sync();render(feed.getState());if(matchMedia('(max-width:700px)').matches)setRecords(false);return;}
@@ -432,7 +433,7 @@
   }
   function leaveBacktest(restore=true){
     if(replay&&cloudLayout)setCloudLayout(false);
-    if(replay&&restore&&liveState)state={...liveState};if(replay?.track==='breadth-ema20')backtest?.clearReplayLink();replay=null;liveState=null;backtest?.setOpen(false,false);chart?.resetFocus();
+    if(replay&&restore&&liveState)state={...liveState};if(replay?.track==='breadth-ema20')backtest?.clearReplayLink();if(replay?.track===CLOUD)window.SpikeCloudBookRoute?.write(null);replay=null;liveState=null;backtest?.setOpen(false,false);chart?.resetFocus();
   }
   function selectTrack(track){
     if(!TRACKS.includes(track))return;
@@ -463,11 +464,21 @@
     else window.SpikeCloudSignals?.closeEmbedded();
   }
   function sync(){window.SpikeNavigation?.sync('signals',{pane:'reclaim',...state});}
-  function replace(id,html){const node=el(id);if(node.innerHTML!==html)node.innerHTML=html;}
+  // Opening a fills table changes the live DOM; account ticks must not close it.
+  const summaryMarkup=new WeakMap();
+  function replace(id,html){
+    const node=el(id);
+    if(id==='backtest-summary'){
+      if(summaryMarkup.get(node)===html)return;
+      summaryMarkup.set(node,html);
+    }else if(node.innerHTML===html)return;
+    node.innerHTML=html;
+  }
   function render(current){
     if(!pageActive)return;mount();
     if(feed.select(state.track))return;
     const {data,error,busy}=current, track=data?.tracks?.[state.track], stats=summary(track,state.track);
+    const cloudReplay=replay?.track===CLOUD;if(cloudReplay)state.period='12H';
     const pendingDetail=detailPending(data,state.track);
     if(pendingDetail&&!busy&&!error)feed.refresh();
     root.setAttribute('aria-busy',String(busy && !data));
@@ -493,9 +504,9 @@
     const selected=replay?null:state.symbol&&!state.trade?window.SpikeReclaimWatchlist.coinTrade(track,state.symbol):window.SpikeReclaimChart.select(track,state.trade,pinned||history.getState().rows.find(p=>String(p.id)===state.trade));if(state.trade&&selected)pinned=selected;
     chartSymbol=state.symbol||selected?.symbol||(state.trade?'':'BTC-USDT-SWAP');
     const historical=!!state.trade&&selected?.stage==='closed',replaying=!!replay||historical;
-    root.classList.toggle('is-backtest',!!replay);root.classList.toggle('is-paper-history',historical);root.classList.toggle('is-replay',replaying);root.classList.toggle('has-history-list',historical&&recordsOpen);quick?.refresh();
+    root.classList.toggle('is-backtest',!!replay);root.classList.toggle('is-paper-history',historical);root.classList.toggle('is-replay',replaying);root.classList.toggle('is-cloud-replay',cloudReplay);root.classList.toggle('has-history-list',historical&&recordsOpen);quick?.refresh();
     el('backtest-mode').hidden=!replaying;el('backtest-summary').hidden=!replaying;
-    el('backtest-mode').querySelector('strong').textContent=historical?'历史交易':'历史回测';
+    el('backtest-mode').querySelector('strong').textContent=cloudReplay?'OKX · 12H 历史回测':historical?'历史交易':'历史回测';
     el('backtest-track').setAttribute('aria-label',historical?'历史交易策略':'回测策略');el('backtest-summary').setAttribute('aria-label',historical?'所选历史交易':'所选回测交易');
     const listButton=root.querySelector('[data-rp-action="backtest-list"]');listButton.setAttribute('aria-controls',historical?'rp-record-panel':'strategy-backtest-panel');listButton.setAttribute('aria-expanded',String(historical?recordsOpen:backtest?.isOpen()));
     if(replay){el('backtest-track').value=replay.track;replace('backtest-summary',window.SpikeStrategyBacktest.summaryHTML(replay.row));}
@@ -504,7 +515,7 @@
     const liveBreadthOption=el('backtest-track').querySelector('option[value="live-breadth"]');liveBreadthOption.hidden=!historical;liveBreadthOption.disabled=!historical;
     const fitButton=root.querySelector('[data-rp-action="fit"]');fitButton.setAttribute('aria-label',replaying?'定位交易':'显示全部 K 线');fitButton.title=replaying?'显示开仓、平仓及附近 K 线':'显示全部已加载 K 线';
     analytics?.setTrack(state.track);
-    if(cloudLayout){if(cloudSymbol!==chartSymbol)openCloud();}else if(replay)chart.showReplay(replay.track,replay.row,state.period,ma,internal,false,replay.options||replay.replayOptions||(replay.replay_source?replay:{}));else if(historical)chart.showHistory(state.track,selected,state.period,ma,internal);else chart.show(selected?{...selected,asof_ms:data.now_ms}:null,state.period,ma,chartSymbol,internal,[...(track?.open||[]),...(track?.closed||[]),...(pinned&&!track?.closed?.some(p=>p.id===pinned.id)?[pinned]:[])].filter(p=>funded(p)&&p.symbol===chartSymbol));watch?.render();if(replay)el('symbol-score').hidden=true;el('period').value=state.period;
+    if(cloudLayout){if(cloudSymbol!==chartSymbol)openCloud();}else if(replay)chart.showReplay(replay.track,replay.row,state.period,cloudReplay?false:ma,cloudReplay?false:internal,false,replay.options||replay.replayOptions||(replay.replay_source?replay:{}));else if(historical)chart.showHistory(state.track,selected,state.period,ma,internal);else chart.show(selected?{...selected,asof_ms:data.now_ms}:null,state.period,ma,chartSymbol,internal,[...(track?.open||[]),...(track?.closed||[]),...(pinned&&!track?.closed?.some(p=>p.id===pinned.id)?[pinned]:[])].filter(p=>funded(p)&&p.symbol===chartSymbol));watch?.render();if(replay)el('symbol-score').hidden=true;el('period').value=state.period;el('period').disabled=cloudReplay;
     if(!selected&&state.trade){el('chart-notice').textContent='该交易不在当前返回记录中，请点击跟随最新单。';el('chart-notice').hidden=false;}
     root.querySelector('[data-rp-action="ma"]').setAttribute('aria-checked',String(ma));
     root.querySelector('[data-rp-action="internal"]').setAttribute('aria-checked',String(internal));
@@ -514,9 +525,11 @@
     root.querySelector('[data-rp-action="follow"]').title=historical?'返回实时':'跟随最新单';
     const periodButtons=root.querySelectorAll('[data-rp-period]');
     const extraPeriod=el('extra-period');
+    root.querySelector('.rp-layout-switch').hidden=cloudReplay;root.querySelector('.rp-more-periods').hidden=cloudReplay;root.querySelector('.rp-indicators').hidden=cloudReplay;
     extraPeriod.hidden=Array.from(periodButtons).some(b=>b.dataset.rpPeriod===state.period);
     if(!extraPeriod.hidden)extraPeriod.textContent=state.period;
     periodButtons.forEach(b=>{
+      b.hidden=cloudReplay&&b.dataset.rpPeriod!=='12H';b.disabled=cloudReplay;
       const pressed=String(b.dataset.rpPeriod===state.period);
       if(b.getAttribute('aria-pressed')!==pressed){
         b.setAttribute('aria-pressed',pressed);
@@ -526,8 +539,8 @@
     el('signal-link').hidden=!chartSymbol;el('signal-link').href=signalChartLink(chartSymbol);el('signal-link').setAttribute('aria-label','打开 '+base(chartSymbol||'')+' 的 12H 信号图表');
     replace('symbol-label',chartSymbol?`${esc(base(chartSymbol))}<small> / USDT</small>`:'选择币种');
     replace('selection-status',replay?`<span class="${tone(replay.row.pnl)}">历史回测 · ${sideLabel(replay.row)} · ${signed(replay.row.pnl)} USDT</span>`:selected?`<span class="${selected.side===1?'rp-positive':'rp-negative'}">${sideLabel(selected)} · ${esc(stage(selected,data.now_ms))}</span>`:'');
-    el('selection-note').textContent=(state.track==='live-allin3'?'触价前评分 · 模拟运行 · ':isWickTrack(state.track)?'触价收盘进场 · 模拟运行 · ':breadth?'全市场宽度信号 · 模拟运行 · ':'')+(replay?`Binance · ${window.SpikeStrategyBacktest.entryLabel(replay.row)} 开仓区间`:selected?`${historical?'历史交易 · 开仓区间':state.trade?'固定交易':state.symbol?'固定币种':'最新资金交易'} · ${date(selected.fill_ms)} 开仓`:chartSymbol?(state.symbol?'固定币种 · 最近记录无资金成交':'默认行情 · 暂无资金成交'):'等待资金交易 · 点击币种查看触价列表');
-    root.querySelector('.rp-chart-foot').textContent=replay?'历史回测 · 标线为原成交价及原周期成交区间':historical?'历史交易 · 开平仓时段 · OKX':'逐周 1.618 区间 · 开平仓按实际成交标记';
+    el('selection-note').textContent=(cloudReplay?'':state.track==='live-allin3'?'触价前评分 · 模拟运行 · ':isWickTrack(state.track)?'触价收盘进场 · 模拟运行 · ':breadth?'全市场宽度信号 · 模拟运行 · ':'')+(replay?`${replay.row.source||'Binance'} · ${window.SpikeStrategyBacktest.entryLabel(replay.row)} 开仓区间`:selected?`${historical?'历史交易 · 开仓区间':state.trade?'固定交易':state.symbol?'固定币种':'最新资金交易'} · ${date(selected.fill_ms)} 开仓`:chartSymbol?(state.symbol?'固定币种 · 最近记录无资金成交':'默认行情 · 暂无资金成交'):'等待资金交易 · 点击币种查看触价列表');
+    root.querySelector('.rp-chart-foot').textContent=cloudReplay?'OKX · 12H · EMA20/EMA50 与周轨按冻结信号绘制 · 退出保留原 1H 时段':replay?'历史回测 · 标线为原成交价及原周期成交区间':historical?'历史交易 · 开平仓时段 · OKX':'逐周 1.618 区间 · 开平仓按实际成交标记';
     el('watermark').textContent=chartSymbol?base(chartSymbol)+' / USDT':'';
     el('total').textContent=track?String(track.open.filter(funded).length):'—';
     const allin=isAllinTrack(state.track);
