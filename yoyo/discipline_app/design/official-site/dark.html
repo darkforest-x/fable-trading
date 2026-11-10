@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>天才交易员 · SPIKE | iPhone 原生金融工具</title>
+<!-- Google Fonts: Manrope, Inter, JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "tertiary": "#ffffff",
+            "on-error": "#690005",
+            "inverse-on-surface": "#313033",
+            "on-secondary-container": "#a7b6cc",
+            "surface-container-lowest": "#0e0e11",
+            "inverse-surface": "#e5e1e5",
+            "on-error-container": "#ffdad6",
+            "primary": "#ffffff",
+            "surface-dim": "#131316",
+            "on-surface-variant": "#c4c7c9",
+            "primary-fixed": "#e0e3e5",
+            "on-tertiary": "#00354a",
+            "surface-variant": "#353438",
+            "surface": "#131316",
+            "tertiary-container": "#c4e7ff",
+            "on-tertiary-fixed-variant": "#004c69",
+            "surface-tint": "#c4c7c9",
+            "secondary": "#b9c8de",
+            "on-surface": "#e5e1e5",
+            "on-background": "#e5e1e5",
+            "surface-container-low": "#1c1b1e",
+            "secondary-fixed": "#d4e4fa",
+            "outline-variant": "#444749",
+            "surface-container-high": "#2a2a2d",
+            "inverse-primary": "#5c5f61",
+            "outline": "#8e9193",
+            "secondary-container": "#39485a",
+            "primary-fixed-dim": "#c4c7c9",
+            "error": "#ffb4ab",
+            "surface-bright": "#39393c",
+            "tertiary-fixed": "#c4e7ff",
+            "error-container": "#93000a",
+            "on-tertiary-fixed": "#001e2c",
+            "on-primary-container": "#626567",
+            "surface-container-highest": "#353438",
+            "secondary-fixed-dim": "#b9c8de",
+            "on-secondary-fixed-variant": "#39485a",
+            "on-primary-fixed": "#191c1e",
+            "on-secondary": "#233143",
+            "on-tertiary-container": "#006c93",
+            "surface-container": "#201f22",
+            "on-secondary-fixed": "#0d1c2d",
+            "primary-container": "#e0e3e5",
+            "on-primary": "#2d3133",
+            "tertiary-fixed-dim": "#7bd0ff",
+            "on-primary-fixed-variant": "#444749",
+            "background": "#000000"
+          },
+          borderRadius: {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "space-xl": "2.5rem",
+            "gutter-mobile": "1rem",
+            "space-3xl": "6rem",
+            "margin-mobile": "1.25rem",
+            "space-lg": "1.5rem",
+            "space-2xl": "4rem",
+            "space-sm": "0.5rem",
+            "space-md": "1rem",
+            "space-xs": "0.25rem",
+            "margin": "3rem",
+            "gutter": "1.5rem"
+          },
+          fontFamily: {
+            "headline-lg": ["Manrope", "sans-serif"],
+            "body-lg": ["Inter", "sans-serif"],
+            "headline-sm": ["Manrope", "sans-serif"],
+            "body-sm": ["Inter", "sans-serif"],
+            "display": ["Manrope", "sans-serif"],
+            "headline-lg-mobile": ["Manrope", "sans-serif"],
+            "label-numeric": ["JetBrains Mono", "monospace"],
+            "headline-md": ["Manrope", "sans-serif"],
+            "display-mobile": ["Manrope", "sans-serif"],
+            "label-caps": ["Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"]
+          },
+          fontSize: {
+            "headline-lg": ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "500" }],
+            "body-lg": ["17px", { lineHeight: "26px", letterSpacing: "-0.01em", fontWeight: "400" }],
+            "headline-sm": ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "500" }],
+            "body-sm": ["13px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "400" }],
+            "display": ["56px", { lineHeight: "64px", letterSpacing: "-0.03em", fontWeight: "600" }],
+            "headline-lg-mobile": ["28px", { lineHeight: "34px", letterSpacing: "-0.015em", fontWeight: "500" }],
+            "label-numeric": ["14px", { lineHeight: "20px", letterSpacing: "-0.01em", fontWeight: "500" }],
+            "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "500" }],
+            "display-mobile": ["38px", { lineHeight: "44px", letterSpacing: "-0.025em", fontWeight: "600" }],
+            "label-caps": ["11px", { lineHeight: "16px", letterSpacing: "0.08em", fontWeight: "600" }],
+            "body-md": ["15px", { lineHeight: "22px", letterSpacing: "-0.005em", fontWeight: "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* 3D Hardware Canvas Simulation */
+    .perspective-stage {
+      perspective: 1600px;
+      perspective-origin: 50% 45%;
+    }
+    .phone-chassis {
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s ease;
+      will-change: transform;
+    }
+    /* Cold brushed titanium sheen and rim reflex */
+    .titanium-frame {
+      box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.12),
+        0 0 0 2px rgba(56, 189, 248, 0.15),
+        0 25px 60px -15px rgba(0, 0, 0, 0.95),
+        0 0 80px -20px rgba(56, 189, 248, 0.12);
+    }
+    .titanium-edge {
+      background: linear-gradient(135deg, #2a2c33 0%, #15161b 45%, #0f1013 100%);
+    }
+    /* Screen states fade switcher */
+    .screen-view {
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .screen-view.hidden-view {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.97);
+      position: absolute;
+      inset: 0;
+    }
+    .screen-view.active-view {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+      position: relative;
+    }
+  </style>
+</head>
+<body class="bg-black text-on-surface antialiased selection:bg-surface-variant selection:text-white overflow-x-hidden min-h-screen flex flex-col justify-between">
+<!-- TopNavBar (Shared Component Anchor) -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 lg:px-12 h-16 max-w-7xl mx-auto border-b border-outline-variant/30 bg-surface/80 dark:bg-surface/80 backdrop-blur-md">
+<div class="flex items-center gap-6">
+<a class="text-headline-sm font-headline-sm tracking-tight text-primary dark:text-primary font-semibold select-none flex items-center gap-2" href="#">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"></span>
+        天才交易员 · SPIKE
+      </a>
+</div>
+<!-- Center Nav Cluster -->
+<nav class="hidden md:flex items-center space-x-8">
+<a class="text-label-caps font-label-caps text-primary dark:text-primary font-medium tracking-wide hover:text-primary transition-colors duration-150" href="#features">核心特性</a>
+<a class="text-label-caps font-label-caps text-on-surface-variant dark:text-on-surface-variant transition-colors hover:text-primary duration-150" href="#tri-tier">三阶系统</a>
+<a class="text-label-caps font-label-caps text-on-surface-variant dark:text-on-surface-variant transition-colors hover:text-primary duration-150" href="#hardware-specs">硬件工规</a>
+<a class="text-label-caps font-label-caps text-on-surface-variant dark:text-on-surface-variant transition-colors hover:text-primary duration-150" href="#install">规格指标</a>
+</nav>
+<!-- Trailing Action -->
+<div class="flex items-center gap-4">
+<a class="hidden sm:inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white text-black font-label-caps text-label-caps font-semibold tracking-wide hover:bg-slate-200 transition-all duration-150 active:scale-95" href="#install">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">download</span>
+        获取 Beta
+      </a>
+<a class="inline-flex items-center px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-on-surface-variant font-label-caps text-label-caps hover:text-white hover:border-white/20 transition-all duration-150" href="#install">
+        TestFlight
+      </a>
+</div>
+</header>
+<!-- Main Hero & Cinematic Hardware Canvas -->
+<main class="flex-grow pt-24 lg:pt-32">
+<!-- Hero Section -->
+<section class="max-w-7xl mx-auto px-6 lg:px-12 py-8 lg:py-16">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+<!-- Left Column: Typographic Gravitas -->
+<div class="lg:col-span-6 z-10 flex flex-col justify-center space-y-6">
+<div class="inline-flex items-center space-x-2.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 w-fit backdrop-blur-md">
+<span class="w-1.5 h-1.5 rounded-full bg-sky-400 shadow-[0_0_6px_rgba(56,189,248,0.8)]"></span>
+<span class="font-label-caps text-label-caps text-secondary tracking-widest uppercase">SPIKE FOR IPHONE · PRO EDITION</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-white font-semibold tracking-tight leading-none text-balance">
+            在波动中，<br class="hidden sm:inline"/>守住纪律。
+          </h1>
+<p class="font-body-lg text-body-md md:text-body-lg text-on-surface-variant max-w-xl font-normal text-balance">
+            专为高净值与纪律交易者打造的 iPhone 原生金融工具，剥离杂音，专注于确定性逻辑。
+          </p>
+<div class="pt-2 flex flex-wrap items-center gap-4">
+<a class="px-8 py-3.5 rounded-full bg-white text-[#050507] font-body-md font-semibold hover:bg-slate-100 transition-all duration-150 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.15)] flex items-center gap-2" href="#install">
+<span>查看安装方式</span>
+<span class="material-symbols-outlined text-[18px]">arrow_downward</span>
+</a>
+<div class="flex items-center gap-2 text-on-surface-variant text-body-sm font-label-numeric px-3 py-2">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500/80"></span>
+              A17 Pro / Metal 3 驱动引擎
+            </div>
+</div>
+<!-- Quick Metrics Bar -->
+<div class="pt-8 border-t border-white/10 grid grid-cols-3 gap-6 max-w-md">
+<div>
+<div class="font-label-numeric text-[20px] font-semibold text-white tracking-tight">4.2<span class="text-xs font-normal text-on-surface-variant ml-0.5">ms</span></div>
+<div class="font-label-caps text-[10px] text-on-surface-variant mt-0.5 uppercase tracking-wider">触价响应延时</div>
+</div>
+<div>
+<div class="font-label-numeric text-[20px] font-semibold text-white tracking-tight">1.618<span class="text-xs font-normal text-on-surface-variant ml-0.5">Φ</span></div>
+<div class="font-label-caps text-[10px] text-on-surface-variant mt-0.5 uppercase tracking-wider">原生黄金回撤</div>
+</div>
+<div>
+<div class="font-label-numeric text-[20px] font-semibold text-white tracking-tight">100<span class="text-xs font-normal text-on-surface-variant ml-0.5">%</span></div>
+<div class="font-label-caps text-[10px] text-on-surface-variant mt-0.5 uppercase tracking-wider">无营销零杂音</div>
+</div>
+</div>
+</div>
+<!-- Right Column: High-Precision 3D Titanium iPhone -->
+<div class="lg:col-span-6 flex flex-col items-center justify-center relative perspective-stage py-6">
+<!-- Device Assembly Wrapper -->
+<div class="phone-chassis relative w-[310px] sm:w-[340px] h-[640px] sm:h-[690px] rounded-[52px] p-[10px] titanium-edge titanium-frame select-none cursor-grab active:cursor-grabbing" id="phone-container" style="transform: rotateY(-18deg) rotateX(8deg) rotateZ(2deg);" title="可微移观察钛金属倒角">
+<!-- Physical Action Button (Left side) -->
+<div class="absolute -left-[13px] top-[115px] w-[3px] h-[26px] bg-slate-600 rounded-l-md border-l border-white/20"></div>
+<!-- Physical Volume Up / Down (Left side) -->
+<div class="absolute -left-[13px] top-[160px] w-[3px] h-[52px] bg-slate-600 rounded-l-md border-l border-white/20"></div>
+<div class="absolute -left-[13px] top-[225px] w-[3px] h-[52px] bg-slate-600 rounded-l-md border-l border-white/20"></div>
+<!-- Physical Power Button (Right side) -->
+<div class="absolute -right-[13px] top-[170px] w-[3px] h-[78px] bg-slate-600 rounded-r-md border-r border-white/20"></div>
+<!-- Inner Screen Bezel -->
+<div class="w-full h-full bg-[#030304] rounded-[44px] overflow-hidden relative border border-white/10 flex flex-col justify-between">
+<!-- Dynamic Island & Status Header -->
+<div class="relative z-30 pt-3 px-6 flex justify-between items-center text-[11px] font-label-numeric text-white/70">
+<span class="font-medium">09:41</span>
+<!-- Dynamic Island Capsule -->
+<div class="absolute left-1/2 -translate-x-1/2 top-2.5 w-[96px] h-[26px] bg-black rounded-full flex items-center justify-between px-2.5 border border-white/[0.08] shadow-[0_0_10px_rgba(0,0,0,0.9)]">
+<div class="w-2.5 h-2.5 rounded-full bg-slate-900 border border-slate-700/60"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-emerald-500/80 animate-pulse"></div>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-[13px]">signal_cellular_alt</span>
+<span class="material-symbols-outlined text-[13px]">wifi</span>
+<span class="material-symbols-outlined text-[14px]">battery_full</span>
+</div>
+</div>
+<!-- SCREEN CONTENT AREA (3 Swappable States) -->
+<div class="relative w-full flex-grow px-5 pt-3 pb-6 flex flex-col justify-center overflow-hidden">
+<!-- STATE 1: 01 触价 (Price Trigger Monitor) -->
+<div class="screen-view active-view w-full h-full flex flex-col justify-between" id="screen-state-1">
+<div class="space-y-4">
+<div class="flex justify-between items-center border-b border-white/5 pb-3">
+<div>
+<div class="text-[10px] font-label-caps text-on-surface-variant uppercase tracking-wider">TRADING PAIR</div>
+<div class="text-headline-sm font-label-numeric font-bold text-white tracking-tight flex items-center gap-1.5">
+                          BTC / USDT
+                          <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-normal border border-emerald-500/20">+3.48%</span>
+</div>
+</div>
+<div class="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-white/80 text-[16px]">sensors</span>
+</div>
+</div>
+<!-- Trigger Target Card -->
+<div class="p-3.5 rounded-2xl bg-[#09090d] border border-white/10 space-y-2 relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-sky-500/5 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex justify-between items-center text-body-sm font-label-caps">
+<span class="text-on-surface-variant">纪律触价触发线</span>
+<span class="text-sky-400 font-label-numeric text-[11px] flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping"></span> 监听中
+                        </span>
+</div>
+<div class="text-[28px] font-label-numeric font-semibold text-white tracking-tight">
+                        96,480.00
+                      </div>
+<div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+<div class="bg-gradient-to-r from-sky-500 to-white h-full w-[84%] rounded-full"></div>
+</div>
+<div class="flex justify-between text-[10px] font-label-numeric text-on-surface-variant">
+<span>当前: 96,120.40</span>
+<span>差距: -359.60 (0.37%)</span>
+</div>
+</div>
+<!-- Millisecond Execution Capsule -->
+<div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-sky-400 text-[18px]">bolt</span>
+<span class="text-body-sm text-on-surface font-body-sm">触价推送延迟</span>
+</div>
+<span class="font-label-numeric text-white text-[13px] font-medium">3.8 ms</span>
+</div>
+</div>
+<!-- Bottom Execution Pill -->
+<div class="pt-2">
+<div class="w-full py-2.5 rounded-xl bg-white/10 border border-white/15 text-center text-white text-body-sm font-body-md font-medium">
+                      设定物理振动强提醒
+                    </div>
+</div>
+</div>
+<!-- STATE 2: 02 图表 (Metal K-Line with 1.618 Fib line) -->
+<div class="screen-view hidden-view w-full h-full flex flex-col justify-between" id="screen-state-2">
+<div>
+<div class="flex justify-between items-center mb-2">
+<div class="font-label-numeric text-body-sm text-white font-semibold">ETH / USDT · 4H</div>
+<div class="font-label-numeric text-[11px] text-amber-300/90 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
+                        Φ 1.618 扩展线
+                      </div>
+</div>
+<!-- Clean Geometric Candlestick Simulation Canvas -->
+<div class="relative w-full h-52 bg-[#050508] rounded-xl border border-white/5 p-3 flex flex-col justify-between overflow-hidden">
+<!-- 1.618 Reference Line (Dotted Amber/Gold) -->
+<div class="absolute top-[38%] left-0 w-full flex items-center z-20 pointer-events-none">
+<div class="w-full border-b border-dashed border-amber-400/80"></div>
+<span class="absolute right-2 -top-4 font-label-numeric text-[10px] text-amber-300 font-semibold px-1 rounded bg-black/80 border border-amber-400/40">
+                          1.618 (3,842.10)
+                        </span>
+</div>
+<!-- 0.618 Retracement hairline -->
+<div class="absolute top-[68%] left-0 w-full flex items-center z-10 pointer-events-none">
+<div class="w-full border-b border-white/15"></div>
+<span class="absolute right-2 -top-4 font-label-numeric text-[9px] text-on-surface-variant px-1 bg-black/60">
+                          0.618 (3,410.00)
+                        </span>
+</div>
+<!-- Pure SVG Candle Cluster -->
+<svg class="w-full h-36" fill="none" viewbox="0 0 260 120">
+<!-- Candle 1: Up -->
+<line stroke="#34d399" stroke-width="1.2" x1="20" x2="20" y1="70" y2="105"></line>
+<rect fill="#10b981" height="18" rx="1" width="8" x="16" y="80"></rect>
+<!-- Candle 2: Up -->
+<line stroke="#34d399" stroke-width="1.2" x1="50" x2="50" y1="55" y2="92"></line>
+<rect fill="#10b981" height="22" rx="1" width="8" x="46" y="62"></rect>
+<!-- Candle 3: Down -->
+<line stroke="#f87171" stroke-width="1.2" x1="80" x2="80" y1="50" y2="85"></line>
+<rect fill="#ef4444" height="16" rx="1" width="8" x="76" y="58"></rect>
+<!-- Candle 4: Up -->
+<line stroke="#34d399" stroke-width="1.2" x1="110" x2="110" y1="40" y2="78"></line>
+<rect fill="#10b981" height="20" rx="1" width="8" x="106" y="48"></rect>
+<!-- Candle 5: Pullback -->
+<line stroke="#f87171" stroke-width="1.2" x1="140" x2="140" y1="35" y2="70"></line>
+<rect fill="#ef4444" height="14" rx="1" width="8" x="136" y="42"></rect>
+<!-- Candle 6: Breakout towards 1.618 -->
+<line stroke="#38bdf8" stroke-width="1.5" x1="170" x2="170" y1="20" y2="58"></line>
+<rect fill="#38bdf8" height="24" rx="1" width="8" x="166" y="26"></rect>
+<!-- Candle 7: Piercing Fib -->
+<line stroke="#38bdf8" stroke-width="1.5" x1="200" x2="200" y1="12" y2="46"></line>
+<rect fill="#38bdf8" height="20" rx="1" width="8" x="196" y="16"></rect>
+<!-- Candle 8: Current -->
+<line stroke="#38bdf8" stroke-width="1.5" x1="230" x2="230" y1="18" y2="40"></line>
+<rect fill="#38bdf8" height="12" rx="1" width="8" x="226" y="20"></rect>
+</svg>
+<!-- Bottom Volume Bars -->
+<div class="h-6 w-full flex items-end justify-between px-2 pt-1 border-t border-white/5 opacity-60">
+<div class="w-2 bg-emerald-500/40 h-2 rounded-t-sm"></div>
+<div class="w-2 bg-emerald-500/60 h-3 rounded-t-sm"></div>
+<div class="w-2 bg-rose-500/40 h-2 rounded-t-sm"></div>
+<div class="w-2 bg-emerald-500/80 h-4 rounded-t-sm"></div>
+<div class="w-2 bg-rose-500/50 h-2 rounded-t-sm"></div>
+<div class="w-2 bg-sky-400 h-5 rounded-t-sm"></div>
+<div class="w-2 bg-sky-400 h-6 rounded-t-sm"></div>
+<div class="w-2 bg-sky-400/80 h-3 rounded-t-sm"></div>
+</div>
+</div>
+</div>
+<div class="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-[11px] font-label-numeric flex justify-between text-on-surface-variant">
+<span>金属加速渲染: 120 FPS</span>
+<span class="text-white">定点刻度对齐</span>
+</div>
+</div>
+<!-- STATE 3: 03 复盘 (Disciplined R:R Execution Log) -->
+<div class="screen-view hidden-view w-full h-full flex flex-col justify-between" id="screen-state-3">
+<div class="space-y-3">
+<div class="border-b border-white/5 pb-2">
+<div class="text-[10px] font-label-caps text-on-surface-variant uppercase tracking-wider">DISCIPLINE JOURNAL</div>
+<div class="text-headline-sm font-label-numeric font-bold text-white tracking-tight">执行纪律与盈亏比</div>
+</div>
+<!-- Discipline Score Widget -->
+<div class="p-3 rounded-2xl bg-[#09090d] border border-white/10 flex items-center justify-between">
+<div>
+<div class="text-[10px] font-label-caps text-on-surface-variant">执行严明度 (30D)</div>
+<div class="text-[24px] font-label-numeric font-bold text-white">94.8<span class="text-xs text-emerald-400 font-normal ml-1">/ 100</span></div>
+</div>
+<div class="text-right">
+<div class="text-[10px] font-label-caps text-on-surface-variant">实际盈亏比</div>
+<div class="text-[20px] font-label-numeric font-bold text-sky-400">1 : 3.42</div>
+</div>
+</div>
+<!-- Clean Execution Rows -->
+<div class="space-y-1.5">
+<div class="p-2 rounded-lg bg-white/[0.02] border border-white/5 flex items-center justify-between text-[11px] font-label-numeric">
+<span class="text-white">BTC突破做多 #104</span>
+<span class="text-slate-400">R:R 1:2.8</span>
+<span class="text-emerald-400 font-medium">止盈达标</span>
+</div>
+<div class="p-2 rounded-lg bg-white/[0.02] border border-white/5 flex items-center justify-between text-[11px] font-label-numeric">
+<span class="text-white">SOL假突破回踩 #103</span>
+<span class="text-slate-400">R:R 1:3.6</span>
+<span class="text-emerald-400 font-medium">规约执行</span>
+</div>
+<div class="p-2 rounded-lg bg-white/[0.02] border border-white/5 flex items-center justify-between text-[11px] font-label-numeric">
+<span class="text-white">ETH跌破观望 #102</span>
+<span class="text-slate-400">空仓</span>
+<span class="text-sky-300 font-medium">避免冲动</span>
+</div>
+</div>
+</div>
+<div class="pt-2">
+<div class="text-[11px] text-center text-on-surface-variant font-label-caps">
+                      无情绪干预 · 机器守则
+                    </div>
+</div>
+</div>
+</div>
+<!-- Home Bar Indicator -->
+<div class="pb-2 flex justify-center">
+<div class="w-32 h-1 bg-white/40 rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Floor Ambient Glint Reflection -->
+<div class="w-[320px] sm:w-[420px] h-12 bg-sky-500/10 rounded-[100%] blur-2xl -mt-6 pointer-events-none"></div>
+<div class="w-[260px] sm:w-[320px] h-8 bg-black/90 rounded-[100%] blur-md -mt-8 pointer-events-none"></div>
+</div>
+</div>
+</section>
+<!-- Tri-Tier Feature Switcher (Single-Row Segmented Dock) -->
+<section class="max-w-7xl mx-auto px-6 lg:px-12 py-10" id="tri-tier">
+<div class="flex flex-col items-center">
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest mb-4">
+          INTERACTIVE ARCHITECTURE · 实时切换
+        </p>
+<!-- Segmented Dock Capsule -->
+<div class="inline-flex p-1.5 rounded-full bg-[#0a0a0d] border border-white/10 shadow-2xl backdrop-blur-xl">
+<button class="tab-button px-5 sm:px-8 py-2.5 rounded-full text-body-sm font-label-numeric font-medium transition-all duration-200 flex items-center gap-2 bg-white text-black shadow-sm" id="tab-btn-1" onclick="switchPhoneState(1)">
+<span class="text-xs opacity-70">01</span>
+<span>触价</span>
+</button>
+<button class="tab-button px-5 sm:px-8 py-2.5 rounded-full text-body-sm font-label-numeric font-medium transition-all duration-200 flex items-center gap-2 text-on-surface-variant hover:text-white" id="tab-btn-2" onclick="switchPhoneState(2)">
+<span class="text-xs opacity-70">02</span>
+<span>图表</span>
+</button>
+<button class="tab-button px-5 sm:px-8 py-2.5 rounded-full text-body-sm font-label-numeric font-medium transition-all duration-200 flex items-center gap-2 text-on-surface-variant hover:text-white" id="tab-btn-3" onclick="switchPhoneState(3)">
+<span class="text-xs opacity-70">03</span>
+<span>复盘</span>
+</button>
+</div>
+<!-- Dynamic Micro-Note Description -->
+<div class="mt-4 text-body-sm text-on-surface-variant font-body-sm text-center transition-opacity duration-200 max-w-md" id="tab-description">
+          毫秒级定点价格穿透预警，搭载物理触感高频震动通知，杜绝假破噪点。
+        </div>
+</div>
+</section>
+<!-- Hardware & Philosophy Grid Section -->
+<section class="max-w-7xl mx-auto px-6 lg:px-12 py-16 border-t border-white/[0.06]" id="hardware-specs">
+<div class="mb-12">
+<span class="font-label-caps text-label-caps text-sky-400 tracking-widest uppercase">HARDWARE CALIBRATED</span>
+<h2 class="font-headline-lg text-headline-md md:text-headline-lg text-white font-medium tracking-tight mt-1">
+          冷钛雕琢，专为确定性而生。
+        </h2>
+</div>
+<!-- Bento-style restrained pod cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Pod 1 -->
+<div class="p-8 rounded-3xl bg-[#060608] border border-white/[0.08] hover:border-white/20 transition-all duration-300 flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white mb-6">
+<span class="material-symbols-outlined text-[20px]">speed</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-white font-medium mb-2">底层 Metal 3 驱动</h3>
+<p class="font-body-md text-body-sm text-on-surface-variant">
+              摒弃传统金融 App 沉重庞杂的 Web 混编容器，以 Apple 原生 Metal 渲染管线直接呼叫 GPU 算力，瞬时缩放百倍 K 线毫无卡顿。
+            </p>
+</div>
+<div class="pt-8 font-label-numeric text-[12px] text-sky-400">
+            FRAME BUDGET &lt; 8.3ms
+          </div>
+</div>
+<!-- Pod 2 -->
+<div class="p-8 rounded-3xl bg-[#060608] border border-white/[0.08] hover:border-white/20 transition-all duration-300 flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white mb-6">
+<span class="material-symbols-outlined text-[20px]">filter_vintage</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-white font-medium mb-2">1.618 斐波那契规约</h3>
+<p class="font-body-md text-body-sm text-on-surface-variant">
+              内嵌经典量化黄金分割率算法。从 0.618 回踩到 1.618 极端延伸目标位，以高精细虚线冷色标定，去除人为主观猜测。
+            </p>
+</div>
+<div class="pt-8 font-label-numeric text-[12px] text-amber-300">
+            GOLDEN EXTENSION 1.618
+          </div>
+</div>
+<!-- Pod 3 -->
+<div class="p-8 rounded-3xl bg-[#060608] border border-white/[0.08] hover:border-white/20 transition-all duration-300 flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white mb-6">
+<span class="material-symbols-outlined text-[20px]">psychology</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-white font-medium mb-2">执行心理阻断机制</h3>
+<p class="font-body-md text-body-sm text-on-surface-variant">
+              没有无谓的广场喧嚣、没有红绿浮夸弹窗。通过强迫性 R:R 记录逻辑，帮助交易者在剧烈波动的黑夜中克制贪婪与恐惧。
+            </p>
+</div>
+<div class="pt-8 font-label-numeric text-[12px] text-white/60">
+            RISK TO REWARD STRICT
+          </div>
+</div>
+</div>
+</section>
+<!-- Installation Status Section (克制安装区 - Minimal Dark Banner) -->
+<section class="max-w-7xl mx-auto px-6 lg:px-12 py-16 border-t border-white/[0.06]" id="install">
+<div class="max-w-3xl">
+<div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant tracking-wider uppercase">RELEASE TIMELINE</span>
+</div>
+<h2 class="font-headline-lg text-headline-md md:text-headline-lg text-white font-medium tracking-tight">
+          获取与安装状态
+        </h2>
+<p class="font-body-lg text-body-md md:text-body-lg text-on-surface-variant mt-2">
+          我们坚持严苛的软件质量与合规准则，当前处于内测优化筹备阶段。
+        </p>
+</div>
+<!-- Two Clean Restrained Rows -->
+<div class="mt-10 rounded-3xl bg-[#07070a] border border-white/10 divide-y divide-white/10 overflow-hidden">
+<!-- Row 1: TestFlight 内测 -->
+<div class="p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="space-y-1">
+<div class="flex items-center gap-3">
+<span class="font-headline-sm text-[18px] sm:text-headline-sm text-white font-medium">TestFlight 内测</span>
+<span class="px-2.5 py-0.5 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-300 font-label-caps text-label-caps">
+                未开放
+              </span>
+</div>
+<div class="font-body-md text-body-sm text-white/80">封闭式技术验证阶段</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant pt-1 max-w-xl">
+              首批体验名额将在技术压力测试后向纪律社区优先开放。
+            </p>
+</div>
+<div class="shrink-0">
+<button class="cursor-not-allowed px-5 py-2 rounded-full bg-white/5 border border-white/10 text-on-surface-variant/60 font-body-sm text-[13px]" disabled="">
+              通道筹备中
+            </button>
+</div>
+</div>
+<!-- Row 2: App Store 正式版 -->
+<div class="p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="space-y-1">
+<div class="flex items-center gap-3">
+<span class="font-headline-sm text-[18px] sm:text-headline-sm text-white font-medium">App Store 正式版</span>
+<span class="px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 font-label-caps text-label-caps">
+                未上架
+              </span>
+</div>
+<div class="font-body-md text-body-sm text-white/80">全球公开发行版本</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant pt-1 max-w-xl">
+              遵循 Apple 开发者审核准则与金融合规标准，待 TestFlight 验证稳定后正式上架。
+            </p>
+</div>
+<div class="shrink-0">
+<button class="cursor-not-allowed px-5 py-2 rounded-full bg-white/5 border border-white/10 text-on-surface-variant/60 font-body-sm text-[13px]" disabled="">
+              筹备就绪后推送
+            </button>
+</div>
+</div>
+</div>
+<!-- Discipline Pledge Notice -->
+<div class="mt-8 p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-between text-body-sm text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-sky-400">verified_user</span>
+<span>SPIKE 坚持纯本地私钥与无痕缓存逻辑，不接触任何用户资金与第三方托盘。</span>
+</div>
+<span class="hidden sm:inline font-label-numeric text-[12px] text-white/40">SHA-256 ENCRYPTED</span>
+</div>
+</section>
+</main>
+<!-- Footer (Shared Component Anchor) -->
+<footer class="w-full max-w-7xl mx-auto px-6 lg:px-12 py-12 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-outline-variant/20 bg-surface-container-lowest dark:bg-surface-container-lowest mt-12">
+<div class="space-y-2 text-center md:text-left">
+<div class="text-headline-sm font-headline-sm text-primary dark:text-primary font-semibold">
+        天才交易员 · SPIKE
+      </div>
+<p class="text-body-sm font-body-sm text-on-surface-variant dark:text-on-surface-variant">
+        © 2025 天才交易员 · SPIKE. 保留所有权利。极简金融工程纪律工具。
+      </p>
+<p class="text-[11px] text-on-surface-variant/70 leading-relaxed max-w-2xl">
+        合规声明：市场有风险，投资需谨慎。本工具仅供交易纪律辅助与图表分析，不构成任何投资建议或代客理财承诺。
+      </p>
+</div>
+<!-- Navigation links from Shared Components -->
+<div class="flex flex-wrap items-center justify-center gap-6 text-label-caps font-label-caps">
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors" href="#">隐私政策</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors" href="#">使用条款</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors" href="#">TestFlight 协议</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors" href="#">系统状态</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors" href="#">硬件规约</a>
+</div>
+</footer>
+<!-- Interactive 3D Rotation & State Switcher Script -->
+<script>
+    const descriptions = {
+      1: "毫秒级定点价格穿透预警，搭载物理触感高频震动通知，杜绝假破噪点。",
+      2: "Apple 原生 Metal 渲染管线，内嵌经典 1.618 黄金分割延伸阻力线与定点回撤刻度。",
+      3: "强制性盈亏比（R:R）执行记录，剥离虚荣数字，以机器纪律对抗人性的恐惧与贪婪。"
+    };
+
+    function switchPhoneState(stateIndex) {
+      // 1. Hide all screens, show target screen
+      for (let i = 1; i <= 3; i++) {
+        const screen = document.getElementById(`screen-state-${i}`);
+        const btn = document.getElementById(`tab-btn-${i}`);
+        if (i === stateIndex) {
+          screen.classList.remove('hidden-view');
+          screen.classList.add('active-view');
+          // Active button styling
+          btn.className = "tab-button px-5 sm:px-8 py-2.5 rounded-full text-body-sm font-label-numeric font-medium transition-all duration-200 flex items-center gap-2 bg-white text-black shadow-sm";
+        } else {
+          screen.classList.add('hidden-view');
+          screen.classList.remove('active-view');
+          // Inactive button styling
+          btn.className = "tab-button px-5 sm:px-8 py-2.5 rounded-full text-body-sm font-label-numeric font-medium transition-all duration-200 flex items-center gap-2 text-on-surface-variant hover:text-white";
+        }
+      }
+
+      // 2. Update dynamic note
+      const descEl = document.getElementById('tab-description');
+      descEl.style.opacity = '0';
+      setTimeout(() => {
+        descEl.innerText = descriptions[stateIndex];
+        descEl.style.opacity = '1';
+      }, 150);
+
+      // 3. Subtle camera jolt on phone
+      const phone = document.getElementById('phone-container');
+      const angleOffsets = [
+        "rotateY(-18deg) rotateX(8deg) rotateZ(2deg)",
+        "rotateY(-14deg) rotateX(6deg) rotateZ(1deg)",
+        "rotateY(-20deg) rotateX(10deg) rotateZ(3deg)"
+      ];
+      phone.style.transform = angleOffsets[stateIndex - 1];
+    }
+
+    // Micro-interaction: Mouse parallax on phone chassis
+    const phone = document.getElementById('phone-container');
+    let isHovering = false;
+
+    document.addEventListener('mousemove', (e) => {
+      if (window.innerWidth < 1024) return;
+      const x = (e.clientX / window.innerWidth - 0.5) * 16;
+      const y = (e.clientY / window.innerHeight - 0.5) * 16;
+      phone.style.transform = `rotateY(${-18 + x}deg) rotateX(${8 - y}deg) rotateZ(2deg)`;
+    });
+  </script>
+</body></html>

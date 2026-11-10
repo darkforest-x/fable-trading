@@ -1,5 +1,12 @@
 # SPIKE 纪律交易 1.0.2
 
+## iPhone 原生 App 官网
+
+[天才交易员 · SPIKE](https://spike-trader.zc994739211.chatgpt.site) 是独立的 GPT Sites 静态官网，只含产品示意和安装入口。当前没有对外的 TestFlight / App Store 链接；获得 Apple 的实际链接后更新 `website/releases.json`，运行 `python3 website/build.py`（在本目录），再发布同一 Sites 项目。设计来自 [Stitch 黑色产品页](https://stitch.withgoogle.com/projects/12127245077614519970?node-id=a8fac6c520fd4cd9abf734daf6964be8)，原稿保存在 `design/official-site/`。
+
+自用真机包会嵌入个人服务令牌。面向客户的分发构建必须移除它并改为独立授权；不将自用包放到官网或上传 TestFlight。
+
+
 ## 2.x 原生 SwiftUI 版（`native/`）
 
 Owner 2026-11-07 否定 1.0.x 网页改版（“和我的预期差一大截 做的不好”），选择“原生 SwiftUI 重写”。新 App `native/SpikeDiscipline.xcodeproj`，iOS 26、仅 iPhone、竖屏，包名 `com.spike.discipline.native`，与 1.x 并存；迁移完成前下单、平仓、改止损只在 1.x 中进行。界面为系统液态玻璃（TabView 底栏、工具栏、分段控件、sheet、`glassEffect` 卡片），Stitch 稿只作版式参考（`design/native-2.0.0/source.json`）。服务端与纪律规则不变，App 只调用现有 `/v1/*`；令牌存本机钥匙串（服务名 `com.spike.discipline.native.session`）。币种图标以文件夹引用复用 `mobile/src/assets/coins`。

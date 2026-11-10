@@ -1,0 +1,65 @@
+(() => {
+  const rows = [
+    {asset:"touch", tag:"触价监控", sub:"周一 1.618", log:"最新触价", value:"上沿 · 1.618", time:"14:35", title:"关键价位，一眼可见。", body:"按时间查看触价记录，对照每次触价的方向与评分。", angle:[8,-21,6]},
+    {asset:"chart", tag:"原生 K 线", sub:"1H · 周一区间", log:"图表参考线", value:"周一高 / 周一低", time:"1H", title:"把触价放回 K 线里。", body:"对照周一高低与区间参考线，在不同周期查看触价前后的走势。", angle:[5,-10,2]},
+    {asset:"review", tag:"交易复盘", sub:"模拟交易 · 历史开单", log:"单笔复盘", value:"入场 → 出场", time:"回看", title:"回到交易发生的那一刻。", body:"在同一张图里回看模拟交易的入场、出场，以及持有期间的价格路径。", angle:[8,-25,4]}
+  ];
+  const by = id => document.getElementById(id);
+  const tabs = [...document.querySelectorAll('[role="tab"]')], stage = by("stage"), device = by("device");
+  const motion = matchMedia("(prefers-reduced-motion: reduce)");
+  let index = 0, drag = null, frame = 0, targetAngles = rows[0].angle;
+  const clip = (v, min, max) => Math.min(max, Math.max(min, v));
+  const angle = (rx, ry, rz) => {
+    targetAngles = [rx, ry, rz];
+    if (frame || motion.matches) return;
+    frame = requestAnimationFrame(() => {
+      ["--rx","--ry","--rz"].forEach((key, i) => device.style.setProperty(key, targetAngles[i] + "deg"));
+      frame = 0;
+    });
+  };
+  function select(next, focus = false) {
+    index = (next + rows.length) % rows.length;
+    const r = rows[index], num = String(index+1).padStart(2,"0");
+    for (const [key, text] of Object.entries({"fig-index":num,"feature-index":num,"feature-title":r.title,"feature-body":r.body,"screen-tag":r.tag,"screen-code":num+" / 03","screen-sub":r.sub,"screen-log":r.log,"screen-value":r.value,"screen-time":r.time})) by(key).textContent=text;
+    by("chart-art").src = "assets/"+r.asset+".svg";
+    tabs.forEach((t,i) => {t.tabIndex=i===index?0:-1;t.setAttribute("aria-selected",String(i===index));});
+    by("feature-panel").setAttribute("aria-labelledby",tabs[index].id);
+    if (!motion.matches) for (const el of [by("screen-inner"),by("feature-panel")]) {
+      el.getAnimations().forEach(anim => anim.cancel());
+      el.animate([{opacity:.4,transform:"translateY(3px)"},{opacity:1,transform:"translateY(0)"}],{duration:270,easing:"ease-out"});
+    }
+    angle(...r.angle);
+    if(focus) tabs[index].focus();
+  }
+  tabs.forEach((t,i) => {
+    t.addEventListener("click",()=>select(i));
+    t.addEventListener("keydown",e=>{
+      if(!["ArrowLeft","ArrowRight","Home","End"].includes(e.key))return;
+      e.preventDefault();
+      select(e.key==="Home"?0:e.key==="End"?2:i+(e.key==="ArrowRight"?1:-1),true);
+    });
+  });
+  stage.addEventListener("pointerdown",e=>{
+    if(!e.isPrimary || e.button!==0) return;
+    drag={id:e.pointerId,x:e.clientX,y:e.clientY,kind:e.pointerType};
+    stage.setPointerCapture(e.pointerId); stage.classList.add("dragging");
+  });
+  stage.addEventListener("pointermove",e=>{
+    if(!drag || drag.id!==e.pointerId)return;
+    const base=rows[index].angle;
+    angle(base[0]-clip((e.clientY-drag.y)*.13,-12,12),base[1]+clip((e.clientX-drag.x)*.24,-30,30),base[2]);
+  });
+  function finish(e, ok){
+    if (!drag || e.pointerId!==drag.id) return;
+    const gesture=drag;drag=null;stage.classList.remove("dragging");
+    if(stage.hasPointerCapture(e.pointerId))stage.releasePointerCapture(e.pointerId);
+    const dx=e.clientX-gesture.x, dy=e.clientY-gesture.y;
+    if(ok && gesture.kind!=="mouse" && Math.abs(dx)>38 && Math.abs(dx)>Math.abs(dy)*1.35) select(index+(dx<0?1:-1));
+    else angle(...rows[index].angle);
+  }
+  stage.addEventListener("pointerup",e=>finish(e,true));
+  stage.addEventListener("pointercancel",e=>finish(e,false));
+  stage.addEventListener("lostpointercapture",e=>finish(e,false));
+  motion.addEventListener("change",()=>angle(...rows[index].angle));
+  for (const {asset} of rows.slice(1)){const pic=new Image();pic.src="assets/"+asset+".svg";}
+})();
