@@ -111,8 +111,8 @@
   function calendarDayLabel(d){return `${d.date} · ${d.covered?`${signed(d.pnl)} USDT${d.returnPct==null?'':` · 日收益 ${signed(d.returnPct)}%`}${d.changed?'':d.marked?' · 净值无变化':' · 无已实现盈亏'}`:'未覆盖'}`;}
   const closeAmount=(a,b)=>Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=Math.max(1e-6,Math.abs(b)*1e-9);
   function validateDayPage(p,q,offset,validRow){
-    if(p?.schema!==1||p.track!==q.track||p.date!==q.date||p.timezone!=='UTC'||p.source!=='Binance'||p.offset!==offset||!Array.isArray(p.rows)||!p.rows.every(r=>validRow(r)&&historyDate(r.exit_ms)===q.date)||new Set(p.rows.map(r=>r.id)).size!==p.rows.length||!Number.isInteger(p.total)||p.total<offset+p.rows.length||p.has_more!==(offset+p.rows.length<p.total)||(p.has_more&&!p.rows.length))throw Error('当日交易数据不完整，请重试');
-    if(!closeAmount(p.pnl,q.expectedPnl))throw Error('交易合计与日历金额不一致，请刷新小册后重试');
+    if(p?.schema!==1||p.track!==q.track||p.date!==q.date||p.timezone!=='UTC'||p.source!==(q.track===CLOUD?'OKX':'Binance')||p.offset!==offset||!Array.isArray(p.rows)||!p.rows.every(r=>validRow(r)&&historyDate(r.exit_ms)===q.date)||new Set(p.rows.map(r=>r.id)).size!==p.rows.length||!Number.isInteger(p.total)||p.total<offset+p.rows.length||p.has_more!==(offset+p.rows.length<p.total)||(p.has_more&&!p.rows.length))throw Error('当日交易数据不完整，请重试');
+    if(!Number.isFinite(p.pnl)||(q.track!==CLOUD&&!closeAmount(p.pnl,q.expectedPnl)))throw Error('交易合计与日历金额不一致，请刷新小册后重试');
     return p;
   }
   function createDayModel({read,validRow,cancel=()=>{},change=()=>{}}){
@@ -139,11 +139,11 @@
   const utcTime=ms=>new Date(ms).toISOString().slice(0,16).replace('T',' ');
   function dayTradeHTML(r){
     const score=r.entry_rules?.score,view=pnlView(r.pnl),side=r.side===1?'做多':'做空';
-    return `<button type="button" class="rs-day-trade" data-day-trade="${r.id}" aria-label="查看 ${esc(r.symbol.replace(/USDT$/,''))} ${side} ${utcTime(r.entry_ms)} 历史K线"><span class="rs-day-trade-head"><span><b>${esc(r.symbol.replace(/USDT$/,''))}</b><em class="${r.side===1?'rp-positive':'rp-negative'}">${side}</em></span><strong class="${view.tone}">${view.text}<small> USDT</small></strong></span><span class="rs-day-trade-times"><span>开 ${utcTime(r.entry_ms)}</span><span>平 ${utcTime(r.exit_ms)}</span></span><span class="rs-day-trade-foot"><span>${r.eventId?'下轨反弹':Number.isFinite(score)?'评分 '+score.toFixed(4):'评分未留存'} · 单笔 ${signed(r.return_pct)}%</span><span>查看K线 ↗</span></span></button>`;
+    return `<button type="button" class="rs-day-trade" data-day-trade="${r.id}" aria-label="查看 ${esc(r.symbol.replace(/USDT$/,''))} ${side} ${utcTime(r.entry_ms)} 历史K线"><span class="rs-day-trade-head"><span><b>${esc(r.symbol.replace(/USDT$/,''))}</b><em class="${r.side===1?'rp-positive':'rp-negative'}">${side}</em></span><strong class="${view.tone}">${view.text}<small> USDT</small></strong></span><span class="rs-day-trade-times"><span>开 ${utcTime(r.entry_ms)}</span><span>平 ${utcTime(r.exit_ms)}</span></span><span class="rs-day-trade-foot"><span>${r.kind==='cloud-v17'?'12H 云带收盘':r.eventId?'下轨反弹':Number.isFinite(score)?'评分 '+score.toFixed(4):'评分未留存'} · 单笔 ${signed(r.return_pct)}%</span><span>查看K线 ↗</span></span></button>`;
   }
   function dayTradesHTML(s){
     const [y,m,d]=s.date.split('-').map(Number);
-    return `<header class="rs-calendar-header"><button type="button" data-calendar-back aria-label="返回月历">‹</button><div class="rs-day-title"><strong id="rs-calendar-title" tabindex="-1">${y}年${m}月${d}日</strong><small>当日结算 · UTC</small></div><div class="rs-calendar-nav"><button type="button" data-calendar-close aria-label="关闭每日盈亏日历">×</button></div></header><div class="rs-calendar-summary"><div><small>当日净盈亏 / USDT</small><strong class="${pnlView(s.expectedPnl).tone}">${signed(s.expectedPnl)}</strong></div><div><small>结算交易</small><strong>${s.data?s.data.total:'—'}<small> 笔</small></strong></div></div><p class="rs-day-hint">点交易查看历史K线 · 单笔 % 按名义本金</p><div class="rs-day-scroll" tabindex="-1"><p class="rs-day-status" role="status">${esc(s.error||(s.busy?'正在读取当日交易…':s.data?.total===0?'当天无结算交易':''))}</p>${s.error?'<button type="button" data-day-retry>重试读取</button>':''}<div class="rs-day-rows">${s.rows.map(dayTradeHTML).join('')}</div>${s.data?.has_more?`<button type="button" class="rs-day-more" data-day-more ${s.busy?'disabled':''}>${s.busy?'读取中…':'再显示 50 笔'}</button>`:''}${s.data?`<small class="rs-day-count">显示 ${s.rows.length} / ${s.data.total} 笔 · 按平仓时间排列</small>`:''}</div><footer>按 UTC 结算日归集 · 已扣原回测成本<br>补充本金不计收益 · K线回放时间显示为北京时间</footer>`;
+    return `<header class="rs-calendar-header"><button type="button" data-calendar-back aria-label="返回月历">‹</button><div class="rs-day-title"><strong id="rs-calendar-title" tabindex="-1">${y}年${m}月${d}日</strong><small>当日结算 · UTC</small></div><div class="rs-calendar-nav"><button type="button" data-calendar-close aria-label="关闭每日盈亏日历">×</button></div></header><div class="rs-calendar-summary"><div><small>${s.track===CLOUD?'净值变动':'当日净盈亏'} / USDT</small><strong class="${pnlView(s.expectedPnl).tone}">${signed(s.expectedPnl)}</strong></div><div><small>结算交易</small><strong>${s.data?s.data.total:'—'}<small> 笔</small></strong></div></div><p class="rs-day-hint">${s.track===CLOUD?'净值变动含浮盈亏；下列按平仓日列出整笔交易。':'点交易查看历史K线 · 单笔 % 按名义本金'}</p><div class="rs-day-scroll" tabindex="-1"><p class="rs-day-status" role="status">${esc(s.error||(s.busy?'正在读取当日交易…':s.data?.total===0?'当天无结算交易':''))}</p>${s.error?'<button type="button" data-day-retry>重试读取</button>':''}<div class="rs-day-rows">${s.rows.map(dayTradeHTML).join('')}</div>${s.data?.has_more?`<button type="button" class="rs-day-more" data-day-more ${s.busy?'disabled':''}>${s.busy?'读取中…':'再显示 50 笔'}</button>`:''}${s.data?`<small class="rs-day-count">显示 ${s.rows.length} / ${s.data.total} 笔 · 按平仓时间排列</small>`:''}</div><footer>${s.track===CLOUD?'日末净值：'+num(s.endNav)+' USDT · 已扣原回测成本':'按 UTC 结算日归集 · 已扣原回测成本<br>补充本金不计收益'} · K线回放时间显示为北京时间</footer>`;
   }
   function calendarHTML(m){
     const cells=m.days.map(d=>`<button type="button" class="rs-calendar-day ${!d.covered?'is-uncovered':d.pnl>0?'is-gain':d.pnl<0?'is-loss':'is-flat'}" data-calendar-day="${d.day}" ${!d.covered?'disabled':''} aria-label="${esc(calendarDayLabel(d))}" title="${esc(calendarDayLabel(d))}"><time datetime="${d.date}">${d.day}</time><b>${d.changed&&d.covered?compactPnl(d.pnl):'—'}</b><small>${!d.covered?'未覆盖':d.changed&&d.returnPct!=null?signed(d.returnPct)+'%':''}</small></button>`);
@@ -324,7 +324,7 @@
       if(!open||!dayView||!calendar.matches(':popover-open'))return;
       const scroll=calendar.querySelector('.rs-day-scroll')?.scrollTop||0,focused=document.activeElement;
       const hadFocus=calendar.contains(focused),focusId=hadFocus?focused.id:'',action=['data-day-more','data-day-retry'].find(a=>focused?.hasAttribute(a));
-      calendar.innerHTML=dayTradesHTML(s);calendar.classList.add('is-day-view');positionCalendar();
+      calendar.innerHTML=dayTradesHTML(s.track===CLOUD?{...s,endNav:calendarMonth?.days[calendarDay-1]?.endNav}:s);calendar.classList.add('is-day-view');positionCalendar();
       calendar.querySelector('.rs-day-scroll').scrollTop=scroll;
       const target=focusId?calendar.querySelector('#'+focusId):action?calendar.querySelector(`[${action}]:not(:disabled)`):focused?.dataset.dayTrade?calendar.querySelector(`[data-day-trade="${focused.dataset.dayTrade}"]`):null;
       // Replacing a loading/pagination button must not leave focus on body:
@@ -334,7 +334,7 @@
     function showDay(number){
       const d=calendarMonth?.days[number-1];if(!d?.covered)return;
       calendarDay=number;dayView=true;
-      if(hourlyMarked(history)){
+      if(hourlyMarked(history)&&track!==CLOUD){
         calendar.innerHTML='<header class="rs-calendar-header"><button type="button" data-calendar-back aria-label="返回月历">‹</button><strong id="rs-calendar-title" tabindex="-1">'+esc(d.date)+'</strong><button type="button" data-calendar-close aria-label="关闭每日盈亏日历">×</button></header><div class="rs-calendar-summary"><div><small>期末净值 / USDT</small><strong>'+num(d.endNav)+'</strong></div><div><small>净值变动 / USDT</small><strong>'+signed(d.pnl)+'</strong></div></div><footer>按当日最后可得小时收盘估值，含持仓浮盈亏。</footer>';
         calendar.classList.add('is-day-view');positionCalendar();
       }else if(track===BREADTH){
@@ -372,7 +372,7 @@
       if(e.target.closest('[data-calendar-back]'))backToCalendar();
       if(e.target.closest('[data-day-more],[data-day-retry]'))dayModel.load();
       const trade=e.target.closest('[data-day-trade]');if(trade&&track===BREADTH){const rows=history.dayRows[calendarMonth.days[calendarDay-1].date]||[];const row=rows[Number(trade.dataset.dayTrade)-1];if(row){closeCalendar();jumpBreadth('replay',row.eventId);}return;}
-      if(trade){const s=dayModel.getState(),row=s.rows.find(r=>r.id===Number(trade.dataset.dayTrade));if(row){const selectedTrack=s.track;close(true);onBacktest?.(selectedTrack,row);}}
+      if(trade){const s=dayModel.getState(),row=s.rows.find(r=>r.id===Number(trade.dataset.dayTrade));if(row){const selectedTrack=s.track;if(selectedTrack===CLOUD){openCloudReplay(new URLSearchParams({trade:String(row.id)}),row);}else{close(true);onBacktest?.(selectedTrack,row);}}}
     });
     calendar.addEventListener('focusin',e=>{const day=e.target.closest('[data-calendar-day]');if(day)calendar.querySelector('.rs-calendar-detail').textContent=calendarDayLabel(calendarMonth.days[Number(day.dataset.calendarDay)-1]);});
     dialog.addEventListener('keydown',e=>{if(e.key==='Escape'&&calendar.matches(':popover-open')){e.preventDefault();e.stopPropagation();if(dayView)backToCalendar();else closeCalendar(true);}});
@@ -514,13 +514,19 @@
     }
     let cloudReader=null;
     function clearCloud(){cloudReader?.dispose();cloudReader=null;}
+    function openCloudReplay(params=new URLSearchParams(),row=null){
+      const route={chapter:'history',params};
+      close(true);
+      window.SpikeCloudBookRoute.write(route);
+      onBacktest?.(CLOUD,row,window.SpikeCloudBookRoute.backtestOptions(route));
+    }
     async function showCloud(token,options){
       const isCurrent=()=>open&&track===CLOUD&&epoch===token;
       window.SpikeCloudBookRoute.write(options);
       try{
         const [module]=await Promise.all([import('/static/strategy-booklet/cloud-v17/sheet.js'),window.SpikeModules.ensure('cloud-booklet')]);
         if(!isCurrent())return;
-        cloudReader=module.cloudSheet({el,isCurrent,esc,tableHTML,write:window.SpikeCloudBookRoute.write,
+        cloudReader=module.cloudSheet({el,isCurrent,esc,tableHTML,openReplay:openCloudReplay,
           fetchJSON:url=>requests.json(url),
           setupHistory:path=>{
             history=validateHistory(path,CLOUD);
@@ -548,6 +554,7 @@
     async function show(next,options={}){
       closeCalendar();
       if(!catalog.includes(next))return;
+      if(next===CLOUD&&options.chapter==='history'){openCloudReplay(options.params);return;}
       if(track===BREADTH&&next!==track)clearBookLocation();
       if(track===CLOUD&&next!==track)window.SpikeCloudBookRoute.write(null);
       clearCloud();

@@ -1,5 +1,4 @@
 import {amount, price, signed, beijing, escapeHTML as esc, tableHTML} from './data.js';
-export {mountGallery} from './gallery.js';
 
 const statusText = {
   active: '运行中', running: '运行中', watching: '等待下一次收盘', idle: '等待下一次收盘', healthy: '运行中',

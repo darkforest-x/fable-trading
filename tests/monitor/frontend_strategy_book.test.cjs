@@ -274,3 +274,11 @@ test('cloud monthly NAV includes the hour ending at midnight and keeps intrahour
   assert.equal(ui.equityOptions(h).series[0].name, '盯市净值');
   assert.doesNotMatch(ui.calendarHTML(october), /已实现盈亏|不含浮盈亏/);
 });
+
+test('cloud settlement list reconciles its closed trades separately from that day’s marked NAV',async()=>{
+ const m=ui.createDayModel({validRow:backtest.valid,read:q=>({...dayPage(q,[dayRow(1,-9)],1,-9),source:'OKX'})});
+ await m.select('live-cloud-v17','2024-02-29',42);
+ const s=m.getState();assert.equal(s.error,'');assert.equal(s.data.pnl,-9);
+ const detail=ui.dayTradesHTML({...s,endNav:1042});assert.match(detail,/净值变动/);assert.match(detail,/\+42.00/);
+ assert.match(detail,/−9.00/);assert.match(detail,/data-day-trade="1"/);
+});
