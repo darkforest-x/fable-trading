@@ -43,6 +43,10 @@ def main():
         'target_price','stop_price','exit_time','exit_reason','exit_price','net_return_pct','fees_pct',
         'mfe_pct','mfe_time','mae_pct','mae_time','mfe_pct_optimistic_upper_bound','ambiguous_sl_tp',
         'period','stress_net_pct']].to_csv(OUT/'trades.csv.gz',index=False)
+    summarize(trades)
+
+
+def summarize(trades):
     signal=trades[~trades.is_control]
     paired=signal.merge(trades[trades.is_control][['paired_id','period','net_return_pct']],on='paired_id',
                         suffixes=('','_random'),validate='1:1')
@@ -66,4 +70,10 @@ def main():
 
 
 if __name__=='__main__':
-    main()
+    import argparse
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--summarize-only',action='store_true')
+    if parser.parse_args().summarize_only:
+        summarize(pd.read_csv(OUT/'trades.csv.gz',dtype={'cap':str}))
+    else:
+        main()

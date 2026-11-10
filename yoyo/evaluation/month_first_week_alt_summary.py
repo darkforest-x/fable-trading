@@ -15,7 +15,7 @@ def group_stats(g):
     return dict(n=len(g), win_pct=100*wins.mean(), mean_net_pct=net.mean(),
                 median_net_pct=net.median(), profit_factor=net[wins].sum() / -net[losses].sum()
                 if losses.any() else np.nan, median_mfe_pct=mfe.median(),
-                mfe_2_or_more=int((mfe>=2).sum()), lost_after_mfe2=int((losses & (mfe>=2)).sum()),
+                mfe_2_or_more=int((mfe>=2-1e-10).sum()), lost_after_mfe2=int((losses & (mfe>=2-1e-10)).sum()),
                 losses=int(losses.sum()), mean_stress_pct=g['stress_net_pct'].mean(),
                 ambiguous_dual=int(g['ambiguous_sl_tp'].sum()))
 

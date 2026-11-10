@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-alt-month-first-week-entries-20261110-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5b36d6e7ed
+    status: inconclusive
+    question: "Do first confirmed NY-month-week 1.618 touches revert on OKX altcoins, and how do seven entry clocks perform?"
+    single_variable: "Entry clock: seven market-next-open alternatives; nearest first-week edge, 5% stop, 168h. Pre-2025 mean independent net return selects candidate. Matched same-month random controls."
+    result: "352 eligible contracts, 8527 complete contract-months, 5182 first touches across 345 names. Seven-day edge hits lower 745/2415, upper 1678/2767. All seven two-sided later net means negative. Early-selected one H1 reclaim: later 2689 trades, mean -0.510%, PF 0.839. 940/1694 net losers had >=2% confirmed excursion."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-alt-month-first-week-entries-20261110-v1/summary.json
+    notes: "57 calendar months 2022-02..2026-10. VectorBT native static barriers plus independent portfolios. Includes 68 verified retired additions; incomplete months excluded, no funding. Entry/stop/time 5bp, target 2bp. H1 dual-touch stop first. Notion 4148856479af8195ad9bc11eb99d5fac."
+
+  - experiment_id: exp-alt-month-first-week-near-target-20261110-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f028bb8599
+    status: inconclusive
+    question: "On the frozen H1 monthly reclaim clocks, do nearer profit targets convert recorded floating gains into positive net results?"
+    single_variable: "Cap target distance at 2% or 4% versus unchanged first-week near edge; reuse baseline and same matched random clocks, fixed barriers/time/costs."
+    result: "Early pick 4%. Later same 2689 trades: baseline -0.510%, 2% cap -0.051%, 4% cap -0.046% mean net. 4% cap leads to 408 instead of 940 losing trades after >=2% floating gains. Later short-only +0.080%, +0.008% under additional market fill cost stress."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-alt-month-first-week-near-target-20261110-v1/summary.json
+    notes: "Targets motivated by the first-phase floating excursion results. Independent round trips, no funding or portfolio leverage. Notion 4148856479af81ee8dedf89002a20d59."
+
   - experiment_id: exp-cloud-close-okx-opposite-entry-three-20261109-v1
     source_repo: "darkforest-x/fable-trading"
     source_commit: "c36934655f"

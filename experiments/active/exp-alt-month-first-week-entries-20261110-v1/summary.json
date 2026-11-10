@@ -1,0 +1,71 @@
+{
+  "source_contracts": 356,
+  "complete_month_contracts": 352,
+  "touch_contracts": 345,
+  "hours": 6419898,
+  "valid_coin_months": 8527,
+  "touched_months": 4767,
+  "first_touches": 5182,
+  "side_stats": [
+    {
+      "side": "lower",
+      "touches": 2415,
+      "n_168h": 2415,
+      "reached_edge": 745,
+      "inward_end": 1165,
+      "n_24h": 2415,
+      "inward_1pct_24h": 2097,
+      "median_target_distance_pct": 13.080694783788394
+    },
+    {
+      "side": "upper",
+      "touches": 2767,
+      "n_168h": 2767,
+      "reached_edge": 1678,
+      "inward_end": 1612,
+      "n_24h": 2767,
+      "inward_1pct_24h": 2471,
+      "median_target_distance_pct": 8.74668726113146
+    }
+  ],
+  "first_month": "2022-02",
+  "last_month": "2026-10",
+  "symbols_min_five_per_side": 171,
+  "upper_reach_rate_higher_symbols": 161,
+  "early_pick": "reclaim_1h",
+  "pick_later": {
+    "period": "later",
+    "entry_rule": "reclaim_1h",
+    "side": "both",
+    "n": 2689,
+    "win_pct": 37.00260319821495,
+    "mean_net_pct": -0.5095401346511035,
+    "median_net_pct": -5.097500000000003,
+    "profit_factor": 0.8385563056865699,
+    "median_mfe_pct": 4.047520375742508,
+    "mfe_2_or_more": 1890,
+    "lost_after_mfe2": 940,
+    "losses": 1694,
+    "mean_stress_pct": -0.593367229680503,
+    "ambiguous_dual": 7
+  },
+  "marked_capital_per_independent_trade": 100,
+  "actual_status": {
+    "closed": 25693
+  },
+  "actual_exit_reasons": {
+    "stop": 15918,
+    "target": 8118,
+    "timeout": 1657
+  },
+  "actual_controls": 25693,
+  "candidate_rules": [
+    "touch_1h",
+    "touch_close_inside",
+    "touch_close_outside",
+    "reclaim_1h",
+    "reclaim_two_1h",
+    "reclaim_4h",
+    "reclaim_1d"
+  ]
+}

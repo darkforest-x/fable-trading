@@ -103,7 +103,7 @@ def _symbol(bars, candidates, taker_fee, maker_fee, timeout_hours, stop_pct):
     f['unrealized_gross_pct']=np.where(live,gross,np.nan)
     f['unrealized_net_pct']=np.where(live,net,np.nan)
     f['engine_exit_type']=kind; f['is_censored']=live
-    f['censor_reason']=np.where(live,'history_end_or_gap','')
+    f['censor_reason']=np.where(live,np.where(last_observed==len(index)-1,'history_end','source_gap'),'')
     f['ambiguous_sl_tp']=intrabar & (low[ix]<=np.minimum(target,stop)) & (high[ix]>=np.maximum(target,stop))
     values=[]
     for k,(a,z) in enumerate(zip(starts,ix)):
@@ -147,5 +147,16 @@ def run_month_first_week_alt_trades(bars_by_symbol,candidates,*,taker_fee=.0005,
                                     timeout_hours=168,stop_pct=.05):
     if not candidates.trade_id.is_unique:
         raise ValueError('Duplicate trade id')
-    return pd.concat([_symbol(bars_by_symbol[symbol],group,taker_fee,maker_fee,timeout_hours,stop_pct)
-        for symbol,group in candidates.groupby('symbol',sort=False)],ignore_index=True)
+    out=[]
+    for symbol, group in candidates.groupby('symbol',sort=False):
+        bars=bars_by_symbol[symbol]
+        entry=bars.open.reindex(pd.DatetimeIndex(group.entry_time)).to_numpy()
+        if np.isnan(entry).any():
+            raise ValueError('Entry hour has no source bar')
+        past=np.where(group.side.eq('lower'),entry>=group.low,entry<=group.high)
+        if past.any():
+            out.append(group.loc[past].assign(status='skipped',exit_reason='entry_at_or_past_target',
+                                               entry_fill=np.nan,net_return_pct=np.nan,is_censored=False))
+        if not past.all():
+            out.append(_symbol(bars,group.loc[~past],taker_fee,maker_fee,timeout_hours,stop_pct))
+    return pd.concat(out,ignore_index=True) if out else candidates.copy()
