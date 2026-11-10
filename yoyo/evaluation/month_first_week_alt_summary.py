@@ -97,12 +97,15 @@ def summarize(trades):
             reached_edge=int(full.reached_near_168h.sum()),inward_end=int(full.inward_close_168h_pct.gt(0).sum()),
             n_24h=int(g.inward_24h_pct.notna().sum()),inward_1pct_24h=int(g.inward_24h_pct.ge(1).sum()),
             median_target_distance_pct=100*(target/full.level-1).abs().median()))
+    symbol_rates=events.pivot_table(index='symbol',columns='side',values='reached_near_168h',aggfunc=['count','mean'])
+    both_sides=symbol_rates[symbol_rates['count'].min(axis=1,skipna=False)>=5]['mean']
     pick=stats.query("period=='early' and side=='both'").nlargest(1,'mean_net_pct').iloc[0].entry_rule
     later=stats[(stats.period=='later') & (stats.side=='both') & (stats.entry_rule==pick)].iloc[0].to_dict()
     summary=dict(source_contracts=len(sources),complete_month_contracts=months[months.complete].symbol.nunique(),
         touch_contracts=events.symbol.nunique(),hours=int(sources.hours.sum()),valid_coin_months=int(months.complete.sum()),
         touched_months=int(months.has_touch.sum()),first_touches=len(events),side_stats=sides,
         first_month=months[months.complete].month.min(),last_month=months[months.complete].month.max(),
+        symbols_min_five_per_side=len(both_sides),upper_reach_rate_higher_symbols=int((both_sides.upper>both_sides.lower).sum()),
         early_pick=pick,pick_later=later,marked_capital_per_independent_trade=100,
         actual_status=fills[~fills.is_control].status.value_counts().to_dict(),
         actual_exit_reasons=actual.exit_reason.value_counts().to_dict(),
