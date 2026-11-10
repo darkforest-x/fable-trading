@@ -1,0 +1,13 @@
+{
+  "parent": "exp-alt-month-first-week-near-target-20261110-v1",
+  "universe": "Frozen upper-side cap4 first-hour reclaims and their matched controls; periods inherited",
+  "variable": "Move original 5% stop only after gross intrabar profit reaches 2%, on the whole position. If the target is already reached it takes priority.",
+  "short_fee_breakeven": "entry * (1 - entry_taker_fee) / (1 + exit_taker_fee)",
+  "fees": {"taker":0.0005,"maker":0.0002},
+  "target": "Frozen original near edge capped at 4%",
+  "horizon_hours":168,
+  "slippage": "Base zero; additional 5bp per market fill as a same-fill sensitivity. Funding excluded.",
+  "cash": "Independent 100 USDT entry notional",
+  "order": "Opening gaps precede intrabar prints. On unresolved candles primary path O-H-L-C. Also evaluate low first and feasible intermediate reversal after activation, using same tape for both policies. Refine order-sensitive hours with H1-reconciled minute quotes.",
+  "split": "2025-01-01T00:00Z"
+}
