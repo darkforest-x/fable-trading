@@ -1,12 +1,13 @@
 (() => {
   const rows = [
-    {asset:"touch", tag:"触价监控", sub:"周一 1.618", log:"最新触价", value:"上沿 · 1.618", time:"14:35", title:"关键价位，一眼可见。", body:"按时间查看触价记录，对照每次触价的方向与评分。", angle:[8,-21,6]},
-    {asset:"chart", tag:"原生 K 线", sub:"1H · 周一区间", log:"图表参考线", value:"周一高 / 周一低", time:"1H", title:"把触价放回 K 线里。", body:"对照周一高低与区间参考线，在不同周期查看触价前后的走势。", angle:[5,-10,2]},
-    {asset:"review", tag:"交易复盘", sub:"模拟交易 · 历史开单", log:"单笔复盘", value:"入场 → 出场", time:"回看", title:"回到交易发生的那一刻。", body:"在同一张图里回看模拟交易的入场、出场，以及持有期间的价格路径。", angle:[8,-25,4]}
+    {scene:"chart",tag:"1.618 图表",sub:"周一 1.618",log:"图表周期",value:"15 分钟",time:"15m",title:"把触价放回 K 线里。",body:"默认打开 15 分钟图。先看周一高低，再看价格离区间有多远。",angle:[8,-21,6]},
+    {scene:"touch",tag:"触价监控",sub:"区间参考线",log:"观察范围",value:"上沿 / 下沿",time:"1.618",title:"关键价位，一眼可见。",body:"按时间查看触价记录，对照每次触价的方向与评分。",angle:[5,-10,2]},
+    {scene:"review",tag:"教学复盘",sub:"单笔回看",log:"示意标记",value:"入场 → 出场",time:"回看",title:"回到交易发生的那一刻。",body:"在一张图上对照入场、出场，以及持有期间的价格路径。",angle:[8,-25,4]}
   ];
   const by = id => document.getElementById(id);
-  const tabs = [...document.querySelectorAll('[role="tab"]')], stage = by("stage"), device = by("device");
+  const tabs = [...document.querySelectorAll('#showcase [role="tab"]')], stage = by("stage"), device = by("device");
   const motion = matchMedia("(prefers-reduced-motion: reduce)");
+  const mini = window.SpikeChart?.mount(by("phone-chart"), {compact:true, scene:"chart"});
   let index = 0, drag = null, frame = 0, targetAngles = rows[0].angle;
   const clip = (v, min, max) => Math.min(max, Math.max(min, v));
   const angle = (rx, ry, rz) => {
@@ -21,7 +22,7 @@
     index = (next + rows.length) % rows.length;
     const r = rows[index], num = String(index+1).padStart(2,"0");
     for (const [key, text] of Object.entries({"fig-index":num,"feature-index":num,"feature-title":r.title,"feature-body":r.body,"screen-tag":r.tag,"screen-code":num+" / 03","screen-sub":r.sub,"screen-log":r.log,"screen-value":r.value,"screen-time":r.time})) by(key).textContent=text;
-    by("chart-art").src = "assets/"+r.asset+".svg";
+    mini?.setScene(r.scene);
     tabs.forEach((t,i) => {t.tabIndex=i===index?0:-1;t.setAttribute("aria-selected",String(i===index));});
     by("feature-panel").setAttribute("aria-labelledby",tabs[index].id);
     if (!motion.matches) for (const el of [by("screen-inner"),by("feature-panel")]) {
@@ -61,5 +62,5 @@
   stage.addEventListener("pointercancel",e=>finish(e,false));
   stage.addEventListener("lostpointercapture",e=>finish(e,false));
   motion.addEventListener("change",()=>angle(...rows[index].angle));
-  for (const {asset} of rows.slice(1)){const pic=new Image();pic.src="assets/"+asset+".svg";}
+
 })();

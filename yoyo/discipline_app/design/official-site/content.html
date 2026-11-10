@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+
+<html class="dark scroll-smooth" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>天才交易员 · SPIKE | iPhone 原生金融工具 v2</title>
+<!-- Google Fonts: Manrope, Inter, JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#050508",
+            "surface-dim": "#000000",
+            "surface-container-lowest": "#030304",
+            "surface-container-low": "#0a0a0f",
+            "surface-container": "#111116",
+            "surface-container-high": "#191921",
+            "surface-container-highest": "#24242e",
+            "outline": "#33353e",
+            "outline-variant": "#202128",
+            "primary": "#ffffff",
+            "secondary": "#a1a7b5",
+            "on-surface": "#f1f3f7",
+            "on-surface-variant": "#858b98",
+            "spike-ice": "#38bdf8",
+            "spike-gold": "#eab308",
+            "spike-bull": "#10b981",
+            "spike-bear": "#f43f5e"
+          },
+          fontFamily: {
+            "headline-lg": ["Manrope", "sans-serif"],
+            "headline-md": ["Manrope", "sans-serif"],
+            "headline-sm": ["Manrope", "sans-serif"],
+            "body-lg": ["Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"],
+            "body-sm": ["Inter", "sans-serif"],
+            "label-caps": ["Inter", "sans-serif"],
+            "label-numeric": ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* 3D Hardware Canvas */
+    .perspective-stage {
+      perspective: 1600px;
+      perspective-origin: 50% 45%;
+    }
+    .phone-chassis {
+      transform-style: preserve-3d;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform;
+    }
+    .titanium-frame {
+      box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.14),
+        0 0 0 2px rgba(56, 189, 248, 0.12),
+        0 25px 60px -15px rgba(0, 0, 0, 0.95),
+        0 0 70px -20px rgba(56, 189, 248, 0.1);
+    }
+    .titanium-edge {
+      background: linear-gradient(145deg, #24262c 0%, #121316 48%, #090a0c 100%);
+    }
+    /* Subtle custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #000000;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #20222a;
+      border-radius: 9999px;
+    }
+    /* Chart interactive crosshair cursor line */
+    .crosshair-line {
+      pointer-events: none;
+      transition: opacity 0.08s ease;
+    }
+  </style>
+</head>
+<body class="bg-black text-on-surface antialiased selection:bg-white/20 selection:text-white overflow-x-hidden min-h-screen flex flex-col justify-between font-body-md">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 lg:px-12 h-16 border-b border-white/[0.08] bg-black/80 backdrop-blur-xl">
+<div class="flex items-center gap-6">
+<a class="text-base font-semibold tracking-tight text-white flex items-center gap-2 select-none" href="#">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"></span>
+<span class="font-headline-md tracking-tight text-[17px]">天才交易员 · SPIKE</span>
+<span class="text-[10px] font-label-numeric font-medium px-1.5 py-0.5 rounded bg-white/10 text-secondary ml-1 border border-white/10">v2 PRO</span>
+</a>
+</div>
+<nav class="hidden md:flex items-center space-x-8 text-[13px] font-medium tracking-wide">
+<a class="text-secondary hover:text-white transition-colors duration-150" href="#chart-suite">1.618 沉浸图表</a>
+<a class="text-secondary hover:text-white transition-colors duration-150" href="#monitor-hub">监控中心</a>
+<a class="text-secondary hover:text-white transition-colors duration-150" href="#playbook-journal">策略与复盘</a>
+<a class="text-secondary hover:text-white transition-colors duration-150" href="#install-guide">TestFlight 指引</a>
+</nav>
+<div class="flex items-center gap-3">
+<a class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white text-black text-[12px] font-medium tracking-wide hover:bg-slate-200 transition-all duration-150 active:scale-95 shadow-sm font-label-caps" href="#install-guide">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">terminal</span>
+      获取内测指引
+    </a>
+</div>
+</header>
+<main class="flex-grow pt-24 lg:pt-28">
+<!-- ==================== HERO SECTION & 3D TITANIUM IPHONE ==================== -->
+<section class="max-w-7xl mx-auto px-6 lg:px-12 py-10 lg:py-16">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+<!-- Left: Minimal Cinematic Typography -->
+<div class="lg:col-span-6 z-10 flex flex-col justify-center space-y-6">
+<div class="inline-flex items-center space-x-2.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 w-fit backdrop-blur-md">
+<span class="w-1.5 h-1.5 rounded-full bg-spike-ice shadow-[0_0_6px_#38bdf8]"></span>
+<span class="text-[11px] font-label-numeric uppercase tracking-widest text-secondary font-medium">SPIKE FOR IPHONE · PRO EDITION</span>
+</div>
+<h1 class="text-4xl sm:text-5xl lg:text-6xl text-white font-semibold tracking-tight font-headline-lg leading-[1.12]">
+          在波动中，<br/>守住纪律。
+        </h1>
+<p class="text-[16px] sm:text-[17px] text-on-surface-variant font-normal leading-relaxed max-w-lg">
+          专为纪律交易者打造的 iPhone 原生金融工具，纯净图表与确定性执行逻辑。
+        </p>
+<div class="pt-3 flex flex-wrap items-center gap-4">
+<a class="px-7 py-3 rounded-full bg-white text-black font-medium text-[14px] hover:bg-slate-200 transition-all duration-150 active:scale-95 shadow-[0_0_24px_rgba(255,255,255,0.18)] flex items-center gap-2" href="#install-guide">
+<span>查看安装与内测指引</span>
+<span class="material-symbols-outlined text-[18px]">arrow_downward</span>
+</a>
+<div class="flex items-center gap-2 text-on-surface-variant text-[13px] font-label-numeric px-3 py-2">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+            A17 Pro / Metal 3 实时渲染
+          </div>
+</div>
+<!-- Technical Telemetry Minimal Stats -->
+<div class="pt-8 border-t border-white/[0.08] grid grid-cols-3 gap-6 max-w-md">
+<div>
+<div class="font-label-numeric text-[22px] font-semibold text-white tracking-tight">4.2<span class="text-xs font-normal text-on-surface-variant ml-0.5">ms</span></div>
+<div class="text-[11px] text-on-surface-variant mt-0.5 uppercase font-medium tracking-wider">触价响应延时</div>
+</div>
+<div>
+<div class="font-label-numeric text-[22px] font-semibold text-white tracking-tight">1.618<span class="text-xs font-normal text-on-surface-variant ml-0.5">Φ</span></div>
+<div class="text-[11px] text-on-surface-variant mt-0.5 uppercase font-medium tracking-wider">周一黄金回撤</div>
+</div>
+<div>
+<div class="font-label-numeric text-[22px] font-semibold text-white tracking-tight">100<span class="text-xs font-normal text-on-surface-variant ml-0.5">%</span></div>
+<div class="text-[11px] text-on-surface-variant mt-0.5 uppercase font-medium tracking-wider">无营销零杂音</div>
+</div>
+</div>
+</div>
+<!-- Right: High-Precision 3D Titanium iPhone with Realistic K-Line -->
+<div class="lg:col-span-6 flex flex-col items-center justify-center relative perspective-stage py-6">
+<div class="phone-chassis relative w-[318px] sm:w-[342px] h-[670px] sm:h-[690px] rounded-[52px] p-[10px] titanium-edge titanium-frame select-none cursor-crosshair" id="hero-phone" style="transform: rotateY(-14deg) rotateX(7deg) rotateZ(1.5deg);">
+<!-- Physical Hardware Buttons -->
+<div class="absolute -left-[12px] top-[108px] w-[3px] h-[26px] bg-slate-500 rounded-l-md border-l border-white/20"></div>
+<div class="absolute -left-[12px] top-[152px] w-[3px] h-[48px] bg-slate-500 rounded-l-md border-l border-white/20"></div>
+<div class="absolute -left-[12px] top-[212px] w-[3px] h-[48px] bg-slate-500 rounded-l-md border-l border-white/20"></div>
+<div class="absolute -right-[12px] top-[162px] w-[3px] h-[72px] bg-slate-500 rounded-r-md border-r border-white/20"></div>
+<!-- Phone Inner Screen Display -->
+<div class="w-full h-full bg-[#050508] rounded-[44px] overflow-hidden relative border border-white/10 flex flex-col justify-between" id="phone-screen">
+<!-- Dynamic Island & Status Bar -->
+<div class="relative z-30 pt-3 px-6 flex justify-between items-center text-[11px] font-label-numeric text-white/80">
+<span class="font-semibold">09:41</span>
+<!-- Dynamic Island -->
+<div class="absolute left-1/2 -translate-x-1/2 top-2.5 w-[94px] h-[26px] bg-black rounded-full flex items-center justify-between px-2.5 border border-white/10 shadow-lg">
+<div class="w-2.5 h-2.5 rounded-full bg-slate-800 border border-slate-700"></div>
+<div class="w-2 h-2 rounded-full bg-emerald-400/90 animate-pulse"></div>
+</div>
+<div class="flex items-center space-x-1.5 text-white/70">
+<span class="material-symbols-outlined text-[13px]">signal_cellular_alt</span>
+<span class="material-symbols-outlined text-[13px]">wifi</span>
+<span class="material-symbols-outlined text-[14px]">battery_full</span>
+</div>
+</div>
+<!-- Screen Header Pair Info -->
+<div class="px-5 pt-3 pb-2 border-b border-white/[0.06] bg-[#07070b]/60 flex items-center justify-between">
+<div>
+<div class="flex items-center gap-2">
+<span class="text-white font-label-numeric font-bold text-[15px]">BTC / USDT</span>
+<span class="text-[10px] font-label-numeric px-1.5 py-0.2 rounded bg-spike-bull/10 text-spike-bull border border-spike-bull/20 font-medium">+2.84%</span>
+</div>
+<div class="text-[10px] font-label-numeric text-secondary" id="phone-ohlc-banner">
+                  O:96,410 H:98,240 L:96,150 C:<span class="text-white font-semibold">97,842</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="px-1.5 py-0.5 rounded text-[10px] font-label-numeric bg-white/10 text-white font-medium">1H</span>
+<span class="material-symbols-outlined text-[15px] text-secondary">tune</span>
+</div>
+</div>
+<!-- Realistic 70+ Candle High Precision Native Canvas -->
+<div class="relative flex-grow px-2 py-1 overflow-hidden flex flex-col justify-between" id="phone-chart-canvas-box">
+<!-- 1.618 Fib Extension Line -->
+<div class="absolute top-[28%] left-0 w-full flex items-center z-10 pointer-events-none">
+<div class="w-full border-b border-dashed border-spike-gold/80"></div>
+<span class="absolute right-2 -top-3.5 font-label-numeric text-[9px] text-spike-gold font-semibold px-1 rounded bg-black/90 border border-spike-gold/30">
+                  Φ 1.618 (98,240.0)
+                </span>
+</div>
+<!-- Current Price Hairline -->
+<div class="absolute top-[36%] left-0 w-full flex items-center z-10 pointer-events-none">
+<div class="w-full border-b border-white/20"></div>
+<span class="absolute right-2 -top-3 font-label-numeric text-[9px] text-white px-1 bg-sky-500/80 rounded font-semibold">
+                  97,842.0
+                </span>
+</div>
+<!-- Mon Low Baseline -->
+<div class="absolute top-[78%] left-0 w-full flex items-center z-10 pointer-events-none">
+<div class="w-full border-b border-dashed border-sky-400/40"></div>
+<span class="absolute right-2 -top-3 font-label-numeric text-[9px] text-sky-400/90 px-1 bg-black/80">
+                  Mon Low (96,180.0)
+                </span>
+</div>
+<!-- Interactive Candlestick SVG Container (72 Candles) -->
+<div class="relative w-full h-[370px] cursor-crosshair" id="phone-svg-wrapper">
+<svg class="w-full h-full" id="phone-candlestick-svg" preserveaspectratio="none" viewbox="0 0 310 360">
+<!-- Grid lines -->
+<line stroke="#1c1d26" stroke-dasharray="3 3" stroke-width="0.8" x1="0" x2="310" y1="90" y2="90"></line>
+<line stroke="#1c1d26" stroke-dasharray="3 3" stroke-width="0.8" x1="0" x2="310" y1="180" y2="180"></line>
+<line stroke="#1c1d26" stroke-dasharray="3 3" stroke-width="0.8" x1="0" x2="310" y1="270" y2="270"></line>
+<!-- Candles will be dynamically mounted or static rendered -->
+<g id="phone-candles-group"></g>
+<!-- Interactive Crosshair -->
+<line class="crosshair-line opacity-0" id="phone-cross-x" stroke="#ffffff" stroke-dasharray="2 2" stroke-width="0.75" x1="0" x2="310" y1="-100" y2="-100"></line>
+<line class="crosshair-line opacity-0" id="phone-cross-y" stroke="#ffffff" stroke-dasharray="2 2" stroke-width="0.75" x1="-100" x2="-100" y1="0" y2="360"></line>
+</svg>
+<!-- Floating Crosshair Tooltip inside Phone -->
+<div class="absolute pointer-events-none opacity-0 transition-opacity text-[9px] font-label-numeric bg-black/90 text-white border border-white/20 px-1.5 py-0.5 rounded shadow-xl z-20" id="phone-crosshair-badge">
+                  97,650.0
+                </div>
+</div>
+<!-- Price & Time Axis Footprint inside Phone -->
+<div class="px-2 py-1 flex justify-between items-center text-[9px] font-label-numeric text-on-surface-variant border-t border-white/[0.04]">
+<span>周一 00:00 锚定</span>
+<span class="text-white font-medium">波动率 1.42%</span>
+<span>今日 09:41</span>
+</div>
+</div>
+<!-- Phone Bottom Discipline Bar & Home Indicator -->
+<div class="px-4 pb-3 pt-2 bg-[#07070b]/80 border-t border-white/[0.06]">
+<div class="flex items-center justify-between text-[11px] font-label-numeric">
+<span class="text-secondary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 触价防线监控就绪
+                </span>
+<span class="text-spike-ice font-semibold">1:2.85 R:R</span>
+</div>
+<!-- Home Bar Indicator -->
+<div class="mt-3 flex justify-center">
+<div class="w-28 h-1 bg-white/40 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Floor Ambient Glint Reflection -->
+<div class="w-[300px] sm:w-[380px] h-10 bg-spike-ice/10 rounded-[100%] blur-2xl -mt-5 pointer-events-none"></div>
+<div class="w-[240px] sm:w-[300px] h-6 bg-black/95 rounded-[100%] blur-md -mt-7 pointer-events-none"></div>
+</div>
+</div>
+</section>
+<!-- ==================== 模块一：宽幅沉浸式周一 1.618 图表 ==================== -->
+<section class="max-w-7xl mx-auto px-6 lg:px-12 py-16 border-t border-white/[0.08]" id="chart-suite">
+<!-- Header Block -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+<div>
+<div class="text-[11px] font-label-numeric uppercase tracking-widest text-spike-ice font-semibold mb-2">
+          01 / INTERACTIVE 1.618 CHART SUITE
+        </div>
+<h2 class="text-2xl sm:text-3xl lg:text-4xl text-white font-headline-md font-semibold tracking-tight">
+          全宽沉浸式周一 1.618 规约工作台
+        </h2>
+<p class="text-on-surface-variant text-[15px] mt-1.5 max-w-2xl">
+          精准锁定周一震荡极值区间，向外辐射 1.618 斐波那契极端延伸阻力与支撑。触碰十字光标实时查看逐根 K 线结构。
+        </p>
+</div>
+<!-- Controls & Toggle Cluster -->
+<div class="flex flex-wrap items-center gap-2">
+<!-- Timeframes -->
+<div class="inline-flex p-1 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-label-numeric" id="timeframe-selector">
+<button class="px-3 py-1 rounded-lg bg-white text-black font-semibold tf-btn" onclick="setTimeframe('5m')">5m</button>
+<button class="px-3 py-1 rounded-lg text-secondary hover:text-white tf-btn" onclick="setTimeframe('15m')">15m</button>
+<button class="px-3 py-1 rounded-lg text-secondary hover:text-white tf-btn" onclick="setTimeframe('1H')">1H</button>
+<button class="px-3 py-1 rounded-lg text-secondary hover:text-white tf-btn" onclick="setTimeframe('4H')">4H</button>
+</div>
+<!-- Color Palette Toggle (Green/Red vs Titanium Cold) -->
+<button class="px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-label-numeric text-secondary hover:text-white flex items-center gap-1.5 transition-colors" id="theme-color-btn" onclick="toggleCandleTheme()">
+<span class="w-2 h-2 rounded-full bg-spike-bull" id="palette-dot"></span>
+<span id="palette-label">经典绿红</span>
+</button>
+<!-- Indicator Toggle -->
+<button class="px-3 py-1.5 rounded-xl bg-spike-gold/10 border border-spike-gold/30 text-xs font-label-numeric text-spike-gold hover:bg-spike-gold/20 flex items-center gap-1 transition-colors" id="fib-toggle-btn" onclick="toggleFibLines()">
+<span class="material-symbols-outlined text-[14px]">show_chart</span>
+<span>1.618 标注</span>
+</button>
+</div>
+</div>
+<!-- The Broad Full-Canvas Workspace -->
+<div class="rounded-3xl bg-[#050508] border border-white/10 overflow-hidden shadow-2xl relative">
+<!-- Workbench Top Bar Telemetry -->
+<div class="px-6 py-3.5 border-b border-white/[0.06] bg-[#07070b] flex flex-wrap items-center justify-between gap-4">
+<div class="flex flex-wrap items-center gap-4 text-xs font-label-numeric">
+<span class="text-white font-bold text-sm tracking-tight flex items-center gap-1.5">
+            BTC/USDT · PERPETUAL
+            <span class="w-1.5 h-1.5 rounded-full bg-spike-ice"></span>
+</span>
+<span class="text-secondary">O: <span class="text-white font-medium" id="wb-open">96,480.0</span></span>
+<span class="text-secondary">H: <span class="text-white font-medium" id="wb-high">98,620.5</span></span>
+<span class="text-secondary">L: <span class="text-white font-medium" id="wb-low">96,110.0</span></span>
+<span class="text-secondary">C: <span class="text-spike-bull font-bold" id="wb-close">98,150.2</span></span>
+<span class="text-secondary">VOL: <span class="text-white font-medium" id="wb-vol">24,890 BTC</span></span>
+<span class="text-spike-bull font-medium ml-1" id="wb-change">+1.73%</span>
+</div>
+<div class="flex items-center gap-3 text-xs font-label-numeric text-secondary">
+<span class="flex items-center gap-1">
+<span class="inline-block w-2 h-0.5 bg-spike-gold"></span> 周一高: 97,950
+          </span>
+<span class="flex items-center gap-1">
+<span class="inline-block w-2 h-0.5 bg-sky-400"></span> 周一低: 96,220
+          </span>
+<span class="text-[11px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white">
+            1.618 延伸: 99,020
+          </span>
+</div>
+</div>
+<!-- Main Canvas SVG Area (85+ Candles with Shadows & Fib Geometry) -->
+<div class="relative w-full h-[460px] cursor-crosshair bg-[#040407]" id="workbench-chart-container">
+<!-- Y-Axis Grid Lines & Price Labels -->
+<div class="absolute inset-0 pointer-events-none flex flex-col justify-between py-6 px-4">
+<div class="w-full border-b border-white/[0.04] flex justify-between text-[11px] font-label-numeric text-white/30">
+<span></span><span>99,500.0</span>
+</div>
+<div class="w-full border-b border-white/[0.04] flex justify-between text-[11px] font-label-numeric text-white/30">
+<span></span><span>98,500.0</span>
+</div>
+<div class="w-full border-b border-white/[0.04] flex justify-between text-[11px] font-label-numeric text-white/30">
+<span></span><span>97,500.0</span>
+</div>
+<div class="w-full border-b border-white/[0.04] flex justify-between text-[11px] font-label-numeric text-white/30">
+<span></span><span>96,500.0</span>
+</div>
+<div class="w-full border-b border-white/[0.04] flex justify-between text-[11px] font-label-numeric text-white/30">
+<span></span><span>95,500.0</span>
+</div>
+</div>
+<!-- Overlaid Mon High / Low & 1.618 Lines -->
+<div class="absolute inset-0 pointer-events-none" id="fib-overlay-lines">
+<!-- Mon High 1.618 Extension -->
+<div class="absolute top-[16%] left-0 w-full flex items-center z-10">
+<div class="w-full border-b border-dashed border-spike-gold/80"></div>
+<div class="absolute right-4 -top-3.5 px-2 py-0.5 rounded bg-black/90 border border-spike-gold/40 text-[10px] font-label-numeric text-spike-gold font-semibold flex items-center gap-1 shadow-lg">
+<span>Φ 1.618 目标延伸</span>
+<span class="text-white">99,020.0</span>
+</div>
+</div>
+<!-- Monday High Pivot -->
+<div class="absolute top-[36%] left-0 w-full flex items-center z-10">
+<div class="w-full border-b border-dotted border-white/30"></div>
+<div class="absolute right-4 -top-3 px-2 py-0.5 rounded bg-[#0b0c10] border border-white/20 text-[10px] font-label-numeric text-white font-medium">
+              Mon High (97,950.0)
+            </div>
+</div>
+<!-- Monday Low Pivot -->
+<div class="absolute top-[72%] left-0 w-full flex items-center z-10">
+<div class="w-full border-b border-dotted border-sky-400/40"></div>
+<div class="absolute right-4 -top-3 px-2 py-0.5 rounded bg-[#0b0c10] border border-sky-400/30 text-[10px] font-label-numeric text-sky-400 font-medium">
+              Mon Low (96,220.0)
+            </div>
+</div>
+</div>
+<!-- Interactive Workbench SVG -->
+<svg class="w-full h-full" id="workbench-svg" preserveaspectratio="none" viewbox="0 0 1000 460">
+<!-- Candles & volume bars dynamically rendered -->
+<g id="wb-volume-group" opacity="0.3"></g>
+<g id="wb-candles-group"></g>
+<!-- Crosshair Vertical & Horizontal -->
+<line class="crosshair-line opacity-0" id="wb-cross-x" stroke="#ffffff" stroke-dasharray="3 3" stroke-width="0.8" x1="0" x2="1000" y1="-100" y2="-100"></line>
+<line class="crosshair-line opacity-0" id="wb-cross-y" stroke="#ffffff" stroke-dasharray="3 3" stroke-width="0.8" x1="-100" x2="-100" y1="0" y2="460"></line>
+</svg>
+<!-- Floating Interactive Price Box on Crosshair -->
+<div class="absolute pointer-events-none opacity-0 transition-opacity text-xs font-label-numeric bg-white text-black font-semibold px-2 py-1 rounded shadow-2xl z-30" id="wb-crosshair-badge">
+          98,120.0
+        </div>
+</div>
+<!-- X-Axis Timeline Footprint -->
+<div class="px-6 py-2.5 bg-[#060609] border-t border-white/[0.06] flex justify-between items-center text-[11px] font-label-numeric text-on-surface-variant">
+<span>周一 00:00 (区间锚点)</span>
+<span>周一 12:00</span>
+<span>周二 00:00 (假突破回踩)</span>
+<span>周二 16:00</span>
+<span>周三 04:00 (冲高 1.618)</span>
+<span class="text-white font-medium">实时 09:41 (回抽确认)</span>
+</div>
+</div>
+</section>
+<!-- ==================== 模块二：“监控中心” (Monitor & Alert Hub) ==================== -->
+<section class="max-w-7xl mx-auto px-6 lg:px-12 py-16 border-t border-white/[0.08]" id="monitor-hub">
+<div class="mb-12">
+<div class="text-[11px] font-label-numeric uppercase tracking-widest text-spike-ice font-semibold mb-2">
+        02 / MONITOR &amp; ALERT HUB
+      </div>
+<h2 class="text-2xl sm:text-3xl lg:text-4xl text-white font-headline-md font-semibold tracking-tight">
+        三阶定点监控中心
+      </h2>
+<p class="text-on-surface-variant text-[15px] mt-1.5 max-w-2xl">
+        无营销推送、无广场噪音。基于底层毫秒级触价雷达与行为阻断机制，在价格穿透关键位时提供物理级感知通知。
+      </p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Card A: 触价雷达 -->
+<div class="p-6 rounded-3xl bg-[#060609] border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-5">
+<div class="w-10 h-10 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-spike-ice">
+<span class="material-symbols-outlined text-[22px]">radar</span>
+</div>
+<span class="text-[11px] font-label-numeric px-2 py-0.5 rounded-full bg-spike-ice/10 text-spike-ice border border-spike-ice/30">
+              3 组防线监听中
+            </span>
+</div>
+<h3 class="text-lg font-headline-sm text-white font-medium mb-1">触价雷达 (Precision Radar)</h3>
+<p class="text-xs text-on-surface-variant mb-5">监测周一 1.618 关键扩展位与极值防守线，过滤假破刺穿噪声。</p>
+<!-- Queue Items -->
+<div class="space-y-2.5 font-label-numeric">
+<!-- Item 1 -->
+<div class="p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between">
+<div>
+<div class="text-white text-xs font-semibold flex items-center gap-1.5">
+                  BTC 1.618 向上扩展
+                  <span class="w-1.5 h-1.5 rounded-full bg-spike-gold animate-ping"></span>
+</div>
+<div class="text-[11px] text-secondary mt-0.5">目标: 99,020.0 · 差距: 869.8 pts</div>
+</div>
+<span class="text-[11px] text-spike-ice bg-spike-ice/10 px-2 py-0.5 rounded">震动强提醒</span>
+</div>
+<!-- Item 2 -->
+<div class="p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between">
+<div>
+<div class="text-white text-xs font-semibold">ETH 周一高点假破防守</div>
+<div class="text-[11px] text-secondary mt-0.5">目标: 3,840.5 · 差距: 42.1 pts</div>
+</div>
+<span class="text-[11px] text-secondary bg-white/5 px-2 py-0.5 rounded">待命</span>
+</div>
+<!-- Item 3 -->
+<div class="p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between">
+<div>
+<div class="text-white text-xs font-semibold">SOL 支撑回踩防线</div>
+<div class="text-[11px] text-secondary mt-0.5">目标: 184.20 · 偏离: 1.8%</div>
+</div>
+<span class="text-[11px] text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded">就绪</span>
+</div>
+</div>
+</div>
+<div class="pt-6 border-t border-white/[0.06] mt-4 flex justify-between items-center text-xs font-label-numeric text-on-surface-variant">
+<span>采样率: 100Hz</span>
+<span class="text-white">端侧 CoreHaptics 震动引擎</span>
+</div>
+</div>
+<!-- Card B: 纪律报警器 -->
+<div class="p-6 rounded-3xl bg-[#060609] border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-5">
+<div class="w-10 h-10 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-spike-bear">
+<span class="material-symbols-outlined text-[22px]">alarm_on</span>
+</div>
+<span class="text-[11px] font-label-numeric px-2 py-0.5 rounded-full bg-spike-bear/10 text-spike-bear border border-spike-bear/30">
+              强制执行
+            </span>
+</div>
+<h3 class="text-lg font-headline-sm text-white font-medium mb-1">纪律报警器 (Discipline Sentry)</h3>
+<p class="text-xs text-on-surface-variant mb-5">严苛限制非理性交易冲动，构建强迫性情绪冷却阻断通道。</p>
+<div class="space-y-3 font-label-numeric text-xs">
+<div class="p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between">
+<div>
+<div class="text-white font-medium">连续两笔未达 1:2.5 盈亏比</div>
+<div class="text-[11px] text-secondary">强行锁仓冷却 45 分钟</div>
+</div>
+<span class="text-spike-bear font-semibold">已激活</span>
+</div>
+<div class="p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between">
+<div>
+<div class="text-white font-medium">非计划外极端插针</div>
+<div class="text-[11px] text-secondary">屏蔽交易按钮 · 警报音静音</div>
+</div>
+<span class="text-white font-semibold">防御中</span>
+</div>
+<div class="p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between">
+<div>
+<div class="text-white font-medium">深夜持仓超时预警 (23:00+)</div>
+<div class="text-[11px] text-secondary">建议减半头寸保持清醒</div>
+</div>
+<span class="text-secondary font-semibold">自启</span>
+</div>
+</div>
+</div>
+<div class="pt-6 border-t border-white/[0.06] mt-4 flex justify-between items-center text-xs font-label-numeric text-on-surface-variant">
+<span>阻断逻辑: 本地零通讯拦截</span>
+<span class="text-spike-bear">杜绝复仇交易</span>
+</div>
+</div>
+<!-- Card C: 模拟沙盘与云带通道 -->
+<div class="p-6 rounded-3xl bg-[#060609] border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-5">
+<div class="w-10 h-10 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-spike-gold">
+<span class="material-symbols-outlined text-[22px]">layers</span>
+</div>
+<span class="text-[11px] font-label-numeric px-2 py-0.5 rounded-full bg-spike-gold/10 text-spike-gold border border-spike-gold/30">
+              零真金风险
+            </span>
+</div>
+<h3 class="text-lg font-headline-sm text-white font-medium mb-1">模拟沙盘与云带通道 (Sandtable)</h3>
+<p class="text-xs text-on-surface-variant mb-5">在零资本风险下验证周一高低点突破策略，配备布林收敛与 EMA 云带指示。</p>
+<div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-3 font-label-numeric text-xs">
+<div class="flex justify-between items-center">
+<span class="text-secondary">EMA 21/55 动态云带</span>
+<span class="text-emerald-400 font-semibold">多头扩张通道</span>
+</div>
+<div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+<div class="bg-gradient-to-r from-sky-400 to-emerald-400 h-full w-[78%]"></div>
+</div>
+<div class="flex justify-between items-center text-[11px] text-secondary">
+<span>布林带宽 (BBW): 0.042 (蓄势收敛)</span>
+<span>沙盘胜率: 68.4%</span>
+</div>
+</div>
+<div class="mt-3 p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between text-xs font-label-numeric">
+<span class="text-white">沙盘交易重放功能</span>
+<span class="text-spike-gold">支持逐 K 线快进</span>
+</div>
+</div>
+<div class="pt-6 border-t border-white/[0.06] mt-4 flex justify-between items-center text-xs font-label-numeric text-on-surface-variant">
+<span>物理引擎校验: 纯真离线演练</span>
+<span class="text-white">高频回放回测</span>
+</div>
+</div>
+</div>
+</section>
+<!-- ==================== 模块三：“策略小册与复盘” (Playbook & Post-Trade Review) ==================== -->
+<section class="max-w-7xl mx-auto px-6 lg:px-12 py-16 border-t border-white/[0.08]" id="playbook-journal">
+<div class="mb-12">
+<div class="text-[11px] font-label-numeric uppercase tracking-widest text-spike-ice font-semibold mb-2">
+        03 / PLAYBOOK &amp; POST-TRADE REVIEW
+      </div>
+<h2 class="text-2xl sm:text-3xl lg:text-4xl text-white font-headline-md font-semibold tracking-tight">
+        纪律准则小册与逐单复盘
+      </h2>
+<p class="text-on-surface-variant text-[15px] mt-1.5 max-w-2xl">
+        没有任何玄学指标与夸张收益率。只有清晰的入场逻辑、止损底线与严密的动作执行评价。
+      </p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Sub-module A: 策略规则卡 (Playbook Checklist) -->
+<div class="lg:col-span-5 space-y-4">
+<div class="text-xs font-label-numeric text-secondary uppercase tracking-wider mb-2 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-white"></span> 入场三阶纪律规约
+        </div>
+<!-- Rule Card 1 -->
+<div class="p-5 rounded-2xl bg-[#060609] border border-white/10 space-y-2">
+<div class="flex items-center justify-between text-xs font-label-numeric">
+<span class="text-spike-ice font-bold">RULE 01</span>
+<span class="text-secondary">周一高点假突破跌回</span>
+</div>
+<h4 class="text-white font-medium text-sm">假刺破放量，收盘收回高点下方</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+            周一形成的高点若在周二/周三被快速刺破，但 1 小时 K 线收盘未能站稳并留下长上影线，触发做空信号，止损严设于影线最高点。
+          </p>
+</div>
+<!-- Rule Card 2 -->
+<div class="p-5 rounded-2xl bg-[#060609] border border-white/10 space-y-2">
+<div class="flex items-center justify-between text-xs font-label-numeric">
+<span class="text-spike-gold font-bold">RULE 02</span>
+<span class="text-secondary">触及 1.618 黄金延伸衰竭</span>
+</div>
+<h4 class="text-white font-medium text-sm">极端延伸位不追单，分批止盈兑现</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+            当价格触达由周一区间投影计算出的 1.618 目标线，且成交量与 RSI 呈现顶背离时，坚决执行分批获利了结，禁止情绪化追高。
+          </p>
+</div>
+<!-- Rule Card 3 -->
+<div class="p-5 rounded-2xl bg-[#060609] border border-white/10 space-y-2">
+<div class="flex items-center justify-between text-xs font-label-numeric">
+<span class="text-spike-bear font-bold">RULE 03</span>
+<span class="text-secondary">盈亏比 R:R 强制门槛</span>
+</div>
+<h4 class="text-white font-medium text-sm">低于 1:2.5 坚决弃单，空仓即是收益</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+            无论形态多么诱人，若预期获利空间与防守止损位测算比值小于 2.5 倍，软件自动锁定开单面板，阻断期望值为负的平庸交易。
+          </p>
+</div>
+</div>
+<!-- Sub-module B: 历史开单复盘流 (Post-Trade Execution Stream) -->
+<div class="lg:col-span-7">
+<div class="text-xs font-label-numeric text-secondary uppercase tracking-wider mb-2 flex items-center justify-between">
+<span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 纪律执行归档 (点击联动高亮)</span>
+<span class="text-white font-medium">执行合规率: 95.2%</span>
+</div>
+<div class="space-y-3 font-label-numeric" id="review-cards-list">
+<!-- Trade Log Item 1 -->
+<div class="trade-review-card p-5 rounded-2xl bg-[#07070b] border border-white/10 hover:border-spike-ice/40 cursor-pointer transition-all duration-200" onclick="highlightChartTrade(1)">
+<div class="flex items-center justify-between text-xs mb-2">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded bg-spike-bear/10 text-spike-bear font-bold border border-spike-bear/20">做空 SHORT</span>
+<span class="text-white font-semibold">BTC 假破周一高点 #20250212</span>
+</div>
+<span class="text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded font-medium">动作合规 100 分</span>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs py-2 my-1 border-y border-white/[0.06]">
+<div>
+<span class="text-secondary text-[10px] block">入场点位</span>
+<span class="text-white font-semibold">97,890.0</span>
+</div>
+<div>
+<span class="text-secondary text-[10px] block">硬止损位</span>
+<span class="text-rose-400 font-semibold">98,210.0</span>
+</div>
+<div>
+<span class="text-secondary text-[10px] block">止盈目标</span>
+<span class="text-emerald-400 font-semibold">96,350.0</span>
+</div>
+<div>
+<span class="text-secondary text-[10px] block">实现盈亏比</span>
+<span class="text-spike-ice font-bold">1 : 4.81</span>
+</div>
+</div>
+<p class="text-[12px] text-on-surface-variant font-body-sm mt-2">
+              复盘总结：早盘刺破周一高点后快速收阴，精准在跌破 97,900 时按规则开单，止损仅 320 点，全程无情绪波动，于第一支撑位从容平仓。
+            </p>
+</div>
+<!-- Trade Log Item 2 -->
+<div class="trade-review-card p-5 rounded-2xl bg-[#07070b] border border-white/10 hover:border-spike-ice/40 cursor-pointer transition-all duration-200" onclick="highlightChartTrade(2)">
+<div class="flex items-center justify-between text-xs mb-2">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded bg-spike-bull/10 text-spike-bull font-bold border border-spike-bull/20">做多 LONG</span>
+<span class="text-white font-semibold">ETH 周一低点反弹测试 #20250210</span>
+</div>
+<span class="text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded font-medium">动作合规 96 分</span>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs py-2 my-1 border-y border-white/[0.06]">
+<div>
+<span class="text-secondary text-[10px] block">入场点位</span>
+<span class="text-white font-semibold">3,420.0</span>
+</div>
+<div>
+<span class="text-secondary text-[10px] block">硬止损位</span>
+<span class="text-rose-400 font-semibold">3,380.0</span>
+</div>
+<div>
+<span class="text-secondary text-[10px] block">止盈目标</span>
+<span class="text-emerald-400 font-semibold">3,560.0</span>
+</div>
+<div>
+<span class="text-secondary text-[10px] block">实现盈亏比</span>
+<span class="text-spike-ice font-bold">1 : 3.50</span>
+</div>
+</div>
+<p class="text-[12px] text-on-surface-variant font-body-sm mt-2">
+              复盘总结：触底后收敛三角形突破，在回抽周一低点确认有效后打入首仓。严格遵守金字塔加仓原则，达标第 1 阻力位后即刻保本。
+            </p>
+</div>
+<!-- Trade Log Item 3 -->
+<div class="trade-review-card p-5 rounded-2xl bg-[#07070b] border border-white/10 hover:border-spike-ice/40 cursor-pointer transition-all duration-200" onclick="highlightChartTrade(3)">
+<div class="flex items-center justify-between text-xs mb-2">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded bg-white/10 text-secondary font-bold border border-white/20">空仓 PASS</span>
+<span class="text-white font-semibold">SOL 杂乱震荡放弃开单 #20250209</span>
+</div>
+<span class="text-spike-ice bg-spike-ice/10 px-2 py-0.5 rounded font-medium">规约守正 100 分</span>
+</div>
+<p class="text-[12px] text-on-surface-variant font-body-sm">
+              复盘总结：未能满足 R:R &gt; 1:2.5 规则，中间位置追单风险极大。系统主动警告并阻断冲动操作，事后证实为双向扫盘行情，成功保全本金。
+            </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ==================== 模块四：Apple TestFlight 极简指引与安装状态 ==================== -->
+<section class="max-w-7xl mx-auto px-6 lg:px-12 py-16 border-t border-white/[0.08]" id="install-guide">
+<div class="max-w-3xl mb-12">
+<div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-3">
+<span class="text-[11px] font-label-numeric uppercase tracking-wider text-spike-ice">04 / TESTFLIGHT ONBOARDING GUIDE</span>
+</div>
+<h2 class="text-2xl sm:text-3xl lg:text-4xl text-white font-headline-md font-semibold tracking-tight">
+        Apple TestFlight 极简安装指引
+      </h2>
+<p class="text-on-surface-variant text-[15px] mt-2 leading-relaxed">
+        遵循 Apple 官方高规格内测分发流程。请按照以下 3 步在您的 iPhone 上完成原生体验配置。
+      </p>
+</div>
+<!-- 3-Step Clear Visual Instruction Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+<!-- Step 1 -->
+<div class="p-6 rounded-3xl bg-[#060609] border border-white/10 flex flex-col justify-between">
+<div>
+<div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white mb-6 font-label-numeric font-bold text-base">
+            01
+          </div>
+<h3 class="text-lg font-headline-sm text-white font-semibold mb-2">获取官方 TestFlight</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed font-body-sm">
+            在您的 iPhone 上打开系统自带的 <strong class="text-white">App Store</strong>，搜索并免费下载 Apple 官方 <strong class="text-white">TestFlight</strong> 应用程序。
+          </p>
+</div>
+<div class="pt-6 border-t border-white/[0.06] mt-6 flex items-center gap-2 text-xs font-label-numeric text-secondary">
+<span class="material-symbols-outlined text-[16px] text-white">storefront</span>
+<span>Apple 官方签名环境</span>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="p-6 rounded-3xl bg-[#060609] border border-white/10 flex flex-col justify-between">
+<div>
+<div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white mb-6 font-label-numeric font-bold text-base">
+            02
+          </div>
+<h3 class="text-lg font-headline-sm text-white font-semibold mb-2">开启专属内测邀请</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed font-body-sm">
+            获取内测资格推送后，使用 iPhone 自带的 <strong class="text-white">Safari 浏览器</strong> 打开 SPIKE 官方分发的专属公共/定向邀请兑换通道。
+          </p>
+</div>
+<div class="pt-6 border-t border-white/[0.06] mt-6 flex items-center gap-2 text-xs font-label-numeric text-secondary">
+<span class="material-symbols-outlined text-[16px] text-spike-ice">open_in_browser</span>
+<span>Safari 原生无缝拉起</span>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="p-6 rounded-3xl bg-[#060609] border border-white/10 flex flex-col justify-between">
+<div>
+<div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white mb-6 font-label-numeric font-bold text-base">
+            03
+          </div>
+<h3 class="text-lg font-headline-sm text-white font-semibold mb-2">接受并启动 SPIKE</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed font-body-sm">
+            系统将自动跳转至 TestFlight。点击 <strong class="text-white">「接受」</strong> 并完成安装，即可在主屏幕畅享 120Hz 丝滑金融图表工具。
+          </p>
+</div>
+<div class="pt-6 border-t border-white/[0.06] mt-6 flex items-center gap-2 text-xs font-label-numeric text-secondary">
+<span class="material-symbols-outlined text-[16px] text-emerald-400">verified</span>
+<span>Pro 级原生安全沙盒</span>
+</div>
+</div>
+</div>
+<!-- Official Status Clarification Banner (Restrained & Authoritative) -->
+<div class="rounded-3xl bg-[#07070b] border border-white/10 divide-y divide-white/10 overflow-hidden">
+<!-- Row 1: TestFlight 封闭内测状态 -->
+<div class="p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="space-y-1">
+<div class="flex items-center gap-3">
+<span class="text-lg text-white font-semibold font-headline-sm">TestFlight 封闭内测</span>
+<span class="px-2.5 py-0.5 rounded-full bg-spike-gold/10 border border-spike-gold/30 text-spike-gold font-label-numeric text-xs font-medium">
+              即将开启第一期招募
+            </span>
+</div>
+<div class="text-xs text-secondary font-label-numeric">首期规模：限额 500 位纪律交易者 · 封闭代码审计与压力测试</div>
+<p class="text-xs text-on-surface-variant pt-1 max-w-xl font-body-sm">
+            我们正在对 Metal 渲染引擎与低功耗触价监听进行最后阶段的功耗调优，通道就绪后将即刻推送邮件通知。
+          </p>
+</div>
+<div class="shrink-0">
+<button class="px-5 py-2.5 rounded-full bg-white/5 border border-white/15 text-white/50 cursor-not-allowed font-label-numeric text-xs flex items-center gap-2" disabled="">
+<span class="w-1.5 h-1.5 rounded-full bg-spike-gold animate-pulse"></span>
+            筹备通道就绪中
+          </button>
+</div>
+</div>
+<!-- Row 2: App Store 正式版本状态 -->
+<div class="p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="space-y-1">
+<div class="flex items-center gap-3">
+<span class="text-lg text-white font-semibold font-headline-sm">App Store 正式版</span>
+<span class="px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 font-label-numeric text-xs font-medium">
+              待内测验证稳定后提审
+            </span>
+</div>
+<div class="text-xs text-secondary font-label-numeric">全球 App Store 发布计划 · 严格遵从金融应用隐私与合规规范</div>
+<p class="text-xs text-on-surface-variant pt-1 max-w-xl font-body-sm">
+            遵循 Apple 开发者审核准则，所有指标算法与私密数据均驻留于 iPhone 硬件 Enclave，不设任何虚假按钮。
+          </p>
+</div>
+<div class="shrink-0">
+<button class="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-white/40 cursor-not-allowed font-label-numeric text-xs" disabled="">
+            待 TestFlight 验证稳定
+          </button>
+</div>
+</div>
+</div>
+<!-- Compliance & Security Notice Banner -->
+<div class="mt-8 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-on-surface-variant">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[18px] text-spike-ice">shield</span>
+<span>合规声明：SPIKE 纯属图表技术分析与交易纪律训练工具，不提供任何资管、跟单或投资劝诱服务。</span>
+</div>
+<span class="font-label-numeric text-white/40 text-[11px] shrink-0">END-TO-END VERIFIED</span>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full max-w-7xl mx-auto px-6 lg:px-12 py-12 border-t border-white/[0.08] mt-12 bg-black">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+<div class="space-y-2">
+<div class="text-base font-semibold text-white tracking-tight flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-white"></span>
+        天才交易员 · SPIKE
+      </div>
+<p class="text-xs text-on-surface-variant">
+        © 2025 天才交易员 · SPIKE PRO. 保留所有权利。纯粹金融工程与纪律防线。
+      </p>
+<p class="text-[11px] text-on-surface-variant/60 max-w-xl leading-relaxed">
+        免责声明：金融衍生品及加密数字资产具有极高波动风险。本网站及 SPIKE 应用所示图表数据仅供学术交流与纪律约束演示，严禁作为实盘投资决策唯一依据。
+      </p>
+</div>
+<div class="flex flex-wrap items-center gap-6 text-xs font-label-numeric text-secondary">
+<a class="hover:text-white transition-colors" href="#">隐私权政策</a>
+<a class="hover:text-white transition-colors" href="#">服务协议</a>
+<a class="hover:text-white transition-colors" href="#">TestFlight 协议</a>
+<a class="hover:text-white transition-colors" href="#">1.618 算法白皮书</a>
+</div>
+</div>
+</footer>
+<!-- ==================== SCRIPT: HIGH DENSITY REALISTIC K-LINE & INTERACTIVITY ==================== -->
+<script>
+  // ================= 1. CANDLE GENERATION LOGIC (85+ realistic candles) =================
+  const basePrice = 96400;
+  const candleCount = 88;
+  let candlesData = [];
+  let isColdPalette = false;
+  let showFib = true;
+
+  // Generate realistic OHLC market trajectory with a Monday anchor structure
+  function generateMarketCandles() {
+    let currentClose = basePrice;
+    candlesData = [];
+
+    for (let i = 0; i < candleCount; i++) {
+      // Simulate price trending: Mon consolidation -> fake breakout -> retracement -> fib spike
+      let delta = (Math.random() - 0.48) * 140;
+      if (i > 15 && i < 28) delta += 65; // Mon push
+      if (i >= 28 && i < 35) delta += 110; // fake breakout up
+      if (i >= 35 && i < 52) delta -= 90; // severe drop back inside range
+      if (i >= 52 && i < 75) delta += 80; // accumulation & march to 1.618
+      if (i >= 75) delta += (Math.random() - 0.5) * 80; // consolidation around high
+
+      let open = currentClose;
+      let close = open + delta;
+      let high = Math.max(open, close) + Math.random() * 85;
+      let low = Math.min(open, close) - Math.random() * 85;
+      let volume = Math.floor(Math.random() * 800 + 200);
+
+      candlesData.push({
+        index: i,
+        open: open,
+        high: high,
+        low: low,
+        close: close,
+        volume: volume,
+        isBull: close >= open
+      });
+
+      currentClose = close;
+    }
+  }
+  generateMarketCandles();
+
+  // ================= 2. MOUNT CANDLES ON 3D PHONE SCREEN (70+ items) =================
+  function renderPhoneCandles() {
+    const group = document.getElementById('phone-candles-group');
+    if (!group) return;
+    group.innerHTML = '';
+
+    const phoneSlice = candlesData.slice(14, 86); // 72 candles
+    const minP = Math.min(...phoneSlice.map(c => c.low));
+    const maxP = Math.max(...phoneSlice.map(c => c.high));
+    const range = maxP - minP;
+
+    const svgW = 310;
+    const svgH = 340;
+    const step = svgW / phoneSlice.length;
+    const candleWidth = Math.max(1.8, step * 0.65);
+
+    phoneSlice.forEach((c, idx) => {
+      const x = idx * step + step / 2;
+      const yHigh = svgH - ((c.high - minP) / range) * (svgH - 24) - 12;
+      const yLow = svgH - ((c.low - minP) / range) * (svgH - 24) - 12;
+      const yOpen = svgH - ((c.open - minP) / range) * (svgH - 24) - 12;
+      const yClose = svgH - ((c.close - minP) / range) * (svgH - 24) - 12;
+
+      const yBody = Math.min(yOpen, yClose);
+      const hBody = Math.max(Math.abs(yClose - yOpen), 1.5);
+
+      const color = isColdPalette 
+        ? (c.isBull ? '#38bdf8' : '#64748b') 
+        : (c.isBull ? '#10b981' : '#f43f5e');
+
+      // Wick Line
+      const wick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      wick.setAttribute('x1', x);
+      wick.setAttribute('x2', x);
+      wick.setAttribute('y1', yHigh);
+      wick.setAttribute('y2', yLow);
+      wick.setAttribute('stroke', color);
+      wick.setAttribute('stroke-width', '1');
+      wick.setAttribute('opacity', '0.85');
+      group.appendChild(wick);
+
+      // Body Rect
+      const body = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      body.setAttribute('x', x - candleWidth / 2);
+      body.setAttribute('y', yBody);
+      body.setAttribute('width', candleWidth);
+      body.setAttribute('height', hBody);
+      body.setAttribute('fill', color);
+      body.setAttribute('rx', '0.6');
+      group.appendChild(body);
+    });
+  }
+
+  // ================= 3. MOUNT CANDLES ON FULL WORKBENCH (88 items) =================
+  function renderWorkbenchCandles() {
+    const candlesGroup = document.getElementById('wb-candles-group');
+    const volGroup = document.getElementById('wb-volume-group');
+    if (!candlesGroup || !volGroup) return;
+
+    candlesGroup.innerHTML = '';
+    volGroup.innerHTML = '';
+
+    const minP = Math.min(...candlesData.map(c => c.low));
+    const maxP = Math.max(...candlesData.map(c => c.high));
+    const range = maxP - minP;
+
+    const svgW = 1000;
+    const svgH = 460;
+    const step = svgW / candlesData.length;
+    const candleWidth = Math.max(3.2, step * 0.7);
+
+    const maxVol = Math.max(...candlesData.map(c => c.volume));
+
+    candlesData.forEach((c, idx) => {
+      const x = idx * step + step / 2;
+      const yHigh = svgH - ((c.high - minP) / range) * (svgH - 60) - 30;
+      const yLow = svgH - ((c.low - minP) / range) * (svgH - 60) - 30;
+      const yOpen = svgH - ((c.open - minP) / range) * (svgH - 60) - 30;
+      const yClose = svgH - ((c.close - minP) / range) * (svgH - 60) - 30;
+
+      const yBody = Math.min(yOpen, yClose);
+      const hBody = Math.max(Math.abs(yClose - yOpen), 2);
+
+      const color = isColdPalette 
+        ? (c.isBull ? '#38bdf8' : '#475569') 
+        : (c.isBull ? '#10b981' : '#f43f5e');
+
+      // Volume bar
+      const volH = (c.volume / maxVol) * 70;
+      const volBar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      volBar.setAttribute('x', x - candleWidth / 2);
+      volBar.setAttribute('y', svgH - volH);
+      volBar.setAttribute('width', candleWidth);
+      volBar.setAttribute('height', volH);
+      volBar.setAttribute('fill', color);
+      volBar.setAttribute('opacity', '0.4');
+      volGroup.appendChild(volBar);
+
+      // Wick
+      const wick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      wick.setAttribute('x1', x);
+      wick.setAttribute('x2', x);
+      wick.setAttribute('y1', yHigh);
+      wick.setAttribute('y2', yLow);
+      wick.setAttribute('stroke', color);
+      wick.setAttribute('stroke-width', '1.2');
+      candlesGroup.appendChild(wick);
+
+      // Candle Body
+      const body = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      body.setAttribute('x', x - candleWidth / 2);
+      body.setAttribute('y', yBody);
+      body.setAttribute('width', candleWidth);
+      body.setAttribute('height', hBody);
+      body.setAttribute('fill', color);
+      body.setAttribute('rx', '1');
+      body.setAttribute('class', 'candle-element cursor-pointer');
+      body.dataset.index = idx;
+      candlesGroup.appendChild(body);
+    });
+  }
+
+  renderPhoneCandles();
+  renderWorkbenchCandles();
+
+  // ================= 4. INTERACTIVE CROSSHAIR & HOVER ENGINE =================
+  const wbSvg = document.getElementById('workbench-svg');
+  const wbCrossX = document.getElementById('wb-cross-x');
+  const wbCrossY = document.getElementById('wb-cross-y');
+  const wbBadge = document.getElementById('wb-crosshair-badge');
+
+  wbSvg.addEventListener('mousemove', (e) => {
+    const rect = wbSvg.getBoundingClientRect();
+    const clientX = e.clientX - rect.left;
+    const clientY = e.clientY - rect.top;
+
+    const svgX = (clientX / rect.width) * 1000;
+    const svgY = (clientY / rect.height) * 460;
+
+    wbCrossX.setAttribute('y1', svgY);
+    wbCrossX.setAttribute('y2', svgY);
+    wbCrossY.setAttribute('x1', svgX);
+    wbCrossY.setAttribute('x2', svgX);
+
+    wbCrossX.classList.remove('opacity-0');
+    wbCrossY.classList.remove('opacity-0');
+    wbBadge.style.opacity = '1';
+
+    // Calculate approximate price for badge
+    const minP = Math.min(...candlesData.map(c => c.low));
+    const maxP = Math.max(...candlesData.map(c => c.high));
+    const currentHoverPrice = maxP - ((svgY - 30) / (460 - 60)) * (maxP - minP);
+    wbBadge.innerText = currentHoverPrice.toFixed(1);
+    wbBadge.style.left = `${clientX + 10}px`;
+    wbBadge.style.top = `${clientY - 25}px`;
+
+    // Map to closest candle index for Telemetry header update
+    const candleIndex = Math.min(candlesData.length - 1, Math.max(0, Math.floor((svgX / 1000) * candlesData.length)));
+    const candle = candlesData[candleIndex];
+    if (candle) {
+      document.getElementById('wb-open').innerText = candle.open.toFixed(1);
+      document.getElementById('wb-high').innerText = candle.high.toFixed(1);
+      document.getElementById('wb-low').innerText = candle.low.toFixed(1);
+      document.getElementById('wb-close').innerText = candle.close.toFixed(1);
+      document.getElementById('wb-vol').innerText = `${candle.volume} BTC`;
+      const chg = (((candle.close - candle.open) / candle.open) * 100).toFixed(2);
+      const chgEl = document.getElementById('wb-change');
+      chgEl.innerText = (chg >= 0 ? `+${chg}%` : `${chg}%`);
+      chgEl.className = chg >= 0 ? 'text-spike-bull font-bold' : 'text-spike-bear font-bold';
+    }
+  });
+
+  wbSvg.addEventListener('mouseleave', () => {
+    wbCrossX.classList.add('opacity-0');
+    wbCrossY.classList.add('opacity-0');
+    wbBadge.style.opacity = '0';
+  });
+
+  // Crosshair for Phone Screen
+  const phoneSvg = document.getElementById('phone-candlestick-svg');
+  const phoneCrossX = document.getElementById('phone-cross-x');
+  const phoneCrossY = document.getElementById('phone-cross-y');
+  const phoneBadge = document.getElementById('phone-crosshair-badge');
+
+  phoneSvg.addEventListener('mousemove', (e) => {
+    const rect = phoneSvg.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 310;
+    const y = ((e.clientY - rect.top) / rect.height) * 360;
+
+    phoneCrossX.setAttribute('y1', y);
+    phoneCrossX.setAttribute('y2', y);
+    phoneCrossY.setAttribute('x1', x);
+    phoneCrossY.setAttribute('x2', x);
+
+    phoneCrossX.classList.remove('opacity-0');
+    phoneCrossY.classList.remove('opacity-0');
+    phoneBadge.style.opacity = '1';
+    phoneBadge.style.left = `${Math.min(200, e.clientX - rect.left + 8)}px`;
+    phoneBadge.style.top = `${Math.max(10, e.clientY - rect.top - 20)}px`;
+
+    const approxPrice = 99000 - (y / 360) * 3000;
+    phoneBadge.innerText = approxPrice.toFixed(1);
+  });
+
+  phoneSvg.addEventListener('mouseleave', () => {
+    phoneCrossX.classList.add('opacity-0');
+    phoneCrossY.classList.add('opacity-0');
+    phoneBadge.style.opacity = '0';
+  });
+
+  // ================= 5. BUTTON ACTIONS: THEME & INDICATORS =================
+  function toggleCandleTheme() {
+    isColdPalette = !isColdPalette;
+    const dot = document.getElementById('palette-dot');
+    const label = document.getElementById('palette-label');
+    if (isColdPalette) {
+      dot.className = "w-2 h-2 rounded-full bg-spike-ice";
+      label.innerText = "冷色钛白";
+    } else {
+      dot.className = "w-2 h-2 rounded-full bg-spike-bull";
+      label.innerText = "经典绿红";
+    }
+    renderPhoneCandles();
+    renderWorkbenchCandles();
+  }
+
+  function toggleFibLines() {
+    showFib = !showFib;
+    const overlay = document.getElementById('fib-overlay-lines');
+    const btn = document.getElementById('fib-toggle-btn');
+    if (showFib) {
+      overlay.style.display = 'block';
+      btn.className = "px-3 py-1.5 rounded-xl bg-spike-gold/10 border border-spike-gold/30 text-xs font-label-numeric text-spike-gold hover:bg-spike-gold/20 flex items-center gap-1 transition-colors";
+    } else {
+      overlay.style.display = 'none';
+      btn.className = "px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-label-numeric text-secondary hover:text-white flex items-center gap-1 transition-colors";
+    }
+  }
+
+  function setTimeframe(tf) {
+    document.querySelectorAll('.tf-btn').forEach(btn => {
+      if (btn.innerText === tf) {
+        btn.className = "px-3 py-1 rounded-lg bg-white text-black font-semibold tf-btn";
+      } else {
+        btn.className = "px-3 py-1 rounded-lg text-secondary hover:text-white tf-btn";
+      }
+    });
+    // Reshuffle slight data to simulate timeframe change
+    generateMarketCandles();
+    renderPhoneCandles();
+    renderWorkbenchCandles();
+  }
+
+  // ================= 6. POST-TRADE LOG INTERACTIVE HIGHLIGHTING =================
+  function highlightChartTrade(tradeId) {
+    const cards = document.querySelectorAll('.trade-review-card');
+    cards.forEach((c, idx) => {
+      if (idx + 1 === tradeId) {
+        c.classList.add('border-spike-ice', 'bg-white/[0.04]');
+      } else {
+        c.classList.remove('border-spike-ice', 'bg-white/[0.04]');
+      }
+    });
+
+    // Animate crosshair position on workbench to point to relevant anchor
+    const targets = {
+      1: { x: 340, y: 165, price: '97,890.0' },
+      2: { x: 680, y: 330, price: '3,420.0' },
+      3: { x: 500, y: 220, price: '观望未入场' }
+    };
+
+    const target = targets[tradeId];
+    if (target) {
+      wbCrossX.setAttribute('y1', target.y);
+      wbCrossX.setAttribute('y2', target.y);
+      wbCrossY.setAttribute('x1', target.x);
+      wbCrossY.setAttribute('x2', target.x);
+      wbCrossX.classList.remove('opacity-0');
+      wbCrossY.classList.remove('opacity-0');
+      wbBadge.innerText = target.price;
+      wbBadge.style.opacity = '1';
+      wbBadge.style.left = `${(target.x / 1000) * wbSvg.clientWidth + 10}px`;
+      wbBadge.style.top = `${(target.y / 460) * wbSvg.clientHeight - 20}px`;
+    }
+  }
+
+  // ================= 7. 3D PHONE SUBTLE PARALLAX =================
+  const heroPhone = document.getElementById('hero-phone');
+  document.addEventListener('mousemove', (e) => {
+    if (window.innerWidth < 1024) return;
+    const x = (e.clientX / window.innerWidth - 0.5) * 12;
+    const y = (e.clientY / window.innerHeight - 0.5) * 12;
+    heroPhone.style.transform = `rotateY(${-14 + x}deg) rotateX(${7 - y}deg) rotateZ(1.5deg)`;
+  });
+</script>
+</body></html>

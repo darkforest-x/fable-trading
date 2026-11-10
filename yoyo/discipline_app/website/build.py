@@ -1,4 +1,4 @@
-"""Render verified Apple release links into a standalone, JavaScript-free site."""
+"""Render verified Apple release links into the standalone product site; installation links also work without JavaScript."""
 import json
 import re
 from html import escape

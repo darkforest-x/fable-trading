@@ -2,7 +2,7 @@
 
 ## iPhone 原生 App 官网
 
-[天才交易员 · SPIKE](https://spike-trader.zc994739211.chatgpt.site) 是独立的 GPT Sites 静态官网，只含产品示意和安装入口。当前没有对外的 TestFlight / App Store 链接；获得 Apple 的实际链接后更新 `website/releases.json`，运行 `python3 website/build.py`（在本目录），再发布同一 Sites 项目。设计来自 [Stitch 黑色产品页](https://stitch.withgoogle.com/projects/12127245077614519970?node-id=a8fac6c520fd4cd9abf734daf6964be8)，原稿保存在 `design/official-site/`。
+[天才交易员 · SPIKE](https://spike-trader.zc994739211.chatgpt.site) 是独立的 GPT Sites 静态官网，展示冻结的 OKX BTC 永续行情、四个监控分区、可检索的策略小册、回测账本摘录和 TestFlight 安装说明，不连接交易服务。当前没有对外的 TestFlight / App Store 链接；获得 Apple 的实际链接后更新 `website/releases.json`，运行 `python3 website/build.py`（在本目录），再发布同一 Sites 项目。设计来自 [Stitch 黑色产品页](https://stitch.withgoogle.com/projects/12127245077614519970?node-id=7907414fcce34fa8bf2baf8fc176465c)，原稿保存在 `design/official-site/`。
 
 自用真机包会嵌入个人服务令牌。面向客户的分发构建必须移除它并改为独立授权；不将自用包放到官网或上传 TestFlight。
 

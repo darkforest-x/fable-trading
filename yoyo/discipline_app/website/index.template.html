@@ -3,36 +3,58 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#060709">
 <title>天才交易员 · SPIKE｜iPhone 原生 App 官网</title>
 <meta name="description" content="追踪 1.618 触价，查看原生 K 线，回到每一笔模拟交易发生的那一刻。了解天才交易员 iPhone App 及官方安装方式。">
-<link rel="icon" href="assets/icon.png"><link rel="apple-touch-icon" href="assets/icon.png"><link rel="stylesheet" href="site.css"><script defer src="showcase.js"></script>
+<link rel="icon" href="assets/icon.png"><link rel="apple-touch-icon" href="assets/icon.png"><link rel="stylesheet" href="site.css"><link rel="stylesheet" href="guide.css"><script defer src="chart-demo.js"></script><script defer src="book-excerpts.js"></script><script defer src="product-catalog.js"></script><script defer src="showcase.js"></script><script defer src="guide.js"></script>
 </head><body id="top">
-<header><div class="wrap bar"><a class="brand" href="#top" aria-label="天才交易员，返回顶部"><img width="28" height="28" src="assets/icon.png" alt=""><strong>SPIKE</strong><span>天才交易员</span></a><nav aria-label="主导航"><a href="#showcase">产品体验</a><a href="#install">安装方式 <b aria-hidden="true">↗</b></a></nav></div></header>
+<header><div class="wrap bar"><a class="brand" href="#top" aria-label="天才交易员，返回顶部"><img width="28" height="28" src="assets/icon.png" alt=""><strong>SPIKE</strong><span>天才交易员</span></a><nav aria-label="主导航"><a href="#chart-lab">K 线</a><a class="deep-nav" href="#monitor">监控</a><a class="deep-nav" href="#library">策略小册</a><a href="#install">安装方式 <b aria-hidden="true">↗</b></a></nav></div></header>
 <main>
 <section id="showcase" class="hero" aria-labelledby="headline">
 <div class="wrap hero-grid">
 <div class="hero-copy"><p class="eyebrow"><i></i> SPIKE FOR IPHONE</p>
 <h1 id="headline">在波动中，<br><span>守住纪律。</span></h1>
-<p class="intro">看见触价，读懂 K 线，回到交易发生的那一刻。<br class="wide">天才交易员，为 iPhone 原生打造。</p>
-<a class="primary" href="#install">查看安装方式 <span aria-hidden="true">↗</span></a>
+<p class="intro">从周一的高低点开始，读图、看触价、回放每一笔。<br class="wide">探索 <a href="#monitor">4 个监控分区</a>与<a href="#library"> 17 本策略小册</a>。</p>
+<div class="hero-actions"><a class="primary" href="#chart-lab">体验 K 线 <span aria-hidden="true">↓</span></a><a class="secondary-action" href="#install">安装方式 ↗</a></div>
 </div>
 <figure class="exhibit" id="exhibit">
 <div class="halo" aria-hidden="true"></div><div class="rimlight" aria-hidden="true"></div>
 <div class="stage" id="stage" aria-hidden="true"><div class="device" id="device"><div class="slice s0"></div><div class="slice s1"></div><div class="slice s2"></div><div class="slice s3"></div><div class="slice s4"></div><div class="slice s5"></div><div class="hardware key-a"></div><div class="hardware key-b"></div><div class="hardware key-c"></div>
 <div class="face"><div class="glass"><div class="status"><b>9:41</b><i class="island"></i><svg viewBox="0 0 31 9" width="32" height="10"><path d="M0 8V6h2v2zm3 0V4h2v4zm3 0V2h2v6zm3 0V0h2v8z" fill="#dce3ea"/><rect x="15" y="1" width="13" height="6" rx="1.8" stroke="#dce3ea" fill="none"/><rect x="17" y="2.5" width="9" height="3" rx=".7" fill="#dce3ea"/><path d="M30 3v2" stroke="#dce3ea"/></svg></div>
 <div class="screen-brand"><b>SPIKE</b><span>MARKET STUDIO</span></div>
-<div class="screen-inner" id="screen-inner"><div class="screen-head"><span id="screen-tag">触价监控</span><small id="screen-code">01 / 03</small></div>
+<div class="screen-inner" id="screen-inner"><div class="screen-head"><span id="screen-tag">1.618 图表</span><small id="screen-code">01 / 03</small></div>
 <div class="pair">BTC <span>/ USDT</span></div><div class="market"><i></i><span id="screen-sub">周一 1.618</span></div>
-<div class="chartbox"><img id="chart-art" alt="" width="240" height="160" src="assets/touch.svg"></div>
-<div class="scale"><span>09:00</span><span>12:00</span><span>15:00</span></div>
-<div class="data-row"><i></i><div><small id="screen-log">最新触价</small><strong id="screen-value">上沿 · 1.618</strong></div><b id="screen-time">14:35</b></div></div>
+<div id="phone-chart" class="phone-chart"></div>
+<div class="data-row"><i></i><div><small id="screen-log">图表周期</small><strong id="screen-value">15 分钟</strong></div><b id="screen-time">15m</b></div></div>
 <div class="phone-foot">SPIKE <span>/</span> 界面示意</div><div class="home"></div></div></div></div></div>
 <figcaption><span>FIG. <b id="fig-index">01</b> / 03</span><span class="caption-line"></span><span>产品演示</span></figcaption>
 </figure></div>
-<div class="wrap switch-row"><div id="feature-panel" class="scene-description" role="tabpanel" aria-labelledby="tab-touch"><p class="panel-tag">FEATURE <b id="feature-index">01</b> <span>/ 03</span></p><h2 id="feature-title">关键价位，一眼可见。</h2><p id="feature-body">按时间查看触价记录，对照每次触价的方向与评分。</p></div>
-<div class="selector"><div class="tabs" role="tablist" aria-label="产品演示场景"><button type="button" role="tab" id="tab-touch" aria-selected="true" aria-controls="feature-panel" data-scene="0"><small>01</small> 触价</button><button type="button" role="tab" id="tab-chart" aria-selected="false" aria-controls="feature-panel" tabindex="-1" data-scene="1"><small>02</small> 图表</button><button type="button" role="tab" id="tab-review" aria-selected="false" aria-controls="feature-panel" tabindex="-1" data-scene="2"><small>03</small> 复盘</button></div><p class="interaction-hint"><span aria-hidden="true">↔</span> <span class="mouse-hint">拖动机身查看角度，点按切换场景</span><span class="touch-hint">轻扫机身或点按切换场景</span></p></div></div>
+<div class="wrap switch-row"><div id="feature-panel" class="scene-description" role="tabpanel" aria-labelledby="tab-chart"><p class="panel-tag">FEATURE <b id="feature-index">01</b> <span>/ 03</span></p><h2 id="feature-title">把触价放回 K 线里。</h2><p id="feature-body">默认打开 15 分钟图。先看周一高低，再看价格离区间有多远。</p></div>
+<div class="selector"><div class="tabs" role="tablist" aria-label="产品演示场景"><button type="button" role="tab" id="tab-chart" aria-selected="true" aria-controls="feature-panel" data-scene="0"><small>01</small> 图表</button><button type="button" role="tab" id="tab-touch" aria-selected="false" aria-controls="feature-panel" tabindex="-1" data-scene="1"><small>02</small> 触价</button><button type="button" role="tab" id="tab-review" aria-selected="false" aria-controls="feature-panel" tabindex="-1" data-scene="2"><small>03</small> 复盘</button></div><p class="interaction-hint"><span aria-hidden="true">↔</span> <span class="mouse-hint">拖动机身查看角度，点按切换场景</span><span class="touch-hint">轻扫机身或点按切换场景</span></p></div></div>
 <noscript><div class="wrap">产品提供触价监控、原生 K 线及模拟交易复盘。下方可查看安装状态。</div></noscript>
 </section>
-<section id="install" class="install" aria-labelledby="install-title"><div class="wrap install-grid"><div><p class="eyebrow"><i></i> AVAILABILITY</p><h2 id="install-title">在 iPhone 上安装。</h2><p class="platform">适用于 iOS 26 或更高版本。</p></div><div class="channels">
-<article><div><small>01 / BETA</small><h3>TestFlight 内测</h3><p>开放后，使用邀请链接安装测试版。</p></div>{{testflight}}</article>
-<article><div><small>02 / RELEASE</small><h3>App Store 正式版</h3><p>上架后，通过 App Store 下载与更新。</p></div>{{app_store}}</article>
-</div></div></section></main>
+<section class="chapter chart-chapter" id="chart-lab" aria-labelledby="chart-heading"><div class="wrap">
+<p class="eyebrow"><i></i> 01 / MARKET WORKSPACE</p>
+<div class="section-heading"><div><h2 id="chart-heading">周一 1.618 工作台</h2><p>这是 App 默认打开的图表。切换周期或点一根 K 线，看同一段行情如何变化。</p></div></div>
+<div class="terminal">
+<div class="terminal-head"><div><span class="instrument">BTC <em>/ USDT</em></span><small>永续合约 · 历史行情</small></div>
+<div class="chart-options"><div class="segment" role="group" aria-label="图表周期"><button type="button" data-period="5m" aria-pressed="false">5m</button><button type="button" data-period="15m" aria-pressed="true">15m</button><button type="button" data-period="1H" aria-pressed="false">1H</button></div>
+<div class="segment palette" role="group" aria-label="K 线配色"><button type="button" data-palette="workbench" aria-pressed="true">工作台</button><button type="button" data-palette="classic" aria-pressed="false">经典红绿</button></div></div></div>
+<div class="quote" aria-label="所选 K 线数据"><span id="bar-stamp">选择一根 K 线</span><span>开 <b data-quote="o">—</b></span><span>高 <b data-quote="h">—</b></span><span>低 <b data-quote="l">—</b></span><span>收 <b data-quote="c">—</b></span></div>
+<div class="market-plot" id="market-plot" aria-label="可交互历史 K 线图"></div>
+<div class="chart-footer"><span id="market-source">OKX · 2026/02/20–25 UTC · 横轴：纽约时间 · 非实时行情</span><div class="plot-tools"><button type="button" id="chart-extent" aria-pressed="false">1.618 全幅</button><button type="button" id="chart-reset">重置 ↺</button></div></div></div>
+<div class="chart-explainer"><strong>怎么看这张图？</strong><p>工作台配色里，<b>绿色 K 线标出纽约周一</b>，淡色云带是 EMA20 与 EMA50。周一收盘后，以当天高低点为两端，向外各延伸 0.618 倍区间宽度，得到两条 1.618 参考线。</p></div>
+<a id="back-from-review" class="back-link" href="#example-trade" hidden>← 返回单笔复盘</a>
+</div></section>
+<section class="chapter" id="monitor" aria-labelledby="monitor-heading"><div class="wrap">
+<p class="eyebrow"><i></i> 02 / MONITOR</p><div class="section-heading"><div><h2 id="monitor-heading">监控中心</h2><p>App 底部有合约、监控、1.618、持仓、统计五个入口。这里展开「监控」：选一页，看看模拟账户和市场事件是怎么记录的。</p></div></div>
+<div class="monitor-layout"><div class="catalog-menu" id="monitor-menu" aria-label="选择监控分区"></div><div id="monitor-panel" class="catalog-panel"><span class="micro">PAPER</span><h3>模拟盘</h3><p>前向模拟、回测复刻和研究小册分别展示。</p></div></div>
+</div></section>
+<section class="chapter library-chapter" id="library" aria-labelledby="library-heading"><div class="wrap">
+<p class="eyebrow"><i></i> 03 / FIELD NOTES</p><div class="section-heading"><div><h2 id="library-heading">打开策略小册</h2><p>选一本，先读它观察的信号，再看这条规则能说明什么、不能说明什么。</p></div></div>
+<div class="library-layout"><div class="book-controls"><div class="book-search"><label for="book-find">小册目录</label><span id="book-total"></span><input type="search" id="book-find" placeholder="搜索名称、关键词或版本" autocomplete="off"></div><div class="library-index" id="book-menu" aria-label="选择策略小册"></div></div><article class="book-page" id="book-panel"><span class="micro">策略小册</span><h3>周一 1.618</h3><p>从触价到确认，了解每个策略具体在观察什么。</p></article></div>
+<div class="archive-exhibit"><div class="archive-copy"><span class="micro">ORIGINAL CHARTS / 原始回放</span><h3>打开当时的开仓图</h3><p>云带 v1.7 小册保存了 <b id="archive-count">1,252</b> 张历史回测图。这里按原目录顺序摘录前三笔，保留当时的 K 线、开平仓标记与时间精度。</p><div class="archive-tabs" id="archive-tabs" aria-label="选择历史回测图"></div></div><figure><a id="archive-zoom" href="assets/replay-01.webp" target="_blank" rel="noopener"><img id="archive-image" width="1280" height="620" loading="lazy" src="assets/replay-01.webp" alt="NEO 的云带 v1.7 原始历史回测图"></a><figcaption id="archive-caption">历史回测 · 点击查看原图 ↗</figcaption></figure></div>
+<div class="replay-strip" id="example-trade"><div><span class="micro">TRADE REPLAY / 教学示例</span><h3>把一笔交易放回图上</h3><p id="trade-stamp">用同一段历史行情标出示意入场和出场，查看持有期间的波动。</p><small>示意点位只用于演示读图，不是策略成交记录。</small></div><a href="#chart-lab" id="open-review">在图上复盘 <span aria-hidden="true">↗</span></a></div>
+</div></section>
+<section id="install" class="install" aria-labelledby="install-title"><div class="wrap"><p class="eyebrow"><i></i> 04 / TESTFLIGHT</p><div class="section-heading"><div><h2 id="install-title">在 iPhone 上参加内测</h2><p>需要 iOS 26 或更高版本。TestFlight 是 Apple 的免费测试工具，可提前安装。</p></div></div>
+<ol class="install-steps"><li><span>01</span><h3>安装 TestFlight</h3><p>在 iPhone 的 App Store 下载 Apple 提供的测试工具。</p><a href="https://apps.apple.com/cn/app/testflight/id899247664">获取 Apple TestFlight ↗</a></li><li><span>02</span><h3>打开本 App 的邀请</h3><p>公开邀请开放后，用 iPhone 打开下方的内测入口，也可使用开发者发给你的邀请。</p></li><li><span>03</span><h3>接受并安装</h3><p>在 TestFlight 中点「接受」和「安装」。新测试版本也从这里更新，不需要连接 Mac。</p></li></ol>
+<div class="channels install-channels"><article><div><small>BETA</small><h3>天才交易员 · 内测版</h3></div>{{testflight}}</article><article><div><small>RELEASE</small><h3>App Store 正式版</h3></div>{{app_store}}</article></div>
+</div></section></main>
 <footer><div class="wrap bar"><span>SPIKE <i>/</i> 天才交易员</span><a href="#top">返回顶部 ↑</a></div></footer></body></html>
