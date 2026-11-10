@@ -224,6 +224,61 @@ def _candidate(event, arm, found, bars):
                 target_price=max(edge, entry * 0.96)), 'confirmed_entry'
 
 
+def _reclassify_coverage(ledger):
+    """Separate source mismatches from event times outside the local archive."""
+    f = ledger.copy()
+    for c in ('touch', 'first_15m', 'last_15m'):
+        if c in f:
+            f[c] = pd.to_datetime(f[c], utc=True, errors='coerce')
+    statuses, mismatches = [], []
+    for _, row in f.iterrows():
+        status = row.get('coverage_status', 'unknown')
+        mismatch = False
+        file_value = row.get('file_15m')
+        has_file = isinstance(file_value, str) and bool(file_value)
+        if not has_file:
+            status = 'no_15m_file' if status == 'no_15m_manifest' else status
+        else:
+            h1_touch = bool(row.get('h1_event_bar_touch', False))
+            literal = bool(row.get('literal_touch_15m', False))
+            hour_complete = bool(row.get('touch_hour_complete_15m', False))
+            prior_hit = bool(row.get('earlier_15m_touch_before_recorded_hour', False))
+            prior_complete = bool(row.get('prior_15m_history_complete', False))
+            if not h1_touch:
+                status, mismatch = 'h1_touch_mismatch', True
+            elif not literal:
+                touch = row.get('touch')
+                first, last = row.get('first_15m'), row.get('last_15m')
+                if pd.notna(last) and last < touch:
+                    status = '15m_archive_ends_before_touch'
+                elif pd.notna(first) and first >= touch + HOUR:
+                    status = '15m_archive_starts_after_touch'
+                elif hour_complete:
+                    status, mismatch = '15m_h1_level_touch_mismatch', True
+                else:
+                    status = 'incomplete_15m_touch_hour'
+            elif not hour_complete:
+                status = 'incomplete_15m_touch_hour'
+            elif prior_hit:
+                status, mismatch = 'earlier_15m_touch_mismatch', True
+            elif not prior_complete:
+                status = 'prior_15m_history_incomplete'
+            else:
+                status = 'eligible'
+        statuses.append(status)
+        mismatches.append(mismatch)
+    f['coverage_status'] = statuses
+    f['source_touch_mismatch'] = mismatches
+    for arm in ('15m', '1h'):
+        key = f'{arm}_status'
+        if key not in f:
+            f[key] = f.coverage_status
+        else:
+            f[key] = f[key].fillna(f.coverage_status)
+            f.loc[f[key].eq('no_literal_15m_touch'), key] = f.coverage_status
+    return f
+
+
 def _native_trades(bars, candidates, *, arm, stress=False):
     """Resolve all candidates through VectorBT native stops and Portfolio."""
     if not candidates:
@@ -411,7 +466,7 @@ def _process_symbol(events, source_row, path):
 
 
 def _summarize(ledger, trades):
-    l = pd.DataFrame(ledger)
+    l = _reclassify_coverage(pd.DataFrame(ledger))
     t = pd.DataFrame(trades)
     if not t.empty:
         t['touch'] = pd.to_datetime(t.touch, utc=True)
@@ -463,8 +518,6 @@ def _summarize(ledger, trades):
     metrics = pd.DataFrame(rows)
     metrics.to_csv(OUT / 'metrics.csv', index=False)
     status_counts = l.coverage_status.value_counts(dropna=False).to_dict()
-    for arm in ('15m', '1h'):
-        status_counts[f'{arm}_confirmed_entries'] = int(l.get(f'{arm}_status', pd.Series(dtype=str)).eq('confirmed_entry').sum())
     base = t[(t.scenario == 'base') & (t.status == 'closed')] if not t.empty else pd.DataFrame()
     both = l[(l.get('15m_status', '') == 'confirmed_entry') & (l.get('1h_status', '') == 'confirmed_entry')]
     paired = pd.DataFrame()
@@ -472,28 +525,36 @@ def _summarize(ledger, trades):
         p = base[base.event_id.isin(both.event_id)].pivot(index='event_id', columns='arm',
                                                           values=['entry_time', 'confirm_time', 'net_return_pct'])
         if ('net_return_pct', '15m') in p and ('net_return_pct', '1h') in p:
-            p['net_return_difference_15m_minus_1h'] = p[('net_return_pct', '15m')] - p[('net_return_pct', '1h')]
             paired = p.reset_index()
             paired.columns = ['_'.join(str(x) for x in c if str(x)) if isinstance(c, tuple) else str(c)
                               for c in paired.columns]
+            paired['net_return_difference_15m_minus_1h'] = (
+                paired['net_return_pct_15m'] - paired['net_return_pct_1h'])
             paired.to_csv(OUT / 'paired_clocks.csv', index=False)
     file_present = l.get('file_15m', pd.Series('', index=l.index)).fillna('').ne('')
     h1_touch_values = l.get('h1_event_bar_touch', pd.Series(False, index=l.index))
-    literal_values = l.get('literal_touch_15m', pd.Series(False, index=l.index))
     prior_values = l.get('earlier_15m_touch_before_recorded_hour', pd.Series(False, index=l.index))
-    prior_complete_values = l.get('prior_15m_history_complete', pd.Series(False, index=l.index))
     summary = {
         'experiment_id': CONFIG['experiment_id'],
         'vectorbt_version': vbt.__version__,
         'source_upper_events': int(len(l)),
+        'source_upper_symbols': int(l.symbol.nunique()),
+        'symbols_with_local_15m_file': int(l.loc[file_present, 'symbol'].nunique()),
+        'events_with_local_15m_file': int(file_present.sum()),
+        'events_eligible_with_complete_15m_touch_history': int(l.coverage_status.eq('eligible').sum()),
         'coverage_status_counts': status_counts,
         'arm_status_counts': {arm: l[f'{arm}_status'].value_counts(dropna=False).to_dict()
                               for arm in ('15m', '1h') if f'{arm}_status' in l.columns},
+        'confirmed_entries_by_arm': {arm: int(l[f'{arm}_status'].eq('confirmed_entry').sum())
+                                     for arm in ('15m', '1h')},
         'recorded_h1_source_touch_mismatches': int(h1_touch_values.eq(False).sum()),
-        '15m_literal_touch_mismatches': int(literal_values.eq(False).sum()),
-        'incomplete_15m_touch_hours': int((file_present & l.get('touch_hour_complete_15m', pd.Series(False, index=l.index)).eq(False)).sum()),
+        '15m_h1_level_touch_mismatches': int(l.coverage_status.eq('15m_h1_level_touch_mismatch').sum()),
+        'events_after_local_15m_archive_end': int(l.coverage_status.eq('15m_archive_ends_before_touch').sum()),
+        'events_before_local_15m_archive_start': int(l.coverage_status.eq('15m_archive_starts_after_touch').sum()),
+        'incomplete_15m_touch_hours': int(l.coverage_status.eq('incomplete_15m_touch_hour').sum()),
         'earlier_15m_touch_before_recorded_h1_hour': int(prior_values.eq(True).sum()),
-        'prior_15m_history_incomplete': int((file_present & prior_complete_values.eq(False)).sum()),
+        'prior_15m_history_incomplete': int(l.coverage_status.eq('prior_15m_history_incomplete').sum()),
+        'source_touch_mismatch_events': int(l.source_touch_mismatch.eq(True).sum()),
         'shared_confirmed_events': int(len(both)),
         'paired_closed_events': int(len(paired)),
         'paired_mean_entry_lag_15m_minus_1h_minutes': (
@@ -525,13 +586,23 @@ def _summarize(ledger, trades):
     summary = json_safe(summary)
     (OUT / 'summary.json').write_text(json.dumps(summary, indent=2, allow_nan=False) + '\n')
     print(json.dumps({k: summary[k] for k in ('source_upper_events', 'coverage_status_counts',
-          'recorded_h1_source_touch_mismatches', '15m_literal_touch_mismatches',
+          'events_with_local_15m_file', 'events_eligible_with_complete_15m_touch_history',
+          'recorded_h1_source_touch_mismatches', '15m_h1_level_touch_mismatches',
           'earlier_15m_touch_before_recorded_h1_hour', 'shared_confirmed_events', 'paired_closed_events')},
           indent=2))
     print(metrics.to_string(index=False))
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--summarize-only', action='store_true')
+    args = parser.parse_args()
+    if args.summarize_only:
+        ledger = pd.read_csv(OUT / 'event_eligibility.csv.gz')
+        trades = pd.read_csv(OUT / 'trades.csv.gz')
+        _summarize(ledger.to_dict('records'), trades.to_dict('records'))
+        return
     events = _read_events()
     sources = _source_map()
     ledger, trades = [], []
