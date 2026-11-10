@@ -105,4 +105,52 @@ final class StrategyFrameTests: XCTestCase {
         XCTAssertEqual(StrategyFmt.decimals(114.46), 2)
         XCTAssertEqual(StrategyFmt.decimals(0.0123), 6)
     }
+
+    func testCloudReplayViewportFitsTradeInFinalPhoneWidthAndLongHold() throws {
+        let period = 12 * 60 * 60.0
+        let exit = 1_794_096_000.0 + 11 * 60 * 60 // 2026-11-08 11:00 UTC, inside the 00:00 candle.
+        let entry = exit - (3 * 24 * 60 * 60 + 23 * 60 * 60)
+        let lastBar = exit - 11 * 60 * 60
+        let firstBar = lastBar - 71 * period
+        let width: CGFloat = 275
+        let fit = try XCTUnwrap(ChartReplayViewportFit.make(plotWidth: width, periodSeconds: period,
+                                                            firstBarTime: firstBar, lastBarTime: lastBar,
+                                                            focus: entry...exit, rightPad: 5))
+        XCTAssertGreaterThanOrEqual(fit.visiblePeriods, 25)
+        XCTAssertLessThanOrEqual(fit.visiblePeriods, 42)
+
+        let shortAxis = ChartTimeAxis(times: (0..<72).map { firstBar + Double($0) * period }, periodSeconds: period)
+        let shortRight = max(shortAxis.position(atTime: lastBar), shortAxis.position(atTime: exit)) + 5 - fit.offset
+        let shortEntryX = width - (shortRight - shortAxis.position(atTime: entry)) * fit.spacing
+        let shortExitX = width - (shortRight - shortAxis.position(atTime: exit)) * fit.spacing
+        XCTAssertTrue((0...width).contains(shortEntryX))
+        XCTAssertTrue((0...width).contains(shortExitX))
+
+        let longEntry = firstBar + 10 * period
+        let longExit = longEntry + 100 * period
+        let longFit = try XCTUnwrap(ChartReplayViewportFit.make(plotWidth: width, periodSeconds: period,
+                                                                firstBarTime: firstBar, lastBarTime: longExit,
+                                                                focus: longEntry...longExit, rightPad: 5))
+        let longAxis = ChartTimeAxis(times: [firstBar, longExit], periodSeconds: period)
+        let longRight = longAxis.position(atTime: longExit) + 5 - longFit.offset
+        let longEntryX = width - (longRight - longAxis.position(atTime: longEntry)) * longFit.spacing
+        let longExitX = width - (longRight - longAxis.position(atTime: longExit)) * longFit.spacing
+        XCTAssertTrue((0...width).contains(longEntryX))
+        XCTAssertTrue((0...width).contains(longExitX))
+        XCTAssertGreaterThan(longFit.visiblePeriods, 42)
+    }
+
+    func testSparseChartTimeAxisPreservesMissingPeriodsWithoutSnapping() {
+        let period = 12 * 60 * 60.0
+        let start = 1_794_000_000.0
+        let axis = ChartTimeAxis(times: [start, start + period, start + 3 * period], periodSeconds: period)
+        XCTAssertEqual(axis.times.count, 3)
+        XCTAssertEqual(Double(axis.position(forFractionalBarIndex: 2) - axis.position(forFractionalBarIndex: 1)), 2, accuracy: 1e-6)
+
+        let missingTime = start + 2 * period
+        let sourceIndex = axis.barIndex(atTime: missingTime)
+        let mappedPosition = axis.position(forFractionalBarIndex: sourceIndex)
+        XCTAssertEqual(Double(mappedPosition), Double(axis.position(atTime: missingTime)), accuracy: 1e-6)
+        XCTAssertEqual(axis.nearestBarIndex(atPosition: mappedPosition), 1) // the gap is not synthesized as a candle.
+    }
 }

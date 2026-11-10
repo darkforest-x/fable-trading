@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-surface-dim" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>云带历史开单 · 成交起止</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-tint": "#004fe5",
+            "tertiary": "#6e5000",
+            "on-surface": "#181c23",
+            "on-secondary-fixed-variant": "#00504e",
+            "surface-dim": "#d7dae5",
+            "on-primary-fixed-variant": "#003bb0",
+            "on-primary-container": "#eeefff",
+            "secondary-fixed-dim": "#3edbd7",
+            "secondary-container": "#60f5f0",
+            "on-primary-fixed": "#00164f",
+            "tertiary-fixed": "#ffdea1",
+            "surface-bright": "#f9f9ff",
+            "background": "#f9f9ff",
+            "on-tertiary": "#ffffff",
+            "outline-variant": "#c3c5d9",
+            "primary-fixed-dim": "#b6c4ff",
+            "on-surface-variant": "#434656",
+            "on-secondary-container": "#006e6c",
+            "error": "#ba1a1a",
+            "secondary-fixed": "#64f8f3",
+            "on-tertiary-fixed-variant": "#5c4300",
+            "on-background": "#181c23",
+            "surface-container": "#ebedf9",
+            "tertiary-container": "#8c6700",
+            "outline": "#737688",
+            "on-secondary-fixed": "#00201f",
+            "on-error": "#ffffff",
+            "error-container": "#ffdad6",
+            "tertiary-fixed-dim": "#fabd22",
+            "on-tertiary-fixed": "#261900",
+            "surface-container-lowest": "#ffffff",
+            "surface": "#f9f9ff",
+            "on-primary": "#ffffff",
+            "inverse-primary": "#b6c4ff",
+            "primary": "#0047cf",
+            "on-tertiary-container": "#ffeed3",
+            "inverse-on-surface": "#eef0fc",
+            "on-error-container": "#93000a",
+            "surface-variant": "#dfe2ed",
+            "surface-container-high": "#e5e8f3",
+            "primary-fixed": "#dce1ff",
+            "surface-container-highest": "#dfe2ed",
+            "secondary": "#006a67",
+            "primary-container": "#165dff",
+            "inverse-surface": "#2c3039",
+            "surface-container-low": "#f1f3ff",
+            "on-secondary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-lg": "1rem",
+            "space-xl": "1.5rem",
+            "gutter": "1rem",
+            "space-2xl": "2.25rem",
+            "margin-mobile": "1rem",
+            "space-xs": "0.25rem",
+            "space-2xs": "0.125rem",
+            "gutter-mobile": "0.75rem",
+            "margin": "1.5rem",
+            "space-sm": "0.5rem",
+            "space-md": "0.75rem"
+          },
+          "fontFamily": {
+            "label-mono-md": ["JetBrains Mono"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "body-lg": ["Inter"],
+            "label-mono-sm": ["JetBrains Mono"],
+            "body-md": ["Inter"],
+            "label-mono-lg": ["JetBrains Mono"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "body-sm": ["Inter"]
+          },
+          "fontSize": {
+            "label-mono-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "headline-sm": ["15px", { "lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "headline-md": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "display-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "display-lg": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-lg": ["15px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "label-mono-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "body-md": ["13px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-mono-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "headline-lg": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-size: 18px;
+      line-height: 1;
+    }
+    /* Hairline fine-stroke rendering */
+    .hairline-b { border-bottom: 0.5px solid #E5E6EB; }
+    .hairline-t { border-top: 0.5px solid #E5E6EB; }
+    .hairline-r { border-right: 0.5px solid #E5E6EB; }
+    .hairline-all { border: 0.5px solid #E5E6EB; }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="h-full flex items-center justify-center p-0 sm:py-6 bg-surface-dim font-body-md text-on-surface antialiased select-none">
+<!-- iPhone 15 Pro Canvas (402pt width constraint, simulated modal presentation) -->
+<main class="w-full max-w-[402px] h-full sm:h-[874px] bg-surface flex flex-col sm:rounded-t-[36px] sm:rounded-b-[24px] shadow-2xl overflow-hidden relative border border-outline-variant/40">
+<!-- Top Status / Sheet Drag Handle & Modal Bar -->
+<header class="pt-2 px-4 pb-2.5 bg-surface-container-lowest/90 backdrop-blur-md hairline-b shrink-0 z-30">
+<!-- Drag handle -->
+<div class="w-10 h-1 bg-outline-variant/60 rounded-full mx-auto mb-2.5"></div>
+<!-- Top Badges Row & Close Button -->
+<div class="flex items-center justify-between gap-1.5 mb-2">
+<div class="flex items-center gap-1.5 overflow-hidden">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-mono-sm text-label-mono-sm tracking-tight font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+            SPIKE 1.618 QUANT
+          </span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono-sm text-label-mono-sm">
+            SIM-CORE 3.0
+          </span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 font-label-mono-sm text-label-mono-sm font-semibold truncate border border-amber-500/20">
+            Paper-Only Context
+          </span>
+</div>
+<button aria-label="Close" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-surface-container text-outline hover:text-on-surface transition-colors shrink-0" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<!-- Title & Subtitle -->
+<div class="flex items-baseline justify-between">
+<div>
+<h1 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight flex items-center gap-1.5">
+            云带历史开单 · 成交起止
+          </h1>
+<p class="font-label-mono-sm text-label-mono-sm text-on-surface-variant mt-0.5 flex items-center gap-1">
+<span>12H</span>
+<span class="text-outline-variant">•</span>
+<span>仿真合成标的 ABC/USDT</span>
+<span class="text-outline-variant">•</span>
+<span class="text-primary font-semibold">订单 #312 复盘</span>
+</p>
+</div>
+<div class="text-right shrink-0">
+<span class="inline-block px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-700 font-label-mono-sm text-label-mono-sm font-bold border border-emerald-500/25">
+            PROFIT EXIT
+          </span>
+</div>
+</div>
+<!-- Navigation Sub-tabs (Exact strings from JSON; 历史开仓图 active) -->
+<nav aria-label="Sub-navigation" class="flex items-center gap-5 mt-2.5 pt-1 hairline-t">
+<a class="font-headline-sm text-[13px] text-on-surface-variant hover:text-on-surface transition-colors pb-1" href="#overview">
+          概览
+        </a>
+<a class="font-headline-sm text-[13px] text-primary border-b-2 border-primary font-bold pb-1 flex items-center gap-1" href="#history">
+          历史开仓图
+          <span class="w-1 h-1 rounded-full bg-primary inline-block"></span>
+</a>
+<a class="font-headline-sm text-[13px] text-on-surface-variant hover:text-on-surface transition-colors pb-1" href="#rules">
+          交易规则
+        </a>
+<a class="font-headline-sm text-[13px] text-on-surface-variant hover:text-on-surface transition-colors pb-1" href="#forward-fund">
+          前向账户
+        </a>
+</nav>
+</header>
+<!-- Scrollable Content Canvas -->
+<div class="flex-1 overflow-y-auto overflow-x-hidden flex flex-col bg-surface-bright">
+<!-- Single Compact 12H Control & Opt-in Row (NO EXTRA ROWS) -->
+<div class="px-3.5 py-1.5 bg-surface-container-lowest hairline-b flex items-center justify-between text-on-surface-variant shrink-0">
+<!-- Timeframe selector -->
+<div class="flex items-center p-0.5 rounded bg-surface-container-high">
+<button class="px-2 py-0.5 rounded font-label-mono-sm text-label-mono-sm bg-surface-container-lowest text-primary font-bold shadow-xs" type="button">
+            12H
+          </button>
+<button class="px-2 py-0.5 font-label-mono-sm text-label-mono-sm text-outline hover:text-on-surface transition-colors" type="button">
+            4H
+          </button>
+<button class="px-2 py-0.5 font-label-mono-sm text-label-mono-sm text-outline hover:text-on-surface transition-colors" type="button">
+            1D
+          </button>
+</div>
+<!-- Integrated Opt-in Toggles & Indicators in the same row -->
+<div class="flex items-center gap-1.5">
+<!-- Toggle: Secondary Reference Cloud Lines -->
+<label class="inline-flex items-center gap-1 cursor-pointer px-1.5 py-0.5 rounded bg-surface-container-low hover:bg-surface-container transition-colors border border-outline-variant/60">
+<input checked="" class="w-3 h-3 text-primary rounded-[2px] border-outline focus:ring-0 focus:ring-offset-0" id="referenceLineToggle" type="checkbox"/>
+<span class="font-label-mono-sm text-[10px] text-on-surface font-medium select-none">参考线</span>
+</label>
+<!-- Timezone indicator -->
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container-low font-label-mono-sm text-[10px] text-outline border border-outline-variant/40">
+<span class="material-symbols-outlined text-[12px] text-outline">schedule</span>
+            UTC+8
+          </span>
+<!-- Synthetic Target Tag -->
+<span class="font-label-mono-sm text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-semibold border border-primary/20">
+            合成 ABC
+          </span>
+</div>
+</div>
+<!-- Core Vector SVG Chart Section -->
+<div class="relative bg-surface-container-lowest flex flex-col hairline-b">
+<!-- Live Precision Mini Status Bar -->
+<div class="px-3.5 py-1 flex items-center justify-between text-[11px] font-label-mono-sm text-outline bg-surface-container-lowest/60 hairline-b">
+<div class="flex items-center gap-2">
+<span class="text-on-surface font-semibold">ABC/USDT</span>
+<span class="text-outline">O:<span class="text-on-surface font-normal">62,940</span></span>
+<span class="text-outline">H:<span class="text-on-surface font-normal">64,120</span></span>
+<span class="text-outline">L:<span class="text-on-surface font-normal">62,010</span></span>
+<span class="text-outline">C:<span class="text-on-surface font-normal">63,890</span></span>
+</div>
+<div class="text-emerald-600 font-semibold flex items-center gap-0.5">
+<span>+2.86%</span>
+<span class="material-symbols-outlined text-[12px]">trending_up</span>
+</div>
+</div>
+<!-- SVG Candlestick & Duration Area -->
+<div class="w-full relative overflow-hidden" style="height: 270px;">
+<svg class="w-full h-full select-none" viewbox="0 0 402 270" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<!-- Position duration soft gradient tint -->
+<lineargradient id="durationBandGrad" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#165DFF" stop-opacity="0.10"></stop>
+<stop offset="50%" stop-color="#165DFF" stop-opacity="0.05"></stop>
+<stop offset="100%" stop-color="#165DFF" stop-opacity="0.02"></stop>
+</lineargradient>
+<!-- Secondary cloud boundary gradient -->
+<lineargradient id="cloudRibbon" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#006A67" stop-opacity="0.08"></stop>
+<stop offset="100%" stop-color="#0047CF" stop-opacity="0.03"></stop>
+</lineargradient>
+<!-- Drop shadow for callout pills -->
+<filter height="150%" id="pillShadow" width="120%" x="-10%" y="-20%">
+<fedropshadow dx="0" dy="2" flood-color="#181C23" flood-opacity="0.08" stddeviation="2"></fedropshadow>
+</filter>
+</defs>
+<!-- Chart Horizontal Grid Lines -->
+<g stroke="#F0F1F5" stroke-width="0.8">
+<line stroke-dasharray="2,3" x1="0" x2="360" y1="35" y2="35"></line>
+<line stroke-dasharray="2,3" x1="0" x2="360" y1="75" y2="75"></line>
+<line stroke-dasharray="2,3" x1="0" x2="360" y1="115" y2="115"></line>
+<line stroke-dasharray="2,3" x1="0" x2="360" y1="155" y2="155"></line>
+<line stroke-dasharray="2,3" x1="0" x2="360" y1="195" y2="195"></line>
+<line stroke-dasharray="2,3" x1="0" x2="360" y1="235" y2="235"></line>
+</g>
+<!-- Price Axis Right Rail (360 - 402px) -->
+<line stroke="#E5E6EB" stroke-width="0.5" x1="360" x2="360" y1="0" y2="250"></line>
+<g fill="#86909C" font-family="JetBrains Mono" font-size="9" text-anchor="start">
+<text x="364" y="38">66,000</text>
+<text x="364" y="78">65,000</text>
+<text x="364" y="118">64,000</text>
+<text x="364" y="158">63,000</text>
+<text x="364" y="198">62,000</text>
+<text x="364" y="238">61,000</text>
+</g>
+<!-- Secondary Cloud Ribbon (EMA89 +/- 2.20σ) Opt-in display -->
+<g id="secondaryCloudRibbon">
+<!-- Cloud fill area -->
+<path d="M 0 178 Q 60 162 120 184 T 240 135 T 360 110 L 360 148 Q 280 160 210 185 T 100 205 L 0 212 Z" fill="url(#cloudRibbon)"></path>
+<!-- Cloud upper & lower fine trajectory boundary lines -->
+<path d="M 0 178 Q 60 162 120 184 T 240 135 T 360 110" fill="none" opacity="0.45" stroke="#0047CF" stroke-dasharray="3,3" stroke-width="0.8"></path>
+<path d="M 0 212 Q 100 205 210 185 T 280 160 T 360 148" fill="none" opacity="0.45" stroke="#006A67" stroke-dasharray="3,3" stroke-width="0.8"></path>
+<!-- Cloud baseline text -->
+<text fill="#0047CF" font-family="JetBrains Mono" font-size="8" opacity="0.6" x="14" y="172">EMA89 +2.20σ 逆向上轨</text>
+</g>
+<!-- POSITION DURATION BAND: Entry candle (x=112) to Exit candle (x=278) -->
+<!-- Soft shaded vertical region -->
+<rect fill="url(#durationBandGrad)" height="238" width="166" x="112" y="12"></rect>
+<!-- Exact Holding Duration Boundary Vertical Lines -->
+<line stroke="#165DFF" stroke-dasharray="3,2" stroke-width="1.2" x1="112" x2="112" y1="12" y2="250"></line>
+<line stroke="#00B42A" stroke-dasharray="3,2" stroke-width="1.2" x1="278" x2="278" y1="12" y2="250"></line>
+<!-- Duration span indicator pill in top of band -->
+<rect fill="#FFFFFF" filter="url(#pillShadow)" height="17" rx="3" stroke="#C3C5D9" stroke-width="0.7" width="98" x="146" y="16"></rect>
+<text fill="#165DFF" font-family="JetBrains Mono" font-size="8.5" font-weight="600" text-anchor="middle" x="195" y="28">
+              持仓 14.5天 · 29根K线
+            </text>
+<!-- Candlestick Series (Pre-trade, in-trade, post-trade) -->
+<!-- Candle 1: x=18 -->
+<line stroke="#F53F3F" stroke-width="1" x1="18" x2="18" y1="165" y2="218"></line>
+<rect fill="#F53F3F" height="34" rx="0.5" width="8" x="14" y="175"></rect>
+<!-- Candle 2: x=34 -->
+<line stroke="#00B42A" stroke-width="1" x1="34" x2="34" y1="182" y2="225"></line>
+<rect fill="#00B42A" height="26" rx="0.5" width="8" x="30" y="188"></rect>
+<!-- Candle 3: x=50 -->
+<line stroke="#00B42A" stroke-width="1" x1="50" x2="50" y1="170" y2="210"></line>
+<rect fill="#00B42A" height="24" rx="0.5" width="8" x="46" y="172"></rect>
+<!-- Candle 4: x=66 -->
+<line stroke="#F53F3F" stroke-width="1" x1="66" x2="66" y1="160" y2="215"></line>
+<rect fill="#F53F3F" height="36" rx="0.5" width="8" x="62" y="170"></rect>
+<!-- Candle 5: x=82 -->
+<line stroke="#F53F3F" stroke-width="1" x1="82" x2="82" y1="190" y2="238"></line>
+<rect fill="#F53F3F" height="30" rx="0.5" width="8" x="78" y="196"></rect>
+<!-- Candle 6: x=98 (pre-entry swing low wick) -->
+<line stroke="#F53F3F" stroke-width="1" x1="98" x2="98" y1="185" y2="242"></line>
+<rect fill="#F53F3F" height="32" rx="0.5" width="8" x="94" y="192"></rect>
+<!-- Candle 7 [ENTRY CANDLE]: x=112 (Bullish reversal hammer) -->
+<!-- Open: 61,900, Low: 61,650, High: 62,350, Close: 62,280 | Entry Point: 62,110.5 (y=191) -->
+<line stroke="#00B42A" stroke-width="1.2" x1="112" x2="112" y1="180" y2="236"></line>
+<rect fill="#00B42A" height="38" rx="0.5" width="8" x="108" y="184"></rect>
+<!-- Candle 8: x=128 -->
+<line stroke="#00B42A" stroke-width="1" x1="128" x2="128" y1="172" y2="214"></line>
+<rect fill="#00B42A" height="28" rx="0.5" width="8" x="124" y="176"></rect>
+<!-- Candle 9: x=144 -->
+<line stroke="#00B42A" stroke-width="1" x1="144" x2="144" y1="165" y2="204"></line>
+<rect fill="#00B42A" height="22" rx="0.5" width="8" x="140" y="168"></rect>
+<!-- Candle 10: x=160 (Midtrade retracement) -->
+<line stroke="#F53F3F" stroke-width="1" x1="160" x2="160" y1="160" y2="198"></line>
+<rect fill="#F53F3F" height="20" rx="0.5" width="8" x="156" y="166"></rect>
+<!-- Candle 11: x=176 [TRIM 1 POINT] -->
+<!-- Price: 63,050 (y=153) -->
+<line stroke="#00B42A" stroke-width="1" x1="176" x2="176" y1="140" y2="182"></line>
+<rect fill="#00B42A" height="26" rx="0.5" width="8" x="172" y="145"></rect>
+<!-- Candle 12: x=192 -->
+<line stroke="#00B42A" stroke-width="1" x1="192" x2="192" y1="130" y2="170"></line>
+<rect fill="#00B42A" height="24" rx="0.5" width="8" x="188" y="136"></rect>
+<!-- Candle 13: x=208 [BREAKEVEN STOP MOVE POINT] -->
+<line stroke="#00B42A" stroke-width="1" x1="208" x2="208" y1="118" y2="162"></line>
+<rect fill="#00B42A" height="28" rx="0.5" width="8" x="204" y="122"></rect>
+<!-- Candle 14: x=224 (Doji test) -->
+<line stroke="#F53F3F" stroke-width="1" x1="224" x2="224" y1="108" y2="150"></line>
+<rect fill="#F53F3F" height="12" rx="0.5" width="8" x="220" y="120"></rect>
+<!-- Candle 15: x=240 -->
+<line stroke="#00B42A" stroke-width="1" x1="240" x2="240" y1="102" y2="140"></line>
+<rect fill="#00B42A" height="22" rx="0.5" width="8" x="236" y="106"></rect>
+<!-- Candle 16: x=256 -->
+<line stroke="#00B42A" stroke-width="1" x1="256" x2="256" y1="92" y2="134"></line>
+<rect fill="#00B42A" height="26" rx="0.5" width="8" x="252" y="98"></rect>
+<!-- Candle 17 [EXIT CANDLE]: x=278 -->
+<!-- Exit settlement at high wick test: 63,890.0 (y=119) -->
+<line stroke="#F53F3F" stroke-width="1.2" x1="278" x2="278" y1="88" y2="135"></line>
+<rect fill="#F53F3F" height="28" rx="0.5" width="8" x="274" y="96"></rect>
+<!-- Post Trade Candle 18: x=296 -->
+<line stroke="#F53F3F" stroke-width="1" x1="296" x2="296" y1="102" y2="150"></line>
+<rect fill="#F53F3F" height="24" rx="0.5" width="8" x="292" y="112"></rect>
+<!-- Post Trade Candle 19: x=312 -->
+<line stroke="#00B42A" stroke-width="1" x1="312" x2="312" y1="110" y2="160"></line>
+<rect fill="#00B42A" height="22" rx="0.5" width="8" x="308" y="118"></rect>
+<!-- Post Trade Candle 20: x=328 -->
+<line stroke="#00B42A" stroke-width="1" x1="328" x2="328" y1="98" y2="148"></line>
+<rect fill="#00B42A" height="30" rx="0.5" width="8" x="324" y="104"></rect>
+<!-- Post Trade Candle 21: x=344 -->
+<line stroke="#F53F3F" stroke-width="1" x1="344" x2="344" y1="105" y2="152"></line>
+<rect fill="#F53F3F" height="26" rx="0.5" width="8" x="340" y="110"></rect>
+<!-- MIDTRADE TRIM DOTS & ANNOTATIONS (Along trade duration) -->
+<!-- Trim Dot 1: x=176, y=153 ($63,050) -->
+<circle cx="176" cy="153" fill="#FABD22" r="3.5" stroke="#FFFFFF" stroke-width="1.5"></circle>
+<line stroke="#FABD22" stroke-width="0.8" x1="176" x2="162" y1="153" y2="135"></line>
+<rect fill="#FFFFFF" filter="url(#pillShadow)" height="14" rx="2" stroke="#FABD22" stroke-width="0.7" width="94" x="114" y="122"></rect>
+<text fill="#8C6700" font-family="JetBrains Mono" font-size="7.5" font-weight="600" text-anchor="middle" x="161" y="132">
+              0.5R 减仓 40% @ 63,050
+            </text>
+<!-- Breakeven stop move Dot 2: x=208, y=134 -->
+<circle cx="208" cy="134" fill="#006A67" r="3" stroke="#FFFFFF" stroke-width="1.2"></circle>
+<line stroke="#006A67" stroke-dasharray="2,2" stroke-width="0.8" x1="208" x2="220" y1="134" y2="154"></line>
+<rect fill="#FFFFFF" filter="url(#pillShadow)" height="13" rx="2" stroke="#006A67" stroke-width="0.7" width="68" x="186" y="156"></rect>
+<text fill="#006A67" font-family="JetBrains Mono" font-size="7.5" font-weight="600" text-anchor="middle" x="220" y="165">
+              保本移损触发
+            </text>
+<!-- CALLOUT LEADER 1: ENTRY CANDLE (Strong short leader pinned tightly to true price/time) -->
+<!-- True coordinate: x=112, y=191 ($62,110.5) -->
+<g id="entryLeaderCallout">
+<!-- True coord anchor point -->
+<circle cx="112" cy="191" fill="#0047CF" r="3" stroke="#FFFFFF" stroke-width="1.5"></circle>
+<!-- Short prominent elbow leader (NO full-width line) -->
+<polyline fill="none" points="112,191 96,212 50,212" stroke="#0047CF" stroke-width="1.2"></polyline>
+<!-- High-contrast Pill Label -->
+<rect fill="#0047CF" filter="url(#pillShadow)" height="20" rx="3" width="134" x="6" y="203"></rect>
+<text fill="#FFFFFF" font-family="JetBrains Mono" font-size="8.5" font-weight="700" x="12" y="217">
+                ① 开多 $62,110.5
+              </text>
+<!-- Small timestamp tag below -->
+<rect fill="#EBF0FF" height="12" rx="2" stroke="#B6C4FF" stroke-width="0.5" width="118" x="6" y="224"></rect>
+<text fill="#003BB0" font-family="JetBrains Mono" font-size="7.5" x="10" y="233">
+                2024-05-14 00:00 (UTC+8)
+              </text>
+</g>
+<!-- CALLOUT LEADER 2: EXIT CANDLE (Strong short leader pinned tightly to true price/time) -->
+<!-- True coordinate: x=278, y=119 ($63,890.0) -->
+<g id="exitLeaderCallout">
+<!-- True coord anchor point -->
+<circle cx="278" cy="119" fill="#00B42A" r="3" stroke="#FFFFFF" stroke-width="1.5"></circle>
+<!-- Short prominent elbow leader (NO full-width line) -->
+<polyline fill="none" points="278,119 292,84 322,84" stroke="#00B42A" stroke-width="1.2"></polyline>
+<!-- High-contrast Pill Label -->
+<rect fill="#00B42A" filter="url(#pillShadow)" height="20" rx="3" width="104" x="254" y="62"></rect>
+<text fill="#FFFFFF" font-family="JetBrains Mono" font-size="8.5" font-weight="700" x="260" y="76">
+                ② 期末结算 $63,890.0
+              </text>
+<!-- Small timestamp tag below -->
+<rect fill="#E8F8EE" height="12" rx="2" stroke="#A7E4B9" stroke-width="0.5" width="104" x="254" y="83"></rect>
+<text fill="#006E1C" font-family="JetBrains Mono" font-size="7.5" x="258" y="92">
+                2024-05-28 12:00
+              </text>
+</g>
+<!-- Date Axis Divider Line -->
+<line stroke="#E5E6EB" stroke-width="0.8" x1="0" x2="360" y1="250" y2="250"></line>
+<!-- Time Axis Ticks & Beijing Time UTC+8 Labels -->
+<g fill="#86909C" font-family="JetBrains Mono" font-size="8" text-anchor="middle">
+<line stroke="#C3C5D9" x1="50" x2="50" y1="250" y2="254"></line>
+<text x="50" y="264">05-10 12:00</text>
+<!-- Entry aligned timestamp (highlighted in bold blue) -->
+<line stroke="#0047CF" stroke-width="1.5" x1="112" x2="112" y1="250" y2="254"></line>
+<text fill="#0047CF" font-weight="700" x="112" y="264">05-14 00:00</text>
+<line stroke="#C3C5D9" x1="168" x2="168" y1="250" y2="254"></line>
+<text x="168" y="264">05-18 12:00</text>
+<line stroke="#C3C5D9" x1="224" x2="224" y1="250" y2="254"></line>
+<text x="224" y="264">05-22 00:00</text>
+<!-- Exit aligned timestamp (highlighted in bold green) -->
+<line stroke="#00B42A" stroke-width="1.5" x1="278" x2="278" y1="250" y2="254"></line>
+<text fill="#00B42A" font-weight="700" x="278" y="264">05-28 12:00</text>
+<line stroke="#C3C5D9" x1="334" x2="334" y1="250" y2="254"></line>
+<text x="334" y="264">05-30 00:00</text>
+</g>
+</svg>
+</div>
+<!-- Legend Ribbon below Chart Canvas -->
+<div class="px-3.5 py-1.5 bg-surface-container-low/70 flex items-center justify-between text-[10px] font-label-mono-sm text-on-surface-variant hairline-t">
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1">
+<span class="w-2.5 h-2 rounded-[1px] bg-primary/20 border border-primary"></span>
+<span>持仓区间 (14.5D)</span>
+</span>
+<span class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+<span>分批止盈点</span>
+</span>
+<span class="flex items-center gap-1">
+<span class="w-2 h-0.5 bg-secondary border border-secondary"></span>
+<span>移动止损</span>
+</span>
+</div>
+<span class="text-outline">无全局贯穿横线 · 真实标的坐标点</span>
+</div>
+</div>
+<!-- Execution Stats & Quantitative Metrics Panel -->
+<div class="p-3.5 flex flex-col gap-2.5 flex-1">
+<!-- Primary Net PnL Highlight Banner -->
+<div class="p-3 rounded bg-surface-container-lowest hairline-all flex items-center justify-between shadow-xs">
+<div>
+<span class="font-label-mono-sm text-[10px] text-outline uppercase tracking-wider block">最终净盈亏 (Net PnL)</span>
+<div class="flex items-baseline gap-1.5 mt-0.5">
+<span class="font-label-mono-lg text-[20px] font-bold text-emerald-600">+$2,135.00</span>
+<span class="font-label-mono-md text-[13px] font-bold text-emerald-600 bg-emerald-500/10 px-1 py-0.5 rounded">
+                +4.86%
+              </span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-mono-sm text-[10px] text-outline uppercase tracking-wider block">名义开仓规模</span>
+<span class="font-label-mono-md text-[13px] font-semibold text-on-surface mt-0.5 block">$43,925.00 (0.707 ABC)</span>
+</div>
+</div>
+<!-- 4-Grid Dense Quant Metrics -->
+<div class="grid grid-cols-2 gap-2">
+<!-- Metric 1: MFE -->
+<div class="p-2.5 rounded bg-surface-container-lowest hairline-all">
+<div class="flex items-center justify-between">
+<span class="font-label-mono-sm text-[10px] text-outline uppercase">最大浮盈 (MFE)</span>
+<span class="material-symbols-outlined text-[13px] text-emerald-600">north_east</span>
+</div>
+<div class="mt-1 flex items-baseline gap-1">
+<span class="font-label-mono-lg text-label-mono-lg font-bold text-on-surface">+6.42%</span>
+<span class="font-label-mono-sm text-[10px] text-emerald-600">(+$2,820)</span>
+</div>
+<div class="w-full bg-surface-container-high h-1 rounded-full mt-1.5 overflow-hidden">
+<div class="bg-emerald-500 h-full w-[78%]"></div>
+</div>
+</div>
+<!-- Metric 2: MAE -->
+<div class="p-2.5 rounded bg-surface-container-lowest hairline-all">
+<div class="flex items-center justify-between">
+<span class="font-label-mono-sm text-[10px] text-outline uppercase">最大浮亏 (MAE)</span>
+<span class="material-symbols-outlined text-[13px] text-rose-500">south_east</span>
+</div>
+<div class="mt-1 flex items-baseline gap-1">
+<span class="font-label-mono-lg text-label-mono-lg font-bold text-on-surface">-1.18%</span>
+<span class="font-label-mono-sm text-[10px] text-rose-500">(-$518)</span>
+</div>
+<div class="w-full bg-surface-container-high h-1 rounded-full mt-1.5 overflow-hidden">
+<div class="bg-rose-500 h-full w-[18%]"></div>
+</div>
+</div>
+<!-- Metric 3: Holding Period -->
+<div class="p-2.5 rounded bg-surface-container-lowest hairline-all">
+<div class="flex items-center justify-between">
+<span class="font-label-mono-sm text-[10px] text-outline uppercase">持仓周期</span>
+<span class="material-symbols-outlined text-[13px] text-outline">timelapse</span>
+</div>
+<div class="mt-1">
+<span class="font-label-mono-md text-label-mono-md font-bold text-on-surface">14.5天</span>
+<span class="font-label-mono-sm text-[10px] text-outline block mt-0.5">29根 12H K线</span>
+</div>
+</div>
+<!-- Metric 4: Exit Reason -->
+<div class="p-2.5 rounded bg-surface-container-lowest hairline-all">
+<div class="flex items-center justify-between">
+<span class="font-label-mono-sm text-[10px] text-outline uppercase">出场属性</span>
+<span class="material-symbols-outlined text-[13px] text-primary">logout</span>
+</div>
+<div class="mt-1">
+<span class="font-label-mono-md text-[11px] font-bold text-primary block truncate">规则触轨平仓</span>
+<span class="font-label-mono-sm text-[9.5px] text-outline block mt-0.5">Cloud Band Exit</span>
+</div>
+</div>
+</div>
+<!-- Detailed Execution Ledger Breakdown (Compact table) -->
+<div class="rounded bg-surface-container-lowest hairline-all overflow-hidden">
+<div class="px-3 py-1.5 bg-surface-container-low hairline-b flex items-center justify-between">
+<span class="font-label-mono-sm text-[10px] font-semibold text-on-surface uppercase">分步撮合记录 (Execution Fills)</span>
+<span class="font-label-mono-sm text-[9px] text-outline">MATCHED 3/3</span>
+</div>
+<div class="divide-y divide-[#F2F3F5] text-[11px] font-label-mono-sm">
+<!-- Entry Row -->
+<div class="px-3 py-1.5 flex items-center justify-between hover:bg-primary/5 transition-colors">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="font-semibold text-on-surface">初始建仓 (Buy Long)</span>
+</div>
+<div class="text-right">
+<span class="text-on-surface font-medium">$62,110.5</span>
+<span class="text-outline text-[10px] ml-1.5">100% (0.707)</span>
+</div>
+</div>
+<!-- Trim Row -->
+<div class="px-3 py-1.5 flex items-center justify-between hover:bg-primary/5 transition-colors">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+<span class="text-on-surface">目标位 0.5R 减仓</span>
+</div>
+<div class="text-right">
+<span class="text-emerald-600 font-medium">$63,050.0</span>
+<span class="text-outline text-[10px] ml-1.5">40% (0.283)</span>
+</div>
+</div>
+<!-- Final Exit Row -->
+<div class="px-3 py-1.5 flex items-center justify-between hover:bg-primary/5 transition-colors">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+<span class="text-on-surface">上轨收敛终结平仓</span>
+</div>
+<div class="text-right">
+<span class="text-emerald-600 font-medium">$63,890.0</span>
+<span class="text-outline text-[10px] ml-1.5">60% (0.424)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Compliance & Research Group Note -->
+<p class="font-label-mono-sm text-[9.5px] leading-3.5 text-outline text-justify px-1">
+          本图表数据均来自前向模拟回溯环境 (Paper-Trading Engine v3)，标的为虚拟合成数据 ABC，不构成任何投资实盘建议。SPIKE QUANT RESEARCH GROUP · SYSTEM LATENCY 2.1ms
+        </p>
+</div>
+</div>
+<!-- Bottom Sticky Action Bar -->
+<footer class="p-3 bg-surface-container-lowest hairline-t shrink-0 flex items-center gap-2">
+<!-- Secondary Outline Button -->
+<button class="flex-1 h-9 px-2.5 rounded bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container transition-colors flex items-center justify-center gap-1 font-label-mono-sm text-label-mono-sm font-semibold active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[15px] text-outline">file_download</span>
+<span class="truncate">导出单笔复盘明细 (JSON/CSV)</span>
+</button>
+<!-- Primary Electric Blue Button -->
+<button class="flex-1 h-9 px-2.5 rounded bg-primary text-on-primary hover:bg-[#0E4ED8] active:bg-[#0940B5] transition-colors flex items-center justify-center gap-1 font-label-mono-sm text-label-mono-sm font-semibold shadow-sm active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[15px]">compare_arrows</span>
+<span class="truncate">比对基准收益 (BTC B&H)</span>
+</button>
+</footer>
+<!-- iOS Home Indicator -->
+<div class="h-4 w-full bg-surface-container-lowest flex items-center justify-center pb-1">
+<div class="w-32 h-1 bg-on-surface/20 rounded-full"></div>
+</div>
+</main>
+<!-- Interactive script for reference line toggle -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggle = document.getElementById('referenceLineToggle');
+      const ribbon = document.getElementById('secondaryCloudRibbon');
+      if (toggle && ribbon) {
+        toggle.addEventListener('change', (e) => {
+          ribbon.style.display = e.target.checked ? 'block' : 'none';
+        });
+      }
+    });
+  </script>
+</body></html>

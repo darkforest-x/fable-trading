@@ -161,6 +161,7 @@ struct BacktestChartView: View {
     @State private var error: String?
     @State private var generation = 0
     @State private var showOriginal = false
+    @State private var showLevels = false
     private var periods: [CandlePeriod] { key == "live-cloud-v17" ? [.h12] : [.m5, .m15, .h1, .h4] }
 
     init(key: String, trade: BacktestTrade, connection: Connection) {
@@ -177,18 +178,19 @@ struct BacktestChartView: View {
                 if let data, !data.candles.isEmpty {
                     // The chart opens at its right edge: end the bars a few periods after the exit so the
                     // trade itself is on screen (earlier history stays a drag away).
-                    let last = key == "live-cloud-v17" ? (data.candles.last?.time ?? .infinity) : ((trade.exitMs ?? .infinity) / 1000) + period.seconds * 8
+                    let last = key == "live-cloud-v17" ? .infinity : ((trade.exitMs ?? .infinity) / 1000) + period.seconds * 8
                     let bars = data.candles.filter { $0.time / 1000 <= last }.map {
                         Candle(time: $0.time / 1000, open: $0.open, high: $0.high, low: $0.low, close: $0.close,
                                volume: $0.volume ?? 0, confirmed: true, ema20: $0.ema20, ema50: $0.ema50, emaReady: $0.emaReady)
                     }
                     let executions = key == "live-cloud-v17" ? (data.executionLegs ?? []).map {
                         ExecutionMarker(time: $0.timeMs / 1000, price: $0.price, label: $0.label, action: $0.action,
-                                        quantity: $0.quantity, share: $0.share, phase: $0.phase)
+                                        quantity: $0.quantity, share: $0.share, phase: $0.phase, endTime: $0.endMs / 1000)
                     } : []
                     CandleChart(bars: bars, generation: generation, period: period, decimals: StrategyFmt.decimals(trade.entryPrice ?? data.candles.last?.close),
                                 range: ranges(data).current, history: ranges(data).past, cloud: key == "live-cloud-v17", lines: lines,
-                                executionMarkers: executions, focusRange: focusRange, watermark: trade.coin + "USDT")
+                                executionMarkers: executions, replayEntryTitle: key == "live-cloud-v17" ? (trade.side == .long ? "① 开多" : "① 开空") : nil,
+                                focusRange: focusRange, watermark: trade.coin + "USDT")
                 } else if let error {
                     VStack(spacing: 8) {
                         Label(error, systemImage: "exclamationmark.arrow.triangle.2.circlepath").font(.footnote).foregroundStyle(Color.amber)
@@ -218,12 +220,28 @@ struct BacktestChartView: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text("开 \(Fmt.price(trade.entryPrice)) → 平 \(Fmt.price(trade.exitPrice))").font(.system(.subheadline, design: .monospaced).weight(.semibold)).foregroundStyle(Color.ink)
+                    .lineLimit(1).minimumScaleFactor(0.72)
                 Spacer(minLength: 4)
                 Text(StrategyFmt.signedMoney(trade.pnl) + " U · " + Fmt.signedPercent(trade.returnPct))
                     .font(.subheadline.weight(.bold)).monospacedDigit().foregroundStyle(Fmt.tone(trade.pnl).color)
+                    .lineLimit(1).minimumScaleFactor(0.78)
             }
-            Text("\(StrategyFmt.utcTime(trade.entryMs)) — \(StrategyFmt.utcShortTime(trade.exitMs)) UTC" + (trade.exitReasonLabel.map { " · \($0)" } ?? (trade.exitReason == "time_6d" ? " · 6天到期" : trade.score.map { String(format: " · 评分 %.4f", $0) } ?? "")))
-                .font(.system(.caption2, design: .monospaced)).foregroundStyle(Color.muted)
+            if key == "live-cloud-v17",
+               let entry = data?.executionLegs?.first(where: { $0.action == "entry" }),
+               let exit = data?.executionLegs?.last(where: { $0.action != "entry" }) {
+                let from = CandleChart.fullTime(entry.timeMs / 1000)
+                let closeTime = CandleChart.executionTime(exit.timeMs / 1000, endTime: exit.endMs / 1000, phase: exit.phase)
+                let interval = exit.phase == "intrabar" ? "（H1 区间）" : ""
+                let closeLabel = exit.action == "series_tail_close" ? "期末结算" : "平仓"
+                Text("北京时间 · \(from) 开 → \(closeTime)\(interval) · \(closeLabel)")
+                    .font(.caption2.monospacedDigit()).foregroundStyle(Color.muted)
+            } else if key != "live-cloud-v17" {
+                Text("\(StrategyFmt.utcTime(trade.entryMs)) — \(StrategyFmt.utcShortTime(trade.exitMs)) UTC" + (trade.exitReasonLabel.map { " · \($0)" } ?? (trade.exitReason == "time_6d" ? " · 6天到期" : trade.score.map { String(format: " · 评分 %.4f", $0) } ?? "")))
+                    .font(.system(.caption2, design: .monospaced)).foregroundStyle(Color.muted)
+            } else {
+                Text("成交区间与结算类型以原始成交流水为准")
+                    .font(.system(.caption2, design: .monospaced)).foregroundStyle(Color.muted)
+            }
         }
         .padding(.horizontal, 14).padding(.vertical, 10)
         .glassCard(cornerRadius: 18)
@@ -241,12 +259,20 @@ struct BacktestChartView: View {
                     }
                     .buttonStyle(.plain)
                 }
+                if key == "live-cloud-v17" {
+                    Button { showLevels.toggle() } label: {
+                        Label("参考线", systemImage: showLevels ? "eye" : "eye.slash")
+                            .font(.footnote.weight(.medium)).padding(.horizontal, 9).frame(minHeight: 32)
+                    }
+                    .buttonStyle(.plain).foregroundStyle(showLevels ? Color.accentColor : Color.muted)
+                    .accessibilityValue(showLevels ? "已显示" : "已隐藏")
+                }
             }
             .padding(4).frosted(Capsule(), veil: 0.8)
             HStack(spacing: 8) {
                 Text(chartNote)
                     .font(.caption2).foregroundStyle(Color.muted).lineLimit(2).frame(maxWidth: .infinity, alignment: .leading)
-                if let originalChartURL {
+                if originalChartURL != nil {
                     Button { showOriginal = true } label: { Label("查看原图", systemImage: "doc.viewfinder").font(.caption.weight(.semibold)) }
                         .buttonStyle(.pill(.soft, height: 32))
                 }
@@ -256,8 +282,10 @@ struct BacktestChartView: View {
 
     private var chartNote: String {
         guard key == "live-cloud-v17" else { return "币安历史行情 · 图中时间为北京时间 · 双指缩放 · 线为原回测成交价" }
-        let source = data?.note ?? "OKX 原始 12H K 线 · 缺失时段留空"
-        return source + (data?.executionLegs?.isEmpty == false ? " · 菱形开仓、圆点为实际出场/减仓；点按查看 H1 成交" : "")
+        guard let data else { return "OKX · 12H · 北京时间" }
+        let missing = (data.missingBars ?? 0) > 0 ? " · 缺 \(data.missingBars ?? 0) 根 K" : ""
+        return "OKX · 北京时间 · 阴影为持仓时段" + missing + "。点成交标记可看详情。"
+
     }
 
     /// Fit the saved holding interval on first load; this is only passed by historical details.
@@ -269,7 +297,8 @@ struct BacktestChartView: View {
 
     private var lines: [ChartLine] {
         if key == "live-cloud-v17" {
-            return (data?.references ?? []).map { ref in
+            guard showLevels else { return [] }
+            return (data?.references ?? []).filter { !["入场", "退出"].contains($0.title) }.map { ref in
                 let color: Color = switch ref.color {
                 case "up": ChartPalette.up
                 case "down": ChartPalette.down

@@ -61,7 +61,7 @@ struct ChartMarker: Equatable, Identifiable {
     var id: String { "\(edge.rawValue)-\(Int(time))" }
 }
 
-/// A frozen opening or close fill placed on its source candle. Cloud history can contain many real
+/// A frozen opening or close fill placed at its recorded time and price. Cloud history can contain many real
 /// trim fills; each marker remains tappable so its exact hour, price and original-size share are clear.
 struct ExecutionMarker: Equatable, Identifiable {
     let time: Double      // epoch seconds
@@ -71,15 +71,121 @@ struct ExecutionMarker: Equatable, Identifiable {
     let quantity: Double
     let share: Double
     let phase: String
+    var endTime: Double? = nil   // exclusive right edge when the fill is known only to its native hour
     var id: String { "\(action)-\(Int(time))-\(price)" }
     var color: Color {
         switch action {
         case "entry": ChartPalette.up
         case "trim": ChartPalette.hex(0xD97706)
-        case "take_profit", "take_profit_open": ChartPalette.accent
         default: ChartPalette.down
         }
     }
+}
+
+/// Initial viewport fit for a historical cloud trade. Short holds show 25–42 periods; longer holds
+/// keep both endpoints in view and add eight periods of context on either side when the screen allows.
+struct ChartReplayViewportFit {
+    let spacing: CGFloat
+    let offset: CGFloat
+    let visiblePeriods: CGFloat
+
+    static func make(plotWidth: CGFloat, periodSeconds: Double, firstBarTime: Double, lastBarTime: Double,
+                     focus: ClosedRange<Double>, rightPad: CGFloat) -> ChartReplayViewportFit? {
+        guard plotWidth > 0, periodSeconds > 0, firstBarTime.isFinite, lastBarTime.isFinite,
+              focus.lowerBound.isFinite, focus.upperBound.isFinite, focus.upperBound >= focus.lowerBound else { return nil }
+        let entry = (focus.lowerBound - firstBarTime) / periodSeconds
+        let exit = (focus.upperBound - firstBarTime) / periodSeconds
+        let duration = max(1, exit - entry)
+        let targetVisible = max(25, ceil(duration) + 16)
+        let spacing = min(32, max(0.25, plotWidth / CGFloat(targetVisible)))
+        let contentEnd = max((lastBarTime - firstBarTime) / periodSeconds, exit)
+        let targetRight = exit + 3
+        let offset = CGFloat(contentEnd) + rightPad - CGFloat(targetRight)
+        return ChartReplayViewportFit(spacing: spacing, offset: offset, visiblePeriods: plotWidth / spacing)
+    }
+}
+
+/// A sparse source-bar time axis. Bar indices remain available to drawing code, but their horizontal
+/// coordinates follow elapsed periods so missing source candles stay visible as empty time slots.
+struct ChartTimeAxis {
+    let times: [Double]
+    let periodSeconds: Double
+
+    private var origin: Double { times.first ?? 0 }
+
+    func position(atTime time: Double) -> CGFloat {
+        guard periodSeconds > 0, time.isFinite else { return 0 }
+        return CGFloat((time - origin) / periodSeconds)
+    }
+
+    func position(forFractionalBarIndex index: CGFloat) -> CGFloat {
+        guard let first = times.first, let last = times.last, !times.isEmpty, periodSeconds > 0 else { return index }
+        let time: Double
+        if index <= 0 {
+            time = first + Double(index) * periodSeconds
+        } else if index >= CGFloat(times.count - 1) {
+            time = last + Double(index - CGFloat(times.count - 1)) * periodSeconds
+        } else {
+            let lower = Int(floor(index)), fraction = Double(index - CGFloat(lower))
+            time = times[lower] + (times[lower + 1] - times[lower]) * fraction
+        }
+        return position(atTime: time)
+    }
+
+    /// Fractional source-array index at a time. `position(forFractionalBarIndex:)` round-trips through
+    /// sparse gaps without snapping a time to either neighboring candle.
+    func barIndex(atTime time: Double) -> CGFloat {
+        guard let first = times.first, let last = times.last, !times.isEmpty, periodSeconds > 0 else { return 0 }
+        if time <= first { return CGFloat((time - first) / periodSeconds) }
+        if time >= last { return CGFloat(times.count - 1) + CGFloat((time - last) / periodSeconds) }
+        var low = 0, high = times.count - 1
+        while low + 1 < high {
+            let middle = (low + high) / 2
+            if times[middle] <= time { low = middle } else { high = middle }
+        }
+        return CGFloat(low) + CGFloat((time - times[low]) / max(times[high] - times[low], 1))
+    }
+
+    func nearestBarIndex(atPosition position: CGFloat) -> Int? {
+        guard !times.isEmpty, periodSeconds > 0 else { return nil }
+        let time = origin + Double(position) * periodSeconds
+        var low = 0, high = times.count
+        while low < high {
+            let middle = (low + high) / 2
+            if times[middle] < time { low = middle + 1 } else { high = middle }
+        }
+        if low == 0 { return 0 }
+        if low == times.count { return times.count - 1 }
+        return time - times[low - 1] <= times[low] - time ? low - 1 : low
+    }
+
+    func visibleBarRange(left: CGFloat, right: CGFloat) -> ClosedRange<Int>? {
+        guard !times.isEmpty, periodSeconds > 0, left.isFinite, right.isFinite, right >= left else { return nil }
+        let lowerTime = origin + Double(left - 0.5) * periodSeconds
+        let upperTime = origin + Double(right + 0.5) * periodSeconds
+        var low = 0, high = times.count
+        while low < high {
+            let middle = (low + high) / 2
+            if times[middle] < lowerTime { low = middle + 1 } else { high = middle }
+        }
+        let first = low
+        low = 0; high = times.count
+        while low < high {
+            let middle = (low + high) / 2
+            if times[middle] <= upperTime { low = middle + 1 } else { high = middle }
+        }
+        let last = low - 1
+        guard first < times.count, last >= first else { return nil }
+        return first...last
+    }
+}
+
+private struct ExecutionTagPlacement {
+    let marker: ExecutionMarker
+    let anchor: CGPoint
+    let rect: CGRect
+    let title: String
+    let color: Color
 }
 
 struct CandleChart: View {
@@ -95,6 +201,7 @@ struct CandleChart: View {
     var lines: [ChartLine] = []
     var markers: [ChartMarker] = []
     var executionMarkers: [ExecutionMarker] = []
+    var replayEntryTitle: String? = nil
     /// Optional trade span to fit on first appearance. Historical replay sets this; live charts stay at the edge.
     var focusRange: ClosedRange<Double>? = nil
     /// Also mark the first 1.618 touch of each previous week in `history` (found from the bars).
@@ -125,11 +232,17 @@ struct CandleChart: View {
     @State private var memo = IndicatorMemo()
     @State private var picked: String?
     @State private var pickedExecutions: [ExecutionMarker] = []
+    @State private var viewportInteracted = false
+    @State private var resetGeneration = Int.min
     @AppStorage("touch.highScore") private var highScore = 0.5
 
     private let axisWidth: CGFloat = 58
     private let timeHeight: CGFloat = 20
     private let rightPad: CGFloat = 5
+
+    /// Historical cloud replays have a bounded focus range; live and non-cloud charts keep their
+    /// existing index-based viewport and spacing.
+    private var timestampReplay: Bool { cloud && focusRange != nil }
 
     var body: some View {
         // Paused unless a fling is gliding; then it redraws once per display frame.
@@ -142,7 +255,8 @@ struct CandleChart: View {
             let axisY = wallpaper ? plot.maxY - bottomOverlay - 12 : plot.maxY + timeHeight / 2 + 1
             let layout = Layout(bars: bars, spacing: spacing, offset: glide?.offset(at: timeline.date) ?? offset, plot: plot, rightPad: rightPad,
                                 period: period, range: range, lines: lines, wallpaper: wallpaper,
-                                bottomReserve: wallpaper ? Double((bottomOverlay + 34) / max(plot.height, 1)) : 0, yShift: yShift, yZoom: yZoom)
+                                bottomReserve: wallpaper ? Double((bottomOverlay + 34) / max(plot.height, 1)) : 0, yShift: yShift, yZoom: yZoom,
+                                timestampAxis: timestampReplay, focusRange: focusRange, executions: executionMarkers)
             ZStack(alignment: .topLeading) {
                 if wallpaper { (scheme == .dark ? ChartPalette.hex(0x0B0E14) : Color.white) }
                 Canvas(rendersAsynchronously: false) { context, _ in
@@ -183,6 +297,10 @@ struct CandleChart: View {
             }
             .onAppear { resetForGeneration(in: plot) }
             .onChange(of: generation) { _, _ in resetForGeneration(in: plot) }
+            .onChange(of: plot.size) { old, new in
+                guard old != new, resetGeneration == generation, !viewportInteracted else { return }
+                resetForGeneration(in: plot)
+            }
         }
         }
         // Commit the glide's resting offset when it has decayed (or hit the edge); a new touch cancels it first.
@@ -198,6 +316,7 @@ struct CandleChart: View {
         }
         .onChange(of: followToken) { _, _ in reset() }
         .onChange(of: bars.last?.time) { old, new in
+            guard !timestampReplay, resetGeneration == generation else { return }
             guard let old, let new, new > old else { return }
             let added = CGFloat((new - old) / period.seconds)
             // Away from the live edge, keep the same bars in view when a new bar opens (also mid-glide).
@@ -222,18 +341,32 @@ struct CandleChart: View {
         Haptics.tap()
         glide = nil
         withAnimation(.snappy(duration: 0.35)) {
+            viewportInteracted = false
             spacing = 7; yShift = 0; yZoom = 1; cross = nil; picked = nil; pickedExecutions = []
             applyFocus(focusRange, in: plot)
         }
     }
 
     private func resetForGeneration(in plot: CGRect) {
+        resetGeneration = generation
+        viewportInteracted = false
         glide = nil; offset = 0; spacing = 7; yShift = 0; yZoom = 1; cross = nil; picked = nil; pickedExecutions = []
         if let focusRange { applyFocus(focusRange, in: plot) }
     }
 
-    /// Fit the trade plus three source bars of context on both sides, retaining normal pan and pinch gestures.
+    /// Fit historical cloud holds to the final plot width; normal charts retain their original three-bar fit.
     private func applyFocus(_ range: ClosedRange<Double>, in plot: CGRect) {
+        if timestampReplay {
+            // GeometryReader can report a transient one-point width while the card is entering layout.
+            // Leave the default viewport until the size-change handler sees the final plot width.
+            guard plot.width >= 120, let first = bars.first?.time, let last = bars.last?.time,
+                  let fit = ChartReplayViewportFit.make(plotWidth: plot.width, periodSeconds: period.seconds,
+                                                        firstBarTime: first, lastBarTime: last,
+                                                        focus: range, rightPad: rightPad) else { return }
+            spacing = fit.spacing
+            offset = fit.offset
+            return
+        }
         guard plot.width > 0, let firstTrade = barIndex(range.lowerBound), let lastTrade = barIndex(range.upperBound) else { return }
         let first = max(0, firstTrade - 3), last = min(bars.count - 1, lastTrade + 3)
         let visibleBars = CGFloat(max(1, last - first + 1))
@@ -264,13 +397,17 @@ struct CandleChart: View {
         if picked != nil { withAnimation(.easeOut(duration: 0.15)) { picked = nil; pickedExecutions = [] }; return }
         if cross != nil { withAnimation(.easeOut(duration: 0.15)) { cross = nil }; return }
         let executionHits = executionPoints(layout).filter { hypot($0.point.x - point.x, $0.point.y - point.y) < 22 }
-        if let hit = executionHits.min(by: {
+        let tagHit = executionTagPlacements(layout).first { $0.rect.insetBy(dx: -8, dy: -8).contains(point) }
+        let pointHit = executionHits.min(by: {
             hypot($0.point.x - point.x, $0.point.y - point.y) < hypot($1.point.x - point.x, $1.point.y - point.y)
-        }) {
+        })
+        if let hit = tagHit.map({ (marker: $0.marker, point: $0.anchor) }) ?? pointHit {
             Haptics.select()
+            var clustered = executionHits.map(\.marker)
+            if !clustered.contains(where: { $0.id == hit.marker.id }) { clustered.append(hit.marker) }
             withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
                 picked = hit.marker.id
-                pickedExecutions = executionHits.map(\.marker).sorted { $0.time < $1.time }
+                pickedExecutions = clustered.sorted { $0.time < $1.time }
             }
             return
         }
@@ -308,6 +445,7 @@ struct CandleChart: View {
                 if panStart == nil {
                     stopGlide()
                     panStart = (offset, yShift)
+                    viewportInteracted = true
                     #if DEBUG
                     ChartFrameProbe.shared.begin("drag")
                     #endif
@@ -337,6 +475,7 @@ struct CandleChart: View {
                 if zoomStart == nil {
                     stopGlide()
                     zoomStart = spacing
+                    viewportInteracted = true
                     #if DEBUG
                     ChartFrameProbe.shared.begin("pinch")
                     #endif
@@ -353,7 +492,8 @@ struct CandleChart: View {
 
     private func offsetBounds(layout: Layout) -> (lower: CGFloat, upper: CGFloat) {
         let visible = layout.plot.width / spacing
-        return (-visible * 0.6, max(0, CGFloat(bars.count) - visible * 0.3))
+        let latest = layout.timestampAxis ? layout.timelineEnd + rightPad : CGFloat(bars.count)
+        return (-visible * 0.6, max(0, latest - visible * 0.3))
     }
 
     private func clampOffset(_ value: CGFloat, layout: Layout) -> CGFloat {
@@ -399,19 +539,43 @@ struct CandleChart: View {
         let bars: [Candle]
         let spacing: CGFloat
         let rightIndex: CGFloat
+        let timelineEnd: CGFloat
         let plot: CGRect
         let period: CandlePeriod
+        let timestampAxis: Bool
+        let timeAxis: ChartTimeAxis
         let firstVisible: Int
         let lastVisible: Int
         let low: Double
         let high: Double
 
         init(bars: [Candle], spacing: CGFloat, offset: CGFloat, plot: CGRect, rightPad: CGFloat, period: CandlePeriod, range: FibRange?,
-             lines: [ChartLine], wallpaper: Bool, bottomReserve: Double, yShift: Double, yZoom: Double) {
+             lines: [ChartLine], wallpaper: Bool, bottomReserve: Double, yShift: Double, yZoom: Double,
+             timestampAxis: Bool = false, focusRange: ClosedRange<Double>? = nil, executions: [ExecutionMarker] = []) {
+            // Live charts retain their O(visible-bars) layout work; only the short historical replay
+            // window materializes a timestamp axis.
+            let axis = ChartTimeAxis(times: timestampAxis ? bars.map(\.time) : [], periodSeconds: period.seconds)
+            let lastPosition = bars.isEmpty ? 0 : axis.position(forFractionalBarIndex: CGFloat(bars.count - 1))
+            let focusEnd: CGFloat
+            if timestampAxis, let focusRange { focusEnd = axis.position(atTime: focusRange.upperBound) }
+            else { focusEnd = lastPosition }
+            let end = timestampAxis ? max(lastPosition, focusEnd) : CGFloat(bars.count - 1)
+            let right = end + rightPad - offset
+            let left = right - plot.width / max(spacing, 0.25)
+            let visible: ClosedRange<Int>?
+            if timestampAxis {
+                visible = axis.visibleBarRange(left: left, right: right)
+            } else if bars.isEmpty {
+                visible = nil
+            } else {
+                let first = max(0, Int(floor(left))), last = min(bars.count - 1, Int(ceil(right)))
+                visible = first <= last ? first...last : nil
+            }
             self.bars = bars; self.spacing = spacing; self.plot = plot; self.period = period
-            rightIndex = CGFloat(bars.count - 1) + rightPad - offset
-            firstVisible = max(0, Int(floor(rightIndex - plot.width / spacing)))
-            lastVisible = min(bars.count - 1, Int(ceil(rightIndex)))
+            self.timestampAxis = timestampAxis; timeAxis = axis
+            timelineEnd = end; rightIndex = right
+            firstVisible = visible?.lowerBound ?? 0
+            lastVisible = visible?.upperBound ?? -1
             var lo = Double.infinity, hi = -Double.infinity
             if firstVisible <= lastVisible {
                 for bar in bars[firstVisible...lastVisible] { lo = min(lo, bar.low); hi = max(hi, bar.high) }
@@ -420,6 +584,12 @@ struct CandleChart: View {
                 lo = min(lo, max(0, range.lower)); hi = max(hi, range.upper)
             }
             for line in lines where line.price > 0 { lo = min(lo, line.price); hi = max(hi, line.price) }
+            if timestampAxis {
+                for fill in executions where fill.time.isFinite && fill.price.isFinite && fill.price > 0 {
+                    let position = axis.position(atTime: fill.time)
+                    if left <= position && position <= right { lo = min(lo, fill.price); hi = max(hi, fill.price) }
+                }
+            }
             if !lo.isFinite || !hi.isFinite { lo = 0; hi = 1 }
             if hi - lo < hi * 1e-6 { let pad = max(hi * 0.001, 1e-9); lo -= pad; hi += pad }
             let span = hi - lo
@@ -433,19 +603,29 @@ struct CandleChart: View {
             low = center - half; high = center + half
         }
 
-        func x(_ index: CGFloat) -> CGFloat { plot.maxX - (rightIndex - index) * spacing }
+        func x(_ index: CGFloat) -> CGFloat {
+            let position = timestampAxis ? timeAxis.position(forFractionalBarIndex: index) : index
+            return plot.maxX - (rightIndex - position) * spacing
+        }
         func y(_ price: Double) -> CGFloat { plot.minY + CGFloat((high - price) / (high - low)) * plot.height }
         func price(atY y: CGFloat) -> Double { high - Double((y - plot.minY) / plot.height) * (high - low) }
-        func index(atX x: CGFloat) -> Int { min(max(Int((rightIndex - (plot.maxX - x) / spacing).rounded()), 0), max(0, bars.count - 1)) }
+        func index(atX x: CGFloat) -> Int {
+            let position = rightIndex - (plot.maxX - x) / spacing
+            if timestampAxis { return timeAxis.nearestBarIndex(atPosition: position) ?? 0 }
+            return min(max(Int(position.rounded()), 0), max(0, bars.count - 1))
+        }
 
         func index(atTime t: Double) -> CGFloat {
-            guard let first = bars.first, let last = bars.last else { return 0 }
-            if t <= first.time { return CGFloat((t - first.time) / period.seconds) }
-            if t >= last.time { return CGFloat(bars.count - 1) + CGFloat((t - last.time) / period.seconds) }
-            var lo = 0, hi = bars.count - 1
-            while lo + 1 < hi { let mid = (lo + hi) / 2; if bars[mid].time <= t { lo = mid } else { hi = mid } }
-            let a = bars[lo].time, b = bars[hi].time
-            return CGFloat(lo) + CGFloat((t - a) / max(b - a, 1))
+            guard timestampAxis else {
+                guard let first = bars.first, let last = bars.last else { return 0 }
+                if t <= first.time { return CGFloat((t - first.time) / period.seconds) }
+                if t >= last.time { return CGFloat(bars.count - 1) + CGFloat((t - last.time) / period.seconds) }
+                var lo = 0, hi = bars.count - 1
+                while lo + 1 < hi { let mid = (lo + hi) / 2; if bars[mid].time <= t { lo = mid } else { hi = mid } }
+                let a = bars[lo].time, b = bars[hi].time
+                return CGFloat(lo) + CGFloat((t - a) / max(b - a, 1))
+            }
+            return timeAxis.barIndex(atTime: t)
         }
     }
 
@@ -471,7 +651,7 @@ struct CandleChart: View {
         }
 
         let ticks = niceTicks(low: layout.low, high: layout.high, count: wallpaper ? 9 : 6)
-        let lastY = layout.bars.last.map { layout.y($0.close) }
+        let lastY = replayEntryTitle == nil ? layout.bars.last.map { layout.y($0.close) } : nil
         for value in ticks {
             let y = layout.y(value)
             guard y > plot.minY + 8, y < priceFloor else { continue }
@@ -480,9 +660,26 @@ struct CandleChart: View {
             context.draw(Text(format(value)).font(.system(size: 10).monospacedDigit()).foregroundStyle(textColor), at: CGPoint(x: plot.maxX + 6, y: y), anchor: .leading)
         }
 
-        guard layout.firstVisible <= layout.lastVisible else { return }
         var clipped = context
         clipped.clip(to: Path(plot))
+        // Stitch 4f56e93594b0418c9259759d6f6737e2: time boundaries, not an invented price trajectory.
+        if replayEntryTitle != nil, let holding = focusRange {
+            let start = layout.x(layout.index(atTime: holding.lowerBound))
+            let end = layout.x(layout.index(atTime: holding.upperBound))
+            let left = max(plot.minX, start), right = min(plot.maxX, end)
+            if right > left {
+                clipped.fill(Path(CGRect(x: left, y: plot.minY, width: right - left, height: plot.height)),
+                             with: .color(ChartPalette.accent.opacity(dark ? 0.09 : 0.05)))
+            }
+            for x in [start, end] where plot.minX...plot.maxX ~= x {
+                clipped.stroke(Path { $0.move(to: .init(x: x, y: plot.minY)); $0.addLine(to: .init(x: x, y: plot.maxY)) },
+                               with: .color(ChartPalette.reference.opacity(0.48)), style: StrokeStyle(lineWidth: 0.8, dash: [3, 4]))
+            }
+        }
+        guard layout.firstVisible <= layout.lastVisible else {
+            if layout.timestampAxis { drawExecutions(&clipped, layout: layout) }
+            return
+        }
         let visible = layout.bars[layout.firstVisible...layout.lastVisible]
 
         // One path per colour (up / down / NY Monday) for candles and for volume: a handful of fills per
@@ -541,16 +738,22 @@ struct CandleChart: View {
 
         for line in lines where line.price > 0 {
             let y = layout.y(line.price)
-            clipped.stroke(Path { $0.move(to: CGPoint(x: plot.minX, y: y)); $0.addLine(to: CGPoint(x: plot.maxX, y: y)) },
+            var left = plot.minX, right = plot.maxX
+            if replayEntryTitle != nil, let span = focusRange {
+                left = max(left, layout.x(layout.index(atTime: span.lowerBound)))
+                right = min(right, layout.x(layout.index(atTime: span.upperBound)))
+            }
+            guard right > left else { continue }
+            clipped.stroke(Path { $0.move(to: CGPoint(x: left, y: y)); $0.addLine(to: CGPoint(x: right, y: y)) },
                            with: .color(line.color), style: StrokeStyle(lineWidth: 1.4, dash: line.dashed ? [5, 4] : []))
             clipped.draw(Text("\(line.title) \(format(line.price))").font(.system(size: 10, weight: .semibold)).foregroundStyle(line.color),
-                         at: CGPoint(x: plot.minX + 6, y: y - 3), anchor: .bottomLeading)
+                         at: CGPoint(x: left + 4, y: y - 3), anchor: .bottomLeading)
         }
 
         drawMarkers(&clipped, layout: layout)
         drawExecutions(&clipped, layout: layout)
 
-        if let last = layout.bars.last {
+        if replayEntryTitle == nil, let last = layout.bars.last {
             let y = layout.y(last.close), color = last.close >= last.open ? ChartPalette.up : ChartPalette.down
             if y >= plot.minY && y <= priceFloor {
                 clipped.stroke(Path { $0.move(to: CGPoint(x: plot.minX, y: y)); $0.addLine(to: CGPoint(x: plot.maxX, y: y)) },
@@ -671,14 +874,21 @@ struct CandleChart: View {
         }
     }
 
-    /// Execution stamps are H1 precise while the cloud plot is 12H. Plot within the containing source
-    /// candle's horizontal interval; a missing source candle never gets a synthetic marker.
+    /// The cloud ledger is independent of its 12H candles. A real fill can land in a candle gap;
+    /// keep its timestamp and leave the underlying OHLC blank.
     private func executionPoints(_ layout: Layout) -> [(marker: ExecutionMarker, point: CGPoint)] {
         executionMarkers.compactMap { marker in
-            guard let index = barIndex(marker.time), index >= layout.firstVisible, index <= layout.lastVisible,
-                  index < bars.count, marker.time < bars[index].time + period.seconds else { return nil }
-            let fraction = min(max((marker.time - bars[index].time) / period.seconds, 0), 0.999)
-            let point = CGPoint(x: layout.x(CGFloat(index) + CGFloat(fraction)), y: layout.y(marker.price))
+            guard marker.time.isFinite, marker.price.isFinite, marker.price > 0 else { return nil }
+            let x: CGFloat
+            if layout.timestampAxis {
+                x = layout.plot.maxX - (layout.rightIndex - layout.timeAxis.position(atTime: marker.time)) * layout.spacing
+            } else {
+                guard let index = barIndex(marker.time), index >= layout.firstVisible, index <= layout.lastVisible,
+                      index < bars.count, marker.time < bars[index].time + period.seconds else { return nil }
+                let fraction = min(max((marker.time - bars[index].time) / period.seconds, 0), 0.999)
+                x = layout.x(CGFloat(index) + CGFloat(fraction))
+            }
+            let point = CGPoint(x: x, y: layout.y(marker.price))
             guard point.x >= layout.plot.minX, point.x <= layout.plot.maxX,
                   point.y > layout.plot.minY, point.y < layout.plot.maxY else { return nil }
             return (marker, point)
@@ -709,7 +919,16 @@ struct CandleChart: View {
     }
 
     private func drawExecutions(_ context: inout GraphicsContext, layout: Layout) {
-        for (marker, point) in executionPoints(layout) {
+        let points = executionPoints(layout)
+        let tags = executionTagPlacements(layout)
+        // Leaders sit beneath the fill glyphs so the true price/time anchor stays visible.
+        for tag in tags {
+            let edge = CGPoint(x: min(max(tag.anchor.x, tag.rect.minX + 7), tag.rect.maxX - 7),
+                               y: tag.anchor.y < tag.rect.minY ? tag.rect.minY : tag.anchor.y > tag.rect.maxY ? tag.rect.maxY : tag.rect.midY)
+            context.stroke(Path { path in path.move(to: tag.anchor); path.addLine(to: edge) },
+                           with: .color(tag.color.opacity(0.9)), style: StrokeStyle(lineWidth: 1.2, lineCap: .round))
+        }
+        for (marker, point) in points {
             let color = marker.color, selected = marker.id == picked
             if selected {
                 context.fill(Path(ellipseIn: CGRect(x: point.x - 9, y: point.y - 9, width: 18, height: 18)),
@@ -737,6 +956,47 @@ struct CandleChart: View {
                 context.fill(Path(ellipseIn: CGRect(x: point.x - 3.1, y: point.y - 3.1, width: 6.2, height: 6.2)), with: .color(color))
             }
         }
+        for tag in tags {
+            let shape = Path(roundedRect: tag.rect, cornerRadius: 7)
+            context.fill(shape, with: .color(tag.color))
+            context.stroke(shape, with: .color(.white.opacity(0.78)), lineWidth: 1)
+            let text = context.resolve(Text(tag.title).font(.system(size: 10, weight: .bold).monospacedDigit()).foregroundStyle(.white))
+            context.draw(text, at: CGPoint(x: tag.rect.midX, y: tag.rect.midY))
+        }
+    }
+
+    /// Label only the first funded entry and final ledger exit. Intermediate trims remain small dots.
+    /// Each pill is positioned from the visible fill anchor, with a short leader and collision checks.
+    private func executionTagPlacements(_ layout: Layout) -> [ExecutionTagPlacement] {
+        let visible = executionPoints(layout)
+        guard let entry = executionMarkers.filter({ $0.action == "entry" }).min(by: { $0.time < $1.time }),
+              let exit = executionMarkers.filter({ $0.action != "entry" }).max(by: { $0.time < $1.time }) else { return [] }
+        let endpoints: [(marker: ExecutionMarker, title: String)] = [
+            (entry, replayEntryTitle ?? "① 开仓"),
+            (exit, exit.action == "series_tail_close" ? "② 期末结算" : "② 平仓")
+        ]
+        var placed: [ExecutionTagPlacement] = []
+        for endpoint in endpoints {
+            guard let point = visible.first(where: { $0.marker.id == endpoint.marker.id })?.point else { continue }
+            let width = max(58, CGFloat(endpoint.title.count) * 10.5 + 16)
+            let height: CGFloat = 22
+            let gap: CGFloat = 12
+            let above = CGRect(x: point.x - width / 2, y: point.y - gap - height, width: width, height: height)
+            let below = CGRect(x: point.x - width / 2, y: point.y + gap, width: width, height: height)
+            let right = CGRect(x: point.x + gap, y: point.y - height / 2, width: width, height: height)
+            let left = CGRect(x: point.x - gap - width, y: point.y - height / 2, width: width, height: height)
+            let preferAbove = endpoint.marker.action == "entry" ? point.y > layout.plot.midY : point.y <= layout.plot.midY
+            let ordered = preferAbove ? [above, below, right, left] : [below, above, left, right]
+            func fit(_ candidate: CGRect) -> CGRect {
+                CGRect(x: min(max(candidate.minX, layout.plot.minX + 2), layout.plot.maxX - candidate.width - 2),
+                       y: min(max(candidate.minY, layout.plot.minY + 2), layout.plot.maxY - candidate.height - 2),
+                       width: candidate.width, height: candidate.height)
+            }
+            let rect = ordered.map(fit).first { candidate in !placed.contains(where: { $0.rect.insetBy(dx: -3, dy: -3).intersects(candidate) }) } ?? fit(ordered[0])
+            let color = endpoint.marker.action == "entry" ? ChartPalette.up : ChartPalette.down
+            placed.append(ExecutionTagPlacement(marker: endpoint.marker, anchor: point, rect: rect, title: endpoint.title, color: color))
+        }
+        return placed
     }
 
     /// 0 up, 1 down, 2 NY Monday (custom colours only).
@@ -801,6 +1061,17 @@ struct CandleChart: View {
     private static let timeFormatter: DateFormatter = { let f = DateFormatter(); f.timeZone = TimeZone(identifier: "Asia/Shanghai"); f.dateFormat = "HH:mm"; return f }()
     private static let fullFormatter: DateFormatter = { let f = DateFormatter(); f.timeZone = TimeZone(identifier: "Asia/Shanghai"); f.dateFormat = "MM/dd HH:mm"; return f }()
     static func fullTime(_ t: Double) -> String { fullFormatter.string(from: Date(timeIntervalSince1970: t)) }
+
+    static func executionTime(_ marker: ExecutionMarker) -> String {
+        executionTime(marker.time, endTime: marker.endTime, phase: marker.phase)
+    }
+
+    static func executionTime(_ time: Double, endTime: Double?, phase: String) -> String {
+        let start = fullTime(time)
+        guard phase == "intrabar", let endTime, endTime > time else { return start }
+        let end = fullTime(endTime)
+        return start.prefix(5) == end.prefix(5) ? "\(start)–\(end.suffix(5))" : "\(start)–\(end)"
+    }
 
     private func timeLabel(_ t: Double, previous: Double?) -> String {
         memo.text(.init(kind: 2, value: t, other: previous ?? -1, digits: period == .d1 || period == .h12 ? 1 : 0)) { makeTimeLabel(t, previous: previous) }
@@ -992,7 +1263,7 @@ private struct ExecutionCallout: View {
                                 Circle().fill(marker.color).frame(width: 6, height: 6)
                                 Text(marker.label).font(.system(size: 11, weight: .semibold)).foregroundStyle(Color.ink)
                                 Spacer(minLength: 4)
-                                Text(CandleChart.fullTime(marker.time)).font(.system(size: 10).monospacedDigit()).foregroundStyle(Color.muted)
+                                Text(CandleChart.executionTime(marker)).font(.system(size: 10).monospacedDigit()).foregroundStyle(Color.muted)
                             }
                             HStack(spacing: 8) {
                                 Text("价 \(marker.price.formatted(.number.precision(.fractionLength(0...10)).grouping(.never)))")
@@ -1001,7 +1272,7 @@ private struct ExecutionCallout: View {
                                 Text(marker.quantity.formatted(.number.precision(.fractionLength(0...8)).grouping(.automatic)))
                             }
                             .font(.system(size: 10).monospacedDigit()).foregroundStyle(Color.muted)
-                            Text(marker.phase == "intrabar" ? "原始小时盘中成交" : "K线开盘成交")
+                            Text(marker.phase == "intrabar" ? "H1 区间内成交 · 精确时点未记录" : "K线开盘成交")
                                 .font(.system(size: 9)).foregroundStyle(Color.muted)
                         }
                         .padding(.vertical, 4)
