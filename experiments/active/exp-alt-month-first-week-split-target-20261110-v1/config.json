@@ -1,0 +1,11 @@
+{
+  "baseline": "exp-alt-month-first-week-account-20261110-v1",
+  "single_variable": "Split each opened short equally by quantity between the frozen nearer cap4 target and original near first-week boundary. Both legs retain the same absolute stop and 168-hour timeout. When the boundary is within 4%, both exit at the boundary.",
+  "account": "1000 USDT. At most five contracts and 10% initial combined parent notional per signal, same priority, collateral, fees and stress as baseline; an occupied slot remains busy through the final exit hour.",
+  "fees": {"entry_stop_timeout": 0.0005, "resting_target": 0.0002},
+  "stress": "5bp adverse slippage on market fills on the same native barriers. Funding and lot rounding excluded.",
+  "entry_months": ["2022-02", "2026-10"],
+  "split": "2025-01-01T00:00:00Z",
+  "end": "2026-11-05T00:00:00Z",
+  "order": "Reuse frozen cap4 exits. Apply the same reconciled 1m tape to the runner exit hour when available; open before range and high first within an unresolved candle. At the 168-hour deadline use only the open."
+}
