@@ -1,8 +1,8 @@
 """Fixed short monthly entries, one intrabar 2% breakeven intervention.
 
 The reference ledger supplies the same entries, fixed exits and matched control
-clocks. Only its 20 dual-hit reference exits may change when finer data can
-resolve the tape. Only the outcome labels and post-entry excursions see future
+clocks. Reprice the reference on a shared tape when its exit candle has
+minute data or its original target and stop were both touched. Only the outcome labels and post-entry excursions see future
 data. Relative thresholds in the VectorBT native stop selector are referenced
 to the start of each stage; actual fills use the unrounded absolute order.
 """
@@ -98,11 +98,11 @@ def fixed_exit(points,opening,start,stop,target,stop_name):
     return i,points[i,0],'timeout'
 
 
-def run_path(ohlc,stamps,order,row,static_ambiguous):
+def run_path(ohlc,stamps,order,row,reprice_reference):
     entry=row.entry_fill;target=row.target_price;stop=row.stop_price
     trigger=entry*.98;be=entry*(1-TAKER)/(1+TAKER)
     points,source,opening=tape(ohlc,order,trigger,be)
-    if static_ambiguous:
+    if reprice_reference:
         _,old_price,old_reason=fixed_exit(points,opening,0,stop,target,'stop')
     else:
         old_price,old_reason=row.exit_price,row.exit_reason
@@ -210,7 +210,8 @@ def summary(ledger):
                 full_4_targets_washed=int((cut & np.isclose(g.target_price/g.entry_fill,.96)).sum()),
                 earned_pp=g.delta_pp.clip(lower=0).sum(),given_back_pp=-g.delta_pp.clip(upper=0).sum(),
                 outcome_sensitive=int((g.delta_max-g.delta_min>1e-8).sum()),
-                baseline_changes=int(g.old_reason.ne(g.frozen_exit_reason).sum())))
+                baseline_changes=int(g.old_reason.ne(g.frozen_exit_reason).sum()),
+                baseline_price_or_fee_changes=int((abs(g.old_net_pct-g.frozen_net_pct)>1e-8).sum())))
     pd.DataFrame(rows).to_csv(EXP/'metrics.csv',index=False)
     signals=ledger[~ledger.is_control]
     pairs=signals.merge(ledger[ledger.is_control][['paired_id','period','net_pct','delta_pp']],
@@ -243,24 +244,25 @@ def main():
         for row in g.itertuples(index=False):
             values,stamps=price_window(row,bars,by_symbol.get(symbol,{}))
             paths=order_scenarios(values,row.stop_price,row.target_price,row.entry_fill*.98,row.entry_fill*(1-TAKER)/(1+TAKER))
+            reprice_reference=row.ambiguous_sl_tp or row.exit_time in by_symbol.get(symbol,{})
             for branch,order in enumerate(paths):
-                result=run_path(values,stamps,order,row,row.ambiguous_sl_tp)
+                result=run_path(values,stamps,order,row,reprice_reference)
                 scenarios.append(dict(**result,trade_id=row.trade_id,branch=branch,entry=row.entry_fill,
-                    frozen=row.net_return_pct,old_ambiguous=row.ambiguous_sl_tp))
+                    frozen=row.net_return_pct,reprice_reference=reprice_reference))
             positions.append(dict(trade_id=row.trade_id,paired_id=row.paired_id,symbol=symbol,month=row.month,
                 period=row.period,is_control=row.is_control,entry_time=row.entry_time,entry_fill=row.entry_fill,
                 stop_price=row.stop_price,target_price=row.target_price,frozen_exit_reason=row.exit_reason,
                 frozen_net_pct=row.net_return_pct,baseline_mfe_pct=row.mfe_pct))
     trial=pd.DataFrame(scenarios);trial['net_pct']=cash(trial.entry.to_numpy(),trial.exit_price.to_numpy(),trial.exit_reason)
     trial['old_net_pct']=trial.frozen
-    dual=trial[trial.old_ambiguous]
-    if len(dual):
-        trial.loc[dual.index,'old_net_pct']=cash(dual.entry.to_numpy(),dual.old_price.to_numpy(),dual.old_reason)
+    repriced=trial[trial.reprice_reference]
+    if len(repriced):
+        trial.loc[repriced.index,'old_net_pct']=cash(repriced.entry.to_numpy(),repriced.old_price.to_numpy(),repriced.old_reason)
     trial['delta_pp']=trial.net_pct-trial.old_net_pct
     bounds=trial.groupby('trade_id').agg(delta_min=('delta_pp','min'),delta_max=('delta_pp','max'),
         float_min=('mfe_lower','min'),float_max=('mfe_upper','max'),
         adverse_min=('mae_lower','min'),adverse_max=('mae_upper','max'))
-    primary=trial[trial.branch==0].drop(columns=['entry','frozen','old_ambiguous','branch'])
+    primary=trial[trial.branch==0].drop(columns=['entry','frozen','reprice_reference','branch'])
     ledger=pd.DataFrame(positions).merge(primary,on='trade_id',validate='1:1').join(bounds,on='trade_id')
     for stem,name in [('', 'stress_pct'),('old_','old_stress_pct')]:
         reason=ledger.exit_reason if not stem else ledger.old_reason
