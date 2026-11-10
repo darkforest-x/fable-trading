@@ -1,0 +1,57 @@
+{
+  "experiment_id": "exp-alt-month-first-week-quarter-reclaim-20261110-v1",
+  "source_events": {
+    "experiment_id": "exp-alt-month-first-week-entries-20261110-v1",
+    "file": "events.csv.gz",
+    "side": "upper",
+    "months": ["2022-02", "2026-10"],
+    "event_anchor": "recorded H1 first-touch bar open; event level and first-week high/low are frozen from this ledger"
+  },
+  "prices": {
+    "execution_timeframe": "15m",
+    "execution_source": "data/crypto/market/kline_deep/okx_{symbol}_USDT_SWAP_15m_*.csv",
+    "h1_confirmation_source": "original cached H1 source paths in source experiment sources.csv.gz",
+    "scope": "all recorded upper events whose symbol has a registered local OKX 15m file and whose recorded touch is literally present in that file; no symbol sampling and no API fetch"
+  },
+  "entries": {
+    "arms": ["one_15m_close_reclaim", "one_h1_close_reclaim"],
+    "reclaim": "strict close below the recorded upper 1.618 level; the close of the literal touch bar is eligible because its high touch occurs before its close",
+    "literal_touch": "15m high reaches or exceeds the frozen upper level within the recorded H1 touch hour",
+    "confirm_deadline_hours": 24,
+    "pending_cancel": "cancel before confirmation when any later completed bar in that arm's source timeframe has low at or below the original first-week high",
+    "expiry": "NY calendar month expiry cancels pending entries; no new entry at or after expiry",
+    "fill": "open of the next 15m grid bar after the confirming close",
+    "entry_validity": "skip if next 15m open is at or below the first-week high target"
+  },
+  "exits": {
+    "target": "closer of the original first-week high and 4% below the actual short entry fill; target price = max(first_week_high, entry_fill * 0.96)",
+    "initial_stop_pct": 5,
+    "breakeven": false,
+    "holding_timeout_hours": 168,
+    "month_expiry_closes_open_positions": false,
+    "intrabar_ambiguity": "VectorBT native OHLC stop kernel; conservative stop-first on simultaneous stop/target touches"
+  },
+  "costs": {
+    "taker_fee": 0.0005,
+    "maker_fee": 0.0002,
+    "entry_type": "market/taker",
+    "target_exit_type": "limit/maker",
+    "stop_and_timeout_exit_type": "market/taker",
+    "market_slippage_bp": 5,
+    "stress": "separate rerun with adverse 5bp slippage on each market fill; no slippage on resting target fills",
+    "funding": "excluded"
+  },
+  "portfolio": {
+    "position_unit": "one independent base unit per event/arm; VectorBT cash is isolated per trade column",
+    "cash_sharing": false,
+    "account_equity_claim": false
+  },
+  "splits": {
+    "pre_2025": "event touch before 2025-01-01 UTC",
+    "post_2025": "event touch at or after 2025-01-01 UTC"
+  },
+  "framework": "VectorBT native ohlc_stop_choice_nb and Portfolio.from_orders via /Users/zhangzc/.local/bin/vectorbt-python",
+  "matched_random_control": false,
+  "training_eligible": false,
+  "production_eligible": false
+}
