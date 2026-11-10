@@ -20,6 +20,7 @@
     market: ['market-terminal.css','research.css','v130.css','market-sync.css','market-accounts.css','range-chart.css','range-chart.js','market-accounts.js','market-intelligence.js','symbol-list-model.js','market-terminal.js','market-sync.js'],
     'trading-books': ['research.css','reading-tools.css','reading-tools.js','trading-books.css','trading-books-study.js','trading-books.js'],
     orderflow: ['research.css','market-sync.css','reading-tools.css','reading-tools.js','orderflow.css','orderflow.js'],
+    'month-first-week-1618': ['month-first-week.css','month-first-week.js'],
     'monday-fib': ['floating-layout.js','monday-fib.css','public-chart-cache.js','chart-history.js','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','monday-quick.js','monday-list-model.js','monday-fib.js'],
     'monday-live': ['monday-live.css','monday-ledger.js','monday-live.js'],
     'auto-leaders': ['research.css','market-sync.css','altcoin-leaders.css','altcoin-leaders.js','leader-page.js'],

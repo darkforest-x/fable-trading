@@ -45,7 +45,7 @@
     const account=view==='signals'&&new URLSearchParams(query||'').get('pane')==='account';
     const maAccount=view==='yolo-detect'&&new URLSearchParams(query||'').get('tab')==='account';
     const home=view==='signals'&&new URLSearchParams(query||'').get('pane')==='reclaim';
-    const family=home?'reclaim':view==='monday-fib'?'reclaim':account||maAccount||['manual','copier'].includes(view)?'yolo-detect?tab=account':
+    const family=view==='month-first-week-1618'?'month-first-week-1618':home?'reclaim':view==='monday-fib'?'reclaim':account||maAccount||['manual','copier'].includes(view)?'yolo-detect?tab=account':
       ['paper-desk','paper'].includes(view)?'paper-desk':view==='signals'?'signals':view==='yolo-detect'?'yolo-detect':
       ['platform','research','datasets','factors','models','strategies','yolo','vision','experiments','backtests'].includes(view)?'research':
       ['learning','trading-books','orderflow','langlang','rektproof','knowledge','content'].includes(view)?'learning':

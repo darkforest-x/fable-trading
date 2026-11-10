@@ -10,18 +10,29 @@ struct AlarmBanner: View {
     @State private var pulse = false
     private var alarm: Bool { event.kind == "alarm" }
 
+    private var monthly: Bool { event.kind == MonthTouchStyle.kind }
+    private var tint: Color { monthly ? MonthTouchStyle.tint : (alarm ? .down : .blue) }
+    private var title: String {
+        if alarm { return "全市场插针 · \(Fmt.edge(event.side))" }
+        return (monthly ? "月首周 1.618" : "周一 1.618") + " · " + MonthTouchStyle.edge(event.side)
+    }
+    private var detail: String {
+        let who = alarm ? "\(event.n ?? 0) 个币触及" : Fmt.coin(event.symbol ?? "")
+        return who + " · " + Fmt.clock(event.atMs, now: now)
+    }
+
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: alarm ? "bell.and.waves.left.and.right.fill" : "chart.line.uptrend.xyaxis")
+            Image(systemName: monthly ? MonthTouchStyle.icon : alarm ? "bell.and.waves.left.and.right.fill" : "chart.line.uptrend.xyaxis")
                 .font(.scaled(size: 17, weight: .semibold))
-                .foregroundStyle(alarm ? Color.down : Color.blue)
+                .foregroundStyle(tint)
                 .frame(width: 40, height: 40)
-                .background((alarm ? Color.down : Color.blue).opacity(0.14), in: .circle)
+                .background(tint.opacity(0.14), in: .circle)
                 .scaleEffect(alarm && pulse ? 1.08 : 1)
             VStack(alignment: .leading, spacing: 2) {
-                Text(alarm ? "全市场插针 · \(Fmt.edge(event.side))" : "1.618 触价 · \(Fmt.coin(event.symbol ?? "")) \(event.side == .upper ? "上沿" : "下沿")")
+                Text(title)
                     .font(.subheadline.weight(.semibold)).lineLimit(1)
-                Text(alarm ? "\(event.n ?? 0) 个币触及 · \(Fmt.clock(event.atMs, now: now))" : "已推送 · \(Fmt.clock(event.atMs, now: now))")
+                Text(detail)
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer(minLength: 4)

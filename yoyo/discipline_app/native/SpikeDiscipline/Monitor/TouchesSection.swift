@@ -10,6 +10,7 @@ struct TouchesSection: View {
     @Environment(\.openChart) private var openChart
     let connection: Connection
     let refresh: Int
+    @AppStorage("touch.source") private var source = "monday"
     @AppStorage("touch.side") private var side = "all"
     @AppStorage("touch.sort") private var sort = "latest"
     @State private var sortMenu = false
@@ -29,6 +30,17 @@ struct TouchesSection: View {
     }
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SoftSegment(selection: $source, options: [("monday", "周一 1.618"), ("month", "月首周 1.618")], height: 36)
+            if source == "month" {
+                MonthFirstWeekSection(connection: connection, refresh: refresh)
+            } else {
+                mondaySection
+            }
+        }
+    }
+
+    private var mondaySection: some View {
         VStack(alignment: .leading, spacing: 10) {
             BTCStatusCard(connection: connection, refresh: refresh)
             HStack(spacing: 10) {

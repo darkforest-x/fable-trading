@@ -64,9 +64,12 @@ struct SettingsView: View {
                 Section {
                     Toggle("App 内报警弹窗", isOn: $notices.prefs.popup)
                     Toggle("报警声音", isOn: $notices.prefs.sound)
-                    Toggle("1.618 触价提醒", isOn: $notices.prefs.fib)
+                    Toggle("周一 1.618 触价提醒", isOn: $notices.prefs.fib)
+                    Toggle(isOn: $notices.prefs.monthFirstWeekTouch) {
+                        Label("月首周 1.618 触价提醒", systemImage: MonthTouchStyle.icon)
+                    }.tint(MonthTouchStyle.tint)
                 } header: { Text("通知与报警") } footer: {
-                    Text("App 打开时顶部提醒并震动。1.618 只提醒已推送的触价（评分 >\(Fmt.price(notices.data?.channels.fib.minScore ?? 0.4)) 或 live- 账户开仓）。")
+                    Text("App 打开时顶部提醒并震动。月首周按每币每月每侧首次触及提醒。周一只提醒已推送的触价（评分 >\(Fmt.price(notices.data?.channels.fib.minScore ?? 0.4)) 或 live- 账户开仓）。")
                 }
                 Section {
                     LabeledContent("全市场插针报警") {
@@ -75,12 +78,22 @@ struct SettingsView: View {
                     }
                     Toggle(isOn: Binding(get: { notices.data?.channels.fib.bark ?? false }, set: { value in Task { await setBark(value) } })) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("1.618 触价信号")
+                            Text("周一 1.618 触价信号")
                             Text(notices.data.map { $0.channels.fib.barkConfigured ? "已推送 \($0.channels.fib.barkSent) 条" : "本机尚未配置 Bark" } ?? "连接后读取")
                                 .font(.caption).foregroundStyle(.secondary)
                         }
                     }
                     .disabled(barkBusy || notices.data?.channels.fib.barkConfigured != true)
+                    Toggle(isOn: Binding(get: { notices.data?.channels.monthFirstWeekTouch?.bark ?? false },
+                                         set: { value in Task { await setMonthlyBark(value) } })) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("月首周 1.618 触价")
+                            Text(notices.data?.channels.monthFirstWeekTouch.map { $0.barkConfigured ? "每币每侧当月首次触及" : "本机尚未配置 Bark" } ?? "等待监控服务")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                    .tint(MonthTouchStyle.tint)
+                    .disabled(barkBusy || notices.data?.channels.monthFirstWeekTouch?.barkConfigured != true)
                 } header: { Text("Bark 推送 · App 关闭时") } footer: {
                     Text("后台推送经 Bark 送达；确认报警仍在监控工作台操作。")
                 }
@@ -111,7 +124,7 @@ struct SettingsView: View {
                 } header: { Text("体验设置") }
             }
             .onChange(of: haptics) { _, value in Haptics.enabled = value; Haptics.tap() }
-            .onChange(of: notices.prefs) { _, now in Haptics.select(); PushRegistry.shared.update(fib: now.fib, alarm: now.popup) }
+            .onChange(of: notices.prefs) { _, now in Haptics.select(); PushRegistry.shared.update(fib: now.fib, alarm: now.popup, monthFirstWeekTouch: now.monthFirstWeekTouch) }
             .onChange(of: liveActivity) { _, _ in Haptics.select(); if let state = account.state { PositionActivities.sync(state) } }
             .onChange(of: appearance) { _, _ in Haptics.select() }
             .onChange(of: confirmTrades) { _, _ in Haptics.select() }
@@ -122,6 +135,14 @@ struct SettingsView: View {
             .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar { ToolbarItem(placement: .topBarTrailing) { CloseButton { dismiss() } }.sharedBackgroundVisibility(.hidden) }
         }
+    }
+
+    private func setMonthlyBark(_ value: Bool) async {
+        guard let connection = session.connection else { return }
+        barkBusy = true
+        defer { barkBusy = false }
+        do { notices.data = try await MonthFirstWeekBarkSwitch.set(value, connection: connection); notices.error = nil }
+        catch { notices.error = error.localizedDescription; Haptics.warning() }
     }
 
     private func setBark(_ value: Bool) async {
