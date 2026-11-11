@@ -1,0 +1,10 @@
+{
+  "question": "When do the first completed hourly closes following the first 12h reclaim distinguish the original 1616 favorable-first paths from the 3722 adverse-first paths, and how far has price moved then?",
+  "population": "Reuse the archived Binance first-touch labels from direction_check.match. Keep the original strictly inside 12h first closes dated no later than the deciding H1 open. Targets and adverse moves are measured from the original rail. No trading, score fit or parameter sweep.",
+  "checkpoints_hours_after_reclaim": [0, 1, 2, 3, 4, 5, 6],
+  "primary": "At each post-reclaim close, fraction whose close is further in the reversal direction than its own t0 close. Compare the two labeled groups while the original outcome is unresolved and the rail is current. A tie does not advance.",
+  "earliest_group_difference": "First of the six post-reclaim checkpoints where the pooled 95% simultaneous month-bootstrap lower bound for the favorable-minus-adverse proportion difference exceeds zero and both pre-2025 and 2025-onward point estimates are positive. Group separation is not a trading signal.",
+  "uncertainty": "Resample whole NY range months with replacement, 4000 draws, seed 20261112. Use the 95th percentile of the largest absolute bootstrap deviation over the six checkpoints for a simultaneous descriptive interval.",
+  "cost_of_wait": "At each checkpoint record eligible counts, original decisive outcomes already reached, expired unresolved rails, median signed rail distance, and paired change from t0. Report displacement in percentage points of rail and signed percent of t0 close. Record the initial rail-distance AUC on the same risk set and the new displacement AUC with half credit for ties.",
+  "checks": "Report direction and pre-2025/2025-onward splits, with no time split used to choose a threshold. A checkpoint exactly at a deciding hour open uses only the preceding close. Clamp at original rail expiry and verify raw timestamp prefixes."
+}
