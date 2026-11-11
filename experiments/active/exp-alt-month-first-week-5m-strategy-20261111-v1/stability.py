@@ -294,10 +294,10 @@ def _json_value(value: Any) -> Any:
         return {str(k): _json_value(v) for k, v in value.items()}
     if isinstance(value, (list, tuple)):
         return [_json_value(v) for v in value]
-    if isinstance(value, (np.integer, int)):
-        return int(value)
     if isinstance(value, (np.bool_, bool)):
         return bool(value)
+    if isinstance(value, (np.integer, int)):
+        return int(value)
     if isinstance(value, (np.floating, float)):
         if math.isnan(float(value)):
             return None
