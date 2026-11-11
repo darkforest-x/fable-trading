@@ -161,8 +161,11 @@ def read_path(event, bars, hours, end, raw_last):
     # The touch H1's high/low could precede the first touch. Use only its close for the first mark.
     signed_closes=np.r_[event.touch_h1_close_pct,shift(hours[:,4],event.rail,d)]
     best_idx=int(np.argmax(signed_closes))
+    marked_20=np.flatnonzero(signed_closes>=20)
     obs.update(best_h1_close_pct=signed_closes[best_idx],best_h1_close_ms=event.touch_ms+(1+best_idx)*HOUR,
                best_post_touch_hour_extreme_pct=float(max(0,shift(hours[:,2 if d==1 else 3],event.rail,d).max())) if len(hours) else None)
+    if len(marked_20):
+        obs['first_20_h1_close_ms']=int(event.touch_ms+(1+marked_20[0])*HOUR)
     start=event.scheduled_close_ms
     rail_inside=None
     ref=None
@@ -223,6 +226,8 @@ def read_path(event, bars, hours, end, raw_last):
     obs['attempts']=attempt
     if 'first_confirmation_ms' in obs:
         obs['path_type']='失守后重新收回并确认' if obs.get('first_outside_ms',float('inf'))<obs['first_confirmation_ms'] else '先守住并确认'
+        at_confirm=int((obs['first_confirmation_ms']-event.touch_ms)//HOUR)
+        obs['max_known_h1_close_pct_at_confirmation']=signed_closes[:at_confirm].max()
         after=hours[hours[:,0]>=obs['first_confirmation_ms']]
         obs['remaining_best_h1_close_pp']=max(0,float(shift(after[:,4],event.rail,d).max()-obs['confirmation_close_pct'])) if len(after) else None
     elif number==0: obs['path_type']='无完整12H收盘'
