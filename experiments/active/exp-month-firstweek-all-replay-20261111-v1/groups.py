@@ -87,7 +87,12 @@ def peers():
         delta=ranks.sub(ranks.loc[ref]).abs().mean(axis=1)
         check=delta[delta.index.get_level_values('symbol')!=ref[0]]
         other=check.sort_values(kind='stable').index[0]
-        for kind,key in [('参照',ref),('相似对照',other)]:
+        choices=[('参照',ref),('相似对照',other)]
+        if other[1]>=ref[1]:
+            earlier=check[check.index.get_level_values('month')<ref[1]]
+            if len(earlier):
+                choices.append(('更早月份对照',earlier.sort_values(kind='stable').index[0]))
+        for kind,key in choices:
             picks.append(dict(example=ref[0],role=kind,symbol=key[0],month=key[1],side=key[2],
                               **data.loc[key].to_dict()))
     pd.DataFrame(picks).to_csv(HERE/'peer_decisions.csv',index=False,encoding='utf-8-sig')
