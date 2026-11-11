@@ -15,6 +15,30 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-month-firstweek-blind-review-20261111-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "21c3463e95"
+    status: inconclusive
+    question: Which monthly rail reactions can be identified before the future bars are shown, and how often do they precede a reversal before structural invalidation?
+    single_variable: Fixed first long rejection wick or separated second body-inside retest. Decisions were locked at the first close, next close and separated test before unmasking cases.
+    result: >-
+      Fourteen Binance-comparable owner references plus the separately specified PEPE and 15 date-nearest,
+      same-market same-side controls. Six of the 15 references signalled before the first 20% rail excursion,
+      five reached it before the next outside 12h close. Three controls signalled early and all three invalidated.
+      In the 47010-row historical signal source the union produced 3620 distinct contract-month-sides.
+      Of 3321 with no prior 20% move and a known outcome, 1014 reached 20% before structural failure.
+      Of those, 712 reached the rail target before an adverse 5% move from the next-open reference.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    canonical_report: experiments/active/exp-month-firstweek-blind-review-20261111-v1/population_counts.csv
+    artifacts: []
+    notes: >-
+      This is an event study. The 20% outcome is relative to the original rail. Cases helped define the setup,
+      and the first-touch baseline includes some qualifying patterns. Seven eligible union paths were censored.
+      The data-level inputs, cap at 45 days and signed blind calls are preserved alongside revealed.csv.
+
   - experiment_id: exp-month-firstweek-cloud-overlay-20261111-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "86949e0fb8"
