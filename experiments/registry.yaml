@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-etc-month-first-week-12h-retests-20261111-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d6af5ef5ea"
+    status: inconclusive
+    question: Which ETC trades correspond to the July to September 2026 chart examples, and how do target selection and repeat touches affect their historical results?
+    single_variable: Reuse identical hourly reclaim fills to compare target caps and separately size the account. In the 12h study vary the ability to rearm after a full inside candle.
+    data_scope: OKX ETC USDT perpetual, February 2022 through October 2026 NY entry months with exit follow-up. Hourly paths and causal UTC 12h confirmations, capital 1000 USDT.
+    result: "Same 29 hourly ETC reclaims, 10% of NAV, from 1,000 USDT at 1bp additional adverse market slippage: near boundary 14 wins and 999.81 USDT, 2% cap 23 wins and 1013.40 USDT, 4% cap 20 wins and 1030.45 USDT. Full unlevered 4% cap returned 1318.11 USDT with 17.35% intrabar DD upper bound. Separate 12h near-edge comparison: first-touch 21 funded, 11 winners, 990.27 USDT; rearmed retests 36 funded, 20 winners, 1022.47 USDT. Historical observations on a single owner-selected coin."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-etc-month-first-week-12h-retests-20261111-v1/first_touch_target_accounts.csv
+    notes: ETC and example dates chosen after seeing chart. Include fees and slippage scenarios, omit funding and lot rounding. Chart examples use the archived extra-zero-slippage path.
+
   - experiment_id: exp-alt-month-first-week-5m-strategy-20261111-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "0236817722"
