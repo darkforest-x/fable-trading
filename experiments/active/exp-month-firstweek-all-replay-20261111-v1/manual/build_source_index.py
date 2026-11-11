@@ -16,6 +16,7 @@ import subprocess
 from pathlib import Path
 
 import pandas as pd
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[4]
 OUT = Path(__file__).resolve().parent
@@ -32,6 +33,7 @@ ETH_ARROWS = ROOT / "data/chart_annotations/eth-month-first-week-20261110/arrow_
 ETH_TOUCHES = ROOT / "data/chart_annotations/eth-month-first-week-20261110/all_39_first_touches.csv"
 ETH_H1 = ROOT / "experiments/active/exp-month-first-week-touches-20261102-v1/inputs_ETH_1h.csv.gz"
 ETH_EXISTING_EVENTS = ROOT / "experiments/active/exp-month-first-week-touches-20261102-v1/events.csv"
+OWNER_IMAGE_DIR = Path("/Users/zhangzc/未命名文件夹")
 
 
 def read_csv(path: Path) -> pd.DataFrame:
@@ -85,6 +87,14 @@ def photo_rows() -> tuple[list[dict], dict, dict]:
     for ordinal, r in enumerate(raw.to_dict("records"), start=1):
         image_time = as_text(r["原图文件时间"])
         image = photo_name(image_time)
+        image_path = OWNER_IMAGE_DIR / image
+        if not image_path.is_file() or image_path.stat().st_size <= 0:
+            raise FileNotFoundError(f"Expected original owner image is missing or empty: {image_path}")
+        with Image.open(image_path) as img:
+            img.verify()
+        with Image.open(image_path) as img:
+            image_width, image_height = img.size
+            image_format = img.format
         photo_occurrence[image] = photo_occurrence.get(image, 0) + 1
         symbol = clean_symbol(as_text(r["OKX合约简称"]))
         month = as_text(r["纽约区间月"])
@@ -93,6 +103,7 @@ def photo_rows() -> tuple[list[dict], dict, dict]:
         pair_row = pair_by_photo.get(image, {})
         signal_row = signal_by_photo.get(image, {})
         blind_matches = blind_by_key.get((symbol, month, side), [])
+        blind_matches = list({as_text(x.get("blind_id")): x for x in blind_matches}.values())
         # Selection table has one SSV photo representing both its first touch and
         # a separately selected Sep 27 retouch. The latter remains a distinct row.
         repeated = photo_occurrence[image] > 1
@@ -103,7 +114,12 @@ def photo_rows() -> tuple[list[dict], dict, dict]:
             "case_id": case_id,
             "source_group": "owner_15_image" if not repeated else "owner_15_image_same_photo_second_touch",
             "image_ref": image,
-            "image_bytes_in_workspace": False,
+            "owner_image_path": str(image_path),
+            "image_bytes": image_path.stat().st_size,
+            "image_width": image_width,
+            "image_height": image_height,
+            "image_format": image_format,
+            "image_decodes": True,
             "okx_instrument": f"{symbol}-USDT-SWAP",
             "month_ny": month,
             "side": side,
@@ -113,6 +129,7 @@ def photo_rows() -> tuple[list[dict], dict, dict]:
             "rail_price_okx": as_text(r["轨价"]),
             "source_selection_note": as_text(r["起算轮次"]),
             "blind_review_match": ";".join(as_text(x.get("blind_id")) for x in blind_matches),
+            "blind_review_match_basis": "same symbol + NY month + side; not an exact image/touch-time join",
             "blind_review_call": ";".join(as_text(x.get("call")) for x in blind_matches),
             "blind_review_reason": " | ".join(as_text(x.get("首碰盲判依据")) for x in blind_matches),
             "okx_binance_pair_status": "paired" if as_text(pair_row.get("币安_轨价")) else "OKX_only_no_Binance_counterpart_in_saved_table",
@@ -293,17 +310,29 @@ def main() -> None:
         "reuse_note": "The arrow ledger and existing hourly inputs/outcomes are linked; no duplicate ETH replay was generated.",
     }
     image_names = sorted(unique_photos)
+    image_inventory = []
+    for name in image_names:
+        path = OWNER_IMAGE_DIR / name
+        with Image.open(path) as img:
+            img.verify()
+        with Image.open(path) as img:
+            image_inventory.append({"name": name, "path": str(path), "bytes": path.stat().st_size, "width": img.width, "height": img.height, "format": img.format, "decodes": True})
     source_receipt = {
         "generated_by_commit": subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, check=True, capture_output=True, text=True).stdout.strip(),
         "selected_unique_images": len(unique_photos),
         "selected_touch_rows": len(cases),
         "ssv_same_image_multiple_touches": 1,
-        "original_image_bytes_found_in_repository": False,
+        "owner_image_folder": str(OWNER_IMAGE_DIR),
+        "owner_image_files_expected": 15,
+        "owner_image_files_found_and_decodable": len(image_inventory),
+        "original_image_bytes_found_in_project_repo": False,
         "image_file_references": image_names,
-        "original_image_bytes_note": "The source ledger preserves photo timestamps and sample metadata; original JPG bytes were not found in the workspace.",
+        "owner_image_inventory": image_inventory,
+        "original_image_bytes_note": "The original JPGs are available at owner_image_folder, outside the repository; each exact filename from the source ledger was opened and decoded.",
         "owner_15_venue_pairs_with_binance_counterpart": int(cases_df.drop_duplicates("image_ref")["okx_binance_pair_status"].eq("paired").sum()),
         "owner_15_okx_only_unique_images": int(cases_df.drop_duplicates("image_ref")["okx_binance_pair_status"].ne("paired").sum()),
         "blind_hand_selected_unique_keys_matched": int(cases_df.loc[cases_df["blind_review_match"].ne("")].drop_duplicates(["okx_instrument", "month_ny", "side"]).shape[0]),
+        "blind_review_join_basis": "same symbol + NY month + side; not an exact image/touch-time join",
         "named_references": ["IOST-USDT-SWAP 2026-10 OKX 12H lower", "PEPE-USDT-SWAP 2025-06 OKX lower, compared with 1000PEPE Binance sample after unit normalization"],
         "iost_reference": iost,
         "pepe_reference": pepe,
@@ -312,7 +341,7 @@ def main() -> None:
         "source_bytes_mtime": {str(p.relative_to(ROOT)): {"bytes": p.stat().st_size, "mtime_ns": p.stat().st_mtime_ns} for p in [SOURCE_IMAGES, OKX_HOURS, VENUE_COMPARE, SIGNAL_COMPARE, BLIND_REVEAL, IOST_REFERENCE, IOST_H1, PEPE_15M, ETH_ARROWS, ETH_TOUCHES, ETH_H1, ETH_EXISTING_EVENTS]},
     }
     (OUT / "source_receipt.json").write_text(json.dumps(source_receipt, ensure_ascii=False, indent=2, allow_nan=False) + "\n")
-    print(json.dumps({"unique_images": len(unique_photos), "selected_touch_rows": len(cases), "paired_binance_images": source_receipt["owner_15_venue_pairs_with_binance_counterpart"], "okx_only_unique_images": source_receipt["owner_15_okx_only_unique_images"], "blind_hand_selected_unique_keys_matched": source_receipt["blind_hand_selected_unique_keys_matched"], "iost_12h_rebuild_matches": iost["twelve_hour_rebuild_matches_reference"], "pepe_okx_touch_bjt": pepe["touch_beijing"], "eth_manual_arrow_rows_linked": eth_notes["manual_arrow_rows"]}, ensure_ascii=False))
+    print(json.dumps({"unique_images": len(unique_photos), "owner_images_decoded": len(image_inventory), "selected_touch_rows": len(cases), "paired_binance_images": source_receipt["owner_15_venue_pairs_with_binance_counterpart"], "okx_only_unique_images": source_receipt["owner_15_okx_only_unique_images"], "blind_hand_selected_unique_keys_matched": source_receipt["blind_hand_selected_unique_keys_matched"], "iost_12h_rebuild_matches": iost["twelve_hour_rebuild_matches_reference"], "pepe_okx_touch_bjt": pepe["touch_beijing"], "eth_manual_arrow_rows_linked": eth_notes["manual_arrow_rows"]}, ensure_ascii=False))
 
 
 if __name__ == "__main__":
