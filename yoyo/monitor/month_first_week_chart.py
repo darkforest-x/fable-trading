@@ -100,7 +100,18 @@ def _window(history, symbol, period, left, right, now):
         if row and left <= row["time"] < right and row["time"] not in bars:
             forming = row["time"]
             bars[forming] = row
-    return [bars[t] for t in sorted(bars)], forming
+    step = step_ms(period)
+    candles = []
+    for stamp in sorted(bars):
+        close = stamp + step
+        observed = min(close, now)
+        window = month_window(observed)
+        start, ready = window["start_ms"], window["ready_ms"]
+        # Match Pine V1.5's whole-candle rule, including UTC daily/12H bars
+        # that are already open when NY enters its first complete week.
+        first_week = observed >= start and (stamp <= start < close or start <= stamp and close <= ready)
+        candles.append(dict(bars[stamp], first_week=first_week))
+    return candles, forming
 
 
 def install(app, service):

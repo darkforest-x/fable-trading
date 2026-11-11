@@ -1,4 +1,5 @@
 from types import SimpleNamespace
+from datetime import datetime, timezone
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -72,7 +73,6 @@ def test_minute_recovery_at_top_of_hour_and_live_unclosed_bar(tmp_path):
 
 
 def test_untouched_contract_can_open_during_new_month_without_previous_levels(tmp_path):
-    from datetime import datetime, timezone
     new_month = int(datetime(2026, 12, 1, 12, tzinfo=timezone.utc).timestamp() * 1000)
     history = History(new_month, [], forming=candle(new_month))
     http = setup_chart(tmp_path, history, source="live", created=START)
@@ -84,3 +84,14 @@ def test_untouched_contract_can_open_during_new_month_without_previous_levels(tm
     assert current["forming_time_ms"] == current["candles"][0]["time"] == new_month
     assert http.get(path, params=dict(symbol="UNKNOWN-USDT-SWAP")).status_code == 404
     assert http.get(path, params=dict(symbol=SYMBOL, event_id=EVENT)).status_code == 422
+
+
+def test_daily_color_matches_ny_first_week_across_months_and_dst(tmp_path):
+    def utc(month, day):
+        return int(datetime(2026, month, day, tzinfo=timezone.utc).timestamp() * 1000)
+
+    days = [(10, 4), (10, 5), (10, 11), (10, 12), (11, 1), (11, 2), (11, 8), (11, 9)]
+    history = History(utc(11, 12), [candle(utc(*day)) for day in days])
+    http = setup_chart(tmp_path, history, source="live", created=START)
+    data = http.get("/api/month-first-week-1618/chart", params=dict(symbol=SYMBOL, period="1D")).json()
+    assert [row["first_week"] for row in data["candles"]] == [False, True, True, False]*2
