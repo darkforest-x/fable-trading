@@ -244,6 +244,8 @@ def _find_pre_signal_moves(
             later_hour_hits["20"] = idx
         visited += 1
         expected += HOUR
+    if not gap and expected < confirmation_ms:
+        gap = True
     out["pre_signal_path_hours"] = visited
     out["pre_signal_path_gap"] = gap
     for label, hit in [("5", first_5), ("20", first_20)]:
@@ -478,7 +480,14 @@ def _build_events(
         for key in symbol_keys:
             key_signals = signals_by_key.get(key, pd.DataFrame())
             touch = touch_by_key.get(key)
-            touch_ms = int(touch["touch_ms"]) if touch is not None else None
+            catalogue_touch_ms = int(touch["touch_ms"]) if touch is not None else None
+            touch_ms = catalogue_touch_ms
+            attention_start_source = "daily_touch_catalogue"
+            if touch_ms is None and not key_signals.empty:
+                touch_ms = int(key_signals.touch_ms.min())
+                attention_start_source = "earliest_signal_touch_fallback"
+            elif touch_ms is None:
+                attention_start_source = "no_touch_hour_available"
             rail_candidates = []
             if touch is not None and pd.notna(touch.get("catalogue_rail")):
                 rail_candidates.append(float(touch["catalogue_rail"]))
@@ -498,6 +507,7 @@ def _build_events(
                     "catalogue_touch_days": int(touch["catalogue_touch_days"]) if touch is not None else 0,
                     "attention_start_ms": touch_ms,
                     "attention_start_hour_beijing": _beijing_label(touch_ms),
+                    "attention_start_source": attention_start_source,
                     "rail": rail,
                     "rule": rule_name,
                     "signal_present": signal is not None,
@@ -645,7 +655,9 @@ def _make_summary(events: pd.DataFrame, valid: pd.DataFrame, touched: pd.DataFra
                     "complete_45d_no_target_or_invalidation_count": int(
                         statuses.get("complete_45d_no_target_or_invalidation", 0)
                     ),
-                    "unknown_cutoff_or_gap_count": int(statuses.get("unknown_cutoff_or_gap", 0)),
+                    "unknown_path_count": int(
+                        present.path_status.fillna("").astype(str).str.startswith("unknown").sum()
+                    ),
                     "pre_signal_5_reached_count": int(pre5.get("reached_before_signal", 0)),
                     "pre_signal_5_ambiguous_touch_hour_count": int(pre5.get("ambiguous_same_touch_hour", 0)),
                     "pre_signal_5_unknown_count": int(
@@ -693,8 +705,14 @@ def _make_photos(events: pd.DataFrame, keys: pd.DataFrame, touched: pd.DataFrame
             row["attention_start_hour_beijing"] = _beijing_label(int(touch.touch_ms))
             row["catalogue_touch_days"] = int(touch.catalogue_touch_days)
         else:
-            row["attention_start_hour_beijing"] = None
+            fallback = candidates.attention_start_hour_beijing.dropna() if len(candidates) else pd.Series(dtype=object)
+            row["attention_start_hour_beijing"] = fallback.iloc[0] if len(fallback) else None
             row["catalogue_touch_days"] = 0
+        row["attention_start_source"] = (
+            "daily_touch_catalogue" if key in touch_keys else
+            "earliest_signal_touch_fallback" if row["attention_start_hour_beijing"] else
+            "no_touch_hour_available"
+        )
         for rule_name, _ in RULES:
             one = candidates[candidates.rule.eq(rule_name)]
             signal = one.iloc[0] if len(one) else None
