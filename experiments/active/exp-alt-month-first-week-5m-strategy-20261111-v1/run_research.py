@@ -34,7 +34,7 @@ class Inputs:
         events = pd.read_csv(HERE/'source_events.csv.gz')
         self.windows = {e:pd.DataFrame(self.array[i],columns=PRICE_COLS,copy=False)
                         for i,e in enumerate(events.event_id)}
-        self.candidates = pd.read_csv(HERE/'entry_candidates.csv.gz')
+        self.candidates = pd.concat([pd.read_csv(HERE/name) for name in ('entry_candidates.csv.gz','shape_candidates.csv.gz')],ignore_index=True)
 
     def clocks(self, rule, params, mode):
         rows = self.candidates[self.candidates.rule.eq(rule)].copy()
