@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ETC 月首周 1.618 触价复盘</title>
+<style>
+  :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; color:#26292d; background:#fff; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:20px; background:#fff; }
+  main { width:min(1500px,100%); margin:0 auto; }
+  h1 { margin:0; font-size:20px; line-height:1.35; font-weight:600; letter-spacing:.01em; }
+  .subtitle { margin:4px 0 16px; color:#72777f; font-size:13px; }
+  .toolbar { display:flex; flex-wrap:wrap; align-items:end; gap:10px 12px; margin:0 0 12px; }
+  .field { display:flex; flex-direction:column; gap:5px; min-width:110px; }
+  .field label { color:#656b73; font-size:12px; }
+  select, input, button { min-height:36px; border:1px solid #d9dde2; border-radius:6px; background:#fff; color:#25292e; padding:0 10px; font:inherit; font-size:13px; }
+  button { cursor:pointer; white-space:nowrap; }
+  button:hover:not(:disabled) { background:#f4f5f6; }
+  button:disabled { color:#a0a5ac; cursor:default; }
+  input[type="number"] { width:84px; }
+  input[type="date"] { min-width:142px; }
+  input[type="text"] { width:98px; text-transform:uppercase; }
+  .group { display:flex; gap:6px; align-items:end; }
+  .field.inline { min-width:0; }
+  .field.inline label { text-align:center; }
+  .event-line { display:flex; flex-wrap:wrap; align-items:center; gap:8px 16px; min-height:32px; margin:2px 0 8px; color:#4e545b; font-size:13px; }
+  .event-line strong { color:#25292e; font-weight:600; }
+  .event-line .warning { color:#a84920; }
+  .chart-wrap { position:relative; width:100%; height:clamp(430px,62vh,690px); min-height:430px; }
+  canvas { display:block; width:100%; height:100%; touch-action:none; cursor:crosshair; }
+  .tip { position:absolute; z-index:2; display:none; pointer-events:none; min-width:190px; padding:8px 10px; border:1px solid #d8dce1; border-radius:5px; background:rgba(255,255,255,.96); color:#30353b; font-size:12px; line-height:1.55; box-shadow:0 2px 9px rgba(24,30,38,.08); }
+  .legend { display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; margin:8px 0 0; color:#626870; font-size:12px; }
+  .legend-item { display:inline-flex; align-items:center; gap:7px; }
+  .swatch { width:17px; height:9px; display:inline-block; }
+  .swatch.gray { background:#949aa1; }
+  .swatch.green { background:#25ad59; }
+  .swatch.rail { height:0; border-top:2px solid #30343a; }
+  .swatch.week { height:0; border-top:1px solid #858b93; }
+  .swatch.touch { width:10px; height:10px; border:2px solid #d56b2f; border-radius:50%; }
+  .foot { margin-top:8px; color:#747a82; font-size:11px; line-height:1.5; }
+  .empty { padding:36px 12px; color:#656b73; font-size:14px; }
+  @media (max-width:700px) {
+    body { padding:13px 10px; }
+    h1 { font-size:18px; }
+    .subtitle { margin-bottom:12px; }
+    .toolbar { gap:8px; }
+    .field { min-width:calc(50% - 8px); flex:1 1 calc(50% - 8px); }
+    .field.event-picker { flex-basis:100%; }
+    .group { flex-wrap:wrap; }
+    .field.inline { flex:0 0 auto; }
+    .event-line { align-items:flex-start; gap:5px 12px; }
+    .chart-wrap { height:58vh; min-height:400px; }
+    .tip { max-width:calc(100% - 20px); }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>ETC 月首周 1.618 触价复盘</h1>
+  <div class="subtitle">OKX ETC 永续 · UTC 5 分钟原始 OHLC · 日期时间按北京时间显示</div>
+  <div class="toolbar" id="toolbar">
+    <div class="field">
+      <label for="monthFilter">月份</label>
+      <select id="monthFilter"><option value="">全部月份</option></select>
+    </div>
+    <div class="field">
+      <label for="sideFilter">方向</label>
+      <select id="sideFilter">
+        <option value="">全部方向</option>
+        <option value="upper">上轨</option>
+        <option value="lower">下轨</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="firstFilter">触价类型</label>
+      <select id="firstFilter">
+        <option value="">全部触价段</option>
+        <option value="first">每月同侧首触</option>
+        <option value="retest">后续触价</option>
+      </select>
+    </div>
+    <div class="field event-picker">
+      <label for="eventSelect">触价段编号 / 日期</label>
+      <select id="eventSelect" aria-label="选择触价段"></select>
+    </div>
+    <div class="group">
+      <div class="field inline">
+        <label for="eventIdInput">跳转编号</label>
+        <input id="eventIdInput" type="text" placeholder="E0001" aria-label="触价段编号">
+      </div>
+      <button id="jumpId" type="button">定位</button>
+    </div>
+    <div class="group">
+      <div class="field inline">
+        <label for="dateInput">跳转日期</label>
+        <input id="dateInput" type="date" aria-label="触价日期">
+      </div>
+      <button id="jumpDate" type="button">定位日期</button>
+    </div>
+    <div class="group">
+      <button id="prevEvent" type="button" aria-label="上一触价段">上一段</button>
+      <button id="nextEvent" type="button" aria-label="下一触价段">下一段</button>
+    </div>
+    <div class="field">
+      <label for="timeframe">K线周期</label>
+      <select id="timeframe">
+        <option value="43200">12 小时</option>
+        <option value="3600">1 小时</option>
+        <option value="300">5 分钟</option>
+      </select>
+    </div>
+    <div class="group">
+      <button id="prevTouch" type="button" aria-label="上一根实际触线五分钟K">上一触线 K</button>
+      <div class="field inline">
+        <label for="touchNumber">片段内触线序号</label>
+        <input id="touchNumber" type="number" min="1" step="1" value="1" aria-label="片段内触线五分钟K序号">
+      </div>
+      <button id="nextTouch" type="button" aria-label="下一根实际触线五分钟K">下一触线 K</button>
+    </div>
+    <button id="resetView" type="button">复位视图</button>
+  </div>
+  <div id="eventSummary" class="event-line" aria-live="polite"></div>
+  <div class="chart-wrap" id="chartWrap">
+    <canvas id="chart" aria-label="ETC 月首周 1.618 触价 K 线图"></canvas>
+    <div class="tip" id="tip"></div>
+  </div>
+  <div class="legend" aria-label="图例">
+    <span class="legend-item"><i class="swatch gray"></i>其余 5 分钟 K 聚合</span>
+    <span class="legend-item"><i class="swatch green"></i>纽约月首周</span>
+    <span class="legend-item"><i class="swatch rail"></i>1.618 扩展轨</span>
+    <span class="legend-item"><i class="swatch week"></i>首周高 / 低</span>
+    <span class="legend-item"><i class="swatch touch"></i>当前选中的实际触线 5 分钟 K</span>
+  </div>
+  <div class="foot" id="sourceLine"></div>
+</main>
+<script>
+const DATA = __ETC_DATA__;
+
+(function () {
+  "use strict";
+  const bars = Array.isArray(DATA.bars) ? DATA.bars : [];
+  const months = Array.isArray(DATA.months) ? DATA.months : [];
+  const events = Array.isArray(DATA.events) ? DATA.events.slice() : [];
+  const monthById = new Map(months.map(function (m) { return [m.month, m]; }));
+  events.sort(function (a, b) { return a.time - b.time || String(a.id).localeCompare(String(b.id)); });
+  const monthEl = document.getElementById("monthFilter");
+  const sideEl = document.getElementById("sideFilter");
+  const firstEl = document.getElementById("firstFilter");
+  const eventEl = document.getElementById("eventSelect");
+  const idEl = document.getElementById("eventIdInput");
+  const dateEl = document.getElementById("dateInput");
+  const tfEl = document.getElementById("timeframe");
+  const touchEl = document.getElementById("touchNumber");
+  const summaryEl = document.getElementById("eventSummary");
+  const canvas = document.getElementById("chart");
+  const ctx = canvas.getContext("2d");
+  const wrap = document.getElementById("chartWrap");
+  const tip = document.getElementById("tip");
+  const DAY = 86400;
+  const BAR5 = 300;
+  const MAX_DRAW_BARS = 1400;
+  const fmtDateTime = new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+  });
+  const fmtDate = new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit"
+  });
+  const fmtPrice = new Intl.NumberFormat("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+  function eventFromHash() {
+    const raw = decodeURIComponent(String(location.hash || "").replace(/^#/, "")).toLowerCase();
+    if (!raw) return null;
+    const number = idNumber(raw);
+    return events.find(function (e) {
+      return String(e.id).toLowerCase() === raw || (number && idNumber(e.id) === number);
+    }) || null;
+  }
+  let selectedEvent = eventFromHash() || (events.length ? events[0] : null);
+  let touchOffset = 0;
+  let timeframe = 43200;
+  let view = null;
+  let plot = null;
+  let plottedBars = [];
+  let resizeObserver = null;
+  let dragging = null;
+
+  function seconds(value) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : NaN;
+  }
+  function price(value) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : NaN;
+  }
+  function dateParts(ts) {
+    const parts = fmtDateTime.formatToParts(new Date(ts * 1000));
+    const out = {};
+    parts.forEach(function (p) { if (p.type !== "literal") out[p.type] = p.value; });
+    return out;
+  }
+  function dateKey(ts) {
+    const p = dateParts(ts);
+    return p.year + "-" + p.month + "-" + p.day;
+  }
+  function dateLabel(ts) {
+    return fmtDateTime.format(new Date(ts * 1000));
+  }
+  function shortDate(ts) {
+    const p = dateParts(ts);
+    return p.month + "/" + p.day + " " + p.hour + ":" + p.minute;
+  }
+  function sideLabel(side) {
+    return side === "upper" ? "上轨" : "下轨";
+  }
+  function levelFor(event) {
+    const m = event ? monthById.get(event.month) : null;
+    if (!m) return NaN;
+    return price(event.side === "upper" ? m.upper : m.lower);
+  }
+  function idNumber(id) {
+    const digits = String(id == null ? "" : id).replace(/\D/g, "");
+    return digits ? String(Number(digits)) : "";
+  }
+  function lowerBound(ts) {
+    let lo = 0, hi = bars.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1;
+      if (Number(bars[mid][0]) < ts) lo = mid + 1; else hi = mid;
+    }
+    return lo;
+  }
+  function rawAt(ts) {
+    const i = lowerBound(ts);
+    return i < bars.length && Number(bars[i][0]) === ts ? bars[i] : null;
+  }
+  function monthDefaultRange(event) {
+    const m = event ? monthById.get(event.month) : null;
+    let start = m ? seconds(m.start) : NaN;
+    let end = m ? seconds(m.end) : NaN;
+    if (!(Number.isFinite(start) && Number.isFinite(end) && end > start)) {
+      const date = new Date(String(event.month) + "-01T00:00:00Z");
+      start = Math.floor(date.getTime() / 1000);
+      const next = new Date(date.getTime());
+      next.setUTCMonth(next.getUTCMonth() + 1);
+      end = Math.floor(next.getTime() / 1000);
+    }
+    return [start - 2 * DAY, end + 2 * DAY];
+  }
+  function defaultRange(event, tf) {
+    if (!event) return [0, DAY];
+    const center = event.time + Math.max(0, (Number(event.count) - 1) / 2) * BAR5;
+    if (tf === 43200) return monthDefaultRange(event);
+    const span = tf === 3600 ? 10 * DAY : DAY;
+    return [center - span / 2, center + span / 2];
+  }
+  function activeEvents() {
+    const month = monthEl.value;
+    const side = sideEl.value;
+    const first = firstEl.value;
+    return events.filter(function (e) {
+      return (!month || e.month === month) && (!side || e.side === side) &&
+        (!first || (first === "first" ? e.first === true : e.first === false));
+    });
+  }
+  function filteredIndex() {
+    return activeEvents().findIndex(function (e) { return e === selectedEvent; });
+  }
+  function updateEventSelect() {
+    const list = activeEvents();
+    eventEl.innerHTML = "";
+    list.forEach(function (e) {
+      const opt = document.createElement("option");
+      opt.value = String(events.indexOf(e));
+      opt.textContent = String(e.id) + " · " + e.month + " · " +
+        sideLabel(e.side) + " · " + shortDate(e.time) + " · " + e.count + " 根";
+      eventEl.appendChild(opt);
+    });
+    if (selectedEvent && list.indexOf(selectedEvent) < 0) selectedEvent = list[0] || null;
+    if (selectedEvent) eventEl.value = String(events.indexOf(selectedEvent));
+    document.getElementById("prevEvent").disabled = !selectedEvent || list.indexOf(selectedEvent) <= 0;
+    document.getElementById("nextEvent").disabled = !selectedEvent || list.indexOf(selectedEvent) < 0 || list.indexOf(selectedEvent) >= list.length - 1;
+    idEl.value = selectedEvent ? String(selectedEvent.id) : "";
+  }
+  function fillMonths() {
+    const unique = Array.from(new Set(events.map(function (e) { return e.month; }))).sort();
+    unique.forEach(function (m) {
+      const opt = document.createElement("option");
+      opt.value = m; opt.textContent = m;
+      monthEl.appendChild(opt);
+    });
+  }
+  function setEvent(event, reset) {
+    selectedEvent = event || null;
+    touchOffset = 0;
+    if (selectedEvent) {
+      touchEl.max = String(Math.max(1, Number(selectedEvent.count) || 1));
+      touchEl.value = "1";
+      dateEl.value = dateKey(selectedEvent.time);
+      if (reset !== false) view = defaultRange(selectedEvent, timeframe);
+      try { history.replaceState(null, "", "#" + encodeURIComponent(String(selectedEvent.id))); } catch (_) {}
+    }
+    updateEventSelect();
+    updateSummary();
+    syncTouchButtons();
+    draw();
+  }
+  function syncTouchButtons() {
+    const count = selectedEvent ? Math.max(1, Number(selectedEvent.count) || 1) : 0;
+    touchEl.disabled = !selectedEvent;
+    touchEl.min = "1";
+    touchEl.max = String(Math.max(1, count));
+    touchEl.value = String(Math.min(count || 1, touchOffset + 1));
+    document.getElementById("prevTouch").disabled = !selectedEvent || touchOffset <= 0;
+    document.getElementById("nextTouch").disabled = !selectedEvent || touchOffset >= count - 1;
+  }
+  function selectedTouchTime() {
+    return selectedEvent ? Number(selectedEvent.time) + touchOffset * BAR5 : NaN;
+  }
+  function ensureTouchVisible() {
+    const t = selectedTouchTime();
+    if (!Number.isFinite(t) || !view) return;
+    if (t < view[0] || t > view[1]) {
+      const span = view[1] - view[0];
+      view = [t - span / 2, t + span / 2];
+      constrainView();
+    }
+  }
+  function updateSummary() {
+    if (!selectedEvent) {
+      summaryEl.innerHTML = '<span class="warning">当前筛选下没有触价段。</span>';
+      return;
+    }
+    const m = monthById.get(selectedEvent.month);
+    const t = selectedTouchTime();
+    const k = rawAt(t);
+    const level = levelFor(selectedEvent);
+    const first = dateLabel(Number(selectedEvent.time));
+    const last = dateLabel(Number(selectedEvent.last));
+    let parts = '<strong>' + escapeHtml(String(selectedEvent.id)) + '</strong>' +
+      '<span>' + escapeHtml(selectedEvent.month) + ' · ' + sideLabel(selectedEvent.side) + '</span>' +
+      '<span>触价段 ' + escapeHtml(first) + ' 至 ' + escapeHtml(last) + '</span>' +
+      '<span>' + (touchOffset + 1) + ' / ' + selectedEvent.count + ' 根触线 K</span>' +
+      '<span>轨道 ' + fmtPrice.format(level) + '</span>';
+    if (m && Number.isFinite(Number(m.hi)) && Number.isFinite(Number(m.lo))) {
+      parts += '<span>首周高 / 低 ' + fmtPrice.format(Number(m.hi)) + ' / ' + fmtPrice.format(Number(m.lo)) + '</span>';
+    }
+    if (k) {
+      parts += '<span>当前 K ' + shortDate(t) + ' · O ' + fmtPrice.format(Number(k[1])) +
+        ' H ' + fmtPrice.format(Number(k[2])) + ' L ' + fmtPrice.format(Number(k[3])) +
+        ' C ' + fmtPrice.format(Number(k[4])) + '</span>';
+    } else {
+      parts += '<span class="warning">数据中未找到该序号的实际 5 分钟 K（期望 ' + escapeHtml(dateLabel(t)) + '）。</span>';
+    }
+    summaryEl.innerHTML = parts;
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[c];
+    });
+  }
+  function constrainView() {
+    if (!view || !selectedEvent) return;
+    const maxSpan = timeframe * MAX_DRAW_BARS;
+    const minSpan = timeframe * 10;
+    let span = Math.max(minSpan, Math.min(maxSpan, view[1] - view[0]));
+    const mid = (view[0] + view[1]) / 2;
+    view = [mid - span / 2, mid + span / 2];
+  }
+  function getVisibleBars(start, end, tf) {
+    const firstBucket = Math.floor(start / tf) * tf;
+    const lastBucket = Math.ceil(end / tf) * tf;
+    let i = lowerBound(firstBucket);
+    if (tf === BAR5) {
+      const result = [];
+      for (; i < bars.length && Number(bars[i][0]) < lastBucket; i++) {
+        const b = bars[i];
+        if (Number(b[0]) >= start - BAR5 && Number(b[0]) <= end) {
+          result.push({ t:Number(b[0]), o:Number(b[1]), h:Number(b[2]), l:Number(b[3]), c:Number(b[4]), bucket:Number(b[0]) });
+        }
+      }
+      return result;
+    }
+    const byBucket = new Map();
+    for (; i < bars.length && Number(bars[i][0]) < lastBucket; i++) {
+      const b = bars[i];
+      const t = Number(b[0]);
+      const bucket = Math.floor(t / tf) * tf;
+      let agg = byBucket.get(bucket);
+      if (!agg) {
+        agg = { t:bucket, bucket:bucket, o:Number(b[1]), h:Number(b[2]), l:Number(b[3]), c:Number(b[4]) };
+        byBucket.set(bucket, agg);
+      } else {
+        agg.h = Math.max(agg.h, Number(b[2]));
+        agg.l = Math.min(agg.l, Number(b[3]));
+        agg.c = Number(b[4]);
+      }
+    }
+    return Array.from(byBucket.values());
+  }
+  function niceStep(range) {
+    const raw = range / 6;
+    const power = Math.pow(10, Math.floor(Math.log10(Math.max(raw, 1e-9))));
+    const n = raw / power;
+    return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * power;
+  }
+  function xFor(t) {
+    return plot.left + (t - view[0]) / (view[1] - view[0]) * plot.width;
+  }
+  function yFor(v) {
+    return plot.top + (plot.max - v) / (plot.max - plot.min) * plot.height;
+  }
+  function roundRectPath(x, y, w, h, r) {
+    const rr = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rr);
+    ctx.arcTo(x + w, y + h, x, y + h, rr);
+    ctx.arcTo(x, y + h, x, y, rr);
+    ctx.arcTo(x, y, x + w, y, rr);
+    ctx.closePath();
+  }
+  function draw() {
+    if (!ctx) return;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    const width = Math.max(1, rect.width);
+    const height = Math.max(1, rect.height);
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, width, height);
+    if (!selectedEvent || !bars.length) {
+      ctx.fillStyle = "#68707a";
+      ctx.font = "14px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText(!selectedEvent ? "当前筛选下没有触价段。" : "数据未载入。", 24, 42);
+      return;
+    }
+    constrainView();
+    const left = width < 520 ? 50 : 62;
+    const right = width < 520 ? 78 : 92;
+    plot = { left:left, top:18, width:Math.max(20,width-left-right), height:Math.max(30,height-62), min:0, max:1 };
+    const visible = getVisibleBars(view[0], view[1], timeframe);
+    plottedBars = visible;
+    const m = monthById.get(selectedEvent.month);
+    const level = levelFor(selectedEvent);
+    let min = Infinity, max = -Infinity;
+    visible.forEach(function (b) { if (Number.isFinite(b.l)) min=Math.min(min,b.l); if (Number.isFinite(b.h)) max=Math.max(max,b.h); });
+    if (m) [m.hi,m.lo,m.upper,m.lower].forEach(function (v) {
+      const n = Number(v); if (Number.isFinite(n)) { min=Math.min(min,n); max=Math.max(max,n); }
+    });
+    if (!Number.isFinite(min) || !Number.isFinite(max)) { min=0; max=1; }
+    if (max <= min) { max += 1; min -= 1; }
+    const pad = (max - min) * .07;
+    plot.min = min - pad; plot.max = max + pad;
+
+    const x1 = plot.left, x2 = plot.left + plot.width, y1 = plot.top, y2 = plot.top + plot.height;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x1,y1,plot.width,plot.height); ctx.clip();
+
+    if (m && Number.isFinite(Number(m.ready)) && Number.isFinite(Number(m.end)) &&
+        Number.isFinite(Number(m.hi)) && Number.isFinite(Number(m.lo))) {
+      const sx = xFor(Number(m.ready)), ex = xFor(Number(m.end));
+      const top = yFor(Math.max(Number(m.hi),Number(m.lo)));
+      const bottom = yFor(Math.min(Number(m.hi),Number(m.lo)));
+      ctx.fillStyle = "rgba(125,132,140,.09)";
+      ctx.fillRect(sx, top, ex-sx, bottom-top);
+      const rails = [
+        { value:Number(m.upper), color:"#30343a", width:1.35, dash:[] },
+        { value:Number(m.hi), color:"#858b93", width:1, dash:[4,4] },
+        { value:Number(m.lo), color:"#858b93", width:1, dash:[4,4] },
+        { value:Number(m.lower), color:"#30343a", width:1.35, dash:[] }
+      ];
+      rails.forEach(function (r) {
+        if (!Number.isFinite(r.value)) return;
+        ctx.beginPath(); ctx.setLineDash(r.dash); ctx.lineWidth=r.width; ctx.strokeStyle=r.color;
+        ctx.moveTo(sx,yFor(r.value)); ctx.lineTo(ex,yFor(r.value)); ctx.stroke();
+      });
+      ctx.setLineDash([]);
+    }
+
+    const yStep = niceStep(plot.max - plot.min);
+    const yStart = Math.ceil(plot.min / yStep) * yStep;
+    ctx.font = "11px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.textAlign = "left";
+    for (let v=yStart; v<=plot.max; v+=yStep) {
+      const y=yFor(v);
+      ctx.beginPath(); ctx.setLineDash([]); ctx.strokeStyle="#eceef0"; ctx.lineWidth=1;
+      ctx.moveTo(x1,y); ctx.lineTo(x2,y); ctx.stroke();
+    }
+
+    const barWidth = Math.max(1, Math.min(12, plot.width * timeframe / (view[1]-view[0]) * .58));
+    visible.forEach(function (b) {
+      const center = timeframe === BAR5 ? b.t + BAR5/2 : b.bucket + timeframe/2;
+      if (center < view[0]-timeframe || center > view[1]+timeframe) return;
+      const x=xFor(center);
+      const firstWeek = m && b.bucket >= Number(m.start) && b.bucket < Number(m.ready);
+      let color = firstWeek ? "#25ad59" : "#92989f";
+      const inSegment = timeframe === BAR5 && b.t >= Number(selectedEvent.time) && b.t <= Number(selectedEvent.last);
+      if (inSegment) color = "#d38345";
+      const selected = timeframe === BAR5 && b.t === selectedTouchTime();
+      ctx.strokeStyle = selected ? "#ab451c" : color;
+      ctx.fillStyle = selected ? "#cf642b" : color;
+      ctx.lineWidth = selected ? 1.65 : .85;
+      ctx.beginPath();
+      ctx.moveTo(x,yFor(b.h)); ctx.lineTo(x,yFor(b.l)); ctx.stroke();
+      const top = yFor(Math.max(b.o,b.c)), bottom = yFor(Math.min(b.o,b.c));
+      const bh = Math.max(1, bottom-top);
+      ctx.fillRect(x-barWidth/2,top,barWidth,bh);
+      if (selected) {
+        ctx.beginPath(); ctx.arc(x,yFor(level),4.2,0,Math.PI*2);
+        ctx.strokeStyle="#b84920"; ctx.fillStyle="#fff"; ctx.lineWidth=1.8;
+        ctx.fill(); ctx.stroke();
+      }
+    });
+
+    const touchT = selectedTouchTime();
+    const touchAnchor = timeframe === BAR5 ? touchT + BAR5/2 : touchT;
+    const touchX = xFor(touchAnchor);
+    if (touchAnchor >= view[0] && touchAnchor <= view[1] && Number.isFinite(level)) {
+      ctx.beginPath(); ctx.setLineDash([3,4]); ctx.lineWidth=1; ctx.strokeStyle="rgba(187,75,33,.72)";
+      ctx.moveTo(touchX,y1); ctx.lineTo(touchX,y2); ctx.stroke(); ctx.setLineDash([]);
+      const touchY=yFor(level);
+      ctx.beginPath(); ctx.arc(touchX,touchY,5.5,0,Math.PI*2);
+      ctx.fillStyle="#fff"; ctx.fill(); ctx.strokeStyle="#b84920"; ctx.lineWidth=2; ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.font = "11px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillStyle="#555c64"; ctx.textAlign="right"; ctx.textBaseline="middle";
+    if (m) {
+      const railText=[
+        ["上 1.618",m.upper],["首周高",m.hi],["首周低",m.lo],["下 1.618",m.lower]
+      ];
+      railText.forEach(function (row) {
+        const v=Number(row[1]);
+        if (!Number.isFinite(v) || v<plot.min || v>plot.max) return;
+        const y=Math.max(y1+10,Math.min(y2-3,yFor(v)));
+        const text=row[0]+"  "+fmtPrice.format(v);
+        const textWidth=ctx.measureText(text).width;
+        ctx.fillStyle="#fff";
+        ctx.fillRect(x2-textWidth-9,y-8,textWidth+7,16);
+        ctx.fillStyle = String(row[0]).indexOf("1.618")>=0 ? "#30343a" : "#737a82";
+        ctx.fillText(text,x2-5,y);
+      });
+    }
+    ctx.fillStyle="#626870"; ctx.textAlign="right"; ctx.textBaseline="middle";
+    for (let v=yStart; v<=plot.max; v+=yStep) {
+      const y=yFor(v);
+      if (y>=y1-4 && y<=y2+4) ctx.fillText(fmtPrice.format(v),x2+68,y);
+    }
+    ctx.textBaseline="top"; ctx.textAlign="center";
+    const span=view[1]-view[0];
+    const tickStep=span<=2*DAY?6*3600:span<=14*DAY?DAY:span<=65*DAY?7*DAY:30*DAY;
+    const tickStart=Math.ceil(view[0]/tickStep)*tickStep;
+    for (let t=tickStart;t<=view[1];t+=tickStep) {
+      const x=xFor(t);
+      ctx.beginPath(); ctx.strokeStyle="#b6bbc1"; ctx.lineWidth=1;
+      ctx.moveTo(x,y2); ctx.lineTo(x,y2+4); ctx.stroke();
+      ctx.fillStyle="#666d75";
+      ctx.fillText(tickStep<=6*3600?shortDate(t):fmtDate.format(new Date(t*1000)),x,y2+8);
+    }
+    ctx.textAlign="left"; ctx.textBaseline="top"; ctx.fillStyle="#777e86";
+    ctx.font="11px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText("价格 (USDT)",x1,2);
+    ctx.textAlign="right";
+    ctx.fillText(timeframe===43200?"12H":timeframe===3600?"1H":"5m",x2,y2+27);
+
+    if (visible.length > MAX_DRAW_BARS) {
+      summaryEl.innerHTML += '<span class="warning">当前范围内 K 线数量过多，已限制绘制；请放大查看。</span>';
+    }
+  }
+
+  function resetRange() {
+    if (selectedEvent) view = defaultRange(selectedEvent, timeframe);
+    draw();
+  }
+  function jumpToEvent(target) {
+    if (!target) return;
+    monthEl.value = "";
+    sideEl.value = "";
+    firstEl.value = "";
+    setEvent(target, true);
+  }
+  function setTouchIndex(value) {
+    if (!selectedEvent) return;
+    const count = Math.max(1, Number(selectedEvent.count) || 1);
+    const n = Math.max(1, Math.min(count, Math.floor(Number(value) || 1)));
+    touchOffset = n - 1;
+    syncTouchButtons();
+    ensureTouchVisible();
+    updateSummary();
+    draw();
+  }
+  function nearestEventOnDate(date) {
+    const list = activeEvents();
+    if (!list.length) return null;
+    const wanted = new Date(date + "T12:00:00+08:00").getTime()/1000;
+    return list.reduce(function (best, e) {
+      return !best || Math.abs(e.time-wanted) < Math.abs(best.time-wanted) ? e : best;
+    }, null);
+  }
+  function stepEvent(delta) {
+    const list = activeEvents();
+    const index = list.indexOf(selectedEvent);
+    const next = list[index+delta];
+    if (next) setEvent(next, true);
+  }
+  function zoomAt(factor, px) {
+    if (!view || !plot) return;
+    const ratio = Math.max(0,Math.min(1,(px-plot.left)/plot.width));
+    const anchor=view[0]+ratio*(view[1]-view[0]);
+    const left=anchor-(anchor-view[0])*factor;
+    const right=anchor+(view[1]-anchor)*factor;
+    view=[left,right]; constrainView(); draw();
+  }
+  function nearestPlottedBar(x) {
+    if (!plottedBars.length) return null;
+    const t=view[0]+(x-plot.left)/plot.width*(view[1]-view[0]);
+    let lo=0,hi=plottedBars.length;
+    while(lo<hi) {
+      const mid=(lo+hi)>>>1;
+      const center=timeframe===BAR5?plottedBars[mid].t+BAR5/2:plottedBars[mid].bucket+timeframe/2;
+      if(center<t)lo=mid+1;else hi=mid;
+    }
+    const a=plottedBars[Math.max(0,lo-1)], b=plottedBars[Math.min(plottedBars.length-1,lo)];
+    const ca=timeframe===BAR5?a.t+BAR5/2:a.bucket+timeframe/2;
+    const cb=timeframe===BAR5?b.t+BAR5/2:b.bucket+timeframe/2;
+    return Math.abs(ca-t)<=Math.abs(cb-t)?a:b;
+  }
+  function showTip(ev) {
+    if (!plot || !plottedBars.length) return;
+    const rect=canvas.getBoundingClientRect();
+    const x=ev.clientX-rect.left, y=ev.clientY-rect.top;
+    if(x<plot.left||x>plot.left+plot.width||y<plot.top||y>plot.top+plot.height) {
+      tip.style.display="none"; return;
+    }
+    const b=nearestPlottedBar(x);
+    if(!b) return;
+    const t=timeframe===BAR5?b.t:b.bucket;
+    tip.innerHTML="<strong>"+escapeHtml(dateLabel(t))+(timeframe===BAR5?" · 5m":timeframe===3600?" · 1h":" · 12h")+"</strong><br>" +
+      "O "+fmtPrice.format(b.o)+"　H "+fmtPrice.format(b.h)+"<br>L "+fmtPrice.format(b.l)+"　C "+fmtPrice.format(b.c);
+    const maxLeft=Math.max(8,rect.width-210);
+    tip.style.left=Math.max(8,Math.min(maxLeft,x+12))+"px";
+    tip.style.top=Math.max(8,Math.min(rect.height-74,y+10))+"px";
+    tip.style.display="block";
+  }
+
+  fillMonths();
+  document.getElementById("sourceLine").textContent = "数据来源：" + String(DATA.source || "未注明") +
+    "。时间锚点均为 Unix 秒 UTC；月界、纽约首周 ready/end 使用数据给定时间戳；触线序号按连续实际 5 分钟 K（time + 序号 × 300 秒）定位。滚轮缩放，按住图表拖动平移。";
+  monthEl.addEventListener("change", function () {
+    const list=activeEvents();
+    if (list.indexOf(selectedEvent)<0) setEvent(list[0]||null,true);
+    else { updateEventSelect(); }
+  });
+  sideEl.addEventListener("change", function () {
+    const list=activeEvents();
+    if (list.indexOf(selectedEvent)<0) setEvent(list[0]||null,true);
+    else { updateEventSelect(); }
+  });
+  firstEl.addEventListener("change", function () {
+    const list=activeEvents();
+    if (list.indexOf(selectedEvent)<0) setEvent(list[0]||null,true);
+    else { updateEventSelect(); }
+  });
+  eventEl.addEventListener("change", function () {
+    const i=Number(eventEl.value);
+    if(Number.isInteger(i)&&events[i]) setEvent(events[i],true);
+  });
+  document.getElementById("jumpId").addEventListener("click", function () {
+    const wanted=idEl.value.trim().toLowerCase();
+    const num=idNumber(wanted);
+    const match=events.find(function (e) {
+      return String(e.id).toLowerCase()===wanted || (num && idNumber(e.id)===num);
+    });
+    if(match) jumpToEvent(match);
+    else { summaryEl.innerHTML='<span class="warning">没有找到编号 '+escapeHtml(idEl.value.trim())+'。</span>'; }
+  });
+  document.getElementById("jumpDate").addEventListener("click", function () {
+    if(!dateEl.value) return;
+    const match=nearestEventOnDate(dateEl.value);
+    if(match) {
+      setEvent(match,true);
+      if(dateKey(match.time)!==dateEl.value) {
+        summaryEl.innerHTML+='<span>该日期没有触价段，已定位到筛选范围内日期最近的段。</span>';
+      }
+    } else {
+      summaryEl.innerHTML='<span class="warning">当前月份 / 方向筛选下没有触价段。</span>';
+    }
+  });
+  document.getElementById("prevEvent").addEventListener("click", function () { stepEvent(-1); });
+  document.getElementById("nextEvent").addEventListener("click", function () { stepEvent(1); });
+  window.addEventListener("hashchange", function () {
+    const match=eventFromHash();
+    if(match && match!==selectedEvent) jumpToEvent(match);
+  });
+  document.getElementById("prevTouch").addEventListener("click", function () { setTouchIndex(touchOffset); });
+  document.getElementById("nextTouch").addEventListener("click", function () { setTouchIndex(touchOffset+2); });
+  touchEl.addEventListener("change", function () { setTouchIndex(touchEl.value); });
+  touchEl.addEventListener("keydown", function (ev) { if(ev.key==="Enter")setTouchIndex(touchEl.value); });
+  tfEl.addEventListener("change", function () {
+    timeframe=Number(tfEl.value)||43200;
+    resetRange();
+  });
+  document.getElementById("resetView").addEventListener("click", resetRange);
+
+  canvas.addEventListener("wheel", function (ev) {
+    ev.preventDefault();
+    const rect=canvas.getBoundingClientRect();
+    const x=ev.clientX-rect.left;
+    zoomAt(ev.deltaY<0?.82:1.22,x);
+  }, {passive:false});
+  canvas.addEventListener("pointerdown", function (ev) {
+    if(ev.button!==undefined&&ev.button!==0)return;
+    const rect=canvas.getBoundingClientRect();
+    if(!plot||ev.clientX-rect.left<plot.left||ev.clientX-rect.left>plot.left+plot.width)return;
+    dragging={x:ev.clientX,view:view.slice()};
+    canvas.setPointerCapture(ev.pointerId);
+    canvas.style.cursor="grabbing";
+    tip.style.display="none";
+  });
+  canvas.addEventListener("pointermove", function (ev) {
+    if(dragging) {
+      const dx=ev.clientX-dragging.x;
+      const shift=-dx/plot.width*(dragging.view[1]-dragging.view[0]);
+      view=[dragging.view[0]+shift,dragging.view[1]+shift];
+      draw();
+    } else showTip(ev);
+  });
+  canvas.addEventListener("pointerup", function () {
+    dragging=null; canvas.style.cursor="crosshair";
+  });
+  canvas.addEventListener("pointercancel", function () {
+    dragging=null; canvas.style.cursor="crosshair";
+  });
+  canvas.addEventListener("pointerleave", function () {
+    if(!dragging)tip.style.display="none";
+  });
+
+  updateEventSelect();
+  if(selectedEvent) {
+    view=defaultRange(selectedEvent,timeframe);
+    touchEl.max=String(Math.max(1,Number(selectedEvent.count)||1));
+    touchEl.value="1";
+    dateEl.value=dateKey(selectedEvent.time);
+  }
+  syncTouchButtons();
+  updateSummary();
+  resizeObserver = typeof ResizeObserver === "function" ? new ResizeObserver(draw) : null;
+  if(resizeObserver)resizeObserver.observe(wrap);else window.addEventListener("resize",draw);
+  draw();
+})();
+</script>
+</body>
+</html>
+
