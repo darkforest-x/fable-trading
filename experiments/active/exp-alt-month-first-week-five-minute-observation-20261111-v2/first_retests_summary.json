@@ -1,0 +1,92 @@
+{
+  "eligibility": {
+    "included": 2849,
+    "incomplete_first_hour": 1
+  },
+  "all": {
+    "n": 2849,
+    "symbols": 334,
+    "first_retest_by_close": {
+      "inside": 1046,
+      "outside": 946,
+      "none": 857
+    },
+    "observations_with_near_not_already_hit": 1960,
+    "inward_close_next_hour": 1133,
+    "median_favorable_next_hour_pct": 1.1951508159420476,
+    "median_adverse_next_hour_pct": 1.0187010405182773
+  },
+  "by_retest": {
+    "inside": {
+      "n": 1046,
+      "symbols": 288,
+      "first_retest_by_close": {
+        "inside": 1046
+      },
+      "observations_with_near_not_already_hit": 1023,
+      "inward_close_next_hour": 592,
+      "median_favorable_next_hour_pct": 1.120543293718157,
+      "median_adverse_next_hour_pct": 0.9761811792268649
+    },
+    "outside": {
+      "n": 946,
+      "symbols": 290,
+      "first_retest_by_close": {
+        "outside": 946
+      },
+      "observations_with_near_not_already_hit": 937,
+      "inward_close_next_hour": 541,
+      "median_favorable_next_hour_pct": 1.3090909090909042,
+      "median_adverse_next_hour_pct": 1.045510455104559
+    },
+    "equal": {
+      "n": 0,
+      "symbols": 0,
+      "first_retest_by_close": {},
+      "observations_with_near_not_already_hit": 0,
+      "inward_close_next_hour": 0,
+      "median_favorable_next_hour_pct": null,
+      "median_adverse_next_hour_pct": null
+    },
+    "none": {
+      "n": 857,
+      "symbols": 283,
+      "first_retest_by_close": {
+        "none": 857
+      },
+      "observations_with_near_not_already_hit": 0,
+      "inward_close_next_hour": 0,
+      "median_favorable_next_hour_pct": null,
+      "median_adverse_next_hour_pct": null
+    }
+  },
+  "by_side": {
+    "upper": {
+      "n": 1470,
+      "symbols": 311,
+      "first_retest_by_close": {
+        "none": 371,
+        "inside": 557,
+        "outside": 542
+      },
+      "observations_with_near_not_already_hit": 1080,
+      "inward_close_next_hour": 612,
+      "median_favorable_next_hour_pct": 1.3926772150427535,
+      "median_adverse_next_hour_pct": 1.1901225823403805
+    },
+    "lower": {
+      "n": 1379,
+      "symbols": 313,
+      "first_retest_by_close": {
+        "inside": 489,
+        "outside": 404,
+        "none": 486
+      },
+      "observations_with_near_not_already_hit": 880,
+      "inward_close_next_hour": 521,
+      "median_favorable_next_hour_pct": 1.0281981624101433,
+      "median_adverse_next_hour_pct": 0.8949055474932799
+    }
+  },
+  "horizon": "First 12 complete same-month bars after A. Following outcomes from the next open after first retest through 12 more full bars, excluding near-boundary touches before/on retest, including the initial reclaim bar. No simulated orders or costs."
+}
