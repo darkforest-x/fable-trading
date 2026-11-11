@@ -17,6 +17,7 @@ import io
 import json
 import os
 import re
+import sys
 import threading
 import time
 import zipfile
@@ -472,7 +473,8 @@ def _public_fapi_gap(symbol: str, start_ms: int, end_ms: int, retries: int = 3) 
                 "status": "unexpected_payload", "url": url, "auth": "none", "requests": request_log,
             }
         request_log.append({"start_time_ms": cursor, "end_time_exclusive_ms": end_ms,
-                            "status": "ok", "http_status": response.status_code, "rows": len(payload)})
+                            "request_url": response.url, "status": "ok",
+                            "http_status": response.status_code, "rows": len(payload)})
         if not payload:
             break
         page_rows = []
@@ -674,7 +676,7 @@ def _build_symbol(symbol: str, universe_row: dict, mode: str, old_record: Option
                        "sources": source_signatures, "cutoff_exclusive_ms": CUTOFF_MS}
     output_path = OUTPUT_DIR / f"{symbol}.npy"
     if (resume and output_path.is_file() and old_record and old_record.get("input_signature") == input_signature
-            and old_record.get("mode") == mode and old_record.get("status") in ("ready", "ready_with_gaps", "native_partial", "awaiting_official")
+            and old_record.get("mode") == mode and old_record.get("status") in ("ready", "ready_with_gaps", "native_partial", "awaiting_official", "not_listed_by_cutoff")
             and old_record.get("output_size_bytes") == output_path.stat().st_size
             and old_record.get("output_mtime_ns") == output_path.stat().st_mtime_ns):
         cached = dict(old_record)
@@ -690,12 +692,19 @@ def _build_symbol(symbol: str, universe_row: dict, mode: str, old_record: Option
         if not keys_months:
             # Empty 15m inventories can occur for a newly archived ticker. Check the
             # official 1h inventory once before declaring that it has no Vision data.
-            try:
-                from yoyo.data.binance_um_vision_listing import files
-                listed = files(symbol, interval="1h")
-                keys_months = sorted({m for key in listed if (m := _month_from_key(key)) and m <= "2026-09"})
-            except Exception as exc:
-                official_metadata.append({"status": "inventory_lookup_failed", "error": f"{type(exc).__name__}: {exc}"})
+            declared_listed = universe_row.get("listed_ms", "")
+            declared_listed_ms = int(float(declared_listed)) if declared_listed not in (None, "") else None
+            if declared_listed_ms is not None and declared_listed_ms >= CUTOFF_MS:
+                official_metadata.append({"status": "not_listed_by_cutoff", "declared_listed_ms": declared_listed_ms})
+            else:
+                try:
+                    if str(REPO_ROOT) not in sys.path:
+                        sys.path.insert(0, str(REPO_ROOT))
+                    from yoyo.data.binance_um_vision_listing import files
+                    listed = files(symbol, interval="1h")
+                    keys_months = sorted({m for key in listed if (m := _month_from_key(key)) and m <= "2026-09"})
+                except Exception as exc:
+                    official_metadata.append({"status": "inventory_lookup_failed", "error": f"{type(exc).__name__}: {exc}"})
         plan = _download_plan(keys_months, local, local_merge)
         for month in plan:
             rows, meta = _download_month(symbol, month)
@@ -728,6 +737,8 @@ def _build_symbol(symbol: str, universe_row: dict, mode: str, old_record: Option
 
     if mode == "native_only":
         status = "native_partial" if len(merged) else "awaiting_official"
+    elif not listing_precedes_cutoff:
+        status = "not_listed_by_cutoff"
     elif not len(merged):
         status = "awaiting_official"
     elif coverage["gap_segments"] or missing_archive_months or not_published or failed_inventory or tail_gap:
@@ -792,6 +803,7 @@ def _write_progress(records: dict, selected: Sequence[str], mode: str, started: 
     ready = sum(record.get("status") == "ready" for record in values)
     gaps = sum(record.get("status") == "ready_with_gaps" for record in values)
     pending = sum(record.get("status") in ("native_partial", "awaiting_official") for record in values)
+    not_listed = sum(record.get("status") == "not_listed_by_cutoff" for record in values)
     failures = sum(record.get("status") == "failed" for record in values)
     _atomic_json(RECEIPT_PATH, {
         "schema_version": SCHEMA_VERSION,
@@ -804,11 +816,12 @@ def _write_progress(records: dict, selected: Sequence[str], mode: str, started: 
         "mode": mode,
         "started_utc": started,
         "cutoff_exclusive_utc": CUTOFF.isoformat().replace("+00:00", "Z"),
-        "authentication": "none; public Binance Vision monthly archive downloads",
+        "authentication": "none; public Binance Vision archives and public Binance USD-M market data",
         "output_columns": ["utc_ms", "open", "high", "low", "close"],
         "sorting": "strictly ascending UTC hour; duplicate timestamps resolved by source priority and reported",
         "bar_policy": "preserve observed OHLC, including official zero-volume rows; never synthesize missing hours or post-delist prices",
-        "progress": {"recorded": len(values), "ready": ready, "ready_with_gaps": gaps, "pending": pending, "failed": failures},
+        "progress": {"recorded": len(values), "ready": ready, "ready_with_gaps": gaps,
+                     "not_listed_by_cutoff": not_listed, "pending": pending, "failed": failures},
         "symbols": records,
     })
 
