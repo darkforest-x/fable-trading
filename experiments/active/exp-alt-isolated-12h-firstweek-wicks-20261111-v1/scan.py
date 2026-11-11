@@ -130,15 +130,33 @@ def scan(symbol,raw):
     return events,coverage
 
 
-def process(pathname):
-    path=Path(pathname)
-    store=CACHE/path.stem
+def sources(symbol):
+    return [p for p in (DATA/(symbol+'.npy'),DATA.parent/'tail'/(symbol+'.npy')) if p.is_file()]
+
+
+def signature(parts):
+    return [[p.parent.name,p.stat().st_size,p.stat().st_mtime_ns] for p in parts]
+
+
+def process(symbol):
+    parts=sources(symbol)
+    store=CACHE/symbol
     store.mkdir(parents=True,exist_ok=True)
     receipt=store/'done.json'
-    state=[path.stat().st_size,path.stat().st_mtime_ns]
+    state=signature(parts)
     if receipt.exists() and json.loads(receipt.read_text())==state:
-        return path.stem
-    events,coverage=scan(path.stem,np.load(path,mmap_mode='r'))
+        return symbol
+    arrays=[np.load(p,mmap_mode='r') for p in parts]
+    raw=arrays[0]
+    if len(arrays)==2 and len(arrays[1]):
+        # Prefer the recent exchange snapshot on overlapping timestamps;
+        # retain archived rows for any holes in that snapshot.
+        tail=arrays[1]
+        pos=np.searchsorted(raw[:,0],tail[0,0])
+        keep=~np.isin(raw[pos:,0],tail[:,0])
+        merged=np.concatenate((raw[pos:][keep],tail))
+        raw=np.concatenate((raw[:pos],merged[np.argsort(merged[:,0])]))
+    events,coverage=scan(symbol,raw)
     for name,rows in [('events',events),('coverage',coverage)]:
         tmp=store/(name+'.tmp')
         pd.DataFrame(rows).to_csv(tmp,index=False,compression='gzip')
@@ -146,7 +164,7 @@ def process(pathname):
     tmp=store/'done.tmp'
     tmp.write_text(json.dumps(state))
     tmp.replace(receipt)
-    return path.stem
+    return symbol
 
 
 def run(files,workers):
@@ -160,12 +178,15 @@ if __name__=='__main__':
     p.add_argument('--workers',type=int,default=6)
     p.add_argument('--watch',action='store_true')
     a=p.parse_args()
+    eligible=set(pd.read_csv(DATA.parent/'universe_eligible.csv').symbol)
     while True:
+        available=({p.stem for p in DATA.glob('*.npy')} | {p.stem for p in (DATA.parent/'tail').glob('*.npy')}) & eligible
         todo=[]
-        for path in sorted(DATA.glob('*.npy')):
-            receipt=CACHE/path.stem/'done.json'
-            if not receipt.exists() or json.loads(receipt.read_text())!=[path.stat().st_size,path.stat().st_mtime_ns]:
-                todo.append(str(path))
+        for symbol in sorted(available):
+            receipt=CACHE/symbol/'done.json'
+            if not receipt.exists() or json.loads(receipt.read_text())!=signature(sources(symbol)):
+                todo.append(symbol)
+        if todo: print('scan batch',len(todo),'of',len(available),flush=True)
         run(todo,a.workers)
         if not a.watch:break
-        time.sleep(4)
+        time.sleep(5)
