@@ -19,7 +19,7 @@ from .book import Book
 from .market import PublicMarket
 from .candles import CandleHistory, CandleUnavailable
 from .monday_fib import MondayFibFeed, FibUnavailable
-from .monitor_feed import MonitorFeed, MonitorUnavailable
+from .monitor_feed import MonitorFeed, MonitorUnavailable, MonthTouchNotFound
 from .push import PushService, PushUnavailable
 from .wick_stop import WickStops
 from .policy import Rejected
@@ -341,6 +341,16 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
     def monitor_month_first_week_1618():
         try:
             return app.state.monitor.month_first_week_1618()
+        except MonitorUnavailable as error:
+            raise HTTPException(503, str(error)) from None
+
+    @app.get('/v1/monitor/month-first-week-1618/chart', dependencies=[Depends(auth)])
+    def month_chart(event_id: str = Query(min_length=1, max_length=96),
+                    period: str = Query('1H', pattern=r'^(1m|5m|15m|1H|4H|12H|1D)$')):
+        try:
+            return app.state.monitor.month_first_week_chart(event_id, period)
+        except MonthTouchNotFound as error:
+            raise HTTPException(404, str(error)) from None
         except MonitorUnavailable as error:
             raise HTTPException(503, str(error)) from None
 

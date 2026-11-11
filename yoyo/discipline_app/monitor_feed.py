@@ -63,6 +63,10 @@ class MonitorUnavailable(ValueError):
     """The monitor cannot currently supply an honest snapshot."""
 
 
+class MonthTouchNotFound(MonitorUnavailable):
+    """The requested monthly touch does not exist in the monitor's ledger."""
+
+
 def _num(value):
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
         return None
@@ -371,7 +375,7 @@ def project_touch_scores(rows):
 def _http(path, body=None):
     if body is None:
         # Saved backtest K-lines and the frozen breadth ledger are slow first reads on the monitor.
-        slow = path.startswith('/api/strategy-backtest') or path.startswith('/static/')
+        slow = path.startswith(('/api/strategy-backtest', '/static/', '/api/month-first-week-1618/chart?'))
         with urlopen(SOURCE + path, timeout=30 if slow else 4) as response:
             if path.endswith('.json.gz'):
                 return json.loads(gzip.decompress(response.read()))
@@ -444,6 +448,23 @@ class MonitorFeed:
     def month_first_week_1618(self):
         return self._read('month-first-week-1618', self._month_first_week_snapshot,
                           load=lambda: self._fetch('/api/month-first-week-1618'), ttl=1)
+
+    def month_first_week_chart(self, event_id, period):
+        path = '/api/month-first-week-1618/chart?' + urlencode(dict(event_id=event_id, period=period))
+
+        def load():
+            try:
+                raw = self._fetch(path)
+            except HTTPError as error:
+                if error.code == 404:
+                    raise MonthTouchNotFound('未找到这条月首周触价') from None
+                raise MonitorUnavailable('月首周 K 线暂不可用，请重试') from None
+            if (not isinstance(raw, dict) or raw.get('event_id') != event_id or raw.get('bar') != period
+                    or not isinstance(raw.get('candles'), list) or not isinstance(raw.get('anchor'), dict)):
+                raise MonitorUnavailable('月首周 K 线数据格式无效')
+            return raw
+
+        return self._read(path, None, load=load, ttl=2)
 
     def month_first_week_1618_events(self, after_id=0, limit=500):
         """Read the monitor's durable source cursor for APNs; this is not the UI snapshot."""

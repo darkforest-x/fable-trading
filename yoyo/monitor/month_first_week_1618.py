@@ -388,6 +388,14 @@ class MonthFirstWeekBook:
             rows = db.execute("SELECT * FROM touches WHERE id>? ORDER BY id ASC LIMIT ?", (after_id, limit))
             return [self._touch_dict(row) for row in rows]
 
+    def chart_record(self, event_id: str):
+        """Read the saved touch and its own month's anchor, including after rollover."""
+        with self.db() as db:
+            row = db.execute("""SELECT t.*, a.start_ms, a.ready_ms, a.high, a.low, a.upper, a.lower
+                FROM touches t LEFT JOIN anchors a ON a.month=t.month AND a.symbol=t.symbol
+                WHERE t.event_id=?""", (event_id,)).fetchone()
+            return dict(row) if row else None
+
     def events(self, month: str | None = None, limit: int | None = None):
         with self.db() as db:
             if month is None:
