@@ -114,6 +114,35 @@ def prepare():
     print(f'{len(selected)} cards prepared')
 
 
+def remaining_closes(raw, decision, expires, rail, side):
+    """Describe later completed UTC12h closes through rail expiry, with the original rail as reference."""
+    direction = 1 if side == 'long' else -1
+    best = None
+    best_before_loss = None
+    first_outside = None
+    best_time = None
+    count = 0
+    complete = True
+    for start in range(decision, expires - BAR + 1, BAR):
+        hours = segment(raw, start, 12)
+        if hours is None:
+            complete = False
+            break
+        value = signed(hours[-1, 4], rail, direction)
+        when = start + BAR
+        count += 1
+        if best is None or value > best:
+            best, best_time = value, when
+        if first_outside is None:
+            if value < 0:
+                first_outside = when
+            elif best_before_loss is None or value > best_before_loss:
+                best_before_loss = value
+    return dict(followup_12h_closes=count, followup_complete=complete,
+                first_outside_12h_close_ms=first_outside, max_favorable_close_pct=best,
+                max_favorable_close_ms=best_time, best_inside_close_before_loss_pct=best_before_loss)
+
+
 def reveal():
     meta = pd.read_csv(DATA/'key.csv',float_precision='round_trip')
     notes = [pd.read_csv(HERE/f'calls_{name}.csv') for name in ('price','context')]
@@ -136,7 +165,9 @@ def reveal():
             c=signed(seg[-1,4],r.rail,d);closes.append(f'{c:.3f}')
             if c>threshold or c<0:
                 outcome='推进' if c>threshold else '失守';stamp=t+BAR;break
-        checks.append(dict(card=r.card,outcome=outcome,observed_closes=' / '.join(closes),resolved_ms=stamp))
+        followup = remaining_closes(raw, int(r.second_close), WINDOW[r.month][2], r.rail, r.side)
+        checks.append(dict(card=r.card,outcome=outcome,observed_closes=' / '.join(closes),resolved_ms=stamp,
+                           **followup))
     full=(meta.merge(pd.DataFrame(checks),on='card').merge(price.reset_index(),on='card')
           .merge(pd.read_csv(DATA/'context_cards.csv'),on='card'))
     full.to_csv(HERE/'observations.csv',index=False,encoding='utf-8-sig')
