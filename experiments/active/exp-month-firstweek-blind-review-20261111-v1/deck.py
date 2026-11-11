@@ -315,7 +315,7 @@ def _find_phase3(event: TouchEvent, bars: dict[int, Candle]) -> tuple[list[Candl
 
 def _blind_id(event: TouchEvent) -> str:
     plain = "\0".join((event.symbol, event.month, event.side, str(event.open_ms))).encode()
-    digest = hashlib.blake2s(plain, key=ID_SALT, digest_size=6).hexdigest().upper()
+    digest = hashlib.blake2s(plain, key=ID_SALT[:32], digest_size=6).hexdigest().upper()
     return "R" + digest
 
 
