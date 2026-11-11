@@ -1,0 +1,16 @@
+{
+  "purpose": "Identify an observable monthly 1.618 rejection in an anonymized 12h replay and score the same candidate definitions in historical Binance data.",
+  "venue": "Binance USDT perpetual contracts, all underlying types in the frozen roster",
+  "reference": "completed New York first Monday-through-Sunday range",
+  "sample": "owner's 14 Binance-comparable contract-month-sides, plus June 2025 PEPE discussed separately, and same-symbol same-side other-month controls where available",
+  "chart": "normalize rail to zero and favourable displacement above zero. Use only completed UTC 12h OHLC.",
+  "watch": "first touch of the active rail",
+  "stage1": "Record a reason at the first touching 12h close. First-wick trigger requires the full body strictly inside the rail, with the rail-facing wick >= half the candle range. Other reclaims remain watchable.",
+  "stage2": "Read just the next 12h candle. Record whether price departed, retested, held or closed outside. It can invalidate the first attempt, but does not create another entry family.",
+  "stage3": "Read the first separated retest. The comparable second-touch rule requires exactly one prior touching 12h, a full clear bar between touches and both bodies wholly inside. A later third or fourth test is recorded as context.",
+  "invalidation": "first later confirmed complete UTC 12h close strictly beyond the touched rail; a wick outside alone does not invalidate",
+  "reference_entry": "following hourly open after the completed trigger candle; no presumed fill at the historical extreme",
+  "outcome": "fixed original rail. Separate already-observed 5% and 20% moves from subsequent favourable 20%. Follow continuous H1 up to 45 days, recording target, structural invalidation, censored or elapsed. No simulated PnL.",
+  "membership": "Whole-market denominator uses the existing daily-first-touch eligibility. The anonymous chart reader judges only the displayed shape. Separate these counts.",
+  "blind_order": "Freeze anonymous first decisions before reading next-bar data. Freeze next-bar decisions before reading separated retests. Freeze all decisions before opening the mapping or any outcomes. Previously seen owner examples inform the protocol, so this cannot be an independent validation set."
+}
