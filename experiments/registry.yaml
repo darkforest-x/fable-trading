@@ -28,7 +28,17 @@ experiments:
     reuse_allowed: true
     artifacts: []
     canonical_report: experiments/active/exp-alt-isolated-12h-firstweek-wicks-20261111-v1/summary12.json
-    notes: "Excursions are retrospective, include subsequent pullbacks and overlapping calendar windows, and are not trading outcomes. Unusable months and the incomplete tail are excluded. Original OKX IOST October 2026 reference is kept separately."
+    notes: >-
+      Excursions are retrospective and may include pullbacks and overlapping windows. Original OKX IOST is kept separately.
+      Follow-up across all Binance USDT perpetual categories used 47010 eligible daily-first 12h touch signals. The
+      first-body-inside or separated second reclaim triggered before the 20% move in 13 of 14 available owner examples;
+      the strict wick version plus retests covered 5. These 14 examples informed the rules. For next-open entry at 5% fixed
+      stop, 20% target and 45-day timeout, the exploratory rule yielded 444.23 USDT from 1000 at 66.55% hourly-close DD
+      (10% NAV per position, five slots, no leverage, per-fill fees, no funding or slippage). A 3% stop gave 412.97 at
+      67.66% DD. Earlier 1h confirmation gave 179.07 at 83.16% DD with the 5% stop. The post hoc 12h maximum 0.5% wick
+      penetration subset covered four references and ended at 819.85 with 29.10% DD. Executable sources include
+      strategy_signals.py, strategy_fixed_grid.py, strategy_account.py and strategy_proximity.py. Ledgers are under
+      data/research/alt-isolated-12h-wicks-20261111/expanded12/strategy_v1.
 
   - experiment_id: exp-etc-month-first-week-12h-retests-20261111-v1
     source_repo: darkforest-x/fable-trading
