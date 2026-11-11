@@ -29,7 +29,7 @@ struct TradeView: View {
         let existing = ticket.existing(state)
         let block = Trading.availability(state: state, symbol: ticket.symbol, connected: session.connection != nil, online: account.online,
                                          fresh: account.quoteFresh(ticket.symbol), pending: account.pendingEntry != nil || account.closeAttempt != nil,
-                                         room: Trading.marginRoom(state, symbol: ticket.symbol), now: account.now)
+                                         room: Trading.allocationRoom(state, symbol: ticket.symbol), now: account.now)
         GeometryReader { proxy in
             let top = proxy.safeAreaInsets.top, bottom = proxy.safeAreaInsets.bottom
             ZStack(alignment: .top) {
@@ -45,7 +45,7 @@ struct TradeView: View {
                             if session.connection == nil {
                                 chip(icon: nil, text: "正在连接纪律服务", tint: Color.muted, spinning: true) {}
                             } else if let existing {
-                                chip(icon: "circle.fill", text: "\(existing.side == "short" ? "空头" : "多头")持仓中 · \(existing.leverage)x · \(Fmt.signed(Double(existing.pnl))) U",
+                                chip(icon: "circle.fill", text: "\(existing.side == "short" ? "空头" : "多头")持仓中 · \(Fmt.leverage(existing.leverage))x · \(Fmt.signed(Double(existing.pnl))) U",
                                      tint: existing.side == "short" ? ChartPalette.down : ChartPalette.up) { onDestination(.positions) }
                             } else if let count = state?.positions.count, count > 0 {
                                 chip(icon: "circle.fill", text: "其他持仓 \(count) 笔", tint: Color.accentColor) { onDestination(.positions) }
@@ -93,7 +93,7 @@ struct TradeView: View {
             await touches.watch(connection: connection, session: session)   // touch-marker scores
         }
         .onChange(of: "\(ticket.symbol)|\(period.rawValue)|\(active)|\(session.connection?.token.hashValue ?? 0)") { _, _ in showCandles() }
-        .onAppear { showCandles() }
+        .onAppear { showCandles(); ticket.syncLeverage(state) }
         .onChange(of: "\(ticket.symbol)|\(state?.policyRevision ?? -1)|\(ticket.cap(state))|\(state?.sharedLeverage?[ticket.symbol] ?? -1)") { _, _ in ticket.syncLeverage(state) }
         .onChange(of: "\(existing?.id ?? "")|\(existing?.stop ?? "")|\(existing?.leverage ?? 0)") { _, _ in ticket.syncExisting(state) }
     }
@@ -262,7 +262,7 @@ struct TradeTicketSheet: View {
         let state = account.state
         let block = Trading.availability(state: state, symbol: ticket.symbol, connected: session.connection != nil, online: account.online,
                                          fresh: account.quoteFresh(ticket.symbol), pending: account.pendingEntry != nil || account.closeAttempt != nil,
-                                         room: Trading.marginRoom(state, symbol: ticket.symbol), now: account.now)
+                                         room: Trading.allocationRoom(state, symbol: ticket.symbol), now: account.now)
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {

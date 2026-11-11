@@ -113,7 +113,7 @@ struct OverviewView: View {
                 if let p = s.positions.first {
                     HStack(spacing: 6) {
                         WCoin(symbol: p.symbol, size: 20)
-                        Text("\(WidgetSnapshot.coin(p.symbol)) \(p.side == "short" ? "空" : "多") \(p.leverage)x").font(.system(size: 14, weight: .semibold)).lineLimit(1)
+                        Text("\(WidgetSnapshot.coin(p.symbol)) \(p.side == "short" ? "空" : "多") \(WidgetSnapshot.leverage(p.leverage))x").font(.system(size: 14, weight: .semibold)).lineLimit(1)
                     }
                     Text(WPalette.signed(p.pnl) + " U").font(.system(size: 22, weight: .bold, design: .rounded).monospacedDigit())
                         .foregroundStyle(WPalette.tone(p.pnl)).minimumScaleFactor(0.7).lineLimit(1)
@@ -177,7 +177,7 @@ struct ActivityCard: View {
                 WCoin(symbol: a.symbol, size: 34)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
-                        Text("\(WidgetSnapshot.coin(a.symbol)) \(a.side == "short" ? "空" : "多") \(a.leverage)x").font(.system(size: 16, weight: .bold))
+                        Text("\(WidgetSnapshot.coin(a.symbol)) \(a.side == "short" ? "空" : "多") \(WidgetSnapshot.leverage(a.leverage))x").font(.system(size: 16, weight: .bold))
                         Text("持仓中").font(.system(size: 10, weight: .semibold)).foregroundStyle(WPalette.up)
                             .padding(.horizontal, 6).padding(.vertical, 2).background(WPalette.up.opacity(0.14), in: .capsule)
                     }

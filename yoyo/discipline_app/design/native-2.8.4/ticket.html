@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>SPIKE 纪律 · CT 快捷开单 (iOS 26 Liquid Glass 402x874pt)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          accent: '#0A84FF',
+          tradeGreen: '#169873',
+          tradeRed: '#D7355D',
+          canvasBg: '#F5F7FB',
+          textMain: '#111827',
+          textSub: '#6B7280',
+          pillBg: '#EEF2F8',
+        },
+        boxShadow: {
+          glass: '0 6px 20px rgba(15, 23, 42, 0.08)',
+          card: '0 10px 30px rgba(15, 23, 42, 0.07)',
+          modal: '0 -10px 40px rgba(15, 23, 42, 0.12)',
+        }
+      }
+    }
+  }
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #0b0f17;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "JetBrains Mono", sans-serif;
+  }
+
+  /* Frosted Glass - 70% white over 24px blur, zero dark border, hairline white inner highlight */
+  .frosted-glass {
+    background: rgba(255, 255, 255, 0.70);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08), inset 0 1px 0.5px rgba(255, 255, 255, 0.95);
+  }
+
+  .frosted-card {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.07), inset 0 1px 1px rgba(255, 255, 255, 0.98);
+  }
+
+  .frosted-tabbar {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.10), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+  }
+
+  .soft-pill {
+    background: #EEF2F8;
+    color: #111827;
+    transition: all 0.15s ease;
+  }
+
+  .accent-chip-selected {
+    background: rgba(10, 132, 255, 0.12);
+    color: #0A84FF;
+  }
+
+  .accent-pill-selected {
+    background: rgba(10, 132, 255, 0.12);
+    color: #0A84FF;
+  }
+
+  .recessed-input {
+    background: #F0F3F9;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
+  }
+
+  .amber-notice {
+    background: rgba(255, 159, 10, 0.12);
+    color: #B45309;
+  }
+
+  /* Custom slider track */
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: #E2E8F0;
+    border-radius: 9999px;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(10, 132, 255, 0.35), 0 1px 3px rgba(15, 23, 42, 0.15);
+    border: 3px solid #0A84FF;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+  }
+  input[type="range"]::-webkit-slider-thumb:active {
+    transform: scale(1.15);
+  }
+</style>
+</head>
+<body class="p-0 sm:p-4">
+<!-- Device Frame 402x874 (iPhone 16 Pro / iOS 26 Standard) -->
+<div class="relative w-[402px] h-[874px] bg-[#F5F7FB] overflow-hidden rounded-[54px] shadow-[0_25px_70px_rgba(0,0,0,0.45)] flex flex-col justify-between select-none">
+<!-- Subtle Ambient Glow under the glass (soft blue / teal light) -->
+<div class="absolute -top-16 -right-16 w-80 h-80 rounded-full bg-blue-100/50 blur-3xl pointer-events-none"></div>
+<div class="absolute top-1/3 -left-20 w-72 h-72 rounded-full bg-emerald-50/40 blur-3xl pointer-events-none"></div>
+<div class="absolute bottom-24 right-0 w-64 h-64 rounded-full bg-slate-100/60 blur-2xl pointer-events-none"></div>
+<!-- iOS 26 Dynamic Island & Status Bar (402pt) -->
+<div class="relative z-40 w-full pt-3 px-7 flex justify-between items-center text-[14px] font-semibold text-textMain tracking-tight">
+<span>9:41</span>
+<!-- Dynamic Island -->
+<div class="w-[126px] h-[35px] bg-black rounded-full flex items-center justify-between px-3 text-white shadow-sm">
+<div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+<span class="text-[11px] font-medium tracking-wider text-slate-300">SPIKE</span>
+<div class="w-3 h-3 rounded-full bg-slate-800 border border-slate-700"></div>
+</div>
+<!-- Status Icons -->
+<div class="flex items-center space-x-1.5 text-textMain">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.23 19.64 10.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"></path></svg>
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"></path></svg>
+<div class="w-5 h-2.5 border border-current rounded-sm p-0.5 flex items-center">
+<div class="w-full h-full bg-current rounded-2xs"></div>
+</div>
+</div>
+</div>
+<!-- Simulated Background: Subtle 1.618 Candlestick Chart underlay showing through sheet backdrop -->
+<div class="absolute inset-0 pt-16 px-6 opacity-35 pointer-events-none flex flex-col justify-start">
+<div class="flex items-center justify-between py-2 text-textSub text-xs">
+<span class="font-medium text-textMain">SUI / USDT 15m</span>
+<span class="tabular-nums font-semibold text-[#169873]">0.14326 +2.48%</span>
+</div>
+<!-- Simple decorative candlestick silhouettes -->
+<div class="w-full h-32 flex items-end justify-between px-2 pt-4">
+<div class="w-1.5 h-16 bg-[#169873]/60 rounded-full"></div>
+<div class="w-1.5 h-20 bg-[#169873]/60 rounded-full"></div>
+<div class="w-1.5 h-12 bg-[#D7355D]/60 rounded-full"></div>
+<div class="w-1.5 h-14 bg-[#169873]/60 rounded-full"></div>
+<div class="w-1.5 h-24 bg-[#169873]/60 rounded-full"></div>
+<div class="w-1.5 h-18 bg-[#D7355D]/60 rounded-full"></div>
+<div class="w-1.5 h-22 bg-[#D7355D]/60 rounded-full"></div>
+<div class="w-1.5 h-10 bg-[#169873]/60 rounded-full"></div>
+<div class="w-1.5 h-16 bg-[#169873]/60 rounded-full"></div>
+<div class="w-1.5 h-28 bg-[#169873]/70 rounded-full"></div>
+</div>
+<div class="w-full border-b border-dashed border-slate-300 my-1"></div>
+<div class="text-[10px] text-slate-400 font-mono">周一高 0.14820 · 下1.618 0.13890</div>
+</div>
+<!-- Quick Order Bottom Sheet Container -->
+<div class="relative z-30 flex-1 flex flex-col justify-end px-3.5 pb-20">
+<!-- Sheet Card Wrapper: All controls in soft FROSTED GLASS with hairline white inner highlight, 0 dark borders -->
+<div class="frosted-card rounded-[34px] p-4.5 sm:p-5 flex flex-col space-y-3.5 transition-all duration-300">
+<!-- Sheet Header: Grabber + Title 'CT' + Frosted Round Close Button (no border) -->
+<div class="flex flex-col space-y-1">
+<!-- Sheet Pull Indicator / Grabber -->
+<div class="self-center w-9 h-1 bg-slate-300/80 rounded-full -mt-1 mb-1"></div>
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<h2 class="text-[20px] font-bold text-textMain tracking-tight">CT</h2>
+<span class="text-[11px] font-semibold text-textSub bg-white/70 px-2 py-0.5 rounded-full shadow-sm">SUI · 永续</span>
+</div>
+<!-- Small frosted round close button (absolutely no dark border) -->
+<button class="w-7 h-7 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-textSub hover:text-textMain shadow-[0_2px_8px_rgba(15,23,42,0.06),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<line x1="18" x2="6" y1="6" y2="18"></line>
+<line x1="6" x2="18" y1="6" y2="18"></line>
+</svg>
+</button>
+</div>
+</div>
+<!-- Slim amber-tinted notice row at top -->
+<div class="amber-notice w-full rounded-full py-1.5 px-3 flex items-center justify-between text-[11.5px] font-medium transition-opacity cursor-pointer active:opacity-80">
+<div class="flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+<span>交易账户没有可用 USDT 净值</span>
+</div>
+<span class="text-amber-600/90 font-semibold text-[13px] leading-none">›</span>
+</div>
+<!-- Direction Segmented Control: 做多 | 做空 (Selected side fills with its color, other is light pill) -->
+<div class="grid grid-cols-2 gap-2 p-1 bg-white/60 rounded-full shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)]">
+<!-- Long side (Unselected: light pill) -->
+<button class="h-9 rounded-full soft-pill flex items-center justify-center space-x-1.5 text-[13.5px] font-semibold text-textSub active:scale-[0.98]">
+<span class="w-2 h-2 rounded-full bg-slate-300"></span>
+<span>做多</span>
+</button>
+<!-- Short side (Selected: fills with tradeRed #D7355D, white text) -->
+<button class="h-9 rounded-full bg-[#D7355D] text-white flex items-center justify-center space-x-1.5 text-[13.5px] font-bold shadow-[0_3px_12px_rgba(215,53,93,0.30)] active:scale-[0.98]">
+<span class="w-2 h-2 rounded-full bg-white"></span>
+<span>做空</span>
+</button>
+</div>
+<!-- Execution Mode & Leverage Row: soft segmented 市价 | 限价 and light pill '杠杆 20x ›' -->
+<div class="flex items-center justify-between space-x-2">
+<!-- Soft segmented control: 市价 | 限价 -->
+<div class="flex-1 flex p-0.5 bg-white/70 rounded-full shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)]">
+<button class="flex-1 h-8 rounded-full bg-white text-textMain text-[12.5px] font-semibold shadow-[0_2px_6px_rgba(15,23,42,0.06)] active:scale-95 transition-all">
+            市价
+          </button>
+<button class="flex-1 h-8 rounded-full text-textSub text-[12.5px] font-medium hover:text-textMain active:scale-95 transition-all">
+            限价
+          </button>
+</div>
+<!-- Light pill: 杠杆 20x › -->
+<div class="h-8 px-3 rounded-full soft-pill flex items-center space-x-1 text-[11.5px] font-medium text-textSub shadow-[0_1px_3px_rgba(15,23,42,0.04)] select-none cursor-default"><span class="w-1.5 h-1.5 rounded-full bg-slate-400/60"></span><span class="text-textMain font-semibold">交易所 100x</span></div>
+</div>
+<!-- Section: 初始止损 + 2 chips (1R 自动计算 selected vs 手动) -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<span class="text-[12.5px] font-semibold text-textMain tracking-tight">初始止损</span>
+<div class="flex items-center space-x-1.5">
+<!-- Selected chip: accent tinted (12% fill, accent text) with small green dot -->
+<button class="h-6.5 px-2.5 rounded-full accent-chip-selected flex items-center space-x-1 text-[11px] font-semibold transition-all">
+<span class="w-1.5 h-1.5 rounded-full bg-[#169873]"></span>
+<span>1R 自动计算</span>
+</button>
+<!-- Unselected chip: light pill -->
+<button class="h-6.5 px-2.5 rounded-full soft-pill text-[11px] font-medium text-textSub hover:text-textMain transition-all">
+              手动
+            </button>
+</div>
+</div>
+<!-- Recessed light input: '0.14326  USDT' -->
+<div class="recessed-input w-full h-10 rounded-[14px] px-3.5 flex items-center justify-between text-textMain">
+<span class="text-[14.5px] font-semibold tabular-nums tracking-wide">0.14326</span>
+<span class="text-[12px] font-medium text-textSub">USDT</span>
+</div>
+<!-- Small green check line: '5分插针止损 · 按1R与剩余额度计算' -->
+<div class="flex items-center space-x-1.5 text-[11px] text-[#169873] font-medium pt-0.5">
+<svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewbox="0 0 20 20">
+<path clip-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill-rule="evenodd"></path>
+</svg>
+<span class="truncate">5分插针止损 · 按1R与剩余额度计算</span>
+</div>
+</div>
+<!-- Section: 仓位额度 + slider + presets (25%, 50%, 75%, 100%) -->
+<div class="space-y-1.5 pt-0.5">
+<div class="flex items-center justify-between text-[12.5px]"><div class="flex items-center space-x-1.5"><span class="font-semibold text-textMain tracking-tight">仓位额度</span><span class="text-[10.5px] text-textSub/80 font-normal">(独立额度)</span></div><div class="flex items-center space-x-1.5"><span class="text-[11px] font-medium text-textSub tabular-nums">BTC 剩余 10,000 U</span><span class="font-bold tabular-nums text-accent text-[13px]">100%</span></div></div>
+<!-- Thin accent slider -->
+<div class="py-1">
+<input class="w-full cursor-pointer" max="100" min="0" type="range" value="100"/>
+</div>
+<!-- Four light preset pills (100% is accent tinted) -->
+<div class="grid grid-cols-4 gap-2 pt-0.5">
+<button class="h-6.5 rounded-full soft-pill text-[11px] font-medium text-textSub active:scale-95 transition-all">25%</button>
+<button class="h-6.5 rounded-full soft-pill text-[11px] font-medium text-textSub active:scale-95 transition-all">50%</button>
+<button class="h-6.5 rounded-full soft-pill text-[11px] font-medium text-textSub active:scale-95 transition-all">75%</button>
+<button class="h-6.5 rounded-full accent-pill-selected text-[11px] font-bold active:scale-95 transition-all">100%</button>
+</div>
+</div>
+<!-- Light recessed estimate row: 持仓金额 · 保证金 · 预计止损 -->
+<div class="recessed-input w-full rounded-[16px] p-2.5 grid grid-cols-3 gap-1 text-center">
+<div class="flex flex-col">
+<span class="text-[10.5px] text-textSub">持仓金额</span>
+<span class="text-[12.5px] font-semibold text-textMain tabular-nums mt-0.5">0.00 U</span>
+</div>
+<div class="flex flex-col border-x border-slate-200/60">
+<span class="text-[10.5px] text-textSub">保证金</span>
+<span class="text-[12.5px] font-semibold text-textMain tabular-nums mt-0.5">0.00 U</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10.5px] text-textSub">预计止损</span>
+<span class="text-[12.5px] font-semibold text-[#D7355D] tabular-nums mt-0.5">-0.00 U</span>
+</div>
+</div>
+<!-- Footer account line: 主账户 · USDT 净值  0.00 USDT -->
+<div class="flex items-center justify-between text-[11.5px] text-textSub pt-0.5 px-0.5">
+<span>主账户</span>
+<div class="flex items-center space-x-1 tabular-nums">
+<span>USDT 净值</span>
+<span class="font-semibold text-textMain">0.00 USDT</span>
+</div>
+</div>
+<!-- Primary Action: Solid full-width red pill '卖出开空' -->
+<!-- Enabled state & (when disabled it is same red at 35% opacity, never grey, never outlined) -->
+<div class="pt-0.5">
+<button class="w-full h-11 rounded-full bg-[#D7355D] text-white text-[15px] font-bold tracking-wide shadow-[0_4px_16px_rgba(215,53,93,0.32)] active:scale-[0.98] transition-all flex items-center justify-center space-x-1.5">
+<span>卖出开空</span>
+</button>
+<!-- Notice underneath for disabled specification reference -->
+<p class="text-[10px] text-center text-textSub/70 mt-1">资金不足禁用时保持同色 35% 不透明度 · 杜绝灰色边框</p>
+</div>
+</div>
+</div>
+<!-- Floating Frosted Tab Bar Capsule: 5 SF-Symbols-style icons only (no labels, 22pt, regular when inactive, filled accent when active, subtle accent-tinted lens behind active icon) -->
+<div class="absolute bottom-5 inset-x-6 z-40 flex justify-center pointer-events-auto">
+<nav class="frosted-tabbar h-[56px] w-full max-w-[350px] rounded-full px-3 flex items-center justify-between">
+<!-- Tab 1: 合约 (Active icon with subtle accent-tinted lens) -->
+<button class="relative flex items-center justify-center w-11 h-11 rounded-full active:scale-90 transition-transform">
+<!-- Subtle accent-tinted lens -->
+<div class="absolute inset-0 rounded-full bg-accent/15 backdrop-blur-sm"></div>
+<!-- SF Symbol: Filled Swap / Candlestick style icon (22pt / 22px) -->
+<svg class="w-[22px] h-[22px] text-accent relative z-10" fill="currentColor" viewbox="0 0 24 24">
+<path d="M4 17h10v2H4zm0-5h16v2H4zm0-5h16v2H4zm14 10h2v2h-2z" fill="none"></path>
+<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14h-2v-4h2v4zm0-6h-2V7h2v4zm4 6h-2v-2h2v2zm0-4h-2V9h2v4z"></path>
+</svg>
+</button>
+<!-- Tab 2: 监控 (Inactive: regular weight outline) -->
+<button class="flex items-center justify-center w-11 h-11 rounded-full text-slate-500 hover:text-textMain active:scale-90 transition-all">
+<!-- SF Symbol: Radar / Wave -->
+<svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<path d="M12 3v9l5 3"></path>
+</svg>
+</button>
+<!-- Tab 3: 1.618 (Inactive: regular weight outline) -->
+<button class="flex items-center justify-center w-11 h-11 rounded-full text-slate-500 hover:text-textMain active:scale-90 transition-all">
+<!-- SF Symbol: Chart Trending / Fib -->
+<svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24">
+<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+<polyline points="16 7 22 7 22 13"></polyline>
+</svg>
+</button>
+<!-- Tab 4: 持仓 (Inactive: regular weight outline) -->
+<button class="flex items-center justify-center w-11 h-11 rounded-full text-slate-500 hover:text-textMain active:scale-90 transition-all">
+<!-- SF Symbol: Shield / Bag Protection -->
+<svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+</svg>
+</button>
+<!-- Tab 5: 统计 (Inactive: regular weight outline) -->
+<button class="flex items-center justify-center w-11 h-11 rounded-full text-slate-500 hover:text-textMain active:scale-90 transition-all">
+<!-- SF Symbol: Bar Chart Analytics -->
+<svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24">
+<line x1="18" x2="18" y1="20" y2="10"></line>
+<line x1="12" x2="12" y1="20" y2="4"></line>
+<line x1="6" x2="6" y1="20" y2="14"></line>
+</svg>
+</button>
+</nav>
+</div>
+<!-- iOS Home Bar -->
+<div class="absolute bottom-1.5 inset-x-0 flex justify-center pointer-events-none z-50">
+<div class="w-32 h-1 bg-slate-400/60 rounded-full"></div>
+</div>
+</div>
+</body>
+</html>

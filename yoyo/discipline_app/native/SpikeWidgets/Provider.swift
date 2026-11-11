@@ -49,7 +49,7 @@ enum ServiceFeed {
         let signals: [Signal]
     }
     private struct State: Decodable {
-        struct Position: Decodable { let symbol: String; let side: String; let leverage: Int; let pnl: String }
+        struct Position: Decodable { let symbol: String; let side: String; let leverage: Double; let pnl: String }
         let positions: [Position]
     }
 

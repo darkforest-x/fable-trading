@@ -4,6 +4,8 @@ import Foundation
 // the phone submits intent only and never sends locally computed sizes.
 
 struct Policy: Codable, Hashable {
+    /// Additive selector; missing or legacy values preserve the existing margin ticket contract.
+    let entrySizing: String?
     let majorAllowanceScope: String?
     let riskFraction: String
     let majorMarginFraction: String?
@@ -12,7 +14,7 @@ struct Policy: Codable, Hashable {
     let majorExposureMultiple: String?
     let altExposureMultiple: String?
     let majorLeverage: Int
-    let altLeverage: Int
+    let altLeverage: Int?
     let maxPositions: Int
     let maxEntries: Int
     let profitEntryBonus: Int?
@@ -57,7 +59,7 @@ struct Position: Codable, Hashable, Identifiable {
     let originalStop: String?
     let risk: String
     let margin: String
-    let leverage: Int
+    let leverage: Double
     let pnl: String
     let currentR: String?
     let breakeven: Bool
@@ -82,6 +84,8 @@ struct Plan: Codable, Hashable {
     let marginMode: String
     let notionalEquityMultiple: String
     let exposureLimited: Bool
+    /// Actual exchange leverage can be a fractional tier (for example 66.66x).
+    var leverage: Double? = nil
 }
 
 struct PendingOrder: Codable, Hashable, Identifiable {
@@ -115,6 +119,8 @@ struct AccountState: Codable {
     let policyRevision: Int
     let policyProposal: PolicyProposal?
     let equity: String
+    /// Exchange-reported available funds, when present (used only for local estimates).
+    let available: String?
     let cash: String
     let positions: [Position]
     let pending: [PendingOrder]
@@ -129,7 +135,7 @@ struct AccountState: Codable {
     let serverTime: Double
     let privateAt: Double?
     let privateError: String?
-    let sharedLeverage: [String: Int]?
+    let sharedLeverage: [String: Double]?
     let externalActivity: ExternalActivity?
 }
 
@@ -158,9 +164,10 @@ struct Ticket: Hashable {
     var price: String
     var stop: String
     var fraction: String
-    var leverage: Int
+    var leverage: Double
+    var sizingMode: String = "margin"
     var json: [String: Any] {
-        ["symbol": symbol, "side": side, "kind": kind, "price": price, "stop": stop, "fraction": fraction, "leverage": leverage, "sizing_mode": "margin"]
+        ["symbol": symbol, "side": side, "kind": kind, "price": price, "stop": stop, "fraction": fraction, "leverage": leverage, "sizing_mode": sizingMode]
     }
 }
 

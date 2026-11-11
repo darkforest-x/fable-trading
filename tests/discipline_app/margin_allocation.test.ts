@@ -1,7 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {allocatedMargin,marginRoom,ticketEstimate} from '../../yoyo/discipline_app/mobile/src/ticketEstimate.ts';
+import {allocatedMargin,marginRoom,notionalRoom,ticketEstimate} from '../../yoyo/discipline_app/mobile/src/ticketEstimate.ts';
 import type {State} from '../../yoyo/discipline_app/mobile/src/api.ts';
+
+test('exposure slider targets a percentage of unused notional across the shared alt pool',()=>{
+ const alt='SOL-USDT-SWAP', btc='BTC-USDT-SWAP', eth='ETH-USDT-SWAP';
+ const state={equity:'1000',policy:{entry_sizing:'exposure',major_allowance_scope:'independent',
+  major_exposure_multiple:'10',alt_exposure_multiple:'5',risk_fraction:'.05',fee_rate:'.0005',slippage_rate:'.001'},
+  positions:[{symbol:btc,remaining:'100',quantity:'100',margin:'100',entry:'100'},{symbol:'DOGE-USDT-SWAP',remaining:'1000',quantity:'1000',margin:'20',entry:'1'}],
+  pending:[{symbol:'ADA-USDT-SWAP',side:'short',plan:{quantity:'2500',entry:'.4',margin:'20'}}],
+  quotes:{[alt]:{last:'100',ask:'100',bid:'100'}},instruments:{[alt]:{step:'.01'}}} as unknown as State;
+ assert.equal(notionalRoom(state,btc),0);
+ assert.equal(notionalRoom(state,eth),10000);
+ assert.equal(notionalRoom(state,alt),3000);
+ const ticket={symbol:alt,side:'long' as const,kind:'limit' as const,price:'100',stop:'99.99',
+  fraction:'.5',leverage:50,sizing_mode:'exposure' as const};
+ assert.equal(ticketEstimate(state,ticket)?.notional,1500);
+ assert.equal(ticketEstimate(state,ticket)?.margin,30);
+ assert.ok(ticketEstimate(state,{...ticket,stop:'90'})!.risk<=50);
+});
 
 test('100% spends only the remaining category allowance',()=>{
  const state={equity:'1000',policy:{major_margin_fraction:'.1',alt_margin_fraction:'.05'},

@@ -213,7 +213,7 @@ struct PositionCardView: View {
         let fresh = online && q.map { state.serverTime - $0.time >= 0 && state.serverTime - $0.time <= (state.policy?.quoteMaxAgeSeconds ?? 15) } == true
         let last = q.flatMap { Double($0.last) }
         let pnl = last.map { ($0 - entry) * remaining * direction }
-        let margin = entry * remaining / Double(max(position.leverage, 1))
+        let margin = entry * remaining / max(position.leverage, 1)
         let roi = pnl.flatMap { margin > 0 ? $0 / margin * 100 : nil }
         let protectedEntry = ((Double(position.stop) ?? 0) - entry) * direction >= 0
         let allowed = fresh && last.map { ($0 - entry) * direction > 0 } == true && !protectedEntry && (state.mode != "okx_live" || position.protection == "exchange-verified")
@@ -232,7 +232,7 @@ struct PositionCardView: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("查看 \(coin)/USDT 合约")
                 Spacer()
-                Pill(text: "\(direction == 1 ? "多" : "空") · \(position.leverage)x", color: direction == 1 ? .up : .down)
+                Pill(text: "\(direction == 1 ? "多" : "空") · \(Fmt.leverage(position.leverage))x", color: direction == 1 ? .up : .down)
             }
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 2) {

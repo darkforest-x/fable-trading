@@ -34,6 +34,37 @@ def test_writes_default_disabled_and_sensitive_nontrade_routes_forbidden():
         c.close()
 
 
+def test_cross_tier_uses_contracts_and_keeps_fractional_maximum():
+    from yoyo.discipline_app.leverage_tiers import fit_order
+
+    def exchange(request):
+        assert request.method == 'GET' and request.url.path == '/api/v5/public/position-tiers'
+        assert dict(request.url.params) == {'instType': 'SWAP', 'tdMode': 'cross', 'instFamily': 'SOL-USDT'}
+        assert 'OK-ACCESS-KEY' not in request.headers
+        return httpx.Response(200, json={'code':'0','data':[
+            dict(instFamily='SOL-USDT', minSz='0', maxSz='5000', maxLever='100'),
+            dict(instFamily='SOL-USDT', minSz='5000.01', maxSz='10000', maxLever='66.66')]})
+
+    c = client(exchange)
+    spec = dict(symbol='SOL-USDT-SWAP', contract_value='.1', step='.001', max_leverage=100)
+    def fit(size, cash='100000', **changes):
+        terms = dict(side='long', held={}, quantity=D(size), entry=D(100),
+                     unit_cost=D(0), available=D(cash))
+        return fit_order(c, spec, **{**terms, **changes})
+
+    try:
+        assert fit('500') == (D('500'), D(100))
+        assert fit('500.001') == (D('500.001'), D('66.66'))
+        # Second-tier collateral only covers 400 base units, while the first
+        # tier permits 500 at 100x. Spend all 500 instead of stopping at 400.
+        assert fit('600', cash='600') == (D('500'), D(100))
+        assert fit('100', fixed_leverage=100, held={'long':'499.9'}) == (D('.1'), D(100))
+        with pytest.raises(Rejected, match='档位'):
+            fit('1', fixed_leverage=100, held={'short':'501'})
+    finally:
+        c.close()
+
+
 def test_signed_body_and_live_environment_are_explicit():
     requests = []
     def exchange(request):

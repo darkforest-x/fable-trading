@@ -16,6 +16,24 @@ export function marginRoom(state:State|null,symbol:string){
  for(const p of state?.pending??[])if(pool(state?.policy,p.symbol)===pool(state?.policy,symbol))used+=Number(p.plan.margin);
  return Math.max(0,cap-used/equity);
 }
+/** Unused gross notional, in USDT. Opening orders reserve only their outstanding quantity. */
+export function notionalRoom(state:State|null, symbol:string) {
+ const policy=state?.policy;
+ if(!state||!policy)return 0;
+ const multiple=Number(major(symbol)?policy.major_exposure_multiple:policy.alt_exposure_multiple);
+ const bucket=pool(policy,symbol,true);
+ let remaining=Number(state.equity)*multiple;
+ for(const position of state.positions){
+  if(pool(policy,position.symbol,true)!==bucket)continue;
+  remaining-=Number(position.remaining)*Number(state.quotes[position.symbol]?.last??position.entry);
+ }
+ for(const order of state.pending){
+  if(pool(policy,order.symbol,true)!==bucket)continue;
+  const entry=Number(order.plan.entry);
+  remaining-=Number(order.plan.quantity)*Math.max(entry,Number(state.quotes[order.symbol]?.last??entry));
+ }
+ return Number.isFinite(remaining)?Math.max(0,remaining):0;
+}
 export function ticketEstimate(state:State|null,ticket:Ticket){
  const policy=state?.policy,q=state?.quotes[ticket.symbol],instrument=state?.instruments[ticket.symbol];
  if(!policy||!q||!instrument)return null;
@@ -24,7 +42,9 @@ export function ticketEstimate(state:State|null,ticket:Ticket){
  const stop=Number(ticket.stop),distance=(price-stop)*direction;
  if(!(equity>0&&price>0&&stop>0&&distance>0))return null;
  const cost=price*(2*Number(policy.fee_rate)+Number(policy.slippage_rate));
- const requested=equity*Math.min(Number(ticket.fraction),marginRoom(state,ticket.symbol))*ticket.leverage/price;
+ const requested=ticket.sizing_mode==='exposure'
+  ?notionalRoom(state,ticket.symbol)*Number(ticket.fraction)/price
+  :equity*Math.min(Number(ticket.fraction),marginRoom(state,ticket.symbol))*ticket.leverage/price;
  let used=0;
  const cap=(s:string)=>Number(major(s)?policy.major_exposure_multiple:policy.alt_exposure_multiple);
  for(const p of state!.positions)if(pool(policy,p.symbol,true)===pool(policy,ticket.symbol,true))used+=Number(state!.quotes[p.symbol]?.last??p.entry)*Number(p.remaining)/cap(p.symbol);
@@ -32,8 +52,18 @@ export function ticketEstimate(state:State|null,ticket:Ticket){
  const exposure=Math.max(0,equity-used)/(Math.max(price,Number(q.last))/cap(ticket.symbol)+price*Number(policy.fee_rate)+Math.max(0,(price-Number(q.last))*direction));
  const existing=state!.positions.find(p=>p.symbol===ticket.symbol&&p.side===ticket.side);
  const remainingRisk=existing?Number(existing.remaining)*((Number(existing.entry)-Number(existing.stop))*direction+Number(existing.entry)*(Number(policy.fee_rate)+Number(policy.slippage_rate)))+Number(existing.entry_fee)*Number(existing.remaining)/Number(existing.quantity):0;
- const riskLimit=Math.max(0,equity*Number(policy.risk_fraction)-Math.max(0,remainingRisk))/(distance+cost),step=Number(instrument.step);
- const quantity=Math.floor(Math.min(requested,riskLimit,exposure)/step)*step;
+ const riskFraction=Number(policy.risk_fraction), step=Number(instrument.step);
+ const immediateLoss=Math.max(0,(price-Number(q.last))*direction);
+ const unitRisk=distance+cost+(existing?(price*Number(policy.fee_rate)+immediateLoss)*riskFraction:0);
+ const riskLimit=Math.max(0,equity*riskFraction-Math.max(0,remainingRisk))/unitRisk;
+ let collateralLimit=Infinity;
+ if(ticket.sizing_mode==='exposure'){
+  const positions=state!.positions.reduce((sum,p)=>sum+Number(p.margin)*Number(p.remaining)/Number(p.quantity),0);
+  const orders=state!.pending.reduce((sum,p)=>sum+Number(p.plan.margin),0);
+  const available=Math.min(equity-positions-orders,Number(state!.available??Infinity));
+  collateralLimit=Math.max(0,available)/(price/ticket.leverage+cost);
+ }
+ const quantity=Math.floor(Math.min(requested,riskLimit,exposure,collateralLimit)/step)*step;
  if(!Number.isFinite(quantity)||quantity<0)return null;
  return {quantity,notional:quantity*price,margin:quantity*price/ticket.leverage,risk:quantity*(distance+cost)+remainingRisk,limited:quantity<requested-step/2};
 }

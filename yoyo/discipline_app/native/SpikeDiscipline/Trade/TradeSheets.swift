@@ -21,7 +21,7 @@ struct PreviewSheet: View {
                         CoinLogo(coin: Fmt.coin(order.symbol), size: 30)
                         Text(Fmt.coin(order.symbol) + "USDT").font(.headline)
                         Spacer()
-                        Pill(text: "\(order.side == "long" ? "开多" : "开空") · \(Fmt.marginMode(pending.plan?.marginMode)) \(order.leverage)x", color: order.side == "long" ? .up : .down)
+                        Pill(text: "\(order.side == "long" ? "开多" : "开空") · \(Fmt.marginMode(pending.plan?.marginMode)) \(Fmt.leverage(pending.plan?.leverage ?? order.leverage))x", color: order.side == "long" ? .up : .down)
                     }
                     if let plan = pending.plan {
                         let tick = account.state?.instruments[order.symbol]?.tick
@@ -198,7 +198,7 @@ struct QuickTicketSheet: View {
         let state = account.state
         let block = Trading.availability(state: state, symbol: ticket.symbol, connected: session.connection != nil, online: account.online,
                                          fresh: account.quoteFresh(ticket.symbol), pending: account.pendingEntry != nil || account.closeAttempt != nil,
-                                         room: Trading.marginRoom(state, symbol: ticket.symbol), now: account.now)
+                                         room: Trading.allocationRoom(state, symbol: ticket.symbol), now: account.now)
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {

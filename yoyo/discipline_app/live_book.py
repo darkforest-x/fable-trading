@@ -17,7 +17,8 @@ from decimal import Decimal
 from .book import Book, encoded
 from .execution_journal import ExecutionJournal
 from .okx_execution import ExchangeRejected, ExchangeUncertain, entry_payload, protective_prices, stable_id
-from .policy import Policy, Rejected, dec, positive, ceil_step, floor_step
+from .policy import Policy, Rejected, dec, positive, ceil_step, floor_step, json_number
+from .leverage_tiers import fit_order
 from .closing import close_fraction, close_quantity
 from .managed_orders import ManagedOrders
 from .owned_lots import OwnedLots
@@ -34,7 +35,7 @@ class _Failed:
 class LiveBook(OwnedLots, ManagedOrders, Book):
     mode = 'okx_live'
 
-    def __init__(self, path, client, clock=time.time):
+    def __init__(self, path, client, clock=time.time, initial_policy=None):
         if client.environment != self.mode:
             raise ValueError('Live ledger requires an explicitly live client')
         super().__init__(path, clock, initial_equity='1')
@@ -58,7 +59,7 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
         with self.transaction() as (_, state):
             initialized = state['policy'] is not None
         if not initialized:
-            self.configure(Policy())
+            self.configure(initial_policy or Policy().with_exposure_sizing())
 
     def equity(self, state):
         return dec(state.get('account_equity', '0'))
@@ -123,6 +124,9 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
             raise Rejected('该合约当前杠杆尚未核对，请稍后重试')
         return state.get('shared_leverage', {}).get(symbol)
 
+    def available_entry_funds(self, state):
+        return min(super().available_entry_funds(state), max(Decimal(0), dec(state['available'])))
+
     def _shared_leverage(self, positions, orders, algos):
         # Cross leverage is shared across both hedge sides of an instrument.
         symbols = {row['instId'] for row in [p for p in positions if dec(p.get('pos') or '0')!=0]+orders+algos
@@ -136,28 +140,134 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
             try:
                 rows = self._value(result)
                 rates = {dec(r['lever']) for r in rows}
-                if len(rates)!=1 or not rates or next(iter(rates))<=0 or next(iter(rates))%1:
+                if len(rates)!=1 or not rates or next(iter(rates))<=0:
                     raise Rejected('Invalid shared leverage')
-                shared[name] = int(next(iter(rates)))
+                shared[name] = json_number(next(iter(rates)))
             except Exception:
                 errors.append(name)
         with self.transaction() as (_, state):
-            state.update(shared_leverage=shared, shared_leverage_errors=errors)
+            # None means both hedge sides were observed as zero. Unknown
+            # quantities are tracked separately so a clean close-only algo
+            # cannot mask a malformed opening order for the same symbol.
+            shared_quantities = {symbol: {'long': Decimal(0), 'short': Decimal(0)}
+                                 for symbol in shared}
+            quantity_errors = set()
+            def add_shared(symbol, side, quantity):
+                sides = shared_quantities.setdefault(symbol, {'long': Decimal(0), 'short': Decimal(0)})
+                sides[side] += quantity
+            for row in positions:
+                symbol = row.get('instId')
+                instrument = state['instruments'].get(symbol)
+                try:
+                    side = row.get('posSide')
+                    if (symbol in shared and row.get('mgnMode', row.get('tdMode', 'cross')) == 'cross'
+                            and dec(row.get('pos') or '0') != 0):
+                        if not instrument or side not in ('long', 'short'):
+                            quantity_errors.add(symbol)
+                            continue
+                        add_shared(symbol, side, abs(dec(row['pos']) * dec(instrument['contract_value'])))
+                except (KeyError, TypeError, ValueError, Rejected):
+                    if symbol in shared:
+                        quantity_errors.add(symbol)
+            for row in orders:
+                symbol = row.get('instId')
+                instrument = state['instruments'].get(symbol)
+                try:
+                    side = row.get('posSide')
+                    order_side = row.get('side')
+                    if (symbol not in shared
+                            or row.get('tdMode', row.get('mgnMode', 'cross')) != 'cross'):
+                        continue
+                    if str(row.get('reduceOnly', 'false')).lower() == 'true':
+                        continue
+                    opening = ((side == 'long' and row.get('side') == 'buy')
+                               or (side == 'short' and row.get('side') == 'sell'))
+                    reducing = ((side == 'long' and order_side == 'sell')
+                                or (side == 'short' and order_side == 'buy'))
+                    if reducing:
+                        continue  # Hedge-mode opposite-side order can only reduce.
+                    if not opening:
+                        quantity_errors.add(symbol)
+                        continue
+                    if (not instrument or 'sz' not in row or 'accFillSz' not in row
+                            or side not in ('long', 'short')):
+                        quantity_errors.add(symbol)
+                        continue
+                    remaining_lots = max(Decimal(0), dec(row['sz']) - dec(row['accFillSz']))
+                    if remaining_lots:
+                        add_shared(symbol, side, remaining_lots * dec(instrument['contract_value']))
+                except (KeyError, TypeError, ValueError, Rejected):
+                    if symbol in shared:
+                        quantity_errors.add(symbol)
+            for row in algos:
+                symbol = row.get('instId')
+                if (symbol not in shared
+                        or row.get('tdMode', row.get('mgnMode', 'cross')) != 'cross'):
+                    continue
+                side, order_side = row.get('posSide'), row.get('side')
+                # Explicit reduce-only and hedge-mode opposite-side algos are
+                # trusted closes. A same-side trigger can grow exposure and
+                # must reserve its unfilled opening amount.
+                reduce_only = str(row.get('reduceOnly', 'false')).lower() == 'true'
+                close_all = bool(row.get('closeFraction')) or str(row.get('closeOrder', 'false')).lower() == 'true'
+                if reduce_only or close_all or ((side == 'long' and order_side == 'sell')
+                                                or (side == 'short' and order_side == 'buy')):
+                    continue
+                opening = ((side == 'long' and order_side == 'buy')
+                           or (side == 'short' and order_side == 'sell'))
+                instrument = state['instruments'].get(symbol)
+                if not opening or not instrument or 'sz' not in row:
+                    quantity_errors.add(symbol)
+                    continue
+                try:
+                    amount = max(Decimal(0), dec(row['sz']) - dec(row.get('accFillSz') or '0'))
+                    add_shared(symbol, side, amount * dec(instrument['contract_value']))
+                except (KeyError, TypeError, ValueError, Rejected):
+                    quantity_errors.add(symbol)
+            state.update(shared_leverage=shared, shared_leverage_errors=errors,
+                         shared_quantities={k:{side:str(v) for side,v in sides.items()}
+                                            for k,sides in shared_quantities.items()},
+                         shared_quantity_errors=sorted(quantity_errors))
             for pos in state['positions']:
                 if pos['symbol'] in shared:
                     pos['leverage']=shared[pos['symbol']]
-                    pos['margin']=str(dec(pos['remaining'])*dec(pos['entry'])/pos['leverage'])
+                    # The ledger stores margin on initial quantity basis;
+                    # reserved() prorates by remaining/quantity exactly once.
+                    pos['margin']=str(dec(pos['quantity'])*dec(pos['entry'])/dec(pos['leverage']))
 
     def preview_in(self, state, request, reviewed_plan=None):
-        inherited = self.inherited_leverage(state, request['symbol'])
-        if inherited is not None and request['leverage'] != inherited:
+        symbol = request['symbol']
+        inherited = self.inherited_leverage(state, symbol)
+        policy = self.policy(state)
+        if policy.entry_sizing == 'margin' and inherited is not None and dec(request['leverage']) != dec(inherited):
             raise Rejected('交易所当前杠杆已变化，请沿用当前杠杆重新预览')
         result = super().preview_in(state, request, reviewed_plan)
+        if policy.entry_sizing == 'exposure':
+            holdings = state.get('shared_quantities', {})
+            if inherited is not None and (symbol not in holdings or symbol in state.get('shared_quantity_errors', [])):
+                raise Rejected('该合约已有共享委托，但持仓档位数量未核对，暂停开仓')
+            major = symbol in ('BTC-USDT-SWAP', 'ETH-USDT-SWAP')
+            fixed = inherited if inherited is not None else (100 if major else None)
+            planned = dec(result['quantity'])
+            entry = dec(result['entry'])
+            quantity, leverage = fit_order(self.client, state['instruments'][symbol],
+                side=request['side'], held=holdings.get(symbol, {}), quantity=planned,
+                entry=entry, unit_cost=entry * (2 * dec(policy.fee_rate) + dec(policy.slippage_rate)),
+                available=self.available_entry_funds(state), fixed_leverage=fixed,
+                reviewed_margin=dec(reviewed_plan['margin']) if reviewed_plan else None)
+            if quantity != planned or leverage != dec(result['leverage']):
+                result = super().preview_in(state, request, reviewed_plan,
+                    leverage_override=leverage, extra_quantity_limit=quantity)
         if dec(result['margin']) + dec(result['costs']) > dec(state['available']):
             raise Rejected('OKX 可用保证金不足')
         # Compile before accepting an intent, including minimum split sizes.
         entry_payload('preflight', request, result, state['instruments'][request['symbol']], self.policy(state), 'long_short_mode')
         return result
+
+    def auto_stop(self, request):
+        with self.lock:
+            self.reconcile()
+            return super().auto_stop(request)
 
     def preview(self, request):
         with self.lock:
@@ -205,12 +315,20 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
                     raise Rejected('实盘预览已过期或参数变化，请重新确认')
                 sized = self.preview_in(state, request, saved['plan'])
                 # A changed quote never increases the user's reviewed exposure.
-                if any(dec(sized[field]) > dec(saved['plan'][field]) for field in ('quantity','notional','risk','margin')):
+                saved_leverage = saved['plan'].get('leverage')
+                if saved_leverage is None:
+                    if self.policy(state).entry_sizing != 'margin':
+                        raise Rejected('仓位计划版本已更新，请重新预览')
+                    saved_leverage = request['leverage']  # pre-upgrade preview schema
+                if any(dec(sized[field]) > dec(saved['plan'][field]) for field in
+                       ('quantity','notional','risk','margin')) or dec(sized['leverage']) != dec(saved_leverage):
                     raise Rejected('行情变化使本单超出已确认计划，请重新预览')
                 payload = entry_payload(key, request, sized, state['instruments'][request['symbol']], self.policy(state), 'long_short_mode')
                 if request['kind'] == 'limit':
                     payload['ordType'] = 'limit'
-                intent = dict(id=key, fingerprint=fingerprint, request=request, plan=sized, payload=payload,
+                resolved_request = dict(request, leverage=sized['leverage'])
+                intent = dict(id=key, fingerprint=fingerprint, request=resolved_request,
+                    client_request=request, plan=sized, payload=payload,
                     policy=self.policy(state).document(), policy_revision=revision, created=self.clock(),
                     phase='accepted', error=None, entry_day=state['daily']['key'], ownership_version=1,
                     inherited_leverage=self.inherited_leverage(state, request['symbol']),
@@ -220,20 +338,20 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
                     intent.update(execution_version=2, add_to=sized.get('add_to'))
                 state['intents'][key] = intent
                 saved['consumed_by'] = key
-                state['pending'].append(dict(id=key, **request, plan=sized, created=self.clock()))
+                state['pending'].append(dict(id=key, **resolved_request, plan=sized, created=self.clock()))
                 state['daily']['entries'] += 1
                 self.outbox.prepare(key, '/api/v5/trade/order', payload, db)
                 lever_id = stable_id(key, 'leverage')
                 if intent['inherited_leverage'] is None:
                     self.outbox.prepare(lever_id, '/api/v5/account/set-leverage',
-                        dict(instId=request['symbol'], mgnMode='cross', lever=str(request['leverage'])), db)
+                        dict(instId=request['symbol'], mgnMode='cross', lever=str(sized['leverage'])), db)
                 self.event(db, 'live_intent_accepted', dict(id=key, plan=sized, request=request))
             # Committed reservation precedes either external write.
             try:
                 if intent['inherited_leverage'] is None:
                     self.outbox.dispatch(lever_id, self.client)
                 lever = self.client.get('/api/v5/account/leverage-info', instId=request['symbol'], mgnMode='cross')
-                if not lever or any(dec(row['lever']) != request['leverage'] for row in lever):
+                if not lever or any(dec(row['lever']) != dec(sized['leverage']) for row in lever):
                     raise Rejected('交易所杠杆回读不一致，未发送开仓委托')
                 with self.transaction() as (_,state):
                     self.quote(state,request['symbol'])
@@ -922,7 +1040,7 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
             result['closed']=display_state(state)['closed'][-30:]
             result['statistics_started_at']=history_epoch(state).get('started_at')
             result.pop('statistics_history_epoch',None)
-        for field in ('intents','previews','account_reference','close_commands','close_fractions','close_abandoned','statistics_return_basis','owned_receipts','owned_algo_receipts','owned_exit_commands','external_activity','foreign'):
+        for field in ('intents','previews','account_reference','close_commands','close_fractions','close_abandoned','statistics_return_basis','owned_receipts','owned_algo_receipts','owned_exit_commands','external_activity','foreign','shared_quantities','shared_quantity_errors'):
             result.pop(field,None)
         return result
 

@@ -52,7 +52,7 @@ struct PositionLiveActivity: Widget {
             let a = context.attributes, s = context.state, coin = WidgetSnapshot.coin(a.symbol)
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    HStack(spacing: 6) { WCoin(symbol: a.symbol, size: 22); Text("\(coin) \(a.side == "short" ? "空" : "多") \(a.leverage)x").font(.system(size: 14, weight: .semibold)) }
+                    HStack(spacing: 6) { WCoin(symbol: a.symbol, size: 22); Text("\(coin) \(a.side == "short" ? "空" : "多") \(WidgetSnapshot.leverage(a.leverage))x").font(.system(size: 14, weight: .semibold)) }
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     Text(WPalette.signed(s.pnl) + " U").font(.system(size: 16, weight: .bold).monospacedDigit()).foregroundStyle(WPalette.tone(s.pnl))

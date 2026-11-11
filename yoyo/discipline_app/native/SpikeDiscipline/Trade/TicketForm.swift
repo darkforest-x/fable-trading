@@ -22,7 +22,7 @@ struct TicketForm: View {
         let side = ticket.side(state)
         let quote = state?.quotes[ticket.symbol]
         let fresh = account.quoteFresh(ticket.symbol)
-        let room = Trading.marginRoom(state, symbol: ticket.symbol)
+        let room = Trading.allocationRoom(state, symbol: ticket.symbol)
         let block = Trading.availability(state: state, symbol: ticket.symbol, connected: session.connection != nil, online: account.online, fresh: fresh,
                                          pending: account.pendingEntry != nil || account.closeAttempt != nil, room: room, now: account.now)
         let locked = ticket.reviewing || account.pendingEntry != nil
@@ -63,18 +63,28 @@ struct TicketForm: View {
                 SoftSegment(selection: $ticket.kind, options: [("market", "市价"), ("limit", "限价")])
                     .disabled(locked)
                     .onChange(of: ticket.kind) { _, _ in ticket.fieldIssue = nil }
-                Button {
-                    Haptics.tap(); leverageSheet = true
-                } label: {
-                    HStack(spacing: 4) {
-                        Text(state?.sharedLeverage?[ticket.symbol] != nil ? "沿用" : "杠杆").font(.caption).foregroundStyle(.secondary)
-                        Text("\(ticket.leverage)x").font(.subheadline.weight(.bold).monospacedDigit())
-                        Image(systemName: "chevron.right").font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
+                if ticket.sizingMode(state) == "exposure" {
+                    HStack(spacing: 5) {
+                        Circle().fill(Color.muted.opacity(0.6)).frame(width: 6, height: 6)
+                        Text(ticket.leverageLabel(state)).font(.caption.weight(.semibold)).foregroundStyle(.primary)
                     }
+                    .padding(.horizontal, 12).frame(height: 36)
+                    .background(Color.field, in: .capsule)
+                    .accessibilityLabel("\(ticket.leverageLabel(state))，交易所将按持仓档位核定实际杠杆")
+                } else {
+                    Button {
+                        Haptics.tap(); leverageSheet = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(state?.sharedLeverage?[ticket.symbol] != nil ? "沿用" : "杠杆").font(.caption).foregroundStyle(.secondary)
+                            Text("\(Fmt.leverage(ticket.leverage))x").font(.subheadline.weight(.bold).monospacedDigit())
+                            Image(systemName: "chevron.right").font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
+                        }
+                    }
+                    .buttonStyle(.pill(.soft, height: 36))
+                    .disabled(locked || existing != nil || state?.sharedLeverage?[ticket.symbol] != nil)
+                    .accessibilityLabel("调整杠杆，当前 \(Fmt.leverage(ticket.leverage)) 倍")
                 }
-                .buttonStyle(.pill(.soft, height: 36))
-                .disabled(locked || existing != nil || state?.sharedLeverage?[ticket.symbol] != nil)
-                .accessibilityLabel("调整杠杆，当前 \(ticket.leverage) 倍")
             }
 
             if ticket.kind == "limit" {
@@ -129,8 +139,15 @@ struct TicketForm: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(alignment: .firstTextBaseline) {
                     Text("仓位额度").font(.subheadline.weight(.semibold))
-                    Text("保证金占净值 \(state == nil ? "—" : Fmt.amount((Double(ticket.fraction(state)) ?? 0) * 100))%").font(.caption).foregroundStyle(.secondary)
+                    if ticket.sizingMode(state) == "exposure" {
+                        Text("(独立额度)").font(.caption2).foregroundStyle(.secondary)
+                    }
                     Spacer()
+                    if ticket.sizingMode(state) == "exposure" {
+                        Text(allocationLabel(state)).font(.caption).foregroundStyle(.secondary)
+                    } else {
+                        Text("保证金占净值 \(state == nil ? "—" : Fmt.amount((Double(ticket.fraction(state)) ?? 0) * 100))%").font(.caption).foregroundStyle(.secondary)
+                    }
                     Text("\(Int(ticket.allocation))").font(.title3.weight(.bold).monospacedDigit()).contentTransition(.numericText(value: ticket.allocation))
                     Text("%").font(.caption).foregroundStyle(.secondary)
                 }
@@ -220,6 +237,12 @@ struct TicketForm: View {
 
     private func validate(_ field: Trading.FieldIssue.Field, state: AccountState?) {
         if let issue = Trading.fieldIssue(ticket.ticket(state), state: state), issue.field == field { ticket.fieldIssue = issue }
+    }
+
+    private func allocationLabel(_ state: AccountState?) -> String {
+        guard state != nil else { return "额度剩余 —" }
+        let remaining = Fmt.amount(floor(Trading.exposureRoom(state, symbol: ticket.symbol)), 0)
+        return Trading.isMajor(ticket.symbol) ? "\(Fmt.coin(ticket.symbol)) 剩余 \(remaining) U" : "山寨共享剩余 \(remaining) U"
     }
 
     private func selectDirection(_ value: String, state: AccountState?) {
@@ -348,13 +371,13 @@ struct LeverageSheet: View {
                 Text("杠杆影响保证金，仓位仍由止损风险与当前规则核定。" + (account.state?.policy?.marginMode == "isolated" ? "逐仓模式下，较远的止损可能需要降低杠杆。" : ""))
                     .font(.caption).foregroundStyle(.secondary)
                 Button {
-                    ticket.leverage = min(cap, Int(draft)); Haptics.tap(); dismiss()
+                    ticket.leverage = min(Double(cap), Double(Int(draft))); Haptics.tap(); dismiss()
                 } label: { Text("确认 \(min(cap, Int(draft)))x").font(.body.weight(.bold)).frame(maxWidth: .infinity).frame(height: 46) }
                 .buttonStyle(.pill(.solid(.accentColor), height: 46))
             }
             .padding(18)
             .navigationTitle("杠杆").navigationBarTitleDisplayMode(.inline)
         }
-        .onAppear { draft = Double(min(ticket.leverage, cap)) }
+        .onAppear { draft = min(ticket.leverage, Double(cap)) }
     }
 }

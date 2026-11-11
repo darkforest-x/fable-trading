@@ -10,7 +10,7 @@ from test_live_book import quote, ticket, enter
 from test_managed_orders import ManagedExchange
 from yoyo.discipline_app.live_book import LiveBook
 from yoyo.discipline_app.owned_lots import lot_totals
-from yoyo.discipline_app.policy import Rejected
+from yoyo.discipline_app.policy import Policy, Rejected
 from yoyo.discipline_app.okx_execution import ExchangeUncertain
 
 
@@ -93,7 +93,7 @@ class SharedExchange(ManagedExchange):
 def shared(tmp_path):
     now=[1792332000.0]
     ex=SharedExchange(lambda:now[0]);ex.outside()
-    book=LiveBook(tmp_path/'shared.db',ex,lambda:now[0]);quote(book)
+    book=LiveBook(tmp_path/'shared.db',ex,lambda:now[0],initial_policy=Policy());quote(book)
     assert book.reconcile()
     return book,ex,now
 

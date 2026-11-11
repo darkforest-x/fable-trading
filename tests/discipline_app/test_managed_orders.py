@@ -6,7 +6,7 @@ import pytest
 from test_live_book import Exchange, quote, ticket, enter
 from yoyo.discipline_app.live_book import LiveBook
 from yoyo.discipline_app.okx_execution import ExchangeUncertain, stable_id
-from yoyo.discipline_app.policy import Rejected
+from yoyo.discipline_app.policy import Policy, Rejected
 
 
 class ManagedExchange(Exchange):
@@ -59,7 +59,7 @@ class ManagedExchange(Exchange):
 @pytest.fixture
 def managed(tmp_path):
     now=[1792332000.0];clock=lambda:now[0]
-    ex=ManagedExchange(clock);book=LiveBook(tmp_path/'book.db',ex,clock)
+    ex=ManagedExchange(clock);book=LiveBook(tmp_path/'book.db',ex,clock,initial_policy=Policy())
     quote(book);assert book.reconcile()
     return book,ex,now
 

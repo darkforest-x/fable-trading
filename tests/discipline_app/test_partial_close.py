@@ -140,7 +140,7 @@ class FakeExchange:
 def live_book(tmp_path):
     now = Clock()
     exchange = FakeExchange(now)
-    book = LiveBook(tmp_path / 'live.sqlite3', exchange, now)
+    book = LiveBook(tmp_path / 'live.sqlite3', exchange, now, initial_policy=Policy())
     instruments = {'BTC-USDT-SWAP': dict(symbol='BTC-USDT-SWAP', step='.01',
         minimum='.01', tick='.01', contract_value='.01', fee_group='2', max_leverage=100)}
     quotes = {'BTC-USDT-SWAP': dict(last='100', bid='100', ask='100', time=now())}

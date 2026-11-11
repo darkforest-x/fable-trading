@@ -5,7 +5,7 @@ import uuid
 import pytest
 from yoyo.discipline_app.live_book import LiveBook
 from yoyo.discipline_app.okx_execution import ExchangeRejected, ExchangeUncertain
-from yoyo.discipline_app.policy import Rejected
+from yoyo.discipline_app.policy import Policy, Rejected
 
 
 class Exchange:
@@ -14,17 +14,23 @@ class Exchange:
     def __init__(self,clock):
         self.clock=clock
         self.orders={}; self.algos={}; self.positions=[]; self.history=[]; self.writes=[]
-        self.leverage='100'; self.equity='1000'; self.fee='-0.0005'; self.timeout=False
+        self.leverage='100'; self.equity='1000'; self.available=None; self.fee='-0.0005'; self.timeout=False
         self.reject=False; self.cancel_entry=False; self.foreign=[]
+        self.position_tiers={}
     def get(self,path,**params):
         if path.endswith('/config'): return [dict(acctLv='2',posMode='long_short_mode',perm='read_only,trade',uid='fixture-account')]
-        if path.endswith('/balance'): return [dict(details=[dict(ccy='USDT',eq=self.equity,cashBal=self.equity,availEq=self.equity)])]
+        if path.endswith('/balance'):
+            available = self.equity if self.available is None else self.available
+            return [dict(details=[dict(ccy='USDT',eq=self.equity,cashBal=self.equity,availEq=available)])]
         if path.endswith('/positions'): return copy.deepcopy(self.positions)
         if path.endswith('/positions-history'): return copy.deepcopy(self.history)
         if path.endswith('/orders-pending'): return copy.deepcopy(self.foreign)
         if path.endswith('/orders-algo-pending'): return copy.deepcopy([x for x in self.algos.values() if x['state']=='live']) if params['ordType']=='conditional' else []
         if path.endswith('/trade-fee'): return [dict(taker='',feeGroup=[dict(groupId='2',taker=self.fee)])]
         if path.endswith('/leverage-info'): return [dict(lever=self.leverage)]
+        if path.endswith('/position-tiers'):
+            family=params['instFamily']
+            return copy.deepcopy(self.position_tiers.get(family,[dict(instFamily=family,minSz='0',maxSz='999999999',maxLever='100')]))
         if path.endswith('/order'):
             row=next((x for x in self.orders.values() if x['clOrdId']==params.get('clOrdId') or x['ordId']==params.get('ordId')),None)
             if not row: raise ExchangeRejected('51603')
@@ -68,7 +74,7 @@ def live(tmp_path):
     now=[1792332000.0]
     clock=lambda:now[0]
     exchange=Exchange(clock)
-    book=LiveBook(tmp_path/'live.sqlite3',exchange,clock)
+    book=LiveBook(tmp_path/'live.sqlite3',exchange,clock,initial_policy=Policy())
     quote(book)
     assert book.reconcile()
     return book,exchange,now

@@ -2,7 +2,7 @@ import Foundation
 import Observation
 
 /// Shared order ticket for 合约 and the 1.618 快捷开单 sheet (1.x App.tsx ticket state + useAutoStop.ts).
-/// The phone sends intent only (symbol, side, kind, price, stop, margin fraction, leverage);
+/// The phone sends intent only (symbol, side, kind, price, stop, allocation fraction, leverage);
 /// the server re-sizes and enforces every rule.
 @MainActor @Observable
 final class TicketModel {
@@ -12,7 +12,7 @@ final class TicketModel {
     var price = ""
     var stop = ""
     var allocation: Double = 100
-    var leverage = 20
+    var leverage = 20.0
     var fieldIssue: Trading.FieldIssue?
     var stopApplied: String?               // "<context>|<value>" when an automatic stop was filled in
     var fibTicket = false                  // 1.618 快捷开单 sheet is open
@@ -39,16 +39,34 @@ final class TicketModel {
     }
     func cap(_ state: AccountState?) -> Int {
         let p = state?.policy
+        if Trading.usesExposureSizing(p) {
+            // Major exposure mode always targets the fixed 100x policy. If the instrument
+            // cannot support it, the server rejects preflight instead of silently lowering it.
+            return Trading.isMajor(symbol) ? 100 : max(1, state?.instruments[symbol]?.maxLeverage ?? 1)
+        }
         let policyCap = Trading.isMajor(symbol) ? (p?.majorLeverage ?? 100) : (p?.altLeverage ?? 20)
         return min(policyCap, state?.instruments[symbol]?.maxLeverage ?? policyCap)
     }
+    func sizingMode(_ state: AccountState?) -> String { Trading.usesExposureSizing(state?.policy) ? "exposure" : "margin" }
+    func leverageLabel(_ state: AccountState?) -> String {
+        if let current = existing(state) { return "沿用 \(Fmt.leverage(current.leverage))x" }
+        if let shared = state?.sharedLeverage?[symbol] { return "沿用 \(Fmt.leverage(shared))x" }
+        if Trading.isMajor(symbol) { return "交易所 100x" }
+        guard let maxLeverage = state?.instruments[symbol]?.maxLeverage else { return "最高 —" }
+        return "最高 \(Fmt.leverage(Double(maxLeverage)))x"
+    }
     func fraction(_ state: AccountState?) -> String {
+        if sizingMode(state) == "exposure" {
+            let percent = allocation.isFinite ? min(100, max(0, allocation)) : 0
+            return String(percent / 100)
+        }
         let value = Trading.allocatedMargin(room: Trading.marginRoom(state, symbol: symbol), percent: allocation)
         return value.formatted(.number.precision(.fractionLength(0...8)).grouping(.never).locale(Locale(identifier: "en_US")))
     }
     func ticket(_ state: AccountState?, side: String? = nil, stop: String? = nil) -> Ticket {
         Ticket(symbol: symbol, side: side ?? self.side(state), kind: kind, price: price.trimmingCharacters(in: .whitespaces),
-               stop: (stop ?? self.stop).trimmingCharacters(in: .whitespaces), fraction: fraction(state), leverage: leverage)
+               stop: (stop ?? self.stop).trimmingCharacters(in: .whitespaces), fraction: fraction(state), leverage: leverage,
+               sizingMode: sizingMode(state))
     }
     /// Context of an automatic stop: any change invalidates a computed value.
     func stopContext(_ state: AccountState?, connection: Connection?) -> String {
@@ -70,8 +88,8 @@ final class TicketModel {
     /// Keep leverage within the cap; inherit the exchange's leverage or the open position's.
     func syncLeverage(_ state: AccountState?) {
         let cap = cap(state)
-        leverage = state?.sharedLeverage?[symbol] ?? existing(state)?.leverage ?? cap
-        if leverage > cap { leverage = cap }
+        leverage = existing(state)?.leverage ?? state?.sharedLeverage?[symbol] ?? Double(cap)
+        if leverage > Double(cap) { leverage = Double(cap) }
     }
     func syncExisting(_ state: AccountState?) {
         guard let e = existing(state) else { return }

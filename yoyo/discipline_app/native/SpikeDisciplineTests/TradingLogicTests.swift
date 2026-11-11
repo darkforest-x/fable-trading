@@ -35,6 +35,9 @@ final class TradingLogicTests: XCTestCase {
         let s = try API.decoder.decode(AccountState.self, from: fixture("state_live"))
         XCTAssertEqual(s.mode, "okx_live")
         XCTAssertFalse(s.positions.isEmpty)
+        XCTAssertNil(s.policy?.entrySizing)
+        XCTAssertEqual(s.positions.first?.leverage, 100)
+        XCTAssertEqual(s.sharedLeverage?["BTC-USDT-SWAP"], 100)
         XCTAssertEqual(s.discipline?.entriesLimit, 4)
         XCTAssertNoThrow(try API.decoder.decode(Statistics.self, from: fixture("statistics")))
         XCTAssertEqual(try API.decoder.decode(AccountList.self, from: fixture("accounts")).items.first?.id, "primary")
@@ -45,6 +48,199 @@ final class TradingLogicTests: XCTestCase {
         XCTAssertEqual(bars.count, 6)
         XCTAssertEqual(bars, bars.sorted { $0.time < $1.time })
         XCTAssertFalse(bars.last!.confirmed)
+    }
+
+    func testExposurePolicyAndFractionalExchangeLeverageDecodeWithLegacyFallback() throws {
+        let raw = try base()
+        let old = try state { _ in }
+        XCTAssertFalse(Trading.usesExposureSizing(old.policy))
+
+        let new = try state { value in
+            var policy = value["policy"] as! [String: Any]
+            policy["entry_sizing"] = "exposure"
+            policy["major_allowance_scope"] = "independent"
+            policy["alt_leverage"] = NSNull()
+            value["policy"] = policy
+            var positions = value["positions"] as! [[String: Any]]
+            positions[0]["leverage"] = 66.66
+            value["positions"] = positions
+            value["shared_leverage"] = ["BTC-USDT-SWAP": 66.66]
+        }
+        XCTAssertTrue(Trading.usesExposureSizing(new.policy))
+        XCTAssertNil(new.policy?.altLeverage)
+        XCTAssertEqual(new.positions.first?.leverage ?? 0, 66.66, accuracy: 1e-12)
+        XCTAssertEqual(new.sharedLeverage?["BTC-USDT-SWAP"] ?? 0, 66.66, accuracy: 1e-12)
+
+        let planData = try JSONSerialization.data(withJSONObject: [
+            "quantity": "1", "notional": "100", "margin": "1.5", "risk": "2", "entry": "100", "stop": "98",
+            "price_risk": "2", "costs": "0", "margin_mode": "cross", "notional_equity_multiple": "0.1",
+            "exposure_limited": false, "leverage": 66.66
+        ])
+        let actualPlan = try API.decoder.decode(Plan.self, from: planData)
+        XCTAssertEqual(actualPlan.leverage ?? 0, 66.66, accuracy: 1e-12)
+        var oldPlanObject = try XCTUnwrap(JSONSerialization.jsonObject(with: planData) as? [String: Any])
+        oldPlanObject.removeValue(forKey: "leverage")
+        let oldPlanData = try JSONSerialization.data(withJSONObject: oldPlanObject)
+        XCTAssertNil(try API.decoder.decode(Plan.self, from: oldPlanData).leverage)
+
+        let intent = Ticket(symbol: "BTC-USDT-SWAP", side: "long", kind: "market", price: "", stop: "99", fraction: "0.33", leverage: 66.66, sizingMode: "exposure")
+        XCTAssertEqual(intent.json["sizing_mode"] as? String, "exposure")
+        XCTAssertEqual(intent.json["leverage"] as? Double ?? 0, 66.66, accuracy: 1e-12)
+        let legacyIntent = Ticket(symbol: "BTC-USDT-SWAP", side: "long", kind: "market", price: "", stop: "99", fraction: "0.1", leverage: 20)
+        XCTAssertEqual(legacyIntent.json["sizing_mode"] as? String, "margin")
+        XCTAssertEqual(raw["equity"] as? String, "1000")
+    }
+
+    @MainActor
+    func testExposureTicketUsesPoolRoomFractionAndExchangeLeverageCap() throws {
+        let raw = try base()
+        let s = try state { value in
+            var policy = value["policy"] as! [String: Any]
+            policy["entry_sizing"] = "exposure"
+            policy["major_allowance_scope"] = "independent"
+            policy["major_exposure_multiple"] = "10"
+            policy["alt_exposure_multiple"] = "5"
+            policy["major_margin_fraction"] = NSNull()
+            policy["alt_margin_fraction"] = NSNull()
+            policy["alt_leverage"] = NSNull()
+            value["policy"] = policy
+            value["equity"] = "1000"
+            value["available"] = "1000"
+            value["positions"] = [position("BTC-USDT-SWAP", entry: "100", remaining: "2", leverage: 10, from: raw),
+                                   position("SOL-USDT-SWAP", entry: "100", remaining: "3", leverage: 10, from: raw)]
+            value["pending"] = [pending("SOL-USDT-SWAP", margin: "0", quantity: "4", entry: "100")]
+            value["quotes"] = [
+                "BTC-USDT-SWAP": ["last": "100", "ask": "100", "bid": "100", "time": 1],
+                "ETH-USDT-SWAP": ["last": "100", "ask": "100", "bid": "100", "time": 1],
+                "SOL-USDT-SWAP": ["last": "200", "ask": "200", "bid": "200", "time": 1]
+            ]
+            var instruments = value["instruments"] as! [String: [String: Any]]
+            instruments["SOL-USDT-SWAP"]?["max_leverage"] = 75
+            value["instruments"] = instruments
+        }
+        XCTAssertEqual(Trading.exposureRoom(s, symbol: "BTC-USDT-SWAP"), 9_800, accuracy: 1e-9)
+        XCTAssertEqual(Trading.exposureRoom(s, symbol: "ETH-USDT-SWAP"), 10_000, accuracy: 1e-9)
+        XCTAssertEqual(Trading.exposureRoom(s, symbol: "SOL-USDT-SWAP"), 3_600, accuracy: 1e-9)
+
+        let defaults = try state { value in
+            var policy = value["policy"] as! [String: Any]
+            policy["entry_sizing"] = "exposure"
+            policy["major_allowance_scope"] = "independent"
+            policy["alt_leverage"] = NSNull()
+            value["policy"] = policy
+            value["positions"] = [Any]()
+            value["pending"] = [Any]()
+            value["shared_leverage"] = [String: Any]()
+            var instruments = value["instruments"] as! [String: [String: Any]]
+            instruments["BTC-USDT-SWAP"]?["max_leverage"] = 75
+            instruments["SOL-USDT-SWAP"]?["max_leverage"] = 75
+            value["instruments"] = instruments
+        }
+        let ticket = TicketModel()
+        ticket.symbol = "BTC-USDT-SWAP"
+        ticket.allocation = 33
+        ticket.syncLeverage(defaults)
+        XCTAssertEqual(ticket.cap(defaults), 100)
+        XCTAssertEqual(ticket.leverage, 100)
+        XCTAssertEqual(ticket.leverageLabel(defaults), "交易所 100x")
+        XCTAssertEqual(ticket.fraction(defaults), "0.33")
+        XCTAssertEqual(ticket.ticket(defaults).sizingMode, "exposure")
+
+        ticket.symbol = "SOL-USDT-SWAP"
+        ticket.syncLeverage(defaults)
+        XCTAssertEqual(ticket.cap(defaults), 75)
+        XCTAssertEqual(ticket.leverage, 75)
+    }
+
+    func testExposureEstimateAppliesNotionalRequestAndKeepsRiskAndStepCaps() throws {
+        let s = try state { value in
+            var policy = value["policy"] as! [String: Any]
+            policy["entry_sizing"] = "exposure"
+            policy["major_allowance_scope"] = "independent"
+            policy["major_exposure_multiple"] = "10"
+            policy["risk_fraction"] = ".05"
+            policy["fee_rate"] = ".0005"
+            policy["slippage_rate"] = ".001"
+            value["policy"] = policy
+            value["equity"] = "1000"
+            value["available"] = "1000"
+            value["positions"] = [Any]()
+            value["pending"] = [Any]()
+            value["quotes"] = ["BTC-USDT-SWAP": ["last": "100", "ask": "100", "bid": "100", "time": 1]]
+        }
+        let ticket = Ticket(symbol: "BTC-USDT-SWAP", side: "long", kind: "market", price: "", stop: "99.99", fraction: "0.5", leverage: 100, sizingMode: "exposure")
+        let estimate = try XCTUnwrap(Trading.estimate(s, ticket))
+        XCTAssertEqual(estimate.quantity, 49.95, accuracy: 1e-9) // 50% × (1000 × 10 U), / estimated market entry, then .01 step
+        XCTAssertEqual(estimate.notional, 4_999.995, accuracy: 1e-6)
+        XCTAssertLessThanOrEqual(estimate.risk, 50)
+        XCTAssertEqual((estimate.quantity / 0.01).rounded(), estimate.quantity / 0.01, accuracy: 1e-8)
+    }
+
+    func testExposureEstimateUsesPaperReservedFundsAndServerAddOnRiskBudget() throws {
+        let noPosition = try state { value in
+            var policy = value["policy"] as! [String: Any]
+            policy["entry_sizing"] = "exposure"
+            policy["major_allowance_scope"] = "independent"
+            policy["major_exposure_multiple"] = "10"
+            policy["risk_fraction"] = ".05"
+            policy["fee_rate"] = ".0005"
+            policy["slippage_rate"] = ".001"
+            value["policy"] = policy
+            value["equity"] = "1000"
+            value["available"] = NSNull()
+            value["positions"] = [Any]()
+            value["pending"] = [pending("BTC-USDT-SWAP", margin: "900", quantity: "0")]
+            value["quotes"] = ["BTC-USDT-SWAP": ["last": "100", "ask": "100", "bid": "100", "time": 1]]
+        }
+        let freshTicket = Ticket(symbol: "BTC-USDT-SWAP", side: "long", kind: "market", price: "", stop: "99.99", fraction: "1", leverage: 100, sizingMode: "exposure")
+        let availableEstimate = try XCTUnwrap(Trading.estimate(noPosition, freshTicket))
+        let entry = 100.1, unitCost = entry * (2 * 0.0005 + 0.001)
+        let expectedFundsQuantity = floor((100 / (entry / 100 + unitCost)) / 0.01) * 0.01
+        XCTAssertEqual(availableEstimate.quantity, expectedFundsQuantity, accuracy: 1e-8)
+
+        let exchangeLimited = try state { value in
+            var policy = value["policy"] as! [String: Any]
+            policy["entry_sizing"] = "exposure"
+            policy["major_allowance_scope"] = "independent"
+            policy["major_exposure_multiple"] = "10"
+            policy["risk_fraction"] = ".05"
+            policy["fee_rate"] = ".0005"
+            policy["slippage_rate"] = ".001"
+            value["policy"] = policy
+            value["equity"] = "1000"
+            value["available"] = "50"
+            value["positions"] = [Any]()
+            value["pending"] = [pending("BTC-USDT-SWAP", margin: "900", quantity: "0")]
+            value["quotes"] = ["BTC-USDT-SWAP": ["last": "100", "ask": "100", "bid": "100", "time": 1]]
+        }
+        let exchangeEstimate = try XCTUnwrap(Trading.estimate(exchangeLimited, freshTicket))
+        let expectedExchangeQuantity = floor((50 / (entry / 100 + unitCost)) / 0.01) * 0.01
+        XCTAssertEqual(exchangeEstimate.quantity, expectedExchangeQuantity, accuracy: 1e-8)
+
+        let addOnBase = try base()
+        let addOn = try state { value in
+            var policy = value["policy"] as! [String: Any]
+            policy["entry_sizing"] = "exposure"
+            policy["major_allowance_scope"] = "independent"
+            policy["major_exposure_multiple"] = "10"
+            policy["risk_fraction"] = ".05"
+            policy["fee_rate"] = ".0005"
+            policy["slippage_rate"] = ".001"
+            value["policy"] = policy
+            value["equity"] = "1000"
+            value["available"] = "1000"
+            value["positions"] = [position("BTC-USDT-SWAP", entry: "100", remaining: "1", leverage: 10, from: addOnBase)]
+            value["pending"] = [Any]()
+            value["quotes"] = ["BTC-USDT-SWAP": ["last": "100", "ask": "100", "bid": "100", "time": 1]]
+        }
+        let addOnTicket = Ticket(symbol: "BTC-USDT-SWAP", side: "long", kind: "market", price: "", stop: "95", fraction: "1", leverage: 10, sizingMode: "exposure")
+        let addOnEstimate = try XCTUnwrap(Trading.estimate(addOn, addOnTicket))
+        let currentRisk = 1 * ((100.0 - 95) + 100 * (2 * 0.0005 + 0.001))
+        let remainingBudget = 1000 * 0.05 - currentRisk
+        let newRiskPerUnit = (entry - 95) + unitCost + (entry * 0.0005 + max(0, (entry - 100) * 1)) * 0.05
+        let expectedRiskQuantity = floor((remainingBudget / newRiskPerUnit) / 0.01) * 0.01
+        XCTAssertEqual(addOnEstimate.quantity, expectedRiskQuantity, accuracy: 1e-8)
+        XCTAssertLessThanOrEqual(addOnEstimate.risk, 50)
     }
 
     func testCandleParsingRejectsMalformedRows() {

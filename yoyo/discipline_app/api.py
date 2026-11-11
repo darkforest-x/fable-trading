@@ -7,13 +7,13 @@ import hashlib
 import hmac
 from pathlib import Path
 from contextlib import asynccontextmanager
-from typing import Literal, Optional
+from typing import Literal, Optional, Union
 from fastapi import FastAPI, Depends, Header, HTTPException, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictBool, SecretStr
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictFloat, StrictBool, SecretStr
 from fastapi.exceptions import RequestValidationError
 from .book import Book
 from .market import PublicMarket
@@ -33,8 +33,10 @@ class Ticket(BaseModel):
     price: str = Field(max_length=32)
     stop: str = Field(max_length=32)
     fraction: str = Field(max_length=20)
-    sizing_mode: Literal['risk', 'margin'] = 'risk'
-    leverage: StrictInt = Field(ge=1, le=100)
+    sizing_mode: Optional[Literal['risk', 'margin', 'exposure']] = None
+    # Legacy policies still require integral leverage. Exposure policies treat
+    # this as a hint only and return the resolved tier in plan.leverage.
+    leverage: Union[StrictInt, StrictFloat] = Field(ge=1, le=1000)
 
 
 class Entry(BaseModel):

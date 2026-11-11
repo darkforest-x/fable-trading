@@ -55,7 +55,7 @@ def main():
                 output.write(secrets.token_urlsafe(36) + '\n')
             token_file.chmod(0o600)
         if book.snapshot()['policy'] is None:
-            book.configure(Policy())
+            book.configure(Policy().with_exposure_sizing())
         print(json.dumps({'mode': 'paper', 'live_enabled': False, 'token_file': str(token_file), 'runtime': str(args.runtime)}))
     elif args.command == 'status':
         state = book.snapshot()

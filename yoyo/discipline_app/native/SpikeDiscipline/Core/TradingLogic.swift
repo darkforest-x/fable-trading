@@ -6,6 +6,11 @@ import Foundation
 enum Trading {
     static func num(_ s: String?) -> Double { Double(s ?? "") ?? .nan }
     static func isMajor(_ symbol: String) -> Bool { symbol == "BTC-USDT-SWAP" || symbol == "ETH-USDT-SWAP" }
+    /// Exposure sizing is configured only for the three independent pools (BTC, ETH, alts).
+    /// Missing, legacy, unknown, and shared-pool policies keep the established margin behavior.
+    static func usesExposureSizing(_ policy: Policy?) -> Bool {
+        policy?.entrySizing == "exposure" && policy?.majorAllowanceScope == "independent"
+    }
 
     private static func pool(_ policy: Policy?, _ symbol: String, exposure: Bool = false) -> String {
         if policy?.majorAllowanceScope == "independent" { return isMajor(symbol) ? symbol : "alts" }
@@ -31,6 +36,60 @@ enum Trading {
         return max(0, cap - used / equity)
     }
 
+    /// Remaining raw notional allowance for the selected independent pool, in quote currency.
+    /// This is a display estimate; preview and order submission remain server-authoritative.
+    static func exposureRoom(_ state: AccountState?, symbol: String) -> Double {
+        guard let state, let policy = state.policy, policy.majorAllowanceScope == "independent" else { return 0 }
+        let equity = num(state.equity)
+        let multiple = num(isMajor(symbol) ? policy.majorExposureMultiple : policy.altExposureMultiple)
+        guard equity.isFinite, equity > 0, multiple.isFinite, multiple > 0 else { return 0 }
+        let selectedPool = pool(policy, symbol, exposure: true)
+        var used = 0.0
+        for position in state.positions where pool(policy, position.symbol, exposure: true) == selectedPool {
+            let quantity = num(position.remaining)
+            let quote = num(state.quotes[position.symbol]?.last)
+            let mark = quote.isFinite && quote > 0 ? quote : num(position.entry)
+            if quantity.isFinite, quantity > 0, mark.isFinite, mark > 0 { used += quantity * mark }
+        }
+        for pending in state.pending where pool(policy, pending.symbol, exposure: true) == selectedPool {
+            let planned = num(pending.plan.quantity)
+            let filled = num(pending.filledQuantity)
+            let quantity = max(0, planned - (filled.isFinite ? filled : 0))
+            let entry = num(pending.plan.entry)
+            let quote = num(state.quotes[pending.symbol]?.last)
+            let mark = quote.isFinite && quote > 0 ? max(quote, entry) : entry
+            if quantity.isFinite, mark.isFinite, mark > 0 { used += quantity * mark }
+        }
+        let room = equity * multiple - used
+        return room.isFinite ? max(0, room) : 0
+    }
+
+    /// Amount the current ticket's slider can allocate from its active sizing pool.
+    static func allocationRoom(_ state: AccountState?, symbol: String) -> Double {
+        guard let state else { return 0 }
+        return usesExposureSizing(state.policy) ? exposureRoom(state, symbol: symbol) : marginRoom(state, symbol: symbol)
+    }
+
+    private static func availableFunds(_ state: AccountState, equity: Double) -> Double {
+        let reported = num(state.available)
+        var reserved = 0.0
+        for position in state.positions {
+            let quantity = num(position.quantity), remaining = num(position.remaining), margin = num(position.margin)
+            if quantity.isFinite, quantity > 0, remaining.isFinite, remaining > 0, margin.isFinite, margin > 0 {
+                reserved += margin * min(1, remaining / quantity)
+            }
+        }
+        for pending in state.pending {
+            let margin = num(pending.plan.margin)
+            if margin.isFinite, margin > 0 { reserved += margin }
+        }
+        let ledgerAvailable = max(0, equity - reserved)
+        // LiveBook takes the smaller of exchange-reported availability and the
+        // App ledger's unreserved equity so locally estimated size stays bounded
+        // by the same collateral ceiling as server preview.
+        return reported.isFinite && reported >= 0 ? min(ledgerAvailable, reported) : ledgerAvailable
+    }
+
     struct Estimate: Equatable { let quantity: Double; let notional: Double; let margin: Double; let risk: Double; let limited: Bool }
 
     static func estimate(_ state: AccountState?, _ t: Ticket) -> Estimate? {
@@ -38,9 +97,16 @@ enum Trading {
         let equity = num(state.equity), direction: Double = t.side == "long" ? 1 : -1
         let price = t.kind == "limit" ? num(t.price) : num(direction == 1 ? q.ask : q.bid) * (1 + direction * num(policy.slippageRate))
         let stop = num(t.stop), distance = (price - stop) * direction
-        guard equity > 0, price > 0, stop > 0, distance > 0 else { return nil }
+        guard equity > 0, price > 0, stop > 0, distance > 0, t.leverage.isFinite, t.leverage > 0 else { return nil }
         let cost = price * (2 * num(policy.feeRate) + num(policy.slippageRate))
-        let requested = equity * min(num(t.fraction), marginRoom(state, symbol: t.symbol)) * Double(t.leverage) / price
+        let exposureMode = usesExposureSizing(policy) && t.sizingMode == "exposure"
+        let requestFraction = num(t.fraction)
+        let requested: Double
+        if exposureMode {
+            requested = exposureRoom(state, symbol: t.symbol) * min(1, max(0, requestFraction)) / price
+        } else {
+            requested = equity * min(requestFraction, marginRoom(state, symbol: t.symbol)) * t.leverage / price
+        }
         func cap(_ s: String) -> Double { num(isMajor(s) ? policy.majorExposureMultiple : policy.altExposureMultiple) }
         var used = 0.0
         for p in state.positions where pool(policy, p.symbol, exposure: true) == pool(policy, t.symbol, exposure: true) {
@@ -52,15 +118,26 @@ enum Trading {
         }
         let exposure = max(0, equity - used) / (max(price, num(q.last)) / cap(t.symbol) + price * num(policy.feeRate) + max(0, (price - num(q.last)) * direction))
         var remainingRisk = 0.0
+        var isAddOn = false
         if let e = state.positions.first(where: { $0.symbol == t.symbol && $0.side == t.side }) {
-            remainingRisk = num(e.remaining) * ((num(e.entry) - num(e.stop)) * direction + num(e.entry) * (num(policy.feeRate) + num(policy.slippageRate)))
-                + num(e.entryFee) * num(e.remaining) / num(e.quantity)
+            let remaining = num(e.remaining), entry = num(e.entry), stop = num(e.stop)
+            let signedDistance = (entry - stop) * direction
+            let currentCost = entry * (2 * num(policy.feeRate) + num(policy.slippageRate))
+            let currentRisk = remaining * (signedDistance + currentCost)
+            remainingRisk = currentRisk.isFinite ? max(0, currentRisk) : .infinity
+            isAddOn = true
         }
-        let riskLimit = max(0, equity * num(policy.riskFraction) - max(0, remainingRisk)) / (distance + cost)
+        let remainingBudget = max(0, equity * num(policy.riskFraction) - remainingRisk)
+        let immediateLoss = max(0, (price - num(q.last)) * direction)
+        let budgetPerUnit = distance + cost + (isAddOn ? (price * num(policy.feeRate) + immediateLoss) * num(policy.riskFraction) : 0)
+        let riskLimit = budgetPerUnit > 0 ? remainingBudget / budgetPerUnit : 0
         let step = num(instrument.step)
-        let quantity = floor(min(requested, riskLimit, exposure) / step) * step
+        let funds = availableFunds(state, equity: equity)
+        let availablePerUnit = price / t.leverage + cost
+        let availableQuantity = exposureMode && availablePerUnit > 0 ? funds / availablePerUnit : .infinity
+        let quantity = floor(min(min(requested, riskLimit), min(exposure, availableQuantity)) / step) * step
         guard quantity.isFinite, quantity >= 0 else { return nil }
-        return Estimate(quantity: quantity, notional: quantity * price, margin: quantity * price / Double(t.leverage),
+        return Estimate(quantity: quantity, notional: quantity * price, margin: quantity * price / t.leverage,
                         risk: quantity * (distance + cost) + remainingRisk, limited: quantity < requested - step / 2)
     }
 
@@ -157,7 +234,8 @@ enum Trading {
         if state.pending.contains(where: { $0.symbol == symbol }) { return Block(text: "该币种已有挂单，成交或撤单后可继续", destination: .positions) }
         if room <= 0 {
             let name = isMajor(symbol) ? (policy.majorAllowanceScope == "independent" ? Fmt.coin(symbol) : "BTC/ETH") : "山寨币"
-            return Block(text: "\(name)可用保证金额度已用完", destination: .positions)
+            let allowance = usesExposureSizing(policy) ? "名义额度" : "保证金额度"
+            return Block(text: "\(name)可用\(allowance)已用完", destination: .positions)
         }
         return nil
     }

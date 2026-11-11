@@ -30,7 +30,7 @@ struct ClosePositionSheet: View {
                         CoinLogo(coin: Fmt.coin(current.symbol), size: 30)
                         Text(Fmt.coin(current.symbol)).font(.headline)
                         Spacer()
-                        Pill(text: "\(current.side == "long" ? "多" : "空") · \(current.leverage)x", color: current.side == "long" ? .up : .down)
+                        Pill(text: "\(current.side == "long" ? "多" : "空") · \(Fmt.leverage(current.leverage))x", color: current.side == "long" ? .up : .down)
                     }
                     HStack {
                         Text("当前剩余持仓").foregroundStyle(.secondary)

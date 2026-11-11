@@ -120,6 +120,12 @@ class OkxExecutionClient:
         return self._response(response, write=write)
 
     def get(self, path, **params):
+        if path == '/api/v5/public/position-tiers':
+            try:
+                response = self.client.get(path, params=params)
+            except httpx.HTTPError:
+                raise Rejected('无法读取 OKX 杠杆档位，请稍后重试') from None
+            return self._response(response, write=False)
         return self.request('GET', path, params=params)
 
     def post(self, path, body):

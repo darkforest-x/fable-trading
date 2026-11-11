@@ -5,14 +5,14 @@ from fastapi.testclient import TestClient
 import pytest
 from yoyo.discipline_app.api import create_app
 from yoyo.discipline_app.live_book import LiveBook
-from yoyo.discipline_app.policy import Rejected
+from yoyo.discipline_app.policy import Policy, Rejected
 from test_live_book import Exchange, quote, ticket
 
 
 def test_display_reads_do_not_wait_for_writer_or_change_ledger(tmp_path):
     now = [1792332000.0]
     exchange = Exchange(lambda: now[0])
-    book = LiveBook(tmp_path / 'live.sqlite3', exchange, lambda: now[0])
+    book = LiveBook(tmp_path / 'live.sqlite3', exchange, lambda: now[0], initial_policy=Policy())
     quote(book)
     assert book.reconcile()
     with book.read_transaction() as (_, state):
@@ -38,7 +38,7 @@ def test_display_reads_do_not_wait_for_writer_or_change_ledger(tmp_path):
 
 def test_compressed_private_response_is_not_http_cached(tmp_path):
     exchange = Exchange(lambda: 1792332000.0)
-    book = LiveBook(tmp_path / 'live.sqlite3', exchange, exchange.clock)
+    book = LiveBook(tmp_path / 'live.sqlite3', exchange, exchange.clock, initial_policy=Policy())
     quote(book)
     book.reconcile()
     with book.transaction() as (_, state):

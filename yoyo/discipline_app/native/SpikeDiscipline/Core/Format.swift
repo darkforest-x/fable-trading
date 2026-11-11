@@ -9,6 +9,12 @@ enum Fmt {
         return v.formatted(.number.precision(.fractionLength(2)).grouping(.automatic))
     }
 
+    /// Keep integer tiers compact while preserving fractional OKX leverage tiers.
+    static func leverage(_ value: Double?) -> String {
+        guard let value, value.isFinite else { return "—" }
+        return value.formatted(.number.precision(.fractionLength(0...2)).grouping(.never))
+    }
+
     static func signedPercent(_ v: Double?, digits: Int = 2) -> String {
         guard let v, v.isFinite else { return "—" }
         let text = String(format: "%.\(digits)f", abs(v))

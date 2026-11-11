@@ -18,7 +18,7 @@ struct PositionActivityAttributes: ActivityAttributes {
     var positionId: String
     var symbol: String
     var side: String                 // long / short
-    var leverage: Int
+    var leverage: Double
     var entry: Double
     var decimals: Int
 }
@@ -28,7 +28,7 @@ struct PositionActivityAttributes: ActivityAttributes {
 /// widget refreshes it itself on device builds. Simulated scores, display only.
 struct WidgetSnapshot: Codable, Equatable {
     struct Touch: Codable, Hashable { let symbol: String; let side: String; let score: Double?; let at: Double }
-    struct Holding: Codable, Hashable { let symbol: String; let side: String; let leverage: Int; let pnl: Double }
+    struct Holding: Codable, Hashable { let symbol: String; let side: String; let leverage: Double; let pnl: Double }
     var updated: Double              // epoch seconds
     var touches: [Touch]             // today (Beijing day), newest first
     var positions: [Holding]
@@ -51,6 +51,7 @@ struct WidgetSnapshot: Codable, Equatable {
     var highTouches: [Touch] { touches.filter { ($0.score ?? -1) >= threshold }.sorted { ($0.score ?? 0) > ($1.score ?? 0) } }
 
     static func coin(_ symbol: String) -> String { symbol.components(separatedBy: "-").first ?? symbol }
+    static func leverage(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(0...2)).grouping(.never)) }
 
     static func beijingDay(_ date: Date) -> String {
         let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.timeZone = TimeZone(identifier: "Asia/Shanghai")

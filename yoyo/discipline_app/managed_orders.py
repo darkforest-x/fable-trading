@@ -139,7 +139,8 @@ class ManagedOrders:
                 risk = quantity * ((price - dec(current['plan']['stop'])) * (1 if order['posSide']=='long' else -1) + price * (dec(policy.fee_rate) + dec(policy.slippage_rate))) + fee
                 pos = dict(id=root, symbol=order['instId'], side=order['posSide'], direction=1 if order['posSide']=='long' else -1,
                     quantity=str(quantity), remaining=str(quantity), entry=str(price), stop=current['plan']['stop'], original_stop=current['plan']['stop'],
-                    risk=str(risk), margin=str(quantity*price/current['request']['leverage']), leverage=current['request']['leverage'], margin_mode='cross',
+                    risk=str(risk), margin=str(quantity*price/dec(current['request']['leverage'])),
+                    leverage=current['request']['leverage'], margin_mode='cross',
                     entry_fee=str(fee), pnl=order['fee'], breakeven=False, stages=[], opened=int(order['cTime'])/1000,
                     policy=current['policy'], policy_revision=current['policy_revision'], ord_id=order['ordId'], pos_id=raw['posId'], protection='awaiting-exchange')
             else:

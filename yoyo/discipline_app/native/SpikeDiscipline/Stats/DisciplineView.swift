@@ -9,6 +9,7 @@ struct DisciplineView: View {
 
     var body: some View {
         let state = account.state, p = state?.policy
+        let exposureSizing = Trading.usesExposureSizing(p)
         let symbol = state?.positions.first?.symbol ?? "BTC-USDT-SWAP"
         let reason = Trading.availability(state: state, symbol: symbol, connected: session.connection != nil, online: account.online,
                                           fresh: account.online, pending: account.pendingEntry != nil || account.closeAttempt != nil,
@@ -29,8 +30,10 @@ struct DisciplineView: View {
                 ])
                 Explainer(title: "规则计算与运行边界", paragraphs: [
                     "每日按北京时间 00:00 切换。未成交撤单经交易所确认后返还次数，已成交不返还。规则以当前生效版本为准。",
-                    "外部交易不显示，不占用 App 开仓次数、连亏、仓位或保证金额度。日亏只计算 App 管理交易的当日已实现与浮动盈亏；交易所可用资金仍需满足开仓要求。同币种沿用交易所当前杠杆，App 只管理自己新增的数量。",
-                    "保证金占比按账户净值计算：BTC、ETH 各自不超过 10%，山寨合计不超过 5%；本 App 对应额度池的持仓与挂单占用会扣除，单笔计划止损风险仍不超过净值 5%。名义仓位按当前规则分别核验各额度池。开仓与成交前检查，并预留入场费用与不利价差；行情变化仍可能使已有仓位超过比例上限。",
+                    "外部交易不显示，不占用 App 开仓次数、连亏、仓位或保证金额度。日亏只计算 App 管理交易的当日已实现与浮动盈亏；交易所可用资金仍需满足开仓要求。" + (exposureSizing ? "BTC、ETH 默认请求 100x，山寨按对应合约最高档；同币种已有交易所杠杆时沿用。交易所可能按持仓规模下调实际杠杆，确认计划显示服务端核定值。App 只管理自己新增的数量。" : "同币种沿用交易所当前杠杆，App 只管理自己新增的数量。"),
+                    exposureSizing
+                        ? "名义额度按当前账户净值×规则倍数计算：BTC、ETH 各自独立，山寨币共享；App 持仓按剩余数量×最新价扣减，挂单按剩余数量×当前价与委托价较高者扣减。滑杆提交池内剩余额度的比例，服务端再按合约步进、风险预算、可用资金和交易所杠杆档位核算数量；单笔计划止损风险仍不超过净值的 \(Fmt.plainPercent(p?.riskFraction ?? "0.05"))%。"
+                        : "保证金占比按账户净值计算：BTC、ETH 各自不超过 10%，山寨合计不超过 5%；本 App 对应额度池的持仓与挂单占用会扣除，单笔计划止损风险仍不超过净值 5%。名义仓位按当前规则分别核验各额度池。开仓与成交前检查，并预留入场费用与不利价差；行情变化仍可能使已有仓位超过比例上限。",
                     "R 按确认的开仓计划固定，包含费用与滑点预留。止盈比例按原始仓位计算。成本预留费率每边 \(Fmt.plainPercent(p?.feeRate ?? "0.0005"))%，滑点预留 \(Fmt.plainPercent(p?.slippageRate ?? "0.001"))%，未计资金费，不代表你的实际交易所费率。",
                     "日亏停手线不代替每笔止损，多个持仓风险会叠加。" + (account.live ? "资金费、滑点与全仓强平仍受交易所规则影响；实盘止损不是最大亏损保证。" : "当前模拟不计算交易所真实强平价。"),
                 ])
@@ -100,12 +103,17 @@ struct DisciplineView: View {
 
     private func groups(_ p: Policy?) -> [Group] {
         let wait = "待连接服务"
+        let exposureSizing = Trading.usesExposureSizing(p)
         var sizing: [(String, String)] = [
             ("单笔计划风险", p.map { "净值的 \(Fmt.plainPercent($0.riskFraction))%" } ?? wait),
             ("保证金模式", p.map { Fmt.marginMode($0.marginMode) } ?? wait),
-            ("杠杆上限", p.map { "BTC / ETH \($0.majorLeverage)x · 山寨 \($0.altLeverage)x" } ?? wait),
+            ("杠杆上限", p.map { exposureSizing ? "BTC / ETH 100x · 山寨按合约最高档" : "BTC / ETH \($0.majorLeverage)x · 山寨 \($0.altLeverage.map { String($0) + "x" } ?? "—")" } ?? wait),
         ]
-        if let p, p.majorAllowanceScope == "independent" {
+        if exposureSizing, let p {
+            let major = "净值 × \(p.majorExposureMultiple ?? "—")倍"
+            sizing += [("BTC 独立名义额度", major), ("ETH 独立名义额度", major),
+                       ("山寨币共享名义额度", "净值 × \(p.altExposureMultiple ?? "—")倍")]
+        } else if let p, p.majorAllowanceScope == "independent" {
             let major = "保证金 \(Fmt.plainPercent(p.majorMarginFraction ?? "0"))% · 名义 \(p.majorExposureMultiple ?? "—")倍"
             sizing += [("BTC 独立额度", major), ("ETH 独立额度", major),
                        ("山寨币共享额度", "保证金 \(Fmt.plainPercent(p.altMarginFraction ?? "0"))% · 名义 \(p.altExposureMultiple ?? "—")倍")]
@@ -117,7 +125,7 @@ struct DisciplineView: View {
             ("每日基础次数", p.map { "\($0.maxEntries) 次" } ?? wait),
             ("盈利平仓奖励", p.map { ($0.profitEntryBonus ?? 0) > 0 ? "整笔净盈利平仓，当天 +1 次" : "未启用" } ?? wait),
             ("奖励计次", "每笔仅一次，分批止盈不重复计"),
-            ("额度计算", p?.majorAllowanceScope == "independent" ? "BTC、ETH 各自独立，山寨币共享；持仓与挂单合计占用" : "同类持仓与挂单共享保证金额度"),
+            ("额度计算", exposureSizing ? "滑杆按所属池剩余名义额度比例申请，持仓与挂单占用会扣除" : (p?.majorAllowanceScope == "independent" ? "BTC、ETH 各自独立，山寨币共享；持仓与挂单合计占用" : "同类持仓与挂单共享保证金额度")),
         ]
         let takeProfits = p.map { p in p.takeProfits.enumerated().map { i, tp in "\(tp.first ?? "")R " + (i == p.takeProfits.count - 1 ? "全部余仓" : "平原始 \(Fmt.plainPercent(tp.last))%") }.joined(separator: " · ") }
         return [

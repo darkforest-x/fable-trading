@@ -15,7 +15,7 @@ from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 from zoneinfo import ZoneInfo
-from .policy import Policy, Rejected, dec, positive, floor_step, ceil_step, plan
+from .policy import Policy, Rejected, dec, positive, floor_step, ceil_step, plan, json_number
 from .closing import close_fraction, close_quantity
 from .scaling import merged_position, remaining_risk
 
@@ -385,6 +385,38 @@ class Book:
                   self.margin_quantity_limit(state, symbol, entry, leverage, exclude_pending)]
         return min(x for x in limits if x is not None) if any(x is not None for x in limits) else None
 
+    def remaining_exposure_notional(self, state, symbol):
+        """Raw gross-notional room in this App-managed allowance pool.
+
+        Open positions reserve mark notional; pending orders reserve the larger
+        of mark and reviewed entry. External account activity is intentionally
+        not part of the App's allocation ledger.
+        """
+        p = self.policy(state)
+        pool, cap = p.allowance_pool(symbol, exposure=True), p.exposure_cap(symbol)
+        if cap is None:
+            return None
+        used = Decimal(0)
+        for pos in state['positions']:
+            if p.allowance_pool(pos['symbol'], exposure=True) == pool:
+                mark = positive(self.quote(state, pos['symbol'])['last'])
+                used += mark * dec(pos['remaining'])
+        for order in state['pending']:
+            if p.allowance_pool(order['symbol'], exposure=True) == pool:
+                mark = positive(self.quote(state, order['symbol'])['last'])
+                entry = positive(order['plan']['entry'])
+                used += max(mark, entry) * dec(order['plan']['quantity'])
+        return max(Decimal(0), self.equity(state) * cap - used)
+
+    def available_entry_funds(self, state):
+        return max(Decimal(0), self.equity(state) - self.reserved(state))
+
+    def available_entry_quantity_limit(self, state, entry, leverage, unit_cost):
+        """Quantity ceiling for collateral plus the full modeled cost reserve."""
+        available = self.available_entry_funds(state)
+        per_unit = positive(entry) / positive(leverage) + dec(unit_cost)
+        return available / per_unit
+
     @staticmethod
     def scale_parent_snapshot(pos):
         """Fields that change the scale-in baseline or its safe fill limits."""
@@ -417,7 +449,8 @@ class Book:
     def inherited_leverage(self, state, symbol):
         return None
 
-    def preview_in(self, state, request, reviewed_plan=None):
+    def preview_in(self, state, request, reviewed_plan=None, leverage_override=None,
+                   extra_quantity_limit=None):
         if set(request) - {'sizing_mode', 'add_to'} != {'symbol', 'side', 'kind', 'price', 'stop', 'fraction', 'leverage'}:
             raise Rejected('订单字段不匹配；仓位与权益必须由服务端计算')
         symbol, side, kind = request['symbol'], request['side'], request['kind']
@@ -425,21 +458,47 @@ class Book:
             raise Rejected('不支持的合约或订单类型')
         if side not in ('long', 'short'):
             raise Rejected('方向无效')
+        p = self.policy(state)
+        sizing_mode = request.get('sizing_mode')
+        if sizing_mode is None:
+            if p.entry_sizing == 'exposure':
+                raise Rejected('开仓规则已更新，请更新 App 后重新开单')
+            sizing_mode = 'risk'
+        if p.entry_sizing == 'exposure' and sizing_mode != 'exposure':
+            raise Rejected('当前规则要求按剩余名义额度计算仓位')
+        if p.entry_sizing == 'margin' and sizing_mode == 'exposure':
+            raise Rejected('旧规则不支持名义额度仓位，请按旧规则重新预览')
         candidate=next((pos for pos in state['positions'] if pos['symbol']==symbol),None)
         self.entry_guard(state,add_to=candidate['id'] if candidate else None)
         target = self.scale_target(state, request)
         add_to = target['id'] if target else None
-        if target and (dec(request['stop']) != dec(target['stop']) or request['leverage'] != target['leverage']):
+        if target and (dec(request['stop']) != dec(target['stop']) or
+                       (p.entry_sizing == 'margin' and dec(request['leverage']) != dec(target['leverage']))):
             raise Rejected('加仓的止损和杠杆必须与现有持仓一致，请更新计划')
         self.entry_guard(state, add_to=add_to)
-        q, p = self.quote(state, symbol), self.policy(state)
+        q = self.quote(state, symbol)
         direction = 1 if side == 'long' else -1
         entry = positive(request['price'], '委托价格') if kind == 'limit' else positive(q['ask'] if side == 'long' else q['bid']) * (1 + direction * dec(p.slippage_rate))
         if kind == 'limit' and entry % dec(state['instruments'][symbol]['tick']):
             raise Rejected('委托价格不符合最小价格单位')
         stop = positive(target['stop'], '止损价格') if target else positive(request['stop'], '初始止损价格')
-        leverage = target['leverage'] if target else request['leverage']
+        inherited = self.inherited_leverage(state, symbol)
+        if leverage_override is not None:
+            leverage = dec(leverage_override)
+        elif target:
+            leverage = dec(target['leverage']) if p.entry_sizing == 'exposure' else target['leverage']
+        elif p.entry_sizing == 'exposure':
+            leverage = p.target_leverage(symbol, state['instruments'][symbol], inherited)
+        else:
+            leverage = request['leverage']
         limit = self.quantity_limit(state, symbol, entry, side, leverage)
+        distance = (entry - stop) * direction
+        unit_cost = entry * (2 * dec(p.fee_rate) + dec(p.slippage_rate))
+        if p.entry_sizing == 'exposure':
+            collateral_limit = self.available_entry_quantity_limit(state, entry, leverage, unit_cost)
+            limit = min(limit, collateral_limit) if limit is not None else collateral_limit
+        if extra_quantity_limit is not None:
+            limit = min(limit, dec(extra_quantity_limit)) if limit is not None else dec(extra_quantity_limit)
         if target:
             remaining_budget = max(Decimal(0), self.equity(state) * dec(p.risk_fraction) - remaining_risk(target, p))
             distance = (entry - stop) * direction
@@ -459,7 +518,7 @@ class Book:
                 if reviewed_plan.get('add_to') != target['id'] or reviewed_plan.get('parent_snapshot') != snapshot:
                     raise Rejected('加仓目标持仓已变化，请重新预览')
             distance = (entry - stop) * direction
-            unit_risk = distance + entry * (2 * dec(p.fee_rate) + dec(p.slippage_rate))
+            unit_risk = distance + unit_cost
             if distance <= 0:
                 raise Rejected('行情已越过止损价，不能开仓')
             bounds = [dec(reviewed_plan['quantity']), dec(reviewed_plan['notional']) / entry,
@@ -467,7 +526,9 @@ class Book:
             limit = min(bounds + ([limit] if limit is not None else []))
         result = plan(p, self.equity(state), entry, stop, side,
                       request['fraction'], leverage, state['instruments'][symbol],
-                      limit, request.get('sizing_mode', 'risk'), self.inherited_leverage(state, symbol))
+                      limit, sizing_mode, inherited,
+                      self.remaining_exposure_notional(state, symbol)
+                      if sizing_mode == 'exposure' else None)
         if target:
             result['add_to'] = target['id']
             result['parent_snapshot'] = self.scale_parent_snapshot(target)
@@ -491,27 +552,60 @@ class Book:
             self.entry_guard(state)
             p, symbol, side = self.policy(state), request['symbol'], request['side']
             instrument = state['instruments'].get(symbol)
-            if not instrument or request.get('sizing_mode') != 'margin' or side not in ('long', 'short'):
-                raise Rejected('请选择有效合约和保证金仓位比例')
-            leverage, fraction = request['leverage'], positive(request['fraction'])
-            if type(leverage) is not int or not 1 <= leverage <= min(self.inherited_leverage(state, symbol) or p.leverage_cap(symbol), int(instrument['max_leverage'])):
-                raise Rejected('杠杆超过币种或交易所上限')
-            if p.margin_cap(symbol) is None or fraction > p.margin_cap(symbol):
-                raise Rejected('保证金比例超过当前币种上限')
+            mode = request.get('sizing_mode')
+            if mode is None:
+                if p.entry_sizing == 'exposure':
+                    raise Rejected('开仓规则已更新，请更新 App 后重新开单')
+                mode = 'margin'
+            if not instrument or side not in ('long', 'short'):
+                raise Rejected('请选择有效合约和仓位比例')
+            if p.entry_sizing == 'exposure' and mode != 'exposure':
+                raise Rejected('当前规则要求按剩余名义额度计算仓位')
+            if p.entry_sizing == 'margin' and mode != 'margin':
+                raise Rejected('当前旧规则要求保证金仓位比例')
+            leverage = p.target_leverage(symbol, instrument, self.inherited_leverage(state, symbol)) if mode == 'exposure' else request['leverage']
+            fraction = dec(request['fraction'], '仓位比例')
+            if fraction < 0 or fraction > 1 or (mode == 'margin' and fraction <= 0):
+                raise Rejected('仓位比例必须在 0 和 1 之间')
+            if mode == 'margin':
+                if type(leverage) is not int or not 1 <= leverage <= min(self.inherited_leverage(state, symbol) or p.leverage_cap(symbol), int(instrument['max_leverage'])):
+                    raise Rejected('杠杆超过币种或交易所上限')
+                if p.margin_cap(symbol) is None or fraction > p.margin_cap(symbol):
+                    raise Rejected('保证金比例超过当前币种上限')
             q = self.quote(state, symbol)
             direction = 1 if side == 'long' else -1
             entry = positive(request['price'], '委托价格') if request['kind'] == 'limit' else positive(q['ask'] if side == 'long' else q['bid']) * (1 + direction * dec(p.slippage_rate))
             equity = positive(self.equity(state))
             limit = self.quantity_limit(state, symbol, entry, side, leverage)
-            quantity = floor_step(min(equity * fraction * leverage / entry, limit if limit is not None else Decimal('Infinity')), positive(instrument['step']))
+            if mode == 'exposure':
+                raw_remaining = self.remaining_exposure_notional(state, symbol)
+                requested_quantity = raw_remaining * fraction / entry
+                cost_per_unit = entry * (2 * dec(p.fee_rate) + dec(p.slippage_rate))
+                collateral_limit = self.available_entry_quantity_limit(state, entry, leverage, cost_per_unit)
+                limit = min(limit, collateral_limit) if limit is not None else collateral_limit
+            else:
+                requested_quantity = equity * fraction * dec(leverage) / entry
+            quantity = floor_step(min(requested_quantity, limit if limit is not None else Decimal('Infinity')), positive(instrument['step']))
             if quantity < positive(instrument['minimum']):
                 raise Rejected('剩余仓位额度低于最小委托量')
             distance = equity * dec(p.risk_fraction) / quantity - entry * (2 * dec(p.fee_rate) + dec(p.slippage_rate))
             stop = (ceil_step if side == 'long' else floor_step)(entry - direction * distance, positive(instrument['tick']))
             if distance <= 0 or stop <= 0 or (entry - stop) * direction <= 0:
                 raise Rejected('此仓位无法设置有效的 1R 止损，请调整仓位比例')
-            ticket = dict(request, stop=str(stop))
+            ticket = dict(request, stop=str(stop), sizing_mode=mode)
             sized = self.preview_in(state, ticket)
+            if mode == 'exposure' and dec(sized['quantity']) < quantity:
+                # If available margin or an exposure ceiling reduced the
+                # requested quantity, retain a 1R stop for the amount actually
+                # authorized by preview.
+                distance = equity * dec(p.risk_fraction) / dec(sized['quantity']) - entry * (
+                    2 * dec(p.fee_rate) + dec(p.slippage_rate))
+                stop = (ceil_step if side == 'long' else floor_step)(
+                    entry - direction * distance, positive(instrument['tick']))
+                if distance <= 0 or stop <= 0 or (entry - stop) * direction <= 0:
+                    raise Rejected('此仓位无法设置有效的 1R 止损，请调整仓位比例')
+                ticket['stop'] = str(stop)
+                sized = self.preview_in(state, ticket)
             return dict(stop=str(stop), plan=sized, policy_revision=state['policy_revision'])
 
     def command(self, key, payload, operation):
@@ -580,7 +674,7 @@ class Book:
                                     (self.equity(state) - fee - immediate_loss) * dec(p.risk_fraction))
             if parent_risk + risk > merged_risk_limit:
                 raise Rejected('成交后合并仓位风险超过当前单笔风险上限')
-        leverage = target['leverage'] if target else order['leverage']
+        leverage = dec(target['leverage']) if target else dec(original.get('leverage', order['leverage']))
         margin = quantity * price / leverage
         quantity_limit = self.quantity_limit(state, order['symbol'], price, order['side'], leverage, order['id'])
         if quantity_limit is not None and quantity > quantity_limit:
@@ -600,7 +694,7 @@ class Book:
             return
         pos = dict(id=order['id'], symbol=order['symbol'], side=order['side'], direction=direction,
             quantity=str(quantity), remaining=str(quantity), entry=str(price), original_stop=str(stop),
-            stop=str(stop), risk=str(risk), margin=str(margin), leverage=leverage, margin_mode=p.margin_mode,
+            stop=str(stop), risk=str(risk), margin=str(margin), leverage=json_number(leverage), margin_mode=p.margin_mode,
             entry_fee=str(fee), pnl=str(-fee), breakeven=False, stages=[], opened=self.clock(),
             policy=p.document(), policy_revision=state['policy_revision'], protection='server-paper-only')
         state['cash'] = str(dec(state['cash']) - fee)
