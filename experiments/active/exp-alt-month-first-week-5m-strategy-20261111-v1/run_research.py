@@ -137,7 +137,7 @@ def select(data,cfgs,scores):
     extras = []
     for key in sorted(finalists):
         fills, marks = independent(data,key,cfgs,CFG['base_market_slippage_bps'])
-        for fraction in (.05,.20):
+        for fraction in (x for x in CFG['sizing_fractions'] if x != .10):
             s = dict(account_result(fills,marks,'early',fraction)['summary'],strategy=key,fraction=fraction)
             extras.append(s)
     all_scores = pd.concat([scores,pd.DataFrame(extras)],ignore_index=True)
@@ -183,7 +183,7 @@ def evaluate(data,cfgs,picks):
     sensitivity = []
     for key in sorted({pair[0] for pair in pairs}):
         fills, marks = independent(data,key,cfgs,CFG['base_market_slippage_bps'])
-        for fraction in (.05,.10,.20):
+        for fraction in CFG['sizing_fractions']:
             for period in ('early','late','full'):
                 previous = next((r for r in summaries if r['strategy']==key and r['fraction']==fraction
                                  and r['type']=='signal' and r['period']==period
