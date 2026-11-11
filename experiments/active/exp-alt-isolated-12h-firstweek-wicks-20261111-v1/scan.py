@@ -1,9 +1,9 @@
 """Descriptive Binance monthly-first-week event census. No simulated orders.
 
-Formation: UTC-aligned OHLC from complete 15m candles, NY first Monday week as
+Formation: UTC-aligned OHLC from complete source candles, NY first Monday week as
 in Pine V1.5. The inward wick uses this bar's OHLC. Isolation, which depends on
 subsequent bars, is retrospective. Reversal labels use only the NEXT seven
-days' 15m high/low, relative to the signal close; no data from the wick itself.
+days' high/low, relative to the signal close; no data from the wick itself.
 """
 import argparse
 from concurrent.futures import ProcessPoolExecutor
@@ -37,17 +37,21 @@ def aggregate(q,k):
                             groups[:,:,2].min(axis=1),groups[:,-1,3]))
 
 
-def scan(symbol,raw):
+def scan(symbol,raw,slot_ms=SLOT,periods=PERIODS):
+    per_day=86_400_000//slot_ms
+    half=per_day//2
+    week=7*per_day
+    beijing_offset=28_800_000//slot_ms
     raw=raw[raw[:,0]<CUTOFF]
     if len(raw)==0:
         return [],[]
     times=raw[:,0].astype(np.int64)
-    if (times%SLOT).any() or (np.diff(times)<=0).any():
+    if (times%slot_ms).any() or (np.diff(times)<=0).any():
         raise ValueError(f'{symbol}: timestamp order/alignment')
-    slots=times//SLOT
-    origin=slots[0]//48*48
+    slots=times//slot_ms
+    origin=slots[0]//half*half
     last=slots[-1]+1
-    q=np.full((((last-origin+47)//48)*48,4),np.nan)
+    q=np.full((((last-origin+half-1)//half)*half,4),np.nan)
     values=np.asarray(raw[:,1:5],dtype=float)
     if (not np.isfinite(values).all() or (values[:,2]<=0).any() or
         (values[:,1]<np.maximum(values[:,0],values[:,3])).any() or
@@ -55,9 +59,10 @@ def scan(symbol,raw):
         raise ValueError(f'{symbol}: invalid OHLC')
     q[slots-origin]=values
     missing=np.r_[0,np.cumsum(np.isnan(q[:,0]))]
-    agg={tf:aggregate(q,tf//15) for tf in PERIODS}
+    agg={tf:aggregate(q,tf*60_000//slot_ms) for tf in periods}
     events,coverage=[],[]
-    for month,start,ready,end in CAL:
+    for month,cs,cr,ce in CAL:
+        start,ready,end=(v*SLOT//slot_ms for v in (cs,cr,ce))
         if ready<=slots[0] or start>=last or ready>=last:
             continue
         a,b,c=start-origin,ready-origin,min(end,last)-origin
@@ -81,11 +86,11 @@ def scan(symbol,raw):
         if not len(combined):
             continue
         # UTC+8 calendar date of the first literal touch (either rail).
-        days=(origin+combined+32)//96
+        days=(origin+combined+beijing_offset)//per_day
         daily=combined[np.r_[True,np.diff(days)!=0]]
         daily=np.setdiff1d(daily,np.intersect1d(hits['lower'],hits['upper']))
-        for tf in PERIODS:
-            k=tf//15; frame=agg[tf]
+        for tf in periods:
+            k=tf*60_000//slot_ms; frame=agg[tf]
             for side,rail in rails.items():
                 touch=hits[side]
                 if not len(touch):
@@ -98,7 +103,7 @@ def scan(symbol,raw):
                     o,h,l,close=frame[i];eps=rail*1e-12
                     wick=min(o,close)-l if sign==1 else h-max(o,close)
                     body=abs(o-close)
-                    pure=(min(o,close)>rail+eps and l<rail-eps) if sign==1 else (max(o,close)<rail-eps and h>rail+eps)
+                    pure=(min(o,close)>rail+eps and l<=rail+eps) if sign==1 else (max(o,close)<rail-eps and h>=rail-eps)
                     ratio=wick/(h-l) if h>l else 0.
                     long_wick=pure and ratio>=.5-1e-12 and wick+eps>=2*body
                     nbh=i>=2 and (i-2)*k>=b and (i+3)*k<=c
@@ -106,25 +111,29 @@ def scan(symbol,raw):
                     if nbh:
                         neighbours=frame[[i-2,i-1,i+1,i+2]]
                         isolated=bool((neighbours[:,2]>rail+eps).all() if sign==1 else (neighbours[:,1]<rail-eps).all())
-                    ev=dict(symbol=symbol,month=month,tf=tf,side=side,touch_ms=int((origin+touch_pos)*SLOT),
-                            open_ms=int((origin+i*k)*SLOT),close_ms=int((origin+(i+1)*k)*SLOT),level=rail,
+                    ev=dict(symbol=symbol,month=month,tf=tf,side=side,touch_ms=int((origin+touch_pos)*slot_ms),
+                            open_ms=int((origin+i*k)*slot_ms),close_ms=int((origin+(i+1)*k)*slot_ms),level=rail,
                             week_high=H,week_low=L,open=o,high=h,low=l,close=close,wick_pct=100*ratio,
                             long_wick=bool(long_wick),neighbours_known=bool(nbh),isolated=isolated,
                             month_unique=bool(row['full_month'] and len(bins)==1),month_complete=bool(row['full_month']))
                     j=(i+1)*k
-                    ev['follow7']=bool(j+WEEK<=last-origin and missing[j+WEEK]==missing[j])
+                    ev['follow7']=bool(j+week<=last-origin and missing[j+week]==missing[j])
                     if ev['follow7']:
-                        future=q[j:j+WEEK]
+                        future=q[j:j+week]
                         favorable=(future[:,1]/close-1)*100 if sign==1 else (1-future[:,2]/close)*100
                         ev['mfe7']=float(favorable.max())
-                        ev['mfe3']=float(favorable[:288].max())
+                        reached=np.flatnonzero(favorable>=20)
+                        ev['first_20_ms']=int((origin+j+reached[0])*slot_ms) if len(reached) else None
+                        ev['peak_ms']=int((origin+j+int(np.argmax(favorable)))*slot_ms)
+                        ev['peak_price']=float(future[:,1].max() if sign==1 else future[:,2].min())
+                        ev['mfe3']=float(favorable[:3*per_day].max())
                         ev['end7']=float((future[-1,3]/close-1)*sign*100)
                         retouch=future[:,2]<=rail+eps if sign==1 else future[:,1]>=rail-eps
                         first_ret=np.flatnonzero(retouch)
-                        n=int(first_ret[0]) if len(first_ret) else WEEK
+                        n=int(first_ret[0]) if len(first_ret) else week
                         ev['max_before_retouch']=float(favorable[:n].max()) if n else 0.
-                        # On a shared 15m candle only its opening price has provable precedence.
-                        if n<WEEK and (future[n,0]-rail)*sign>eps:
+                        # On a shared source candle only its opening price has provable precedence.
+                        if n<week and (future[n,0]-rail)*sign>eps:
                             ev['max_before_retouch']=max(ev['max_before_retouch'],float((future[n,0]/close-1)*sign*100))
                     events.append(ev)
     return events,coverage
