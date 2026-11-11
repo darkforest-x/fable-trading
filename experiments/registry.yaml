@@ -15,6 +15,30 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-month-firstweek-adjacent-replay-20261111-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "eca847ad37"
+    status: inconclusive
+    question: What does the hourly path add when adjacent monthly-rail touches both reclaim on a 12h close?
+    single_variable: At the same second close, supplement the masked 12h candles with the hourly reclaim path and distance already covered to the near first-week edge. The two readings were committed before unmasking.
+    result: >-
+      Twelve new Binance contracts outside the previous review and four previously known references.
+      In the twelve, the following two 12h closes first broke the two-bar favorable extreme in one case,
+      lost the rail in five and resolved neither way in six. Price-only calls were directional in six
+      (four correct); supplemented calls in five (the same four correct). AXS advanced without a directional
+      call. AAVE changed from loss to watch and held. Three of four old-reference calls changed.
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    canonical_report: experiments/active/exp-month-firstweek-adjacent-replay-20261111-v1/observations.csv
+    artifacts: []
+    notes: >-
+      Descriptive manual replay, no trades. Fixed selection order by symbol/month/side digest, no future-based
+      selection for new cases. The four references were already known. Later closes through expiry were
+      inspected after the one-day reveal; monthly distance is relative to rail, not to an entry fill.
+      The hourly path and geometric progress were read together; their individual contributions are unknown.
+
   - experiment_id: exp-month-firstweek-blind-review-20261111-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "21c3463e95"
