@@ -15,6 +15,31 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-month-firstweek-cloud-overlay-20261111-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "86949e0fb8"
+    status: inconclusive
+    question: Does a confirmed 12h SPIKE V1.9 cloud condition improve the existing monthly first-week reversal strategy and retain the owner's examples?
+    single_variable: Cloud information available at the original confirmation close. Compare EMA direction, close beyond both EMAs and same-bar native weekly key with original and warm-only controls. The opposite EMA direction was added after checking photo retention.
+    result: >-
+      On 8634 original Binance setups (838 contracts), 5% fixed stop, 20% target, 45 days maximum,
+      the 1000 USDT original account ended at 444.23 (66.55% hourly close DD, 13/14 references).
+      Matching the weekly native key on the monthly signal bar gave 253 candidates, 207 funded closes,
+      1080.48 final NAV, 10.74% DD and zero of the 14 references. At 3% stop the same 253 candidates
+      yielded 1202.68 with 9.62% DD, but mean net return before 2025 was negative at both stops.
+      Opposite EMA direction at 5% stop retained 12 references and ended at 396.84 (62.90% DD).
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    canonical_report: experiments/active/exp-month-firstweek-cloud-overlay-20261111-v1/results.csv
+    artifacts: []
+    notes: >-
+      Reuses exp-alt-isolated-12h-firstweek-wicks-20261111-v1 VectorBT fills, H1 cash-account marks
+      and fee schedule. No funding or slippage. H1 highs/lows from complete NY Mondays reconstruct the native
+      weekly anchor. Rule-level positions, source features and photo checks are in the original study's
+      strategy_v1/cloud_overlay_v1 directory. Coverage counts signals appearing before the move, irrespective of funding.
+
   - experiment_id: exp-alt-isolated-12h-firstweek-wicks-20261111-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "7c85af4842"
