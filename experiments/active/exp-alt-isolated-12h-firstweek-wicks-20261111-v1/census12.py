@@ -5,12 +5,13 @@ The returned touch timestamp denotes the beginning of its source candle.
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import json
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-from scan import DATA, aggregate, scan
+from scan import DATA, ROOT, aggregate, scan
 
 BASE = DATA.parent
 OUT = BASE.parent / 'results12'
@@ -29,9 +30,23 @@ def source_paths(symbol):
     return [BASE / d / (symbol+'.npy') for d in ('hourly12input', 'hourly12tail', 'series', 'archive_fill')]
 
 
+@lru_cache(maxsize=1)
+def existing_quotes():
+    stores = [
+        ROOT/'experiments/active/exp-cloud-close-binance-transfer-20261109-v1/work',
+        ROOT/'data/research/cloud_close_binance_feb2022_replay',
+        ROOT/'data/research/cloud_close_archive_cohort/symbols',
+        ROOT/'data/research/cloud_close_november_supplemental/symbols',
+    ]
+    return {p.parent.name:p for store in stores for p in store.glob('*/quotes.npz')}
+
+
 def read_raw(symbol):
     hist, tail, *quarter = source_paths(symbol)
     pieces = [np.load(p) for p in (hist, tail) if p.exists()]
+    if not hist.exists() and symbol in existing_quotes():
+        with np.load(existing_quotes()[symbol]) as quotes:
+            pieces.insert(0,np.column_stack((quotes['clock'],quotes['prices'])))
     quarters = join([np.load(p) for p in quarter if p.exists()])
     if len(quarters):
         aligned = quarters[:,0].astype('int64')//HOUR
@@ -47,7 +62,10 @@ def process(symbol):
     store = OUT/'symbols'/symbol
     store.mkdir(parents=True, exist_ok=True)
     sources = {p.parent.name:[p.stat().st_size,p.stat().st_mtime_ns] for p in source_paths(symbol) if p.is_file()}
-    receipt = store/'done.json'
+    if 'hourly12input' not in sources and symbol in existing_quotes():
+        p=existing_quotes()[symbol]
+        sources['registered_quotes']=[p.stat().st_size,p.stat().st_mtime_ns]
+    receipt = store/'done.json' 
     if receipt.is_file() and json.loads(receipt.read_text())['sources'] == sources:
         return
     raw = read_raw(symbol)
@@ -108,7 +126,7 @@ if __name__=='__main__':
     args=parser.parse_args()
     roster=set(pd.read_csv(BASE/'universe_eligible.csv').symbol)
     available={p.stem for d in ('hourly12input','hourly12tail','series','archive_fill') for p in (BASE/d).glob('*.npy')}
-    targets=sorted(set(args.symbols or available)&roster)
+    targets=sorted(set(args.symbols or (available | set(existing_quotes())))&roster)
     with ThreadPoolExecutor(max_workers=4) as pool:
         list(pool.map(process,targets))
     summarize()
