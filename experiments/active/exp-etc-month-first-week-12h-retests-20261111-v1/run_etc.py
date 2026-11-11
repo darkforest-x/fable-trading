@@ -9,9 +9,13 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import sys
 
 import numpy as np
 import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
 
 from yoyo.evaluation import cloud_close_reward_account as wallet
 from yoyo.evaluation.month_first_week_alt_entries import prices, universe
@@ -19,7 +23,6 @@ from yoyo.evaluation.month_first_week_alt_trades import run_month_first_week_alt
 from yoyo.evaluation.month_first_week_touch_review import bounds
 
 
-ROOT = Path(__file__).resolve().parents[3]
 EXP = Path(__file__).resolve().parent
 ENTRY_SOURCE = ROOT / "experiments/active/exp-alt-month-first-week-entries-20261110-v1"
 HOUR = pd.Timedelta(hours=1)
