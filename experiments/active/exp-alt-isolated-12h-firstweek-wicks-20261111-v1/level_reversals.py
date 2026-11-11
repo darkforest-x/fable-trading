@@ -56,7 +56,7 @@ def per_symbol(pair):
 def group_successful_days(a):
     wins=a[a[COLS[9]]>=20]
     groups=wins.groupby([COLS[0],COLS[1],COLS[4]],sort=True)
-    g=groups.agg(达到20%的触价日数=(COLS[2],'size'),最早达标样本的触价小时_北京=(COLS[2],'first'),
+    g=groups.agg(反向至少百分之二十的触价日数=(COLS[2],'size'),最早达标样本的触价小时_北京=(COLS[2],'first'),
                  最后达标样本的触价小时_北京=(COLS[2],'last'),轨价=(COLS[5],'first'),
                  各达标日45天最大反向幅度百分比的最高值=(COLS[9],'max'))
     g.to_csv(OUT/'45天反转20pct_按合约月份方向合并.csv',encoding='utf-8-sig')
