@@ -5,8 +5,6 @@ while the original month's rail is active. The outcome may occur after expiry.
 An H1 candle that hits both the rail and the target can leave the final count
 ambiguous. Save the lower and upper bounds separately.
 """
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 
@@ -86,7 +84,8 @@ def main():
             print(name, count, len(d), 'over7d',sum(d['达标用时（小时）']>168))
         print(name,'不确定',len(part)-len(exact))
     strict = a[a['首根长影线收回'] & a['至少触轨根数'].eq(2) & a['至多触轨根数'].eq(2)]
-    print(strict[(strict['达标用时（小时）']>168) & strict['第二根实体在线内'].eq(True)].to_string(index=False,max_rows=85))
+    strict.to_csv(OUT / '首根长影线_两根碰轨后先反转20pct.csv', index=False, encoding='utf-8-sig')
+    print('两根碰轨', strict.groupby('方向').size().to_dict())
 
 
 if __name__=='__main__':
