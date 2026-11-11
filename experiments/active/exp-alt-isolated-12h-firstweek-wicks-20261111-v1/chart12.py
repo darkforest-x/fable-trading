@@ -30,7 +30,7 @@ def font(sz):
 
 def chart(row):
     raw=read_raw(row.symbol)
-    anchor, ready, end=bounds(row.bar_open_Beijing[:7])
+    anchor, ready, end=bounds(row.month)
     start=int(anchor.timestamp()*1000)//(12*HOUR)*12*HOUR
     stop=row.open_ms+12*HOUR+7*24*HOUR
     rows=raw[(raw[:,0]>=start)&(raw[:,0]<stop)]
