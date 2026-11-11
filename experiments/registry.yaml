@@ -15,6 +15,37 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-month-firstweek-h4-rail-target-20261112-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "32e600939e"
+    status: rejected
+    question: Does targeting a 20 percent move from the original monthly rail rescue H4 reversal trades, and how often did those entries cover the 15 original charts?
+    single_variable: Target anchor changes from entry to the known rail. Keep fourth-hour signals and paired random timestamps, 5 percent entry-based stop, 168-hour timeout, fill fees and capital rules frozen.
+    result: >-
+      1802 realized signal entries, 41 additional opportunities with the target at or behind entry and
+      one terminal mark. Win rate 30.41 percent, mean net -0.600 percent and PF 0.824.
+      On these same 1802 entries the old rule averaged -0.653 percent. 48 previous stops became
+      targets, 1190 remained stops; 144 old target winners still hit target, but mean net fell
+      from 19.93 to 14.93 percent. On the 15 owner's reference photos one predates Binance listing;
+      6 of the 14 Binance first contacts qualified, 5 were rejected because H1 had already advanced,
+      2 did not hold the rail and 1 failed to reclaim on the first 12h close.
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    canonical_report: experiments/active/exp-month-firstweek-h4-rail-target-20261112-v1/trade_summary.csv
+    artifacts: []
+    notes: >-
+      VectorBT 1.2.0 open-first and adverse-first H1 handling, fee proxy taker 5bp/maker 2bp, no
+      added slippage/funding. Monthly rail known before entry in both signal and random streams.
+      Cases that already passed target at entry are logged separately; 1510 common signal/random
+      pairs averaging -0.954 versus -1.271 percent. New rule is negative in both chronological subsets.
+      See photo_coverage.csv, exit_changes.csv and account_comparison.csv in the same experiment;
+      raw entries, skipped opportunities and account paths under
+      data/research/alt-isolated-12h-wicks-20261111/expanded12/all_replay_v1/h4_rail_target/.
+      H4 is the slow-first-hour branch; neither the 205 retrospective outcomes nor the selected
+      chart examples estimate forward win rate.
+
   - experiment_id: exp-month-firstweek-h4-strategy-20261112-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "a1c1020ed7"
