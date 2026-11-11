@@ -176,19 +176,38 @@ def build():
     if matched_h12!=set(old_h12):
         raise ValueError(("12h joins",set(old_h12)-matched_h12))
     assert len(touch_rows)==sum(c["触线K根数"] for c in covered)
+    # Use the actual candle time so an overnight contact can qualify on both days.
+    daily_rows, daily_events = [], []
+    previous_day, first_time = None, None
+    by_id = {e["id"]: e for e in events}
+    for row in sorted(touch_rows, key=lambda r: r["开盘时间_北京"]):
+        timestamp = row["开盘时间_北京"]
+        day = timestamp[:10]
+        if day == previous_day:
+            if timestamp == first_time:
+                raise ValueError(f"Both rails touched on the first candle of {day}; intrabar order unavailable")
+            continue
+        previous_day, first_time = day, timestamp
+        segment = by_id[row["编号"]]
+        epoch = segment["time"] + 300 * (row["段内根序号"] - 1)
+        daily_id = f"D{len(daily_rows)+1:04d}"
+        daily_rows.append({"日首触编号": daily_id, **row})
+        daily_events.append(dict(id=daily_id, parent=segment["id"], month=segment["month"],
+                                 side=segment["side"], time=epoch, last=epoch, count=1))
+    write_csv("每日首次触价.csv", daily_rows)
     write_csv("全部触价段.csv",segment_rows)
     write_csv("逐根5分钟触线.csv",touch_rows)
     write_csv("逐月覆盖.csv",covered)
     bars = np.column_stack((t,raw[:,1:5])).tolist()
     for bar in bars:
         bar[0]=int(bar[0])
-    payload=dict(source=SNAPSHOT,bars=bars,months=months,events=events)
+    payload=dict(source=SNAPSHOT,bars=bars,months=months,events=events,daily=daily_events)
     template=(HERE/"touch_viewer.html").read_text()
     if template.count("__ETC_DATA__")!=1:
         raise ValueError("unexpected chart template")
     (OUT/"ETC全部触价.html").write_text(template.replace("__ETC_DATA__",json.dumps(payload,ensure_ascii=False,separators=(",",":"),allow_nan=False)))
     result=dict(source=SNAPSHOT,source_first_open=local(int(t[0])),source_last_open=local(int(t[-1])),
-                n_bars=len(t),anchors=len(months),n_events=len(segments),n_touch_bars=len(touch_rows),
+                n_daily_first=len(daily_rows),daily_zone="Asia/Shanghai",n_bars=len(t),anchors=len(months),n_events=len(segments),n_touch_bars=len(touch_rows),
                 n_first=sum(row["当月同侧第几段"]==1 for row in segment_rows),gaps_after_first_bar=int((t[-1]-t[0])//300+1-len(t)),
                 n_upper=sum(row["方向"]=="上轨" for row in segment_rows),matched_prior_fills=len(fills))
     (OUT/"coverage.json").write_text(json.dumps(result,ensure_ascii=False,indent=2))

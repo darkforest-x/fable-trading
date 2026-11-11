@@ -75,6 +75,7 @@
     <div class="field">
       <label for="firstFilter">触价类型</label>
       <select id="firstFilter">
+        <option value="daily" selected>每日首次（北京时间）</option>
         <option value="">全部触价段</option>
         <option value="first">每月同侧首触</option>
         <option value="retest">后续触价</option>
@@ -87,7 +88,7 @@
     <div class="group">
       <div class="field inline">
         <label for="eventIdInput">跳转编号</label>
-        <input id="eventIdInput" type="text" placeholder="E0001" aria-label="触价段编号">
+        <input id="eventIdInput" type="text" placeholder="D0001 / E0001" aria-label="触价段编号">
       </div>
       <button id="jumpId" type="button">定位</button>
     </div>
@@ -142,6 +143,8 @@ const DATA = __ETC_DATA__;
   const bars = Array.isArray(DATA.bars) ? DATA.bars : [];
   const months = Array.isArray(DATA.months) ? DATA.months : [];
   const events = Array.isArray(DATA.events) ? DATA.events.slice() : [];
+  const dailyEvents = DATA.daily || [];
+  const allEvents = events.concat(dailyEvents);
   const monthById = new Map(months.map(function (m) { return [m.month, m]; }));
   events.sort(function (a, b) { return a.time - b.time || String(a.id).localeCompare(String(b.id)); });
   const monthEl = document.getElementById("monthFilter");
@@ -168,15 +171,18 @@ const DATA = __ETC_DATA__;
     timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit"
   });
   const fmtPrice = new Intl.NumberFormat("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 6 });
-  function eventFromHash() {
-    const raw = decodeURIComponent(String(location.hash || "").replace(/^#/, "")).toLowerCase();
-    if (!raw) return null;
-    const number = idNumber(raw);
-    return events.find(function (e) {
-      return String(e.id).toLowerCase() === raw || (number && idNumber(e.id) === number);
-    }) || null;
+  function findId(value) {
+    const match = /^([de]?)([0-9]+)$/i.exec(String(value || "").trim());
+    if (!match) return null;
+    const prefix = match[1].toUpperCase() || (firstEl.value === "daily" ? "D" : "E");
+    const id = prefix + match[2].padStart(4,"0");
+    return allEvents.find(e => e.id === id) || null;
   }
-  let selectedEvent = eventFromHash() || (events.length ? events[0] : null);
+  function eventFromHash() {
+    return findId(location.hash.slice(1));
+  }
+  let selectedEvent = eventFromHash() || dailyEvents[0] || events[0];
+  firstEl.value = selectedEvent && selectedEvent.parent ? "daily" : "";
   let touchOffset = 0;
   let timeframe = 43200;
   let view = null;
@@ -218,10 +224,6 @@ const DATA = __ETC_DATA__;
     if (!m) return NaN;
     return price(event.side === "upper" ? m.upper : m.lower);
   }
-  function idNumber(id) {
-    const digits = String(id == null ? "" : id).replace(/\D/g, "");
-    return digits ? String(Number(digits)) : "";
-  }
   function lowerBound(ts) {
     let lo = 0, hi = bars.length;
     while (lo < hi) {
@@ -258,26 +260,24 @@ const DATA = __ETC_DATA__;
     const month = monthEl.value;
     const side = sideEl.value;
     const first = firstEl.value;
-    return events.filter(function (e) {
+    const pool = first === "daily" ? dailyEvents : events;
+    return pool.filter(function (e) {
       return (!month || e.month === month) && (!side || e.side === side) &&
-        (!first || (first === "first" ? e.first === true : e.first === false));
+        (!first || first === "daily" || (first === "first" ? e.first === true : e.first === false));
     });
-  }
-  function filteredIndex() {
-    return activeEvents().findIndex(function (e) { return e === selectedEvent; });
   }
   function updateEventSelect() {
     const list = activeEvents();
     eventEl.innerHTML = "";
     list.forEach(function (e) {
       const opt = document.createElement("option");
-      opt.value = String(events.indexOf(e));
+      opt.value = e.id;
       opt.textContent = String(e.id) + " · " + e.month + " · " +
         sideLabel(e.side) + " · " + shortDate(e.time) + " · " + e.count + " 根";
       eventEl.appendChild(opt);
     });
     if (selectedEvent && list.indexOf(selectedEvent) < 0) selectedEvent = list[0] || null;
-    if (selectedEvent) eventEl.value = String(events.indexOf(selectedEvent));
+    if (selectedEvent) eventEl.value = selectedEvent.id;
     document.getElementById("prevEvent").disabled = !selectedEvent || list.indexOf(selectedEvent) <= 0;
     document.getElementById("nextEvent").disabled = !selectedEvent || list.indexOf(selectedEvent) < 0 || list.indexOf(selectedEvent) >= list.length - 1;
     idEl.value = selectedEvent ? String(selectedEvent.id) : "";
@@ -339,7 +339,7 @@ const DATA = __ETC_DATA__;
     const last = dateLabel(Number(selectedEvent.last));
     let parts = '<strong>' + escapeHtml(String(selectedEvent.id)) + '</strong>' +
       '<span>' + escapeHtml(selectedEvent.month) + ' · ' + sideLabel(selectedEvent.side) + '</span>' +
-      '<span>触价段 ' + escapeHtml(first) + ' 至 ' + escapeHtml(last) + '</span>' +
+      (selectedEvent.parent ? '<span>当日首触 ' + escapeHtml(first) + ' · 原段 ' + escapeHtml(selectedEvent.parent) + '</span>' : '<span>触价段 ' + escapeHtml(first) + ' 至 ' + escapeHtml(last) + '</span>') +
       '<span>' + (touchOffset + 1) + ' / ' + selectedEvent.count + ' 根触线 K</span>' +
       '<span>轨道 ' + fmtPrice.format(level) + '</span>';
     if (m && Number.isFinite(Number(m.hi)) && Number.isFinite(Number(m.lo))) {
@@ -410,16 +410,6 @@ const DATA = __ETC_DATA__;
   function yFor(v) {
     return plot.top + (plot.max - v) / (plot.max - plot.min) * plot.height;
   }
-  function roundRectPath(x, y, w, h, r) {
-    const rr = Math.min(r, w / 2, h / 2);
-    ctx.beginPath();
-    ctx.moveTo(x + rr, y);
-    ctx.arcTo(x + w, y, x + w, y + h, rr);
-    ctx.arcTo(x + w, y + h, x, y + h, rr);
-    ctx.arcTo(x, y + h, x, y, rr);
-    ctx.arcTo(x, y, x + w, y, rr);
-    ctx.closePath();
-  }
   function draw() {
     if (!ctx) return;
     const rect = canvas.getBoundingClientRect();
@@ -467,18 +457,6 @@ const DATA = __ETC_DATA__;
       const bottom = yFor(Math.min(Number(m.hi),Number(m.lo)));
       ctx.fillStyle = "rgba(125,132,140,.09)";
       ctx.fillRect(sx, top, ex-sx, bottom-top);
-      const rails = [
-        { value:Number(m.upper), color:"#30343a", width:1.35, dash:[] },
-        { value:Number(m.hi), color:"#858b93", width:1, dash:[4,4] },
-        { value:Number(m.lo), color:"#858b93", width:1, dash:[4,4] },
-        { value:Number(m.lower), color:"#30343a", width:1.35, dash:[] }
-      ];
-      rails.forEach(function (r) {
-        if (!Number.isFinite(r.value)) return;
-        ctx.beginPath(); ctx.setLineDash(r.dash); ctx.lineWidth=r.width; ctx.strokeStyle=r.color;
-        ctx.moveTo(sx,yFor(r.value)); ctx.lineTo(ex,yFor(r.value)); ctx.stroke();
-      });
-      ctx.setLineDash([]);
     }
 
     const yStep = niceStep(plot.max - plot.min);
@@ -489,6 +467,21 @@ const DATA = __ETC_DATA__;
       const y=yFor(v);
       ctx.beginPath(); ctx.setLineDash([]); ctx.strokeStyle="#eceef0"; ctx.lineWidth=1;
       ctx.moveTo(x1,y); ctx.lineTo(x2,y); ctx.stroke();
+    }
+
+    if (m && Number.isFinite(Number(m.ready)) && Number.isFinite(Number(m.end))) {
+      const sx=xFor(Number(m.ready)), ex=xFor(Number(m.end));
+      [
+        { value:Number(m.upper), color:"#30343a", width:1.45, dash:[] },
+        { value:Number(m.hi), color:"#858b93", width:1, dash:[4,4] },
+        { value:Number(m.lo), color:"#858b93", width:1, dash:[4,4] },
+        { value:Number(m.lower), color:"#30343a", width:1.45, dash:[] }
+      ].forEach(function (r) {
+        if (!Number.isFinite(r.value)) return;
+        ctx.beginPath(); ctx.setLineDash(r.dash); ctx.lineWidth=r.width; ctx.strokeStyle=r.color;
+        ctx.moveTo(sx,yFor(r.value)); ctx.lineTo(ex,yFor(r.value)); ctx.stroke();
+      });
+      ctx.setLineDash([]);
     }
 
     const barWidth = Math.max(1, Math.min(12, plot.width * timeframe / (view[1]-view[0]) * .58));
@@ -581,7 +574,7 @@ const DATA = __ETC_DATA__;
     if (!target) return;
     monthEl.value = "";
     sideEl.value = "";
-    firstEl.value = "";
+    firstEl.value = target.parent ? "daily" : "";
     setEvent(target, true);
   }
   function setTouchIndex(value) {
@@ -667,15 +660,12 @@ const DATA = __ETC_DATA__;
     else { updateEventSelect(); }
   });
   eventEl.addEventListener("change", function () {
-    const i=Number(eventEl.value);
-    if(Number.isInteger(i)&&events[i]) setEvent(events[i],true);
+    const e=findId(eventEl.value);
+    if(e) setEvent(e,true);
   });
   document.getElementById("jumpId").addEventListener("click", function () {
     const wanted=idEl.value.trim().toLowerCase();
-    const num=idNumber(wanted);
-    const match=events.find(function (e) {
-      return String(e.id).toLowerCase()===wanted || (num && idNumber(e.id)===num);
-    });
+    const match=findId(wanted);
     if(match) jumpToEvent(match);
     else { summaryEl.innerHTML='<span class="warning">没有找到编号 '+escapeHtml(idEl.value.trim())+'。</span>'; }
   });
@@ -688,7 +678,7 @@ const DATA = __ETC_DATA__;
         summaryEl.innerHTML+='<span>该日期没有触价段，已定位到筛选范围内日期最近的段。</span>';
       }
     } else {
-      summaryEl.innerHTML='<span class="warning">当前月份 / 方向筛选下没有触价段。</span>';
+      summaryEl.innerHTML='<span class="warning">当前筛选下没有触价段。</span>';
     }
   });
   document.getElementById("prevEvent").addEventListener("click", function () { stepEvent(-1); });
