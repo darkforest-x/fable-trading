@@ -113,7 +113,18 @@ def _read_vision_month(symbol: str) -> tuple[np.ndarray, str]:
                 if not csv_names:
                     raise ValueError("Vision zip has no CSV member")
                 with archive.open(csv_names[0]) as member:
-                    rows = np.loadtxt(member, delimiter=",", usecols=(0, 1, 2, 3, 4), dtype=np.float64, ndmin=2)
+                    text = io.TextIOWrapper(member, encoding="utf-8-sig")
+                    parsed = []
+                    for line_no, fields in enumerate(csv.reader(text)):
+                        if not fields:
+                            continue
+                        try:
+                            parsed.append([float(value) for value in fields[:5]])
+                        except ValueError:
+                            if line_no == 0:  # Newer Vision CSVs include a column-name header.
+                                continue
+                            raise ValueError(f"non-numeric field in Vision CSV at row {line_no + 1}")
+                    rows = np.asarray(parsed, dtype=np.float64).reshape((-1, 5))
             rows = _clean_rows(rows, START_MS, NOV_START_MS)
             return rows, url
         except FileNotFoundError:
