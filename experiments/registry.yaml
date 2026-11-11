@@ -15,6 +15,34 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-month-firstweek-h4-strategy-20261112-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a1c1020ed7"
+    status: rejected
+    question: Can next-open entry after the fourth hourly close monetize the monthly first-touch reclaim with a fixed stop, and does a shorter maximum hold help?
+    single_variable: Compare 168h and 72h maximum holding times, keeping entries, 5% stop, 20% target and fees identical. Report the shared account with and without its 30% drawdown entry budget separately.
+    result: >-
+      1844 main signals (636 contracts, 2019-10 to 2026-11), 1843 settled and one terminal mark.
+      7d wins 27.62%, mean net -0.624%, PF 0.824 vs matched random mean -1.796%. 3d wins 35.00%,
+      mean net -0.571%, PF 0.809 vs random -1.450%. Mean returns negative on both sides of the
+      2025 time cut for both holds. Of 466 still-observable rail-based historical winners, the
+      7d fill-based bracket hit target in 104, stop in 174 and timeout in 188. Full shared
+      accounts, drawdowns and accepted counts are in account_comparison.csv.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    canonical_report: experiments/active/exp-month-firstweek-h4-strategy-20261112-v1/trade_summary_168h.csv
+    artifacts: []
+    notes: >-
+      Prior complete 12h touch reclaim, H1 stalls then first four hourly closes hold the rail;
+      upper short, lower long only if H2-H4 close higher than original reclaim at least once.
+      Other 494 lower holds retained as shadow controls. Binance archive, OKX fee proxy, taker
+      5bp and target maker 2bp per fill, no funding or additional slippage. O-L-H-C for longs,
+      O-H-L-C for shorts. One matched comparison per same symbol/side/month/hour matched on
+      prior 24h range. Baseline native builder 9e1a891caf and VectorBT horizon a054056f39.
+      Full ledgers under data/research/alt-isolated-12h-wicks-20261111/expanded12/all_replay_v1/h4_strategy/.
+
   - experiment_id: exp-month-firstweek-h4-forward-excursions-20261112-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "341cc2d11c"
