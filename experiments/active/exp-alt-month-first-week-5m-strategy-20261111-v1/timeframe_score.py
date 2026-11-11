@@ -14,6 +14,7 @@ import pandas as pd
 
 from prepare import BAR, CACHE, HERE, PARENT
 from run_research import Inputs, START, SPLIT, END, PERIODS, account_result
+from account import PERIODS as ACCOUNT_PERIODS
 from engine import simulate_batch
 
 YEAR26 = pd.Timestamp('2026-01-01T00:00:00Z').value // 1_000_000
@@ -21,7 +22,9 @@ INTERVALS = (5,15,60,240)
 ALPHA = 30
 BASE = ['side','high_atr','room','fast_approach']
 CONF = BASE + ['reclaimed','long_wick']
-PERIODS.update({'2025':(SPLIT,YEAR26), '2026':(YEAR26,END), 'forward':(SPLIT,END)})
+TEST_PERIODS = {'2025':(SPLIT,YEAR26), '2026':(YEAR26,END), 'forward':(SPLIT,END)}
+PERIODS.update(TEST_PERIODS)
+ACCOUNT_PERIODS.update(TEST_PERIODS)
 
 
 def features(data, minutes):
