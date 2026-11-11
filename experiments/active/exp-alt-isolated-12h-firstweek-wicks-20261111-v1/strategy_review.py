@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from all_contract_touches import DEST
-from strategy_signals import HOUR, OUT
+from strategy_signals import CUTOFF, HOUR, OUT, read_raw
 
 RULES = ['first_wick','retest','strict_union','owner_style']
 KEY = ['symbol','side','entry_ms']
@@ -61,12 +61,45 @@ def matched_pairs(signals):
              .drop(columns=['case_i','control_i']))
 
 
+def price_reference_comparison(signals):
+    """Label the same mature post-entry path with two different 20% reference prices.
+
+    Both use the next 1080 H1 highs/lows, starting at the actual entry open.
+    These are uncensored price excursions, not fills or strategy returns.
+    """
+    samples = []
+    for symbol,g in signals.groupby('symbol'):
+        q = read_raw(symbol)
+        q = q[q[:,0]+HOUR<=CUTOFF]
+        t = q[:,0]
+        for r in g.itertuples():
+            i = t.searchsorted(r.entry_ms)
+            j = i+45*24-1
+            if j>=len(t) or t[i]!=r.entry_ms or t[j]-t[i]!=(j-i)*HOUR:
+                continue
+            if r.side=='long':
+                edge = q[i:j+1,2].max()
+                from_rail,from_entry = edge>=r.rail*1.2,edge>=r.entry_price*1.2
+            else:
+                edge = q[i:j+1,3].min()
+                from_rail,from_entry = edge<=r.rail*.8,edge<=r.entry_price*.8
+            samples.append((r.Index,from_rail,from_entry))
+    cases = pd.DataFrame(samples,columns=['row','rail20','entry20']).set_index('row')
+    rows = []
+    for name in ['baseline',*RULES]:
+        obs = cases[signals.loc[cases.index,name].eq(1)]
+        rows.append(dict(rule=name,complete_45d=len(obs),rail20=int(obs.rail20.sum()),
+                         entry20=int(obs.entry20.sum()),only_rail20=int((obs.rail20&~obs.entry20).sum())))
+    return pd.DataFrame(rows)
+
+
 def main():
     a = add_rules(pd.read_csv(OUT/'signals.csv.gz'))
     photos = photo_coverage(a)
     photos.to_csv(OUT/'owner_photo_capture.csv',index=False)
     matched = matched_pairs(a)
     matched.to_csv(OUT/'matched_pairs.csv.gz',index=False)
+    price_reference_comparison(a).to_csv(OUT/'target_reference.csv',index=False)
     print('source',a[RULES].sum().to_dict(),'reference',photos[RULES].sum().to_dict(),
           'pairs',matched.groupby('rule').size().to_dict())
 
