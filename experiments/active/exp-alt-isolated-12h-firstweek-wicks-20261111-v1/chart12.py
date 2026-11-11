@@ -23,6 +23,8 @@ def stamp(ms):
 
 
 def fmt(p):
+    if p==0:
+        return '0'
     places=max(1,4-int(math.floor(math.log10(p))))
     return f'{p:.{places}f}'
 
@@ -50,7 +52,7 @@ def chart(row, archive=False):
     a,b,top,bot=44,w-122,105,h-86
     low=np.min(bars[:,3]);hi=np.max(bars[:,2])
     spread=hi-low
-    lo=low-.07*spread; high=hi+.07*spread
+    lo=max(0,low-.07*spread); high=hi+.07*spread
     x=lambda t: a+(b-a)*((t-start)/(stop-start+12*HOUR))
     y=lambda p: top+(high-p)/(high-lo)*(bot-top)
     cn='下轨' if row.side=='lower' else '上轨'
