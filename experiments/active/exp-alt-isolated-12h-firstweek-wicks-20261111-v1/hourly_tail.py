@@ -330,9 +330,13 @@ def _write_manifest() -> None:
 
 def _order(symbols: list[str]) -> list[str]:
     have = set(symbols)
-    preferred = [symbol for symbol in PRIORITY + LIQUID if symbol in have]
-    preferred += sorted(symbol for symbol in have if symbol not in set(preferred))
-    return preferred
+    ordered = []
+    seen = set()
+    for symbol in PRIORITY + LIQUID + sorted(have):
+        if symbol in have and symbol not in seen:
+            ordered.append(symbol)
+            seen.add(symbol)
+    return ordered
 
 
 def main() -> None:
