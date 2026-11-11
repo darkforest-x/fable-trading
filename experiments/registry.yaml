@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-alt-isolated-12h-firstweek-wicks-20261111-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7c85af4842"
+    status: inconclusive
+    question: How often do first-week extension touches lead to large opposite-direction moves, including multi-candle retests seen in the owner's 15 charts?
+    single_variable: Descriptive event catalogue; distinguish isolated 12h long wicks from all first daily touches; report 7, 14 and 45-day market excursions from the rail separately from the close-based wick study.
+    result: "681 historical Binance UM alt contracts checked, 679 with usable first-week ranges. Of 1503 neighbouring single long-wick reclaims, 323 reached 20% from close in 7 days and 276 did so before retouch. Broad daily-first-touch search: 27016 of 45813 complete 45-day touch paths reached 20% from the level, spanning 7210 contract/month/side groups. All 15 owner-marked OKX contract-month sides touched and subsequently reached 20% from the rail; 12 had multiple touching 12h candles. All 8 crypto examples also touched on Binance, 1 fits the narrow no-retouch list."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-alt-isolated-12h-firstweek-wicks-20261111-v1/summary12.json
+    notes: "Excursions are retrospective, include subsequent pullbacks and overlapping calendar windows, and are not trading outcomes. Unusable months and the incomplete tail are excluded. Original OKX IOST October 2026 reference is kept separately."
+
   - experiment_id: exp-etc-month-first-week-12h-retests-20261111-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "e7a3e094ce"
