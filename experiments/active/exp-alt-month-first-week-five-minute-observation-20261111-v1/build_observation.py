@@ -202,6 +202,7 @@ def event_path(
         "touch_5m_high": "",
         "touch_5m_low": "",
         "touch_5m_close": "",
+        "touch_hour_rows_present": "",
         "pre_h1_expected_bars": (hour_start - ready_ts) // BAR_MS,
         "pre_h1_observed_bars": "",
         "pre_h1_same_side_touch_count": "",
