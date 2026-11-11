@@ -1,0 +1,477 @@
+{
+  "experiment_id": "exp-alt-month-first-week-five-minute-observation-20261111-v2",
+  "built_at_utc": "2026-11-11T06:11:31+00:00",
+  "observation_only": true,
+  "inputs": {
+    "frozen_events": "experiments/active/exp-alt-month-first-week-entries-20261110-v1/events.csv.gz",
+    "frozen_event_rows": 5182,
+    "frozen_event_symbols": 345,
+    "frozen_event_side_counts": {
+      "lower": 2415,
+      "upper": 2767
+    },
+    "frozen_event_cohort_counts": {
+      "top20_current": 396,
+      "current_crypto_non_top20": 4382,
+      "archived_crypto_delisted_notice": 44,
+      "verified_retired": 360
+    },
+    "h1_source_manifest": "experiments/active/exp-alt-month-first-week-entries-20261110-v1/sources.csv.gz",
+    "h1_manifest_rows": 356,
+    "native_event_ledger": "data/research/month-first-week-okx-5m-first-touch-windows-v2/events.csv.gz",
+    "native_event_ledger_rows": 5182,
+    "native_candles": "data/research/month-first-week-okx-5m-first-touch-windows-v2/candles.csv.gz",
+    "native_candle_event_groups_seen": 4776,
+    "v1_event_paths": "experiments/active/exp-alt-month-first-week-five-minute-observation-20261111-v1/event_paths.csv",
+    "v1_rows": 5182,
+    "archive_windows_directory": "data/research/month-first-week-okx-archive5m-v2/windows",
+    "analysis_as_of_utc": "2026-11-11T06:11:15+00:00"
+  },
+  "method": {
+    "h1_prefix": "Require each original frozen H1 timestamp from derived ready_utc through the event H1 open inclusive. No earlier same-side rail touch is permitted, and the recorded H1 bar must touch the rail.",
+    "event_hour_match": "Aggregate the 12 event-hour 5m bars as first open, max high, min low, last close; compare to original H1 using Decimal with rel_tol=1e-10 and abs_tol=1e-12.",
+    "first_5m_touch": "Within the full frozen H1 touch hour, first lower low<=rail or upper high>=rail; all event-hour 5m bars must be present, sequential, and not explicitly unconfirmed.",
+    "category_window": "First touch bar plus the next five consecutive 5m bars in the same NY month. A=first close strictly inside, B=first strict inside close in bars 1-5, C=no strict inside close.",
+    "post_reclaim_hour": "For A/B, the next 12 consecutive 5m bars after the first strict reclaim bar. Report any outer-rail retouch, any strict close outside (lower close<rail; upper close>rail), equal closes separately, end close outside, near-boundary reach before/on/after reclaim, directional MFE/MAE from the next bar open, and one-hour end close direction.",
+    "near_boundary_direction": "Lower side reaches first-week low when high>=low boundary; upper side reaches first-week high when low<=high boundary.",
+    "primary_5m_source": "Use complete direct native 5m when it matches original H1. If its touch hour is missing/incomplete, use complete matching OKX month-archive 1m-derived 5m data as a labeled fallback. A complete native H1/5m mismatch is a source conflict and is not hidden by archive fallback.",
+    "pre_touch_5m_audit": "Check native event-window bars from max(ready_utc, H1 touch open minus 120 five-minute bars) through the H1 open exclusive. An observed earlier same-side touch excludes the event; verified requires the entire interval, including zero expected bars where ready equals touch. Archive and v1 full-prefix evidence remain separate.",
+    "primary_exclusions": "Exclude incomplete or contradictory original H1 prefixes, any earlier same-side 5m touch found by native-window/archive/v1 prefix audit, incomplete event-hour windows, and H1/5m OHLC mismatches. Archive 5m prefix incompleteness is retained with an explicit evidence-basis label.",
+    "v1_comparison": "v1 strict 5m-prefix subset is pre_h1_coverage_status=complete_no_same_side_5m_touch; it is separately counted and never substituted for H1 proof.",
+    "costs_or_pnl": "none; no simulated trades or fills"
+  },
+  "coverage_funnel": {
+    "source_events": 5182,
+    "h1_first_touch_validation_status_counts": {
+      "complete_h1_first_touch_no_prior_same_side_touch": 5182
+    },
+    "native_fetch_status_counts": {
+      "complete_confirmed": 4743,
+      "api_51001": 64,
+      "api_51001_cached_symbol": 340,
+      "empty_api": 2,
+      "complete_confirm_unknown": 33
+    },
+    "direct_native_touch_hour_status_counts": {
+      "complete": 4776,
+      "missing_bar": 406
+    },
+    "direct_native_h1_5m_ohlc_match_status_counts": {
+      "exact": 4768,
+      "incomplete_native_touch_hour": 406,
+      "mismatch": 8
+    },
+    "primary_touch_hour_status_counts": {
+      "complete": 5163,
+      "none": 19
+    },
+    "primary_h1_5m_ohlc_match_status_counts": {
+      "exact": 5135,
+      "within_tolerance": 28,
+      "none": 19
+    },
+    "archive_prior_5m_status_counts": {
+      "verified": 4581,
+      "incomplete": 35,
+      "missing_archive_window": 566
+    },
+    "native_event_window_prior_5m_status_counts": {
+      "incomplete": 5125,
+      "verified": 57
+    },
+    "first_touch_evidence_basis_counts": {
+      "h1_complete_no_prior_touch;5m_prefix_verified;primary=okx_native_5m": 4194,
+      "h1_complete_no_prior_touch;5m_prefix_verified;primary=okx_month_archive_1m_aggregated_5m_fallback": 395,
+      "h1_complete_no_prior_touch;5m_prefix_verified;primary=none": 8,
+      "h1_complete_no_prior_touch;5m_prefix_incomplete_or_unavailable;primary=okx_native_5m": 574,
+      "h1_complete_no_prior_touch;5m_prefix_incomplete_or_unavailable;primary=none": 11
+    },
+    "analysis_status_counts": {
+      "eligible_ABC": 5162,
+      "direct_native_h1_5m_ohlc_mismatch_source_conflict": 8,
+      "no_complete_h1_matching_5m_touch_hour": 11,
+      "six_bar_window_crosses_ny_month_end": 1
+    },
+    "primary_5m_source_counts": {
+      "okx_native_5m": 4768,
+      "okx_month_archive_1m_aggregated_5m_fallback": 395,
+      "none": 19
+    },
+    "events_in_primary_ABC_denominator": 5162,
+    "events_with_A_or_B": 4204
+  },
+  "six_bar_classification": {
+    "eligible_n": 5162,
+    "category_counts": {
+      "B": 1354,
+      "A": 2850,
+      "C": 958
+    },
+    "category_pct_of_eligible": {
+      "B": 26.230143,
+      "A": 55.211158,
+      "C": 18.558698
+    },
+    "category_counts_by_side": {
+      "lower": {
+        "B": 584,
+        "A": 1380,
+        "C": 440
+      },
+      "upper": {
+        "B": 770,
+        "A": 1470,
+        "C": 518
+      }
+    },
+    "category_counts_by_period": {
+      "before_2025": {
+        "B": 575,
+        "A": 1092,
+        "C": 438
+      },
+      "2025_or_later": {
+        "A": 1758,
+        "B": 779,
+        "C": 520
+      }
+    },
+    "category_counts_by_side_period": {
+      "lower|before_2025": {
+        "B": 236,
+        "A": 479,
+        "C": 196
+      },
+      "lower|2025_or_later": {
+        "A": 901,
+        "C": 244,
+        "B": 348
+      },
+      "upper|before_2025": {
+        "B": 339,
+        "A": 613,
+        "C": 242
+      },
+      "upper|2025_or_later": {
+        "B": 431,
+        "A": 857,
+        "C": 276
+      }
+    }
+  },
+  "A_B_post_reclaim_one_hour": {
+    "by_side_category": {
+      "lower|A": {
+        "A_or_B_n": 1380,
+        "post_reclaim_1h_complete_n": 1379,
+        "post_reclaim_1h_retouch_outer_n": 893,
+        "post_reclaim_1h_retouch_outer_rate": "0.647571",
+        "post_reclaim_1h_any_close_outside_n": 653,
+        "post_reclaim_1h_any_close_outside_rate": "0.473532",
+        "post_reclaim_1h_end_close_outside_n": 366,
+        "post_reclaim_1h_end_close_outside_rate": "0.265410",
+        "near_boundary_pre_reclaim_n": 0,
+        "near_boundary_pre_reclaim_rate": "0.000000",
+        "near_boundary_on_reclaim_bar_n": 81,
+        "near_boundary_on_reclaim_bar_rate": "0.058696",
+        "near_boundary_post_reclaim_1h_n": 33,
+        "near_boundary_post_reclaim_1h_rate": "0.023930",
+        "mfe_from_next_open_median_pct": "1.080246913580246913580246900",
+        "mae_from_next_open_median_pct": "-1.029214345074474205715016300",
+        "one_hour_end_close_inward_n": 794,
+        "one_hour_end_close_inward_rate": "0.575780"
+      },
+      "lower|B": {
+        "A_or_B_n": 584,
+        "post_reclaim_1h_complete_n": 583,
+        "post_reclaim_1h_retouch_outer_n": 388,
+        "post_reclaim_1h_retouch_outer_rate": "0.665523",
+        "post_reclaim_1h_any_close_outside_n": 322,
+        "post_reclaim_1h_any_close_outside_rate": "0.552316",
+        "post_reclaim_1h_end_close_outside_n": 183,
+        "post_reclaim_1h_end_close_outside_rate": "0.313894",
+        "near_boundary_pre_reclaim_n": 19,
+        "near_boundary_pre_reclaim_rate": "0.032534",
+        "near_boundary_on_reclaim_bar_n": 2,
+        "near_boundary_on_reclaim_bar_rate": "0.003425",
+        "near_boundary_post_reclaim_1h_n": 3,
+        "near_boundary_post_reclaim_1h_rate": "0.005146",
+        "mfe_from_next_open_median_pct": "0.994406463642013673088875100",
+        "mae_from_next_open_median_pct": "-0.8501594048884165781083953200",
+        "one_hour_end_close_inward_n": 332,
+        "one_hour_end_close_inward_rate": "0.569468"
+      },
+      "upper|A": {
+        "A_or_B_n": 1470,
+        "post_reclaim_1h_complete_n": 1470,
+        "post_reclaim_1h_retouch_outer_n": 1099,
+        "post_reclaim_1h_retouch_outer_rate": "0.747619",
+        "post_reclaim_1h_any_close_outside_n": 855,
+        "post_reclaim_1h_any_close_outside_rate": "0.581633",
+        "post_reclaim_1h_end_close_outside_n": 475,
+        "post_reclaim_1h_end_close_outside_rate": "0.323129",
+        "near_boundary_pre_reclaim_n": 0,
+        "near_boundary_pre_reclaim_rate": "0.000000",
+        "near_boundary_on_reclaim_bar_n": 41,
+        "near_boundary_on_reclaim_bar_rate": "0.027891",
+        "near_boundary_post_reclaim_1h_n": 75,
+        "near_boundary_post_reclaim_1h_rate": "0.051020",
+        "mfe_from_next_open_median_pct": "1.450647782169521299956082565",
+        "mae_from_next_open_median_pct": "-1.231640759783315831810184498",
+        "one_hour_end_close_inward_n": 836,
+        "one_hour_end_close_inward_rate": "0.568707"
+      },
+      "upper|B": {
+        "A_or_B_n": 770,
+        "post_reclaim_1h_complete_n": 769,
+        "post_reclaim_1h_retouch_outer_n": 599,
+        "post_reclaim_1h_retouch_outer_rate": "0.778934",
+        "post_reclaim_1h_any_close_outside_n": 493,
+        "post_reclaim_1h_any_close_outside_rate": "0.641092",
+        "post_reclaim_1h_end_close_outside_n": 264,
+        "post_reclaim_1h_end_close_outside_rate": "0.343303",
+        "near_boundary_pre_reclaim_n": 10,
+        "near_boundary_pre_reclaim_rate": "0.012987",
+        "near_boundary_on_reclaim_bar_n": 8,
+        "near_boundary_on_reclaim_bar_rate": "0.010390",
+        "near_boundary_post_reclaim_1h_n": 35,
+        "near_boundary_post_reclaim_1h_rate": "0.045514",
+        "mfe_from_next_open_median_pct": "1.212747955250540565949045784",
+        "mae_from_next_open_median_pct": "-1.170671595810227972889710413",
+        "one_hour_end_close_inward_n": 420,
+        "one_hour_end_close_inward_rate": "0.546164"
+      }
+    },
+    "by_side_period_category": {
+      "lower|before_2025|A": {
+        "A_or_B_n": 479,
+        "post_reclaim_1h_complete_n": 479,
+        "post_reclaim_1h_retouch_outer_n": 287,
+        "post_reclaim_1h_retouch_outer_rate": "0.599165",
+        "post_reclaim_1h_any_close_outside_n": 195,
+        "post_reclaim_1h_any_close_outside_rate": "0.407098",
+        "post_reclaim_1h_end_close_outside_n": 101,
+        "post_reclaim_1h_end_close_outside_rate": "0.210856",
+        "near_boundary_pre_reclaim_n": 0,
+        "near_boundary_pre_reclaim_rate": "0.000000",
+        "near_boundary_on_reclaim_bar_n": 20,
+        "near_boundary_on_reclaim_bar_rate": "0.041754",
+        "near_boundary_post_reclaim_1h_n": 9,
+        "near_boundary_post_reclaim_1h_rate": "0.018789",
+        "mfe_from_next_open_median_pct": "1.393389500972132209980557400",
+        "mae_from_next_open_median_pct": "-1.048304213771839886599016190",
+        "one_hour_end_close_inward_n": 305,
+        "one_hour_end_close_inward_rate": "0.636743"
+      },
+      "lower|before_2025|B": {
+        "A_or_B_n": 236,
+        "post_reclaim_1h_complete_n": 235,
+        "post_reclaim_1h_retouch_outer_n": 148,
+        "post_reclaim_1h_retouch_outer_rate": "0.629787",
+        "post_reclaim_1h_any_close_outside_n": 125,
+        "post_reclaim_1h_any_close_outside_rate": "0.531915",
+        "post_reclaim_1h_end_close_outside_n": 63,
+        "post_reclaim_1h_end_close_outside_rate": "0.268085",
+        "near_boundary_pre_reclaim_n": 15,
+        "near_boundary_pre_reclaim_rate": "0.063559",
+        "near_boundary_on_reclaim_bar_n": 1,
+        "near_boundary_on_reclaim_bar_rate": "0.004237",
+        "near_boundary_post_reclaim_1h_n": 2,
+        "near_boundary_post_reclaim_1h_rate": "0.008511",
+        "mfe_from_next_open_median_pct": "1.137235749668596944114979400",
+        "mae_from_next_open_median_pct": "-1.051880905687288286682118020",
+        "one_hour_end_close_inward_n": 140,
+        "one_hour_end_close_inward_rate": "0.595745"
+      },
+      "lower|2025_or_later|A": {
+        "A_or_B_n": 901,
+        "post_reclaim_1h_complete_n": 900,
+        "post_reclaim_1h_retouch_outer_n": 606,
+        "post_reclaim_1h_retouch_outer_rate": "0.673333",
+        "post_reclaim_1h_any_close_outside_n": 458,
+        "post_reclaim_1h_any_close_outside_rate": "0.508889",
+        "post_reclaim_1h_end_close_outside_n": 265,
+        "post_reclaim_1h_end_close_outside_rate": "0.294444",
+        "near_boundary_pre_reclaim_n": 0,
+        "near_boundary_pre_reclaim_rate": "0.000000",
+        "near_boundary_on_reclaim_bar_n": 61,
+        "near_boundary_on_reclaim_bar_rate": "0.067703",
+        "near_boundary_post_reclaim_1h_n": 24,
+        "near_boundary_post_reclaim_1h_rate": "0.026667",
+        "mfe_from_next_open_median_pct": "0.877898900009184252154606250",
+        "mae_from_next_open_median_pct": "-1.022709206683903573729614845",
+        "one_hour_end_close_inward_n": 489,
+        "one_hour_end_close_inward_rate": "0.543333"
+      },
+      "lower|2025_or_later|B": {
+        "A_or_B_n": 348,
+        "post_reclaim_1h_complete_n": 348,
+        "post_reclaim_1h_retouch_outer_n": 240,
+        "post_reclaim_1h_retouch_outer_rate": "0.689655",
+        "post_reclaim_1h_any_close_outside_n": 197,
+        "post_reclaim_1h_any_close_outside_rate": "0.566092",
+        "post_reclaim_1h_end_close_outside_n": 120,
+        "post_reclaim_1h_end_close_outside_rate": "0.344828",
+        "near_boundary_pre_reclaim_n": 4,
+        "near_boundary_pre_reclaim_rate": "0.011494",
+        "near_boundary_on_reclaim_bar_n": 1,
+        "near_boundary_on_reclaim_bar_rate": "0.002874",
+        "near_boundary_post_reclaim_1h_n": 1,
+        "near_boundary_post_reclaim_1h_rate": "0.002874",
+        "mfe_from_next_open_median_pct": "0.919320434543488923169808900",
+        "mae_from_next_open_median_pct": "-0.710113739642346584873498440",
+        "one_hour_end_close_inward_n": 192,
+        "one_hour_end_close_inward_rate": "0.551724"
+      },
+      "upper|before_2025|A": {
+        "A_or_B_n": 613,
+        "post_reclaim_1h_complete_n": 613,
+        "post_reclaim_1h_retouch_outer_n": 450,
+        "post_reclaim_1h_retouch_outer_rate": "0.734095",
+        "post_reclaim_1h_any_close_outside_n": 333,
+        "post_reclaim_1h_any_close_outside_rate": "0.543230",
+        "post_reclaim_1h_end_close_outside_n": 174,
+        "post_reclaim_1h_end_close_outside_rate": "0.283850",
+        "near_boundary_pre_reclaim_n": 0,
+        "near_boundary_pre_reclaim_rate": "0.000000",
+        "near_boundary_on_reclaim_bar_n": 14,
+        "near_boundary_on_reclaim_bar_rate": "0.022838",
+        "near_boundary_post_reclaim_1h_n": 24,
+        "near_boundary_post_reclaim_1h_rate": "0.039152",
+        "mfe_from_next_open_median_pct": "1.337907375643224699828473413",
+        "mae_from_next_open_median_pct": "-1.039979541386071093683402949",
+        "one_hour_end_close_inward_n": 378,
+        "one_hour_end_close_inward_rate": "0.616639"
+      },
+      "upper|before_2025|B": {
+        "A_or_B_n": 339,
+        "post_reclaim_1h_complete_n": 338,
+        "post_reclaim_1h_retouch_outer_n": 276,
+        "post_reclaim_1h_retouch_outer_rate": "0.816568",
+        "post_reclaim_1h_any_close_outside_n": 231,
+        "post_reclaim_1h_any_close_outside_rate": "0.683432",
+        "post_reclaim_1h_end_close_outside_n": 124,
+        "post_reclaim_1h_end_close_outside_rate": "0.366864",
+        "near_boundary_pre_reclaim_n": 2,
+        "near_boundary_pre_reclaim_rate": "0.005900",
+        "near_boundary_on_reclaim_bar_n": 0,
+        "near_boundary_on_reclaim_bar_rate": "0.000000",
+        "near_boundary_post_reclaim_1h_n": 9,
+        "near_boundary_post_reclaim_1h_rate": "0.026627",
+        "mfe_from_next_open_median_pct": "1.099811071493918911772562135",
+        "mae_from_next_open_median_pct": "-1.162742872474273868548087366",
+        "one_hour_end_close_inward_n": 181,
+        "one_hour_end_close_inward_rate": "0.535503"
+      },
+      "upper|2025_or_later|A": {
+        "A_or_B_n": 857,
+        "post_reclaim_1h_complete_n": 857,
+        "post_reclaim_1h_retouch_outer_n": 649,
+        "post_reclaim_1h_retouch_outer_rate": "0.757293",
+        "post_reclaim_1h_any_close_outside_n": 522,
+        "post_reclaim_1h_any_close_outside_rate": "0.609102",
+        "post_reclaim_1h_end_close_outside_n": 301,
+        "post_reclaim_1h_end_close_outside_rate": "0.351225",
+        "near_boundary_pre_reclaim_n": 0,
+        "near_boundary_pre_reclaim_rate": "0.000000",
+        "near_boundary_on_reclaim_bar_n": 27,
+        "near_boundary_on_reclaim_bar_rate": "0.031505",
+        "near_boundary_post_reclaim_1h_n": 51,
+        "near_boundary_post_reclaim_1h_rate": "0.059510",
+        "mfe_from_next_open_median_pct": "1.544401544401544401544401544",
+        "mae_from_next_open_median_pct": "-1.420176297747306562193927522",
+        "one_hour_end_close_inward_n": 458,
+        "one_hour_end_close_inward_rate": "0.534422"
+      },
+      "upper|2025_or_later|B": {
+        "A_or_B_n": 431,
+        "post_reclaim_1h_complete_n": 431,
+        "post_reclaim_1h_retouch_outer_n": 323,
+        "post_reclaim_1h_retouch_outer_rate": "0.749420",
+        "post_reclaim_1h_any_close_outside_n": 262,
+        "post_reclaim_1h_any_close_outside_rate": "0.607889",
+        "post_reclaim_1h_end_close_outside_n": 140,
+        "post_reclaim_1h_end_close_outside_rate": "0.324826",
+        "near_boundary_pre_reclaim_n": 8,
+        "near_boundary_pre_reclaim_rate": "0.018561",
+        "near_boundary_on_reclaim_bar_n": 8,
+        "near_boundary_on_reclaim_bar_rate": "0.018561",
+        "near_boundary_post_reclaim_1h_n": 26,
+        "near_boundary_post_reclaim_1h_rate": "0.060325",
+        "mfe_from_next_open_median_pct": "1.348314606741573033707865169",
+        "mae_from_next_open_median_pct": "-1.176470588235294117647058824",
+        "one_hour_end_close_inward_n": 239,
+        "one_hour_end_close_inward_rate": "0.554524"
+      }
+    }
+  },
+  "strict_5m_prefix_subset": {
+    "verified_n_in_primary_ABC": 4588,
+    "categories": {
+      "B": 1195,
+      "A": 2556,
+      "C": 837
+    },
+    "native_window_verified_n": 57,
+    "archive_window_verified_n": 4572,
+    "v1_full_prefix_verified_n": 31,
+    "v1_subset_is_reported_separately": true
+  },
+  "time_concentration": {
+    "unique_first_touch_5m_timestamps": 3664,
+    "multi_event_first_touch_timestamps": 454,
+    "events_in_multi_event_first_touch_timestamps": 1952,
+    "max_events_at_one_first_touch_5m_timestamp": 93,
+    "unique_first_reclaim_5m_timestamps": 3218,
+    "multi_event_first_reclaim_timestamps": 373,
+    "max_events_at_one_first_reclaim_5m_timestamp": 77
+  },
+  "archive_rest_source_comparison": {
+    "events_with_archive_window": 4616,
+    "shared_candles": 1012808,
+    "exact_ohlc_candles": 919298,
+    "within_tolerance_ohlc_candles": 69990,
+    "mismatched_ohlc_candles": 23520,
+    "mismatched_open_fields": 23516,
+    "mismatched_high_fields": 7156,
+    "mismatched_low_fields": 6818,
+    "mismatched_close_fields": 1,
+    "max_abs_difference_by_field": {
+      "open": "6.0",
+      "high": "5.0",
+      "low": "3.0",
+      "close": "0.00001"
+    },
+    "root_match_events": 4196,
+    "root_mismatch_events": 24,
+    "root_time_match_events": 4220,
+    "root_ohlc_match_events": 4196,
+    "category_match_events": 4219,
+    "category_mismatch_events": 0
+  },
+  "v1_overlap_consistency": {
+    "v1_rows": 5182,
+    "native_root_comparable_n": 33,
+    "root_matches": 33,
+    "root_mismatches": 0,
+    "category_matches": 33,
+    "category_mismatches": 0,
+    "future12_matches": 29,
+    "future12_mismatches": 0,
+    "v1_strict_pre_h1_verified_n": 31,
+    "v1_strict_subset_primary_eligible_n": 31,
+    "v1_strict_subset_categories": {
+      "B": 10,
+      "A": 19,
+      "C": 2
+    }
+  },
+  "outputs": {
+    "event_paths": "event_paths.csv.gz",
+    "coverage_by_symbol": "coverage_by_symbol.csv",
+    "category_summary": "category_summary.csv",
+    "outcome_summary": "outcome_summary.csv",
+    "same_5m_touch_times": "same_5m_touch_times.csv",
+    "summary": "summary.json"
+  }
+}
