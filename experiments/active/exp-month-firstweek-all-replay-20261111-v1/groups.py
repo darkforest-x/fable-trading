@@ -119,6 +119,16 @@ def next_two_closes(row, bars):
     return '拉锯' if len(window)==2 else '不足24H'
 
 
+def first_resolution(row,bars):
+    """Observe the first later close through the original rail or the two touching bars' favorable extreme."""
+    for b in bars.itertuples():
+        if b.time_ms<=row.time_ms: continue
+        if b.close_pct<0 or b.close_pct>row.extreme:
+            state='失守' if b.close_pct<0 else '推进'
+            return state,(b.time_ms-row.time_ms)/HOUR,b.close_pct
+    return '观察结束仍未决',None,None
+
+
 def summarize():
     r=pd.read_csv(OUT/'reviewed.csv.gz',**ROUNDTRIP).merge(pd.read_csv(OUT/'45day_path.csv.gz',**ROUNDTRIP),
                                                          on='id',validate='one_to_one')
@@ -131,8 +141,12 @@ def summarize():
     candidates=pd.read_csv(OUT/'two_reclaims_at_second_close.csv.gz',**ROUNDTRIP)
     candidates['二试类型']=np.where(candidates.gap==1,'连续两根','两根之间有间隔')
     candidates['其后24小时']=[next_two_closes(x,lookup[(x.symbol,x.month,x.side)]) for x in candidates.itertuples()]
+    paths=[first_resolution(x,lookup[(x.symbol,x.month,x.side)]) for x in candidates.itertuples()]
+    candidates[['当月后续','二试后首个结果小时数','判定收盘距轨%']]=pd.DataFrame(paths,index=candidates.index)
     save(candidates,'two_reclaims_followup')
     pd.crosstab(candidates['二试类型'],candidates['其后24小时']).to_csv(HERE/'two_reclaims_counts.csv',encoding='utf-8-sig')
+    stalled=candidates[candidates['其后24小时']=='拉锯']
+    pd.crosstab(stalled['二试类型'],stalled['当月后续']).to_csv(HERE/'sideways_followup_counts.csv',encoding='utf-8-sig')
     first['shape']=[label_group(x,lookup.get((x.symbol,x.month,x.side))) for x in first.itertuples()]
     n=r.groupby(GROUP).size()
     first['touch_days']=n.reindex(pd.MultiIndex.from_frame(first[GROUP])).values
