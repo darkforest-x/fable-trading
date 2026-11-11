@@ -93,6 +93,30 @@ def price_reference_comparison(signals):
     return pd.DataFrame(rows)
 
 
+def matched_returns(stop):
+    pairs = pd.read_csv(OUT/'matched_pairs.csv.gz')
+    ledger = pd.read_csv(OUT/f'fixed_trades_sl{stop}.csv.gz',usecols=KEY+['closed_flag','net_return','exit_ms'])
+    for prefix in ['case','control']:
+        pairs = pairs.merge(ledger.add_prefix(prefix+'_'),on=[prefix+'_'+k for k in KEY],
+                            how='left',validate='many_to_one')
+    assert pairs[['case_closed_flag','control_closed_flag']].notna().all().all()
+    closed = pairs[pairs.case_closed_flag & pairs.control_closed_flag].copy()
+    cutoff = pd.Timestamp('2025-01-01',tz='UTC').value//10**6
+    results = []
+    for rule,group in closed.groupby('rule'):
+        periods = [('all',group),
+                   ('before_2025',group[(group.case_exit_ms<cutoff)&(group.control_exit_ms<cutoff)]),
+                   ('2025_and_after',group[(group.case_entry_ms>=cutoff)&(group.control_entry_ms>=cutoff)])]
+        for period,obs in periods:
+            results.append(dict(rule=rule,period=period,complete_pairs=len(obs),
+                                case_mean_net_pct=obs.case_net_return.mean()*100,
+                                control_mean_net_pct=obs.control_net_return.mean()*100,
+                                paired_difference_pp=(obs.case_net_return-obs.control_net_return).mean()*100))
+    result = pd.DataFrame(results)
+    result.to_csv(OUT/f'matched_returns_sl{stop}.csv',index=False)
+    return result
+
+
 def main():
     a = add_rules(pd.read_csv(OUT/'signals.csv.gz'))
     photos = photo_coverage(a)
@@ -100,6 +124,9 @@ def main():
     matched = matched_pairs(a)
     matched.to_csv(OUT/'matched_pairs.csv.gz',index=False)
     price_reference_comparison(a).to_csv(OUT/'target_reference.csv',index=False)
+    for stop in [3,5]:
+        if (OUT/f'fixed_trades_sl{stop}.csv.gz').is_file():
+            matched_returns(stop)
     print('source',a[RULES].sum().to_dict(),'reference',photos[RULES].sum().to_dict(),
           'pairs',matched.groupby('rule').size().to_dict())
 
