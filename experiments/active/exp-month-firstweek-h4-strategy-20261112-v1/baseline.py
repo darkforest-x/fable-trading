@@ -11,7 +11,6 @@ import hashlib
 import json
 import sys
 from concurrent.futures import ProcessPoolExecutor
-from decimal import Decimal
 from pathlib import Path
 
 import numpy as np
@@ -22,18 +21,12 @@ ROOT = HERE.parents[2]
 sys.path[:0] = [str(ROOT), str(HERE.parent / 'exp-month-firstweek-all-replay-20261111-v1')]
 from replay import CUTOFF, HOUR, OUT, ROUNDTRIP, WINDOW, read_raw
 from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy, run_native
+from yoyo.evaluation.month_firstweek_reclaim_strategy import bracket
 
 DEST = OUT / "h4_strategy"
 HOLD = 168
-STOP = Decimal("0.05")
-TARGET = Decimal("0.20")
 MAKER, TAKER = .0002, .0005
 SEED = 20261112
-
-
-def bracket(price, side):
-    entry = Decimal(str(price))
-    return float(entry*(1-side*STOP)), float(entry*(1+side*TARGET))
 
 
 def price_grid(values):
@@ -151,9 +144,11 @@ def simulate(job):
 
 
 def load_events():
-    cols=['id','symbol','month','group','decision_ms','horizon_hours']
-    source=pd.read_csv(OUT/'h4_forward_excursions/excursions.csv',usecols=cols,**ROUNDTRIP)
-    events=source[source.horizon_hours==24].drop(columns='horizon_hours').reset_index(drop=True)
+    path = DEST/'signals.csv'
+    if not path.exists():
+        from signals import extract
+        extract().to_csv(path,index=False)
+    events=pd.read_csv(path,**ROUNDTRIP)
     assert len(events)==2338 and events.id.is_unique
     return events
 
