@@ -1,4 +1,4 @@
-"""First outer-rail retest after a same-bar reclaim, from confirmed OKX monthly archives."""
+"""First outer-rail retest after a same-bar reclaim, using each event’s validated OKX candle source."""
 import csv
 import gzip
 import json
@@ -8,6 +8,8 @@ from pathlib import Path
 from statistics import median
 from zoneinfo import ZoneInfo
 
+from fetch_windows import _cache_path
+
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 WINDOWS = ROOT / 'data/research/month-first-week-okx-archive5m-v2/windows'
@@ -16,18 +18,19 @@ NY = ZoneInfo('America/New_York')
 STEP = 300_000
 
 
-def observe(event, symbol, month, side, level, near, touch_ms):
+def observe(event, symbol, month, side, level, near, touch_ms, source):
     """Use only the 12 bars after a completed reclaim for the retest. Measure its subsequent 12 bars separately."""
-    path = WINDOWS / symbol / (month + '-' + side + '.json.gz')
-    if not path.is_file():
-        return None, 'no_archive_file'
+    native = source == 'okx_native_5m'
+    path = _cache_path(event) if native else WINDOWS / symbol / (month + '-' + side + '.json.gz')
     with gzip.open(path, 'rt') as f:
-        archive = json.load(f)
-    if archive['event_id'] != event:
-        raise ValueError('archive event identity mismatch')
-    if archive['prior_5m_status'] != 'verified':
-        return None, 'no_full_archive_prefix'
-    bars = {int(b[0]): b for b in archive['candles']}
+        payload = json.load(f)
+    if payload['event_id'] != event:
+        raise ValueError('source event identity mismatch')
+    if native:
+        bars = {int(b['ts_ms']): (int(b['ts_ms']), *(float(b[k]) for k in ('open','high','low','close')))
+                for b in payload['candles']}
+    else:
+        bars = {int(b[0]): b for b in payload['candles']}
     upper = side == 'upper'
 
     def crosses(bar):
@@ -86,9 +89,13 @@ def main():
             near = float(raw['high' if raw['side'] == 'upper' else 'low'])
             ts = int(datetime.fromisoformat(e['primary_first_touch_5m_utc'].replace('Z', '+00:00')).timestamp() * 1000)
             row, status = observe(e['event_id'], raw['symbol'], raw['month'], raw['side'],
-                                  float(raw['level']), near, ts)
+                                  float(raw['level']), near, ts, e['primary_5m_source'])
             counts[status] += 1
             if row:
+                row['primary_5m_source'] = e['primary_5m_source']
+                expected_retest = e['primary_post_reclaim_1h_retouch_outer'] == 'true'
+                if (row['retest'] != 'none') != expected_retest:
+                    raise ValueError('first retest disagrees with event observation for ' + row['event_id'])
                 rows.append(row)
     if not rows:
         raise ValueError('no eligible same-bar reclaims')
