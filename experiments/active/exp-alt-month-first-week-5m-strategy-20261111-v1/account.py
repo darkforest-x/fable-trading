@@ -216,14 +216,22 @@ def _validate_inputs(trades: pd.DataFrame, mark_path: pd.DataFrame) -> tuple[pd.
 
 
 def _admit(fills: pd.DataFrame, max_slots: int) -> tuple[pd.DataFrame, dict[str, int]]:
-    """Assign fixed slots chronologically; simultaneous congestion sorts by symbol."""
+    """Admit by clock, then optional descending known score, then symbol."""
     if max_slots < 1:
         raise ValueError("max_slots must be positive")
     ordered = fills.copy()
     ordered["source_row"] = np.arange(len(ordered), dtype=np.int64)
-    ordered = ordered.sort_values(
-        ["entry_ms", "symbol", "event_id", "candidate_id"], kind="mergesort"
-    )
+    keys = ["entry_ms"]
+    ascending = [True]
+    if "entry_priority" in ordered:
+        priority = pd.to_numeric(ordered["entry_priority"], errors="raise")
+        if not np.isfinite(priority.to_numpy(dtype=float)).all():
+            raise ValueError("entry_priority must be finite")
+        ordered["entry_priority"] = priority
+        keys.append("entry_priority")
+        ascending.append(False)
+    ordered = ordered.sort_values(keys + ["symbol", "event_id", "candidate_id"],
+                                  ascending=ascending + [True, True, True], kind="mergesort")
     exit_ms = np.full(max_slots, -1, dtype=np.int64)
     exit_phase = np.full(max_slots, "", dtype=object)
     symbols = np.full(max_slots, "", dtype=object)
