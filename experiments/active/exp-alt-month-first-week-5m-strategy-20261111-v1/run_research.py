@@ -178,6 +178,20 @@ def evaluate(data,cfgs,picks):
                     name=f'{key}__{round(fraction*100)}pct'
                     result['funded_trades'].to_csv(HERE/(name+'_trades.csv.gz'),index=False)
                     result['equity_5m'].to_csv(HERE/(name+'_equity.csv.gz'),index=False)
+    # All prespecified sizes of the frozen winning rules are visible to the
+    # owner. The pre-2025 winners retain their original sizes.
+    sensitivity = []
+    for key in sorted({pair[0] for pair in pairs}):
+        fills, marks = independent(data,key,cfgs,CFG['base_market_slippage_bps'])
+        for fraction in (.05,.10,.20):
+            for period in ('early','late','full'):
+                previous = next((r for r in summaries if r['strategy']==key and r['fraction']==fraction
+                                 and r['type']=='signal' and r['period']==period
+                                 and r['market_slippage_bps']==CFG['base_market_slippage_bps']),None)
+                if previous is None:
+                    previous = dict(account_result(fills,marks,period,fraction)['summary'],strategy=key,fraction=fraction)
+                sensitivity.append(previous)
+    pd.DataFrame(sensitivity).to_csv(HERE/'winning_rule_sizing.csv',index=False)
     return pd.DataFrame(summaries)
 
 
