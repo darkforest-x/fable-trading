@@ -104,7 +104,7 @@ def summarize():
     candidates[candidates.mfe7>=20][cols].to_csv(OUT/'reversals_20pct.csv',index=False)
     candidates[candidates.month_unique & (candidates.mfe7>=20)][cols].to_csv(OUT/'single_touch_month_20pct.csv',index=False)
     replay=candidates[candidates.follow7].copy()
-    replay['local_flag']=replay.isolated.map({True:'是',False:'边界未覆盖'})
+    replay['local_flag']=replay.isolated.map({True:'是',False:'否或窗口不足'})
     replay['month_flag']=np.where(replay.month_unique,'是',np.where(replay.month_complete,'否','月份未走完'))
     replay['side']=replay.side.map({'lower':'下轨','upper':'上轨'})
     replay['tip']=replay.low.where(replay.side=='下轨',replay.high)
@@ -115,6 +115,7 @@ def summarize():
              'mfe7':'7天最大反向幅度百分比','peak_price':'7天最有利价格',
              'end7':'第7天收盘反向涨跌百分比','first_20pct_hour_Beijing':'首次达到20%的小时（北京）'}
     for name,frame in [('单针形态_全部',replay),('单针形态_7天反转至少20pct',replay[replay.mfe7>=20]),
+                       ('邻近单针_再碰轨前已反转20pct',replay[replay.isolated & (replay.max_before_retouch>=20)]),
                        ('整月单针_全部',replay[replay.month_unique]),('整月单针_7天反转至少20pct',replay[replay.month_unique & (replay.mfe7>=20)])]:
         frame[list(mapping)].rename(columns=mapping).to_csv(OUT/(name+'.csv'),index=False,encoding='utf-8-sig')
     coverage=read_group('coverage')
@@ -131,6 +132,10 @@ def summarize():
              month_unique_success=int((followed.month_unique & (followed.mfe7>=20)).sum()),
              success_by_side=followed[followed.mfe7>=20].side.value_counts().to_dict())
     strict=followed[followed.month_unique & (followed.mfe7>=20)]
+    unbroken=followed[followed.isolated & (followed.max_before_retouch>=20)]
+    out['local_success_before_retouch']=len(unbroken)
+    out['local_success_before_retouch_symbols']=unbroken.symbol.nunique()
+    out['local_success_before_retouch_by_side']=unbroken.side.value_counts().to_dict()
     out['strict_success_symbols']=strict.symbol.nunique()
     out['strict_success_by_side']=strict.side.value_counts().to_dict()
     valid_counts=valid.groupby('symbol').size()

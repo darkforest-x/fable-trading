@@ -110,11 +110,15 @@ if __name__=='__main__':
         cases=frame[frame.mfe7>=20]
         all_path=OUT/'12小时_单针形态_反转20pct_K线图.zip'
         strict_path=OUT/'12小时_整月单针_反转20pct_K线图.zip'
-        with ThreadPoolExecutor(max_workers=4) as pool, zipfile.ZipFile(all_path.with_suffix('.tmp'),'w') as book, zipfile.ZipFile(strict_path.with_suffix('.tmp'),'w') as strict:
-            for path,unique in zip(pool.map(lambda row:chart(row,archive=True),cases.itertuples()),cases.month_unique):
+        close_path=OUT/'12小时_邻近单针_再碰轨前已反转20pct.zip'
+        with ThreadPoolExecutor(max_workers=4) as pool, zipfile.ZipFile(all_path.with_suffix('.tmp'),'w') as book, zipfile.ZipFile(strict_path.with_suffix('.tmp'),'w') as strict, zipfile.ZipFile(close_path.with_suffix('.tmp'),'w') as close_book:
+            for path,unique,clean in zip(pool.map(lambda row:chart(row,archive=True),cases.itertuples()),cases.month_unique,cases.isolated & (cases.max_before_retouch>=20)):
                 book.write(path,arcname=path.name)
+                if clean:
+                    close_book.write(path,arcname=path.name)
                 if unique:
                     strict.write(path,arcname=path.name)
+        close_path.with_suffix('.tmp').replace(close_path)
         all_path.with_suffix('.tmp').replace(all_path)
         strict_path.with_suffix('.tmp').replace(strict_path)
         print('charts',len(cases),flush=True)
