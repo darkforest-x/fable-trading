@@ -287,6 +287,7 @@ def read_archive_window(path: Path) -> tuple[dict[str, Any] | None, dict[int, di
 def parse_native_rows(event: dict[str, str], rows: list[dict[str, str]]) -> dict[int, dict[str, Any]]:
     event_hour_ms = int(parse_utc(event["touch"]).timestamp() * 1000)
     bars: dict[int, dict[str, Any]] = {}
+    ordered_ts: list[int] = []
     for row in rows:
         ts = int(row["ts_ms"])
         if ts % BAR_MS:
@@ -309,6 +310,9 @@ def parse_native_rows(event: dict[str, str], rows: list[dict[str, str]]) -> dict
         if decimal(bar["high"]) < max(decimal(bar["open"]), decimal(bar["close"])):
             raise ValueError(f"Invalid native high/OHLC: {event['event_id']} {ts}")
         bars[ts] = bar
+        ordered_ts.append(ts)
+    if ordered_ts != sorted(ordered_ts):
+        raise ValueError(f"Native event candles are not ascending by ts_ms: {event['event_id']}")
     return bars
 
 
@@ -564,18 +568,22 @@ def audit_window_prefix(event: dict[str, str], bars: dict[int, dict[str, Any]]) 
     ready_ms = int(first_full_week_ready(event["month"]).timestamp() * 1000)
     touch_ms = int(parse_utc(event["touch"]).timestamp() * 1000)
     start_ms = max(ready_ms, touch_ms - 120 * BAR_MS)
-    expected_times = list(range(start_ms, touch_ms, BAR_MS))
-    observed = [(ts, bars[ts]) for ts in expected_times if ts in bars]
+    scan_times = list(range(start_ms, touch_ms, BAR_MS))
+    observed = [(ts, bars[ts]) for ts in scan_times if ts in bars]
     level = decimal(event["level"])
     earlier = [(ts, bar) for ts, bar in observed if rail_touched(bar, event["side"], level)]
-    complete = len(observed) == len(expected_times) and all(
+    full_prefix_expected = (touch_ms - ready_ms) // BAR_MS
+    prefix_fits_window = ready_ms >= touch_ms - 120 * BAR_MS
+    complete = prefix_fits_window and len(observed) == len(scan_times) and all(
         str(bar.get("confirm", "")).strip() != "0" for _, bar in observed
     )
     status = "earlier_touch" if earlier else "verified" if complete else "incomplete"
     return {
         "native_window_prior_5m_status": status,
-        "native_window_prior_5m_expected_bars": len(expected_times),
-        "native_window_prior_5m_observed_bars": len(observed),
+        "native_window_prior_5m_expected_bars": full_prefix_expected,
+        "native_window_prior_5m_scan_expected_bars": len(scan_times),
+        "native_window_prior_5m_scan_observed_bars": len(observed),
+        "native_window_prior_5m_full_prefix_fits_window": str(prefix_fits_window).lower(),
         "native_window_prior_5m_first_utc": iso_utc(from_ms(start_ms)),
         "native_window_prior_5m_first_same_side_touch_utc": iso_utc(from_ms(earlier[0][0])) if earlier else "",
     }
@@ -800,6 +808,8 @@ def enrich_event(event: dict[str, str], h1: dict[str, Any], fetch: dict[str, str
 
     archive_path = event_window_path(archive_dir, event)
     archive_data, archive_bars = read_archive_window(archive_path)
+    if archive_data and (archive_data.get("event_id") != event["event_id"] or archive_data.get("symbol") != event["symbol"]):
+        raise ValueError(f"Archive window event identity mismatch: {event['event_id']}")
     archive_prior_status = str(archive_data.get("prior_5m_status", "unknown")) if archive_data else "missing_archive_window"
     archive_class = classify_path(event, archive_bars, h1_bar, rel_tol, abs_tol, as_of_ms) if archive_data else {}
     comparison = compare_bar_maps(bars, archive_bars, rel_tol, abs_tol) if archive_data else {
@@ -843,6 +853,9 @@ def enrich_event(event: dict[str, str], h1: dict[str, Any], fetch: dict[str, str
 
     event_hour_ms = int(parse_utc(event["touch"]).timestamp() * 1000)
     period = "before_2025" if event_hour_ms < SPLIT_MS else "2025_or_later"
+    ledger_count_match = "unavailable"
+    if fetch and fetch.get("returned_bars", "") != "":
+        ledger_count_match = str(int(fetch["returned_bars"]) == len(bars)).lower()
     output: dict[str, Any] = {
         **event,
         **h1,
@@ -853,6 +866,7 @@ def enrich_event(event: dict[str, str], h1: dict[str, Any], fetch: dict[str, str
         "native_fetch_requested_bars": fetch.get("requested_bars", "") if fetch else "",
         "native_fetch_returned_bars": fetch.get("returned_bars", "") if fetch else "",
         "native_fetch_contiguous_confirmed_bars": fetch.get("contiguous_confirmed_bars", "") if fetch else "",
+        "native_ledger_return_count_matches_candles": ledger_count_match,
         **window_prefix,
         **observed,
         "archive_prior_5m_status": archive_prior_status,
@@ -921,6 +935,8 @@ def enrich_event(event: dict[str, str], h1: dict[str, Any], fetch: dict[str, str
         analysis_status = f"excluded_h1_{h1['h1_first_touch_validation_status']}"
     elif direct_prior_touch:
         analysis_status = "excluded_prior_same_side_5m_touch_found"
+    elif ledger_count_match == "false" and selected_source == "okx_native_5m":
+        analysis_status = "excluded_native_ledger_candle_count_mismatch"
     elif not selected and direct_hour_conflict:
         analysis_status = "direct_native_h1_5m_ohlc_mismatch_source_conflict"
     elif not selected:

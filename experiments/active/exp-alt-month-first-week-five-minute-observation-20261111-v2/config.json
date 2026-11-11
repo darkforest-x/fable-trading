@@ -26,6 +26,7 @@
     "fields": ["open", "high", "low", "close"]
   },
   "supplementary_sources": {
+    "native_event_window_prior_5m_status": "Scan max(ready_utc, H1 touch open minus 120 five-minute bars) through the H1 open, exclusive. Any earlier same-side touch excludes the event. Mark verified only if ready_utc itself falls within the 120-bar window and every expected bar from ready_utc is present; an expected interval of zero bars is verified.",
     "archive_prior_5m_status": "Use as an independent full-prefix audit when available. earlier_touch excludes the primary classification; verified and incomplete remain separately identified.",
     "v1_overlap": "Reuse v1 results only for overlap consistency checks; its strict pre-H1 subset is v1_pre_h1_coverage_status=complete_no_same_side_5m_touch."
   },
