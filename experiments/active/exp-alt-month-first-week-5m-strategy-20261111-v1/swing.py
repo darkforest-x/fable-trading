@@ -299,11 +299,9 @@ def _account_pools(fills: pd.DataFrame, marks: pd.DataFrame) -> dict[str, tuple[
 def run() -> dict:
     config = json.loads(CONFIG_PATH.read_text())
     roster, windows = _load_roster()
-    pair_audit, pair_violations = _audit_matched_pairs(roster, require_complete=True)
+    pair_audit, _ = _audit_matched_pairs(roster, require_complete=True)
     roster, sample_counts = _eligible_roster(roster)
-    eligible_pair_audit, eligible_pair_violations = _audit_matched_pairs(
-        roster, require_complete=True
-    )
+    eligible_pair_audit, _ = _audit_matched_pairs(roster, require_complete=True)
     _validate_windows(roster, windows)
     print(
         f"Common 7d-complete roster: {len(roster)} ({roster.kind.value_counts().to_dict()})",
@@ -407,11 +405,12 @@ def run() -> dict:
     metrics.to_csv(HERE / "swing_account_metrics.csv", index=False)
     fills_all.to_csv(HERE / "swing_independent_trades.csv.gz", index=False)
     funded_all.to_csv(HERE / "swing_funded_trades.csv.gz", index=False)
-    equity_all.to_csv(HERE / "swing_equity_5m.csv.gz", index=False)
+    equity_all.to_csv(DATA / "swing_equity_5m.csv.gz", index=False)
     output = {
         "strategy": "first upper-rail reclaim, next-open short",
         "source_windows": str(WINDOW_PATH.relative_to(ROOT)),
         "source_roster": str(ROSTER_PATH.relative_to(ROOT)),
+        "equity_curve": str((DATA / "swing_equity_5m.csv.gz").relative_to(ROOT)),
         "entry": "first strict close back inside the upper first-week rail within touch bar through the next five 5m bars; short at following open",
         "target": "max(first-week high, actual slipped entry * 0.96); limit fee 2bp",
         "stop": "fixed 5% adverse from actual slipped entry; market fee 5bp",
@@ -424,10 +423,9 @@ def run() -> dict:
         "eligible_matched_pair_audit": eligible_pair_audit,
         "scenarios": all_timing,
         "engine": "VectorBT Portfolio.from_order_func native OHLC callback; account is VectorBT cash-sharing callback; no funding",
+        "holding_window_note": "Only continuous complete 5m windows are included. Seven-day exits may cross the NY month boundary; the frozen first-week target remains active.",
         "cap_note": "The same 5bp-feasible candidate set is shared by all horizons and both slippage levels. Target cap is recomputed from each actual slipped entry fill.",
     }
-    pair_violations.to_csv(HERE / "swing_matched_pair_violations.csv", index=False)
-    eligible_pair_violations.to_csv(HERE / "swing_eligible_pair_violations.csv", index=False)
     (HERE / "swing_summary.json").write_text(json.dumps(output, indent=2, allow_nan=False) + "\n")
     return output
 

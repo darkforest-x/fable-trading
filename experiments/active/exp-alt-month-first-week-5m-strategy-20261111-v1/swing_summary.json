@@ -1,0 +1,129 @@
+{
+  "strategy": "first upper-rail reclaim, next-open short",
+  "source_windows": "data/research/month-first-week-5m-strategy-20261111-v1/swing_windows.npy",
+  "source_roster": "data/research/month-first-week-5m-strategy-20261111-v1/swing_roster.csv.gz",
+  "entry": "first strict close back inside the upper first-week rail within touch bar through the next five 5m bars; short at following open",
+  "target": "max(first-week high, actual slipped entry * 0.96); limit fee 2bp",
+  "stop": "fixed 5% adverse from actual slipped entry; market fee 5bp",
+  "market_slippage_bps": [
+    1,
+    5
+  ],
+  "holding_bars": {
+    "1h": 12,
+    "24h": 288,
+    "7d": 2016
+  },
+  "account": {
+    "initial_usdt": 1000,
+    "per_trade_fraction": 0.05,
+    "max_slots": 10
+  },
+  "periods": [
+    {
+      "period": "pre_2025",
+      "start_ms": 1643673600000,
+      "end_exclusive_ms": 1735689600000
+    },
+    {
+      "period": "2025",
+      "start_ms": 1735689600000,
+      "end_exclusive_ms": 1767225600000
+    },
+    {
+      "period": "2026_jan_oct",
+      "start_ms": 1767225600000,
+      "end_exclusive_ms": 1793505600000
+    },
+    {
+      "period": "full",
+      "start_ms": 1643673600000,
+      "end_exclusive_ms": 1793505600000
+    }
+  ],
+  "sample": {
+    "roster_rows": 3313,
+    "signal_roster_rows": 1764,
+    "placebo_roster_rows": 1549,
+    "matched_signal_rows": 1549,
+    "excluded_target_not_favorable_at_5bp": 0
+  },
+  "matched_pair_audit": {
+    "matched_signal_pairs": 1549,
+    "matched_placebo_pairs": 1549,
+    "pair_violations": 0,
+    "minimum_pair_gap_days": 7.0
+  },
+  "eligible_matched_pair_audit": {
+    "matched_signal_pairs": 1549,
+    "matched_placebo_pairs": 1549,
+    "pair_violations": 0,
+    "minimum_pair_gap_days": 7.0
+  },
+  "scenarios": {
+    "signal_1h_1bp": {
+      "candidates": 1764,
+      "engine_trades": 1764,
+      "active_mark_rows": 18435
+    },
+    "placebo_1h_1bp": {
+      "candidates": 1549,
+      "engine_trades": 1549,
+      "active_mark_rows": 18072
+    },
+    "signal_1h_5bp": {
+      "candidates": 1764,
+      "engine_trades": 1764,
+      "active_mark_rows": 18409
+    },
+    "placebo_1h_5bp": {
+      "candidates": 1549,
+      "engine_trades": 1549,
+      "active_mark_rows": 18075
+    },
+    "signal_24h_1bp": {
+      "candidates": 1764,
+      "engine_trades": 1764,
+      "active_mark_rows": 183476
+    },
+    "placebo_24h_1bp": {
+      "candidates": 1549,
+      "engine_trades": 1549,
+      "active_mark_rows": 259498
+    },
+    "signal_24h_5bp": {
+      "candidates": 1764,
+      "engine_trades": 1764,
+      "active_mark_rows": 183025
+    },
+    "placebo_24h_5bp": {
+      "candidates": 1549,
+      "engine_trades": 1549,
+      "active_mark_rows": 259633
+    },
+    "signal_7d_1bp": {
+      "candidates": 1764,
+      "engine_trades": 1764,
+      "active_mark_rows": 276126
+    },
+    "placebo_7d_1bp": {
+      "candidates": 1549,
+      "engine_trades": 1549,
+      "active_mark_rows": 507983
+    },
+    "signal_7d_5bp": {
+      "candidates": 1764,
+      "engine_trades": 1764,
+      "active_mark_rows": 275656
+    },
+    "placebo_7d_5bp": {
+      "candidates": 1549,
+      "engine_trades": 1549,
+      "active_mark_rows": 508625
+    }
+  },
+  "engine": "VectorBT Portfolio.from_order_func native OHLC callback; account is VectorBT cash-sharing callback; no funding",
+  "cap_note": "The same 5bp-feasible candidate set is shared by all horizons and both slippage levels. Target cap is recomputed from each actual slipped entry fill.",
+  "equity_curve": "data/research/month-first-week-5m-strategy-20261111-v1/swing_equity_5m.csv.gz",
+  "holding_window_note": "Only continuous complete 5m windows are included. Seven-day exits may cross the NY month boundary; the frozen first-week target remains active."
+}
