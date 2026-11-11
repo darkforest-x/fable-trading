@@ -270,7 +270,7 @@ def build_symbol(symbol: str, force: bool = False) -> dict[str, Any]:
         failures.append(f"monthly_archive_unavailable: {exc}")
         if absence_candidate and not _has_october_monthly_key(symbol):
             # An old archive-only symbol with no October monthly listing has no
-            # October window to fill. Probe the recent tail once; -1121 or an
+            # October window to fill. Probe the recent tail once; -1121/-1122 or an
             # empty response is an absent-in-window receipt, not a data gap.
             try:
                 tail_rows = _rest_klines(symbol, NOV_START_MS, CUTOFF_MS, 300)
@@ -279,7 +279,7 @@ def build_symbol(symbol: str, force: bool = False) -> dict[str, Any]:
                     return _publish_absent(symbol, sources, failures + ["no_october_monthly_key_and_rest_tail_empty"])
                 return _publish(symbol, tail_rows, sources, failures)
             except BinanceApiError as exc2:
-                if exc2.code == -1121:
+                if exc2.code in {-1121, -1122}:
                     sources.append({"source": "binance_um_rest_1h_tail_probe", "url": UM_KLINES, "rows": 0, "api_code": exc2.code})
                     return _publish_absent(symbol, sources, failures + [f"no_october_monthly_key_and_rest_unknown_symbol: {exc2}"])
                 return _publish_failure(symbol, sources, failures + [f"rest_tail_probe_failed: {exc2}"])
@@ -294,7 +294,7 @@ def build_symbol(symbol: str, force: bool = False) -> dict[str, Any]:
             tail_rows = all_rows[all_rows[:, 0] >= NOV_START_MS]
             return _publish(symbol, np.concatenate([month_rows, tail_rows]) if len(month_rows) or len(tail_rows) else all_rows, sources, failures)
         except Exception as exc2:
-            if absence_candidate and isinstance(exc2, BinanceApiError) and exc2.code == -1121:
+            if absence_candidate and isinstance(exc2, BinanceApiError) and exc2.code in {-1121, -1122}:
                 sources.append({"source": "binance_um_rest_full_probe", "url": UM_KLINES, "rows": 0, "api_code": exc2.code})
                 return _publish_absent(symbol, sources, failures + [f"unknown_symbol_no_usable_2026_window: {exc2}"])
             return _publish_failure(symbol, sources, failures + [f"rest_full_fallback_failed: {type(exc2).__name__}: {exc2}"])
@@ -305,7 +305,7 @@ def build_symbol(symbol: str, force: bool = False) -> dict[str, Any]:
         tail_rows = _rest_klines(symbol, NOV_START_MS, CUTOFF_MS, 300)
         sources.append({"source": "binance_um_rest_1h_tail", "url": UM_KLINES, "rows": int(len(tail_rows))})
     except Exception as exc:
-        if absence_candidate and isinstance(exc, BinanceApiError) and exc.code == -1121:
+        if absence_candidate and isinstance(exc, BinanceApiError) and exc.code in {-1121, -1122}:
             sources.append({"source": "binance_um_rest_1h_tail_probe", "url": UM_KLINES, "rows": 0, "api_code": exc.code})
             return _publish_absent(symbol, sources, [f"pending_or_archived_symbol_has_no_tail_candles: {exc}"])
         return _publish_failure(symbol, sources, [f"rest_tail_failed: {type(exc).__name__}: {exc}"])
