@@ -419,8 +419,8 @@ def main() -> None:
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--force", action="store_true", help="refetch even when a valid receipt exists")
     args = parser.parse_args()
-    if args.workers < 1 or args.workers > 8:
-        parser.error("--workers must be between 1 and 8")
+    if args.workers < 1 or args.workers > 16:
+        parser.error("--workers must be between 1 and 16")
     symbols = _order([s.upper() for s in args.symbols]) if args.symbols else _order(_eligible_symbols())
     OUT.mkdir(parents=True, exist_ok=True)
     from concurrent.futures import ThreadPoolExecutor, as_completed
