@@ -103,6 +103,16 @@ def summarize():
     candidates[cols].to_csv(OUT/'isolated_12h.csv',index=False)
     candidates[candidates.mfe7>=20][cols].to_csv(OUT/'reversals_20pct.csv',index=False)
     candidates[candidates.month_unique & (candidates.mfe7>=20)][cols].to_csv(OUT/'single_touch_month_20pct.csv',index=False)
+    replay=candidates[candidates.month_unique & candidates.follow7].copy()
+    replay['side']=replay.side.map({'lower':'下轨','upper':'上轨'})
+    replay['tip']=replay.low.where(replay.side=='下轨',replay.high)
+    mapping={'symbol':'币安合约','month':'区间所属月（纽约）','bar_open_Beijing':'12小时开盘（北京）',
+             'bar_close_Beijing':'12小时收盘（北京）','side':'触及方向','level':'1.618轨价',
+             'tip':'针尖价格','close':'收盘价','wick_pct':'触轨影线占整根百分比',
+             'mfe7':'7天最大反向幅度百分比','peak_price':'7天最有利价格',
+             'end7':'第7天收盘反向涨跌百分比','first_20pct_hour_Beijing':'首次达到20%的小时（北京）'}
+    for name,frame in [('整月单针_全部',replay),('整月单针_7天反转至少20pct',replay[replay.mfe7>=20])]:
+        frame[list(mapping)].rename(columns=mapping).to_csv(OUT/(name+'.csv'),index=False,encoding='utf-8-sig')
     coverage=read_group('coverage')
     coverage.to_csv(OUT/'coverage_months.csv',index=False)
     valid=coverage[coverage.status=='valid']
