@@ -18,6 +18,7 @@ import time
 import zipfile
 from collections import deque
 from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
@@ -52,6 +53,13 @@ LIQUID = [
 _rate_lock = threading.Lock()
 _recent_weight: deque[tuple[float, int]] = deque()
 _WEIGHT_BUDGET = 1_800
+
+
+class BinanceApiError(RuntimeError):
+    def __init__(self, status_code: int, code: Any, message: str):
+        super().__init__(f"Binance UM HTTP {status_code} code={code}: {message}")
+        self.status_code = status_code
+        self.code = code
 
 
 def _utc_now() -> str:
@@ -97,6 +105,19 @@ def _archive_key(symbol: str) -> str:
                 return key.replace("/15m/", "/1h/").replace("-15m-", "-1h-")
     escaped = quote(symbol, safe="")
     return f"data/futures/um/monthly/klines/{escaped}/1h/{escaped}-1h-2026-10.zip"
+
+
+def _has_october_monthly_key(symbol: str) -> bool:
+    key_file = KEYS / f"{symbol}.json"
+    if not key_file.is_file():
+        return False
+    return any(key.endswith("-15m-2026-10.zip") for key in json.loads(key_file.read_text()))
+
+
+@lru_cache(maxsize=1)
+def _universe_metadata() -> dict[str, dict[str, str]]:
+    with ELIGIBLE.open(newline="") as handle:
+        return {row["symbol"].upper(): row for row in csv.DictReader(handle)}
 
 
 def _read_vision_month(symbol: str) -> tuple[np.ndarray, str]:
@@ -158,10 +179,10 @@ def _rest_klines(symbol: str, start_ms: int, end_exclusive_ms: int, limit: int) 
                 delay = float(response.headers.get("Retry-After", 2 ** min(attempt + 1, 5)))
                 time.sleep(min(max(delay, 1.0), 60.0))
                 continue
-            response.raise_for_status()
             payload = response.json()
             if isinstance(payload, dict):
-                raise RuntimeError(f"Binance UM API error: {payload}")
+                raise BinanceApiError(response.status_code, payload.get("code"), str(payload.get("msg", payload)))
+            response.raise_for_status()
             if not payload:
                 return np.empty((0, 5), dtype=np.float64)
             rows = np.asarray([[bar[0], *bar[1:5]] for bar in payload], dtype=np.float64)
@@ -221,7 +242,7 @@ def _cached_valid(symbol: str) -> bool:
         return False
     try:
         record = json.loads(receipt.read_text())
-        return record.get("status") == "ready" and record.get("cutoff_exclusive_ms") == CUTOFF_MS
+        return record.get("status") in {"ready", "absent_in_tail"} and record.get("cutoff_exclusive_ms") == CUTOFF_MS
     except Exception:
         return False
 
@@ -233,12 +254,37 @@ def build_symbol(symbol: str, force: bool = False) -> dict[str, Any]:
 
     sources: list[dict[str, Any]] = []
     failures: list[str] = []
+    metadata = _universe_metadata().get(symbol, {})
+    basis = metadata.get("basis", "")
+    instrument_status = metadata.get("status", "").upper()
+    absence_candidate = (
+        basis == "archive_only_unclassified"
+        or instrument_status == "PENDING_TRADING"
+        or metadata.get("current", "").lower() == "false"
+    )
     month_rows = np.empty((0, 5), dtype=np.float64)
     try:
         month_rows, month_url = _read_vision_month(symbol)
         sources.append({"source": "binance_vision_monthly_um_1h", "url": month_url, "rows": int(len(month_rows))})
     except FileNotFoundError as exc:
         failures.append(f"monthly_archive_unavailable: {exc}")
+        if absence_candidate and not _has_october_monthly_key(symbol):
+            # An old archive-only symbol with no October monthly listing has no
+            # October window to fill. Probe the recent tail once; -1121 or an
+            # empty response is an absent-in-window receipt, not a data gap.
+            try:
+                tail_rows = _rest_klines(symbol, NOV_START_MS, CUTOFF_MS, 300)
+                sources.append({"source": "binance_um_rest_1h_tail_probe", "url": UM_KLINES, "rows": int(len(tail_rows))})
+                if not len(tail_rows):
+                    return _publish_absent(symbol, sources, failures + ["no_october_monthly_key_and_rest_tail_empty"])
+                return _publish(symbol, tail_rows, sources, failures)
+            except BinanceApiError as exc2:
+                if exc2.code == -1121:
+                    sources.append({"source": "binance_um_rest_1h_tail_probe", "url": UM_KLINES, "rows": 0, "api_code": exc2.code})
+                    return _publish_absent(symbol, sources, failures + [f"no_october_monthly_key_and_rest_unknown_symbol: {exc2}"])
+                return _publish_failure(symbol, sources, failures + [f"rest_tail_probe_failed: {exc2}"])
+            except Exception as exc2:
+                return _publish_failure(symbol, sources, failures + [f"rest_tail_probe_failed: {type(exc2).__name__}: {exc2}"])
         # One bounded REST request recovers October when the official archive
         # is absent; max 1,500 bars covers the requested 1,258-hour window.
         try:
@@ -248,6 +294,9 @@ def build_symbol(symbol: str, force: bool = False) -> dict[str, Any]:
             tail_rows = all_rows[all_rows[:, 0] >= NOV_START_MS]
             return _publish(symbol, np.concatenate([month_rows, tail_rows]) if len(month_rows) or len(tail_rows) else all_rows, sources, failures)
         except Exception as exc2:
+            if absence_candidate and isinstance(exc2, BinanceApiError) and exc2.code == -1121:
+                sources.append({"source": "binance_um_rest_full_probe", "url": UM_KLINES, "rows": 0, "api_code": exc2.code})
+                return _publish_absent(symbol, sources, failures + [f"unknown_symbol_no_usable_2026_window: {exc2}"])
             return _publish_failure(symbol, sources, failures + [f"rest_full_fallback_failed: {type(exc2).__name__}: {exc2}"])
     except Exception as exc:
         return _publish_failure(symbol, sources, [f"monthly_archive_failed: {type(exc).__name__}: {exc}"])
@@ -256,6 +305,9 @@ def build_symbol(symbol: str, force: bool = False) -> dict[str, Any]:
         tail_rows = _rest_klines(symbol, NOV_START_MS, CUTOFF_MS, 300)
         sources.append({"source": "binance_um_rest_1h_tail", "url": UM_KLINES, "rows": int(len(tail_rows))})
     except Exception as exc:
+        if absence_candidate and isinstance(exc, BinanceApiError) and exc.code == -1121:
+            sources.append({"source": "binance_um_rest_1h_tail_probe", "url": UM_KLINES, "rows": 0, "api_code": exc.code})
+            return _publish_absent(symbol, sources, [f"pending_or_archived_symbol_has_no_tail_candles: {exc}"])
         return _publish_failure(symbol, sources, [f"rest_tail_failed: {type(exc).__name__}: {exc}"])
 
     rows = _clean_rows(np.concatenate([month_rows, tail_rows]), START_MS, CUTOFF_MS)
@@ -303,6 +355,27 @@ def _publish_failure(symbol: str, sources: list[dict[str, Any]], errors: list[st
     return {"symbol": symbol, "status": "failed", "errors": errors}
 
 
+def _publish_absent(symbol: str, sources: list[dict[str, Any]], evidence: list[str]) -> dict[str, Any]:
+    _atomic_npy(OUT / f"{symbol}.npy", np.empty((0, 5), dtype=np.float64))
+    receipt = {
+        "symbol": symbol,
+        "status": "absent_in_tail",
+        "exchange": "Binance USDⓈ-M Futures",
+        "interval": "1h",
+        "dtype": "float64",
+        "columns": ["utc_ms", "open", "high", "low", "close"],
+        "start_inclusive_ms": START_MS,
+        "cutoff_exclusive_ms": CUTOFF_MS,
+        "cutoff_exclusive_utc": "2026-11-11T10:00:00Z",
+        "sources": sources,
+        "evidence": evidence,
+        "generated_at_utc": _utc_now(),
+        **_coverage(np.empty((0, 5), dtype=np.float64)),
+    }
+    _atomic_json(OUT / f"{symbol}.json", receipt)
+    return {"symbol": symbol, "status": "absent_in_tail", "rows": 0}
+
+
 def _write_manifest() -> None:
     records = []
     for path in sorted(OUT.glob("*.json")):
@@ -322,6 +395,7 @@ def _write_manifest() -> None:
         "eligible_symbols": len(_eligible_symbols()),
         "ready": sum(record.get("status") == "ready" for record in records),
         "empty": sum(record.get("status") == "empty" for record in records),
+        "absent_in_tail": sum(record.get("status") == "absent_in_tail" for record in records),
         "failed": sum(record.get("status") == "failed" for record in records),
         "receipts": records,
     }
@@ -352,7 +426,7 @@ def main() -> None:
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
     print(f"symbols={len(symbols)} start=2026-10-01T00:00Z cutoff_exclusive=2026-11-11T10:00Z workers={args.workers}", flush=True)
-    failed = ready = cached = 0
+    failed = ready = cached = empty = absent = 0
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         futures = {pool.submit(build_symbol, symbol, args.force): symbol for symbol in symbols}
         for done, future in enumerate(as_completed(futures), 1):
@@ -367,11 +441,17 @@ def main() -> None:
                 print(f"failed {symbol}: {'; '.join(result.get('errors', []))}", flush=True)
             elif status == "cached":
                 cached += 1
+            elif status == "absent_in_tail":
+                absent += 1
+                print(f"absent_in_tail {symbol}", flush=True)
+            elif status == "empty":
+                empty += 1
+                print(f"empty {symbol}", flush=True)
             else:
                 ready += 1
                 print(f"ready {symbol} rows={result.get('rows', '?')}", flush=True)
             if done % 25 == 0 or done == len(symbols):
-                print(f"progress={done}/{len(symbols)} ready={ready} cached={cached} failed={failed}", flush=True)
+                print(f"progress={done}/{len(symbols)} ready={ready} cached={cached} empty={empty} absent={absent} failed={failed}", flush=True)
             if done % 25 == 0 or done == len(symbols):
                 _write_manifest()
 
