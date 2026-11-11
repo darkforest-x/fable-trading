@@ -58,11 +58,12 @@ def main():
                 continue
             ax.hlines(y,ready,end,linewidth=.8,color='#777d84' if '首周' in name else '#363b41')
             if (m,name) in [('2026-07','下 1.618'),('2026-08','下 1.618'),('2026-09','上 1.618')]:
-                ax.text(ready+pd.Timedelta(hours=8),y+.046,f'{name}  {y:.3f}',color='#454a51',fontsize=8,va='bottom')
+                label_time = end-pd.Timedelta(days=5) if m=='2026-08' else ready+pd.Timedelta(hours=8)
+                ax.text(label_time,y+.046,f'{name}  {y:.3f}',color='#454a51',fontsize=8,va='bottom')
     lows,highs,opens,closes=(a[k].to_numpy() for k in ('low','high','open','close'))
     ax.add_collection(LineCollection([[(i,l),(i,h)] for i,l,h in zip(x,lows,highs)],colors=colors,linewidths=.8,zorder=3))
     ax.add_collection(PolyCollection([[(i-.16,o),(i+.16,o),(i+.16,c),(i-.16,c)] for i,o,c in zip(x,opens,closes)],facecolors=colors,edgecolors=colors,linewidths=.55,zorder=4))
-    offsets={('2026-07','lower'):(-40,-37),('2026-08','lower'):(-30,-33),('2026-08','upper'):(-78,41),('2026-09','upper'):(-29,38)}
+    offsets={('2026-07','lower'):(-40,-37),('2026-08','lower'):(-32,-24),('2026-08','upper'):(-78,41),('2026-09','upper'):(-29,38)}
     for key in EVENTS:
         row,trade=ev.loc[key],ledger.loc[key]
         ts=pd.Timestamp(row.touch); tx=ts.floor('12h')+pd.Timedelta(hours=6)
