@@ -2,8 +2,9 @@
 
 All exits, entry prices, fee classes, position excursions and matched clocks
 come from the previously frozen target-cap study. Slip applies to market fills;
-the old resting barriers remain unchanged. A position uses 10% of current NAV.
+the old resting barriers remain unchanged. Compare 10% of NAV and full unlevered exposure.
 """
+import argparse
 import sys
 from pathlib import Path
 
@@ -19,7 +20,7 @@ SOURCE = HERE.parent/'exp-alt-month-first-week-near-target-20261110-v1/trades.cs
 BARS = HERE.parent/'exp-cloud-allmarket-screen-20261108-v1/inputs/ETC/bars1h.csv.gz'
 
 
-def run():
+def run(allocation=.1):
     quotes = pd.read_csv(BARS,float_precision='round_trip')
     clock = quotes.time.to_numpy()
     ohlc = quotes[['open','high','low','close']].to_numpy()
@@ -51,7 +52,7 @@ def run():
             data=wallet.prepare(sample,1,millis(start),millis(end),quote_loader=cache)
             assert data['gap_marks']==0
             for bps in (0,1,5):
-                trades,curve=wallet.account(data,slip=bps/10000,exposure=.1)
+                trades,curve=wallet.account(data,slip=bps/10000,exposure=allocation)
                 intrabar=trades[trades.exit_phase.eq('intrabar')]
                 slip=np.where(intrabar.exit_fee_rate.eq(TAKER),bps/10000,0.)
                 reserve=intrabar.quantity*intrabar.exit_price*(slip+intrabar.exit_fee_rate*(1+slip))
@@ -65,8 +66,11 @@ def run():
                                     wins=trades.cash_pnl.gt(0).sum(),**result))
                 if not control and period=='full' and bps==1:
                     all_trades.append(trades)
-    pd.DataFrame(results).to_csv(HERE/'first_touch_target_accounts.csv',index=False)
-    pd.concat(all_trades,ignore_index=True).to_csv(HERE/'first_touch_target_trades.csv',index=False)
+    suffix = '' if allocation == .1 else '_full_notional'
+    pd.DataFrame(results).to_csv(HERE/f'first_touch_target_accounts{suffix}.csv',index=False)
+    pd.concat(all_trades,ignore_index=True).to_csv(HERE/f'first_touch_target_trades{suffix}.csv',index=False)
 
 if __name__=='__main__':
-    run()
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--allocation',type=float,choices=(.1,1.),default=.1)
+    run(parser.parse_args().allocation)
