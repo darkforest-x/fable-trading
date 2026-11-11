@@ -128,8 +128,9 @@ def month_bands(data,measures):
     for label in [GOOD,BAD]:
         subset=active[active.outcome.eq(label)]
         values=subset.groupby(['month','hour']).above.agg(['sum','size'])
-        arrays=[values[k].unstack().reindex(months).fillna(0).to_numpy() for k in ['sum','size']]
+        arrays=[values[k].unstack().reindex(months).fillna(0).to_numpy(dtype=np.int64) for k in ['sum','size']]
         numerator,denominator=(counts@a for a in arrays)
+        assert ((0 <= numerator) & (numerator <= denominator) & (denominator > 0)).all()
         rates[label]=numerator/denominator
     diff=(rates[GOOD]-rates[BAD])*100
     pooled=(measures['时期或方向']=='全部')&(measures['小时']>0)

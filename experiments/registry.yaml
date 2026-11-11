@@ -15,6 +15,32 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-month-firstweek-first-reclaim-hours-20261112-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9698a2c5ce"
+    status: inconclusive
+    question: After a first-touch 12-hour reclaim, when do the next hourly closes first differ between the original favorable-first and adverse-first paths, and how much movement has already occurred?
+    single_variable: Elapsed completed hours after the reclaim (0 through 6); original labels, population and rail are fixed. No parameter search or trade simulation.
+    result: >-
+      Across 1616 favorable-first and 3722 adverse-first cases from 642 Binance contracts, the 12h reclaim
+      already closed a median 3.13 vs 2.00 percent inward of the rail. After one additional hour,
+      942/1602 vs 1798/3652 unresolved cases advanced further, a 9.57 percentage point gap
+      (95 percent simultaneous month-block interval 2.92 to 16.22; both chronological subsets positive).
+      The median favorable-direction moves from the 12h close were 0.20 vs 0.00 percent, and
+      14 favorable and 70 adverse outcomes had already resolved. At hour four the gap was 14.10 points.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    canonical_report: experiments/active/exp-month-firstweek-first-reclaim-hours-20261112-v1/hourly_groups.csv
+    artifacts: []
+    notes: >-
+      The original outcomes describe which of +20 and -5 percent of rail was reached first within 45 days;
+      unresolved or ambiguous paths are not represented. At each landmark the decisive candle is excluded
+      and the original rail must still be current. At hour one the upper vs lower rail gaps were 14.31 vs
+      4.01 points. These are group differences, not trade win rates. See hourly_separation.csv, protocol.json
+      and data/research/alt-isolated-12h-wicks-20261111/expanded12/all_replay_v1/first_reclaim_hours/landmarks.csv.gz.
+
   - experiment_id: exp-month-firstweek-all-replay-20261111-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "26941badef"
