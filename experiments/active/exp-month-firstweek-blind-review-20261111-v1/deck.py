@@ -63,6 +63,7 @@ class TouchEvent:
     rail_side: str
     open_ms: int
     rail: float
+    month_end_ms: int
 
 
 @dataclass
@@ -95,6 +96,9 @@ def _complete_12h_bars(raw: np.ndarray) -> dict[int, Candle]:
     if raw is None or not len(raw):
         return {}
     q = np.asarray(raw, dtype=float)
+    q = q[q[:, 0] + HOUR <= strategy_signals.CUTOFF]
+    if not len(q):
+        return {}
     times = q[:, 0].astype(np.int64)
     if np.any(times % HOUR) or np.any(np.diff(times) <= 0):
         raise ValueError("read_raw returned unaligned or non-increasing hourly candles")
@@ -133,8 +137,8 @@ def _monthly_first_touches(symbol: str, raw: np.ndarray, bars: dict[int, Candle]
     times = q[:, 0].astype(np.int64)
     events: list[TouchEvent] = []
 
-    for month, start_slot, ready_slot, end_slot in strategy_signals.WINDOWS:
-        start_ms, ready_ms, end_ms = (int(v * SLOT) for v in (start_slot, ready_slot, end_slot))
+    for month, start_ms, ready_ms, end_ms in strategy_signals.WINDOWS:
+        start_ms, ready_ms, end_ms = map(int, (start_ms, ready_ms, end_ms))
         if ready_ms < times[0] or ready_ms >= times[-1] + HOUR:
             continue
         i, j = np.searchsorted(times, [start_ms, ready_ms])
@@ -161,23 +165,28 @@ def _monthly_first_touches(symbol: str, raw: np.ndarray, bars: dict[int, Candle]
         contiguous_hours = int(missing[0]) if len(missing) else len(active_times)
         contiguous_end_ms = ready_ms + contiguous_hours * HOUR
 
+        active = q[j : j + contiguous_hours]
+        active_times = times[j : j + contiguous_hours]
+        if not len(active):
+            continue
         for rail_side, rail in rails.items():
-            # Strategy direction: lower rail is long; upper rail is short.
+            # Find the first hourly contact after ready, then use its complete
+            # UTC-aligned 12h candle. This retains a candle that opened before
+            # ready when the actual touch happened after ready.
             side = "long" if rail_side == "lower" else "short"
             eps = abs(rail) * 1e-12
-            active_bars = [
-                bar
-                for t, bar in sorted(bars.items())
-                if ready_ms <= t and t + BAR <= min(end_ms, contiguous_end_ms)
-            ]
-            first = next(
-                (bar for bar in active_bars if bar.low <= rail + eps and bar.high >= rail - eps),
-                None,
+            touched_hours = np.flatnonzero(
+                (active[:, 3] <= rail + eps) & (active[:, 2] >= rail - eps)
             )
-            if first is not None:
-                events.append(
-                    TouchEvent(symbol, month, side, rail_side, first.open_ms, float(rail))
-                )
+            if not len(touched_hours):
+                continue
+            bar_open_ms = int(active_times[int(touched_hours[0])] // BAR * BAR)
+            first = bars.get(bar_open_ms)
+            if first is None:
+                continue
+            events.append(
+                TouchEvent(symbol, month, side, rail_side, first.open_ms, float(rail), end_ms)
+            )
     return events
 
 
@@ -196,8 +205,11 @@ def _candidate_specs(reference_csv: Path) -> tuple[list[dict], int]:
     frame = pd.read_csv(reference_csv, usecols=columns)
     frame = frame[frame["币安_触轨12h根数"].notna()].copy()
     specs: list[dict] = []
-    for row in frame.itertuples(index=False, name=None):
-        symbol, month, rail_side_cn, count, listed_opens = row
+    for row in frame[columns].to_dict("records"):
+        symbol = row["合约"]
+        month = row["区间月（纽约）"]
+        rail_side_cn = row["侧"]
+        listed_opens = row["币安_K线开盘（北京）"]
         specs.append(
             {
                 "symbol": str(symbol),
@@ -270,7 +282,14 @@ def _find_phase3(event: TouchEvent, bars: dict[int, Candle]) -> tuple[list[Candl
     if first is None:
         return None
     eps = abs(event.rail) * 1e-12
-    ordered = [bars[t] for t in sorted(bars) if t >= event.open_ms]
+    ordered = [first]
+    offset = 1
+    while event.open_ms + offset * BAR + BAR <= event.month_end_ms:
+        bar = bars.get(event.open_ms + offset * BAR)
+        if bar is None:
+            break
+        ordered.append(bar)
+        offset += 1
     prior_touches = 1
     consecutive_clear = 0
     for index, bar in enumerate(ordered[1:], start=1):
