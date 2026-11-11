@@ -325,3 +325,163 @@ struct MonthFirstWeekSnapshot: Codable {
     let items: [MonthFirstWeekItem]
     let touches: [MonthFirstWeekTouch]
 }
+
+/// Read-only event-specific monthly 1.618 chart from
+/// `/v1/monitor/month-first-week-1618/chart`. All timestamps in this response are epoch milliseconds.
+struct MonthFirstWeekChartSnapshot: Codable {
+    struct Anchor: Codable {
+        let startMs: Double
+        let readyMs: Double
+        let expiresMs: Double
+        let high: Double?
+        let low: Double?
+        let upper: Double?
+        let lower: Double?
+    }
+
+    struct Bar: Codable {
+        let time: Double
+        let open: Double
+        let high: Double
+        let low: Double
+        let close: Double
+        let volume: Double
+        /// Per-service first-week classification; nil is tolerated for local mock fixtures.
+        let firstWeek: Bool?
+
+        var candle: Candle {
+            Candle(time: time / 1000, open: open, high: high, low: low, close: close, volume: volume,
+                   confirmed: true)
+        }
+    }
+
+    let eventId: String?
+    let symbol: String
+    let month: String
+    let side: Edge?
+    let source: String?
+    let bar: String
+    let level: Double?
+    let anchor: Anchor
+    let candles: [Bar]
+    let formingTimeMs: Double?
+    /// Optional is the only missing-value signal. A numeric zero is retained as a supplied timestamp.
+    let markerMs: Double?
+    let observationStartMs: Double?
+    let observationEndMs: Double?
+
+    var chartCandles: [Candle] {
+        candles.map { value in
+            var candle = value.candle
+            if let formingTimeMs, formingTimeMs == value.time {
+                candle = Candle(time: candle.time, open: candle.open, high: candle.high, low: candle.low,
+                                close: candle.close, volume: candle.volume, confirmed: false)
+            }
+            return candle
+        }
+    }
+
+    var chartMarkers: [ChartMarker] {
+        guard let markerMs, candles.contains(where: { $0.time == markerMs }),
+              source != nil, let level, let side else { return [] }
+        return [ChartMarker(time: markerMs / 1000, price: level, edge: side)]
+    }
+
+    var locatedMarkerMs: Double? {
+        guard let markerMs, candles.contains(where: { $0.time == markerMs }),
+              source != nil, side != nil, level != nil else { return nil }
+        return markerMs
+    }
+
+    var chartHighlightRange: Range<Double>? {
+        guard anchor.startMs < anchor.readyMs else { return nil }
+        return (anchor.startMs / 1000)..<(anchor.readyMs / 1000)
+    }
+
+    /// nil means this response/mock predates the per-bar flag; an empty set is an explicit all-grey result.
+    var chartHighlightedBarTimes: Set<Double>? {
+        guard candles.contains(where: { $0.firstWeek != nil }) else { return nil }
+        return Set(candles.filter { $0.firstWeek == true }.map { $0.time / 1000 })
+    }
+
+    var chartFocusRange: ClosedRange<Double>? {
+        guard let observationStartMs, let observationEndMs else { return nil }
+        return (observationStartMs / 1000)...(observationEndMs / 1000)
+    }
+
+    var chartRange: FibRange? {
+        guard let high = anchor.high, let low = anchor.low, let upper = anchor.upper, let lower = anchor.lower else { return nil }
+        guard lower > 0 else { return nil }
+        return FibRange(high: high, low: low, upper: upper, lower: lower,
+                 start: anchor.readyMs / 1000, end: anchor.expiresMs / 1000,
+                 highTitle: "首周高", lowTitle: "首周低")
+    }
+
+    var chartLines: [ChartLine] {
+        guard chartRange == nil else { return [] }
+        let start = anchor.readyMs / 1000, end = anchor.expiresMs / 1000
+        let flatRange = anchor.high != nil && anchor.high == anchor.low
+        return [
+            (anchor.upper, "上 1.618", ChartPalette.reference),
+            (anchor.high, flatRange ? "首周高/低" : "首周高", ChartPalette.mondayLine),
+            (flatRange ? nil : anchor.low, "首周低", ChartPalette.mondayLine),
+            (anchor.lower, "下 1.618", ChartPalette.reference),
+        ].compactMap { item in
+            let (value, title, color) = item
+            guard let value, value > 0, value.isFinite else { return nil }
+            return ChartLine(price: value, title: title, color: color, startTime: start, endTime: end)
+        }
+    }
+
+    func validate(eventId expectedEventId: String, period expectedPeriod: CandlePeriod) throws {
+        try validateCommon(period: expectedPeriod)
+        guard eventId == expectedEventId,
+              source.map({ ["live", "history"].contains($0) }) == true,
+              side != nil, let level, level.isFinite, level > 0,
+              observationStartMs?.isFinite == true, observationEndMs?.isFinite == true,
+              let observationStartMs, let observationEndMs, observationStartMs <= observationEndMs,
+              anchor.high != nil, anchor.low != nil, anchor.upper != nil, anchor.lower != nil else {
+            throw APIError(status: 502, message: "月首周触价图表版本不匹配")
+        }
+    }
+
+    func validate(symbol expectedSymbol: String, period expectedPeriod: CandlePeriod) throws {
+        try validateCommon(period: expectedPeriod)
+        guard eventId == nil, symbol == expectedSymbol else {
+            throw APIError(status: 502, message: "月首周合约图表版本不匹配")
+        }
+    }
+
+    private func validateCommon(period expectedPeriod: CandlePeriod) throws {
+        let prices = [anchor.high, anchor.low, anchor.upper, anchor.lower].compactMap { $0 }
+        let validBars = candles.allSatisfy { value in
+            let candle = value.candle
+            return candle.valid
+        }
+        let ascending = zip(candles, candles.dropFirst()).allSatisfy { $0.time < $1.time }
+        let hasExtension = anchor.upper != nil || anchor.lower != nil
+        let validHighLow: Bool
+        if let high = anchor.high, let low = anchor.low {
+            validHighLow = low > 0 && (hasExtension ? high > low : high >= low)
+        } else if let high = anchor.high {
+            validHighLow = high > 0
+        } else if let low = anchor.low {
+            validHighLow = low > 0
+        } else {
+            validHighLow = true
+        }
+        let validUpper: Bool
+        if let upper = anchor.upper, let high = anchor.high { validUpper = upper > high } else { validUpper = true }
+        let validLower: Bool
+        if let lower = anchor.lower, let low = anchor.low { validLower = lower < low } else { validLower = true }
+        let markerMatchesCandle = markerMs.map { marker in candles.contains { $0.time == marker } } ?? true
+        guard bar == expectedPeriod.rawValue,
+              anchor.startMs.isFinite, anchor.readyMs.isFinite, anchor.expiresMs.isFinite,
+              anchor.startMs < anchor.readyMs, anchor.readyMs < anchor.expiresMs,
+              prices.allSatisfy(\.isFinite), validHighLow, validUpper, validLower,
+              markerMs.map(\.isFinite) ?? true, markerMatchesCandle, formingTimeMs.map(\.isFinite) ?? true,
+              validBars, ascending else {
+            throw APIError(status: 502, message: "月首周 K 线数据格式异常")
+        }
+    }
+}

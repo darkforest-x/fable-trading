@@ -19,6 +19,8 @@ struct ChartLine: Equatable, Identifiable {
     let title: String
     let color: Color
     var dashed = false
+    var startTime: Double? = nil
+    var endTime: Double? = nil
     var id: String { title }
 }
 
@@ -204,6 +206,17 @@ struct CandleChart: View {
     var replayEntryTitle: String? = nil
     /// Optional trade span to fit on first appearance. Historical replay sets this; live charts stay at the edge.
     var focusRange: ClosedRange<Double>? = nil
+    /// Monthly event charts use an elapsed-time axis even when there is no event focus (symbol-only view).
+    var timestampFocus = false
+    /// Exact candle opening times flagged by the service (supports candles that overlap the first-week boundary).
+    var highlightedBarTimes: Set<Double> = []
+    /// Fallback for mock responses without `first_week`; applies only to the current anchor interval.
+    var highlightRange: Range<Double>? = nil
+    var highlightColor: Color? = nil
+    /// Highlight the event's actual candle when the service resolved one. Nil means the bar is unknown.
+    var focusBarTime: Double? = nil
+    /// Far monthly extensions remain in the level legend/drawing but do not flatten the candle price scale.
+    var fitReferenceLevels = true
     /// Also mark the first 1.618 touch of each previous week in `history` (found from the bars).
     var markHistory = false
     var colors: ChartColors = .classic
@@ -242,7 +255,7 @@ struct CandleChart: View {
 
     /// Historical cloud replays have a bounded focus range; live and non-cloud charts keep their
     /// existing index-based viewport and spacing.
-    private var timestampReplay: Bool { cloud && focusRange != nil }
+    private var timestampReplay: Bool { timestampFocus || (cloud && focusRange != nil) }
 
     var body: some View {
         // Paused unless a fling is gliding; then it redraws once per display frame.
@@ -256,7 +269,8 @@ struct CandleChart: View {
             let layout = Layout(bars: bars, spacing: spacing, offset: glide?.offset(at: timeline.date) ?? offset, plot: plot, rightPad: rightPad,
                                 period: period, range: range, lines: lines, wallpaper: wallpaper,
                                 bottomReserve: wallpaper ? Double((bottomOverlay + 34) / max(plot.height, 1)) : 0, yShift: yShift, yZoom: yZoom,
-                                timestampAxis: timestampReplay, focusRange: focusRange, executions: executionMarkers)
+                                timestampAxis: timestampReplay, focusRange: focusRange, executions: executionMarkers,
+                                fitReferenceLevels: fitReferenceLevels)
             ZStack(alignment: .topLeading) {
                 if wallpaper { (scheme == .dark ? ChartPalette.hex(0x0B0E14) : Color.white) }
                 Canvas(rendersAsynchronously: false) { context, _ in
@@ -551,7 +565,8 @@ struct CandleChart: View {
 
         init(bars: [Candle], spacing: CGFloat, offset: CGFloat, plot: CGRect, rightPad: CGFloat, period: CandlePeriod, range: FibRange?,
              lines: [ChartLine], wallpaper: Bool, bottomReserve: Double, yShift: Double, yZoom: Double,
-             timestampAxis: Bool = false, focusRange: ClosedRange<Double>? = nil, executions: [ExecutionMarker] = []) {
+             timestampAxis: Bool = false, focusRange: ClosedRange<Double>? = nil, executions: [ExecutionMarker] = [],
+             fitReferenceLevels: Bool = true) {
             // Live charts retain their O(visible-bars) layout work; only the short historical replay
             // window materializes a timestamp axis.
             let axis = ChartTimeAxis(times: timestampAxis ? bars.map(\.time) : [], periodSeconds: period.seconds)
@@ -580,10 +595,13 @@ struct CandleChart: View {
             if firstVisible <= lastVisible {
                 for bar in bars[firstVisible...lastVisible] { lo = min(lo, bar.low); hi = max(hi, bar.high) }
             }
-            if let range, firstVisible <= lastVisible, bars[lastVisible].time + period.seconds > range.start, bars[firstVisible].time < range.end {
+            if fitReferenceLevels, let range, firstVisible <= lastVisible,
+               bars[lastVisible].time + period.seconds > range.start, bars[firstVisible].time < range.end {
                 lo = min(lo, max(0, range.lower)); hi = max(hi, range.upper)
             }
-            for line in lines where line.price > 0 { lo = min(lo, line.price); hi = max(hi, line.price) }
+            if fitReferenceLevels {
+                for line in lines where line.price > 0 { lo = min(lo, line.price); hi = max(hi, line.price) }
+            }
             if timestampAxis {
                 for fill in executions where fill.time.isFinite && fill.price.isFinite && fill.price > 0 {
                     let position = axis.position(atTime: fill.time)
@@ -689,7 +707,7 @@ struct CandleChart: View {
         func snap(_ v: CGFloat) -> CGFloat { (v * scale).rounded() / scale }
         let bodyWidth = max(pixel, snap(max(1, layout.spacing * 0.72))), wickWidth = max(pixel, snap(1))
         let wickInset = snap((bodyWidth - wickWidth) / 2)
-        var candlePaths = [Path(), Path(), Path()], volumePaths = [Path(), Path(), Path()]
+        var candlePaths = [Path(), Path(), Path(), Path()], volumePaths = [Path(), Path(), Path(), Path()]
         let maxVolume = visible.map(\.volume).max() ?? 0
         let volumeFloor = snap(wallpaper ? axisY - 12 : plot.maxY), volumeHeight = plot.height * (wallpaper ? 0.08 : 0.14)
         for (index, bar) in zip(layout.firstVisible..., visible) {
@@ -704,8 +722,16 @@ struct CandleChart: View {
             }
         }
 
+        if let focusBarTime, let index = barIndex(focusBarTime), index >= layout.firstVisible, index <= layout.lastVisible {
+            let x = layout.x(CGFloat(index)), left = max(plot.minX, x - layout.spacing / 2), right = min(plot.maxX, x + layout.spacing / 2)
+            if right > left {
+                clipped.fill(Path(CGRect(x: left, y: plot.minY, width: right - left, height: plot.height)),
+                             with: .color(ChartPalette.accent.opacity(dark ? 0.12 : 0.08)))
+            }
+        }
+
         // Volume rests on the time axis, its own scale.
-        for tone in 0..<3 where !volumePaths[tone].isEmpty { clipped.fill(volumePaths[tone], with: .color(toneColor(tone).opacity(0.22))) }
+        for tone in 0..<4 where !volumePaths[tone].isEmpty { clipped.fill(volumePaths[tone], with: .color(toneColor(tone).opacity(0.22))) }
 
         if cloud { drawCloud(&clipped, layout: layout, dark: dark) }
 
@@ -717,7 +743,7 @@ struct CandleChart: View {
         }
         if let range { drawRange(&clipped, range, layout: layout, dark: dark, inner: innerLines, faded: false) }
 
-        for tone in 0..<3 where !candlePaths[tone].isEmpty { clipped.fill(candlePaths[tone], with: .color(toneColor(tone))) }
+        for tone in 0..<4 where !candlePaths[tone].isEmpty { clipped.fill(candlePaths[tone], with: .color(toneColor(tone))) }
 
         if averages {
             let step = period.seconds
@@ -738,7 +764,9 @@ struct CandleChart: View {
 
         for line in lines where line.price > 0 {
             let y = layout.y(line.price)
-            var left = plot.minX, right = plot.maxX
+            var left = line.startTime.map { layout.x(layout.index(atTime: $0)) } ?? plot.minX
+            var right = line.endTime.map { layout.x(layout.index(atTime: $0)) } ?? plot.maxX
+            left = max(plot.minX, left); right = min(plot.maxX, right)
             if replayEntryTitle != nil, let span = focusRange {
                 left = max(left, layout.x(layout.index(atTime: span.lowerBound)))
                 right = min(right, layout.x(layout.index(atTime: span.upperBound)))
@@ -999,13 +1027,21 @@ struct CandleChart: View {
         return placed
     }
 
-    /// 0 up, 1 down, 2 NY Monday (custom colours only).
+    /// 0 up, 1 down, 2 NY Monday, 3 service-flagged/fallback first-week candle.
     private func candleTone(_ bar: Candle) -> Int {
+        if highlightedBarTimes.contains(bar.time) || highlightRange.map({ $0.contains(bar.time) }) == true { return 3 }
         if colors.monday != nil, memo.isNYMonday(bar.time) { return 2 }
         return bar.close >= bar.open ? 0 : 1
     }
 
-    private func toneColor(_ tone: Int) -> Color { tone == 2 ? colors.monday ?? colors.up : tone == 0 ? colors.up : colors.down }
+    private func toneColor(_ tone: Int) -> Color {
+        switch tone {
+        case 3: highlightColor ?? colors.up
+        case 2: colors.monday ?? colors.up
+        case 0: colors.up
+        default: colors.down
+        }
+    }
 
     private func drawCloud(_ context: inout GraphicsContext, layout: Layout, dark: Bool) {
         let points = memo.cloud(layout.bars, step: period.seconds)

@@ -272,7 +272,10 @@ struct RootView: View {
     private func focusMonthFirstWeekTouch(eventId: String?, month: String?) {
         UserDefaults.standard.set("month", forKey: "touch.source")
         UserDefaults.standard.set(MonitorSegment.touches.rawValue, forKey: "monitor.segment")
-        if let eventId { UserDefaults.standard.set(eventId, forKey: "touch.month.focus") }
+        if let eventId {
+            UserDefaults.standard.set(eventId, forKey: "touch.month.focus")
+            UserDefaults.standard.set(eventId, forKey: "touch.month.chartEventId")
+        }
         if let month { UserDefaults.standard.set(month, forKey: "touch.month") }
     }
 

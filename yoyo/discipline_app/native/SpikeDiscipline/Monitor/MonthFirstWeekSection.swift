@@ -26,8 +26,9 @@ struct MonthFirstWeekSection: View {
     @Environment(SessionStore.self) private var session
     @State private var feed = MonthFirstWeekFeed()
     @AppStorage("touch.month.focus") private var focus = ""
+    @AppStorage("touch.month.chartEventId") private var chartEventId = ""
     @State private var side = "all"
-    @State private var selected: MonthFirstWeekTouch?
+    @State private var presentation: MonthFirstWeekPresentation?
 
     private var filtered: [MonthFirstWeekTouch] {
         feed.events.filter { side == "all" || $0.side.rawValue == side }
@@ -42,6 +43,16 @@ struct MonthFirstWeekSection: View {
                         Label("月首周 1.618", systemImage: MonthTouchStyle.icon)
                             .font(.headline).foregroundStyle(MonthTouchStyle.tint)
                         Spacer()
+                        Button {
+                            Haptics.open()
+                            presentation = .chooser
+                        } label: {
+                            Image(systemName: "chart.xyaxis.line")
+                                .font(.system(size: 14, weight: .bold)).foregroundStyle(Color.ink)
+                                .frame(width: 32, height: 32).frosted(Circle(), veil: 0.8)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("搜索监控合约并查看月度 K 线")
                         Text(MonthTouchStyle.state(snapshot)).font(.caption.weight(.medium))
                     }
                     HStack {
@@ -80,36 +91,37 @@ struct MonthFirstWeekSection: View {
                 }
             }
         }
-        .sheet(item: $selected) { event in
+        .sheet(item: $presentation) { modal in
             NavigationStack {
-                List {
-                    Section {
-                        LabeledContent("合约", value: Fmt.coin(event.symbol))
-                        LabeledContent("纽约月份", value: event.month)
-                        LabeledContent(MonthTouchStyle.edge(event.side) + " 1.618", value: MonthTouchStyle.price(event.level))
-                        LabeledContent(event.source == "history" ? "回补 K 线起点" : "实时首次观测",
-                                       value: Fmt.clock(event.source == "history" ? event.candleMs : event.occurredMs) + " 北京时间")
+                switch modal {
+                case .chooser:
+                    MonthFirstWeekSymbolPicker(symbols: feed.snapshot?.items.map(\.symbol) ?? []) { symbol in
+                        presentation = .chart(.symbol(symbol))
                     }
-                    if let item = feed.snapshot?.items.first(where: { $0.symbol == event.symbol }),
-                       let high = item.high, let low = item.low {
-                        Section("首个完整周") {
-                            LabeledContent("首周高", value: MonthTouchStyle.price(high))
-                            LabeledContent("首周低", value: MonthTouchStyle.price(low))
-                            if let upper = item.upper { LabeledContent("上轨 1.618", value: MonthTouchStyle.price(upper)) }
-                            if let lower = item.lower { LabeledContent("下轨 1.618", value: MonthTouchStyle.price(lower)) }
-                        }
-                    }
+                case .chart(let request):
+                    MonthFirstWeekChartView(request: request, connection: connection)
                 }
-                .navigationTitle("月首周触价").navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .topBarTrailing) { CloseButton { selected = nil } } }
             }
-            .presentationDetents([.medium, .large])
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
         }
+        .onAppear { openRequestedChart() }
+        .onChange(of: chartEventId) { _, _ in openRequestedChart() }
         .task(id: refresh) { await feed.watch(connection: connection, session: session) }
     }
 
+    private func openRequestedChart() {
+        guard !chartEventId.isEmpty else { return }
+        let eventId = chartEventId
+        presentation = .chart(.event(eventId))
+        chartEventId = ""
+    }
+
     private func eventRow(_ event: MonthFirstWeekTouch, now: Double) -> some View {
-        Button { Haptics.open(); selected = event } label: {
+        Button {
+            Haptics.open()
+            presentation = .chart(.event(event.eventId))
+        } label: {
             HStack(spacing: 10) {
                 CoinLogo(coin: Fmt.coin(event.symbol), size: 32).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 4) {
