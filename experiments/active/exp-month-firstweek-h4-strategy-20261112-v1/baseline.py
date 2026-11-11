@@ -1,14 +1,12 @@
 """Execute frozen H4 decisions at the next hourly open with NautilusTrader.
 
 Signal fields are limited to identity, symbol, month, side group and decision
-time from the previous full-population study. The 24h row is only one identity
-per signal. Outcome, horizon completeness and future extremes are never read.
+time from the completed-candle signal extractor. Each signal has one identity.
 The matched control uses the same contract, direction, active NY range month
 and UTC open hour. Randomly sample one of the three closest eligible dates
 by the average H1 range / open in the 24 completed hours before that open.
 """
 import hashlib
-import json
 import sys
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
@@ -155,33 +153,28 @@ def load_events():
 
 def main():
     DEST.mkdir(parents=True,exist_ok=True)
-    cache=DEST/'baseline_parts'
-    cache.mkdir(exist_ok=True)
     jobs=list(load_events().groupby('symbol',sort=True))
-    pending=[job for job in jobs if not (cache/(job[0]+'.json')).exists()]
+    all_rows=[];missing=[]
     with ProcessPoolExecutor(max_workers=5) as pool:
         from concurrent.futures import as_completed
-        futures={pool.submit(simulate,job):job[0] for job in pending}
+        futures={pool.submit(simulate,job):job[0] for job in jobs}
         for index,future in enumerate(as_completed(futures),1):
             symbol=futures[future]
             try:
-                data=future.result()
+                rows,skips=future.result()
             except Exception as error:
                 for other in futures:
                     other.cancel()
                 raise RuntimeError(f"Native replay failed for {symbol}") from error
-            tmp=cache/(symbol+'.tmp')
-            tmp.write_text(json.dumps(data,ensure_ascii=False))
-            tmp.replace(cache/(symbol+'.json'))
+            all_rows.extend(rows)
+            missing.extend(skips)
             if index%100==0:
-                print(f"Native replay {index}/{len(pending)} contract batches",flush=True)
-    all_rows=[];missing=[]
-    for symbol,_ in jobs:
-        rows,skips=json.loads((cache/(symbol+'.json')).read_text())
-        all_rows.extend(rows);missing.extend(skips)
+                print(f"Native replay {index}/{len(jobs)} contract batches",flush=True)
     frame=pd.DataFrame(all_rows).sort_values(['entry_ms','symbol','trade_id'])
     assert frame.trade_id.is_unique
-    frame.to_csv(DEST/'fills.csv',index=False)
+    temporary=DEST/'fills.csv.tmp'
+    frame.to_csv(temporary,index=False)
+    temporary.replace(DEST/'fills.csv')
     pd.DataFrame(missing,columns=['pair_id','sample','reason']).to_csv(DEST/'skips.csv',index=False)
     print(frame.groupby(['sample','group','exit_reason']).size().to_string(),flush=True)
 
