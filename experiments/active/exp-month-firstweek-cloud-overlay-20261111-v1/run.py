@@ -87,17 +87,17 @@ def paired_contrast(closed, rule):
                 matched_comparison_pct=means[1], matched_gap_pp=means[0]-means[1])
 
 
-def evaluate(f, book, stop, coverage):
+def evaluate(f, book, stop, coverage, rules=RULES):
     ledger = pd.read_csv(OUT / f'fixed_trades_{stop}.csv.gz')
     ledger = ledger.loc[ledger.owner_style].merge(
-        f[['signal_row', 'symbol', 'side', 'entry_ms', 'rank_12h', *RULES]],
+        f[['signal_row', 'symbol', 'side', 'entry_ms', 'rank_12h', *dict.fromkeys(('warmed', *rules))]],
         on=['signal_row', 'symbol', 'side', 'entry_ms'], validate='one_to_one')
     assert len(ledger) == len(f)
     closed = ledger[ledger.closed_flag].copy()
     closed['year'] = pd.to_datetime(closed.entry_ms, unit='ms', utc=True).dt.year
     ref = pd.read_csv(OUT / f'account_{stop}_metrics.csv').set_index('strategy').loc['owner_style']
     metrics, splits = [], []
-    for rule in RULES:
+    for rule in rules:
         kept = closed[closed[rule]]
         dropped = closed[~closed[rule]]
         if rule == 'original':

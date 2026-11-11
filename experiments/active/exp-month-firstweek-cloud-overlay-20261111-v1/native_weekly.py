@@ -16,7 +16,6 @@ import pandas as pd
 
 HOUR_MS = 3_600_000
 STEP_12H = 12 * HOUR_MS
-_DAY_NS = 86_400_000_000_000
 _NY = ZoneInfo("America/New_York")
 _EPOCH_DATE = date(1970, 1, 1)
 
@@ -28,7 +27,7 @@ def _week_day_keys(times_ms: np.ndarray) -> np.ndarray:
     # from a zoned index would move a midnight to 23:00 across a DST boundary.
     wall_midnight = local.tz_localize(None).normalize()
     week_midnight = wall_midnight - pd.to_timedelta(local.weekday, unit="D")
-    return (week_midnight.asi8 // _DAY_NS).astype(np.int64, copy=False)
+    return week_midnight.to_numpy(dtype="datetime64[D]").astype(np.int64, copy=False)
 
 
 def _monday_bounds(day_key: int) -> tuple[int, int, int]:
@@ -88,24 +87,6 @@ def _weekly_ranges(hour_df: pd.DataFrame) -> dict[int, tuple[float, float, int, 
         if high > low:
             ranges[int(day_key)] = (high, low, ready_ms, expires_ms)
     return ranges
-
-
-def _valid_plan(side: int, entry: float, target: float) -> bool:
-    """Apply Pine V1.9 positive entry/stop/target/risk/reward gate.
-
-    The caller has no symbol parameter. Checking both supported default stop
-    tiers is equivalent for any positive entry and preserves both BTC/ETH 1.5%
-    and other-symbol 3% plan validation.
-    """
-    if not np.isfinite([entry, target]).all() or entry <= 0 or target <= 0:
-        return False
-    for stop_pct in (0.015, 0.03):
-        stop = entry * (1.0 - side * stop_pct)
-        risk = (entry - stop) * side
-        reward = (target - entry) * side
-        if not np.isfinite([stop, risk, reward]).all() or min(entry, stop, target, risk, reward) <= 0:
-            return False
-    return True
 
 
 def native_sides(hour_df, bars, fast, slow, ready) -> np.ndarray:
