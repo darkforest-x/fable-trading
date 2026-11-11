@@ -78,6 +78,7 @@ def peers():
                    first_close=a.close_pct,second_close=b.close_pct,second_wick=b.wick_range_pct,
                    second_tip=b.low_pct,extreme=max(a.high_pct,b.high_pct),h1_streak=b.ending_inside_streak))
     data=pd.DataFrame(keys).set_index(GROUP)
+    save(data.reset_index(),'two_reclaims_at_second_close')
     observed=['first_close','second_close','second_wick','second_tip','extreme','h1_streak']
     picks=[]
     for ref in REFERENCE:
@@ -110,6 +111,14 @@ def label_group(event,bars):
     return '至少三根试线后确认'
 
 
+def next_two_closes(row, bars):
+    future=bars[bars.time_ms>row.time_ms]
+    window=future[future.time_ms<=row.time_ms+2*BAR]
+    hit=window[(window.close_pct>row.extreme)|(window.close_pct<0)].head(1)
+    if len(hit): return '失守' if hit.iloc[0].close_pct<0 else '推进'
+    return '拉锯' if len(window)==2 else '不足24H'
+
+
 def summarize():
     r=pd.read_csv(OUT/'reviewed.csv.gz',**ROUNDTRIP).merge(pd.read_csv(OUT/'45day_path.csv.gz',**ROUNDTRIP),
                                                          on='id',validate='one_to_one')
@@ -119,6 +128,11 @@ def summarize():
     assert len(first)==12564
     tape=pd.read_csv(OUT/'bar_tape.csv.gz',**ROUNDTRIP)
     lookup={k:g.sort_values('time_ms') for k,g in tape.groupby(GROUP,sort=False)}
+    candidates=pd.read_csv(OUT/'two_reclaims_at_second_close.csv.gz',**ROUNDTRIP)
+    candidates['二试类型']=np.where(candidates.gap==1,'连续两根','两根之间有间隔')
+    candidates['其后24小时']=[next_two_closes(x,lookup[(x.symbol,x.month,x.side)]) for x in candidates.itertuples()]
+    save(candidates,'two_reclaims_followup')
+    pd.crosstab(candidates['二试类型'],candidates['其后24小时']).to_csv(HERE/'two_reclaims_counts.csv',encoding='utf-8-sig')
     first['shape']=[label_group(x,lookup.get((x.symbol,x.month,x.side))) for x in first.itertuples()]
     n=r.groupby(GROUP).size()
     first['touch_days']=n.reindex(pd.MultiIndex.from_frame(first[GROUP])).values
@@ -149,10 +163,7 @@ def summarize():
     for i,row in pp.iterrows():
         bars=lookup[(row.symbol,row.month,row.side)]
         future=bars[bars.time_ms>row.time_ms].sort_values('time_ms')
-        window=future[future.time_ms<=row.time_ms+2*BAR]
-        hit=window[(window.close_pct>row.extreme)|(window.close_pct<0)].head(1)
-        state=('失守' if hit.iloc[0].close_pct<0 else '推进') if len(hit) else ('拉锯' if len(window)==2 else '不足24H')
-        pp.loc[i,'next_24h']=state
+        pp.loc[i,'next_24h']=next_two_closes(row,bars)
         if len(future):
             pp.loc[i,'best_later_12h_close_pct']=future.close_pct.max()
             pp.loc[i,'next_12h_close_pct']=future.iloc[0].close_pct
