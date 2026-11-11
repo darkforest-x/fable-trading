@@ -137,7 +137,7 @@ def build():
         eid = f"E{number:04d}"
         month = m["month"]
         ts,last=int(t[a]),int(t[b])
-        e=dict(id=eid, month=month, side=side, time=ts, last=last, count=b-a+1)
+        e=dict(id=eid, month=month, side=side, time=ts, last=last, count=b-a+1, first=seq==1)
         events.append(e)
         direction=1 if side=="upper" else -1
         prev="缺前一根" if a==0 or t[a]-t[a-1]!=300 else ("轨内" if (quotes[a-1,3]*1000-level)*direction<0 else "轨外" if (quotes[a-1,3]*1000-level)*direction>0 else "线上")
