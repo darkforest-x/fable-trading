@@ -1,0 +1,137 @@
+{
+  "schema": "stability-selection-v1",
+  "frozen_at_utc": "2026-11-11T07:12:44.286260+00:00",
+  "selection_uses_2026": false,
+  "selection_context": "Secondary stability selection created after the first-round four-winner summary was viewed; this is not a fully blind test.",
+  "periods": {
+    "pre_2025": {
+      "start_utc": "2022-02-01T00:00:00+00:00",
+      "end_exclusive_utc": "2025-01-01T00:00:00+00:00"
+    },
+    "2025": {
+      "start_utc": "2025-01-01T00:00:00+00:00",
+      "end_exclusive_utc": "2026-01-01T00:00:00+00:00"
+    }
+  },
+  "account": {
+    "initial_cash_usdt": 1000.0,
+    "fractions": [
+      0.05,
+      0.1
+    ],
+    "max_slots": 10,
+    "leverage": 1,
+    "market_slippage_bps": 1
+  },
+  "eligibility": {
+    "both_periods_net_profit_positive": 1,
+    "both_periods_intrabar_drawdown_pct_at_most": 15.0,
+    "pre_2025_minimum_funded_trades": 100,
+    "2025_minimum_funded_trades": 30
+  },
+  "ranking": {
+    "objectives": [
+      "net_win_rate",
+      "annualized_return",
+      "trades_per_year",
+      "return_over_intrabar_dd"
+    ],
+    "primary": "maximize the lower of pre-2025 and 2025 objective metric",
+    "tie_break": "higher minimum annualized return across the two periods, then strategy name, then fraction",
+    "annualization": "compound rate using exact period milliseconds divided by 365.25 days"
+  },
+  "counts": {
+    "configurations": 118,
+    "profiles_tested": 236,
+    "eligible_profiles": 4
+  },
+  "objective_winners": {
+    "net_win_rate": {
+      "strategy": "breadth5_reclaim-tp4",
+      "fraction": 0.1,
+      "profile_id": "stable_breadth5_reclaim-tp4__10pct",
+      "worst_score": 45.483870967741936,
+      "minimum_annualized_return_pct": 0.30409138592022433,
+      "passed_both_period_gates": true
+    },
+    "annualized_return": {
+      "strategy": "deep_reclaim-tp4",
+      "fraction": 0.1,
+      "profile_id": "stable_deep_reclaim-tp4__10pct",
+      "worst_score": 1.1013585336594467,
+      "minimum_annualized_return_pct": 1.1013585336594467,
+      "passed_both_period_gates": true
+    },
+    "trades_per_year": {
+      "strategy": "deep_reclaim-tp4",
+      "fraction": 0.1,
+      "profile_id": "stable_deep_reclaim-tp4__10pct",
+      "worst_score": 159.1323943661972,
+      "minimum_annualized_return_pct": 1.1013585336594467,
+      "passed_both_period_gates": true
+    },
+    "return_over_intrabar_dd": {
+      "strategy": "deep_reclaim-tp4",
+      "fraction": 0.05,
+      "profile_id": "stable_deep_reclaim-tp4__5pct",
+      "worst_score": 0.20247281015297772,
+      "minimum_annualized_return_pct": 0.587008457768734,
+      "passed_both_period_gates": true
+    }
+  },
+  "distinct_alternatives": {
+    "annualized_return": {
+      "strategy": "breadth5_reclaim-tp4",
+      "fraction": 0.05,
+      "profile_id": "stable_breadth5_reclaim-tp4__5pct",
+      "worst_score": 0.1852149822471949,
+      "minimum_annualized_return_pct": 0.1852149822471949,
+      "passed_both_period_gates": true,
+      "alternative_for_duplicate_winner": "stable_deep_reclaim-tp4__10pct"
+    },
+    "trades_per_year": {
+      "status": "none_available"
+    }
+  },
+  "candidate_diagnostics": [],
+  "selected_profiles": [
+    {
+      "profile_id": "stable_breadth5_reclaim-tp4__10pct",
+      "strategy": "breadth5_reclaim-tp4",
+      "fraction": 0.1,
+      "roles": [
+        "net_win_rate"
+      ],
+      "is_alternative": false
+    },
+    {
+      "profile_id": "stable_deep_reclaim-tp4__10pct",
+      "strategy": "deep_reclaim-tp4",
+      "fraction": 0.1,
+      "roles": [
+        "annualized_return",
+        "trades_per_year"
+      ],
+      "is_alternative": false
+    },
+    {
+      "profile_id": "stable_deep_reclaim-tp4__5pct",
+      "strategy": "deep_reclaim-tp4",
+      "fraction": 0.05,
+      "roles": [
+        "return_over_intrabar_dd"
+      ],
+      "is_alternative": false
+    },
+    {
+      "profile_id": "stable_breadth5_reclaim-tp4__5pct",
+      "strategy": "breadth5_reclaim-tp4",
+      "fraction": 0.05,
+      "roles": [
+        "distinct_alternative_for_annualized_return"
+      ],
+      "is_alternative": true
+    }
+  ],
+  "status": "eligible_profiles_selected"
+}
