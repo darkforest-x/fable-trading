@@ -78,6 +78,7 @@ def adjudicate(meta, first, retry):
         info['entry_reference'] = entry
         info['entry_distance_pct'] = pct(entry, rail, sign)
         info['outcome'] = '数据未完'
+        worst_prior = 0.0
         for i, row in enumerate(q[at:at+HORIZON]):
             stamp, _, high, low, closing = row
             if stamp != decision + i * HOUR:
@@ -85,11 +86,17 @@ def adjudicate(meta, first, retry):
                 break
             reached = pct(high if sign == 1 else low, rail, sign) >= 20
             broken = (stamp + HOUR) % BAR == 0 and pct(closing, rail, sign) < 0
+            worst_with_hour = max(worst_prior, -pct(low if sign == 1 else high, entry, sign))
             if reached or broken:
                 info['outcome'] = '先到20%' if reached else '先收破原轨'
                 info['outcome_hour_ms'] = int(stamp)
                 info['outcome_known_ms'] = int(stamp + HOUR)
+                # The target is intrahour, so its hour's adverse extreme can
+                # bound excursion but its order relative to target is unknown.
+                info['adverse_to_outcome_lower_pct'] = worst_prior if reached else worst_with_hour
+                info['adverse_to_outcome_upper_pct'] = worst_with_hour
                 break
+            worst_prior = worst_with_hour
             if i + 1 == HORIZON:
                 info['outcome'] = '45天内均未到'
         results.append(info)
@@ -112,7 +119,9 @@ def main():
         if col in df:
             df[col.replace('_ms','_beijing')] = pd.to_datetime(
                 df[col], unit='ms', utc=True).dt.tz_convert('Asia/Shanghai').dt.strftime('%Y-%m-%d %H:%M')
-    df.to_csv(HERE / 'revealed.csv', index=False)
+    for label, decisions in zip(('首碰', '下一根', '分开再试'), stages):
+        df = df.join(decisions.reason.rename(label+'盲判依据'), on='blind_id', validate='many_to_one')
+    df.to_csv(HERE / 'revealed.csv', index=False, encoding='utf-8-sig')
 
 
 if __name__ == '__main__':

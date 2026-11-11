@@ -25,8 +25,9 @@ import pandas as pd
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
+SOURCE_EXPERIMENT = HERE.parent / "exp-alt-isolated-12h-firstweek-wicks-20261111-v1"
 sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(SOURCE_EXPERIMENT))
 
 from all_contract_touches import DEST as CATALOGUE_ROOT  # noqa: E402
 from census12 import BASE, HOUR, OUT as CENSUS_OUT, read_raw  # noqa: E402
@@ -139,7 +140,7 @@ def _read_signals() -> pd.DataFrame:
 
 def _read_photo_keys(valid_months: set[tuple[str, str]]) -> pd.DataFrame:
     """Read only the 15 source photo keys, never their reviewed outcome fields."""
-    path = HERE.parent / "exp-alt-isolated-12h-firstweek-wicks-20261111-v1" / "原图15张逐项核对.csv"
+    path = SOURCE_EXPERIMENT / "原图15张逐项核对.csv"
     selected = pd.read_csv(
         path,
         usecols=["图片", "合约", "区间月（纽约）", "侧"],
@@ -215,6 +216,7 @@ def _find_pre_signal_moves(
     sign = 1 if side == "long" else -1
     first_5: int | None = None
     first_20: int | None = None
+    later_hour_hits: dict[str, int | None] = {"5": None, "20": None}
     touch_hour_hits = {"5": False, "20": False}
     touch_hour_close_hits = {"5": False, "20": False}
     gap = False
@@ -234,8 +236,12 @@ def _find_pre_signal_moves(
             touch_hour_close_hits["20"] = favorable_close >= 20
         if first_5 is None and favorable_extreme >= 5:
             first_5 = idx
+        if idx > start and favorable_extreme >= 5 and later_hour_hits["5"] is None:
+            later_hour_hits["5"] = idx
         if first_20 is None and favorable_extreme >= 20:
             first_20 = idx
+        if idx > start and favorable_extreme >= 20 and later_hour_hits["20"] is None:
+            later_hour_hits["20"] = idx
         visited += 1
         expected += HOUR
     out["pre_signal_path_hours"] = visited
@@ -244,9 +250,9 @@ def _find_pre_signal_moves(
         if touch_hour_close_hits[label]:
             out[f"pre_signal_{label}_status"] = "reached_before_signal"
             out[f"pre_signal_{label}_hour_ms"] = int(times[start])
-        elif hit is not None and hit != start:
+        elif later_hour_hits[label] is not None:
             out[f"pre_signal_{label}_status"] = "reached_before_signal"
-            out[f"pre_signal_{label}_hour_ms"] = int(times[start] if touch_hour_hits[label] else times[hit])
+            out[f"pre_signal_{label}_hour_ms"] = int(times[later_hour_hits[label]])
         elif hit == start:
             out[f"pre_signal_{label}_status"] = "ambiguous_same_touch_hour"
             out[f"pre_signal_{label}_hour_ms"] = int(times[start])
