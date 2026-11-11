@@ -246,11 +246,12 @@ def simulate_batch(
     slippage_bps: float = 0.0,
     fee_market_bps: float = TAKER_BPS,
     fee_limit_bps: float = LIMIT_BPS,
+    bar_count: int = BAR_COUNT,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Simulate all candidates once through a VectorBT native portfolio.
 
     Args:
-        events: Mapping of frozen string event IDs to 240-row OHLC frames with
+        events: Mapping of frozen string event IDs to ``bar_count``-row OHLC frames with
             ``ts_ms, open, high, low, close``. The pandas index is ignored.
         candidates: One row per trade candidate with unique ``candidate_id``,
             ``event_id``, ``symbol``, integer ``entry_idx``, ``side`` (``upper``
@@ -262,12 +263,16 @@ def simulate_batch(
         tp_value: TP proportion in decimal form for ``fixed_pct`` and 0..1 for
             ``target_distance``.
         sl_pct: Fixed stop proportion (0.01 means 1%).
-        horizon_bars: One of 6, 12, or 36; the entry bar counts as bar 1.
+        horizon_bars: One of 6, 12, or 36 for the default 240-row event window.
+            Longer explicit windows may use 288 or 2016 bars; the entry bar
+            counts as bar 1.
         slippage_bps: Adverse market slippage per market/stop/timeout fill.
             Limit targets never receive slippage. Pass a separate call for each
             1..5 bp stress scenario; 0 is the baseline.
         fee_market_bps: Per-fill taker fee, default 5 bp.
         fee_limit_bps: Per-fill maker fee, default 2 bp.
+        bar_count: Number of real 5-minute OHLC rows supplied per event. The
+            default preserves the original 240-row contract.
 
     Returns:
         ``(trades, mark_path)``. ``trades`` has one actual VectorBT entry and
@@ -277,8 +282,19 @@ def simulate_batch(
     """
     if tp_mode not in ("fixed_pct", "target_distance"):
         raise ValueError("tp_mode must be 'fixed_pct' or 'target_distance'")
-    if horizon_bars not in HORIZONS:
-        raise ValueError(f"horizon_bars must be one of {sorted(HORIZONS)}")
+    try:
+        n_bars = int(bar_count)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError("bar_count must be a positive integer") from exc
+    if n_bars <= 0 or n_bars != bar_count:
+        raise ValueError("bar_count must be a positive integer")
+    supported_horizons = set(HORIZONS)
+    if n_bars > BAR_COUNT:
+        supported_horizons.update((288, 2016))
+    if horizon_bars not in supported_horizons:
+        raise ValueError(f"horizon_bars must be one of {sorted(supported_horizons)}")
+    if horizon_bars > n_bars:
+        raise ValueError("holding horizon cannot exceed the supplied event window")
     for name, value in (("tp_value", tp_value), ("sl_pct", sl_pct),
                         ("slippage_bps", slippage_bps),
                         ("fee_market_bps", fee_market_bps), ("fee_limit_bps", fee_limit_bps)):
@@ -317,12 +333,12 @@ def simulate_batch(
         starts = pd.to_numeric(f["entry_idx"], errors="raise").to_numpy(dtype=np.int64)
     except (TypeError, ValueError, OverflowError) as exc:
         raise ValueError("entry_idx must contain integer bar positions") from exc
-    if (starts < 0).any() or (starts >= BAR_COUNT).any():
-        raise ValueError(f"entry_idx must be in [0, {BAR_COUNT - 1}]")
+    if (starts < 0).any() or (starts >= n_bars).any():
+        raise ValueError(f"entry_idx must be in [0, {n_bars - 1}]")
     if not np.equal(pd.to_numeric(f["entry_idx"], errors="raise"), starts).all():
         raise ValueError("entry_idx must contain exact integer values")
     ends = starts + int(horizon_bars) - 1
-    if (ends >= BAR_COUNT).any():
+    if (ends >= n_bars).any():
         raise ValueError("candidate does not have the complete requested holding horizon")
 
     sides = np.asarray([_side_number(x) for x in f["side"]], dtype=np.float64)
@@ -334,8 +350,8 @@ def simulate_batch(
     fee_limit = float(fee_limit_bps) / 10000.0
 
     n_cols = len(f)
-    bars = np.empty((BAR_COUNT, n_cols, 4), dtype=np.float64)
-    ts_matrix = np.empty((BAR_COUNT, n_cols), dtype=np.int64)
+    bars = np.empty((n_bars, n_cols, 4), dtype=np.float64)
+    ts_matrix = np.empty((n_bars, n_cols), dtype=np.int64)
     for col, row in f.iterrows():
         event_id = row.event_id
         if event_id not in events:
@@ -345,8 +361,8 @@ def simulate_batch(
         missing_frame = [name for name in needed if name not in frame.columns]
         if missing_frame:
             raise ValueError(f"event {event_id!r} missing columns {missing_frame}")
-        if len(frame) != BAR_COUNT:
-            raise ValueError(f"event {event_id!r} must have exactly {BAR_COUNT} rows; got {len(frame)}")
+        if len(frame) != n_bars:
+            raise ValueError(f"event {event_id!r} must have exactly {n_bars} rows; got {len(frame)}")
         try:
             ts = pd.to_numeric(frame["ts_ms"], errors="raise").to_numpy(dtype=np.int64)
             ohlc = frame[["open", "high", "low", "close"]].to_numpy(dtype=np.float64)
@@ -384,8 +400,8 @@ def simulate_batch(
     exit_prices = np.full(n_cols, np.nan, dtype=np.float64)
     reason_codes = np.zeros(n_cols, dtype=np.int8)
     phase_codes = np.zeros(n_cols, dtype=np.int8)
-    active_highs = np.full((BAR_COUNT, n_cols), np.nan, dtype=np.float64)
-    active_lows = np.full((BAR_COUNT, n_cols), np.nan, dtype=np.float64)
+    active_highs = np.full((n_bars, n_cols), np.nan, dtype=np.float64)
+    active_lows = np.full((n_bars, n_cols), np.nan, dtype=np.float64)
     mfe_prices = np.full(n_cols, np.nan, dtype=np.float64)
     mae_prices = np.full(n_cols, np.nan, dtype=np.float64)
     marks = pd.DataFrame(bars[:, :, 3], columns=np.arange(n_cols))
