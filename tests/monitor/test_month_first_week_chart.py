@@ -40,7 +40,7 @@ def setup_chart(tmp_path, history, *, source, created):
                created_ms=created, expires_ms=anchor["expires_ms"], source=source, candle_confirmed=True)
     app = FastAPI()
     app.state.monday_chart_history = history
-    install(app, book)
+    install(app, SimpleNamespace(book=book, quote_source=SimpleNamespace(symbols=[SYMBOL])))
     return TestClient(app)
 
 
@@ -69,3 +69,18 @@ def test_minute_recovery_at_top_of_hour_and_live_unclosed_bar(tmp_path):
     assert result["observation_end_ms"] == START + step_ms("1m")
     assert result["marker_ms"] == result["forming_time_ms"] == START
     assert len(result["candles"]) == 2
+
+
+def test_untouched_contract_can_open_during_new_month_without_previous_levels(tmp_path):
+    from datetime import datetime, timezone
+    new_month = int(datetime(2026, 12, 1, 12, tzinfo=timezone.utc).timestamp() * 1000)
+    history = History(new_month, [], forming=candle(new_month))
+    http = setup_chart(tmp_path, history, source="live", created=START)
+    path = "/api/month-first-week-1618/chart"
+    current = http.get(path, params=dict(symbol=SYMBOL)).json()
+    assert current["month"] == "2026-12"
+    assert current["event_id"] is None and current["marker_ms"] is None
+    assert current["anchor"]["upper"] is None
+    assert current["forming_time_ms"] == current["candles"][0]["time"] == new_month
+    assert http.get(path, params=dict(symbol="UNKNOWN-USDT-SWAP")).status_code == 404
+    assert http.get(path, params=dict(symbol=SYMBOL, event_id=EVENT)).status_code == 422

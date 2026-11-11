@@ -179,7 +179,7 @@ def create_app(runtime=None, start_monitor=True):
     from yoyo.monitor.monday_candles import install as install_monday_candles
     install_monday_candles(app, runtime)
     from yoyo.monitor.month_first_week_chart import install as install_month_chart
-    install_month_chart(app, month_first_week_1618.book)
+    install_month_chart(app, month_first_week_1618)
     from yoyo.monitor.cloud_signals import install as install_cloud_signals
     install_cloud_signals(app, runtime)
     from yoyo.monitor.strategy_backtest import install as install_strategy_backtest

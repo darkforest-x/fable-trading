@@ -449,17 +449,19 @@ class MonitorFeed:
         return self._read('month-first-week-1618', self._month_first_week_snapshot,
                           load=lambda: self._fetch('/api/month-first-week-1618'), ttl=1)
 
-    def month_first_week_chart(self, event_id, period):
-        path = '/api/month-first-week-1618/chart?' + urlencode(dict(event_id=event_id, period=period))
+    def month_first_week_chart(self, event_id, period, symbol=None):
+        identity = dict(event_id=event_id) if event_id else dict(symbol=symbol)
+        path = '/api/month-first-week-1618/chart?' + urlencode(dict(identity, period=period))
 
         def load():
             try:
                 raw = self._fetch(path)
             except HTTPError as error:
                 if error.code == 404:
-                    raise MonthTouchNotFound('未找到这条月首周触价') from None
+                    raise MonthTouchNotFound('未找到这条月首周触价或监控合约') from None
                 raise MonitorUnavailable('月首周 K 线暂不可用，请重试') from None
             if (not isinstance(raw, dict) or raw.get('event_id') != event_id or raw.get('bar') != period
+                    or (symbol is not None and raw.get('symbol') != symbol)
                     or not isinstance(raw.get('candles'), list) or not isinstance(raw.get('anchor'), dict)):
                 raise MonitorUnavailable('月首周 K 线数据格式无效')
             return raw
