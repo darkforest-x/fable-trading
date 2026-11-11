@@ -418,6 +418,160 @@ def _daily_repair_symbol(symbol: str, old_record: Optional[dict], max_gap_hours:
     return updated
 
 
+def _public_fapi_gap(symbol: str, start_ms: int, end_ms: int, retries: int = 3) -> Tuple[np.ndarray, dict]:
+    """Query exact missing H1 open times from Binance's unauthenticated public klines API."""
+    url = "https://fapi.binance.com/fapi/v1/klines"
+    cursor = start_ms
+    rows, zero_volume = [], 0
+    request_log = []
+    while cursor < end_ms:
+        params = {"symbol": symbol, "interval": "1h", "startTime": cursor,
+                  "endTime": end_ms - 1, "limit": 1500}
+        response = None
+        last_error = None
+        for attempt in range(retries):
+            try:
+                response = requests.get(url, params=params, timeout=(8, 30))
+                if response.status_code >= 500 or response.status_code == 429:
+                    response.raise_for_status()
+                last_error = None
+                break
+            except requests.HTTPError as exc:
+                last_error = f"HTTP {exc.response.status_code if exc.response is not None else 'unknown'}: {exc}"
+                if exc.response is not None and exc.response.status_code < 500 and exc.response.status_code != 429:
+                    break
+            except Exception as exc:
+                last_error = f"{type(exc).__name__}: {exc}"
+            if attempt + 1 < retries:
+                time.sleep((0.5, 1.5, 3.0)[attempt])
+        if response is None or last_error:
+            request_log.append({"start_time_ms": cursor, "end_time_exclusive_ms": end_ms,
+                                "status": "request_error", "error": last_error})
+            return np.empty((0, 5), dtype=np.float64), {
+                "status": "request_error", "url": url, "auth": "none", "requests": request_log,
+                "error": last_error,
+            }
+        try:
+            payload = response.json()
+        except ValueError:
+            request_log.append({"start_time_ms": cursor, "status": "invalid_json", "http_status": response.status_code})
+            return np.empty((0, 5), dtype=np.float64), {
+                "status": "invalid_json", "url": url, "auth": "none", "requests": request_log,
+            }
+        if response.status_code >= 400:
+            message = payload.get("msg", response.text) if isinstance(payload, dict) else str(payload)
+            request_log.append({"start_time_ms": cursor, "status": "http_error", "http_status": response.status_code,
+                                "message": str(message)[:300]})
+            return np.empty((0, 5), dtype=np.float64), {
+                "status": "http_error", "url": url, "auth": "none", "requests": request_log,
+                "http_status": response.status_code, "message": str(message)[:300],
+            }
+        if not isinstance(payload, list):
+            request_log.append({"start_time_ms": cursor, "status": "unexpected_payload", "payload": str(payload)[:300]})
+            return np.empty((0, 5), dtype=np.float64), {
+                "status": "unexpected_payload", "url": url, "auth": "none", "requests": request_log,
+            }
+        request_log.append({"start_time_ms": cursor, "end_time_exclusive_ms": end_ms,
+                            "status": "ok", "http_status": response.status_code, "rows": len(payload)})
+        if not payload:
+            break
+        page_rows = []
+        for item in payload:
+            stamp = int(item[0])
+            if stamp % HOUR_MS:
+                raise ValueError(f"Binance public klines API returned a non-hour timestamp for {symbol}: {stamp}")
+            if not start_ms <= stamp < end_ms:
+                continue
+            ohlc = [float(value) for value in item[1:5]]
+            volume = float(item[5])
+            if not np.isfinite(ohlc).all() or min(ohlc) <= 0 or not np.isfinite(volume):
+                raise ValueError(f"Binance public klines API returned an invalid row for {symbol}: {stamp}")
+            page_rows.append([stamp, *ohlc])
+            zero_volume += int(volume == 0)
+        rows.extend(page_rows)
+        if len(payload) < 1500:
+            break
+        next_cursor = int(payload[-1][0]) + HOUR_MS
+        if next_cursor <= cursor:
+            raise ValueError(f"Binance public klines pagination did not advance for {symbol}")
+        cursor = next_cursor
+    array = np.asarray(rows, dtype=np.float64).reshape((-1, 5))
+    if len(array):
+        array = array[np.argsort(array[:, 0], kind="stable")]
+        _, unique = np.unique(array[:, 0], return_index=True)
+        array = array[np.sort(unique)]
+    return array, {
+        "status": "rows_returned" if len(array) else "no_rows",
+        "url": url,
+        "auth": "none",
+        "requested_start_utc_ms": start_ms,
+        "requested_end_exclusive_utc_ms": end_ms,
+        "rows": int(len(array)),
+        "zero_volume_rows": int(zero_volume),
+        "first_utc_ms": int(array[0, 0]) if len(array) else None,
+        "last_utc_ms": int(array[-1, 0]) if len(array) else None,
+        "requests": request_log,
+    }
+
+
+def _api_repair_symbol(symbol: str, old_record: Optional[dict]) -> dict:
+    output_path = OUTPUT_DIR / f"{symbol}.npy"
+    if not output_path.is_file() or not old_record or old_record.get("mode") != "full":
+        raise FileNotFoundError(f"No full monthly materialization to API-repair for {symbol}")
+    rows = np.load(output_path, allow_pickle=False)
+    before = _gaps(rows)
+    if len(rows) < 2:
+        updated = dict(old_record)
+        updated["api_repair"] = {"status": "no_observed_span", "before": before, "after": before}
+        return updated
+    times = rows[:, 0].astype(np.int64)
+    gap_indexes = np.flatnonzero(np.diff(times) > HOUR_MS)
+    repairs, parts = [], []
+    for idx in gap_indexes:
+        start_ms, end_ms = int(times[idx] + HOUR_MS), int(times[idx + 1])
+        data, evidence = _public_fapi_gap(symbol, start_ms, end_ms)
+        evidence.update(after_utc_ms=int(times[idx]), before_utc_ms=int(times[idx + 1]),
+                        missing_hours=int((end_ms - start_ms) // HOUR_MS))
+        repairs.append(evidence)
+        if len(data):
+            parts.append(("binance_fapi_public_klines", 70, data))
+    if not parts:
+        updated = dict(old_record)
+        updated["api_repair"] = {"status": "no_gap_rows_returned" if repairs else "no_gaps",
+                                 "gaps_queried": repairs, "before": before, "after": before,
+                                 "no_price_synthesis": True}
+        return updated
+    merged, merge_audit = _merge([("previous_materialized_hourly", 50, rows)] + parts)
+    after = _gaps(merged)
+    added = int(len(merged) - len(rows))
+    tmp = output_path.with_name(f"{output_path.name}.tmp-{os.getpid()}-{threading.get_ident()}")
+    try:
+        with tmp.open("wb") as handle:
+            np.save(handle, np.asarray(merged, dtype=np.float64), allow_pickle=False)
+        os.replace(tmp, output_path)
+    finally:
+        if tmp.exists():
+            tmp.unlink()
+    stat = output_path.stat()
+    updated = dict(old_record)
+    tail_missing = old_record.get("tail_missing_hours_to_cutoff_for_current_contract", 0)
+    updated.update({
+        "status": "ready" if after["gap_segments"] == 0 and not old_record.get("official_15m_months_without_any_output_rows")
+                  and not old_record.get("official_1h_months_not_published") and tail_missing == 0 else "ready_with_gaps",
+        "output_size_bytes": stat.st_size,
+        "output_mtime_ns": stat.st_mtime_ns,
+        "shape": list(merged.shape),
+        "coverage": after,
+        "merge_after_api_repair": merge_audit,
+        "last_action": "public_fapi_gap_repair",
+        "api_repair": {"status": "bars_added", "gaps_queried": repairs, "bars_added": added,
+                       "bars_with_zero_volume": int(sum(item.get("zero_volume_rows", 0) for item in repairs)),
+                       "before": before, "after": after, "no_price_synthesis": True},
+        "resume": "api_repair_pass",
+    })
+    return updated
+
+
 def _merge(parts: Sequence[Tuple[str, int, np.ndarray]]) -> Tuple[np.ndarray, dict]:
     nonempty = [(name, priority, rows) for name, priority, rows in parts if len(rows)]
     if not nonempty:
@@ -666,12 +820,13 @@ def main() -> None:
     parser.add_argument("--workers", type=int, default=12)
     parser.add_argument("--native-only", action="store_true", help="Materialize cached compact H1 quotes without official archive fill")
     parser.add_argument("--daily-repair", action="store_true", help="Fill gaps from published official daily 1h ZIPs, without price synthesis")
+    parser.add_argument("--api-repair", action="store_true", help="Query remaining H1 gaps from Binance's public UM klines endpoint")
     parser.add_argument("--no-resume", action="store_true", help="Rebuild symbols even when matching output receipts exist")
     args = parser.parse_args()
     if args.workers < 1:
         parser.error("--workers must be at least 1")
-    if args.native_only and args.daily_repair:
-        parser.error("--native-only and --daily-repair are separate build modes")
+    if sum((args.native_only, args.daily_repair, args.api_repair)) > 1:
+        parser.error("--native-only, --daily-repair, and --api-repair are separate build modes")
     rows = _load_universe()
     by_symbol = {row["symbol"].strip(): row for row in rows}
     selected = list(by_symbol)
@@ -683,7 +838,7 @@ def main() -> None:
         selected = [symbol for symbol in selected if symbol in wanted]
     if args.limit is not None:
         selected = selected[:max(0, args.limit)]
-    mode = "daily_repair" if args.daily_repair else ("native_only" if args.native_only else "full")
+    mode = "api_repair" if args.api_repair else ("daily_repair" if args.daily_repair else ("native_only" if args.native_only else "full"))
     started = datetime.now(timezone.utc).isoformat()
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     if RECEIPT_PATH.exists():
@@ -698,9 +853,11 @@ def main() -> None:
         futures = {
             executor.submit(
                 _daily_repair_symbol, symbol, records.get(symbol)
-            ) if args.daily_repair else executor.submit(
+            ) if args.daily_repair else (executor.submit(
+                _api_repair_symbol, symbol, records.get(symbol)
+            ) if args.api_repair else executor.submit(
                 _build_symbol, symbol, by_symbol[symbol], mode, records.get(symbol), not args.no_resume
-            ): symbol
+            )): symbol
             for symbol in selected
         }
         for index, future in enumerate(as_completed(futures), 1):
