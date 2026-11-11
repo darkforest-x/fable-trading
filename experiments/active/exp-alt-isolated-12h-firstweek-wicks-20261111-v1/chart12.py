@@ -1,6 +1,9 @@
 """Chart audited 12-hour cases using actual Binance candles and their own NY levels."""
 import argparse
 import math
+import zipfile
+from concurrent.futures import ThreadPoolExecutor
+from functools import lru_cache
 
 import numpy as np
 import pandas as pd
@@ -24,11 +27,12 @@ def fmt(p):
     return f'{p:.{places}f}'
 
 
+@lru_cache(maxsize=16)
 def font(sz):
     return ImageFont.truetype('/System/Library/Fonts/Hiragino Sans GB.ttc',sz)
 
 
-def chart(row):
+def chart(row, archive=False):
     raw=read_raw(row.symbol)
     anchor, ready, end=bounds(row.month)
     start=int(anchor.timestamp()*1000)//(12*HOUR)*12*HOUR
@@ -88,15 +92,26 @@ def chart(row):
         label=stamp(xx).strftime('%m-%d');d.text((x(xx)-18,bot+12),label,font=font(15),fill=MUTED)
         xx+=max(3,round((stop-start)/(24*HOUR)/9))*24*HOUR
     d.text((a,h-37),'月首周 1.618  ·  绿K为纽约月首周  ·  红框为针尖触轨位置',font=font(16),fill=MUTED)
-    folder=OUT/'charts';folder.mkdir(exist_ok=True)
+    folder=OUT/('all_month_unique_charts' if archive else 'charts');folder.mkdir(exist_ok=True)
     path=folder/(row.symbol+'_'+row.bar_open_Beijing[:10]+'.png')
+    if archive:
+        path=folder/(f'{row.bar_open_Beijing[:10]}_{row.bar_open_Beijing[11:13]}_{row.symbol}_{cn}.png')
     im.save(path)
     return path
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('cases',nargs='+');args=p.parse_args()
+    p=argparse.ArgumentParser()
+    p.add_argument('cases',nargs='*')
+    p.add_argument('--all-month-unique',action='store_true')
+    args=p.parse_args()
     frame=pd.read_csv(OUT/'isolated_12h.csv')
+    if args.all_month_unique:
+        cases=frame[frame.month_unique & (frame.mfe7>=20)]
+        with ThreadPoolExecutor(max_workers=4) as pool, zipfile.ZipFile(OUT/'12小时_整月单针_反转20pct_K线图.zip','w') as book:
+            for path in pool.map(lambda row:chart(row,archive=True),cases.itertuples()):
+                book.write(path,arcname=path.name)
+        print('charts',len(cases),flush=True)
     for case in args.cases:
         symbol,date=case.split('/')
         event=frame[(frame.symbol==symbol)&(frame.bar_open_Beijing.str.startswith(date))]
