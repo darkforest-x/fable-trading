@@ -54,10 +54,10 @@ REQUIRED_COLUMNS = {
 }
 
 
-def load_signals() -> pd.DataFrame:
-    if not SIGNALS.is_file():
-        raise FileNotFoundError(f"signal input not found: {SIGNALS}")
-    frame = pd.read_csv(SIGNALS)
+def load_signals(source=SIGNALS) -> pd.DataFrame:
+    if not source.is_file():
+        raise FileNotFoundError(f"signal input not found: {source}")
+    frame = pd.read_csv(source)
     missing = REQUIRED_COLUMNS - set(frame.columns)
     if missing:
         raise ValueError(f"signal input missing columns: {sorted(missing)}")
@@ -478,8 +478,8 @@ def summarize(ledger: pd.DataFrame, stop_pct: float) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def run(stop_pct: float, batch_size: int) -> None:
-    signals = load_signals()
+def run(stop_pct: float, batch_size: int, destination=OUT) -> None:
+    signals = load_signals(destination/"signals.csv.gz")
     print(f"VectorBT {vbt.__version__}; stop={stop_pct:.0%}; signals={len(signals)}; batch={batch_size}", flush=True)
     ledger_rows: list[dict] = [None] * len(signals)  # type: ignore[list-item]
     by_symbol = signals.groupby("symbol", sort=True, observed=True)
@@ -506,8 +506,8 @@ def run(stop_pct: float, batch_size: int) -> None:
     ledger = ledger.sort_values("signal_row", kind="stable").reset_index(drop=True)
     summary = summarize(ledger, stop_pct)
     suffix = f"sl{int(round(stop_pct * 100))}"
-    trades_path = OUT / f"fixed_trades_{suffix}.csv.gz"
-    summary_path = OUT / f"fixed_summary_{suffix}.csv"
+    trades_path = destination / f"fixed_trades_{suffix}.csv.gz"
+    summary_path = destination / f"fixed_summary_{suffix}.csv"
     ledger.to_csv(trades_path, index=False, compression="gzip")
     summary.to_csv(summary_path, index=False)
     print(f"wrote {trades_path}", flush=True)
@@ -520,10 +520,12 @@ def main() -> None:
     parser.add_argument("--stop-pct", type=float, required=True, choices=(3.0, 5.0),
                         help="fixed stop percentage, one candidate per run")
     parser.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)
+    parser.add_argument("--confirmation-hours", type=int, choices=(1,12), default=12)
     args = parser.parse_args()
     if args.batch_size <= 0:
         raise ValueError("batch-size must be positive")
-    run(args.stop_pct / 100.0, args.batch_size)
+    destination = OUT if args.confirmation_hours==12 else OUT/"confirm_1h"
+    run(args.stop_pct / 100.0, args.batch_size, destination)
 
 
 if __name__ == "__main__":

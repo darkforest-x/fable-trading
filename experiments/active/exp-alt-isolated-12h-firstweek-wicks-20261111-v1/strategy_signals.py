@@ -6,6 +6,8 @@ hour's open is the execution reference. Later contacts, extrema and the
 eventual reversal outcome are never used to construct signals.
 """
 from concurrent.futures import ThreadPoolExecutor
+import argparse
+from functools import partial
 
 import numpy as np
 import pandas as pd
@@ -21,7 +23,7 @@ COLUMNS = ['symbol','month','side','entry_ms','entry_price','rail','baseline','f
            'touch_ms','rank_12h','body_inside','wick_fraction','tip_outside_pct','close_to_rail_pct']
 
 
-def one_symbol(symbol):
+def one_symbol(symbol, confirmation_hours=12):
     q = read_raw(symbol)
     q = q[q[:,0] + HOUR <= CUTOFF]
     if not len(q):
@@ -62,9 +64,14 @@ def one_symbol(symbol):
             bar_times,offsets = np.unique(t[ix]//BAR*BAR,return_index=True)
             first_body_inside = False
             for rank,(bar,offset) in enumerate(zip(bar_times,offsets),start=1):
-                close = bar+BAR
-                at,after = t.searchsorted([bar,close])
-                if close >= end or after >= len(q) or t[after]!=close or after-at!=12:
+                last_offset = offsets[rank] if rank<len(offsets) else len(ix)
+                eligible = next((n for n in ix[offset:last_offset] if n in first_today),None)
+                # Preserve the 12h contact rank and separation across variants. For an early
+                # confirmation only inspect the touched hourly candle when it closes.
+                bar_start = bar if confirmation_hours==12 else t[ix[offset] if eligible is None else eligible]
+                close = bar_start+confirmation_hours*HOUR
+                at,after = t.searchsorted([bar_start,close])
+                if close >= end or after >= len(q) or t[after]!=close or after-at!=confirmation_hours:
                     continue
                 b = q[at:after]
                 opening,closing = b[0,1],b[-1,4]
@@ -74,8 +81,6 @@ def one_symbol(symbol):
                 share = wick/(high-low) if high>low else 0.
                 if rank==1:
                     first_body_inside = inside
-                last_offset = offsets[rank] if rank<len(offsets) else len(ix)
-                eligible = next((n for n in ix[offset:last_offset] if n in first_today),None)
                 if eligible is None:
                     continue
                 single = rank==1 and inside and share>=.5
@@ -88,18 +93,22 @@ def one_symbol(symbol):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--confirmation-hours',type=int,choices=(1,12),default=12)
+    hours = parser.parse_args().confirmation_hours
     universe = pd.read_csv(BASE/'universe_perpetuals.csv')
     with ThreadPoolExecutor(max_workers=5) as pool:
-        rows = [r for batch in pool.map(one_symbol,universe.symbol) for r in batch]
+        rows = [r for batch in pool.map(partial(one_symbol,confirmation_hours=hours),universe.symbol) for r in batch]
     frame = pd.DataFrame(rows,columns=COLUMNS).sort_values(['entry_ms','symbol','side'])
     assert not frame.duplicated(['symbol','entry_ms','side']).any()
     day = (frame.touch_ms+8*HOUR)//(24*HOUR)
     assert not frame.assign(day=day).duplicated(['symbol','day']).any()
     assert ((frame.entry_ms>frame.touch_ms)&(frame.entry_ms-frame.touch_ms<=BAR)).all()
-    OUT.mkdir(parents=True,exist_ok=True)
-    tmp = OUT/'signals.tmp.gz'
+    dest = OUT if hours==12 else OUT/'confirm_1h'
+    dest.mkdir(parents=True,exist_ok=True)
+    tmp = dest/'signals.tmp.gz'
     frame.to_csv(tmp,index=False,compression='gzip')
-    tmp.replace(OUT/'signals.csv.gz')
+    tmp.replace(dest/'signals.csv.gz')
     print(frame[['baseline','first_wick','retest']].sum().to_dict(),frame.symbol.nunique(),flush=True)
 
 
