@@ -1,0 +1,10 @@
+{
+  "population": "Frozen first recorded Binance contract/NY-month/side H4 candidates. First-touch 12h reclaim; first H1 does not advance; hourly closes hold through hour four. Include sideways and previously resolved paths.",
+  "strategy": "Short upper-rail holds. Long lower-rail holds only if at least one H2..4 close is strictly above the original 12h reclaim close. Track other lower holds as an unfunded control.",
+  "execution": "Next H1 open market; 5% fixed stop market, 20% resting take profit, both relative to the actual fill; max 168h ending at the 168th bar close. Adverse-first order on any double-hit non-gap H1. No extra spread, slippage or funding. Taker 0.05% and maker 0.02% of actual fill notional.",
+  "random": "One seeded same-symbol/side/active NY month and UTC hour comparison. Select from the three closest eligible dates by average high-low/open of the preceding 24 hours. Exact signal time excluded. No future completeness filter.",
+  "account": "1000 USDT, gross 1x, maximum five positions, one per symbol, target 1% initial equity risk per new position via 20% of current equity notional; cash limits apply. Compare peak-to-trough marked drawdown against 30%. Cash account and independent trade statistics reported apart.",
+  "parameter_study": "Only change longest holding time to 72h. Reuse 7d native fills through hour 72; surviving trades time out at 72h with VectorBT at the 72nd close. Evaluate both on the same historical periods and paired random controls; 2025-01-01 UTC split.",
+  "end_of_data": "Process available future hours without filtering at decision; if still open at cutoff mark at final close with provision for market exit and identify separately.",
+  "metrics": "Fee-net return, win rate, profit factor, MFE and MAE to exit, chronological account and time-split results. No deployment."
+}
