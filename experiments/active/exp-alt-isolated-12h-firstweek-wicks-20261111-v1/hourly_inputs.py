@@ -227,6 +227,197 @@ def _download_month(symbol: str, month: str, retries: int = 4) -> Tuple[np.ndarr
     raise RuntimeError(f"Official Binance archive download failed for {key}: {last_error}")
 
 
+def _download_day(symbol: str, day: str, retries: int = 4) -> Tuple[np.ndarray, dict]:
+    key = f"data/futures/um/daily/klines/{symbol}/1h/{symbol}-1h-{day}.zip"
+    url = BINANCE_VISION + quote(key, safe="/-_.")
+    result = {"day": day, "archive_key": key, "url": url, "auth": "none"}
+    for attempt in range(retries):
+        try:
+            response = requests.get(url, timeout=(10, 45))
+            if response.status_code == 404:
+                result.update(status="not_published", rows=0, attempt=attempt + 1)
+                return np.empty((0, 5), dtype=np.float64), result
+            response.raise_for_status()
+            with zipfile.ZipFile(io.BytesIO(response.content)) as zf:
+                names = [name for name in zf.namelist() if name.lower().endswith(".csv")]
+                if len(names) != 1:
+                    raise ValueError(f"Expected one CSV member in {key}, found {names}")
+                with zf.open(names[0]) as raw:
+                    text = io.TextIOWrapper(raw, encoding="utf-8", newline="")
+                    rows, zero_volume = [], 0
+                    for fields in csv.reader(text):
+                        if len(fields) < 6:
+                            continue
+                        try:
+                            stamp = int(fields[0])
+                            ohlc = [float(value) for value in fields[1:5]]
+                            volume = float(fields[5])
+                        except (TypeError, ValueError):
+                            continue
+                        if stamp % HOUR_MS or datetime.fromtimestamp(stamp / 1000, tz=timezone.utc).strftime("%Y-%m-%d") != day:
+                            raise ValueError(f"Official H1 row falls outside the requested UTC day: {key} {stamp}")
+                        if not np.isfinite(ohlc).all() or min(ohlc) <= 0 or not np.isfinite(volume):
+                            raise ValueError(f"Invalid OHLCV row in official archive {key} at {stamp}")
+                        rows.append([stamp, *ohlc])
+                        zero_volume += int(volume == 0)
+            array = np.asarray(rows, dtype=np.float64).reshape((-1, 5))
+            if len(array) and (np.diff(array[:, 0]) <= 0).any():
+                raise ValueError(f"Official daily archive rows are not uniquely sorted: {key}")
+            result.update(
+                status="downloaded" if len(array) else "published_empty",
+                rows=int(len(array)), zero_volume_rows=int(zero_volume),
+                first_utc_ms=int(array[0, 0]) if len(array) else None,
+                last_utc_ms=int(array[-1, 0]) if len(array) else None,
+                compressed_bytes=len(response.content), attempt=attempt + 1,
+            )
+            return array[array[:, 0] < CUTOFF_MS], result
+        except requests.HTTPError as exc:
+            status = exc.response.status_code if exc.response is not None else None
+            if status == 404:
+                result.update(status="not_published", rows=0, attempt=attempt + 1)
+                return np.empty((0, 5), dtype=np.float64), result
+            last_error = f"{type(exc).__name__}: {exc}"
+        except Exception as exc:
+            last_error = f"{type(exc).__name__}: {exc}"
+        if attempt + 1 < retries:
+            time.sleep((0.5, 1.5, 3.0, 6.0)[attempt])
+    result.update(status="failed", rows=0, error=last_error, attempt=retries)
+    raise RuntimeError(f"Official Binance daily H1 archive failed for {key}: {last_error}")
+
+
+def _days_in_gap(after_ms: int, before_ms: int) -> List[str]:
+    first = datetime.fromtimestamp((after_ms + HOUR_MS) / 1000, tz=timezone.utc).date()
+    last = datetime.fromtimestamp((before_ms - HOUR_MS) / 1000, tz=timezone.utc).date()
+    days, day = [], first
+    while day <= last:
+        days.append(day.isoformat())
+        day = day.fromordinal(day.toordinal() + 1)
+    return days
+
+
+def _daily_repair_symbol(symbol: str, old_record: Optional[dict], max_gap_hours: int = 72) -> dict:
+    output_path = OUTPUT_DIR / f"{symbol}.npy"
+    if not output_path.is_file() or not old_record or old_record.get("mode") != "full":
+        raise FileNotFoundError(f"No full monthly materialization to repair for {symbol}")
+    rows = np.load(output_path, allow_pickle=False)
+    if rows.ndim != 2 or rows.shape[1] != 5 or (len(rows) and (np.diff(rows[:, 0]) <= 0).any()):
+        raise ValueError(f"Invalid existing hourly input for daily gap repair: {symbol}")
+    before = _gaps(rows)
+    if len(rows) < 2:
+        updated = dict(old_record)
+        updated["daily_repair"] = {"status": "no_observed_span", "before": before, "after": before}
+        return updated
+
+    keys_months, _ = _monthly_keys(symbol)
+    key_month_set = set(keys_months)
+    times = rows[:, 0].astype(np.int64)
+    delta = np.diff(times)
+    gap_indexes = np.flatnonzero(delta > HOUR_MS)
+    candidates_by_gap, probe_by_gap = [], []
+    all_days = set()
+    for idx in gap_indexes:
+        missing_hours = int(delta[idx] // HOUR_MS) - 1
+        after, before_ms = int(times[idx]), int(times[idx + 1])
+        days = [day for day in _days_in_gap(after, before_ms) if day[:7] in key_month_set]
+        if not days:
+            continue
+        if missing_hours <= max_gap_hours:
+            selected = days
+            probes = []
+        else:
+            midpoint = datetime.fromtimestamp((after + (missing_hours // 2) * HOUR_MS) / 1000, tz=timezone.utc).date().isoformat()
+            probes = sorted({days[0], days[-1], midpoint} & set(days))
+            # Short multi-day holes are cheap to check exhaustively. For longer
+            # interruptions probe first, middle, and last dates before widening.
+            selected = days if len(days) <= 4 else probes
+        candidates_by_gap.append({"after_utc_ms": after, "before_utc_ms": before_ms,
+                                  "missing_hours": missing_hours, "days": days,
+                                  "initial_probe_days": probes, "initial_days": selected})
+        probe_by_gap.append((selected, days, probes))
+        all_days.update(selected)
+
+    archive_rows, archive_meta = [], []
+    cache = {}
+    for day in sorted(all_days):
+        data, meta = _download_day(symbol, day)
+        cache[day] = data
+        archive_meta.append(meta)
+        if len(data):
+            archive_rows.append(("binance_vision_daily_1h", 60, data))
+
+    expanded_days = set()
+    for gap, (initial, days, probes) in zip(candidates_by_gap, probe_by_gap):
+        if not probes or len(days) <= 4:
+            continue
+        probe_has_rows = any(len(cache.get(day, ())) for day in initial)
+        if not probe_has_rows:
+            continue
+        for day in days:
+            if day in cache:
+                continue
+            data, meta = _download_day(symbol, day)
+            cache[day] = data
+            archive_meta.append(meta)
+            expanded_days.add(day)
+            if len(data):
+                archive_rows.append(("binance_vision_daily_1h", 60, data))
+        gap["expanded_after_probe_found_rows"] = True
+
+    parts = [("previous_materialized_hourly", 50, rows)] + archive_rows
+    merged, merge_audit = _merge(parts)
+    after = _gaps(merged)
+    added = int(len(merged) - len(rows))
+    repairable_unfilled = []
+    merged_times = merged[:, 0].astype(np.int64) if len(merged) else np.array([], dtype=np.int64)
+    for gap in candidates_by_gap:
+        missing = [int(stamp) for stamp in range(gap["after_utc_ms"] + HOUR_MS,
+                                                 gap["before_utc_ms"], HOUR_MS)
+                   if not np.searchsorted(merged_times, stamp) < len(merged_times)
+                   or merged_times[np.searchsorted(merged_times, stamp)] != stamp]
+        if missing:
+            repairable_unfilled.append({"after_utc_ms": gap["after_utc_ms"],
+                                        "before_utc_ms": gap["before_utc_ms"],
+                                        "missing_hours_remaining": len(missing),
+                                        "sample_missing_utc_ms": missing[:24]})
+    if added:
+        tmp = output_path.with_name(f"{output_path.name}.tmp-{os.getpid()}-{threading.get_ident()}")
+        try:
+            with tmp.open("wb") as handle:
+                np.save(handle, np.asarray(merged, dtype=np.float64), allow_pickle=False)
+            os.replace(tmp, output_path)
+        finally:
+            if tmp.exists():
+                tmp.unlink()
+    stat = output_path.stat()
+    updated = dict(old_record)
+    tail_missing = old_record.get("tail_missing_hours_to_cutoff_for_current_contract", 0)
+    updated.update({
+        "status": "ready" if after["gap_segments"] == 0 and not old_record.get("official_15m_months_without_any_output_rows")
+                  and not old_record.get("official_1h_months_not_published") and tail_missing == 0 else "ready_with_gaps",
+        "output_size_bytes": stat.st_size,
+        "output_mtime_ns": stat.st_mtime_ns,
+        "shape": list(merged.shape),
+        "coverage": after,
+        "merge_after_daily_repair": merge_audit,
+        "last_action": "daily_archive_gap_repair",
+        "daily_repair": {
+            "status": "bars_added" if added else ("no_published_rows" if archive_meta else "no_eligible_gaps"),
+            "max_gap_hours_filled_exhaustively": max_gap_hours,
+            "gaps_considered": candidates_by_gap,
+            "daily_archives": archive_meta,
+            "days_expanded_after_probe": sorted(expanded_days),
+            "bars_added": added,
+            "bars_with_zero_volume": int(sum(item.get("zero_volume_rows", 0) for item in archive_meta)),
+            "unfilled_hours_in_probed_gaps": repairable_unfilled,
+            "before": before,
+            "after": after,
+            "no_price_synthesis": True,
+        },
+        "resume": "daily_repair_pass",
+    })
+    return updated
+
+
 def _merge(parts: Sequence[Tuple[str, int, np.ndarray]]) -> Tuple[np.ndarray, dict]:
     nonempty = [(name, priority, rows) for name, priority, rows in parts if len(rows)]
     if not nonempty:
@@ -474,10 +665,13 @@ def main() -> None:
     parser.add_argument("--limit", type=int, help="Only process the first N eligible symbols")
     parser.add_argument("--workers", type=int, default=12)
     parser.add_argument("--native-only", action="store_true", help="Materialize cached compact H1 quotes without official archive fill")
+    parser.add_argument("--daily-repair", action="store_true", help="Fill gaps from published official daily 1h ZIPs, without price synthesis")
     parser.add_argument("--no-resume", action="store_true", help="Rebuild symbols even when matching output receipts exist")
     args = parser.parse_args()
     if args.workers < 1:
         parser.error("--workers must be at least 1")
+    if args.native_only and args.daily_repair:
+        parser.error("--native-only and --daily-repair are separate build modes")
     rows = _load_universe()
     by_symbol = {row["symbol"].strip(): row for row in rows}
     selected = list(by_symbol)
@@ -489,7 +683,7 @@ def main() -> None:
         selected = [symbol for symbol in selected if symbol in wanted]
     if args.limit is not None:
         selected = selected[:max(0, args.limit)]
-    mode = "native_only" if args.native_only else "full"
+    mode = "daily_repair" if args.daily_repair else ("native_only" if args.native_only else "full")
     started = datetime.now(timezone.utc).isoformat()
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     if RECEIPT_PATH.exists():
@@ -502,7 +696,11 @@ def main() -> None:
     failures = 0
     with ThreadPoolExecutor(max_workers=args.workers) as executor:
         futures = {
-            executor.submit(_build_symbol, symbol, by_symbol[symbol], mode, records.get(symbol), not args.no_resume): symbol
+            executor.submit(
+                _daily_repair_symbol, symbol, records.get(symbol)
+            ) if args.daily_repair else executor.submit(
+                _build_symbol, symbol, by_symbol[symbol], mode, records.get(symbol), not args.no_resume
+            ): symbol
             for symbol in selected
         }
         for index, future in enumerate(as_completed(futures), 1):
