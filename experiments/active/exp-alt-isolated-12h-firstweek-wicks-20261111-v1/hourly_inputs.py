@@ -703,6 +703,14 @@ def _build_symbol(symbol: str, universe_row: dict, mode: str, old_record: Option
                     from yoyo.data.binance_um_vision_listing import files
                     listed = files(symbol, interval="1h")
                     keys_months = sorted({m for key in listed if (m := _month_from_key(key)) and m <= "2026-09"})
+                    official_metadata.append({
+                        "status": "1h_inventory_checked",
+                        "archive_index": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision",
+                        "listed_archive_keys": len(listed),
+                        "months_through_cutoff": len(keys_months),
+                        "first_listed_key": listed[0] if listed else None,
+                        "last_listed_key": listed[-1] if listed else None,
+                    })
                 except Exception as exc:
                     official_metadata.append({"status": "inventory_lookup_failed", "error": f"{type(exc).__name__}: {exc}"})
         plan = _download_plan(keys_months, local, local_merge)
