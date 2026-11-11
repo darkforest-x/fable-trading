@@ -84,7 +84,7 @@ def main():
                 continue
             raw = original[e['event_id']]
             near = float(raw['high' if raw['side'] == 'upper' else 'low'])
-            ts = int(datetime.fromisoformat(e['first_touch_5m_utc'].replace('Z', '+00:00')).timestamp() * 1000)
+            ts = int(datetime.fromisoformat(e['primary_first_touch_5m_utc'].replace('Z', '+00:00')).timestamp() * 1000)
             row, status = observe(e['event_id'], raw['symbol'], raw['month'], raw['side'],
                                   float(raw['level']), near, ts)
             counts[status] += 1
