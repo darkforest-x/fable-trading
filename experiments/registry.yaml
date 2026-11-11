@@ -15,6 +15,34 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-month-firstweek-all-replay-20261111-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "26941badef"
+    status: inconclusive
+    question: Which monthly-rail reactions deserve continued observation after one or two touching candles, including delayed departures?
+    single_variable: Descriptive replay as new candles become visible. Consolidate repeats into one watch per Binance contract, NY range month and side. Compare second reclaims at the same point in the path.
+    result: >-
+      All 50986 frozen daily first touches mapped to 12564 monthly side groups across 890 contracts.
+      In 3361 groups the first two observable touching 12h bars both reclaimed and no intervening 12h closed outside or on the rail.
+      1644 had neither a close outside nor a close past both touching bars' favorable extreme within 24 hours of the second close.
+      Before the rail expired or observations ended, 551 of those then departed first, 854 lost the rail first
+      and 239 had neither resolution. In those 551 the median wait from the second close was 60 hours.
+      SHIB and its closest masked-prefix peer KOMA closed 8.03% and 6.90% above the lower rail on their second test.
+      A day later their closes were +13.70% and -1.47% from that rail.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    canonical_report: experiments/active/exp-month-firstweek-all-replay-20261111-v1/sideways_followup_counts.csv
+    artifacts: []
+    notes: >-
+      These are structural observations, not fills or PnL. Four owner/earlier reference cases and six peers
+      were compared at the known second close. Historical labels, including the 7210 successful groups,
+      are attached after replay. Across all 12564 first watches the original 45-day favorable-extreme marker
+      was reached in 7303 and remained unresolved for lack of a full path in 507. Daily cards, the price tape,
+      individual paths and an uncompressed Chinese monthly index are under
+      data/research/alt-isolated-12h-wicks-20261111/expanded12/all_replay_v1/.
+
   - experiment_id: exp-month-firstweek-adjacent-replay-20261111-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "eca847ad37"
