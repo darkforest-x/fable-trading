@@ -1,0 +1,35 @@
+{
+  "experiment_id": "exp-etc-month-first-week-12h-retests-20261111-v1",
+  "source": "experiments/active/exp-cloud-allmarket-screen-20261108-v1/inputs/ETC/bars1h.csv.gz",
+  "cutoff_utc": "2026-11-08 12:00:00+00:00",
+  "source_first_hour_utc": "2022-02-05 05:00:00+00:00",
+  "source_last_open_utc": "2026-11-08 11:00:00+00:00",
+  "source_hour_bars": 41695,
+  "months": 57,
+  "frozen_h1_first_touches": 34,
+  "event_rows": 258,
+  "path_candidates": 67,
+  "vectorbt_version": "1.2.0",
+  "costs": {
+    "taker_fee": 0.0005,
+    "maker_fee": 0.0002,
+    "market_slippage_bp": [
+      1,
+      5
+    ],
+    "funding": "excluded"
+  },
+  "account": {
+    "initial_usdt": 1000.0,
+    "per_trade_nav_fraction": 0.1,
+    "slots": 1,
+    "stop_pct": 0.05,
+    "timeout_hours": 168
+  },
+  "execution": "accepted month_first_week_alt_trades VectorBT path adapter; accepted cloud_close_reward_account VectorBT wallet replay",
+  "completion": "Only complete hourly and UTC 12H candles. H1 bars with both stop and target in one candle use stop-first VectorBT semantics.",
+  "same_open_priority": "The accepted wallet's deterministic sort selects the lexical event_id after CRC32(symbol) priority; a second same-symbol event at that open is skipped as same_contract.",
+  "validation": "ETC monthly anchors recomputed from the complete NY first week and exactly reconciled to all 34 frozen H1 first-touch event rows.",
+  "training_eligible": false,
+  "production_eligible": false
+}
