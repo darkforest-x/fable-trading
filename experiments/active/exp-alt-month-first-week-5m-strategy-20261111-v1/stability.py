@@ -214,7 +214,12 @@ def _fit_row(strategy: str, fraction: float, early: dict, year: dict, early_sour
         early_metric = early.get(metric, np.nan)
         year_metric = year.get(metric, np.nan)
         vals = [float(v) for v in (early_metric, year_metric) if v is not None and not pd.isna(v)]
-        row[f"worst_{objective}_pct" if objective != "trades_per_year" else "worst_trades_per_year"] = min(vals) if vals else np.nan
+        score_col = (
+            "worst_trades_per_year" if objective == "trades_per_year"
+            else "worst_return_over_intrabar_dd" if objective == "return_over_intrabar_dd"
+            else f"worst_{objective}_pct"
+        )
+        row[score_col] = min(vals) if vals else np.nan
     row["minimum_annualized_return_pct"] = min(
         _as_float(early.get("annualized_return_pct")),
         _as_float(year.get("annualized_return_pct")),
@@ -266,7 +271,7 @@ def _objective_score_column(objective: str) -> str:
     if objective == "trades_per_year":
         return "worst_trades_per_year"
     if objective == "return_over_intrabar_dd":
-        return "worst_return_over_intrabar_dd_pct"
+        return "worst_return_over_intrabar_dd"
     return f"worst_{objective}_pct"
 
 
@@ -310,12 +315,7 @@ def _profile_id(strategy: str, fraction: float) -> str:
     return f"stable_{safe}__{pct}pct"
 
 
-def fit_and_freeze() -> dict:
-    if FIT_PATH.exists() or SELECTED_PATH.exists():
-        raise FileExistsError("Stability fit/freeze already exists; refusing to silently replace it")
-    cfgs = research.configurations()
-    if len(cfgs) != 118:
-        raise ValueError(f"Expected the frozen 118-config matrix, found {len(cfgs)}")
+def _calculate_fit(cfgs: dict) -> pd.DataFrame:
     _assert_base_signal_caches(cfgs)
     prior_early = _prior_early_10pct(cfgs)
     data = research.Inputs()
@@ -364,8 +364,35 @@ def fit_and_freeze() -> dict:
                 year_metrics[(strategy, fraction)],
                 "selection_period_all.csv:early:10%" if fraction == 0.10 else "account.run_account:pre_2025:5%",
             ))
-    fit = pd.DataFrame(rows, columns=FIT_COLUMNS)
-    fit.to_csv(FIT_PATH, index=False)
+    return pd.DataFrame(rows, columns=FIT_COLUMNS)
+
+
+def fit_and_freeze() -> dict:
+    if SELECTED_PATH.exists():
+        raise FileExistsError("stability_selected.json already exists; refusing to silently replace the freeze")
+    cfgs = research.configurations()
+    if len(cfgs) != 118:
+        raise ValueError(f"Expected the frozen 118-config matrix, found {len(cfgs)}")
+
+    # A complete fit CSV can be resumed when selection/ranking previously
+    # stopped after account results were written. Do not replay those accounts.
+    if FIT_PATH.exists():
+        fit = pd.read_csv(FIT_PATH)
+        expected = {(key, float(fraction)) for key in cfgs for fraction in FRACTIONS}
+        observed = set(zip(fit.strategy.astype(str), fit.fraction.astype(float))) if {"strategy", "fraction"}.issubset(fit.columns) else set()
+        required = set(FIT_COLUMNS).difference({"worst_return_over_intrabar_dd"})
+        if len(fit) != len(expected) or observed != expected or not required.issubset(fit.columns):
+            raise ValueError("Existing stability_fit.csv is incomplete; refusing to overwrite its results")
+        fit["worst_return_over_intrabar_dd"] = np.minimum(
+            pd.to_numeric(fit.early_annualized_return_over_intrabar_dd, errors="coerce"),
+            pd.to_numeric(fit["2025_annualized_return_over_intrabar_dd"], errors="coerce"),
+        )
+        fit = fit.reindex(columns=FIT_COLUMNS)
+        fit.to_csv(FIT_PATH, index=False)
+        print("Resumed complete pre-2025/2025 fit metrics from stability_fit.csv; no account replay.", flush=True)
+    else:
+        fit = _calculate_fit(cfgs)
+        fit.to_csv(FIT_PATH, index=False)
 
     eligible = fit.loc[fit.eligible].copy()
     selection: dict[str, Any] = {
