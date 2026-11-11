@@ -15,6 +15,35 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-month-firstweek-h4-forward-excursions-20261112-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "341cc2d11c"
+    status: inconclusive
+    question: What maximum favorable and adverse moves follow the fourth-hour close over 24, 72 and 168 hours, and which extreme occurs first?
+    single_variable: Prespecified observation horizons from the same fourth close. Compare the entire eligible upper-rail group and lower-rail subgroups defined by whether H2 through H4 ever closed above the first reclaim 12h close.
+    result: >-
+      From 12,564 first contract/month/rail watches, 7,383 reclaimed on the touching 12h.
+      Following a stalled first hour and four held hourly closes, 2,338 cases qualified across 690
+      contracts. Two had insufficient follow-up for any window. Seven-day median MFE/MAE
+      magnitudes were 9.13/9.80 percent for 1,155 complete upper holds, 6.63/8.28 for 687 lower
+      holds with a higher close, and 6.15/10.34 for 494 other lower holds. Counts with favorable
+      first / adverse first were 512/638, 398/283, and 288/204 respectively. Same-hour ties and
+      one-sided or stationary paths are reported separately.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    canonical_report: experiments/active/exp-month-firstweek-h4-forward-excursions-20261112-v1/summary.csv
+    artifacts: []
+    notes: >-
+      All future result classes qualify on the same prefix; the main table includes cases that
+      had reached an old rail-based threshold before the new measurement origin. A separate
+      table retains only prefixes that touched neither original barrier. Count each horizon
+      only when all H1s are continuous. Gross favorable/adverse excursions are relative to reference
+      price, with no simulated orders, and can exceed 100 percent on the adverse side of a short.
+      Frozen builder d029b1fe69. Per-case excursions and first-extreme hours are in
+      data/research/alt-isolated-12h-wicks-20261111/expanded12/all_replay_v1/h4_forward_excursions/excursions.csv.
+
   - experiment_id: exp-month-firstweek-stalled-restart-20261112-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "ddf394b61f"
