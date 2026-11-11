@@ -1,0 +1,22 @@
+{
+  "win": {
+    "strategy": "half_wick-hold3h",
+    "fraction": 1.0
+  },
+  "return": {
+    "strategy": "same_bar-tp4",
+    "fraction": 1.0
+  },
+  "frequency": {
+    "strategy": "repeat_reclaim-tp4",
+    "fraction": 0.1
+  },
+  "value": {
+    "strategy": "same_bar-tp4",
+    "fraction": 1.0
+  },
+  "distinct_value": {
+    "strategy": "same_bar-near_edge",
+    "fraction": 1.0
+  }
+}
