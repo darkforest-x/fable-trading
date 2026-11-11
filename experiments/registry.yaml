@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-alt-month-first-week-five-minute-observation-20261111-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "85ad0f71ed"
+    status: inconclusive
+    question: How often are first five-minute reclaims seen beyond the initial 12-symbol local candle sample?
+    single_variable: Expand the coin and historical coverage of the same frozen monthly first-touch rule.
+    data_scope: All 5,182 frozen OKX altcoin USDT perpetual first touches between February 2022 and October 2026, joined to OKX five-minute candles and historical archives. See coverage by symbol and evidence class.
+    result: "Of 5,182 frozen first-touch events in 345 altcoins, 5,162 in 344 instruments passed; 2,850 reclaimed on the touch 5m bar, 1,354 on the next five, 958 did not within six bars. Full post-ready 5m histories verified for 4,588 (2,556 immediate). Of 2,849 immediate recoveries with a full following hour, 1,992 retouched the rail. Counts describe OHLC paths; no fills or PnL."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-alt-month-first-week-five-minute-observation-20261111-v2/summary.json
+    notes: Descriptive paths, including retired instruments, same-bar timing clusters and subsequent retests. No simulated fills.
+
   - experiment_id: exp-alt-month-first-week-five-minute-observation-20261111-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "0b6d32f1cc"
