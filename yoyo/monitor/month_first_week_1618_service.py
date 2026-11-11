@@ -8,6 +8,7 @@ worker batches durable writes away from the existing market stream thread.
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from urllib.parse import urlencode
 import json
 import math
 import threading
@@ -525,13 +526,16 @@ class MonthFirstWeek1618Service:
 
     def _send_notice(self, channel, event, creds, now_ms):
         text = _event_text(event)
+        chart_url = "https://spikeok.com/#monday-fib?" + urlencode(
+            {"symbol": event["symbol"], "monthEvent": event["event_id"]})
         try:
             if channel == "telegram":
                 token, chat = creds
                 tv_symbol = event["symbol"].removesuffix("-SWAP").replace("-", "") + ".P"
                 response = self.sender("https://api.telegram.org/bot" + token + "/sendMessage",
                                        json={"chat_id": chat, "text": text, "disable_web_page_preview": True,
-                                             "reply_markup": {"inline_keyboard": [[{"text": "打开 TradingView ↗",
+                                             "reply_markup": {"inline_keyboard": [[{"text": "看 1.618 图表",
+                                                 "url": chart_url}, {"text": "打开 TradingView ↗",
                                                  "url": f"https://www.tradingview.com/chart/?symbol=OKX%3A{tv_symbol}&interval=60"}]]}},
                                        timeout=(6, 15), allow_redirects=False)
                 payload = response.json()
@@ -564,7 +568,7 @@ class MonthFirstWeek1618Service:
             title, body = text.split("\n", 1)
             response = self.sender(SERVER + "/push", json={"device_key": creds, "title": title, "body": body,
                                        "group": "SPIKE 月首周 1.618", "level": "active", "isArchive": "1",
-                                       "copy": f"OKX:{tv_symbol}"},
+                                       "copy": f"OKX:{tv_symbol}", "url": chart_url},
                                   timeout=(6, 15), allow_redirects=False)
             if response.status_code == 429:
                 retry = response.headers.get("Retry-After", "30")

@@ -230,7 +230,10 @@ class TestMonthFirstWeekService:
         assert event["candle_confirmed"] is False
         assert service.book.channel_status("telegram")["counts"] == {"sent": 1}
         assert len(sent) == 1
-        assert "OKX%3ABTCUSDT.P" in sent[0][1]["json"]["reply_markup"]["inline_keyboard"][0][0]["url"]
+        chart, tradingview = sent[0][1]["json"]["reply_markup"]["inline_keyboard"][0]
+        assert chart["url"] == ("https://spikeok.com/#monday-fib?symbol=BTC-USDT-SWAP"
+                                "&monthEvent=2026-11%7CBTC-USDT-SWAP%7Cupper")
+        assert "OKX%3ABTCUSDT.P" in tradingview["url"]
         assert "月首周 1.618" in sent[0][1]["json"]["text"].splitlines()[0]
         assert service.events_after(0)[0]["event_id"] == "2026-11|BTC-USDT-SWAP|upper"
 

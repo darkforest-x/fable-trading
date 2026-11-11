@@ -344,10 +344,17 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
         except MonitorUnavailable as error:
             raise HTTPException(503, str(error)) from None
 
+    @app.get('/v1/monitor/month-first-week-1618/levels', dependencies=[Depends(auth)])
+    def month_levels(symbol: str = Query(..., pattern=r'^[A-Z0-9]{1,32}-USDT-SWAP$')):
+        try:
+            return app.state.monitor.month_first_week_levels(symbol)
+        except MonitorUnavailable as error:
+            raise HTTPException(503, str(error)) from None
+
     @app.get('/v1/monitor/month-first-week-1618/chart', dependencies=[Depends(auth)])
     def month_chart(event_id: Optional[str] = Query(None, min_length=1, max_length=96),
                     symbol: Optional[str] = Query(None, pattern=r'^[A-Z0-9]{1,32}-USDT-SWAP$'),
-                    period: str = Query('1H', pattern=r'^(1m|5m|15m|1H|4H|12H|1D)$')):
+                    period: str = Query('1H', pattern=r'^(1m|2m|3m|5m|15m|30m|1H|4H|12H|1D)$')):
         if bool(event_id) == bool(symbol):
             raise HTTPException(422, '请选择一条触价或一个合约')
         try:

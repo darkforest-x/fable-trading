@@ -449,6 +449,17 @@ class MonitorFeed:
         return self._read('month-first-week-1618', self._month_first_week_snapshot,
                           load=lambda: self._fetch('/api/month-first-week-1618'), ttl=1)
 
+    def month_first_week_levels(self, symbol):
+        path = '/api/month-first-week-1618/levels?' + urlencode(dict(symbol=symbol))
+
+        def load():
+            raw = self._fetch(path)
+            if not isinstance(raw, dict) or raw.get('symbol') != symbol or not isinstance(raw.get('ranges'), list):
+                raise MonitorUnavailable('月首周区间数据格式无效')
+            return raw
+
+        return self._read(path, None, load=load, ttl=10)
+
     def month_first_week_chart(self, event_id, period, symbol=None):
         identity = dict(event_id=event_id) if event_id else dict(symbol=symbol)
         path = '/api/month-first-week-1618/chart?' + urlencode(dict(identity, period=period))

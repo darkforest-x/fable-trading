@@ -262,6 +262,16 @@ class MonthFirstWeekBook:
             return [self._anchor_dict(row) for row in db.execute(
                 "SELECT * FROM anchors WHERE month=? ORDER BY symbol", (month,))]
 
+    def chart_ranges(self, symbol: str, now_ms: int):
+        """Closed first-week prices are valid even while post-week touches are being recovered."""
+        with self.db() as db:
+            return [dict(row) for row in db.execute("""
+                SELECT month,start_ms,ready_ms,expires_ms,high,low,upper,lower
+                FROM anchors WHERE symbol=? AND ready_ms<=?
+                  AND high>low AND low>0 AND upper IS NOT NULL AND lower IS NOT NULL
+                ORDER BY month
+            """, (symbol, now_ms))]
+
     @staticmethod
     def _anchor_dict(row):
         result = dict(row)

@@ -23,6 +23,8 @@ class History:
         self.candles = SimpleNamespace(client=SimpleNamespace(clock=lambda: now),
                                        recent=lambda *_: dict(closed_candles=[], forming_candle=forming))
         self.bars = bars
+        self.levels = SimpleNamespace(read_display=lambda symbol, at: dict(
+            state="ready", symbol=symbol, asof=at))
 
     def read(self, symbol, period, before):
         assert symbol == SYMBOL
@@ -55,6 +57,7 @@ def test_historical_hour_finds_first_minute_across_pages_and_requires_complete_p
     assert result["observation_end_ms"] == START + HOUR_MS
     assert result["marker_ms"] == START + 37*MINUTE_MS
     assert result["anchor"]["lower"] == result["level"] == 91.91
+    assert result["weekly_ranges"] == [dict(state="ready", symbol=SYMBOL, asof=START)]
     assert result["candles"][0]["time"] == START - 150*MINUTE_MS
     assert result["forming_time_ms"] is None
     history.bars = [r for r in bars if r["time"] != START + 5*MINUTE_MS]
@@ -95,3 +98,23 @@ def test_daily_color_matches_ny_first_week_across_months_and_dst(tmp_path):
     http = setup_chart(tmp_path, history, source="live", created=START)
     data = http.get("/api/month-first-week-1618/chart", params=dict(symbol=SYMBOL, period="1D")).json()
     assert [row["first_week"] for row in data["candles"]] == [False, True, True, False]*2
+
+
+def test_level_overlay_uses_only_frozen_prices_for_selected_contract(tmp_path):
+    history = History(START, [])
+    http = setup_chart(tmp_path, history, source="live", created=START)
+    book = MonthFirstWeekBook(tmp_path)
+    november = book.anchor("2026-11", SYMBOL)
+    past = {**november, "month": "2026-10", "start_ms": START-40*24*HOUR_MS,
+            "ready_ms": START-33*24*HOUR_MS, "expires_ms": START-10*24*HOUR_MS}
+    book.save_anchor(past, SYMBOL, START, state="recovering")
+    future = {**november, "month": "2026-12", "ready_ms": START+30*24*HOUR_MS}
+    book.save_anchor(future, SYMBOL, START)
+    http_path = "/api/month-first-week-1618/levels"
+    result = http.get(http_path, params={"symbol": SYMBOL}).json()
+    assert [r["month"] for r in result["ranges"]] == ["2026-10", "2026-11"]
+    assert result["symbol"] == SYMBOL and result["ranges"][0]["expires_ms"] == past["expires_ms"]
+    assert http.get(http_path, params={"symbol": "OTHER-USDT-SWAP"}).json()["ranges"] == []
+    history.levels.read_display = lambda *_: dict(state="missing_monday")
+    event = http.get("/api/month-first-week-1618/chart", params=dict(event_id=EVENT, period="30m"))
+    assert event.status_code == 200 and event.json()["weekly_ranges"] == []

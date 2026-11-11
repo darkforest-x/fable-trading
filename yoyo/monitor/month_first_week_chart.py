@@ -3,7 +3,7 @@ from typing import Optional
 
 from fastapi import HTTPException, Query
 
-from .chart_periods import open_time, step_ms
+from .chart_periods import PERIODS, open_time, step_ms
 from .month_first_week_1618 import HOUR_MS, MINUTE_MS, SYMBOL_RE, month_window
 
 LEVELS = ("high", "low", "upper", "lower")
@@ -47,8 +47,15 @@ def chart(book, history, event_id, period):
     right = open_time(end - 1, period) + 81 * step
     symbol = event["symbol"]
     candles, forming = _window(history, symbol, period, left, right, now)
+    # Monday is a separately timed range. In a replay it must come from the
+    # week of the stored touch, including Monday's previous-week fallback.
+    try:
+        weekly = history.levels.read_display(symbol, start)
+    except (RuntimeError, ValueError, OSError):
+        weekly = {}
     return dict(event_id=event_id, symbol=symbol, month=event["month"], side=event["side"],
                 source=event["source"], level=event["level"], bar=period, anchor=anchor,
+                weekly_ranges=[weekly] if weekly.get("state") == "ready" else [],
                 candles=candles, forming_time_ms=forming, observation_start_ms=start,
                 observation_end_ms=end, marker_ms=_marker(event, candles, period, start, end))
 
@@ -115,10 +122,15 @@ def _window(history, symbol, period, left, right, now):
 
 
 def install(app, service):
+    @app.get("/api/month-first-week-1618/levels")
+    def month_levels(symbol: str = Query(..., pattern=SYMBOL_RE.pattern)):
+        now = app.state.monday_chart_history.candles.client.clock()
+        return dict(symbol=symbol, ranges=service.book.chart_ranges(symbol, now))
+
     @app.get("/api/month-first-week-1618/chart")
     def month_chart(event_id: Optional[str] = Query(None, min_length=1, max_length=96),
                     symbol: Optional[str] = Query(None, pattern=SYMBOL_RE.pattern),
-                    period: str = Query("1H", pattern=r"^(1m|5m|15m|1H|4H|12H|1D)$")):
+                    period: str = Query("1H", pattern="^(" + "|".join(PERIODS) + ")$")):
         if bool(event_id) == bool(symbol):
             raise HTTPException(422, "请选择一条触价或一个合约")
         if event_id:
