@@ -11,7 +11,7 @@ sys.path.insert(0,str(ROOT))
 from yoyo.data.binance_um_vision_listing import symbols,_list
 DEST=ROOT/'data/research/alt-isolated-12h-wicks-20261111/binance'
 # Stablecoin, bullion, major coin and exchange-compiled index underlyings.
-EXCLUDE=set('BTC ETH BTCDOM DEFI BLUEBIRD BTCDOMINANCE BUSD USDC FDUSD TUSD USDP USDT USD1 USDE USDD DAI UST USTC USTCUSDT PAXG XAUT XAU XAG'.split())
+EXCLUDE=set('BTC ETH FOOTBALL DOTECO BTCDOM DEFI BLUEBIRD BTCDOMINANCE BUSD USDC FDUSD TUSD USDP USDT USD1 USDE USDD DAI UST USTC USTCUSDT PAXG XAUT XAU XAG'.split())
 
 
 def get_roster():
