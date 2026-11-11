@@ -53,6 +53,15 @@ def per_symbol(pair):
     return out
 
 
+def group_successful_days(a):
+    wins=a[a[COLS[9]]>=20]
+    groups=wins.groupby([COLS[0],COLS[1],COLS[4]],sort=True)
+    g=groups.agg(达到20%的触价日数=(COLS[2],'size'),最早达标样本的触价小时_北京=(COLS[2],'first'),
+                 最后达标样本的触价小时_北京=(COLS[2],'last'),轨价=(COLS[5],'first'),
+                 各达标日45天最大反向幅度百分比的最高值=(COLS[9],'max'))
+    g.to_csv(OUT/'45天反转20pct_按合约月份方向合并.csv',encoding='utf-8-sig')
+
+
 if __name__=='__main__':
     coverage=pd.read_csv(OUT/'coverage_months.csv')
     groups=coverage[coverage.status.eq('valid')].sort_values('month').groupby('symbol')
@@ -63,6 +72,7 @@ if __name__=='__main__':
         a[c]=pd.to_datetime(a[c],unit='h',utc=True).dt.tz_convert('Asia/Shanghai').dt.strftime('%Y-%m-%d %H:%M')
     a.to_csv(OUT/'逐日首次碰轨_7天14天45天.csv.gz',index=False,compression='gzip')
     a[a[COLS[9]]>=20].to_csv(OUT/'逐日首次碰轨_45天反转至少20pct.csv',index=False,encoding='utf-8-sig')
+    group_successful_days(a)
     for name in COLS[7:10]:
         mature=a[a[name].notna()];w=mature[mature[name]>=20]
         print(name,len(mature),len(w),w[COLS[0]].nunique(),len(w[[COLS[0],COLS[1],COLS[4]]].drop_duplicates()),flush=True)
