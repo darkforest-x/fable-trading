@@ -15,9 +15,10 @@ COLS=['币安合约','纽约区间月','首次触价小时（北京）','12小�
       '7天最大反向幅度%','14天最大反向幅度%','45天最大反向幅度%','第几小时达到20%','达20%前已知最大不利幅度%']
 
 
-def per_symbol(pair):
+def per_symbol(pair, raw=None):
     symbol,valid=pair
-    q=read_raw(symbol); times=q[:,0].astype('int64'); clocks=times//HOUR
+    q=read_raw(symbol) if raw is None else raw
+    times=q[:,0].astype('int64'); clocks=times//HOUR
     if not len(q): return []
     out=[]; dates=set()
     for row in valid.itertuples():

@@ -10,7 +10,7 @@ ROOT=HERE.parents[2]
 sys.path.insert(0,str(ROOT))
 from yoyo.data.binance_um_vision_listing import symbols,_list
 DEST=ROOT/'data/research/alt-isolated-12h-wicks-20261111/binance'
-# Stablecoin, bullion, major coin and exchange-compiled index underlyings.
+# Legacy altcoin-only cohort, retained to reproduce the original census.
 EXCLUDE=set('BTC ETH FOOTBALL DOTECO BTCDOM DEFI BLUEBIRD BTCDOMINANCE BUSD USDC FDUSD TUSD USDP USDT USD1 USDE USDD DAI UST USTC USTCUSDT PAXG XAUT XAU XAG'.split())
 
 
@@ -52,6 +52,9 @@ def get_roster():
     a=pd.DataFrame(rows)
     a.to_csv(DEST/'universe_audit.csv',index=False)
     a[a.eligible].to_csv(DEST/'universe_eligible.csv',index=False)
+    perpetuals = a[a.contract_type.isin(['PERPETUAL','TRADIFI_PERPETUAL',''])]
+    perpetuals = perpetuals.rename(columns={'eligible':'in_legacy_altcoin_cohort','basis':'legacy_classification'})
+    perpetuals.to_csv(DEST/'universe_perpetuals.csv',index=False)
     print(a.groupby('basis').size().to_string(),flush=True)
     print('unknown:',a[a.basis=='archive_only_unclassified'].symbol.tolist(),flush=True)
 
