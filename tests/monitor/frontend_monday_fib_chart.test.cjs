@@ -1,10 +1,10 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const {levels,prepare}=require('../../yoyo/monitor/static/monday-fib-chart.js');
+const {levels,prepare,validateMonthlyRanges,monthlyLines,withMonthlyLevels,monthlyEventFrame,validateMonthlyEvent}=require('../../yoyo/monitor/static/monday-fib-chart.js');
 const start=Date.parse('2026-10-19T04:00:00Z');
 const row={symbol:'BTC-USDT-SWAP',high:83149.8,low:81166,upper:84375.7884,lower:79940.0116};
 const anchorReply=url=>({...row,symbol:new URL(url,'http://test').searchParams.get('symbol'),timezone:'America/New_York',week:'2026-10-19',state:'ready',start_ms:start,end_ms:start+86400000,expires_ms:start+7*86400000,high_ms:start+3600000,low_ms:start+7200000});
-const bar=time=>({time,open:82000,high:82100,low:81900,close:82050,volume:10});
+const bar=(time,extra={})=>({time,open:82000,high:82100,low:81900,close:82050,volume:10,...extra});
 const context=(symbol=row.symbol)=>({symbol,bar:'15m',timezone:'America/New_York',monday:{start_ms:start,end_ms:start+86400000},last_close_ms:start+1800000,candles:[bar(start-900000),bar(start),bar(start+900000)]});
 test('chart uses monitor anchors and the exact mirrored nine price levels',()=>{
  const a=levels(row);assert.equal(a.length,9);assert.equal(a[0].price,row.upper);assert.equal(a[8].price,row.lower);
@@ -25,6 +25,82 @@ test('chart retains native history, keeps closed candles, and rejects wrong iden
 test('empty data never invents candles or reuses another symbol',()=>{
  const c={symbol:row.symbol,bar:'15m',timezone:'America/New_York',loading:true,candles:[]};assert.deepEqual(prepare(c,row,'2026-10-19').candles,[]);
  assert.throws(()=>prepare({...c,symbol:'ETH-USDT-SWAP'},row,'2026-10-19'),/币种/);
+});
+
+const monthRange=(month,start,ready,expires,high,low)=>({month,start_ms:start,ready_ms:ready,expires_ms:expires,high,low,upper:high+.618*(high-low),lower:low-.618*(high-low)});
+const october=monthRange('2026-10',Date.parse('2026-10-01T04:00:00Z'),Date.parse('2026-10-08T04:00:00Z'),Date.parse('2026-11-01T04:00:00Z'),120,90);
+const november=monthRange('2026-11',Date.parse('2026-11-01T04:00:00Z'),Date.parse('2026-11-08T05:00:00Z'),Date.parse('2026-12-01T05:00:00Z'),140,105);
+test('monthly levels validate ordered anchors and draw four distinct, low-clutter rays per visible month',()=>{
+ const ranges=validateMonthlyRanges({symbol:row.symbol,ranges:[october,november]},row.symbol);
+ const from=Date.parse('2026-10-20T00:00:00Z'),to=Date.parse('2026-11-12T00:00:00Z'),lines=monthlyLines(ranges,from,to);
+ assert.deepEqual(lines.map(line=>line.label),['月首周高','月首周上 1.618','月首周下 1.618','月首周低','月首周高','月首周上 1.618','月首周下 1.618','月首周低']);
+ assert.equal(lines[0].historical,true);assert.equal(lines[0].inlineNameVisible,false);
+ assert.equal(lines[4].historical,false);assert.equal(lines[4].inlineNameVisible,true);
+ assert.deepEqual(lines.slice(0,4).map(line=>line.start_ms),Array(4).fill(october.ready_ms));
+ assert.deepEqual(lines.slice(4).map(line=>line.end_ms),Array(4).fill(november.expires_ms));
+ assert.equal(lines.find(line=>line.label==='月首周上 1.618').lineStyle,2);
+ assert.throws(()=>validateMonthlyRanges({symbol:row.symbol,ranges:[november,october]},row.symbol),/顺序/);
+});
+test('weekly and monthly overlays share the canonical chart without changing weekly level semantics',()=>{
+ const value={...context(),levels:[{label:'周一高',price:120,start_ms:start-3600000,end_ms:start+86400000}],level_window:{start_ms:start-3600000,end_ms:start+86400000}};
+ const combined=withMonthlyLevels(value,[october,november]);
+ assert.equal(combined.levels.length,5);
+ assert.equal(combined.levels[0].label,'周一高');
+ assert.ok(combined.levels.some(level=>level.label==='月首周上 1.618'));
+ assert.equal(combined.level_window.start_ms,october.ready_ms);
+ assert.equal(combined.level_window.end_ms,october.expires_ms);
+});
+function monthlyEvent(overrides={}){
+ const eventTime=Date.parse('2026-11-12T12:00:00Z'),weekStart=eventTime-3*86400000,weekEnd=weekStart+86400000;
+ const weekly={symbol:row.symbol,week:'2026-11-09',state:'ready',start_ms:weekStart,end_ms:weekEnd,expires_ms:weekStart+7*86400000,
+  high:138,low:112,upper:138+.618*26,lower:112-.618*26,high_ms:weekStart+3600000,low_ms:weekStart+7200000};
+ return {event_id:'2026-11|BTC-USDT-SWAP|upper',symbol:row.symbol,month:'2026-11',side:'upper',source:'live',level:weekly.upper,bar:'1H',
+  anchor:november,candles:[bar(eventTime-3600000),bar(eventTime),bar(eventTime+3600000)],marker_ms:eventTime,
+  observation_start_ms:eventTime,observation_end_ms:eventTime+60000,forming_time_ms:null,
+  weekly_ranges:[{...weekly},{...weekly,week:'2026-11-16',start_ms:weekly.expires_ms,end_ms:weekly.expires_ms+86400000,expires_ms:weekly.expires_ms+7*86400000}],...overrides};
+}
+test('monthly event frame keeps exact marker and selects only the weekly range covering that event',()=>{
+ const data=monthlyEvent(),frame=monthlyEventFrame(data,{symbol:row.symbol,eventId:data.event_id,period:'1H'});
+ assert.equal(frame.marker_ms,data.marker_ms);assert.equal(frame.monthlyEvent.weekly_anchor.week,'2026-11-09');
+ assert.deepEqual(frame.levels.slice(-4).map(level=>level.label),['月首周高','月首周上 1.618','月首周下 1.618','月首周低']);
+ assert.ok(frame.levels.slice(0,-4).every(level=>level.week==='2026-11-09'));
+ assert.equal(frame.levels.at(-3).start_ms,november.ready_ms);
+ assert.equal(frame.level_window.end_ms,november.expires_ms);
+ assert.throws(()=>validateMonthlyEvent({...data,event_id:'other'},{symbol:row.symbol,eventId:data.event_id,period:'1H'}),/不匹配/);
+ assert.throws(()=>validateMonthlyEvent({...data,marker_ms:data.marker_ms+1},{symbol:row.symbol,eventId:data.event_id,period:'1H'}),/标记/);
+});
+function monthlyChartHarness(){
+ const pending=[],rendered=[],markers=[],ranges=[],state={textContent:''},status={textContent:'',classList:{toggle(){}}};let request=0;
+ const instance={rows:[],series:{setMarkers:value=>markers.push(value)},panel:{querySelector:()=>status},chart:{timeScale:()=>({setVisibleLogicalRange:value=>ranges.push(value)})}};
+ const mount={},retry={addEventListener(){}},caption={hidden:false,setAttribute(){}},host={innerHTML:'',replaceChildren(){},querySelector:s=>s==='[role=status]'?state:s==='.mf-chart-caption'?caption:s==='.mf-chart-mount'?mount:retry};
+ const sandbox={document:{hidden:false,documentElement:{dataset:{theme:'dark'}}},window:{SpikeRangeChart:{mount:(h,data,view)=>{rendered.push({data,view});instance.rows=(data.candles||[]).map(c=>({...c,time:c.time/1000}));view.decorate?.(instance,data);return instance;},unmount(){}}},Intl,Date,AbortController,URLSearchParams,fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve})),setTimeout:()=>++request,clearTimeout(){}};
+ vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
+ return {api:sandbox.window.SpikeMondayFibChart,pending,rendered,markers,ranges,state,status,host,settle:async()=>{for(let i=0;i<24;i++)await Promise.resolve();}};
+}
+test('canonical event chart uses the exact signal, eight labeled rails, first-week colors, and OHLC autoscale',async()=>{
+ const h=monthlyChartHarness(),data=monthlyEvent({candles:[bar(Date.parse('2026-11-12T11:00:00Z'),{first_week:true}),bar(Date.parse('2026-11-12T12:00:00Z'),{first_week:false}),bar(Date.parse('2026-11-12T13:00:00Z'),{first_week:false})]});
+ h.api.showMonthlyEvent(h.host,row.symbol,data.event_id,{period:'1H'});
+ assert.match(h.pending[0].url,/event_id=2026-11%7CBTC-USDT-SWAP%7Cupper/);assert.match(h.pending[0].url,/period=1H/);
+ h.pending[0].resolve({ok:true,json:async()=>data});await h.settle();
+ const view=h.rendered.at(-1).view,drawn=h.rendered.at(-1).data;
+ assert.equal(drawn.levels.length,8);assert.equal(view.scaleReferenceLevels,false);assert.equal(view.bars,Infinity);
+ assert.deepEqual(JSON.parse(JSON.stringify(h.markers.at(-1))),[{time:data.marker_ms/1000,position:'aboveBar',shape:'arrowDown',color:'#b86542',text:'首周触价'}]);
+ assert.deepEqual(JSON.parse(JSON.stringify(h.ranges.at(-1))),{from:0,to:2});assert.equal(view.candleColor(drawn.candles[0]),'#30D158');assert.equal(view.candleColor(drawn.candles[1]),'#8B9099');
+ assert.match(h.status.textContent,/已标记/);h.api.hide();
+});
+test('uncertain monthly event charts are fetched again after closing instead of cached without a marker',async()=>{
+ const h=monthlyChartHarness(),data=monthlyEvent({marker_ms:null,candles:[bar(Date.parse('2026-11-12T11:00:00Z')),bar(Date.parse('2026-11-12T12:00:00Z'))]});
+ h.api.showMonthlyEvent(h.host,row.symbol,data.event_id,{period:'1H'});h.pending[0].resolve({ok:true,json:async()=>data});await h.settle();
+ assert.deepEqual(JSON.parse(JSON.stringify(h.markers.at(-1))),[]);h.api.hide();h.api.showMonthlyEvent(h.host,row.symbol,data.event_id,{period:'1H'});
+ assert.equal(h.pending.length,2);h.api.hide();
+});
+test('leaving a monthly event clears only its trigger marker before reusing the chart for another symbol',async()=>{
+ const h=monthlyChartHarness(),data=monthlyEvent();
+ h.api.showMonthlyEvent(h.host,row.symbol,data.event_id,{period:'1H'});h.pending[0].resolve({ok:true,json:async()=>data});await h.settle();
+ assert.equal(h.markers.at(-1).length,1);
+ const other={...row,symbol:'ETH-USDT-SWAP'},anchors={...anchorReply('/?symbol=ETH-USDT-SWAP'),symbol:'ETH-USDT-SWAP'};
+ h.api.show(h.host,other,'2026-10-19',{period:'1H',anchors});
+ assert.deepEqual(JSON.parse(JSON.stringify(h.markers.at(-1))),[]);h.api.hide();
 });
 test('row chart makes only selected GETs, ignores retired replies and aborts on close',async()=>{
  const pending=[],draws=[],rendered=[],views=[],timers=new Map();let n=0;
@@ -88,7 +164,7 @@ test('closed candle scheduling follows server boundaries and retries incomplete 
 test('loading marks the retry control busy while empty-data and failure states keep retry available',async()=>{
  const pending=[],attrs=new Map(),state={textContent:''},caption={hidden:false,setAttribute:(k,v)=>attrs.set(k,v)},mount={},retry={hidden:false,addEventListener(){}};
  const host={innerHTML:'',querySelector:s=>s==='[role=status]'?state:s==='.mf-chart-caption'?caption:s==='.mf-chart-mount'?mount:retry};
- const sandbox={document:{hidden:false},window:{SpikeRangeChart:{mount(){return {};},unmount(){}}},Intl,Date,AbortController,fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve})),setTimeout:()=>1,clearTimeout(){}};
+ const sandbox={document:{hidden:false},window:{SpikeRangeChart:{mount(){return {};},unmount(){}}},Intl,Date,AbortController,fetch:(url,options)=>url.includes('/month-first-week-1618/levels?')?Promise.resolve({ok:true,json:async()=>({symbol:row.symbol,ranges:[]})}):new Promise(resolve=>pending.push({url,options,resolve})),setTimeout:()=>1,clearTimeout(){}};
  vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
  const api=sandbox.window.SpikeMondayFibChart,anchors=anchorReply('/?symbol='+row.symbol),settle=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  api.show(host,row,'2026-10-19',{anchors});assert.equal(retry.hidden,true);assert.equal(attrs.get('aria-busy'),'true');
@@ -102,7 +178,7 @@ test('loading marks the retry control busy while empty-data and failure states k
 test('late anchor replies cannot paint a retired symbol and pending anchors draw no rays',async()=>{
  const pending=[],rendered=[];const state={textContent:''},mount={},button={addEventListener(){}};
  const host={innerHTML:'',replaceChildren(){},querySelector:s=>s==='[role=status]'?state:s==='.mf-chart-mount'?mount:button};
- const sandbox={document:{hidden:false},window:{SpikeRangeChart:{mount:(h,d)=>{rendered.push(d);},unmount(){}}},Intl,Date,AbortController,fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve})),setTimeout:()=>1,clearTimeout(){}};
+ const sandbox={document:{hidden:false},window:{SpikeRangeChart:{mount:(h,d)=>{rendered.push(d);},unmount(){}}},Intl,Date,AbortController,fetch:(url,options)=>url.includes('/month-first-week-1618/levels?')?Promise.resolve({ok:true,json:async()=>({symbol:new URL(url,'http://test').searchParams.get('symbol'),ranges:[]})}):new Promise(resolve=>pending.push({url,options,resolve})),setTimeout:()=>1,clearTimeout(){}};
  vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
  const api=sandbox.window.SpikeMondayFibChart,settle=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
  api.show(host,row,'2026-10-19');
@@ -122,7 +198,7 @@ function cachedChart(){
  const pending=[],restores=[],levelRestores=[],rendered=[],saved=[];
  const shared={candles:new Map(),levels:new Map(),saveCandles:v=>saved.push(v),saveLevels(){},restoreCandles:key=>new Promise(resolve=>restores.push({key,resolve})),restoreLevels:key=>new Promise(resolve=>levelRestores.push({key,resolve}))};
  const host=()=>{const state={textContent:''},caption={},mount={};return {innerHTML:'',replaceChildren(){},querySelector:s=>s==='[role=status]'?state:s==='.mf-chart-caption'?caption:s==='.mf-chart-mount'?mount:{addEventListener(){}}};};
- const sandbox={document:{hidden:false},window:{SpikePublicChartCache:shared,SpikeRangeChart:{mount:(h,d)=>rendered.push(d),unmount(){}}},Intl,Date,AbortController,setTimeout:()=>1,clearTimeout(){},fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve}))};
+ const sandbox={document:{hidden:false},window:{SpikePublicChartCache:shared,SpikeRangeChart:{mount:(h,d)=>rendered.push(d),unmount(){}}},Intl,Date,AbortController,setTimeout:()=>1,clearTimeout(){},fetch:(url,options)=>url.includes('/month-first-week-1618/levels?')?Promise.resolve({ok:true,json:async()=>({symbol:new URL(url,'http://test').searchParams.get('symbol'),ranges:[]})}):new Promise(resolve=>pending.push({url,options,resolve}))};
  vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
  return {api:sandbox.window.SpikeMondayFibChart,pending,restores,levelRestores,rendered,saved,host,settle:async()=>{for(let i=0;i<20;i++)await Promise.resolve();}};
 }

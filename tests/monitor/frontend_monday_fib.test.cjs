@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const source=fs.readFileSync('yoyo/monitor/static/monday-fib.js','utf8');
-const {price,selectRows,latestTouch,touchTime,recentTouch,RECENT_MS,selection,tradingViewURL}=require('../../yoyo/monitor/static/monday-fib.js');
+const {price,selectRows,latestTouch,touchTime,recentTouch,RECENT_MS,selection,tradingViewURL,monthlyEventRoute}=require('../../yoyo/monitor/static/monday-fib.js');
 const event=(o={})=>({source:'live',observed_ms:Date.now()-60000,candle_ms:Date.now()-60000,status:'muted',level:84375.7884,...o});
 const item=(o={})=>({symbol:'BTC-USDT-SWAP',state:'ready',stale:false,price:82500,high:83149.8,low:81166,upper:84375.7884,lower:79940.0116,received_ms:Date.now(),distance_pct:1.2,nearest:'upper',touches:{upper:event()},...o});
 const snap=(o={})=>({now_ms:Date.now(),week:'2026-10-19',monday_complete:true,stream:{connected:true,last_message_ms:Date.now()},telegram:{enabled:false,configured:true},counts:{total:1,touched:0},items:[item()],events:[],...o});
@@ -9,10 +9,10 @@ const response=(d,ok=true)=>({ok,json:async()=>d});
 function harness(fetchImpl,navigator={},localStorage){
  const els=new Map(),timers=new Map();let id=0;
  function el(name){if(!els.has(name))els.set(name,{innerHTML:'',textContent:'',hidden:false,disabled:false,value:'',dataset:{},style:{setProperty(){}},events:{},attrs:{},addEventListener(t,fn){this.events[t]=fn;},setAttribute(k,v){this.attrs[k]=v;},classList:{toggle(){}},contains(){return false;},focus(){},querySelectorAll(){return [];},querySelector(){return null;}});return els.get(name);}
- const routes={};const charts=[];const window={SpikeMondayList:require('../../yoyo/monitor/static/monday-list-model.js'),navigator,localStorage,SpikeNavigation:{register(name,fn){routes[name]=fn;},sync(){}},SpikeMondayFibChart:{show:(host,row,week,options)=>charts.push({symbol:row.symbol,week,...options}),hide(){},fit(){},setInternal(){}}},document={hidden:false,activeElement:null,getElementById:el,events:{},addEventListener(t,fn){this.events[t]=fn;}};
+ const routes={},routeSyncs=[];const charts=[];const window={SpikeMondayList:require('../../yoyo/monitor/static/monday-list-model.js'),navigator,localStorage,matchMedia:query=>({matches:query.includes('min-width')}),SpikeNavigation:{register(name,fn){routes[name]=fn;},sync:(...args)=>routeSyncs.push(args)},SpikeMondayFibChart:{show:(host,row,week,options)=>charts.push({symbol:row.symbol,week,...options}),showMonthlyEvent:(host,symbol,eventId,options)=>charts.push({symbol,eventId,monthlyEvent:true,...options}),hide(){},fit(){},setInternal(){}}},document={hidden:false,activeElement:null,getElementById:el,events:{},addEventListener(t,fn){this.events[t]=fn;}};
  window.SpikeFloatingLayout=require('../../yoyo/monitor/static/floating-layout.js');
  vm.runInNewContext(source,{window,document,fetch:fetchImpl,AbortController,Date,Intl,URLSearchParams,setTimeout(fn,ms){const n=++id;timers.set(n,{fn,ms});return n;},clearTimeout(n){timers.delete(n);}});
- return {api:window.SpikeMondayFib,el,timers,document,charts,routes};
+ return {api:window.SpikeMondayFib,el,timers,document,charts,routes,routeSyncs};
 }
 const flush=async()=>{for(let i=0;i<12;i++)await Promise.resolve();};
 async function ready(c){c.api.setActive(true);await c.api.refresh();await flush();}
@@ -70,6 +70,25 @@ test('patrol route pins the requested untapped contract and timeframe across ref
  value=snap({items:[item(),requested]});await c.api.refresh();assert.equal(c.charts.at(-1).symbol,requested.symbol);
  c.routes['monday-fib']({symbol:requested.symbol,timeframe:'1Dutc'});assert.equal(c.charts.at(-1).period,'1D');
  c.api.setActive(false);
+});
+test('canonical monthEvent route pins the event symbol, collapses the list, and replaces live quote with verified event details',async()=>{
+ const eventId='2026-11|BTC-USDT-SWAP|upper',c=harness(async()=>response(snap()));
+ c.routes['monday-fib']({symbol:'BTC-USDT-SWAP',monthEvent:eventId});
+ assert.equal(monthlyEventRoute({symbol:'BTC-USDT-SWAP',monthEvent:eventId}).eventId,eventId);
+ assert.equal(monthlyEventRoute({symbol:'BAD',monthEvent:eventId}),null);
+ await ready(c);
+ const chart=c.charts.at(-1);assert.equal(chart.monthlyEvent,true);assert.equal(chart.eventId,eventId);assert.equal(chart.symbol,'BTC-USDT-SWAP');
+ assert.equal(c.el('mf-list-panel').hidden,true);assert.equal(c.el('mf-watermark').hidden,true);
+ assert.equal(c.el('mf-price').textContent,'—');assert.match(c.el('mf-touch').textContent,/读取月首周/);
+ chart.onData({event_id:eventId,symbol:'BTC-USDT-SWAP',side:'upper',source:'history',level:.0262,bar:'1m',marker_ms:null,
+  observation_start_ms:Date.parse('2026-11-10T09:00:00Z'),observation_end_ms:Date.parse('2026-11-10T10:00:00Z')});
+ assert.equal(c.el('mf-price').textContent,'0.0262');assert.match(c.el('mf-touch').textContent,/上沿 1\.618/);assert.match(c.el('mf-touch').textContent,/小时级/);
+ assert.doesNotMatch(c.el('mf-price').textContent,/82,500/);
+ chart.onData({event_id:eventId,symbol:'BTC-USDT-SWAP',side:'lower',source:'history',level:.0258,bar:'1m',marker_ms:Date.parse('2026-11-10T15:24:00Z'),
+  observation_start_ms:Date.parse('2026-11-10T09:00:00Z'),observation_end_ms:Date.parse('2026-11-10T10:00:00Z')});
+ assert.match(c.el('mf-touch').textContent,/下沿 1\.618 · 11\/10 23:24/);assert.doesNotMatch(c.el('mf-touch').textContent,/小时级/);
+ c.el('mf-latest').events.click();assert.equal(c.charts.at(-1).monthlyEvent,undefined);assert.equal(c.charts.at(-1).symbol,'BTC-USDT-SWAP');
+ assert.equal(c.routeSyncs.at(-1)[1].monthEvent,null);assert.equal(c.el('mf-follow').attrs['aria-pressed'],'false');c.api.setActive(false);
 });
 test('missing history and escaped symbols remain honest',async()=>{
  const c=harness(async()=>response(snap({items:[item({symbol:'<img onerror=x>-USDT-SWAP',state:'missing_monday',price:null,high:null,low:null,upper:null,lower:null})]})));await ready(c);
