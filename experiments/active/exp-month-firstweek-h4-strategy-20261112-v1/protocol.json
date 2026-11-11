@@ -6,5 +6,6 @@
   "account": "1000 USDT, gross 1x, maximum five positions, one per symbol, target 1% initial equity risk per new position via 20% of current equity notional; cash limits apply. Compare peak-to-trough marked drawdown against 30%. Cash account and independent trade statistics reported apart.",
   "parameter_study": "Only change longest holding time to 72h. Reuse 7d native fills through hour 72; surviving trades time out at 72h with VectorBT at the 72nd close. Evaluate both on the same historical periods and paired random controls; 2025-01-01 UTC split.",
   "end_of_data": "Process available future hours without filtering at decision; if still open at cutoff mark at final close with provision for market exit and identify separately.",
-  "metrics": "Fee-net return, win rate, profit factor, MFE and MAE to exit, chronological account and time-split results. No deployment."
+  "metrics": "Fee-net return, win rate, profit factor, MFE and MAE to exit, chronological account and time-split results. No deployment.",
+  "account_drawdown_budget": "Also run a separate 1000 USDT account with an entry gate. Under the same cash cap and sizing, reject a new position if the equity remaining after every open fixed stop and the proposed stop, including fees, would be below 70% of the previous hourly equity high. The gate does not force close existing positions; gaps can exceed the budget. Report the hourly marked drawdown, a separate intrahour sensitivity bound, and the number admitted."
 }
