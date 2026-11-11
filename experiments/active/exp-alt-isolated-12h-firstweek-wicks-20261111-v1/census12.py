@@ -30,22 +30,35 @@ def source_paths(symbol):
     return [BASE / d / (symbol+'.npy') for d in ('hourly12input', 'hourly12tail', 'series', 'archive_fill')]
 
 
-@lru_cache(maxsize=1)
-def existing_quotes():
-    stores = [
+def quote_stores():
+    return [
         ROOT/'experiments/active/exp-cloud-close-binance-transfer-20261109-v1/work',
         ROOT/'data/research/cloud_close_binance_feb2022_replay',
         ROOT/'data/research/cloud_close_archive_cohort/symbols',
         ROOT/'data/research/cloud_close_november_supplemental/symbols',
     ]
-    return {p.parent.name:p for store in stores for p in store.glob('*/quotes.npz')}
+
+@lru_cache(maxsize=1)
+def existing_quotes():
+    return {p.parent.name:p for store in quote_stores() for p in store.glob('*/quotes.npz')}
+
+
+def symbol_quotes(symbol):
+    # The catalogue keeps the last matching store. A single-symbol lookup can
+    # apply that same precedence without walking unrelated archive directories.
+    for store in reversed(quote_stores()):
+        candidate = store / symbol / 'quotes.npz'
+        if candidate.is_file():
+            return candidate
+    return None
 
 
 def read_raw(symbol):
     hist, tail, *quarter = source_paths(symbol)
     pieces = [np.load(p) for p in (hist, tail) if p.exists()]
-    if not hist.exists() and symbol in existing_quotes():
-        with np.load(existing_quotes()[symbol]) as quotes:
+    quote_path = None if hist.exists() else symbol_quotes(symbol)
+    if quote_path is not None:
+        with np.load(quote_path) as quotes:
             pieces.insert(0,np.column_stack((quotes['clock'],quotes['prices'])))
     quarters = join([np.load(p) for p in quarter if p.exists()])
     if len(quarters):
