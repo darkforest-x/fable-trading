@@ -296,7 +296,7 @@
       finally{clearTimeout(timeout);if(request===c)request=null;}
     }
     function setAppearance(value){appearance=value;chart.setAppearance?.(appearance);}
-    return {show,showReplay,showHistory:(track,trade,period='15m',ma=false,internal=false)=>showReplay(track,trade,period,ma,internal,true),setAppearance,fit:chart.fit,latest:chart.latest,zoom:chart.zoom,retry(){if(desired?.mode){chart.retry();return;}received=0;if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
+    return {show,showReplay,showHistory:(track,trade,period='15m',ma=false,internal=false)=>showReplay(track,trade,period,ma,internal,true),setAppearance,setMonthly:value=>chart.setMonthly?.(value),fit:chart.fit,latest:chart.latest,zoom:chart.zoom,retry(){if(desired?.mode){chart.retry();return;}received=0;if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
       setActive(value){active=value;if(!value){drawings?.cancel();epoch++;request?.abort();request=null;chart.pause();}else if(desired?.mode)showReplay(desired.track,desired.trade,desired.period,desired.ma,desired.internal,desired.paper,desired.replayOptions);else if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
       resetFocus(){pinnedFocus='';},destroy(){active=false;epoch++;request?.abort();chart.hide();}};
   }

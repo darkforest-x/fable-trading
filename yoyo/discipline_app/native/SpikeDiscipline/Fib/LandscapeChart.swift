@@ -38,7 +38,8 @@ struct LandscapeChart: View {
             let past = replay == nil ? (style.showHistory ? (history.ranges[chartSymbol] ?? []) : [])
                 : (style.showHistory ? eventHistory : [])
             let overlayLines = replay?.chartMonthlyLines ?? (route == nil && showMonthlyOverlays
-                ? monthlyLevels.chartLines(symbol: chartSymbol, bars: bars, period: period) : [])
+                ? FibCoinStripProjection.monthlyLines(source: .monthFirstWeek, ranges: monthlyLevels.ranges[chartSymbol] ?? [],
+                                                       bars: bars, period: period) : [])
             let chartMarkers = replay?.chartMarkers ?? (route == nil ? touches.markers(row) : [])
             let chartGeneration = route.map { $0.id * 100 + (CandlePeriod.allCases.firstIndex(of: period) ?? 0) + (replay == nil ? 0 : 1) }
                 ?? candles.generation
@@ -93,8 +94,8 @@ struct LandscapeChart: View {
             guard let connection = session.connection else { return }
             await touches.watch(connection: connection, session: session)
         }
-        .task(id: "\(symbol)|\(navigation.monthlyTouch?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
-            guard navigation.monthlyTouch == nil else { return }
+        .task(id: "\(symbol)|\(showMonthlyOverlays)|\(navigation.monthlyTouch?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
+            guard showMonthlyOverlays, navigation.monthlyTouch == nil else { return }
             await monthlyLevels.watch(symbol, connection: session.connection)
         }
         .task(id: "\(navigation.monthlyTouch?.id ?? 0)|\(period.rawValue)|\(session.connection?.token.hashValue ?? 0)") {

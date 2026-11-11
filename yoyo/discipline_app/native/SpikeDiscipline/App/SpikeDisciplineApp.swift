@@ -73,6 +73,7 @@ struct RootView: View {
     @State private var landscape = false
     @State private var reselect: [AppTab: Int] = [:]
     @AppStorage("trade.period") private var tradePeriod: CandlePeriod = .m15
+    @AppStorage("fib.strip.signalSource") private var fibStripSourceKey = FibCoinStripSource.monday.rawValue
     private var chartTab: Bool { tab == .fib || tab == .trade }
     private var landscapeChart: Bool { landscape && chartTab }
 
@@ -135,7 +136,8 @@ struct RootView: View {
             if landscapeChart {
                     LandscapeChart(symbol: tab == .fib ? (fibNavigation.monthlyTouch?.symbol ?? fib.chartSymbol) : ticket.symbol,
                                period: tab == .fib ? Bindable(fib).period : $tradePeriod,
-                               lines: tab == .trade ? tradeLines : [], showMonthlyOverlays: tab == .fib)
+                               lines: tab == .trade ? tradeLines : [],
+                               showMonthlyOverlays: tab == .fib && FibCoinStripSource(rawValue: fibStripSourceKey) == .monthFirstWeek)
                     .transition(.opacity)
             }
         }

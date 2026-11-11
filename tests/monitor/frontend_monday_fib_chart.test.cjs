@@ -77,6 +77,28 @@ function monthlyChartHarness(){
  vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
  return {api:sandbox.window.SpikeMondayFibChart,pending,rendered,markers,ranges,state,status,host,settle:async()=>{for(let i=0;i<24;i++)await Promise.resolve();}};
 }
+test('live workspace toggles canonical monthly rails in place and keeps the weekly chart identity',async()=>{
+ const h=monthlyChartHarness(),api=h.api.create(),anchors=anchorReply('/?symbol='+row.symbol);
+ api.show(h.host,row,'2026-10-19',{anchors});assert.match(h.pending[0].url,/monday-fib\/candles\?/);
+ h.pending[0].resolve({ok:true,json:async()=>context()});await h.settle();
+ assert.equal(h.rendered.at(-1).data.levels.filter(level=>level.monthly).length,0);
+ const monthLoad=api.setMonthly(true);assert.match(h.pending[1].url,/month-first-week-1618\/levels\?symbol=BTC-USDT-SWAP/);
+ h.pending[1].resolve({ok:true,json:async()=>({symbol:row.symbol,ranges:[october,november]})});await monthLoad;await h.settle();
+ let drawn=h.rendered.at(-1).data;assert.equal(drawn.symbol,row.symbol);assert.equal(drawn.levels.filter(level=>level.monthly).length,4);
+ assert.deepEqual(JSON.parse(JSON.stringify(drawn.levels.filter(level=>level.monthly).map(level=>level.label))),['月首周高','月首周上 1.618','月首周下 1.618','月首周低']);
+ await api.setMonthly(false);drawn=h.rendered.at(-1).data;assert.equal(drawn.levels.filter(level=>level.monthly).length,0);
+ await api.setMonthly(true);assert.equal(h.pending.length,2,'a cached monthly range is reused when the source is toggled back on');
+ assert.equal(h.rendered.at(-1).data.levels.filter(level=>level.monthly).length,4);api.hide();
+});
+test('switching to monthly before the first live candle response still loads the overlays',async()=>{
+ const h=monthlyChartHarness(),api=h.api.create();
+ api.show(h.host,row,'2026-10-19',{anchors:anchorReply('/?symbol='+row.symbol)});
+ await api.setMonthly(true);
+ h.pending[0].resolve({ok:true,json:async()=>context()});await h.settle();
+ assert.match(h.pending[1].url,/month-first-week-1618\/levels/);
+ h.pending[1].resolve({ok:true,json:async()=>({symbol:row.symbol,ranges:[october]})});
+ await h.settle();assert.equal(h.rendered.at(-1).data.levels.filter(l=>l.monthly).length,4);api.hide();
+});
 test('canonical event chart uses the exact signal, eight labeled rails, first-week colors, and OHLC autoscale',async()=>{
  const h=monthlyChartHarness(),data=monthlyEvent({candles:[bar(Date.parse('2026-11-12T11:00:00Z'),{first_week:true}),bar(Date.parse('2026-11-12T12:00:00Z'),{first_week:false}),bar(Date.parse('2026-11-12T13:00:00Z'),{first_week:false})]});
  h.api.showMonthlyEvent(h.host,row.symbol,data.event_id,{period:'1H'});

@@ -112,6 +112,20 @@ test('touch list validates symbol identities and rejects duplicate or malformed 
  const d=snapshot([coin('SOL')]);assert.equal(ui.validate(d),d);
  for(const bad of [{},{...d,items:[null]},{...d,items:[coin('SOL'),coin('SOL')]},{...d,items:[{symbol:'<img>',state:'ready'}]}])assert.throws(()=>ui.validate(bad));
 });
+test('monthly strip uses first-touch monitor rows, keeps source dates, and stays separate from weekly ranking',()=>{
+ const live={event_id:'2026-11|SOL-USDT-SWAP|upper',month:'2026-11',symbol:'SOL-USDT-SWAP',side:'upper',source:'live',candle_ms:1000,occurred_ms:3000,level:110};
+ const historical={event_id:'2026-11|DOGE-USDT-SWAP|lower',month:'2026-11',symbol:'DOGE-USDT-SWAP',side:'lower',source:'history',candle_ms:2000,occurred_ms:2500,level:90};
+ const data=ui.validateMonthly({schema:'month_first_week_1618.v1',now_ms:10000,month:'2026-11',window:{complete:true},items:[
+  coin('SOL',{touches:{upper:live}}),coin('DOGE',{touches:{lower:historical}}),coin('BTC',{touches:{upper:{...live,event_id:'2026-11|BTC-USDT-SWAP|upper',symbol:'BTC-USDT-SWAP'}}}),coin('XAU')
+ ]});
+ assert.equal(data.items[0].touches.upper.observed_ms,3000,'live touch chronology maps to the shared strip model');
+ assert.deepEqual(ui.monthlyRows(data).map(item=>item.symbol),['SOL-USDT-SWAP','DOGE-USDT-SWAP']);
+ const chip=ui.recentHTML(data.items[0],'',{title:'月首周 1.618 触价价位 110 · 不是实时行情'},'110');
+ assert.match(chip,/上沿 1\.618/);assert.match(chip,/>110<\/em>/);assert.match(chip,/月首周 1\.618 触价价位 110 · 不是实时行情/);
+ assert.equal(ui.periodLabel('week'),'周一⌄');assert.equal(ui.periodLabel('month'),'月首周⌄');
+ assert.match(ui.periodDescription('week'),/周一 1\.618/);assert.match(ui.periodDescription('month'),/月首周 1\.618/);
+ for(const bad of [{},{...data,schema:'other'},{...data,items:[{...data.items[0],touches:{side:live}}]},{...data,items:[data.items[0],data.items[0]]}])assert.throws(()=>ui.validateMonthly(bad));
+});
 test('touch list feed retains its last good snapshot on schema failure and stops on leave',async()=>{
  const good=snapshot([coin('SOL')]);let next=good,reads=0,cancels=0;
  const feed=createFeed({read:async()=>{reads++;return next;},validateData:ui.validate,cancel:()=>cancels++,schedule:()=>1,unschedule(){}});

@@ -166,6 +166,7 @@
   }
   function create({decorate,monthly=false}={}){
   const view={decorate,bars:720,initialBars:160,range:true,fib:true,fitAll:false,showLevels:false,mondayBand:true,wallpaper:true};
+  let monthlyActive=!!monthly;
   let target=null,controller=null,timer=null,version=0,paused=false,appearance=null;
   const replayCache=new Map();
   function pause(){paused=true;version++;clearTimeout(timer);controller?.abort();controller=null;target?.feed?.stop();target?.history?.pause();if(target)target.feed=null;}
@@ -182,7 +183,7 @@
       let value=target.monthEvent?monthlyEventFrame(context,{symbol:target.row.symbol,eventId:target.monthEvent,period:target.period})
         :target.replay?context:prepare(context,target.row,target.week,target.period,target.levels);
       if(!target.monthEvent)value=withWeeks(value,target.levels,target.week);
-      if(monthly&&!target.monthEvent&&!target.replay)value=withMonthlyLevels(value,target.monthRanges);
+      if(monthlyActive&&!target.monthEvent&&!target.replay)value=withMonthlyLevels(value,target.monthRanges);
       if(!target.monthEvent&&!target.replay)value=window.SpikeMondayCandleFeed?.mergeDisplay(value,target.live,target.period)||value;
       target.context=context;
       value.paperTrade=target.trade;value.paperTrades=target.trades;
@@ -247,7 +248,7 @@
       if(a.state!=='ready'||![a.high_ms,a.low_ms].every(t=>finite(t)&&t>=a.start_ms&&t<a.end_ms)||!['high','low','upper','lower'].every(k=>finite(a[k])))throw Error('周一锚点待同步');
       return a;
     }).catch(()=>null);
-    const monthRequest=monthly?requestMonthlyRanges(current.row.symbol,c.signal):Promise.resolve(null);
+    const monthRequest=monthlyActive?requestMonthlyRanges(current.row.symbol,c.signal):Promise.resolve(null);
     try{
       const warming=window.SpikeStartup?.take(current.row.symbol+'|'+current.period,c.signal),warm=warming?await warming:null;
       let value=warm?.value;
@@ -264,7 +265,10 @@
       draw(value);
       const [anchors,monthlyRanges]=await Promise.all([anchorRequest,monthRequest]);
       if(token!==version||target!==current)return;
-      if(monthly)current.monthRanges=monthlyRanges;
+      if(monthlyActive){
+        if(monthlyRanges!==null)current.monthRanges=monthlyRanges;
+        else loadMonthly(current); // The user switched sources while the weekly candles were loading.
+      }
       if(anchorRequest){
         current.levels=anchors?.state==='ready'?anchors:current.levels;current.levelError=anchors?'':'周一锚点暂不可用，稍后重试';
         if(anchors?.state==='ready'){shared?.saveLevels(anchors);levelCache.set(current.row.symbol+'|'+current.week,anchors);while(levelCache.size>32)levelCache.delete(levelCache.keys().next().value);}else delay=10000;
@@ -381,13 +385,13 @@
     if(anchors?.symbol===row.symbol&&(anchors.current_week||anchors.week)===week&&anchors.state==='ready'){levelCache.set(row.symbol+'|'+week,anchors);shared?.saveLevels(anchors);}
     if(target?.host===host&&target.key===key){
       const changed=target.internal!==internal||target.ma!==ma||JSON.stringify(target.trade)!==JSON.stringify(trade)||JSON.stringify(target.trades)!==JSON.stringify(trades)||['high','low','upper','lower'].some(k=>target.row[k]!==row[k]);
-      target.row=row;target.levels=levelCache.get(row.symbol+'|'+week)||target.levels;target.trade=trade;target.trades=trades;target.internal=internal;target.ma=ma;if(changed&&target.context)draw(target.context);if(paused){paused=false;target.history?.resume();startFeed();const previous=cache.get(key);if(previous&&previous.due>Date.now())timer=setTimeout(refresh,previous.due-Date.now());else refresh();}return;
+      target.row=row;target.levels=levelCache.get(row.symbol+'|'+week)||target.levels;target.trade=trade;target.trades=trades;target.internal=internal;target.ma=ma;if(changed&&target.context)draw(target.context);if(paused){paused=false;target.history?.resume();startFeed();loadMonthly(target);const previous=cache.get(key);if(previous&&previous.due>Date.now())timer=setTimeout(refresh,previous.due-Date.now());else refresh();}return;
     }
     const reuse=target?.host===host?target:null;
     if(reuse){version++;clearTimeout(timer);controller?.abort();controller=null;target.feed?.stop();target.history?.pause();}else stop();
     if(!host)return;paused=false;
     if(!reuse)host.innerHTML='<div class="mf-chart-caption"><p role="status">正在加载区间 K 线…</p><button type="button" data-mf-chart-retry>重新加载</button></div><div class="mf-chart-mount"></div>';
-    target={host,row,week,key,internal,ma,period,trade,trades,levels:levelCache.get(row.symbol+'|'+week),monthRanges:monthly?monthLevelCache.get(row.symbol)?.ranges||[]:[],state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
+    target={host,row,week,key,internal,ma,period,trade,trades,levels:levelCache.get(row.symbol+'|'+week),monthRanges:monthLevelCache.get(row.symbol)?.ranges??null,state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
     if(!reuse)host.querySelector('[data-mf-chart-retry]').addEventListener('click',()=>{target?.history?.retry();refresh();});
     const owner=target;
     target.history=window.SpikeChartHistory?.create({symbol:row.symbol,period,
@@ -428,7 +432,26 @@
     appearance=window.SpikeMondayChartAppearance?.normalize?window.SpikeMondayChartAppearance.normalize(value):value;
     if(target?.context)draw(target.context);
   }
-  return {show,showReplay,showMonthlyEvent,retry:refresh,hide:stop,pause,setInternal,setMa,setAppearance,fit,latest,zoom};
+  function loadMonthly(current=target){
+    if(!monthlyActive||!current||current.monthEvent||current.replay||!current.context||Array.isArray(current.monthRanges)||paused||document.hidden)return Promise.resolve();
+    if(current.monthLoad)return current.monthLoad;
+    const token=version;
+    const pending=requestMonthlyRanges(current.row.symbol).then(ranges=>{
+      if(target!==current||token!==version||!monthlyActive||!current.context)return;
+      current.monthRanges=monthLevelCache.get(current.row.symbol)?.ranges??(ranges.length?ranges:null);
+      draw(current.context);
+    }).finally(()=>{if(current.monthLoad===pending)current.monthLoad=null;});
+    current.monthLoad=pending;return pending;
+  }
+  function setMonthly(value){
+    monthlyActive=!!value;
+    const current=target;
+    if(!current||current.monthEvent||current.replay||!current.context)return Promise.resolve();
+    if(!monthlyActive){draw(current.context);return Promise.resolve();}
+    if(Array.isArray(current.monthRanges)){draw(current.context);return Promise.resolve();}
+    return loadMonthly(current);
+  }
+  return {show,showReplay,showMonthlyEvent,retry:refresh,hide:stop,pause,setInternal,setMa,setAppearance,setMonthly,fit,latest,zoom};
   }
   window.SpikeMondayFibChart=Object.assign(create({monthly:true}),{create});
 })();

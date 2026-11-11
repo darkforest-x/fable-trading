@@ -17,9 +17,11 @@ struct FibView: View {
     var onQuick: (FibContract, CandlePeriod) -> Void
     @State private var candles = CandleStore()
     @State private var monthlyReplay = MonthFirstWeekChartFeed()
+    @State private var monthlyFeed = MonthFirstWeekFeed()
     @State private var chooser = false
     @State private var settings = false
     @State private var follow = 0
+    @AppStorage("fib.strip.signalSource") private var stripSourceKey = FibCoinStripSource.monday.rawValue
     @Environment(\.reselect) private var reselect
 
     static let choices: [CandlePeriod] = [.m1, .m5, .m15, .h1, .h4, .h12, .d1]
@@ -57,6 +59,10 @@ struct FibView: View {
             guard active, let connection = session.connection else { return }
             await touches.watch(connection: connection, session: session)
         }
+        .task(id: "\(active)|\(stripSourceKey)|\(session.connection?.token.hashValue ?? 0)") {
+            guard active, stripSource == .monthFirstWeek, let connection = session.connection else { return }
+            await monthlyFeed.watch(connection: connection, session: session)
+        }
         .task(id: "\(chartSymbol)|\(active)|\(navigation.monthlyTouch?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
             guard active, navigation.monthlyTouch == nil, let connection = session.connection else { return }
             await history.watchCurrent(chartSymbol, connection: connection)
@@ -66,8 +72,8 @@ struct FibView: View {
             guard active, navigation.monthlyTouch == nil, style.showHistory else { return }
             await history.load(chartSymbol, from: candles.bars.first?.time, connection: session.connection)
         }
-        .task(id: "\(active)|\(chartSymbol)|\(navigation.monthlyTouch?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
-            guard active, navigation.monthlyTouch == nil else { return }
+        .task(id: "\(active)|\(stripSourceKey)|\(chartSymbol)|\(navigation.monthlyTouch?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
+            guard active, stripSource == .monthFirstWeek, navigation.monthlyTouch == nil else { return }
             await monthlyLevels.watch(chartSymbol, connection: session.connection)
         }
         .task(id: "\(active)|\(navigation.monthlyTouch?.id ?? 0)|\(fib.period.rawValue)|\(session.connection?.token.hashValue ?? 0)") {
@@ -80,6 +86,7 @@ struct FibView: View {
     }
 
     private var chartSymbol: String { navigation.monthlyTouch?.symbol ?? fib.chartSymbol }
+    private var stripSource: FibCoinStripSource { FibCoinStripSource(rawValue: stripSourceKey) ?? .monday }
     private var chartKey: String {
         "\(chartSymbol)|\(fib.period.rawValue)|\(session.connection?.token.hashValue ?? 0)|\(navigation.monthlyTouch?.id ?? 0)"
     }
@@ -139,7 +146,8 @@ struct FibView: View {
         let past = replay == nil ? (style.showHistory ? (history.ranges[symbol] ?? []) : [])
             : (style.showHistory ? eventHistory : [])
         let lines = replay?.chartMonthlyLines ?? (navigation.monthlyTouch == nil
-            ? monthlyLevels.chartLines(symbol: symbol, bars: chartBars, period: fib.period) : [])
+            ? FibCoinStripProjection.monthlyLines(source: stripSource, ranges: monthlyLevels.ranges[symbol] ?? [],
+                                                   bars: chartBars, period: fib.period) : [])
         let markers = replay?.chartMarkers ?? (navigation.monthlyTouch == nil ? touches.markers(row) : [])
         let generation = navigation.monthlyTouch.map { $0.id * 100 + (CandlePeriod.allCases.firstIndex(of: fib.period) ?? 0) + (replay == nil ? 0 : 1) }
             ?? candles.generation
@@ -166,14 +174,21 @@ struct FibView: View {
         }
     }
 
-    /// Web-mobile floating coin strip: today's touched coins scroll; BTC and ETH stay pinned at the right.
+    /// The source switch reuses the existing strip; moving chips change source while BTC / ETH stay pinned.
     private var coinStrip: some View {
         HStack(spacing: 0) {
+            stripSourcePicker
             ScrollView(.horizontal) {
-                let others = todayRows.filter { !Self.pinned.contains($0.symbol) }
                 HStack(spacing: 4) {
-                    ForEach(others) { row in stripChip(row.symbol, edge: row.latestTouch?.side) }
-                    if others.isEmpty { Text("今日暂无其他触价").font(.scaled(size: 12, weight: .medium)).foregroundStyle(Color.muted).padding(.horizontal, 10) }
+                    if stripSource == .monday {
+                        let others = todayRows.filter { !Self.pinned.contains($0.symbol) }
+                        ForEach(others) { row in stripChip(row.symbol, edge: row.latestTouch?.side, scoreTouch: row.latestTouch) }
+                        if others.isEmpty { stripEmptyState }
+                    } else {
+                        let others = monthlyStripTouches
+                        ForEach(others) { event in stripChip(event.symbol, edge: event.side, touchLevel: event.level) }
+                        if others.isEmpty { stripEmptyState }
+                    }
                 }
                 .padding(.horizontal, 4)
             }
@@ -186,7 +201,44 @@ struct FibView: View {
         .frosted(RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 
-    private func stripChip(_ symbol: String, edge: Edge?, compact: Bool = false) -> some View {
+    private var stripSourcePicker: some View {
+        Button {
+            Haptics.select()
+            withAnimation(.snappy) { stripSourceKey = stripSource.next.rawValue }
+        } label: {
+            HStack(spacing: 4) {
+                Text(stripSource.title).font(.system(size: 11, weight: .semibold)).lineLimit(1)
+                Image(systemName: "arrow.left.arrow.right").font(.system(size: 9, weight: .semibold))
+            }
+            .foregroundStyle(Color.ink)
+            .padding(.horizontal, 8).frame(height: 36)
+            .contentShape(.capsule)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("信号来源，当前\(stripSource.title)")
+        .accessibilityHint("切换到\(stripSource.next.title)")
+    }
+
+    private var monthlyStripTouches: [MonthFirstWeekTouch] {
+        FibCoinStripProjection.monthlyTouches(monthlyFeed.snapshot?.touches ?? [], month: monthlyFeed.snapshot?.month,
+                                              excluding: Set(Self.pinned))
+    }
+
+    private var stripEmptyState: some View {
+        let title: String
+        if stripSource == .monday {
+            title = "今日暂无其他触价"
+        } else if !monthlyFeed.loaded && monthlyFeed.error == nil {
+            title = "加载月首周信号…"
+        } else if monthlyFeed.snapshot == nil {
+            title = "月首周数据暂不可用"
+        } else {
+            title = "暂无月首周触价"
+        }
+        return Text(title).font(.scaled(size: 12, weight: .medium)).foregroundStyle(Color.muted).padding(.horizontal, 10)
+    }
+
+    private func stripChip(_ symbol: String, edge: Edge?, compact: Bool = false, scoreTouch: FibTouch? = nil, touchLevel: Double? = nil) -> some View {
         let on = symbol == chartSymbol, coin = Fmt.coin(symbol)
         return Button {
             Haptics.select()
@@ -198,12 +250,12 @@ struct FibView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     HStack(spacing: 4) {
                         Text(coin).font(.scaled(size: 12, weight: .bold)).foregroundStyle(Color.ink).lineLimit(1)
-                        if !compact, let score = touches.score(symbol, fib.rows.first { $0.symbol == symbol }?.latestTouch) {
+                        if !compact, let scoreTouch, let score = touches.score(symbol, scoreTouch) {
                             ScoreBadge(score: score, small: true)
                         }
                     }
                     if !compact {
-                        Text(price(symbol).map { $0.formatted(.number.precision(.significantDigits(1...5)).grouping(.never)) } ?? "—")
+                        Text((touchLevel ?? price(symbol)).map { $0.formatted(.number.precision(.significantDigits(1...5)).grouping(.never)) } ?? "—")
                             .font(.scaled(size: 10, weight: .medium).monospacedDigit()).foregroundStyle(edge == .upper ? ChartPalette.down : ChartPalette.up)
                     }
                 }
@@ -214,6 +266,7 @@ struct FibView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("查看 \(coin)")
+        .accessibilityValue(touchLevel.map { "月首周触价 \($0.formatted(.number.precision(.significantDigits(1...8)).grouping(.never)))" } ?? "")
     }
 
     /// Turns the chart to landscape (owner 2026-11-08 item 6); also works with the rotation lock on.
@@ -223,7 +276,11 @@ struct FibView: View {
 
     /// Floating coin card (tap → 最新触价 list): logo, coin, live price and this week's touch.
     private var coinCard: some View {
-        let symbol = chartSymbol, touch = fib.selected?.latestTouch, replay = replaySnapshot
+        let symbol = chartSymbol, replay = replaySnapshot
+        let monthTouch = stripSource == .monthFirstWeek ? monthlyFeed.events
+            .filter { $0.month == monthlyFeed.snapshot?.month && $0.symbol == symbol }.max { $0.occurredMs < $1.occurredMs } : nil
+        let touch = stripSource == .monthFirstWeek ? monthTouch.map { (side: $0.side, time: $0.occurredMs) }
+            : fib.selected?.latestTouch.map { (side: $0.side, time: $0.occurredMs) }
         return Button { Haptics.open(); navigation.showLiveChart(); chooser = true } label: {
             HStack(spacing: 9) {
                 if !symbol.isEmpty { CoinLogo(coin: Fmt.coin(symbol), size: 30) }
@@ -240,10 +297,11 @@ struct FibView: View {
                             .font(.scaled(size: 11, weight: .medium)).foregroundStyle(MonthTouchStyle.tint)
                             .lineLimit(1).minimumScaleFactor(0.72)
                     } else if let touch {
-                        Text("\(touch.side == .upper ? "上沿" : "下沿") · \(FibView.touchTime(touch.occurredMs))")
+                        Text("\(touch.side == .upper ? "上沿" : "下沿") · \(FibView.touchTime(touch.time))")
                             .font(.scaled(size: 11, weight: .medium)).foregroundStyle(touch.side == .upper ? ChartPalette.down : ChartPalette.up)
                     } else {
-                        Text("本周未触价").font(.scaled(size: 11, weight: .medium)).foregroundStyle(Color.muted)
+                        Text(stripSource == .monday ? "本周未触价" : monthlyFeed.snapshot == nil ? "月首周信号待读取" : "本月未触价")
+                            .font(.scaled(size: 11, weight: .medium)).foregroundStyle(Color.muted)
                     }
                 }
                 if let p = price(symbol) {

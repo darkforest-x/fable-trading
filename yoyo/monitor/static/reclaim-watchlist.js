@@ -13,6 +13,21 @@
     if(!Number.isFinite(data?.now_ms)||!/^\d{4}-\d{2}-\d{2}$/.test(data.week)||!Array.isArray(data.items)||!data.items.every(i=>i&&validSymbol(i.symbol)&&typeof i.state==='string')||new Set(data.items.map(i=>i.symbol)).size!==data.items.length)throw Error('触价列表返回格式不完整');
     return data;
   }
+  function validateMonthly(data){
+    if(data?.schema!=='month_first_week_1618.v1'||!positive(data.now_ms)||!/^\d{4}-(0[1-9]|1[0-2])$/.test(data.month||'')||!Array.isArray(data.items)||
+       !data.items.every(item=>item&&validSymbol(item.symbol)&&typeof item.state==='string'&&item.touches&&typeof item.touches==='object'&&!Array.isArray(item.touches))||
+       new Set(data.items.map(item=>item.symbol)).size!==data.items.length)throw Error('月首周触价列表返回格式不完整');
+    const items=data.items.map(item=>{
+      const touches={};
+      for(const [side,event] of Object.entries(item.touches)){
+        if(!['upper','lower'].includes(side)||!event||event.symbol!==item.symbol||event.month!==data.month||event.side!==side||!['history','live'].includes(event.source)||!positive(event.candle_ms)||!positive(event.occurred_ms)||!positive(event.level))
+          throw Error('月首周触价记录格式不完整');
+        touches[side]={...event,...(event.source==='live'?{observed_ms:positive(event.observed_ms)?event.observed_ms:event.occurred_ms}:{})};
+      }
+      return {...item,touches};
+    });
+    return {...data,items};
+  }
   function model(data,preferences,{q='',filter='all',catalog=[],now=Date.now()}={}){
     const visible=preferences.visible(data?.items||[],data?.display_week||data?.week),favorites=preferences.favorites();
     if(filter==='all'||filter==='favorites'){
@@ -27,6 +42,9 @@
   }
   const PINNED=Object.freeze(['BTC-USDT-SWAP','ETH-USDT-SWAP','XAU-USDT-SWAP']);
   const recentRows=(data,preferences)=>selectRows(preferences.visible(data?.items||[],data?.display_week||data?.week)).filter(item=>!PINNED.includes(item.symbol)).slice(0,20);
+  const monthlyRows=data=>list.selectRows(data?.items||[]).filter(item=>!PINNED.includes(item.symbol)).slice(0,20);
+  const periodLabel=period=>period==='month'?'月首周⌄':'周一⌄';
+  const periodDescription=period=>period==='month'?'月首周 1.618 触价':'周一 1.618 触价';
   const avatar=coin=>icons.avatar(coin);
   const touchLabel=side=>side==='upper'?'上沿':side==='lower'?'下沿':'尚未触价';
   const touchTone=side=>side==='upper'?'rp-negative':side==='lower'?'rp-positive':'';
@@ -45,10 +63,12 @@
     const score=touchScore(item,data.display_week||data.week,signals);
     return score.scored?score:null;
   }
-  function recentHTML(item,selected,score={text:'暂无评分',title:'暂无评分',high:false}){
+  function recentHTML(item,selected,score={text:'暂无评分',title:'暂无评分',high:false},value=''){
     const event=latestTouch(item),stamp=touchTime(event),coin=base(item.symbol);
-    return `<button type="button" class="rp-recent-chip" data-symbol="${esc(item.symbol)}" data-watch-select="${esc(item.symbol)}" aria-pressed="${item.symbol===selected}" title="${esc(coin)} · ${touchLabel(event?.side)} 1.618 · ${stamp?date.format(stamp)+' 北京':'时间待核对'} · ${esc(score.title)}">${avatar(coin)}<span><b>${esc(coin)}</b><span class="rp-recent-meta"><em data-scored="${!!score.scored}" class="rp-recent-score${score.high?' is-high':''}" aria-label="${esc(score.title)}">${score.scored?esc(score.text):'—'}</em></span></span></button>`;
+    const display=score.scored?score.text:value||'—';
+    return `<button type="button" class="rp-recent-chip" data-symbol="${esc(item.symbol)}" data-watch-select="${esc(item.symbol)}" aria-pressed="${item.symbol===selected}" title="${esc(coin)} · ${touchLabel(event?.side)} 1.618 · ${stamp?date.format(stamp)+' 北京':'时间待核对'} · ${esc(score.title)}">${avatar(coin)}<span><b>${esc(coin)}</b><span class="rp-recent-meta"><em data-scored="${!!score.scored}" class="rp-recent-score${score.high?' is-high':''}" aria-label="${esc(score.title)}">${esc(display)}</em></span></span></button>`;
   }
+  const monthlyTouchValue=item=>{const value=latestTouch(item)?.level;return positive(value)?price(value):'—';};
   function pinnedHTML(selected){
     return PINNED.map(symbol=>`<button type="button" class="rp-pinned-chip" data-symbol="${symbol}" data-watch-select="${symbol}" aria-pressed="${symbol===selected}" aria-label="查看 ${base(symbol)} K 线">${avatar(base(symbol))}<b>${base(symbol)}</b></button>`).join('');
   }
@@ -101,7 +121,7 @@
     const icon=name=>`<span class="rp-watch-icon" aria-hidden="true" style="--watch-icon:url(/static/icons/${name}.svg)"></span>`;
     return `<article class="rp-watch-row" data-symbol="${esc(item.symbol)}" data-selected="${item.symbol===selected}"><div class="rp-watch-main"><button type="button" class="rp-watch-select" data-watch-select="${esc(item.symbol)}" aria-label="查看 ${esc(coin)} K 线" aria-pressed="${item.symbol===selected}">${avatar(coin)}<span class="rp-watch-identity"><b class="rp-watch-name">${esc(coin)}${side?`<em class="rp-touch-tag ${touchTone(side)}">${touchLabel(side)}</em>`:''}</b><small class="rp-watch-time" title="${esc(meta)}">${esc(meta)}</small></span><span class="rp-watch-quote"><b>${price(item.price)}</b><span class="${item.catalog?(item.change>0?'rp-positive':item.change<0?'rp-negative':''):touchTone(side)}">${item.catalog?change:touchLabel(side)}</span></span></button><button type="button" class="rp-watch-disclosure" data-watch-action="details" aria-expanded="${expanded}" aria-controls="rp-watch-actions-${esc(item.symbol)}" aria-label="${expanded?'收起':'展开'} ${esc(coin)} 操作"><span aria-hidden="true">⌄</span></button></div><div class="rp-watch-bottom" id="rp-watch-actions-${esc(item.symbol)}"${expanded?'':' hidden'}><a class="rp-watch-tv" href="${esc(tradingViewURL(item.symbol,platform))}" target="_blank" rel="noopener" aria-label="在 TradingView 打开 ${esc(coin)}" title="TradingView">TV ↗</a><a href="${esc(inspectionURL(item.symbol,period))}" aria-label="查看 ${esc(coin)} 形态巡检" title="形态巡检">${icon('activity')}</a><button data-watch-action="favorite" aria-pressed="${favorite}" aria-label="${favorite?'取消收藏':'收藏'} ${esc(coin)}">${icon('star')}</button>${!item.catalog&&side?`<button data-watch-action="remove" aria-label="从本周列表移除 ${esc(coin)}" title="从本周列表移除">${icon('trash')}</button>`:''}</div></article>`;
   }
-  const api={validSymbol,validate,model,recentRows,touchScore,selectedScore,recentHTML,PINNED,pinnedHTML,bindRecentDrag,openPosition,holdingTrack,coinTrade,rowHTML};
+  const api={validSymbol,validate,validateMonthly,model,recentRows,monthlyRows,periodLabel,periodDescription,touchScore,selectedScore,recentHTML,PINNED,pinnedHTML,bindRecentDrag,openPosition,holdingTrack,coinTrade,rowHTML};
   if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}
   function reconcile(container,html){
     if(container._html===html)return;
@@ -126,26 +146,28 @@
     if(focused&&container.contains(focused)&&document.activeElement!==focused)focused.focus({preventScroll:true});
     container._html=html;
   }
-  function create({root,createFeed,getContext,onSelect,onOpen,onScore}){
+  function create({root,createFeed,getContext,onSelect,onOpen,onScore,onPeriodChange}){
     const trigger=root.querySelector('[data-rp-action="watch"]'),panel=document.createElement('section');
     panel.id='rp-watch-panel';panel.className='rp-watch-panel rp-glass';panel.setAttribute('aria-label','币种列表');
     panel.innerHTML=`<header class="rp-record-heading rp-watch-heading" data-yd-sheet-drag><strong>币种 <span data-watch="total">—</span></strong><label class="rp-search" hidden><input type="search" placeholder="搜索币种" aria-label="搜索全部合约" maxlength="80" autocomplete="off"></label><button type="button" data-watch-action="search" aria-label="搜索币种" aria-expanded="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></button><button type="button" data-watch-action="close" aria-label="收起币种列表">×</button></header><div class="rp-watch-tools"><div class="rp-tabs" role="group" aria-label="触价与收藏筛选">${Object.entries(FILTERS).map(([key,label])=>`<button type="button" data-watch-filter="${key}" aria-pressed="false">${label}</button>`).join('')}</div><div class="rp-watch-feedback" hidden><span role="status"></span><button data-watch-action="undo">撤销</button></div></div><div class="rp-watch-scroll"><div data-watch="rows"></div><button type="button" data-watch-action="more" hidden>再显示 50 个</button></div><p class="rp-watch-status" role="status"></p>`;
     const recent=document.createElement('nav');recent.className='rp-recent rp-glass';recent.setAttribute('aria-label','最近触价币种');
-    recent.innerHTML='<span class="rp-recent-label">触价</span><div class="rp-recent-scroll" aria-label="滑动查看最近触价"></div><div class="rp-pinned" role="group" aria-label="固定快捷币种"></div>';
+    recent.innerHTML='<button type="button" class="rp-recent-label" data-period-toggle aria-label="切换触价信号来源">周一⌄</button><div class="rp-recent-scroll" aria-label="滑动查看最近触价"></div><div class="rp-pinned" role="group" aria-label="固定快捷币种"></div>';
     root.append(panel,recent);
     const lane=recent.querySelector('.rp-recent-scroll'),resetDrag=bindRecentDrag(lane,document);
     let storage;try{storage=window.localStorage;}catch{}
     const preferences=createListPreferences(storage),platform=navigator.userAgentData?.platform||navigator.platform||'';
-    let active=false,open=false,filter='all',q='',shown=50,lastRemoval=null,expandedSymbol='',searching=false;
+    let active=false,open=false,filter='all',q='',shown=50,lastRemoval=null,expandedSymbol='',searching=false,period='week';
     const pointers=new Set();
     const requests=window.SpikeRuntime.createRequests();
     const feed=createFeed({read:()=>requests.json('/api/monday-fib/display'),validateData:validate,cancel:()=>requests.cancel(),change:render});
+    const monthRequests=window.SpikeRuntime.createRequests();
+    const monthFeed=createFeed({read:()=>monthRequests.json('/api/month-first-week-1618'),validateData:validateMonthly,cancel:()=>monthRequests.cancel(),change:render});
     const catalogRequests=window.SpikeRuntime.createRequests();
     const catalogFeed=createFeed({read:()=>catalogRequests.json('/api/research/paper-desk/symbols'),validateData:catalogModel.validateCatalog,cancel:()=>catalogRequests.cancel(),change:render});
     const sheet=window.SpikeYoloPreviewSheet.bind({panel,isOpen:()=>open,dismiss:()=>setOpen(false)});
     window.SpikeYoloPreviewSheet.bindOutside({panel,triggers:[trigger,recent],isOpen:()=>open,dismiss:restore=>setOpen(false,restore)});
     const el=id=>panel.querySelector(`[data-watch="${id}"]`),scroll=panel.querySelector('.rp-watch-scroll');
-    function setOpen(value,focus=true){sheet.reset();open=value;panel.classList.toggle('is-open',value);panel.inert=!value;panel.setAttribute('aria-hidden',String(!value));trigger.setAttribute('aria-expanded',String(value));catalogFeed.setActive(active&&open);if(value){preferences.read();onOpen?.();render();}else if(focus)trigger.focus({preventScroll:true});}
+    function setOpen(value,focus=true){sheet.reset();open=value;panel.classList.toggle('is-open',value);panel.inert=!value;panel.setAttribute('aria-hidden',String(!value));trigger.setAttribute('aria-expanded',String(value));catalogFeed.setActive(active&&open);feed.setActive(active&&(period==='week'||open));monthFeed.setActive(active&&period==='month');if(value){preferences.read();onOpen?.();render();}else if(focus)trigger.focus({preventScroll:true});}
     function setSearch(value){
       searching=value;const heading=panel.querySelector('.rp-watch-heading'),button=heading.querySelector('[data-watch-action="search"]');
       heading.classList.toggle('is-searching',value);heading.querySelector('.rp-search').hidden=!value;
@@ -154,21 +176,31 @@
     }
     function feedback(text,undo=false){const box=panel.querySelector('.rp-watch-feedback');box.hidden=!text;box.querySelector('span').textContent=text;box.querySelector('button').hidden=!undo;}
     function render(){
-      const {data,error}=feed.getState(),context=getContext();
-      onScore?.(selectedScore(data,context.symbol,context.signals));
-      recent.dataset.previous=String(!!data?.display_previous);recent.querySelector('.rp-recent-label').textContent=data?.display_previous?'上周':'触价';recent.title=data?.display_previous?'本周周一区间形成中，保留上周触价记录':'';
+      const weekly=feed.getState(),monthly=monthFeed.getState(),stripState=period==='month'?monthly:weekly,{data:stripData,error:stripError}=stripState,context=getContext();
+      onScore?.(period==='week'?selectedScore(stripData,context.symbol,context.signals):null);
+      const periodButton=recent.querySelector('[data-period-toggle]');
+      periodButton.textContent=periodLabel(period);periodButton.setAttribute('aria-label',`${periodDescription(period)}信号，点击切换到${periodDescription(period==='week'?'month':'week')}信号`);
+      periodButton.title=`当前：${periodDescription(period)}信号。点击切换到${periodDescription(period==='week'?'month':'week')}信号。`;
+      recent.setAttribute('aria-label',`${periodDescription(period)}币种`);
+      recent.dataset.previous=String(period==='week'&&!!stripData?.display_previous);
+      recent.title=period==='week'&&stripData?.display_previous?'本周周一区间形成中，保留上周触价记录':'';
       // Keep live controls in place, including while a finger is held down.
       if(pointers.size)return;
-      const chips=recentRows(data,preferences).map(item=>recentHTML(item,context.symbol,touchScore(item,data.display_week||data.week,context.signals))).join('')||`<span class="rp-recent-empty">${!data?(error?'触价读取失败':'触价同步中…'):'暂无触价'}</span>`;
+      const rows=period==='week'?recentRows(stripData,preferences):monthlyRows(stripData);
+      const chips=rows.map(item=>{
+        if(period==='week')return recentHTML(item,context.symbol,touchScore(item,stripData.display_week||stripData.week,context.signals));
+        const value=monthlyTouchValue(item);
+        return recentHTML(item,context.symbol,{scored:false,title:`月首周 1.618 触价价位 ${value} · 不是实时行情`},value);
+      }).join('')||`<span class="rp-recent-empty">${!stripData?(stripError?(period==='month'?'月首周触价读取失败':'触价读取失败'):(period==='month'?'月首周触价同步中…':'触价同步中…')):period==='month'&&!stripData.window?.complete?'月首周区间形成中':period==='month'?'本月暂无触价':'暂无触价'}</span>`;
       const offset=lane.scrollLeft;reconcile(lane,chips);lane.scrollLeft=offset;
       reconcile(recent.querySelector('.rp-pinned'),pinnedHTML(context.symbol));
       if(!open)return;
-      const catalog=catalogFeed.getState(),catalogTab=filter==='all'||filter==='favorites',view=model(data,preferences,{q,filter,catalog:catalog.data||[]}),source=catalogTab?catalog:feed.getState();
-      trigger.title='选择币种';el('total').textContent=(catalogTab?catalog.data:data)?view.items.length:'—';
+      const panelData=weekly.data,catalog=catalogFeed.getState(),catalogTab=filter==='all'||filter==='favorites',view=model(panelData,preferences,{q,filter,catalog:catalog.data||[]}),panelSource=catalogTab?catalog:weekly;
+      trigger.title='选择币种';el('total').textContent=(catalogTab?catalog.data:panelData)?view.items.length:'—';
       panel.querySelectorAll('[data-watch-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.watchFilter===filter)));
       panel.querySelector('[data-watch-action="search"]').classList.toggle('has-query',!!q);
-      panel.querySelector('.rp-watch-status').textContent=source.error?`同步失败 · ${source.error}${source.data?' · 保留上次记录':''}`:!source.data?'正在读取币种…':catalogTab?`OKX USDT 永续 · 24h 成交额降序 · ${view.items.length} 个`:`${data?.display_previous?'上周触价':'本周触价'} · 最新触价优先 · ${view.items.length} 个`;
-      const html=view.items.slice(0,shown).map(item=>rowHTML(item,context.symbol,{favorite:preferences.has(item.symbol),expanded:expandedSymbol===item.symbol,now:Date.now(),error:source.error,platform,period:context.period})).join('')||`<div class="rp-empty">${!source.data?(source.error?'读取失败，正在重试':'正在读取…'):q?'没有匹配的币种':filter==='favorites'?'尚未收藏币种':catalogTab?'暂无可用币种':'暂无符合筛选的触价币种'}</div>`;
+      panel.querySelector('.rp-watch-status').textContent=panelSource.error?`同步失败 · ${panelSource.error}${panelSource.data?' · 保留上次记录':''}`:!panelSource.data?'正在读取币种…':catalogTab?`OKX USDT 永续 · 24h 成交额降序 · ${view.items.length} 个`:`${panelData?.display_previous?'上周触价':'本周触价'} · 最新触价优先 · ${view.items.length} 个`;
+      const html=view.items.slice(0,shown).map(item=>rowHTML(item,context.symbol,{favorite:preferences.has(item.symbol),expanded:expandedSymbol===item.symbol,now:Date.now(),error:panelSource.error,platform,period:context.period})).join('')||`<div class="rp-empty">${!panelSource.data?(panelSource.error?'读取失败，正在重试':'正在读取…'):q?'没有匹配的币种':filter==='favorites'?'尚未收藏币种':catalogTab?'暂无可用币种':'暂无符合筛选的触价币种'}</div>`;
       const position=captureListScroll(scroll);reconcile(el('rows'),html);restoreListScroll(scroll,position);
       panel.querySelector('[data-watch-action="more"]').hidden=view.items.length<=shown;
     }
@@ -183,9 +215,13 @@
       if(action==='remove'){const data=feed.getState().data,item=data.items.find(i=>i.symbol===row.dataset.symbol);lastRemoval=preferences.remove(item,data.display_week||data.week);feedback(preferences.persistent?'已从本周列表移除':'暂未保存，仅本次移除',!!lastRemoval);render();return;}
       if(action==='undo'){preferences.undo(lastRemoval);lastRemoval=null;feedback('');render();return;}
       if(action==='close')setOpen(false);if(action==='more'){shown+=50;render();}
-      if(row&&!event.target.closest('a,.rp-watch-bottom')&&!action){onSelect(row.dataset.symbol);setOpen(false);}
+      if(row&&!event.target.closest('a,.rp-watch-bottom')&&!action){onSelect(row.dataset.symbol,{period});setOpen(false);}
     });
-    recent.addEventListener('click',event=>{const b=event.target.closest('[data-watch-select]');if(b){onSelect(b.dataset.watchSelect);setOpen(false,false);}});
+    recent.addEventListener('click',event=>{
+      const toggle=event.target.closest('[data-period-toggle]');
+      if(toggle){period=period==='week'?'month':'week';monthFeed.setActive(active&&period==='month');feed.setActive(active&&(period==='week'||open));onPeriodChange?.(period);render();return;}
+      const b=event.target.closest('[data-watch-select]');if(b){onSelect(b.dataset.watchSelect,{period});setOpen(false,false);}
+    });
     root.addEventListener('keydown',event=>{if(event.key==='Escape'&&open&&!event.defaultPrevented&&!document.querySelector('dialog[open], [popover]:popover-open')){event.preventDefault();event.stopImmediatePropagation();if(searching)setSearch(false);else setOpen(false);}});
     root.addEventListener('pointerdown',event=>{if(panel.contains(event.target)||recent.contains(event.target))pointers.add(event.pointerId);});
     const release=event=>{if(pointers.delete(event.pointerId))setTimeout(render,0);};
@@ -193,7 +229,7 @@
     window.addEventListener('blur',()=>{pointers.clear();resetDrag();render();});
     window.addEventListener('storage',event=>{if(event.key===preferences.key){preferences.read();render();}});
     setOpen(open,false);
-    return {render,refreshPreferences(){preferences.read();render();},setOpen,toggle:()=>setOpen(!open),refresh(){catalogFeed.refresh();return feed.refresh();},setActive(value){active=value;catalogFeed.setActive(active&&open);if(value)preferences.read();else{pointers.clear();resetDrag();setOpen(false,false);}feed.setActive(value);render();}};
+    return {render,refreshPreferences(){preferences.read();render();},setOpen,toggle:()=>setOpen(!open),refresh(){catalogFeed.refresh();return period==='month'?Promise.all([monthFeed.refresh(),...(open?[feed.refresh()]:[])]):feed.refresh();},setActive(value){active=value;catalogFeed.setActive(active&&open);if(value)preferences.read();else{pointers.clear();resetDrag();setOpen(false,false);}feed.setActive(value&&(period==='week'||open));monthFeed.setActive(value&&period==='month');render();}};
   }
   window.SpikeReclaimWatchlist={...api,create};
 })();

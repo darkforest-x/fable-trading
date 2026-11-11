@@ -148,6 +148,7 @@
       const scale=o.chart.timeScale();
       target.useMediaCoordinateSpace(({context:ctx,mediaSize})=>{
         ctx.save();ctx.beginPath();ctx.rect(0,0,mediaSize.width,mediaSize.height);ctx.clip();
+        const occupied=[],monthlyLabels=[];
         for(const l of o.activeLevels||[]){
           const end=coordinateAt(scale,logicalAt(o.rows,l.end_ms??w.end_ms));if(end==null)continue;
           const b=Math.min(mediaSize.width,end);
@@ -164,9 +165,28 @@
             if(width<=b-a){
               // Fibonacci-style text leaves candles visible through the ray.
               ctx.fillStyle=typeof document!=='undefined'&&document.documentElement.dataset.theme==='dark'?'#a1adbd':'#627487';
-              ctx.fillText(text,b-6,y-4);
+              if(l.monthly)monthlyLabels.push({text,left:a,right:b-6,y:y-4,width,alpha:ctx.globalAlpha});
+              else {ctx.fillText(text,b-6,y-4);occupied.push({left:b-width,right:b-6,y:y-4});}
             }
           }
+        }
+        // Keep original weekly labels anchored. If a monthly line is very close, slide
+        // its text along the same ray first, and only then use the next free baseline.
+        for(const label of monthlyLabels){
+          const {text,left,right,y,width,alpha}=label;
+          const space=(x,baseline)=>!occupied.some(p=>Math.abs(p.y-baseline)<14&&x>p.left&&x-width<p.right);
+          let x=right,baseline=y;
+          if(!space(x,baseline)){
+            const other=left+width-6;
+            if(space(other,baseline))x=other;
+            else {
+              baseline=[14,-14,28,-28,42,-42,56,-56].map(d=>y+d)
+                .find(row=>row>=12&&row<mediaSize.height&&space(x,row));
+              if(baseline===undefined)continue;
+            }
+          }
+          ctx.globalAlpha=alpha;ctx.fillStyle=typeof document!=='undefined'&&document.documentElement.dataset.theme==='dark'?'#a1adbd':'#627487';
+          ctx.fillText(text,x,baseline);occupied.push({left:x-width,right:x,y:baseline});
         }
         ctx.restore();
       });

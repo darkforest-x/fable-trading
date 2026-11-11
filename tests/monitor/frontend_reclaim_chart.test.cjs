@@ -162,8 +162,8 @@ test('Monday chart factories own separate requests, canvases and timers',()=>{
  vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
  const a=sandbox.window.SpikeMondayFibChart,b=a.create();
  a.show(host(),{symbol:'SOL-USDT-SWAP'},'2026-10-19');b.show(host(),{symbol:'SUI-USDT-SWAP'},'2026-10-19');
- assert.equal(pending.length,4);assert.ok(pending.every(p=>!p.options.signal.aborted));
- a.hide();assert.ok(pending.slice(0,2).every(p=>p.options.signal.aborted));assert.ok(pending.slice(2).every(p=>!p.options.signal.aborted));assert.equal(unmounts.length,1);
+ assert.equal(pending.length,5,'the canonical page also requests monthly rails while the isolated factory stays weekly-only');assert.ok(pending.every(p=>!p.options.signal.aborted));
+ a.hide();assert.ok(pending.slice(0,3).every(p=>p.options.signal.aborted));assert.ok(pending.slice(3).every(p=>!p.options.signal.aborted));assert.equal(unmounts.length,1);
  b.pause();assert.ok(pending.every(p=>p.options.signal.aborted));
 });
 
@@ -208,6 +208,17 @@ test('untraded symbols load their own real chart without inheriting an execution
  await api.show(pos(),'1H',false,'BTC-USDT-SWAP');assert.equal(calls.at(-1)[3].trade,null);
  api.setActive(false);const n=calls.length;await api.show(null,'5m',false,'DOGE-USDT-SWAP');assert.equal(calls.length,n);
  api.setActive(true);await new Promise(r=>setImmediate(r));assert.match(requests.at(-1),/DOGE-USDT-SWAP/);api.destroy();
+});
+
+test('monthly ribbon mode toggles the same live chart without selecting a replay route',async()=>{
+ const calls=[],monthly=[],chart={show:(...args)=>calls.push(args),hide(){},pause(){},setMonthly:value=>monthly.push(value)};
+ const sandbox={window:{SpikeMondayFibChart:{create:()=>chart}},Date,AbortController,setTimeout,clearTimeout,
+  fetch:async url=>({ok:true,json:async()=>({symbol:decodeURIComponent(url.split('=')[1]),timezone:'America/New_York',week:'2026-10-19'})})};
+ vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/reclaim-chart.js','utf8'),sandbox);
+ const api=sandbox.window.SpikeReclaimChart.create({clientWidth:390},()=>{});
+ api.setMonthly(true);await api.show(null,'15m',false,'SOL-USDT-SWAP');
+ assert.deepEqual(monthly,[true]);assert.equal(calls.at(-1)[1].symbol,'SOL-USDT-SWAP');assert.equal(calls.at(-1)[2],'2026-10-19');assert.equal(calls.at(-1)[3].trade,null);
+ api.setMonthly(false);assert.deepEqual(monthly,[true,false]);api.destroy();
 });
 
 test('paper indicator changes reuse the chart and anchors across polling, periods and resume',async()=>{
