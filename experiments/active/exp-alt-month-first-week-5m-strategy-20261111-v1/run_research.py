@@ -139,6 +139,20 @@ def select(data,cfgs,scores):
     for name, metric in OBJECTIVES.items():
         best = ranking(all_scores,metric).iloc[0]
         picked[name] = {'strategy':best.strategy,'fraction':float(best.fraction)}
+    # Preserve absolute winners even when two objectives choose the same rule.
+    # Also evaluate the highest-ranked unseen entry/exit rule for each overlap.
+    displayed = set()
+    for name, metric in OBJECTIVES.items():
+        winner = picked[name]['strategy']
+        if winner not in displayed:
+            displayed.add(winner)
+            continue
+        ranked = ranking(all_scores,metric)
+        alternatives = ranked[~ranked.strategy.isin(displayed)]
+        if len(alternatives):
+            other = alternatives.iloc[0]
+            picked['distinct_'+name] = {'strategy':other.strategy,'fraction':float(other.fraction)}
+            displayed.add(other.strategy)
     return all_scores,picked
 
 
