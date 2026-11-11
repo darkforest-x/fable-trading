@@ -239,7 +239,7 @@
     if (!legend.childElementCount) legend.append(node('span','暂无已知首周价位','month-chart-no-levels'));
     if (!preserve) clearChart();
     mount.hidden = false;
-    setChartFeedback(data.forming_time_ms == null ? '' : `本根 ${period} K 线尚未收盘。`);
+    setChartFeedback('');
     const marker = markerExists ? [{time:data.marker_ms/1000,
       position:event?.side === 'upper' ? 'aboveBar' : 'belowBar',
       shape:event?.side === 'upper' ? 'arrowDown' : 'arrowUp',
