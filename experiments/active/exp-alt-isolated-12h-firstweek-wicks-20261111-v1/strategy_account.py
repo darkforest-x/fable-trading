@@ -632,6 +632,8 @@ def _account_one(candidates: list[dict[str, Any]], strategy_name: str, stop_name
 
 def run(ledger_path: Path, stop_name: str, signals_path: Path = SIGNALS_PATH,
         expected_stop_pct: float | None = None) -> dict[str, Any]:
+    ledger_path = Path(ledger_path).resolve()
+    signals_path = Path(signals_path).resolve()
     if not ledger_path.is_file():
         raise FileNotFoundError(ledger_path)
     signals, joined = _load_inputs(signals_path, ledger_path)
