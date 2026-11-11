@@ -8,13 +8,41 @@ ambiguous. Save the lower and upper bounds separately.
 import numpy as np
 import pandas as pd
 
-from census12 import HOUR, OUT, read_raw
+from census12 import HOUR, OUT, read_raw, source_paths
 from filter_stop_before_target import beijing_time, to_ms
 from scan import bounds
 
 BAR = 12 * HOUR
 SOURCE = OUT / '首触确认机会_45天内20pct先于5pct止损.csv'
 DEST = OUT / '2033组_首针与达标前触轨根数.csv'
+
+
+def retouch_in_target_hour(symbol, hour, ohlc, rail, sign):
+    """Resolve rail vs target in a shared hour using complete matching 15m candles when available."""
+    bars = ohlc.reshape(1, 5)
+    for path in source_paths(symbol)[2:]:
+        if path.is_file():
+            raw = np.load(path, mmap_mode='r')
+            i = raw[:, 0].searchsorted(hour)
+            q = raw[i:i + 4]
+            if not np.array_equal(q[:, 0], hour + np.arange(4) * HOUR // 4):
+                continue
+            aggregate = [q[0, 1], q[:, 2].max(), q[:, 3].min(), q[-1, 4]]
+            if np.allclose(aggregate, ohlc[1:], rtol=1e-12, atol=0):
+                bars = q
+                break
+    goal = rail * (1 + sign * 0.2)
+    eps = rail * 1e-12
+    for _, opening, high, low, _ in bars:
+        target_hit = (high >= goal - eps if sign == 1 else low <= goal + eps)
+        touched = low <= rail <= high
+        if target_hit:
+            if not touched or sign * (opening - goal) >= -eps:
+                return 0, 0
+            return (1, 1) if sign * (opening - rail) <= 0 else (0, 1)
+        if touched:
+            return 1, 1
+    raise ValueError(f'Missing known target in {symbol} at {hour}')
 
 
 def wick_data(raw, clock, rail, sign):
@@ -50,11 +78,10 @@ def observe(row, raw):
     optional = 0
     target_bin = target // BAR
     if target < expiry and target_bin not in confirmed and raw[j, 3] <= rail <= raw[j, 2]:
-        opening = raw[j, 1]
-        if sign * (opening - rail) <= 0:
+        definite, possible = retouch_in_target_hour(symbol, target, raw[j], rail, sign)
+        if definite:
             confirmed[target_bin] = target
-        elif sign * (opening - rail) < 0.2 * rail:
-            optional = 1
+        optional = possible - definite
     touches = list(confirmed.values())
     second = touches[1] if len(touches) > 1 else None
     pure, long_wick, ratio = wick_data(raw, entry, rail, sign)
