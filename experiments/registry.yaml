@@ -15,6 +15,31 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-month-firstweek-stalled-restart-20261112-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ddf394b61f"
+    status: inconclusive
+    question: After a stalled first hourly close, how often is the original 12h reclaim close crossed in the reversal direction while the rail is still held, and what price has the path reached?
+    single_variable: First strict favorable close beyond the original 12h close during hours 2 through 4, while the historical outcome is still open and all prior hourly closes held the rail.
+    result: >-
+      First crossings occurred on 209/359 favorable vs 388/1038 adverse upper-rail cases and
+      165/301 favorable vs 315/816 adverse lower-rail cases. At the crossing the median favorable
+      distances from the rail were 5.22% vs 3.55% (upper) and 3.18% vs 2.96% (lower).
+      Within cases still holding at hour four, the prior crossing fractions were 203/304 vs
+      368/564 on the upper side, and 162/238 vs 303/532 on the lower side.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    canonical_report: experiments/active/exp-month-firstweek-stalled-restart-20261112-v1/counts.csv
+    artifacts: []
+    notes: >-
+      Each early crossing is recorded immediately even if the path later fails. Hour-four matched
+      comparisons describe only that still-observable subgroup. The lower-side gap there is 4.0
+      points before 2025 and 17.0 points from 2025 on. Original +20/-5 historical labels exclude
+      unresolved or ambiguous cases. No parameter tuning or trade simulation. Event data under
+      data/research/alt-isolated-12h-wicks-20261111/expanded12/all_replay_v1/stalled_restart/cases.csv.gz.
+
   - experiment_id: exp-month-firstweek-stalled-rail-paths-20261112-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "219f02fb47"
