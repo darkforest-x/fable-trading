@@ -168,7 +168,12 @@ struct FlowLayout: Layout {
 }
 
 /// Open a coin on the full-screen 1.618 chart (monitor rows, alarm coins, cloud cards, positions).
-struct OpenChartAction { var run: (String) -> Void = { _ in }; func callAsFunction(_ symbol: String) { run(symbol) } }
+struct OpenChartAction {
+    var run: (String) -> Void = { _ in }
+    var runMonthlyTouch: (MonthFirstWeekTouch) -> Void = { _ in }
+    func callAsFunction(_ symbol: String) { run(symbol) }
+    func monthlyTouch(_ event: MonthFirstWeekTouch) { runMonthlyTouch(event) }
+}
 private struct OpenChartKey: EnvironmentKey { static let defaultValue = OpenChartAction() }
 extension EnvironmentValues {
     var openChart: OpenChartAction { get { self[OpenChartKey.self] } set { self[OpenChartKey.self] = newValue } }

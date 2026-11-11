@@ -8,6 +8,7 @@ struct LandscapeChart: View {
     let symbol: String
     @Binding var period: CandlePeriod
     var lines: [ChartLine] = []
+    var showMonthlyOverlays = false
 
     @Environment(SessionStore.self) private var session
     @Environment(AccountStore.self) private var account
@@ -15,27 +16,57 @@ struct LandscapeChart: View {
     @Environment(ChartStyle.self) private var style
     @Environment(MondayHistory.self) private var history
     @Environment(TouchFeed.self) private var touches
+    @Environment(MonthFirstWeekLevels.self) private var monthlyLevels
+    @Environment(FibNavigation.self) private var navigation
     @Environment(\.colorScheme) private var scheme
     @State private var candles = CandleStore()
+    @State private var monthlyReplay = MonthFirstWeekChartFeed()
     @State private var follow = 0
     @State private var settings = false
 
     var body: some View {
         GeometryReader { proxy in
-            let row = fib.current?.items.first { $0.symbol == symbol }
-            let currentRange = row.flatMap { fib.range(for: $0) } ?? history.currentRange(for: symbol)
+            let route = navigation.monthlyTouch
+            let chartSymbol = route?.symbol ?? symbol
+            let replay = replaySnapshot
+            let row = fib.current?.items.first { $0.symbol == chartSymbol }
+            let bars = route == nil ? candles.bars : (replay?.chartCandles ?? [])
+            let currentRange = replay == nil
+                ? (row.flatMap { fib.range(for: $0) } ?? history.currentRange(for: chartSymbol))
+                : replay?.chartWeeklyRanges.last
+            let eventHistory = replay.map { Array($0.chartWeeklyRanges.dropLast()) } ?? []
+            let past = replay == nil ? (style.showHistory ? (history.ranges[chartSymbol] ?? []) : [])
+                : (style.showHistory ? eventHistory : [])
+            let overlayLines = replay?.chartMonthlyLines ?? (route == nil && showMonthlyOverlays
+                ? monthlyLevels.chartLines(symbol: chartSymbol, bars: bars, period: period) : [])
+            let chartMarkers = replay?.chartMarkers ?? (route == nil ? touches.markers(row) : [])
+            let chartGeneration = route.map { $0.id * 100 + (CandlePeriod.allCases.firstIndex(of: period) ?? 0) + (replay == nil ? 0 : 1) }
+                ?? candles.generation
             let insets = proxy.safeAreaInsets
             ZStack {
-                CandleChart(bars: candles.bars, generation: candles.generation, period: period, decimals: decimals(row),
-                            range: currentRange, history: style.showHistory ? (history.ranges[symbol] ?? []) : [],
-                            innerLines: fib.showInternal, averages: fib.showAverages, cloud: fib.showCloud, lines: lines,
-                            markers: touches.markers(row), markHistory: true, colors: style.colors,
-                            watermark: symbol.isEmpty ? nil : Fmt.coin(symbol) + "USDT", followToken: follow, wallpaper: true,
-                            topInset: insets.top + 54, bottomOverlay: insets.bottom + 46, onNeedOlder: { candles.loadOlder() })
+                CandleChart(bars: bars, generation: chartGeneration, period: period, decimals: decimals(row),
+                            range: currentRange, history: past,
+                            innerLines: fib.showInternal, averages: fib.showAverages, cloud: fib.showCloud,
+                            lines: route == nil ? lines + overlayLines : overlayLines,
+                            markers: chartMarkers,
+                            focusRange: replay?.chartFocusRange, timestampFocus: replay != nil,
+                            highlightedBarTimes: replay?.chartHighlightedBarTimes ?? [],
+                            highlightRange: replay?.chartHighlightedBarTimes == nil ? replay?.chartHighlightRange : nil,
+                            highlightColor: replay == nil ? nil : ChartPalette.hex(0x30D158),
+                            focusBarTime: replay?.locatedMarkerMs.map { $0 / 1000 }, fitReferenceLevels: replay == nil,
+                            markHistory: replay == nil, colors: style.colors,
+                            watermark: chartSymbol.isEmpty ? nil : Fmt.coin(chartSymbol) + "USDT", followToken: follow, wallpaper: true,
+                            topInset: insets.top + 54, bottomOverlay: insets.bottom + 46,
+                            onNeedOlder: { if route == nil { candles.loadOlder() } })
                     .padding(.trailing, insets.trailing)   // price axis clear of the trailing edge; candles run edge to edge
-                if candles.bars.isEmpty && candles.error == nil { ProgressView() }
+                if bars.isEmpty {
+                    if route != nil {
+                        if monthlyReplay.loading { ProgressView("正在读取触价 K 线").font(.footnote).foregroundStyle(Color.muted) }
+                        else { Text(monthlyReplay.error ?? "月首周 K 线暂不可用").font(.footnote).foregroundStyle(Color.muted) }
+                    } else if candles.error == nil { ProgressView() }
+                }
             }
-            .overlay(alignment: .topLeading) { coinPill(row).padding(.leading, insets.leading + 10).padding(.top, max(insets.top, 10)) }
+            .overlay(alignment: .topLeading) { coinPill(row, symbol: chartSymbol, bars: bars, replay: replay, route: route).padding(.leading, insets.leading + 10).padding(.top, max(insets.top, 10)) }
             .overlay(alignment: .topTrailing) {
                 RoundIcon(systemName: "rectangle.portrait.rotate", size: 38) { Orientation.rotate(landscape: false) }
                     .accessibilityLabel("回到竖屏")
@@ -46,22 +77,38 @@ struct LandscapeChart: View {
         }
         .background((scheme == .dark ? ChartPalette.hex(0x0B0E14) : Color.white).ignoresSafeArea())
         .sheet(isPresented: $settings) { ChartSettingsSheet().presentationDetents([.large]).presentationDragIndicator(.visible) }
-        .task(id: "\(symbol)|\(period.rawValue)|\(session.connection?.token.hashValue ?? 0)") {
+        .task(id: "\(symbol)|\(period.rawValue)|\(navigation.monthlyTouch?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
+            guard navigation.monthlyTouch == nil else { candles.stop(); return }
             candles.show(symbol: symbol, period: period, connection: session.connection)
         }
         .task(id: "\(symbol)|\(style.showHistory)|\(Int((candles.bars.first?.time ?? 0) / 86_400))|\(session.connection?.token.hashValue ?? 0)") {
-            guard style.showHistory else { return }
+            guard navigation.monthlyTouch == nil, style.showHistory else { return }
             await history.load(symbol, from: candles.bars.first?.time, connection: session.connection)
         }
         .task(id: "\(symbol)|\(session.connection?.token.hashValue ?? 0)") {
-            guard let connection = session.connection else { return }
+            guard navigation.monthlyTouch == nil, let connection = session.connection else { return }
             await history.watchCurrent(symbol, connection: connection)
         }
         .task(id: session.connection?.token.hashValue ?? 0) {
             guard let connection = session.connection else { return }
             await touches.watch(connection: connection, session: session)
         }
+        .task(id: "\(symbol)|\(navigation.monthlyTouch?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
+            guard navigation.monthlyTouch == nil else { return }
+            await monthlyLevels.watch(symbol, connection: session.connection)
+        }
+        .task(id: "\(navigation.monthlyTouch?.id ?? 0)|\(period.rawValue)|\(session.connection?.token.hashValue ?? 0)") {
+            guard let request = navigation.monthlyTouch, let connection = session.connection else { return }
+            await monthlyReplay.load(request: .event(request.eventId), period: period, connection: connection)
+        }
         .onDisappear { candles.stopAndSave() }
+    }
+
+    private var replaySnapshot: MonthFirstWeekChartSnapshot? {
+        guard let request = navigation.monthlyTouch,
+              monthlyReplay.snapshot?.eventId == request.eventId,
+              monthlyReplay.snapshot?.bar == period.rawValue else { return nil }
+        return monthlyReplay.snapshot
     }
 
     private func decimals(_ row: FibContract?) -> Int {
@@ -71,15 +118,20 @@ struct LandscapeChart: View {
         return min(12, max(2, places))
     }
 
-    private func coinPill(_ row: FibContract?) -> some View {
-        let touch = row?.latestTouch, last = candles.bars.last?.close
+    private func coinPill(_ row: FibContract?, symbol: String, bars: [Candle], replay: MonthFirstWeekChartSnapshot?, route: MonthlyTouchRoute?) -> some View {
+        let touch = row?.latestTouch, last = bars.last?.close
         return HStack(spacing: 8) {
             CoinLogo(coin: Fmt.coin(symbol), size: 24)
             Text(Fmt.coin(symbol)).font(.scaled(size: 15, weight: .bold)).foregroundStyle(Color.ink)
             Text("/ USDT").font(.scaled(size: 11, weight: .medium)).foregroundStyle(Color.muted)
             Text(last.map { FibChooser.price($0) } ?? "—").font(.scaled(size: 15, weight: .bold).monospacedDigit())
                 .foregroundStyle(Color.ink).contentTransition(.numericText(value: last ?? 0)).animation(.snappy, value: last)
-            if let touch {
+            if let route {
+                let side = replay?.side ?? route.side
+                let time = replay.flatMap { FibView.observationTime($0, period: period) } ?? route.occurredMs.map(FibView.touchTime)
+                Text("月首周 · \(route.month) · \(side.map(MonthTouchStyle.edge) ?? "触价")\(time.map { " · " + $0 } ?? "")")
+                    .font(.scaled(size: 11, weight: .semibold).monospacedDigit()).foregroundStyle(MonthTouchStyle.tint)
+            } else if let touch {
                 Text("\(touch.side == .upper ? "上沿" : "下沿") · \(FibView.touchTime(touch.occurredMs))")
                     .font(.scaled(size: 11, weight: .semibold).monospacedDigit())
                     .foregroundStyle(touch.side == .upper ? ChartPalette.down : ChartPalette.up)
@@ -99,7 +151,11 @@ struct LandscapeChart: View {
                 Image(systemName: "slider.horizontal.3").font(.system(size: 14, weight: .semibold)).foregroundStyle(Color.ink).frame(width: 34, height: 34)
             }
             .buttonStyle(.plain).accessibilityLabel("图表设置")
-            Button { Haptics.tap(); follow += 1 } label: {
+            Button {
+                Haptics.tap()
+                if navigation.monthlyTouch != nil { navigation.showLiveChart() }
+                follow += 1
+            } label: {
                 Image(systemName: "arrow.right.to.line").font(.system(size: 14, weight: .semibold)).foregroundStyle(Color.ink).frame(width: 34, height: 34)
             }
             .buttonStyle(.plain).accessibilityLabel("回到最新")

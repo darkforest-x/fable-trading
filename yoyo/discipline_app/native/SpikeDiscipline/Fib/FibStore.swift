@@ -160,6 +160,8 @@ struct FibRange: Equatable {
     let start: Double, end: Double
     var highTitle = "周一高"
     var lowTitle = "周一低"
+    var upperTitle = "上 1.618"
+    var lowerTitle = "下 1.618"
 
     struct Level: Identifiable { let price: Double; let title: String; let kind: Kind; var id: String { title } }
     enum Kind { case upper, lower, monday, inner, mid }
@@ -167,13 +169,13 @@ struct FibRange: Equatable {
     /// Workbench replica: upper 1.618 red / lower green (2 px), Monday high/low blue; 内部线 adds 0.705 / 0.618 / 0.5.
     func levels(inner: Bool) -> [Level] {
         let r = high - low
-        var rows: [Level] = [Level(price: upper, title: "上 1.618", kind: .upper), Level(price: high, title: highTitle, kind: .monday)]
+        var rows: [Level] = [Level(price: upper, title: upperTitle, kind: .upper), Level(price: high, title: highTitle, kind: .monday)]
         if inner {
             rows += [Level(price: low + 0.705 * r, title: "上 0.705", kind: .inner), Level(price: low + 0.618 * r, title: "上 0.618", kind: .inner),
                      Level(price: low + 0.5 * r, title: "中点 0.5", kind: .mid),
                      Level(price: high - 0.618 * r, title: "下 0.618", kind: .inner), Level(price: high - 0.705 * r, title: "下 0.705", kind: .inner)]
         }
-        rows += [Level(price: low, title: lowTitle, kind: .monday), Level(price: lower, title: "下 1.618", kind: .lower)]
+        rows += [Level(price: low, title: lowTitle, kind: .monday), Level(price: lower, title: lowerTitle, kind: .lower)]
         return rows.filter { $0.price > 0 }
     }
 }

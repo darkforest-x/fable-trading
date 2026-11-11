@@ -11,9 +11,12 @@ struct FibView: View {
     @Environment(ChartStyle.self) private var style
     @Environment(MondayHistory.self) private var history
     @Environment(TouchFeed.self) private var touches
+    @Environment(MonthFirstWeekLevels.self) private var monthlyLevels
+    @Environment(FibNavigation.self) private var navigation
     let active: Bool
     var onQuick: (FibContract, CandlePeriod) -> Void
     @State private var candles = CandleStore()
+    @State private var monthlyReplay = MonthFirstWeekChartFeed()
     @State private var chooser = false
     @State private var settings = false
     @State private var follow = 0
@@ -35,7 +38,7 @@ struct FibView: View {
                         rotateButton
                     }
                     Spacer(minLength: 0)
-                    if fib.current == nil && fib.error != nil && candles.bars.isEmpty { offlineNote }
+                    if navigation.monthlyTouch == nil, fib.current == nil && fib.error != nil && candles.bars.isEmpty { offlineNote }
                     dock
                 }
                 .padding(.horizontal, 12)
@@ -54,37 +57,67 @@ struct FibView: View {
             guard active, let connection = session.connection else { return }
             await touches.watch(connection: connection, session: session)
         }
-        .task(id: "\(fib.chartSymbol)|\(active)|\(session.connection?.token.hashValue ?? 0)") {
-            guard active, let connection = session.connection else { return }
-            await history.watchCurrent(fib.chartSymbol, connection: connection)
+        .task(id: "\(chartSymbol)|\(active)|\(navigation.monthlyTouch?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
+            guard active, navigation.monthlyTouch == nil, let connection = session.connection else { return }
+            await history.watchCurrent(chartSymbol, connection: connection)
         }
         // Full history (owner 2026-11-09): weeks back to the oldest loaded bar; older bars → older weeks.
-        .task(id: "\(fib.chartSymbol)|\(style.showHistory)|\(active)|\(Int((candles.bars.first?.time ?? 0) / 86_400))|\(session.connection?.token.hashValue ?? 0)") {
-            guard active, style.showHistory else { return }
-            await history.load(fib.chartSymbol, from: candles.bars.first?.time, connection: session.connection)
+        .task(id: "\(chartSymbol)|\(style.showHistory)|\(active)|\(navigation.monthlyTouch?.id ?? 0)|\(Int((candles.bars.first?.time ?? 0) / 86_400))|\(session.connection?.token.hashValue ?? 0)") {
+            guard active, navigation.monthlyTouch == nil, style.showHistory else { return }
+            await history.load(chartSymbol, from: candles.bars.first?.time, connection: session.connection)
+        }
+        .task(id: "\(active)|\(chartSymbol)|\(navigation.monthlyTouch?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
+            guard active, navigation.monthlyTouch == nil else { return }
+            await monthlyLevels.watch(chartSymbol, connection: session.connection)
+        }
+        .task(id: "\(active)|\(navigation.monthlyTouch?.id ?? 0)|\(fib.period.rawValue)|\(session.connection?.token.hashValue ?? 0)") {
+            guard active, let request = navigation.monthlyTouch, let connection = session.connection else { return }
+            await monthlyReplay.load(request: .event(request.eventId), period: fib.period, connection: connection)
         }
         .onChange(of: chartKey) { _, _ in showCandles() }
         .onChange(of: active) { _, now in if now { showCandles() } }
         .onAppear { if active { showCandles() } }
     }
 
-    private var chartKey: String { "\(fib.chartSymbol)|\(fib.period.rawValue)|\(session.connection?.token.hashValue ?? 0)" }
+    private var chartSymbol: String { navigation.monthlyTouch?.symbol ?? fib.chartSymbol }
+    private var chartKey: String {
+        "\(chartSymbol)|\(fib.period.rawValue)|\(session.connection?.token.hashValue ?? 0)|\(navigation.monthlyTouch?.id ?? 0)"
+    }
+
+    private var replaySnapshot: MonthFirstWeekChartSnapshot? {
+        guard let request = navigation.monthlyTouch,
+              monthlyReplay.snapshot?.eventId == request.eventId,
+              monthlyReplay.snapshot?.bar == fib.period.rawValue else { return nil }
+        return monthlyReplay.snapshot
+    }
+
+    private var chartBars: [Candle] {
+        navigation.monthlyTouch == nil ? candles.bars : (replaySnapshot?.chartCandles ?? [])
+    }
 
     private func showCandles() {
-        let symbol = fib.chartSymbol
+        guard navigation.monthlyTouch == nil else { candles.stop(); return }
+        let symbol = chartSymbol
         guard active, !symbol.isEmpty else { candles.stop(); return }
         candles.show(symbol: symbol, period: fib.period, connection: session.connection)
     }
 
     private func decimals(_ symbol: String) -> Int {
         if let tick = account.state?.instruments[symbol]?.tick { return Fmt.decimals(tick: tick) }
+        if symbol == chartSymbol, let replay = replaySnapshot {
+            let prices = [replay.anchor.high, replay.anchor.low].compactMap { $0 }.filter { $0.isFinite && $0 > 0 }
+            if let smallest = prices.min() { return min(12, max(2, 4 - Int(floor(log10(smallest))))) }
+        }
         guard let row = fib.current?.items.first(where: { $0.symbol == symbol }) else { return 4 }
         let places = [row.high, row.low].map { v -> Int in let t = String(v).split(separator: "."); return t.count > 1 ? t[1].count : 0 }.max() ?? 2
         return min(12, max(2, places))
     }
 
     private func price(_ symbol: String) -> Double? {
-        if symbol == fib.chartSymbol, let last = candles.bars.last?.close { return last }
+        if symbol == chartSymbol {
+            if navigation.monthlyTouch != nil { return chartBars.last?.close }
+            if let last = chartBars.last?.close { return last }
+        }
         if let q = account.state?.quotes[symbol], let v = Double(q.last) { return v }
         return fib.current?.items.first { $0.symbol == symbol }?.price
     }
@@ -98,18 +131,37 @@ struct FibView: View {
     // MARK: pieces
 
     private func chart(top: CGFloat, bottom: CGFloat) -> some View {
-        let row = fib.selected, symbol = fib.chartSymbol
-        let currentRange = row.flatMap { fib.range(for: $0) } ?? history.currentRange(for: symbol)
-        let past = style.showHistory ? (history.ranges[symbol] ?? []) : []
+        let row = fib.selected, symbol = chartSymbol, replay = replaySnapshot
+        let currentRange = replay == nil
+            ? (row.flatMap { fib.range(for: $0) } ?? history.currentRange(for: symbol))
+            : replay?.chartWeeklyRanges.last
+        let eventHistory = replay.map { Array($0.chartWeeklyRanges.dropLast()) } ?? []
+        let past = replay == nil ? (style.showHistory ? (history.ranges[symbol] ?? []) : [])
+            : (style.showHistory ? eventHistory : [])
+        let lines = replay?.chartMonthlyLines ?? (navigation.monthlyTouch == nil
+            ? monthlyLevels.chartLines(symbol: symbol, bars: chartBars, period: fib.period) : [])
+        let markers = replay?.chartMarkers ?? (navigation.monthlyTouch == nil ? touches.markers(row) : [])
+        let generation = navigation.monthlyTouch.map { $0.id * 100 + (CandlePeriod.allCases.firstIndex(of: fib.period) ?? 0) + (replay == nil ? 0 : 1) }
+            ?? candles.generation
         return ZStack {
-            CandleChart(bars: candles.bars, generation: candles.generation, period: fib.period, decimals: decimals(symbol),
+            CandleChart(bars: chartBars, generation: generation, period: fib.period, decimals: decimals(symbol),
                         range: currentRange, history: past, innerLines: fib.showInternal, averages: fib.showAverages,
-                        cloud: fib.showCloud, markers: touches.markers(row), markHistory: true, colors: style.colors,
+                        cloud: fib.showCloud, lines: lines, markers: markers,
+                        focusRange: replay?.chartFocusRange, timestampFocus: replay != nil,
+                        highlightedBarTimes: replay?.chartHighlightedBarTimes ?? [],
+                        highlightRange: replay?.chartHighlightedBarTimes == nil ? replay?.chartHighlightRange : nil,
+                        highlightColor: replay == nil ? nil : ChartPalette.hex(0x30D158),
+                        focusBarTime: replay?.locatedMarkerMs.map { $0 / 1000 }, fitReferenceLevels: replay == nil,
+                        markHistory: replay == nil, colors: style.colors,
                         watermark: symbol.isEmpty ? nil : Fmt.coin(symbol) + "USDT", followToken: follow, wallpaper: true,
                         topInset: top + 58, bottomOverlay: bottom + 78 + 50,
-                        onNeedOlder: { candles.loadOlder() })
-            if candles.bars.isEmpty && !symbol.isEmpty {
-                if candles.error == nil { ProgressView() } else { Text(candles.error ?? "").font(.footnote).foregroundStyle(Color.muted) }
+                        onNeedOlder: { if replay == nil { candles.loadOlder() } })
+            if chartBars.isEmpty && !symbol.isEmpty {
+                if navigation.monthlyTouch != nil {
+                    if monthlyReplay.loading { ProgressView("正在读取触价 K 线").font(.footnote).foregroundStyle(Color.muted) }
+                    else { Text(monthlyReplay.error ?? "月首周 K 线暂不可用").font(.footnote).foregroundStyle(Color.muted) }
+                } else if candles.error == nil { ProgressView() }
+                else { Text(candles.error ?? "").font(.footnote).foregroundStyle(Color.muted) }
             }
         }
     }
@@ -135,8 +187,12 @@ struct FibView: View {
     }
 
     private func stripChip(_ symbol: String, edge: Edge?, compact: Bool = false) -> some View {
-        let on = symbol == fib.chartSymbol, coin = Fmt.coin(symbol)
-        return Button { Haptics.select(); withAnimation(.snappy) { fib.focus(symbol) } } label: {
+        let on = symbol == chartSymbol, coin = Fmt.coin(symbol)
+        return Button {
+            Haptics.select()
+            navigation.showLiveChart()
+            withAnimation(.snappy) { fib.focus(symbol) }
+        } label: {
             HStack(spacing: 5) {
                 CoinLogo(coin: coin, size: 20)
                 VStack(alignment: .leading, spacing: 0) {
@@ -167,8 +223,8 @@ struct FibView: View {
 
     /// Floating coin card (tap → 最新触价 list): logo, coin, live price and this week's touch.
     private var coinCard: some View {
-        let symbol = fib.chartSymbol, touch = fib.selected?.latestTouch
-        return Button { Haptics.open(); chooser = true } label: {
+        let symbol = chartSymbol, touch = fib.selected?.latestTouch, replay = replaySnapshot
+        return Button { Haptics.open(); navigation.showLiveChart(); chooser = true } label: {
             HStack(spacing: 9) {
                 if !symbol.isEmpty { CoinLogo(coin: Fmt.coin(symbol), size: 30) }
                 VStack(alignment: .leading, spacing: 1) {
@@ -177,7 +233,13 @@ struct FibView: View {
                         Text("/ USDT").font(.scaled(size: 11, weight: .medium)).foregroundStyle(Color.muted)
                         Image(systemName: "chevron.down").font(.system(size: 9, weight: .bold)).foregroundStyle(Color.muted)
                     }
-                    if let touch {
+                    if let route = navigation.monthlyTouch {
+                        let side = replay?.side ?? route.side
+                        let time = replay.flatMap { Self.observationTime($0, period: fib.period) } ?? route.occurredMs.map(FibView.touchTime)
+                        Text("月首周 · \(route.month) · \(side.map(MonthTouchStyle.edge) ?? "触价")\(time.map { " · " + $0 } ?? "")")
+                            .font(.scaled(size: 11, weight: .medium)).foregroundStyle(MonthTouchStyle.tint)
+                            .lineLimit(1).minimumScaleFactor(0.72)
+                    } else if let touch {
                         Text("\(touch.side == .upper ? "上沿" : "下沿") · \(FibView.touchTime(touch.occurredMs))")
                             .font(.scaled(size: 11, weight: .medium)).foregroundStyle(touch.side == .upper ? ChartPalette.down : ChartPalette.up)
                     } else {
@@ -187,7 +249,7 @@ struct FibView: View {
                 if let p = price(symbol) {
                     Text(p.formatted(.number.precision(.fractionLength(decimals(symbol))).grouping(.never)))
                         .font(.scaled(size: 16, weight: .bold).monospacedDigit())
-                        .foregroundStyle((candles.bars.last.map { $0.close >= $0.open } ?? true) ? ChartPalette.up : ChartPalette.down)
+                        .foregroundStyle((chartBars.last.map { $0.close >= $0.open } ?? true) ? ChartPalette.up : ChartPalette.down)
                         .contentTransition(.numericText(value: p)).animation(.snappy, value: p)
                         .padding(.leading, 4)
                 }
@@ -210,7 +272,11 @@ struct FibView: View {
                 Image(systemName: "slider.horizontal.3").font(.system(size: 14, weight: .bold)).foregroundStyle(Color.ink).frame(width: 32, height: 34).contentShape(.rect)
             }
             .buttonStyle(.plain).accessibilityLabel("图表设置")
-            Button { Haptics.tap(); follow += 1 } label: {
+            Button {
+                Haptics.tap()
+                if navigation.monthlyTouch != nil { navigation.showLiveChart() }
+                follow += 1
+            } label: {
                 Image(systemName: "arrow.right.to.line").font(.system(size: 13, weight: .bold)).foregroundStyle(Color.ink).frame(width: 30, height: 34).contentShape(.rect)
             }
             .buttonStyle(.plain).accessibilityLabel("跟随最新")
@@ -218,7 +284,7 @@ struct FibView: View {
                 HStack(spacing: 3) { Image(systemName: "bolt.fill"); Text("开单") }.font(.system(size: 13, weight: .bold)).lineLimit(1).fixedSize()
             }
             .buttonStyle(.pill(.solid(.accentColor), height: 34))
-            .disabled(locked || row == nil || !fib.fresh || !fib.live)
+            .disabled(locked || navigation.monthlyTouch != nil || row == nil || !fib.fresh || !fib.live)
             .accessibilityLabel("快捷开单 1R")
         }
         .padding(5)
@@ -236,6 +302,27 @@ struct FibView: View {
     static func touchTime(_ ms: Double) -> String {
         let f = DateFormatter(); f.timeZone = TimeZone(identifier: "Asia/Shanghai"); f.dateFormat = "MM/dd HH:mm"
         return f.string(from: Date(timeIntervalSince1970: ms / 1000))
+    }
+
+    static func observationTime(_ snapshot: MonthFirstWeekChartSnapshot, period: CandlePeriod) -> String? {
+        if period == .m1, let marker = snapshot.locatedMarkerMs {
+            return "\(touchTime(marker)) 1分定位"
+        }
+        guard let start = snapshot.observationStartMs, let end = snapshot.observationEndMs else {
+            return snapshot.markerMs.map(touchTime)
+        }
+        let duration = end - start
+        guard duration > 0 else { return touchTime(start) }
+        let inclusiveEnd = end - 60_000   // observationEndMs is exclusive
+        let span: String
+        if duration >= 3_600_000 {
+            span = "\(touchTime(start))–\(touchTime(inclusiveEnd))"
+        } else if duration >= 60_000 {
+            span = duration == 60_000 ? touchTime(start) : "\(touchTime(start))–\(touchTime(inclusiveEnd))"
+        } else {
+            span = touchTime(start)
+        }
+        return snapshot.source == "history" && duration >= 3_600_000 ? "\(span) 小时窗" : span
     }
 }
 

@@ -355,6 +355,31 @@ struct MonthFirstWeekChartSnapshot: Codable {
         }
     }
 
+    struct WeeklyRange: Codable, Equatable {
+        let week: String
+        let symbol: String
+        let high: Double
+        let low: Double
+        let upper: Double
+        let lower: Double
+        let highMs: Double
+        let lowMs: Double
+        let startMs: Double
+        let endMs: Double
+        let expiresMs: Double
+        let state: String
+
+        var chartRange: FibRange? {
+            guard state == "ready", week.range(of: #"^\d{4}-\d{2}-\d{2}$"#, options: .regularExpression) != nil,
+                  [high, low, upper, lower, highMs, lowMs, startMs, endMs, expiresMs].allSatisfy(\.isFinite),
+                  high > low, low > 0, upper > high, lower < low, startMs < endMs, endMs < expiresMs else { return nil }
+            return FibRange(high: high, low: low, upper: upper, lower: lower,
+                            start: endMs / 1000, end: expiresMs / 1000,
+                            highTitle: "\(week) 周一高", lowTitle: "\(week) 周一低",
+                            upperTitle: "\(week) 上 1.618", lowerTitle: "\(week) 下 1.618")
+        }
+    }
+
     let eventId: String?
     let symbol: String
     let month: String
@@ -369,6 +394,12 @@ struct MonthFirstWeekChartSnapshot: Codable {
     let markerMs: Double?
     let observationStartMs: Double?
     let observationEndMs: Double?
+    /// Weekly ranges that were active at the event time; nil supports older service payloads.
+    var weeklyRanges: [WeeklyRange]? = nil
+
+    var chartWeeklyRanges: [FibRange] {
+        (weeklyRanges ?? []).filter { $0.symbol == symbol }.compactMap(\.chartRange).sorted { $0.start < $1.start }
+    }
 
     var chartCandles: [Candle] {
         candles.map { value in
@@ -414,18 +445,28 @@ struct MonthFirstWeekChartSnapshot: Codable {
         guard lower > 0 else { return nil }
         return FibRange(high: high, low: low, upper: upper, lower: lower,
                  start: anchor.readyMs / 1000, end: anchor.expiresMs / 1000,
-                 highTitle: "首周高", lowTitle: "首周低")
+                 highTitle: "\(month) 首周高", lowTitle: "\(month) 首周低",
+                 upperTitle: "\(month) 首周上 1.618", lowerTitle: "\(month) 首周下 1.618")
     }
+
+    var chartMonthlyRange: MonthFirstWeekRange? {
+        guard let high = anchor.high, let low = anchor.low, let upper = anchor.upper, let lower = anchor.lower else { return nil }
+        let range = MonthFirstWeekRange(month: month, startMs: anchor.startMs, readyMs: anchor.readyMs,
+                                        expiresMs: anchor.expiresMs, high: high, low: low, upper: upper, lower: lower)
+        return range.isValid() ? range : nil
+    }
+
+    var chartMonthlyLines: [ChartLine] { chartMonthlyRange?.chartLines ?? chartLines }
 
     var chartLines: [ChartLine] {
         guard chartRange == nil else { return [] }
         let start = anchor.readyMs / 1000, end = anchor.expiresMs / 1000
         let flatRange = anchor.high != nil && anchor.high == anchor.low
         return [
-            (anchor.upper, "上 1.618", ChartPalette.reference),
-            (anchor.high, flatRange ? "首周高/低" : "首周高", ChartPalette.mondayLine),
-            (flatRange ? nil : anchor.low, "首周低", ChartPalette.mondayLine),
-            (anchor.lower, "下 1.618", ChartPalette.reference),
+            (anchor.upper, "\(month) 首周上 1.618", ChartPalette.reference),
+            (anchor.high, flatRange ? "\(month) 首周高/低" : "\(month) 首周高", ChartPalette.mondayLine),
+            (flatRange ? nil : anchor.low, "\(month) 首周低", ChartPalette.mondayLine),
+            (anchor.lower, "\(month) 首周下 1.618", ChartPalette.reference),
         ].compactMap { item in
             let (value, title, color) = item
             guard let value, value > 0, value.isFinite else { return nil }
@@ -440,7 +481,8 @@ struct MonthFirstWeekChartSnapshot: Codable {
               side != nil, let level, level.isFinite, level > 0,
               observationStartMs?.isFinite == true, observationEndMs?.isFinite == true,
               let observationStartMs, let observationEndMs, observationStartMs <= observationEndMs,
-              anchor.high != nil, anchor.low != nil, anchor.upper != nil, anchor.lower != nil else {
+              anchor.high != nil, anchor.low != nil, anchor.upper != nil, anchor.lower != nil, chartMonthlyRange != nil,
+              weeklyRanges?.allSatisfy({ $0.symbol == symbol && $0.chartRange != nil }) ?? true else {
             throw APIError(status: 502, message: "月首周触价图表版本不匹配")
         }
     }

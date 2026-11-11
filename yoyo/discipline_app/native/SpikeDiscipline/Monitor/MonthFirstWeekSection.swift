@@ -3,7 +3,7 @@ import SwiftUI
 enum MonthTouchStyle {
     static let kind = "month_first_week_touch"
     static let icon = "calendar"
-    static let tint = Color.purple
+    static let tint = ChartPalette.hex(0x8754B8)
 
     static func edge(_ side: Edge) -> String { side == .upper ? "上轨" : "下轨" }
 
@@ -19,16 +19,14 @@ enum MonthTouchStyle {
     }
 }
 
-/// Month and Monday share navigation. A monthly touch opens its own frozen range.
+/// Monthly touches open as event replays in the existing 1.618 chart.
 struct MonthFirstWeekSection: View {
     let connection: Connection
     let refresh: Int
     @Environment(SessionStore.self) private var session
+    @Environment(\.openChart) private var openChart
     @State private var feed = MonthFirstWeekFeed()
-    @AppStorage("touch.month.focus") private var focus = ""
-    @AppStorage("touch.month.chartEventId") private var chartEventId = ""
     @State private var side = "all"
-    @State private var presentation: MonthFirstWeekPresentation?
 
     private var filtered: [MonthFirstWeekTouch] {
         feed.events.filter { side == "all" || $0.side.rawValue == side }
@@ -43,16 +41,6 @@ struct MonthFirstWeekSection: View {
                         Label("月首周 1.618", systemImage: MonthTouchStyle.icon)
                             .font(.headline).foregroundStyle(MonthTouchStyle.tint)
                         Spacer()
-                        Button {
-                            Haptics.open()
-                            presentation = .chooser
-                        } label: {
-                            Image(systemName: "chart.xyaxis.line")
-                                .font(.system(size: 14, weight: .bold)).foregroundStyle(Color.ink)
-                                .frame(width: 32, height: 32).frosted(Circle(), veil: 0.8)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("搜索监控合约并查看月度 K 线")
                         Text(MonthTouchStyle.state(snapshot)).font(.caption.weight(.medium))
                     }
                     HStack {
@@ -72,55 +60,24 @@ struct MonthFirstWeekSection: View {
                         .font(.footnote).foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity).padding(16).glassCard(cornerRadius: 18)
                 } else {
-                    ScrollViewReader { reader in
-                        LazyVStack(spacing: 0) {
-                            ForEach(rows) { event in
-                                eventRow(event, now: snapshot.nowMs)
-                                    .id(event.eventId)
-                                if event.id != rows.last?.id { Divider().padding(.leading, 54) }
-                            }
-                        }
-                        .glassCard(cornerRadius: 18)
-                        .task(id: focus) {
-                            guard !focus.isEmpty else { return }
-                            side = "all"
-                            await Task.yield()
-                            reader.scrollTo(focus, anchor: .center)
+                    LazyVStack(spacing: 0) {
+                        ForEach(rows) { event in
+                            eventRow(event, now: snapshot.nowMs)
+                                .id(event.eventId)
+                            if event.id != rows.last?.id { Divider().padding(.leading, 54) }
                         }
                     }
+                    .glassCard(cornerRadius: 18)
                 }
             }
         }
-        .sheet(item: $presentation) { modal in
-            NavigationStack {
-                switch modal {
-                case .chooser:
-                    MonthFirstWeekSymbolPicker(symbols: feed.snapshot?.items.map(\.symbol) ?? []) { symbol in
-                        presentation = .chart(.symbol(symbol))
-                    }
-                case .chart(let request):
-                    MonthFirstWeekChartView(request: request, connection: connection)
-                }
-            }
-            .presentationDetents([.large])
-            .presentationDragIndicator(.visible)
-        }
-        .onAppear { openRequestedChart() }
-        .onChange(of: chartEventId) { _, _ in openRequestedChart() }
         .task(id: refresh) { await feed.watch(connection: connection, session: session) }
-    }
-
-    private func openRequestedChart() {
-        guard !chartEventId.isEmpty else { return }
-        let eventId = chartEventId
-        presentation = .chart(.event(eventId))
-        chartEventId = ""
     }
 
     private func eventRow(_ event: MonthFirstWeekTouch, now: Double) -> some View {
         Button {
             Haptics.open()
-            presentation = .chart(.event(event.eventId))
+            openChart.monthlyTouch(event)
         } label: {
             HStack(spacing: 10) {
                 CoinLogo(coin: Fmt.coin(event.symbol), size: 32).accessibilityHidden(true)
@@ -138,7 +95,6 @@ struct MonthFirstWeekSection: View {
                 }
             }
             .foregroundStyle(Color.ink).padding(.horizontal, 12).padding(.vertical, 9)
-            .background(event.eventId == focus ? MonthTouchStyle.tint.opacity(0.11) : Color.clear)
             .contentShape(.rect)
         }
         .buttonStyle(RowPressStyle())

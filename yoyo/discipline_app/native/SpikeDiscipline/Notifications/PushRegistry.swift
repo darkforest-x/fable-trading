@@ -18,10 +18,11 @@ final class PushRegistry: NSObject, UNUserNotificationCenterDelegate {
     private(set) var serverOutdated = false
     private(set) var error: String?
     /// A tapped notification asks the root view to open this page / coin.
-    var openRequest: (kind: String, symbol: String?, eventId: String?, month: String?, side: String?)?
+    var openRequest: (kind: String, symbol: String?, eventId: String?, month: String?, side: String?, occurredMs: Double?, candleMs: Double?)?
     var openRequestKey: String? {
         guard let request = openRequest else { return nil }
-        return [request.kind, request.eventId ?? "", request.month ?? "", request.symbol ?? "", request.side ?? ""].joined(separator: "|")
+        return [request.kind, request.eventId ?? "", request.month ?? "", request.symbol ?? "", request.side ?? "",
+                request.occurredMs.map { String($0) } ?? "", request.candleMs.map { String($0) } ?? ""].joined(separator: "|")
     }
 
     private var connection: Connection?
@@ -137,7 +138,9 @@ final class PushRegistry: NSObject, UNUserNotificationCenterDelegate {
         let eventId = info["event_id"] as? String
         let month = info["month"] as? String
         let side = info["side"] as? String
-        await MainActor.run { openRequest = (kind, symbol, eventId, month, side) }
+        let occurredMs = (info["occurred_ms"] as? NSNumber)?.doubleValue
+        let candleMs = (info["candle_ms"] as? NSNumber)?.doubleValue
+        await MainActor.run { openRequest = (kind, symbol, eventId, month, side, occurredMs, candleMs) }
     }
 }
 

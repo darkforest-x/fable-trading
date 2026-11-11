@@ -14,6 +14,8 @@ struct SpikeDisciplineApp: App {
     @State private var chartStyle = ChartStyle()
     @State private var mondayHistory = MondayHistory()
     @State private var touchFeed = TouchFeed()
+    @State private var monthFirstWeekLevels = MonthFirstWeekLevels()
+    @State private var fibNavigation = FibNavigation()
     @AppStorage("appearance") private var appearance = "system"
     var body: some Scene {
         WindowGroup {
@@ -26,6 +28,8 @@ struct SpikeDisciplineApp: App {
                 .environment(chartStyle)
                 .environment(mondayHistory)
                 .environment(touchFeed)
+                .environment(monthFirstWeekLevels)
+                .environment(fibNavigation)
                 .preferredColorScheme(appearance == "light" ? .light : appearance == "dark" ? .dark : nil)
                 // Text follows the system size up to xxxLarge; larger sizes would break the floating docks.
                 .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
@@ -57,6 +61,7 @@ struct RootView: View {
     @Environment(NotificationStore.self) private var notices
     @Environment(AccountStore.self) private var account
     @Environment(FibStore.self) private var fib
+    @Environment(FibNavigation.self) private var fibNavigation
     @Environment(TicketModel.self) private var ticket
     @Environment(\.scenePhase) private var scenePhase
     @State private var tab: AppTab = .fib       // owner 2026-11-07: open on 1.618
@@ -128,9 +133,9 @@ struct RootView: View {
         .onGeometryChange(for: Bool.self) { $0.size.width > $0.size.height } action: { landscape = $0 }
         .overlay {
             if landscapeChart {
-                LandscapeChart(symbol: tab == .fib ? fib.chartSymbol : ticket.symbol,
+                    LandscapeChart(symbol: tab == .fib ? (fibNavigation.monthlyTouch?.symbol ?? fib.chartSymbol) : ticket.symbol,
                                period: tab == .fib ? Bindable(fib).period : $tradePeriod,
-                               lines: tab == .trade ? tradeLines : [])
+                               lines: tab == .trade ? tradeLines : [], showMonthlyOverlays: tab == .fib)
                     .transition(.opacity)
             }
         }
@@ -174,29 +179,43 @@ struct RootView: View {
                 .padding(.top, 4)
             }
         }
-        .onChange(of: tab) { _, now in Haptics.select(); Orientation.allowLandscape(now == .fib || now == .trade) }
+        .onChange(of: tab) { before, now in
+            if before == .fib && now != .fib { fibNavigation.showLiveChart() }
+            Haptics.select(); Orientation.allowLandscape(now == .fib || now == .trade)
+        }
         .onAppear { Orientation.allowLandscape(chartTab) }
         // Widget taps (spike://fib, spike://trade) open their page.
         .onOpenURL { url in
             guard url.scheme == "spike", let page = AppTab(rawValue: url.host() ?? "") else { return }
+            if page == .fib { fibNavigation.showLiveChart() }
             withAnimation(.snappy) { tab = page }
         }
         .onChange(of: PushRegistry.shared.openRequestKey) { _, _ in
             guard let request = PushRegistry.shared.openRequest else { return }
             PushRegistry.shared.openRequest = nil
             if request.kind == "month_first_week_touch" {
-                focusMonthFirstWeekTouch(eventId: request.eventId, month: request.month)
-                withAnimation(.snappy) { tab = .monitor }
+                openMonthlyTouch(eventId: request.eventId, symbol: request.symbol, month: request.month,
+                                 side: request.side.flatMap(Edge.init(rawValue:)), occurredMs: request.occurredMs ?? request.candleMs)
                 return
             }
             if request.kind == "alarm" { UserDefaults.standard.set(MonitorSegment.alerts.rawValue, forKey: "monitor.segment") }
-            if request.kind != "alarm", let symbol = request.symbol { fib.focus(symbol) }
+            if request.kind != "alarm", let symbol = request.symbol {
+                fibNavigation.showLiveChart()
+                fib.focus(symbol)
+            }
             withAnimation(.snappy) { tab = request.kind == "alarm" ? .monitor : .fib }
         }
-        .environment(\.openChart, OpenChartAction { symbol in
-            Haptics.open(); fib.focus(symbol)
-            withAnimation(.snappy) { tab = .fib }
-        })
+        .environment(\.openChart, OpenChartAction(
+            run: { symbol in
+                fibNavigation.showLiveChart()
+                Haptics.open(); fib.focus(symbol)
+                withAnimation(.snappy) { tab = .fib }
+            },
+            runMonthlyTouch: { event in
+                openMonthlyTouch(eventId: event.eventId, symbol: event.symbol, month: event.month,
+                             side: event.side, occurredMs: event.occurredMs)
+            }
+        ))
         #if DEBUG
         .sheet(isPresented: .constant(AppConfig.qaWidgets)) { WidgetGallery() }
         #endif
@@ -260,23 +279,39 @@ struct RootView: View {
     private func open(_ event: NotificationEvent) {
         withAnimation(.snappy) { notices.banner = nil }
         if event.kind == "month_first_week_touch" {
-            focusMonthFirstWeekTouch(eventId: event.eventId, month: event.month)
-            withAnimation(.snappy) { tab = .monitor }
+            openMonthlyTouch(eventId: event.eventId, symbol: event.symbol, month: event.month,
+                             side: event.side, occurredMs: event.occurredMs ?? event.candleMs ?? event.atMs)
             return
         }
         if event.kind == "alarm" { UserDefaults.standard.set(MonitorSegment.alerts.rawValue, forKey: "monitor.segment") }
-        if event.kind != "alarm", let symbol = event.symbol { fib.symbol = symbol }
+        if event.kind != "alarm", let symbol = event.symbol {
+            fibNavigation.showLiveChart()
+            fib.symbol = symbol
+        }
         withAnimation(.snappy) { tab = event.kind == "alarm" ? .monitor : .fib }
     }
 
-    private func focusMonthFirstWeekTouch(eventId: String?, month: String?) {
-        UserDefaults.standard.set("month", forKey: "touch.source")
-        UserDefaults.standard.set(MonitorSegment.touches.rawValue, forKey: "monitor.segment")
-        if let eventId {
-            UserDefaults.standard.set(eventId, forKey: "touch.month.focus")
-            UserDefaults.standard.set(eventId, forKey: "touch.month.chartEventId")
+    private func openMonthlyTouch(eventId: String?, symbol: String?, month: String?, side: Edge?, occurredMs: Double?) {
+        let pieces = eventId?.split(separator: "|", omittingEmptySubsequences: false).map(String.init) ?? []
+        guard let selectedSymbol = symbol ?? pieces.dropFirst().first else {
+            fibNavigation.showLiveChart()
+            withAnimation(.snappy) { tab = .fib }
+            return
         }
-        if let month { UserDefaults.standard.set(month, forKey: "touch.month") }
+        fib.focus(selectedSymbol)
+        let selectedMonth = month ?? pieces.first
+        let selectedSide = side ?? pieces.last.flatMap(Edge.init(rawValue:))
+        let selectedEvent: String?
+        if let eventId { selectedEvent = eventId }
+        else if let selectedMonth, let selectedSide { selectedEvent = "\(selectedMonth)|\(selectedSymbol)|\(selectedSide.rawValue)" }
+        else { selectedEvent = nil }
+        if let selectedEvent, let selectedMonth {
+            fibNavigation.openMonthlyTouch(eventId: selectedEvent, symbol: selectedSymbol, month: selectedMonth,
+                                           side: selectedSide, occurredMs: occurredMs)
+        } else {
+            fibNavigation.showLiveChart()
+        }
+        withAnimation(.snappy) { tab = .fib }
     }
 
     private func applyQA() {

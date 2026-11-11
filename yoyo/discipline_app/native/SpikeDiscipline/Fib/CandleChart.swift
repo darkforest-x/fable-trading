@@ -21,6 +21,9 @@ struct ChartLine: Equatable, Identifiable {
     var dashed = false
     var startTime: Double? = nil
     var endTime: Double? = nil
+    var lineWidth: CGFloat = 1.4
+    /// Reference overlays can be drawn without changing the candle auto-scale.
+    var fitsScale = true
     var id: String { title }
 }
 
@@ -599,8 +602,15 @@ struct CandleChart: View {
                bars[lastVisible].time + period.seconds > range.start, bars[firstVisible].time < range.end {
                 lo = min(lo, max(0, range.lower)); hi = max(hi, range.upper)
             }
-            if fitReferenceLevels {
-                for line in lines where line.price > 0 { lo = min(lo, line.price); hi = max(hi, line.price) }
+            if fitReferenceLevels, firstVisible <= lastVisible {
+                let visibleStart = bars[firstVisible].time
+                let visibleEnd = bars[lastVisible].time + period.seconds
+                for line in lines where line.fitsScale && line.price > 0 {
+                    let lineStart = line.startTime ?? -Double.infinity
+                    let lineEnd = line.endTime ?? Double.infinity
+                    guard lineEnd > visibleStart, lineStart < visibleEnd else { continue }
+                    lo = min(lo, line.price); hi = max(hi, line.price)
+                }
             }
             if timestampAxis {
                 for fill in executions where fill.time.isFinite && fill.price.isFinite && fill.price > 0 {
@@ -773,7 +783,7 @@ struct CandleChart: View {
             }
             guard right > left else { continue }
             clipped.stroke(Path { $0.move(to: CGPoint(x: left, y: y)); $0.addLine(to: CGPoint(x: right, y: y)) },
-                           with: .color(line.color), style: StrokeStyle(lineWidth: 1.4, dash: line.dashed ? [5, 4] : []))
+                           with: .color(line.color), style: StrokeStyle(lineWidth: line.lineWidth, dash: line.dashed ? [5, 4] : []))
             clipped.draw(Text("\(line.title) \(format(line.price))").font(.system(size: 10, weight: .semibold)).foregroundStyle(line.color),
                          at: CGPoint(x: left + 4, y: y - 3), anchor: .bottomLeading)
         }
