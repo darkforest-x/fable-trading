@@ -4,24 +4,97 @@
   "start_utc": "2022-02-01T00:00:00Z",
   "split_utc": "2025-01-01T00:00:00Z",
   "end_exclusive_utc": "2026-11-01T05:00:00Z",
-  "entry_rules": ["touch_close","same_bar","delayed","first_reclaim","upper_reclaim","lower_reclaim","first_retest_inside","repeat_reclaim","continue_outside"],
+  "entry_rules": [
+    "touch_close",
+    "same_bar",
+    "delayed",
+    "first_reclaim",
+    "upper_reclaim",
+    "lower_reclaim",
+    "first_retest_inside",
+    "repeat_reclaim",
+    "continue_outside"
+  ],
   "repeat": "Take the first strict reclaim in bars 0..5; then at most two new outside/equal-to-inside recrosses within 24 bars of touch, at least 3 bars after the prior signal. All opportunities must pass shared-account capacity.",
   "continue_outside": "First two consecutive strictly outside closes, with the second at index 1..5 after touch. Follow the breakout next open.",
   "first_retest_inside": "Only after same-bar recovery. Within the next 12 candles, the first revisit of the outer rail must close strictly inside.",
-  "baseline": {"tp_mode": "fixed_pct","tp_value":0.01,"sl_pct":0.02,"horizon_bars":12},
+  "baseline": {
+    "tp_mode": "fixed_pct",
+    "tp_value": 0.01,
+    "sl_pct": 0.02,
+    "horizon_bars": 12
+  },
   "variants": [
-    ["base",{}],["tp05",{"tp_value":0.005}],["tp2",{"tp_value":0.02}],["tp4",{"tp_value":0.04}],
-    ["sl1",{"sl_pct":0.01}],["sl4",{"sl_pct":0.04}],["hold30m",{"horizon_bars":6}],["hold3h",{"horizon_bars":36}],
-    ["quarter_edge",{"tp_mode":"target_distance","tp_value":0.25}],["near_edge",{"tp_mode":"target_distance","tp_value":1}]
+    [
+      "base",
+      {}
+    ],
+    [
+      "tp05",
+      {
+        "tp_value": 0.005
+      }
+    ],
+    [
+      "tp2",
+      {
+        "tp_value": 0.02
+      }
+    ],
+    [
+      "tp4",
+      {
+        "tp_value": 0.04
+      }
+    ],
+    [
+      "sl1",
+      {
+        "sl_pct": 0.01
+      }
+    ],
+    [
+      "sl4",
+      {
+        "sl_pct": 0.04
+      }
+    ],
+    [
+      "hold30m",
+      {
+        "horizon_bars": 6
+      }
+    ],
+    [
+      "hold3h",
+      {
+        "horizon_bars": 36
+      }
+    ],
+    [
+      "quarter_edge",
+      {
+        "tp_mode": "target_distance",
+        "tp_value": 0.25
+      }
+    ],
+    [
+      "near_edge",
+      {
+        "tp_mode": "target_distance",
+        "tp_value": 1
+      }
+    ]
   ],
   "candidate_scope": "Fixed exits for all 9 entry rules. Inward near-edge targets apply only to reversal rules. One exit variable changes per branch, common entry and risk baseline. For a near-edge target, cancel if the near edge has already been reached on or since the original touch bar or the next open is beyond that target. For fixed-percent exits allow a fresh trade at the quoted next open independent of distance to the near edge.",
-  "base_market_slippage_bps":1,
-  "stress_market_slippage_bps":5,
-  "maker_fee_bps":2,
-  "taker_fee_bps":5,
-  "funding":"Excluded from base account; all versions use the same fee and funding assumptions. Holding intervals are 30 minutes to 3 hours. Exchange funding rates and settlement marks are incomplete for historical contracts.",
-  "allocation":"1000 USDT per independent shared account; target 10% equity per position, up to 10 positions; no leverage. Alphabetical priority at simultaneous signals. Inspect both 5m close and adverse intrabar drawdown.",
-  "selection":"Use only pre-2025 funded account results net of fees and 1bp market slippage. Eligibility = profitable early, at least 100 early closed trades and peak-to-trough intrabar drawdown <=30%. Select (1) highest net win rate (2) highest ending equity (3) most funded trades (4) positive net return / intrabar drawdown. Tie-break positive return then configuration id. Keep ties across goals and identify distinct positive alternatives. Report unselected failures when no profitable candidates pass; never reselect after observing later outcomes. Selected profiles also undergo 5bp market-slip stress.",
-  "clock_control":"For each selected signal precompute one placebo in the same event window/coin/side/NY month after the first-week rail became known, at least 36 five-minute bars before the touch. Choose from prior clocks whose entire 36-bar holding period ends before touch, excluding poor volatility matches (trailing 12 closed 5m return volatility ratio outside [0.5,2]); minimize absolute log volatility ratio with deterministic hashed tie-break. Use same relative target, exact horizon, fees and account rules. Compare matched signal subset with matched controls, report matching coverage. The control is conditional on an eventual touch in the same coin/month and is not an investable strategy.",
-  "research_only":true
+  "base_market_slippage_bps": 1,
+  "stress_market_slippage_bps": 5,
+  "maker_fee_bps": 2,
+  "taker_fee_bps": 5,
+  "funding": "Excluded from base account; all versions use the same fee and funding assumptions. Holding intervals are 30 minutes to 3 hours. Exchange funding rates and settlement marks are incomplete for historical contracts.",
+  "allocation": "1000 USDT per independent shared account; target 10% equity per position, up to 10 positions; no leverage. Alphabetical priority at simultaneous signals. Inspect both 5m close and adverse intrabar drawdown.",
+  "selection": "Use only pre-2025 funded account results net of fees and 1bp market slippage. Eligibility = profitable early, at least 100 early closed trades and peak-to-trough intrabar drawdown <=30%. Select (1) highest net win rate (2) highest ending equity (3) most funded trades (4) positive net return / intrabar drawdown. Tie-break positive return then configuration id. Keep ties across goals and identify distinct positive alternatives. Report unselected failures when no profitable candidates pass; never reselect after observing later outcomes. Selected profiles also undergo 5bp market-slip stress.",
+  "clock_control": "For each selected signal precompute one placebo in the same event window/coin/side/NY month after the first-week rail became known, at least 36 five-minute bars before the touch. Choose from prior clocks whose entire 36-bar holding period ends before touch, excluding poor volatility matches (trailing 12 closed 5m return volatility ratio outside [0.5,2]); minimize absolute log volatility ratio with deterministic hashed tie-break. Use same relative target, exact horizon, fees and account rules. Compare matched signal subset with matched controls, report matching coverage. The control is conditional on an eventual touch in the same coin/month and is not an investable strategy.",
+  "research_only": true,
+  "sizing_stage": "Using only pre-2025 data, take top three qualifying 10% configurations for each goal. For their union check 5%, 10%, and 20% target notional of current equity; cap number of simultaneous positions at floor(1/fraction) up to ten and keep gross notional at most equity. Select each goal within this fixed shortlist across sizes by the original criterion. Later data are printed only after selection."
 }
