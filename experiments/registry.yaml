@@ -15,6 +15,31 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-month-firstweek-stalled-rail-paths-20261112-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "219f02fb47"
+    status: inconclusive
+    question: How do favorable- and adverse-first Binance first-reclaim cases that did not advance at hour one hold or recover the rail through hourly closes two to four, separately by rail?
+    single_variable: Elapsed completed hourly closes 2 through 4 in the frozen hour-one non-advancing cohort. Carry hour-one rail state; use no fitted threshold or trading rule.
+    result: >-
+      At hour four, upper-rail cases with favorable/adverse outcomes numbered 359/1038, of which
+      304/564 continuously held on closes and 23/130 had lost the rail then ended back inside.
+      Lower-rail cases numbered 301/816; 238/532 continuously held and 36/85 lost then ended back inside.
+      Of the hour-one outside cases, 19/25 vs 121/263 (upper) and 24/31 vs 67/140 (lower)
+      had a completed inward recovery by hour four before the decisive candle.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    canonical_report: experiments/active/exp-month-firstweek-stalled-rail-paths-20261112-v1/counts.csv
+    artifacts: []
+    notes: >-
+      By hour four, 3/121 upper and 0/47 lower had already reached their original outcomes (favorable/adverse).
+      Paths first lost then recovered but subsequently lost again are separated; temporary intrabar
+      breaches without a close outside do not break a hold. All fractions use identified denominators.
+      Historical outcome groups omit ambiguous and unresolved original events; these are not trade win rates.
+      Trace: data/research/alt-isolated-12h-wicks-20261111/expanded12/all_replay_v1/stalled_rail_paths/paths.csv.gz.
+
   - experiment_id: exp-month-firstweek-first-reclaim-hours-20261112-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "9698a2c5ce"
