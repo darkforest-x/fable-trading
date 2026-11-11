@@ -13,6 +13,9 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from numba import njit
+from vectorbt.portfolio import nb
+from vectorbt.portfolio.enums import NoOrder
 
 ROOT = Path(__file__).resolve().parents[3]
 INITIAL_CASH = 1_000.0
@@ -37,6 +40,64 @@ TRADE_COLUMNS = (
 MARK_COLUMNS = (
     "candidate_id", "symbol", "bar_ms", "open", "close", "active_high", "active_low",
 )
+
+
+@njit(cache=True)
+def _cash_safe_account_order(
+    c, nav, actions, prices, fees, market_slip, exposure, reservation,
+):
+    """Submit full VectorBT orders with the existing shared-wallet sizing.
+
+    ``free_cash_now`` can exceed ``cash_now`` by a few float ulps after a
+    position releases collateral. Bound the next reservation by both values;
+    VectorBT still validates every fill with ``raise_reject=True``.
+    """
+    action = actions[c.i, c.col]
+    if action == 0:
+        return NoOrder
+    fee = fees[c.i, c.col]
+    slip = market_slip if fee == TAKER_FEE_RATE else 0.0
+    price = prices[c.i, c.col]
+    if action == 2:
+        if c.position_now == 0.0:
+            return NoOrder
+        return nb.order_nb(
+            size=-c.position_now,
+            price=price,
+            fees=fee,
+            slippage=slip,
+            lock_cash=True,
+            allow_partial=False,
+            raise_reject=True,
+        )
+    if c.position_now != 0.0:
+        raise ValueError("Position collision")
+
+    free_slots = 0
+    for col in range(c.from_col, c.to_col):
+        if c.last_position[col] == 0.0:
+            free_slots += 1
+    if free_slots < 1:
+        raise ValueError("No free slot for an admitted entry")
+    capacity = c.group_len
+    target_budget = nav * exposure / capacity
+    available_free_cash = c.free_cash_now / free_slots
+    available_cash = max(0.0, c.cash_now) / free_slots
+    reservation[0] = min(target_budget, available_free_cash, available_cash)
+
+    budget = reservation[0]
+    if budget < 1.0e-8:
+        return NoOrder
+    size = action * (budget * (1.0 - 1.0e-10) / (price * (1.0 + slip) * (1.0 + fee)))
+    return nb.order_nb(
+        size=size,
+        price=price,
+        fees=fee,
+        slippage=slip,
+        lock_cash=True,
+        allow_partial=False,
+        raise_reject=True,
+    )
 
 
 def _epoch_ms(values: pd.Series, name: str) -> np.ndarray:
@@ -322,25 +383,21 @@ def _build_vectorbt_data(
 
 
 def _run_vectorbt(data: dict, max_slots: int) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Run the established shared-wallet callback with sparse 5m marks."""
+    """Run the shared VectorBT wallet callback with sparse 5m marks."""
     import vectorbt as vbt
 
     from yoyo.evaluation import cloud_close_reward_account as wallet
 
     actions = data["actions"]
-    slot_weights = np.ones((1, 1), dtype=np.float64)
     portfolio = vbt.Portfolio.from_order_func(
         data["marks"],
-        wallet.account_order,
+        _cash_safe_account_order,
         actions,
         data["prices"],
         data["fees"],
         data["slippage"],
         data["exposure"],
-        np.ones(1, dtype=np.float64),
         np.zeros(1, dtype=np.float64),
-        0,
-        slot_weights,
         pre_segment_func_nb=wallet.pre_segment,
         pre_segment_args=(),
         cash_sharing=True,
