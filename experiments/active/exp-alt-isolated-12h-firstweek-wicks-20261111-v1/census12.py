@@ -130,6 +130,16 @@ def summarize():
              unique_follow7=int(followed.month_unique.sum()),
              month_unique_success=int((followed.month_unique & (followed.mfe7>=20)).sum()),
              success_by_side=followed[followed.mfe7>=20].side.value_counts().to_dict())
+    strict=followed[followed.month_unique & (followed.mfe7>=20)]
+    out['strict_success_symbols']=strict.symbol.nunique()
+    out['strict_success_by_side']=strict.side.value_counts().to_dict()
+    valid_counts=valid.groupby('symbol').size()
+    checklist=pd.read_csv(BASE/'universe_eligible.csv')[['symbol','basis','status']].copy()
+    checklist['valid_months']=checklist.symbol.map(valid_counts).fillna(0).astype(int)
+    checklist['passed_20pct']=checklist.symbol.map(followed[followed.mfe7>=20].groupby('symbol').size()).fillna(0).astype(int)
+    checklist['strict_20pct']=checklist.symbol.map(strict.groupby('symbol').size()).fillna(0).astype(int)
+    checklist.to_csv(OUT/'contract_coverage.csv',index=False)
+    out['no_valid_months']=checklist.loc[checklist.valid_months.eq(0),'symbol'].tolist()
     (OUT/'summary.json').write_text(json.dumps(out,indent=2))
     print(json.dumps(out),flush=True)
 
