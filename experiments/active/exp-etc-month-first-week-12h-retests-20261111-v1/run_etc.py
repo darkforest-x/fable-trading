@@ -460,9 +460,9 @@ def main() -> None:
                 for col in ("cash_pnl", "net_return", "quantity", "notional"):
                     target_col = f"{col}_{bp}bp"
                     path_rows.loc[mask, target_col] = path_rows.loc[mask, "event_id"].map(fill_map[col])
-                path_rows.loc[mask, f"account_entry_price_{bp}bp"] = (
+                path_rows.loc[mask, f"account_reference_entry_price_{bp}bp"] = (
                     path_rows.loc[mask, "event_id"].map(fill_map.entry_price))
-                path_rows.loc[mask, f"account_exit_price_{bp}bp"] = (
+                path_rows.loc[mask, f"account_reference_exit_price_{bp}bp"] = (
                     path_rows.loc[mask, "event_id"].map(fill_map.exit_price))
     if len(paths):
         admission = {}
@@ -477,7 +477,8 @@ def main() -> None:
                 admission[(arm, 5)])
             closed = mask & path_rows.status.eq("closed")
             path_rows.loc[closed & path_rows.account_admitted_1bp.fillna(False), "status"] = "account_funded"
-            path_rows.loc[closed & ~path_rows.account_admitted_1bp.fillna(False), "status"] = "account_skipped_busy"
+            path_rows.loc[closed & path_rows.account_admitted_1bp.fillna(False).eq(False),
+                          "status"] = "account_skipped_busy"
     paths_by_id = path_rows.set_index("event_id") if len(path_rows) else pd.DataFrame()
     if len(entries):
         entries["path_status"] = entries.event_id.map(paths_by_id.status) if len(paths_by_id) else None
