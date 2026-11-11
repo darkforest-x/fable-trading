@@ -131,7 +131,7 @@ def scan(symbol,raw):
 
 
 def sources(symbol):
-    return [p for p in (DATA/(symbol+'.npy'),DATA.parent/'tail'/(symbol+'.npy')) if p.is_file()]
+    return [p for p in (DATA/(symbol+'.npy'),DATA.parent/'archive_fill'/(symbol+'.npy'),DATA.parent/'tail'/(symbol+'.npy')) if p.is_file()]
 
 
 def signature(parts):
@@ -148,10 +148,10 @@ def process(symbol):
         return symbol
     arrays=[np.load(p,mmap_mode='r') for p in parts]
     raw=arrays[0]
-    if len(arrays)==2 and len(arrays[1]):
+    for tail in arrays[1:]:
+        if not len(tail):continue
         # Prefer the recent exchange snapshot on overlapping timestamps;
         # retain archived rows for any holes in that snapshot.
-        tail=arrays[1]
         pos=np.searchsorted(raw[:,0],tail[0,0])
         keep=~np.isin(raw[pos:,0],tail[:,0])
         merged=np.concatenate((raw[pos:][keep],tail))
@@ -180,7 +180,7 @@ if __name__=='__main__':
     a=p.parse_args()
     eligible=set(pd.read_csv(DATA.parent/'universe_eligible.csv').symbol)
     while True:
-        available=({p.stem for p in DATA.glob('*.npy')} | {p.stem for p in (DATA.parent/'tail').glob('*.npy')}) & eligible
+        available={p.stem for d in (DATA, DATA.parent/'archive_fill', DATA.parent/'tail') for p in d.glob('*.npy')} & eligible
         todo=[]
         for symbol in sorted(available):
             receipt=CACHE/symbol/'done.json'
