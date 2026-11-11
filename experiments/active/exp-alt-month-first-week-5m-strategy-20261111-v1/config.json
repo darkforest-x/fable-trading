@@ -3,7 +3,7 @@
   "protocol": "Evaluate the same frozen OKX monthly first touch in 5m. Eligibility uses data quality only; entry selection recomputes each signal in causal order. First touch at an outer rail, subsequent closes must be strictly inside or outside for the corresponding rule. Buy lower/sell upper for reversals, opposite for continuation. Enter at the next open. Per candidate disallow entries whose entire planned holding period cannot fit before NY month-end. No candle after a signal is used as an entry condition.",
   "start_utc": "2022-02-01T00:00:00Z",
   "split_utc": "2025-01-01T00:00:00Z",
-  "end_exclusive_utc": "2026-11-01T05:00:00Z",
+  "end_exclusive_utc": "2026-11-01T04:00:00Z",
   "entry_rules": [
     "touch_close",
     "same_bar",
