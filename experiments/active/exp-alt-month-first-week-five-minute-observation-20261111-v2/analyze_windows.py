@@ -593,13 +593,18 @@ def compare_bar_maps(left: dict[int, dict[str, Any]], right: dict[int, dict[str,
                      rel_tol: Decimal, abs_tol: Decimal) -> dict[str, Any]:
     common = sorted(set(left) & set(right))
     exact = within = mismatch = 0
+    field_mismatches = Counter()
+    max_abs_difference = {key: Decimal(0) for key in OHLC}
     for ts in common:
         exact_bar, within_bar = True, True
         for key in OHLC:
             a, b = decimal(left[ts][key]), decimal(right[ts][key])
-            e, w, _ = decimal_match(a, b, rel_tol, abs_tol)
+            e, w, difference = decimal_match(a, b, rel_tol, abs_tol)
             exact_bar &= e
             within_bar &= w
+            if not w:
+                field_mismatches[key] += 1
+            max_abs_difference[key] = max(max_abs_difference[key], difference)
         exact += exact_bar
         within += (not exact_bar and within_bar)
         mismatch += not within_bar
@@ -608,6 +613,8 @@ def compare_bar_maps(left: dict[int, dict[str, Any]], right: dict[int, dict[str,
         "exact_ohlc_bars": exact,
         "within_tolerance_ohlc_bars": within,
         "mismatched_ohlc_bars": mismatch,
+        "mismatched_fields": dict(field_mismatches),
+        "max_abs_difference": {key: str(value) for key, value in max_abs_difference.items()},
     }
 
 
@@ -813,7 +820,9 @@ def enrich_event(event: dict[str, str], h1: dict[str, Any], fetch: dict[str, str
     archive_prior_status = str(archive_data.get("prior_5m_status", "unknown")) if archive_data else "missing_archive_window"
     archive_class = classify_path(event, archive_bars, h1_bar, rel_tol, abs_tol, as_of_ms) if archive_data else {}
     comparison = compare_bar_maps(bars, archive_bars, rel_tol, abs_tol) if archive_data else {
-        "common_bars": 0, "exact_ohlc_bars": 0, "within_tolerance_ohlc_bars": 0, "mismatched_ohlc_bars": 0,
+        "common_bars": 0, "exact_ohlc_bars": 0, "within_tolerance_ohlc_bars": 0,
+        "mismatched_ohlc_bars": 0, "mismatched_fields": {},
+        "max_abs_difference": {key: "" for key in OHLC},
     }
     v1_fields = compare_v1(event, observed, v1, rel_tol, abs_tol)
 
@@ -875,6 +884,11 @@ def enrich_event(event: dict[str, str], h1: dict[str, Any], fetch: dict[str, str
         "archive_native_exact_ohlc_bars": comparison["exact_ohlc_bars"],
         "archive_native_within_tolerance_ohlc_bars": comparison["within_tolerance_ohlc_bars"],
         "archive_native_mismatched_ohlc_bars": comparison["mismatched_ohlc_bars"],
+        "archive_native_open_mismatched_bars": comparison["mismatched_fields"].get("open", 0),
+        "archive_native_high_mismatched_bars": comparison["mismatched_fields"].get("high", 0),
+        "archive_native_low_mismatched_bars": comparison["mismatched_fields"].get("low", 0),
+        "archive_native_close_mismatched_bars": comparison["mismatched_fields"].get("close", 0),
+        **{f"archive_native_max_abs_diff_{key}": value for key, value in comparison["max_abs_difference"].items()},
         "archive_first_touch_5m_utc": archive_class.get("first_touch_5m_utc", ""),
         "archive_first_touch_5m_index_in_hour": archive_class.get("first_touch_5m_index_in_hour", ""),
         "archive_h1_5m_ohlc_match_status": archive_class.get("h1_5m_ohlc_match_status", ""),
@@ -892,6 +906,8 @@ def enrich_event(event: dict[str, str], h1: dict[str, Any], fetch: dict[str, str
         "archive_mae_from_next_open_pct": archive_class.get("mae_from_next_open_pct", ""),
         "archive_one_hour_end_close_inward": archive_class.get("one_hour_end_close_inward", ""),
         "archive_native_root_match": "not_comparable",
+        "archive_native_root_time_match": "not_comparable",
+        "archive_native_root_ohlc_match": "not_comparable",
         "archive_native_category_match": "not_comparable",
         **v1_fields,
     }
@@ -924,10 +940,22 @@ def enrich_event(event: dict[str, str], h1: dict[str, Any], fetch: dict[str, str
         "primary_one_hour_end_close": selected.get("one_hour_end_close", ""),
     })
     if observed.get("first_touch_5m_utc") and archive_class.get("first_touch_5m_utc"):
-        output["archive_native_root_match"] = str(
+        time_match = (
             parse_utc(observed["first_touch_5m_utc"]) == parse_utc(archive_class["first_touch_5m_utc"])
             and observed.get("first_touch_5m_index_in_hour") == archive_class.get("first_touch_5m_index_in_hour")
-        ).lower()
+        )
+        output["archive_native_root_time_match"] = str(time_match).lower()
+        ohlc_match = bool(time_match)
+        if time_match:
+            for key in OHLC:
+                left = observed.get(f"first_touch_5m_{key}", "")
+                right = archive_class.get(f"first_touch_5m_{key}", "")
+                if not left or not right or not decimal_match(decimal(left), decimal(right), rel_tol, abs_tol)[1]:
+                    ohlc_match = False
+        else:
+            ohlc_match = False
+        output["archive_native_root_ohlc_match"] = str(ohlc_match).lower()
+        output["archive_native_root_match"] = str(time_match and ohlc_match).lower()
     if observed.get("candidate_category") and archive_class.get("candidate_category"):
         output["archive_native_category_match"] = str(observed["candidate_category"] == archive_class["candidate_category"]).lower()
 
@@ -1082,8 +1110,18 @@ def main() -> None:
         "exact_ohlc_candles": sum(int(row["archive_native_exact_ohlc_bars"]) for row in paths),
         "within_tolerance_ohlc_candles": sum(int(row["archive_native_within_tolerance_ohlc_bars"]) for row in paths),
         "mismatched_ohlc_candles": sum(int(row["archive_native_mismatched_ohlc_bars"]) for row in paths),
+        "mismatched_open_fields": sum(int(row["archive_native_open_mismatched_bars"]) for row in paths),
+        "mismatched_high_fields": sum(int(row["archive_native_high_mismatched_bars"]) for row in paths),
+        "mismatched_low_fields": sum(int(row["archive_native_low_mismatched_bars"]) for row in paths),
+        "mismatched_close_fields": sum(int(row["archive_native_close_mismatched_bars"]) for row in paths),
+        "max_abs_difference_by_field": {
+            key: str(max((decimal(row[f"archive_native_max_abs_diff_{key}"]) for row in paths if row[f"archive_native_max_abs_diff_{key}"]), default=Decimal(0)))
+            for key in OHLC
+        },
         "root_match_events": sum(row["archive_native_root_match"] == "true" for row in paths),
         "root_mismatch_events": sum(row["archive_native_root_match"] == "false" for row in paths),
+        "root_time_match_events": sum(row["archive_native_root_time_match"] == "true" for row in paths),
+        "root_ohlc_match_events": sum(row["archive_native_root_ohlc_match"] == "true" for row in paths),
         "category_match_events": sum(row["archive_native_category_match"] == "true" for row in paths),
         "category_mismatch_events": sum(row["archive_native_category_match"] == "false" for row in paths),
     }
