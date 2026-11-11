@@ -3,12 +3,15 @@ import argparse
 import fcntl
 import json
 import os
+import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-from prepare import BAR, CACHE, CFG, HERE, PRICE_COLS
+from prepare import BAR, CACHE, CFG, HERE, ROOT, PRICE_COLS
+
+sys.path.insert(0,str(ROOT))
 
 START = pd.Timestamp(CFG['start_utc']).value // 1_000_000
 SPLIT = pd.Timestamp(CFG['split_utc']).value // 1_000_000
@@ -91,6 +94,9 @@ def independent(data, key, cfgs, bps, mode='signal'):
 def account_result(fills, marks, period, fraction):
     from account import run_account
     left,right = PERIODS[period]
+    if period != 'full':
+        fills = fills[(fills.entry_ms>=left)&(fills.entry_ms<right)&(fills.exit_ms<right)]
+        marks = marks[marks.candidate_id.isin(fills.candidate_id)]
     r = run_account(fills,marks,period=period,period_start_ms=left,period_end_ms=right,
                     initial_cash=1000.0,per_trade_fraction=fraction,max_slots=min(10,round(1/fraction)))
     s = r['summary']
