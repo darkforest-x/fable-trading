@@ -1,5 +1,6 @@
 """Shared-account selection on early data and later evaluation of frozen monthly first-touch strategies."""
 import argparse
+import fcntl
 import json
 import os
 from pathlib import Path
@@ -73,16 +74,18 @@ def independent(data, key, cfgs, bps, mode='signal'):
     folder = CACHE/f'{key}__{mode}__{bps}bp'
     folder.mkdir(parents=True,exist_ok=True)
     fp, mp = folder/'fills.parquet', folder/'marks.parquet'
-    if fp.is_file() and mp.is_file():
-        return pd.read_parquet(fp),pd.read_parquet(mp)
-    candidates = data.clocks(rule,params,mode)
-    fills, marks = simulate_batch(data.windows,candidates,**params,slippage_bps=bps,
-                                  fee_market_bps=CFG['taker_fee_bps'],fee_limit_bps=CFG['maker_fee_bps'])
-    if not fills.candidate_id.is_unique or not set(fills.candidate_id).issubset(candidates.candidate_id):
-        raise ValueError(f'invalid fill keys for {key}')
-    replace_parquet(fills,fp)
-    replace_parquet(marks,mp)
-    return fills, marks
+    with (folder/'build.lock').open('a') as lock:
+        fcntl.flock(lock,fcntl.LOCK_EX)
+        if fp.is_file() and mp.is_file():
+            return pd.read_parquet(fp),pd.read_parquet(mp)
+        candidates = data.clocks(rule,params,mode)
+        fills, marks = simulate_batch(data.windows,candidates,**params,slippage_bps=bps,
+                                      fee_market_bps=CFG['taker_fee_bps'],fee_limit_bps=CFG['maker_fee_bps'])
+        if not fills.candidate_id.is_unique or not set(fills.candidate_id).issubset(candidates.candidate_id):
+            raise ValueError(f'invalid fill keys for {key}')
+        replace_parquet(fills,fp)
+        replace_parquet(marks,mp)
+        return fills, marks
 
 
 def account_result(fills, marks, period, fraction):
