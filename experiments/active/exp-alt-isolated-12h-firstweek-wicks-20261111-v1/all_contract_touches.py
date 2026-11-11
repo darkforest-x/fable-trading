@@ -65,6 +65,8 @@ def main():
             continue
         raw = read_raw(item.symbol)
         events, cov, status = new_market_observations(item.symbol, raw)
+        if not len(raw) and pd.notna(item.listed_ms) and item.listed_ms >= CUTOFF:
+            status = '截止时尚未挂牌'
         rows.extend(events)
         states[item.symbol] = (sum(r['status']=='valid' for r in cov),status)
     additional = pd.DataFrame(rows, columns=COLS)
@@ -75,6 +77,9 @@ def main():
     daily = daily.sort_values([COLS[2],COLS[0]])
     roster = market.set_index('symbol')
     daily.insert(1,'标的类别',daily[COLS[0]].map(roster.underlying).fillna('历史分类未注明'))
+    local_listing = pd.to_datetime(daily[COLS[0]].map(roster.listed_ms),unit='ms',utc=True)
+    touch = pd.to_datetime(daily[COLS[2]]).dt.tz_localize('Asia/Shanghai').dt.tz_convert('UTC')
+    daily.loc[touch < local_listing.dt.floor('h'), '标的类别'] = '同名合约早期历史'
     daily['已观察到反向20%'] = daily[COLS[10]].notna()
     daily['45天路径完整'] = daily[COLS[9]].notna()
     daily['观察结果'] = np.select([daily['已观察到反向20%'], daily['45天路径完整']],
