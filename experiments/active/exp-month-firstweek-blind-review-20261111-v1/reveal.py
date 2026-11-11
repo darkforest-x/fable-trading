@@ -41,6 +41,15 @@ def adjudicate(meta, first, retry):
     anchor = int(meta.first_touch_open_ms)
     first_hour = np.flatnonzero((t >= max(anchor, ready)) & (t < anchor+BAR) &
                                 (q[:, 3] <= rail) & (q[:, 2] >= rail))[0]
+    # Describe the whole episode for watch-only calls as well. Begin after the
+    # touch hour so the high/low ordering of that first candle cannot leak in.
+    follow = q[first_hour+1:first_hour+1+HORIZON]
+    expected = t[first_hour] + HOUR * np.arange(1, len(follow)+1)
+    gap = np.flatnonzero(follow[:, 0] != expected)
+    if len(gap):
+        follow = follow[:gap[0]]
+    hit = np.flatnonzero(pct(follow[:, 2 if sign == 1 else 3], rail, sign) >= 20)
+    episode_target_ms = int(follow[hit[0], 0]) if len(hit) else None
     results = []
     triggers = []
     if first == 'first_wick':
@@ -50,7 +59,8 @@ def adjudicate(meta, first, retry):
     for kind, decision in triggers or [('观察', None)]:
         info = dict(blind_id=meta.blind_id, symbol=meta.symbol, month=meta.month, side=meta.side,
                     group=meta.group, rail=rail, watch_hour_ms=int(t[first_hour]), call=kind,
-                    decision_ms=decision)
+                    decision_ms=decision, touch_followup_hours=len(follow),
+                    episode_target_hour_ms=episode_target_ms)
         if decision is None:
             results.append(info)
             continue
