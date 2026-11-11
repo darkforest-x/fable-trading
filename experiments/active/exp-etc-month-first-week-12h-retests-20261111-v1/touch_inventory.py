@@ -130,7 +130,8 @@ def build():
     events, segment_rows, touch_rows = [], [], []
     matched_h12, matched_h1, fills = set(),set(),set()
     old_status = {"account_funded":"成交","account_busy_skipped":"持仓占用，跳过",
-                  "no_reclaim":"未收回","target_already_reached":"确认前已触止盈",
+                  "no_strict_reclaim_within_3_closes":"3根内未收回","near_side_reached_while_waiting":"确认前已触止盈",
+                  "month_expired_before_next_open":"下根进场前区间已到期","account_skipped_busy":"持仓占用，跳过",
                   "no_entry":"无可用入场","wrong_side_entry":"开盘价不符"}
     for number,(a,b,side,level,seq,m) in enumerate(segments,1):
         eid = f"E{number:04d}"

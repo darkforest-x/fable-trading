@@ -56,8 +56,13 @@ def load_month(label):
     if old is None and end != END:
         raw = fetch_okx._request_archive(fetch_okx.archive_url("ETC_USDT_SWAP",bj))
         if raw is not None:
-            old = archive.read_zip(raw,"ETC",label)
-            origin = "OKX_monthly_zip"
+            try:
+                old = archive.read_zip(raw,"ETC",label)
+                origin = "OKX_monthly_zip"
+            except ValueError as exc:
+                # Some OKX archives include unconfirmed rows. Discard the archive
+                # and use only confirmed REST data for the entire month.
+                origin = f"discarded archive: {exc}"
     baseline = np.empty((0,5)) if old is None else old[(old[:,0]>=start)&(old[:,0]<end),:5]
     want = np.arange(start,end,STEP,dtype=np.int64)
     missing = np.setdiff1d(want,baseline[:,0].astype(np.int64))
