@@ -321,10 +321,11 @@ def _blind_id(event: TouchEvent) -> str:
 
 def _normalized(candle: Candle, rail: float, side: str) -> tuple[float, float, float, float]:
     sign = 1.0 if side == "long" else -1.0
-    return tuple(
+    opening, high, low, closing = (
         100.0 * sign * (value / rail - 1.0)
         for value in (candle.open, candle.high, candle.low, candle.close)
     )
+    return opening, max(high, low), min(high, low), closing
 
 
 def _write_numeric_csv(samples: list[ReviewSample], out: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
