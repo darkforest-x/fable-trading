@@ -103,15 +103,19 @@ def summarize():
     candidates[cols].to_csv(OUT/'isolated_12h.csv',index=False)
     candidates[candidates.mfe7>=20][cols].to_csv(OUT/'reversals_20pct.csv',index=False)
     candidates[candidates.month_unique & (candidates.mfe7>=20)][cols].to_csv(OUT/'single_touch_month_20pct.csv',index=False)
-    replay=candidates[candidates.month_unique & candidates.follow7].copy()
+    replay=candidates[candidates.follow7].copy()
+    replay['local_flag']=replay.isolated.map({True:'是',False:'边界未覆盖'})
+    replay['month_flag']=np.where(replay.month_unique,'是',np.where(replay.month_complete,'否','月份未走完'))
     replay['side']=replay.side.map({'lower':'下轨','upper':'上轨'})
     replay['tip']=replay.low.where(replay.side=='下轨',replay.high)
     mapping={'symbol':'币安合约','month':'区间所属月（纽约）','bar_open_Beijing':'12小时开盘（北京）',
              'bar_close_Beijing':'12小时收盘（北京）','side':'触及方向','level':'1.618轨价',
              'tip':'针尖价格','close':'收盘价','wick_pct':'触轨影线占整根百分比',
+             'local_flag':'前后各两根均未碰同轨','month_flag':'整月只有一根碰同轨','max_before_retouch':'7天内再碰轨前最大反向幅度百分比',
              'mfe7':'7天最大反向幅度百分比','peak_price':'7天最有利价格',
              'end7':'第7天收盘反向涨跌百分比','first_20pct_hour_Beijing':'首次达到20%的小时（北京）'}
-    for name,frame in [('整月单针_全部',replay),('整月单针_7天反转至少20pct',replay[replay.mfe7>=20])]:
+    for name,frame in [('单针形态_全部',replay),('单针形态_7天反转至少20pct',replay[replay.mfe7>=20]),
+                       ('整月单针_全部',replay[replay.month_unique]),('整月单针_7天反转至少20pct',replay[replay.month_unique & (replay.mfe7>=20)])]:
         frame[list(mapping)].rename(columns=mapping).to_csv(OUT/(name+'.csv'),index=False,encoding='utf-8-sig')
     coverage=read_group('coverage')
     coverage.to_csv(OUT/'coverage_months.csv',index=False)

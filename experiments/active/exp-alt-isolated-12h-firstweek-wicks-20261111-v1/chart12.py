@@ -107,10 +107,16 @@ if __name__=='__main__':
     args=p.parse_args()
     frame=pd.read_csv(OUT/'isolated_12h.csv')
     if args.all_month_unique:
-        cases=frame[frame.month_unique & (frame.mfe7>=20)]
-        with ThreadPoolExecutor(max_workers=4) as pool, zipfile.ZipFile(OUT/'12小时_整月单针_反转20pct_K线图.zip','w') as book:
-            for path in pool.map(lambda row:chart(row,archive=True),cases.itertuples()):
+        cases=frame[frame.mfe7>=20]
+        all_path=OUT/'12小时_单针形态_反转20pct_K线图.zip'
+        strict_path=OUT/'12小时_整月单针_反转20pct_K线图.zip'
+        with ThreadPoolExecutor(max_workers=4) as pool, zipfile.ZipFile(all_path.with_suffix('.tmp'),'w') as book, zipfile.ZipFile(strict_path.with_suffix('.tmp'),'w') as strict:
+            for path,unique in zip(pool.map(lambda row:chart(row,archive=True),cases.itertuples()),cases.month_unique):
                 book.write(path,arcname=path.name)
+                if unique:
+                    strict.write(path,arcname=path.name)
+        all_path.with_suffix('.tmp').replace(all_path)
+        strict_path.with_suffix('.tmp').replace(strict_path)
         print('charts',len(cases),flush=True)
     for case in args.cases:
         symbol,date=case.split('/')
