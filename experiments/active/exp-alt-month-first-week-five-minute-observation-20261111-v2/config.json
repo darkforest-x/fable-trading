@@ -1,0 +1,44 @@
+{
+  "experiment_id": "exp-alt-month-first-week-five-minute-observation-20261111-v2",
+  "description": "Descriptive validation of frozen NY-month first-week outer-rail H1 first touches against native OKX 5m event windows; observation only, no simulated entries, fills, costs, or PnL.",
+  "source_events": "experiments/active/exp-alt-month-first-week-entries-20261110-v1/events.csv.gz",
+  "source_h1_manifest": "experiments/active/exp-alt-month-first-week-entries-20261110-v1/sources.csv.gz",
+  "native_event_ledger": "data/research/month-first-week-okx-5m-first-touch-windows-v2/events.csv.gz",
+  "native_candles": "data/research/month-first-week-okx-5m-first-touch-windows-v2/candles.csv.gz",
+  "archive_windows_directory": "data/research/month-first-week-okx-archive5m-v2/windows",
+  "v1_event_paths": "experiments/active/exp-alt-month-first-week-five-minute-observation-20261111-v1/event_paths.csv",
+  "time_zone": "America/New_York",
+  "split_utc": "2025-01-01T00:00:00Z",
+  "window": {
+    "bar_minutes": 5,
+    "native_bars_requested": 240,
+    "native_start_offset_bars": -120,
+    "native_end_offset_exclusive_bars": 120,
+    "classification_bars": 6,
+    "post_reclaim_bars": 12,
+    "strict_reclaim_rule": "Lower side close > outer rail; upper side close < outer rail. Equality is not a reclaim.",
+    "same_ny_month_required": true
+  },
+  "h1_first_touch_rule": "Derive ready_utc as the close of the first complete NY Monday-Sunday week in the event month. Require every original frozen H1 bar from ready_utc through the recorded touch-hour open, inclusive, with no earlier same-side H1 touch; the touch-hour H1 bar must touch the frozen rail.",
+  "h1_5m_match_tolerance": {
+    "relative": "1e-10",
+    "absolute": "1e-12",
+    "fields": ["open", "high", "low", "close"]
+  },
+  "supplementary_sources": {
+    "archive_prior_5m_status": "Use as an independent full-prefix audit when available. earlier_touch excludes the primary classification; verified and incomplete remain separately identified.",
+    "v1_overlap": "Reuse v1 results only for overlap consistency checks; its strict pre-H1 subset is v1_pre_h1_coverage_status=complete_no_same_side_5m_touch."
+  },
+  "primary_5m_source_priority": "Use the direct native 5m event window when its complete touch hour matches original H1 OHLC. If the direct touch hour is missing, incomplete, or explicitly unconfirmed, use a complete matching OKX 1m-archive-derived 5m window as a labeled fallback. Do not use archive fallback to hide a complete direct-native OHLC mismatch; mark that source conflict excluded.",
+  "outputs": [
+    "event_paths.csv.gz",
+    "coverage_by_symbol.csv",
+    "category_summary.csv",
+    "outcome_summary.csv",
+    "same_5m_touch_times.csv",
+    "summary.json"
+  ],
+  "observation_only": true,
+  "training_eligible": false,
+  "production_eligible": false
+}
