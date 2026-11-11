@@ -1,0 +1,47 @@
+{
+  "experiment_id": "exp-alt-month-first-week-five-minute-observation-20261111-v1",
+  "description": "Descriptive five-minute OHLC path after the first hourly touch of each frozen NY-month first-week outer 1.618 rail. This is observation only, not a trading backtest.",
+  "source_events": "experiments/active/exp-alt-month-first-week-entries-20261110-v1/events.csv.gz",
+  "source_event_fields": {
+    "event_hour_utc": "touch",
+    "first_week_high": "high",
+    "first_week_low": "low",
+    "outer_rail": "level",
+    "side": "side",
+    "symbol": "symbol",
+    "ny_month": "month"
+  },
+  "local_5m_source_directory": "data/kline_fetched",
+  "local_5m_files": [
+    "okx_ADA_USDT_SWAP_5m_57699.csv",
+    "okx_ARB_USDT_SWAP_5m_57699.csv",
+    "okx_AVAX_USDT_SWAP_5m_57699.csv",
+    "okx_BNB_USDT_SWAP_5m_57699.csv",
+    "okx_DOGE_USDT_SWAP_5m_57699.csv",
+    "okx_DOT_USDT_SWAP_5m_57699.csv",
+    "okx_LINK_USDT_SWAP_5m_57699.csv",
+    "okx_LTC_USDT_SWAP_5m_57699.csv",
+    "okx_OP_USDT_SWAP_5m_57699.csv",
+    "okx_SOL_USDT_SWAP_5m_57699.csv",
+    "okx_TRX_USDT_SWAP_5m_57699.csv",
+    "okx_XRP_USDT_SWAP_5m_57699.csv"
+  ],
+  "time_zone": "America/New_York",
+  "ready_time_rule": "ready_ms is derived, not supplied by events.csv.gz: the end of the first complete NY Monday-Sunday week, at the following Monday 00:00 America/New_York. Before trusting the recorded H1 first-touch hour, inspect local 5m bars from ready_ms up to (excluding) that hour start. Any same-side rail touch in that interval is separately marked and excluded from A/B/C; incomplete history is retained only with an explicit H1-first-touch-only basis label.",
+  "observation": {
+    "bar_minutes": 5,
+    "first_touch_rule": "Within the frozen UTC touch hour, lower side first 5m low <= outer rail; upper side first 5m high >= outer rail. Require a complete 5m timestamp prefix from the hour start through the candidate touch bar, so all earlier bars in that hour are observable and did not touch first.",
+    "classification_window": "The first touch bar and its next five complete consecutive 5m bars (six bars total); all six must remain in the event's NY calendar month.",
+    "strict_reclaim_rule": "Lower side close > outer rail; upper side close < outer rail. Equality is not a reclaim.",
+    "categories": {
+      "A": "First touch bar closes strictly back inside the rail.",
+      "B": "First strict inside close occurs in one of the next five bars.",
+      "C": "No strict inside close in the six-bar window."
+    },
+    "near_boundary_followup": "For A/B, examine the next 12 complete consecutive 5m bars after the first reclaim bar, within the same NY month. Count reaching the first-week near-side boundary from beyond the 1.618 rail (lower side: high >= first_week_low; upper side: low <= first_week_high). Exclude cases where the reclaim bar itself already reached that boundary; report incomplete windows separately."
+  },
+  "costs": "Not applicable; descriptive OHLC observation, no simulated fills or PnL.",
+  "outputs": ["event_paths.csv", "coverage_by_symbol.csv", "summary.json"],
+  "training_eligible": false,
+  "production_eligible": false
+}
