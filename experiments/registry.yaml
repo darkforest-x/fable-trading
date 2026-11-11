@@ -15,6 +15,22 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-alt-month-first-week-5m-strategy-20261111-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "0236817722"
+    status: inconclusive
+    question: Which first-week 1.618 rules meet four funded account objectives at a 30 percent historical drawdown ceiling, and how do decision-time scores compare at 5m, 15m, 1h and 4h?
+    single_variable: Vary entries, exits and sizing along individual axes. Additional controlled sweeps compare confirmation clocks, pre-touch vs close score and simultaneous-touch breadth.
+    data_scope: 5,162 eligible monthly first touches across 344 OKX USDT perpetual altcoins from February 2022 through October 2026. The split is January 2025. Use actual independent VectorBT fills and a cash-sharing 1,000 USDT account.
+    result: "早段选出的高胜率、高收益、高频与收益回撤比赢家均未在后段兼顾盈利和回撤约束。两段筛选后的5m深穿收回10%仓全期993笔，1000U到1073.52U，回撤5.98%，5bp滑点期末1011.52U。15m收盘评分叠加同侧至少五币触轨在2025至2026年10月293笔、35天，1000U到1037.25U，回撤2.52%，5bp为1026.34U，收益高度集中。相同上轨5m信号延长到24h或7d，基准终值1036.80或1015.24U，加重滑点均转亏，匹配对照更好。"
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-alt-month-first-week-5m-strategy-20261111-v1/selected_account_metrics.csv
+    notes: Frozen early selection. Fee schedule is taker 5 bp/maker 2 bp, market slippage 1 bp with 5 bp stress; no funding or lot rounding. Retain matched-clock comparisons and open excursions. The additional stability filter and 15m breadth follow-up were exploratory. See stability_metrics.csv, timeframe_accounts.csv, score_breadth_accounts.csv and swing_account_metrics.csv in the experiment folder.
+
   - experiment_id: exp-alt-month-first-week-five-minute-observation-20261111-v2
     source_repo: darkforest-x/fable-trading
     source_commit: "8c34b3caba"
