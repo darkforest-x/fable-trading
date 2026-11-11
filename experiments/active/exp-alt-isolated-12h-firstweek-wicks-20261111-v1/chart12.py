@@ -69,7 +69,12 @@ def chart(row):
             d.text((xx,yylabel),labelstr,font=f,fill=color)
     half=max(2,int((x(start+12*HOUR)-x(start))*.32))
     for t,o,hp,lp,c in bars:
-        xx=x(t); color=GREEN if anchor.timestamp()*1000<=t<ready.timestamp()*1000 else GRAY
+        at, final = t, t+12*HOUR
+        display_month=stamp(int(final)).tz_convert('America/New_York').strftime('%Y-%m')
+        week_start, week_end, _=bounds(display_month)
+        first, last=week_start.timestamp()*1000, week_end.timestamp()*1000
+        week_bar=(at<=first<final) or (at>=first and final<=last)
+        xx=x(t); color=GREEN if week_bar else GRAY
         d.line((xx,y(lp),xx,y(hp)),fill=color,width=2)
         topb,bottom=sorted([y(o),y(c)])
         d.rectangle((xx-half,topb,xx+half,max(topb+2,bottom)),fill=color)
