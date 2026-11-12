@@ -12,10 +12,15 @@ from yoyo.monitor.yolo_detector import YoloDetector,RenderedWindow,parse_predict
 from yoyo.layers.l1_detection.render import render_chart
 from windows import DATA,HERE,MINUTE,cohort,frame,window_end,after_read,expiry
 
-def scan(row, tf, detector):
+def scan(row, tf, detector, extension=False):
     bars=frame(row,tf); step=tf*MINUTE; ts=bars.open_ms.to_numpy(dtype='int64')
     boundary=window_end(row)
-    indices=np.flatnonzero((ts>=row.known_ms)&(ts+step<=min(boundary+9*step,expiry(row.month)-1)))
+    grace_end=min(boundary+9*step,expiry(row.month)-1)
+    last=min(row.known_ms+24*60*MINUTE,expiry(row.month)-1) if extension else grace_end
+    indices=np.flatnonzero((ts>=row.known_ms)&(ts+step<=last))
+    if extension:
+        indices=indices[ts[indices]+step>grace_end]
+    evaluated=0
     batch=[]; proposals=[]
     def flush():
         if not batch:return
@@ -32,6 +37,11 @@ def scan(row, tf, detector):
                     same_side=p['side']==row.side,fresh=p['core_start_ms']>=row.known_ms,**p))
         batch.clear()
     for i in indices:
+        # The extension asks only when the first later box appeared. Stop on an
+        # already emitted matching box after completing its two image windows.
+        if extension and any(p['structural_pass'] and p['same_side'] and p['fresh'] for p in proposals):
+            break
+        evaluated+=1
         for length in (18,19):
             crop=slice(i-length+1,i+1)
             image,transform=render_chart(bars.iloc[crop])
@@ -39,7 +49,7 @@ def scan(row, tf, detector):
             batch.append((i,w))
             if len(batch)==8:flush()
     flush()
-    return proposals, 2*int((ts[indices]+step<=boundary).sum()),2*len(indices)
+    return proposals, 2*int((ts[indices]+step<=boundary).sum()),2*evaluated
 
 def main():
     LOGGER.setLevel(logging.ERROR)
