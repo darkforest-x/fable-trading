@@ -167,8 +167,14 @@ def photos(frame):
     joined = ref.merge(decisions,how="left",on="pair_id",validate="one_to_one")
     joined = joined.merge(frame[frame['sample']=="signal"][["pair_id","net_pct","exit_reason","entry_ms","mfe_pct","mae_pct"]],
                           how="left",on="pair_id",validate="one_to_one")
+    joined["strategy_action"] = np.select(
+        [joined.exit_reason.notna(), joined.status.eq("signal"),
+         joined.status.eq("stalled"), joined.status.eq("no_12h_reclaim")],
+        ["首小时策略成交", "已发出信号但未进场", "首小时未启动，仅作对照", "首碰12H未收回"],
+        default="币安无对应首碰")
+    joined = joined.rename(columns={"execution":"execution_in_respective_group"})
     joined.to_csv(HERE/"photo_coverage.csv",index=False)
-    print(joined[["symbol","h4_status","status","execution","net_pct"]].to_string(index=False))
+    print(joined[["symbol","h4_status","strategy_action","net_pct"]].to_string(index=False))
 
 
 if __name__ == "__main__":
