@@ -15,6 +15,24 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-month-firstweek-h1-wick-confirmation-20261112-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d512966ebc"
+    status: inconclusive
+    question: Which observations distinguish long-wick hourly reclaims of the monthly first-week extension, at entry and while still in the original trade?
+    single_variable: Each observable compared separately on the existing fixed 5% stop and 20% target ledger. No rule combinations or threshold search.
+    result: >-
+      7414 setups, 7386 settled. Of 7002 settled trades observable at the first hourly close, the 1598 closing beyond the wick candle's favorable extreme won 23.40%, vs 18.19% still inside and 13.27% on/outside. From that confirmation close to the frozen exit, the first group's mean directional price move was -0.92%. It retained 362 of 1246 eventual targets among the eligible trades.
+      Aligned/opposed completed 12H EMA20/50 won 17.74%/17.79%. At least one prior hourly ATR of wick versus shorter won 17.73%/17.85%. Isolated versus another same-side daily-first touch in the same H1 averaged -0.325%/-0.855% net per trade. Of 2239 settled trades reaching 10% gross in position, 1253 hit target, 942 hit stop and 44 timed out.
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-month-firstweek-h1-wick-confirmation-20261112-v1/counts.csv
+    notes: >-
+      Descriptive readings of archived Binance contract OHLC. Daily first touch per Beijing day within the original 12h grouping. Favorable price movement and entry-relative win rate at landmarks do not measure new entries at that hour. Splits omit positions crossing 2025-01-01. No extra slippage or funding. Per-reading data in the confirm_1h/confirmation_replay directory of the original strategy ledger. At H1/H2 keep only live rails and positions still open at the close. Simultaneous touch counts refer to all catalogued first touches, including failed reclaims.
+
   - experiment_id: exp-month-firstweek-h1-launch-20261112-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "afba2addcf"
