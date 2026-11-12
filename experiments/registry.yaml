@@ -15,6 +15,30 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-month-firstweek-owner-yolo-20261113-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 422f260622
+    status: inconclusive
+    question: Does the frozen Grade-A YOLO recognize the six-MA launch on 5m and 15m after the ruler-adjacent monthly 1.618
+      touch, and how much movement remains at detection?
+    single_variable: Same pretrained 15m full40 model and original inference settings on 5m and 15m. Independent blinded four-bar
+      visual reference during hours 0-4. First causal model appearance tracked to 24h or rail expiry.
+    result: '15 owner screenshots, 14 mapped to Binance. One episode per ruler and one ordinary same-month/side control each.
+      First 4h / first 24h detections by timeframe (5m, 15m): owner 1/11, 0/7; control 2/7, 0/4. Different assets with either
+      timeframe in 24h: 12/14 owner and 8/14 control. Only one clear primary owner reference in four hours (MVLL 5m), matched
+      at 21:40 Beijing, five minutes after the visual breakout. Direction had already moved 6.12 percent and after the read
+      24h directional extremes were +13.20/-2.04 percent. The 15m cloud was still opposite.'
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-month-firstweek-owner-yolo-20261113-v1/paired_primary.csv
+    notes: Daily first touch, latest valid rail episode before the estimated screenshot ruler; NEAR and ZK nearby alternative
+      dates recorded. 19 original and 5 supplemental matched pairs overlap across owner screenshots and are not 24 independent
+      selections. XAG supplemental control is a crypto contract. Evaluation paths start at the true model read next open. Historical
+      hand selections and some dates predate weights freeze. No trade PnL, parameter tuning or visual accuracy claim.
+
   - experiment_id: exp-month-firstweek-yolo-confirm-20261113-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 24af5f0dd4
