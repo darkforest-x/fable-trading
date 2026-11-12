@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -61,8 +62,10 @@ def _read_month_zip(path: Path, month: str, start_ms: int, end_ms: int) -> np.nd
     return _validate(raw[:, :5], str(path), start_ms, end_ms)
 
 
-def _read_series(path: Path, start_ms: int, end_ms: int) -> np.ndarray:
-    """Read just this month from a registered, headered local 5m series."""
+@lru_cache(maxsize=4)
+def _read_series_full(path_text: str) -> np.ndarray:
+    """Cache a registered series once so missing months do not rescan it."""
+    path = Path(path_text)
     try:
         columns = list(pd.read_csv(path, nrows=0, compression="infer").columns)
     except (OSError, ValueError, pd.errors.ParserError) as exc:
@@ -85,32 +88,52 @@ def _read_series(path: Path, start_ms: int, end_ms: int) -> np.ndarray:
             for frame in reader:
                 if frame.empty:
                     continue
-                frame = frame.loc[(frame[time_col] >= start_ms) & (frame[time_col] < end_ms)]
-                if len(frame):
-                    chunks.append(frame[wanted].to_numpy(dtype=np.float64))
+                chunks.append(frame[wanted].to_numpy(dtype=np.float64))
     except (OSError, ValueError, KeyError, pd.errors.ParserError, EOFError) as exc:
         raise ValueError(f"cannot read local Binance bars: {path}") from exc
     if not chunks:
         return EMPTY.copy()
-    rows = np.concatenate(chunks)
-    return _validate(rows[:, [0, 1, 2, 3, 4]], str(path), start_ms, end_ms)
+    return np.concatenate(chunks)
 
 
-def _series_paths(symbol: str) -> list[Path]:
+def _read_series(path: Path, start_ms: int, end_ms: int) -> np.ndarray:
+    """Read one month from the cached, headered registered local 5m series."""
+    rows = _read_series_full(str(path))
+    if not len(rows):
+        return EMPTY.copy()
+    times = rows[:, 0]
+    selected = rows[(times >= start_ms) & (times < end_ms)]
+    return _validate(selected, str(path), start_ms, end_ms)
+
+
+def _series_paths(symbol: str, month: str, start_ms: int, end_ms: int) -> list[Path]:
     market = ROOT / "data/crypto/market"
-    candidates = [
-        market / "kline_binance_um5m_forward_20260922/series" / f"{symbol}.csv",
-        market / "research-spike_v128_recent_20260923/series" / f"{symbol}.csv.gz",
-        market / "binance_um5m_20260923_20261031/series" / f"{symbol}.csv.gz",
-        ROOT / "experiments/active/exp-monday-limit-live-october-20261101-v1/symbols" / symbol / "new_bars.csv.gz",
-        market / "breadth_rebound_targets_20261107" / f"{symbol}-november-through-04.csv.gz",
-    ]
-    # This six-year merged series is a last resort; exact monthly ZIPs are faster.
-    preholdout = market / "kline_preholdout_binance_um5m/series"
-    candidates.extend(sorted(preholdout.glob(f"binance_um_{symbol}_5m_*.csv")))
-    fallback = market / "binance_um5m_rest_fallback/series" / symbol
-    if fallback.is_dir():
-        candidates.extend(sorted(fallback.glob("*.csv")))
+    candidates: list[Path] = []
+    if month < "2026-05":
+        # Historical continuation is restricted to the frozen pre-archive.
+        preholdout = market / "kline_preholdout_binance_um5m/series"
+        candidates.extend(sorted(preholdout.glob(f"binance_um_{symbol}_5m_*.csv")))
+    elif month <= "2026-09":
+        # Forward/recent data cover May through Sep 22; Sep's tail is added below.
+        candidates.extend([
+            market / "kline_binance_um5m_forward_20260922/series" / f"{symbol}.csv",
+            market / "research-spike_v128_recent_20260923/series" / f"{symbol}.csv.gz",
+        ])
+    if "2026-09" <= month <= "2026-10":
+        candidates.extend([
+            market / "binance_um5m_20260923_20261031/series" / f"{symbol}.csv.gz",
+            ROOT / "experiments/active/exp-monday-limit-live-october-20261101-v1/symbols" / symbol / "new_bars.csv.gz",
+        ])
+    if month == "2026-11":
+        candidates.append(market / "breadth_rebound_targets_20261107" / f"{symbol}-november-through-04.csv.gz")
+        # REST fallback is fragmented by requested time. Ignore other months
+        # before opening any file, and incomplete O/H/C-only files are excluded.
+        fallback = market / "binance_um5m_rest_fallback/series" / symbol
+        if fallback.is_dir():
+            for path in sorted(fallback.glob("*.csv")):
+                match = re.fullmatch(r"(\d+)_(\d+)\.csv", path.name)
+                if match and int(match.group(1)) < end_ms and int(match.group(2)) >= start_ms:
+                    candidates.append(path)
     return [path for path in candidates if path.is_file()]
 
 
@@ -118,6 +141,10 @@ def _merge(rows_by_source: list[tuple[str, np.ndarray]]) -> np.ndarray:
     available = [(label, rows) for label, rows in rows_by_source if len(rows)]
     if not available:
         return EMPTY.copy()
+    if len(available) == 1:
+        only = available[0][1]
+        if np.all(np.diff(only[:, 0]) > 0):
+            return only
     rows = np.concatenate([data for _, data in available], axis=0)
     rows = rows[np.argsort(rows[:, 0], kind="stable")]
     times, first, counts = np.unique(rows[:, 0], return_index=True, return_counts=True)
@@ -141,7 +168,7 @@ def load_bars(symbol: str, month: str) -> np.ndarray:
     """
     symbol = str(symbol).upper()
     ticker = symbol if symbol.endswith("USDT") else f"{symbol}USDT"
-    if not re.fullmatch(r"[A-Z0-9]+USDT", ticker):
+    if not ticker.endswith("USDT") or not ticker[:-4].isalnum():
         raise ValueError(f"invalid Binance USDT symbol: {symbol!r}")
     start_ms, end_ms = _month_bounds(month)
 
@@ -156,5 +183,5 @@ def load_bars(symbol: str, month: str) -> np.ndarray:
                   for path in zip_paths]
     else:
         loaded = [(str(path), _read_series(path, start_ms, end_ms))
-                  for path in _series_paths(ticker)]
+                  for path in _series_paths(ticker, month, start_ms, end_ms)]
     return _merge(loaded)
