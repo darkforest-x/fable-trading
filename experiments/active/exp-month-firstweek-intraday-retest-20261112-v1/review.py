@@ -117,10 +117,14 @@ def run_symbol(item):
         first = pd.Timestamp(r.touch_ms,unit='ms').to_period('M')
         last = pd.Timestamp(end-1,unit='ms').to_period('M')
         parts = []
-        for month in pd.period_range(first,last,freq='M'):
-            a = cache(str(month))
-            lo,hi = a[:,0].searchsorted([r.touch_ms,end])
-            parts.append(a[lo:hi])
+        try:
+            for month in pd.period_range(first,last,freq='M'):
+                a = cache(str(month))
+                lo,hi = a[:,0].searchsorted([r.touch_ms,end])
+                parts.append(a[lo:hi])
+        except (ValueError, OSError) as exc:
+            rows.append(dict(**common,coverage='invalid_5m_source',error=str(exc)))
+            continue
         tape = np.concatenate(parts)
         if (len(tape)!=(end-r.touch_ms)//FIVE or
                 not np.array_equal(tape[:,0],np.arange(r.touch_ms,end,FIVE))):
@@ -152,7 +156,7 @@ def main():
     retained = pd.DataFrame()
     if args.retry_missing:
         existing=pd.read_csv(path,float_precision='round_trip')
-        missing=existing.coverage.eq('incomplete_5m')
+        missing=existing.coverage.isin(['incomplete_5m','invalid_5m_source'])
         retained=existing[~missing]
         frame=frame[frame.id.isin(existing.loc[missing,'id'])]
     rows = []
