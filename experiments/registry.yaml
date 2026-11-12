@@ -15,6 +15,23 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-month-firstweek-intraday-retest-20261112-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a763eba78f"
+    status: inconclusive
+    question: After a closed 1H wick sets the monthly reversal direction, how early do 5m and 15m breakout-retest confirmations arrive and how much movement remains?
+    single_variable: Compare the same causal first-pivot breakout and first retest rule on 5m and 15m bars built from the same Binance tape. No parameter search or synthetic trades.
+    result: >-
+      Of 7777 daily-first directional alerts, 7761 on 818 contracts had comparable complete histories. The 5m rule confirmed 3167 at a median 110 minutes; the 15m rule confirmed 2870 at 255 minutes. When both confirmed (1523), the median paired 5m lead was 30 minutes. From next open the average 24h directional price change was -0.074% and -0.309% respectively. On 1815/1452 held-versus-failed control pairs, held minus failed was +0.169/-0.014 pp and both calendar-month bootstrap intervals included zero. Of 162 alerts that moved 20% in the first 24 hours from H1 close, 75/62 confirmed before or at the open of the first 5m candle reaching the threshold.
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-month-firstweek-intraday-retest-20261112-v1/outcomes.csv
+    notes: >-
+      Watch for 24 hours or until NY range expiry, whichever occurs first. Only completed post-signal bars can establish the local three-bar pivot. Unbroken levels, absent pullbacks and failed first attempts are counted. Fixed-horizon changes and excursions are gross OHLC observations, not funded returns. 6 hourly OHLC mismatches, 5 expired rails at direction close, 3 terminal windows and 2 insufficient 5m windows were excluded. UTC tapes and per-event ledgers under data/research/alt-isolated-12h-wicks-20261111/expanded12/all_replay_v1/intraday_retest.
+
   - experiment_id: exp-month-firstweek-h1-wick-confirmation-20261112-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "d512966ebc"

@@ -1,19 +1,22 @@
 """Backfill missing 5m candles for incomplete intraday retest events.
 
-Only ``coverage == incomplete_5m`` rows in ``OUT/events.csv.gz`` drive archive
-requests.  The cache keeps full Binance monthly archives when available; when a
-monthly archive is unavailable, it stitches only required UTC daily archives
-and records the exact candle timestamps in a sidecar receipt.
+Only ``incomplete_5m`` and ``invalid_5m_source`` rows in ``OUT/events.csv.gz``
+drive archive requests. The cache keeps registered Binance monthly archives
+when available; otherwise it uses a monthly archive or stitches required UTC
+daily archives, with exact timestamps in a sidecar receipt for partial months.
 """
 
 import argparse
 import csv
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import datetime, timezone
 import gzip
 import io
 import json
 from pathlib import Path
 import re
+import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from urllib.parse import quote
 import urllib.error
 import urllib.request
 import zipfile
@@ -26,6 +29,12 @@ BASE = ROOT / "data/research/alt-isolated-12h-wicks-20261111/expanded12/all_repl
 OUT = BASE / "intraday_retest"
 DEFAULT_EVENTS = OUT / "events.csv.gz"
 DEFAULT_CACHE = OUT / "binance_monthly"
+REGISTERED_MONTH_ZIP_ROOTS = (
+    ROOT / "data/crypto/market/kline_preholdout_binance_um5m/downloads",
+    ROOT / "data/crypto/market/kline_binance_um5m_forward_20260922/downloads",
+    ROOT / "data/crypto/market/research-spike_v128_recent_20260923/downloads",
+    ROOT / "data/crypto/market/breadth_rebound_targets_20261107/downloads",
+)
 
 FIVE_MIN_MS = 5 * 60_000
 HOUR_MS = 60 * 60_000
@@ -114,10 +123,10 @@ def read_required_events(events_path):
         if not reader.fieldnames or not {"coverage", "touch_ms", "symbol"}.issubset(reader.fieldnames):
             raise ValueError("events.csv.gz must include symbol, touch_ms, and coverage columns")
         for line_number, row in enumerate(reader, start=2):
-            if (row.get("coverage") or "").strip() != "incomplete_5m":
+            if (row.get("coverage") or "").strip() not in {"incomplete_5m", "invalid_5m_source"}:
                 continue
             symbol = (row.get("symbol") or "").strip().upper()
-            if not re.fullmatch(r"[A-Z0-9]+", symbol):
+            if not symbol or symbol in {".", ".."} or "/" in symbol or "\\" in symbol or "\x00" in symbol:
                 raise ValueError(f"invalid symbol at events row {line_number}: {symbol!r}")
             touch_ms = parse_ms(row.get("touch_ms"))
             event_month = (row.get("month") or "").strip()
@@ -134,16 +143,18 @@ def read_required_events(events_path):
 
 
 def monthly_url(symbol, month):
+    encoded_symbol = quote(symbol, safe="")
     return (
-        f"{BINANCE_BASE}/monthly/klines/{symbol}/5m/"
-        f"{symbol}-5m-{month}.zip"
+        f"{BINANCE_BASE}/monthly/klines/{encoded_symbol}/5m/"
+        f"{encoded_symbol}-5m-{month}.zip"
     )
 
 
 def daily_url(symbol, day):
+    encoded_symbol = quote(symbol, safe="")
     return (
-        f"{BINANCE_BASE}/daily/klines/{symbol}/5m/"
-        f"{symbol}-5m-{day}.zip"
+        f"{BINANCE_BASE}/daily/klines/{encoded_symbol}/5m/"
+        f"{encoded_symbol}-5m-{day}.zip"
     )
 
 
@@ -249,6 +260,17 @@ def add_month_rows(target, incoming, month):
             target[open_ms] = row
 
 
+def add_day_rows(target, incoming, month, day):
+    start = month_start_ms(month)
+    expected = expected_month_open_times(month)
+    end = max(expected) + FIVE_MIN_MS if expected else start
+    day_start = int(datetime.strptime(day, "%Y-%m-%d").replace(tzinfo=UTC).timestamp() * 1000)
+    day_end = day_start + DAY_MS
+    for open_ms, row in incoming.items():
+        if start <= open_ms < end and day_start <= open_ms < day_end:
+            target[open_ms] = row
+
+
 def read_previous_receipt(path):
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -274,16 +296,34 @@ def get_local_data(cache_root, symbol, month, month_path):
     cached_daily_dates = set()
     daily_pattern = f"{symbol}-5m-{month}-??.zip"
     for daily_path in sorted(symbol_dir.glob(daily_pattern)) if symbol_dir.is_dir() else []:
-        day = daily_path.name.removesuffix(".zip").rsplit("-", 1)[-1]
+        prefix = f"{symbol}-5m-"
+        day = daily_path.name.removesuffix(".zip")[len(prefix):]
         try:
             daily_header, daily_rows = read_zip_path(daily_path)
             if not rows:
                 header = daily_header
-            add_month_rows(rows, daily_rows, month)
+            add_day_rows(rows, daily_rows, month, day)
             cached_daily_dates.add(day)
         except (OSError, ValueError, zipfile.BadZipFile) as error:
             local_errors.append({"path": str(daily_path), "error": f"{type(error).__name__}: {error}"})
     return rows, header, loaded_month, cached_daily_dates, local_errors
+
+
+def get_registered_month_data(symbol, month, target_month_path):
+    rows = {}
+    paths = []
+    errors = []
+    for root in REGISTERED_MONTH_ZIP_ROOTS:
+        path = root / symbol / f"{symbol}-5m-{month}.zip"
+        if path.resolve(strict=False) == target_month_path.resolve(strict=False) or not path.is_file():
+            continue
+        try:
+            _, month_rows = read_zip_path(path)
+            add_month_rows(rows, month_rows, month)
+            paths.append(path)
+        except (OSError, ValueError, zipfile.BadZipFile) as error:
+            errors.append({"path": str(path), "error": f"{type(error).__name__}: {error}"})
+    return rows, paths, errors
 
 
 def day_needed_times(needed_times):
@@ -305,27 +345,36 @@ def result_is_full_month(rows, month):
 def process_month(cache_root, symbol, month, needed_times):
     month_path = month_cache_path(cache_root, symbol, month)
     previous_receipt = read_previous_receipt(receipt_path(month_path))
-    rows, header, loaded_month, cached_daily_dates, local_errors = get_local_data(
+    output_rows, header, loaded_month, cached_daily_dates, local_errors = get_local_data(
         cache_root, symbol, month, month_path
     )
+    registered_rows, registered_paths, registered_errors = get_registered_month_data(
+        symbol, month, month_path
+    )
+    local_errors.extend(registered_errors)
     attempts = []
     successful_urls = []
     downloaded_month = False
+    downloaded_month_complete = False
     downloaded_days = []
 
+    rows = dict(registered_rows)
+    rows.update(output_rows)
     missing = set(needed_times) - set(rows)
     # A local month ZIP or previously stitched daily data already covers these
     # exact event bars; avoid any remote request for this symbol-month.
-    if missing and not loaded_month and not cached_daily_dates:
+    if missing and not loaded_month and not registered_paths and not cached_daily_dates:
         url = monthly_url(symbol, month)
         blob, result = fetch_zip(url)
         attempts.append({"kind": "monthly", "scope": month, **result})
         if blob is not None:
             try:
                 downloaded_header, monthly_rows = parse_zip(blob)
-                rows.update(monthly_rows)
+                add_month_rows(output_rows, monthly_rows, month)
+                rows.update(output_rows)
                 header = downloaded_header
                 downloaded_month = True
+                downloaded_month_complete = result_is_full_month(monthly_rows, month)
                 successful_urls.append(url)
             except (ValueError, zipfile.BadZipFile) as error:
                 attempts[-1]["error"] = f"invalid ZIP content: {type(error).__name__}: {error}"
@@ -334,7 +383,6 @@ def process_month(cache_root, symbol, month, needed_times):
         missing = set(needed_times) - set(rows)
 
     needed_by_day = day_needed_times(needed_times)
-    day_cache_dir = cache_root / symbol
     for day in sorted(needed_by_day):
         still_missing = needed_by_day[day] - set(rows)
         if not still_missing:
@@ -347,9 +395,10 @@ def process_month(cache_root, symbol, month, needed_times):
         if path.is_file():
             try:
                 daily_header, daily_rows = read_zip_path(path)
-                if not rows:
+                if not output_rows:
                     header = daily_header
-                add_month_rows(rows, daily_rows, month)
+                add_day_rows(output_rows, daily_rows, month, day)
+                rows.update(output_rows)
                 cached_daily_dates.add(day)
                 continue
             except (OSError, ValueError, zipfile.BadZipFile) as error:
@@ -363,9 +412,23 @@ def process_month(cache_root, symbol, month, needed_times):
         try:
             daily_header, daily_rows = parse_zip(blob)
             cache_daily_blob(path, blob)
-            if not rows:
+            if not output_rows:
                 header = daily_header
-            add_month_rows(rows, daily_rows, month)
+            day_rows = {}
+            add_day_rows(day_rows, daily_rows, month, day)
+            for open_ms, bar in day_rows.items():
+                old = registered_rows.get(open_ms)
+                if old is not None:
+                    # bars.py reads both registered roots and this cache. Avoid
+                    # duplicating a registered bar; record conflicting OHLC.
+                    if old[1:5] != bar[1:5]:
+                        local_errors.append({
+                            "path": str(path),
+                            "error": f"registered archive OHLC conflict at {open_ms}",
+                        })
+                    continue
+                output_rows.setdefault(open_ms, bar)
+            rows.update(output_rows)
             downloaded_days.append(day)
             successful_urls.append(url)
         except (OSError, ValueError, zipfile.BadZipFile) as error:
@@ -373,14 +436,19 @@ def process_month(cache_root, symbol, month, needed_times):
             attempts[-1]["http_status"] = 200
             attempts[-1].pop("bytes", None)
 
+    rows = dict(registered_rows)
+    rows.update(output_rows)
     missing = sorted(set(needed_times) - set(rows))
-    month_complete = result_is_full_month(rows, month)
-    month_data_url = monthly_url(symbol, month)
+    month_complete = result_is_full_month(output_rows, month)
     source_urls = list(previous_receipt.get("source_urls", []))
     for url in successful_urls:
         if url not in source_urls:
             source_urls.append(url)
-    if downloaded_month and downloaded_days:
+    if registered_paths and (downloaded_days or cached_daily_dates):
+        source_kind = "registered_month_plus_daily"
+    elif registered_paths:
+        source_kind = "registered_month_zip"
+    elif downloaded_month and downloaded_days:
         source_kind = "monthly_plus_daily"
     elif downloaded_month:
         source_kind = "binance_monthly"
@@ -395,12 +463,12 @@ def process_month(cache_root, symbol, month, needed_times):
 
     # Keep an exact official monthly ZIP when it contains the entire UTC month.
     # Otherwise write only actual rows, and mark the cache partial in its receipt.
-    if downloaded_month and month_complete:
+    if downloaded_month and downloaded_month_complete:
         atomic_write_bytes(month_path, blob)
-    elif rows and (downloaded_month or downloaded_days or not month_path.is_file()):
-        make_month_zip(month_path, symbol, month, header, rows)
+    elif output_rows and (downloaded_month or downloaded_days or not month_path.is_file()):
+        make_month_zip(month_path, symbol, month, header, output_rows)
 
-    final_rows = rows
+    final_rows = output_rows
     expected = expected_month_open_times(month)
     covered_days = sorted({utc_day(open_ms) for open_ms in final_rows})
     now = datetime.now(UTC).isoformat(timespec="seconds")
@@ -412,6 +480,7 @@ def process_month(cache_root, symbol, month, needed_times):
         "cache_zip": str(month_path),
         "source_kind": source_kind,
         "month_complete": month_complete,
+        "available_month_complete": result_is_full_month(rows, month),
         "expected_month_rows": len(expected),
         "actual_rows": len(final_rows),
         "covered_days": covered_days,
@@ -421,15 +490,17 @@ def process_month(cache_root, symbol, month, needed_times):
         "required_rows_present": len(needed_times) - len(missing),
         "unavailable_required_open_ms": missing,
         "source_urls": source_urls,
+        "local_month_archives": [str(path) for path in registered_paths],
         "attempts": attempts,
         "local_errors": local_errors,
         "updated_at_utc": now,
     }
-    if not month_complete:
+    if not month_complete and final_rows:
         # The zip contains observed bars only. This explicit list prevents a
         # daily-stitch cache from being mistaken for a complete month later.
         receipt["actual_open_ms"] = sorted(final_rows)
-    atomic_write_json(receipt_path(month_path), receipt)
+    if month_path.is_file() or final_rows:
+        atomic_write_json(receipt_path(month_path), receipt)
 
     unavailable = []
     required_by_day = day_needed_times(needed_times)
@@ -459,7 +530,7 @@ def process_month(cache_root, symbol, month, needed_times):
         "required_rows": len(needed_times),
         "rows_present": len(needed_times) - len(missing),
         "unavailable_rows": len(missing),
-        "month_complete": month_complete,
+        "month_complete": result_is_full_month(rows, month),
         "source_kind": source_kind,
         "unavailable_attempts": unavailable,
     }
@@ -495,6 +566,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--events", type=Path, default=DEFAULT_EVENTS)
     parser.add_argument("--cache-root", type=Path, default=DEFAULT_CACHE)
+    parser.add_argument("--workers", type=int, default=10)
     args = parser.parse_args(argv)
     if not args.events.is_file():
         raise SystemExit(f"events file not found; run the main program first: {args.events}")
@@ -504,9 +576,24 @@ def main(argv=None):
         print(json.dumps({"incomplete_events": event_count, "symbol_months": 0}, sort_keys=True))
         return
 
+    work = sorted(required.items())
+    worker_count = max(1, min(12, args.workers))
     results = []
-    for (symbol, month), timestamps in sorted(required.items()):
-        results.append(process_month(args.cache_root, symbol, month, timestamps))
+    with ThreadPoolExecutor(max_workers=worker_count) as pool:
+        futures = {
+            pool.submit(process_month, args.cache_root, symbol, month, timestamps): (symbol, month)
+            for (symbol, month), timestamps in work
+        }
+        for completed, future in enumerate(as_completed(futures), start=1):
+            result = future.result()
+            results.append(result)
+            print(
+                f"[{completed}/{len(futures)}] {result['symbol']} {result['utc_month']} "
+                f"{result['rows_present']}/{result['required_rows']} 5m rows; "
+                f"source={result['source_kind']}",
+                file=sys.stderr,
+                flush=True,
+            )
     update_unavailable_ledger(args.cache_root, results)
     summary = {
         "incomplete_events": event_count,
