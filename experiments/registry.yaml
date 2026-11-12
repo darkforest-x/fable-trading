@@ -15,6 +15,58 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-month-firstweek-yolo-confirm-20261113-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 24af5f0dd4
+    status: inconclusive
+    question: Can the earlier Grade-A YOLO detect newly formed same-side six-MA launches after the monthly H1 wick alert on
+      15m and 5m?
+    single_variable: Use the frozen 15m Grade-A full40 W18/W19 structural detector and same four-hour window; compare native
+      15m with 5m transfer. Twelve distinct post-training Binance instruments/days sampled without outcomes (six per side).
+      All closes replayed; no numerical shape or cloud prefilter.
+    result: 1536 native-renderer images (1152 5m,384 15m). Both periods found one eligible signal-day of twelve, the same MARSCOIN
+      2026-10-28 long. First model read 09:40/10:15 Beijing, +100/+135 minutes after H1. Both clouds then aligned. First-read
+      24h favorable excursion +3.07/+1.04 percent, adverse -5.10/-9.92 percent. Small feasibility sample, no accuracy or trading
+      claim.
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-month-firstweek-yolo-confirm-20261113-v1/pilot.csv
+    notes: Frozen close-MA Grade-A 1280 full40 native 15m. Original model/render/parser conf .25 IoU .70, core length 4/5 and
+      2-9 observed post bars. Require core start at/after hourly close. Read time always end of observed image, not the historical
+      box. Duplicate windows/boxes do not count as trades. This is not the retired V12.8 monitor gate. Native 15m W18/W19 input
+      pixels verified against the original prepare_windows on MRVL actual OHLCV. Source weights weak-labeled; no fresh gold
+      precision measurement.
+
+  - experiment_id: exp-month-firstweek-cloud-dense-20261112-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 24af5f0dd4
+    status: inconclusive
+    question: After a first-day hourly monthly-first-week 1.618 wick reclaim, do 5m or 15m EMA20/50 flips or six-MA dense breakouts
+      confirm remaining directional movement?
+    single_variable: Hold H1 alerts, deadlines, outcome clock and data fixed; read each indicator separately. At the 5m six-line
+      break compare adding a 5m or 15m cloud alignment, then both versus one. Do not select or optimize thresholds.
+    result: '7755 of 7761 prior comparable signal-days have a continuous five-day warmup; 818 Binance USD-M contracts. cloud5_flip:
+      n=7662, median wait 245m, next-open 24h gross -0.140%; cloud15_flip: n=5778, median wait 645m, next-open 24h gross -0.279%;
+      break5: n=7280, median wait 380m, next-open 24h gross -0.152%; break15: n=4379, median wait 630m, next-open 24h gross
+      -0.320%; break5_both: n=3655, median wait 820m, next-open 24h gross -0.399%; launch5: n=71, median wait 900m, next-open
+      24h gross -0.627%; launch15: n=18, median wait 630m, next-open 24h gross -1.388%; launch5_both: n=33, median wait 900m,
+      next-open 24h gross -0.554%. 162 moved 20% in 24h from the H1 close; full retention, temporal/side checks and matched
+      differences retained in the CSVs.'
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-month-firstweek-cloud-dense-20261112-v1/outcomes.csv
+    notes: 'Common exact 5m tape. Cloud=chart EMA20/50, independent of the 12h strategy; six lines=close SMA/EMA20/60/120. break=SPIKE
+      prior-12 width<=3ATR and >=2 pair flips, then first close outside all six; launch=separate MA Dense Launch V1 core 4/5
+      plus 5 confirmation closes with original gates. Baseline control: same direction and range month, different symbol, same
+      elapsed minutes, progress gap <=0.5pp, not yet confirmed. Compare held-side change to 4/24h, MFE/MAE from next open, not
+      PnL. Complete extracts, diagnostics and matching under data/research/month-firstweek-cloud-dense-20261112-v1/.'
+
   - experiment_id: exp-month-firstweek-intraday-retest-20261112-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "a763eba78f"
