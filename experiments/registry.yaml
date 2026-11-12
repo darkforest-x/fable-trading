@@ -15,6 +15,36 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-month-firstweek-h1-launch-20261112-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "afba2addcf"
+    status: rejected
+    question: On a monthly first touch reclaimed at the 12h close, does an immediate favorable first hourly close predict a profitable next-open reversal?
+    single_variable: Replace the stalled four-hour confirmation branch with a strictly advancing first hourly close. Keep the previous rail-based 20% target, entry-based 5% stop, 168h timeout, fees and account rules.
+    result: >-
+      3798 launches on 746 contracts; 113 targets at or behind the opening print, 3685 entries and
+      3683 settled. Win rate 30.57%, mean net -0.488%, PF 0.857. Upper shorts -0.125%, lower longs
+      -0.886%; pooled 2025-before/2025-onward -0.969%/-0.104%. Stalled first reclaims executed at the
+      same one-hour lag averaged -0.557% on 3546 settled entries. With skipped opportunities worth
+      zero and terminal pairs removed, matched signal -0.474% vs random -0.429% across 3796 pairs.
+      The five reference photos excluded by the H4 rule for an immediate advance all entered; four
+      profited and one lost. Capital, fees, trade counts and drawdowns in account_comparison.csv.
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    canonical_report: experiments/active/exp-month-firstweek-h1-launch-20261112-v1/trade_summary.csv
+    artifacts: []
+    notes: >-
+      Full archived first contract/NY-month/rail watches including sideways outcomes.
+      The settled 2993 common-entry treatment/control pairs and the zero-return-for-skips
+      comparison answer different questions. Entry uses the open after the complete first H1.
+      Upper and lower must advance beyond the 12h reclaim close; hindsight isolation and
+      reversal labels did not enter the decision. Fees 5bp taker/2bp target maker, no funding
+      or extra slippage. Causal H1 entry and VectorBT exit builder 6df76fffd4. Raw decisions,
+      opportunities, fills with excursions, stalled and funded ledgers under
+      data/research/alt-isolated-12h-wicks-20261111/expanded12/all_replay_v1/h1_launch/.
+
   - experiment_id: exp-month-firstweek-h4-rail-target-20261112-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "32e600939e"
