@@ -130,6 +130,12 @@ def run_symbol(item):
         if not np.allclose(needle,[o,h,l,c],atol=0,rtol=1e-8):
             rows.append(dict(**common,coverage='source_disagrees_on_h1'))
             continue
+        first_day=tape[12:12+DAY//FIVE]
+        direction=1 if is_long else -1
+        excursion=100*direction*(first_day[:,2 if is_long else 3]/c-1)
+        for threshold in (10,20):
+            hits=np.flatnonzero(excursion>=threshold)
+            common[f'first_{threshold}_bar_ms']=first_day[hits[0],0] if len(hits) else np.nan
         for minutes in (5,15):
             bars = tape[12:] if minutes==5 else summarize_bars(tape[12:],3)
             rows.append(dict(**common,coverage='complete',**read_pattern(bars,minutes,r,c,stop)))
