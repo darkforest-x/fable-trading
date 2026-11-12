@@ -87,10 +87,14 @@ def _input_rows() -> pd.DataFrame:
             raise ValueError(f"prior review rows disagree within id for {field}")
     rows = complete.drop_duplicates("id", keep="first").copy()
     rows["id"] = rows["id"].astype(str)
-    if not rows["id"].map(lambda value: bool(re.fullmatch(
-            r"[A-Z0-9]+USDT\|\d{4}-\d{2}-\d{2}", value))).all():
-        raise ValueError("unexpected id format; refusing unsafe tape filenames")
     rows["symbol"] = rows["symbol"].astype(str).str.upper()
+    def safe_id(row) -> bool:
+        symbol_prefix, separator, date = row.id.partition("|")
+        return (separator == "|" and symbol_prefix == f"{row.symbol}USDT"
+                and bool(re.fullmatch(r"\d{4}-\d{2}-\d{2}", date))
+                and "/" not in row.id and "\\" not in row.id and "\x00" not in row.id)
+    if not rows.apply(safe_id, axis=1).all():
+        raise ValueError("unexpected id format; refusing unsafe tape filenames")
     rows["month"] = rows["month"].astype(str)
     rows["touch_ms"] = pd.to_numeric(rows["touch_ms"], errors="raise").astype("int64")
     return rows.sort_values(["symbol", "touch_ms", "id"], kind="stable")
