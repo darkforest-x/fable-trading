@@ -4,7 +4,7 @@ only EMA20/EMA50 of completed 5m and 15m closes at the actual model read.
 """
 import numpy as np
 import pandas as pd
-from windows import HERE, MINUTE, cohort, frame
+from windows import HERE, DATA, MINUTE, after_read, cohort, frame
 
 def main():
     anchors = pd.read_csv(HERE / 'primary_anchors.csv')
@@ -19,7 +19,7 @@ def main():
     reads = pd.read_csv(HERE / 'case_comparison.csv')
     keys = ['case_id', 'tf']
     cols = keys + ['hours_available', 'found', 'delay', 'read_ms', 'before_pct',
-                    'favorable24', 'adverse24', 'change24']
+                    'favorable24', 'adverse24', 'change24', 'ref_open']
     joined = reads[reads.case_id.isin(usable.index)].merge(
         day[cols].rename(columns={c:'day_'+c for c in cols if c not in keys}),
         on=keys, validate='one_to_one')
@@ -27,6 +27,12 @@ def main():
     assert joined.groupby(['role','tf']).size().eq(len(owners)).all()
     for case_id, group in joined.groupby('case_id'):
         row = cases.loc[case_id]
+        tape = np.load(DATA/'tapes'/f'{case_id}.npy')
+        baseline = after_read(row, int(row.known_ms), tape)
+        for metric in ('favorable24','adverse24','change24'):
+            joined.loc[group.index,'from_h1_'+metric] = baseline[metric]
+        direction = 1 if row.side=='long' else -1
+        joined.loc[group.index,'distance_from_rail_pct'] = 100*direction*(group.day_ref_open/row.rail-1)
         for tf in (5,15):
             b = frame(row, tf)
             closes = b.open_ms.to_numpy()+tf*MINUTE
