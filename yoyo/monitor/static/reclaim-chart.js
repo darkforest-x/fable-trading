@@ -227,7 +227,7 @@
   function create(host,notice,drawings,onReplay=()=>{}){
     let active=true,request=null,epoch=0,desired=null,anchor=null,received=0,pinnedFocus='',appearance=null;
     const shared=window.SpikePublicChartCache;
-    const chart=window.SpikeMondayFibChart.create({decorate:(instance,data)=>{
+    const chart=window.SpikeMondayFibChart.create({monthly:true,decorate:(instance,data)=>{
       frozenCloudLines(instance,data);
       drawings?.attach(instance,data);
       const p=data.paperTrade,step=periods[data.bar],historical=data.paperHistory&&p?.stage==='closed';
@@ -276,8 +276,16 @@
       desired={mode,track,trade,period,ma,internal,paper,replayOptions};
       if(active)chart.showReplay(host,track,trade,{period,ma,internal,paper,replayOptions,refocus:!pinnedFocus});
     }
+    function showMonthEvent(symbol,eventId,period,ma,internal){
+      if(desired?.mode!=='month'||desired.eventId!==eventId){
+        epoch++;request?.abort();request=null;anchor=null;chart.pause();pinnedFocus='';
+        notice('');
+      }
+      desired={mode:'month',symbol,eventId,period,ma,internal};
+      if(active)chart.showMonthlyEvent(host,symbol,eventId,{period,ma,internal});
+    }
     async function show(trade,period='5m',ma=false,symbol=trade?.symbol||'',internal=false,trades=[]){
-      const changed=desired?.symbol!==symbol;desired={trade:valid(trade)&&trade.symbol===symbol?trade:null,period,ma,symbol,internal,trades};
+      const changed=!!desired?.mode||desired?.symbol!==symbol;desired={trade:valid(trade)&&trade.symbol===symbol?trade:null,period,ma,symbol,internal,trades};
       if(changed){epoch++;request?.abort();request=null;anchor=null;chart.hide();pinnedFocus='';}
       if(!active)return;
       if(!/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(symbol)){chart.hide();notice('尚无资金交易，可从监控币种选择 K 线。');return;}
@@ -296,8 +304,8 @@
       finally{clearTimeout(timeout);if(request===c)request=null;}
     }
     function setAppearance(value){appearance=value;chart.setAppearance?.(appearance);}
-    return {show,showReplay,showHistory:(track,trade,period='15m',ma=false,internal=false)=>showReplay(track,trade,period,ma,internal,true),setAppearance,setMonthly:value=>chart.setMonthly?.(value),fit:chart.fit,latest:chart.latest,zoom:chart.zoom,retry(){if(desired?.mode){chart.retry();return;}received=0;if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
-      setActive(value){active=value;if(!value){drawings?.cancel();epoch++;request?.abort();request=null;chart.pause();}else if(desired?.mode)showReplay(desired.track,desired.trade,desired.period,desired.ma,desired.internal,desired.paper,desired.replayOptions);else if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
+    return {show,showReplay,showMonthEvent,showHistory:(track,trade,period='15m',ma=false,internal=false)=>showReplay(track,trade,period,ma,internal,true),setAppearance,setMonthly:value=>chart.setMonthly?.(value),fit:chart.fit,latest:chart.latest,zoom:chart.zoom,retry(){if(desired?.mode){chart.retry();return;}received=0;if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
+      setActive(value){active=value;if(!value){drawings?.cancel();epoch++;request?.abort();request=null;chart.pause();}else if(desired?.mode==='month')showMonthEvent(desired.symbol,desired.eventId,desired.period,desired.ma,desired.internal);else if(desired?.mode)showReplay(desired.track,desired.trade,desired.period,desired.ma,desired.internal,desired.paper,desired.replayOptions);else if(desired)show(desired.trade,desired.period,desired.ma,desired.symbol,desired.internal,desired.trades);},
       resetFocus(){pinnedFocus='';},destroy(){active=false;epoch++;request?.abort();chart.hide();}};
   }
   window.SpikeReclaimChart={create,latest,select,valid,paperReplayTrade};

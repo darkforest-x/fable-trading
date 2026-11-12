@@ -122,6 +122,15 @@ def _window(history, symbol, period, left, right, now):
 
 
 def install(app, service):
+    # Both touch ledgers share one read-only outcome projection. Install it
+    # here because the selected-symbol ChartHistory/CandleHub is attached to
+    # the app by monday_candles.install immediately before this module.
+    monday_book = getattr(getattr(service, "quote_source", None), "book", None)
+    if monday_book is not None and hasattr(app.state, "monday_chart_history"):
+        from .touch_reclaims import install as install_touch_reclaims
+        install_touch_reclaims(app, monday_book=monday_book, month_book=service.book,
+                               history=app.state.monday_chart_history, owner=service)
+
     @app.get("/api/month-first-week-1618/levels")
     def month_levels(symbol: str = Query(..., pattern=SYMBOL_RE.pattern)):
         now = app.state.monday_chart_history.candles.client.clock()

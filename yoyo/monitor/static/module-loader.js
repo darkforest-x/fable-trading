@@ -3,7 +3,7 @@
   'use strict';
   const groups = {
     'alarm-motion': ['vendor/motion-14.6.0.js'],
-    signals: ['signal-history.css','signal-components.css','okx-execution.css','signal-workspace.css','monday-reclaim-paper.css','monday-chart-settings.css','okx-execution.js','public-chart-cache.js','chart-history.js','range-chart.js','monday-candle-feed.js','monday-chart-appearance.js','monday-fib-chart.js','yolo-preview-sheet.js','chart-drawings.css','chart-drawings.js','reclaim-chart.js','chart-focus.js','monday-list-model.js','symbol-list-model.js','reclaim-watchlist.js','reclaim-analytics.js','reclaim-close.js','monday-quick.js','home-ticket.css','home-ticket.js','reclaim-strategy-book.css','reclaim-strategy-book.js','strategy-backtest.css','strategy-backtest.js','cloud-candle-colors.js','monday-chart-settings.js','monday-reclaim-paper.js','cloud-signals.css','cloud-stop-settings.js','cloud-history-stats.js','cloud-history-loader.js','cloud-history-panel.css','cloud-history-panel.js','cloud-signal-chart.js','cloud-chart-settings.js','cloud-signals.js','signal-workspace.js'],
+    signals: ['signal-history.css','signal-components.css','okx-execution.css','signal-workspace.css','monday-reclaim-paper.css','monday-chart-settings.css','okx-execution.js','public-chart-cache.js','chart-history.js','range-chart.js','monday-candle-feed.js','monday-chart-appearance.js','monday-fib-chart.js','yolo-preview-sheet.js','chart-drawings.css','chart-drawings.js','reclaim-chart.js','chart-focus.js','monday-list-model.js','symbol-list-model.js','reclaim-watchlist.js','reclaim-analytics.js','reclaim-close.js','monday-quick.js','home-ticket.css','home-ticket.js','reclaim-strategy-book.css','reclaim-strategy-book.js','strategy-backtest.css','strategy-backtest.js','cloud-candle-colors.js','monday-chart-settings.js','touch-ledger.css','touch-ledger.js','monday-reclaim-paper.js','cloud-signals.css','cloud-stop-settings.js','cloud-history-stats.js','cloud-history-loader.js','cloud-history-panel.css','cloud-history-panel.js','cloud-signal-chart.js','cloud-chart-settings.js','cloud-signals.js','signal-workspace.js'],
     'cloud-booklet': ['strategy-booklet/cloud-v17/book.css'],
     'breadth-booklet': ['breadth-booklet.css', 'breadth-book-history.js', 'breadth-booklet.js', 'breadth-replay-data.js'],
     'signal-charts': ['echarts-6.1.0.min.js'],
@@ -20,7 +20,6 @@
     market: ['market-terminal.css','research.css','v130.css','market-sync.css','market-accounts.css','range-chart.css','range-chart.js','market-accounts.js','market-intelligence.js','symbol-list-model.js','market-terminal.js','market-sync.js'],
     'trading-books': ['research.css','reading-tools.css','reading-tools.js','trading-books.css','trading-books-study.js','trading-books.js'],
     orderflow: ['research.css','market-sync.css','reading-tools.css','reading-tools.js','orderflow.css','orderflow.js'],
-    'month-first-week-1618': ['month-first-week.css','month-first-week.js'],
     'monday-fib': ['floating-layout.js','monday-fib.css','public-chart-cache.js','chart-history.js','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','monday-quick.js','monday-list-model.js','monday-fib.js'],
     'monday-live': ['monday-live.css','monday-ledger.js','monday-live.js'],
     'auto-leaders': ['research.css','market-sync.css','altcoin-leaders.css','altcoin-leaders.js','leader-page.js'],

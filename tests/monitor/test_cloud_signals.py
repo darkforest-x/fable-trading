@@ -154,13 +154,11 @@ def test_startup_history_and_durable_channel_dedup(tmp_path):
     now[0] += 2000
     assert first.record(item())
     assert not first.record(item())
-    first.deliver_pending()
-    assert sender.call_count == 2
+    assert sender.call_count == 0
     restarted = engine(tmp_path, now, sender)
     restarted.activate()
-    restarted.deliver_pending()
-    assert sender.call_count == 2
-    assert restarted.snapshot()['items'][0]['notifications'] == dict(telegram='sent', bark='sent')
+    assert sender.call_count == 0
+    assert restarted.snapshot()['items'][0]['notifications'] == dict(telegram='record_only', bark='record_only')
     assert not restarted.snapshot()['items'][0]['historical']
 
 
@@ -174,8 +172,7 @@ def test_record_keeps_only_first_same_week_signal_across_directions(tmp_path):
     assert first['week'] == opposite['week']
     assert service.record(first)
     assert not service.record(opposite)
-    service.deliver_pending()
-    assert sender.call_count == 2
+    assert sender.call_count == 0
     assert [value['id'] for value in service.snapshot()['items']] == [first['id']]
 
 
@@ -211,7 +208,6 @@ def test_legacy_same_week_projection_filters_before_card_filters_and_redirects_d
     assert [x['id'] for x in service.history('BTC-USDT-SWAP')['items']] == [first['id'], later_week['id']]
     assert [x['id'] for x in service.history('ETH-USDT-SWAP')['items']] == [other_symbol['id']]
 
-    service.deliver_pending()
     with service.db() as db:
         after = tuple(db.execute('SELECT payload,telegram,bark FROM signals WHERE id=?',
                                  (duplicate['id'],)).fetchone())
@@ -227,19 +223,21 @@ def test_historical_and_expired_are_never_sent(tmp_path):
     service = engine(tmp_path, now, sender)
     service.activate()
     service.record(item())
-    service.deliver_pending()
     assert sender.call_count == 0
     assert service.snapshot()['items'][0]['historical']
 
 
-def test_uncertain_http_is_not_retried(tmp_path):
+def test_legacy_pending_does_not_send_on_restart(tmp_path):
     now = [T+STEP-1]
     sender = Mock(side_effect=TimeoutError)
     service = engine(tmp_path, now, sender)
     service.activate(); now[0] += 2
-    service.record(item()); service.deliver_pending(); service.deliver_pending()
-    assert sender.call_count == 2
-    assert set(service.snapshot()['items'][0]['notifications'].values()) == {'unknown'}
+    service.record(item())
+    with service.db() as db:
+        db.execute("UPDATE signals SET telegram='pending',bark='pending'")
+    service.activate()
+    assert sender.call_count == 0
+    assert set(service.snapshot()['items'][0]['notifications'].values()) == {'record_only'}
 
 
 def test_expired_queue_and_interrupted_sending(tmp_path):
@@ -251,9 +249,9 @@ def test_expired_queue_and_interrupted_sending(tmp_path):
     with service.db() as db:
         db.execute("UPDATE signals SET bark='sending'")
     now[0] += FRESH_MS
-    service.activate(); service.deliver_pending()
+    service.activate()
     assert sender.call_count == 0
-    assert service.snapshot()['items'][0]['notifications'] == dict(telegram='expired', bark='unknown')
+    assert service.snapshot()['items'][0]['notifications'] == dict(telegram='record_only', bark='unknown')
 
 
 def test_scanner_excludes_forming_bar_and_resumes_ema_from_checkpoint(tmp_path):

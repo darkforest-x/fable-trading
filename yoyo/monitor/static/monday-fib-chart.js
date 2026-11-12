@@ -76,10 +76,10 @@
     const visible=(Array.isArray(ranges)?ranges:[]).filter(r=>finite(r?.ready_ms)&&finite(r?.expires_ms)&&r.ready_ms<toMs&&r.expires_ms>fromMs);
     const focus=visible.at(-1);
     return visible.flatMap(range=>[
-      {label:'月首周高',price:range.high,kind:'range',color:'#738294',lineWidth:1,lineStyle:2,start_ms:range.ready_ms,end_ms:range.expires_ms,inlinePriceVisible:range===focus,inlineNameVisible:range===focus,axisLabelVisible:false,startMarkerVisible:false,monthly:true,historical:range!==focus,month:range.month},
-      {label:'月首周上 1.618',price:range.upper,kind:'fib',color:MONTH_COLORS.upper,lineWidth:1,lineStyle:2,start_ms:range.ready_ms,end_ms:range.expires_ms,inlinePriceVisible:range===focus,inlineNameVisible:range===focus,axisLabelVisible:false,startMarkerVisible:false,monthly:true,historical:range!==focus,month:range.month},
-      {label:'月首周下 1.618',price:range.lower,kind:'fib',color:MONTH_COLORS.lower,lineWidth:1,lineStyle:2,start_ms:range.ready_ms,end_ms:range.expires_ms,inlinePriceVisible:range===focus,inlineNameVisible:range===focus,axisLabelVisible:false,startMarkerVisible:false,monthly:true,historical:range!==focus,month:range.month},
-      {label:'月首周低',price:range.low,kind:'range',color:'#738294',lineWidth:1,lineStyle:2,start_ms:range.ready_ms,end_ms:range.expires_ms,inlinePriceVisible:range===focus,inlineNameVisible:range===focus,axisLabelVisible:false,startMarkerVisible:false,monthly:true,historical:range!==focus,month:range.month},
+      {label:'月首周高',price:range.high,kind:'range',color:'#738294',lineWidth:1,lineStyle:0,start_ms:range.ready_ms,end_ms:range.expires_ms,inlinePriceVisible:range===focus,inlineNameVisible:range===focus,axisLabelVisible:false,startMarkerVisible:false,monthly:true,historical:range!==focus,month:range.month},
+      {label:'月首周上 1.618',price:range.upper,kind:'fib',color:MONTH_COLORS.upper,lineWidth:1,lineStyle:0,start_ms:range.ready_ms,end_ms:range.expires_ms,inlinePriceVisible:range===focus,inlineNameVisible:range===focus,axisLabelVisible:false,startMarkerVisible:false,monthly:true,historical:range!==focus,month:range.month},
+      {label:'月首周下 1.618',price:range.lower,kind:'fib',color:MONTH_COLORS.lower,lineWidth:1,lineStyle:0,start_ms:range.ready_ms,end_ms:range.expires_ms,inlinePriceVisible:range===focus,inlineNameVisible:range===focus,axisLabelVisible:false,startMarkerVisible:false,monthly:true,historical:range!==focus,month:range.month},
+      {label:'月首周低',price:range.low,kind:'range',color:'#738294',lineWidth:1,lineStyle:0,start_ms:range.ready_ms,end_ms:range.expires_ms,inlinePriceVisible:range===focus,inlineNameVisible:range===focus,axisLabelVisible:false,startMarkerVisible:false,monthly:true,historical:range!==focus,month:range.month},
     ].filter(level=>finite(level.price)&&level.price>0));
   }
   function withMonthlyLevels(value,ranges){
@@ -110,7 +110,7 @@
     if(!Array.isArray(data.weekly_ranges))throw Error('缺少触价对应的周一锚点');
     return data;
   }
-  function monthlyEventFrame(data,{symbol,eventId,period}){
+  function monthlyEventFrame(data,{symbol,eventId,period,includeMonthly=true}){
     validateMonthlyEvent(data,{symbol,eventId,period});
     const markerMs=data.marker_ms??data.observation_start_ms;
     const eventWeek=data.weekly_ranges.filter(w=>w?.symbol===symbol&&w.state==='ready'&&finite(w.start_ms)&&finite(w.expires_ms)&&
@@ -120,7 +120,7 @@
     const fromMs=finite(first)?first:-Infinity,toMs=finite(last)?last+PERIODS[period]:Infinity;
     const monthly=monthlyLines([{month:data.month,...data.anchor}],fromMs,toMs);
     const weeklyLines=weekly?levels(weekly,weekly).map(level=>({...level,start_ms:finite(level.start_ms)?level.start_ms:weekly.end_ms,end_ms:weekly.expires_ms,week:weekly.week,historical:false})):[];
-    const allLevels=[...weeklyLines,...monthly];
+    const allLevels=[...weeklyLines,...(includeMonthly?monthly:[])];
     const windows=allLevels.filter(l=>finite(l.start_ms)&&finite(l.end_ms));
     return {...data,source:'OKX',timezone:'America/New_York',levels:allLevels,
       ...(windows.length?{level_window:{start_ms:Math.min(...windows.map(l=>l.start_ms)),end_ms:Math.max(...windows.map(l=>l.end_ms))}}:{}),
@@ -164,9 +164,10 @@
       return ranges;
     }).catch(()=>cached?.ranges||[]);
   }
-  function create({decorate,monthly=false}={}){
+  function create({decorate,monthly=false,monthlyEnabled=false}={}){
   const view={decorate,bars:720,initialBars:160,range:true,fib:true,fitAll:false,showLevels:false,mondayBand:true,wallpaper:true};
-  let monthlyActive=!!monthly;
+  const monthlyEventsEnabled=!!monthly;
+  let monthlyActive=!!monthlyEnabled;
   let target=null,controller=null,timer=null,version=0,paused=false,appearance=null;
   const replayCache=new Map();
   function pause(){paused=true;version++;clearTimeout(timer);controller?.abort();controller=null;target?.feed?.stop();target?.history?.pause();if(target)target.feed=null;}
@@ -180,7 +181,7 @@
   function draw(context,error=''){
     if(!target)return;
     try{
-      let value=target.monthEvent?monthlyEventFrame(context,{symbol:target.row.symbol,eventId:target.monthEvent,period:target.period})
+      let value=target.monthEvent?monthlyEventFrame(context,{symbol:target.row.symbol,eventId:target.monthEvent,period:target.period,includeMonthly:monthlyActive})
         :target.replay?context:prepare(context,target.row,target.week,target.period,target.levels);
       if(!target.monthEvent)value=withWeeks(value,target.levels,target.week);
       if(monthlyActive&&!target.monthEvent&&!target.replay)value=withMonthlyLevels(value,target.monthRanges);
@@ -202,7 +203,8 @@
         color:eventData.side==='upper'?MONTH_COLORS.upper:MONTH_COLORS.lower,text:'首周触价'}]:[];
       const eventCandleColor=eventData?candle=>candle.first_week===true?'#30D158':'#8B9099':null;
       let positioned=!!target.eventPositioned;
-      const eventDecorate=eventData?instance=>{
+      const eventDecorate=eventData?(instance,data)=>{
+        decorate?.(instance,data);
         if(instance.series?.setMarkers)instance.series.setMarkers(marker);
         const status=instance.panel?.querySelector('.cv-range-status');
         if(status){const text=eventData.forming_time_ms!=null?`本根 ${target.period} K 线尚未收盘。`:marker.length?'已标记可核实的月首周触价 K 线。':'触价 K 线暂不可核实，未添加标记。';status.textContent=text;status.classList.toggle('is-warning',!marker.length||eventData.forming_time_ms!=null);}
@@ -214,7 +216,7 @@
         instance.chart.timeScale().setVisibleLogicalRange({from:Math.max(0,index-span/2),to:Math.min(instance.rows.length-1,index+span/2)});
         target.eventPositioned=true;positioned=true;
       }:null;
-      target.instance=window.SpikeRangeChart.mount(target.mount,value,{...view,...(eventCandleColor?{candleColor:eventCandleColor}:candleColor?{candleColor}:{}),compactReplay,displayWindow,scaleReferenceLevels:target.monthEvent?false:!compactReplay,bars:target.monthEvent||target.replay||window.SpikeChartHistory?.full(target.row.symbol)?Infinity:720,ma:target.monthEvent?false:target.ma,mondayBand:target.period!=='1D',...(target.monthEvent?{decorate:eventDecorate,onVisibleRange:undefined}:{onVisibleRange:instance=>target?.history?.observe(instance)})},error);
+      target.instance=window.SpikeRangeChart.mount(target.mount,value,{...view,...(eventCandleColor?{candleColor:eventCandleColor}:candleColor?{candleColor}:{}),compactReplay,displayWindow,scaleReferenceLevels:target.monthEvent?false:!compactReplay,bars:target.monthEvent||target.replay||window.SpikeChartHistory?.full(target.row.symbol)?Infinity:720,ma:target.ma,mondayBand:target.period!=='1D',...(target.monthEvent?{decorate:eventDecorate,onVisibleRange:undefined}:{onVisibleRange:instance=>target?.history?.observe(instance)})},error);
       const status=error||target.levelError||(context.error?'K 线更新失败：'+context.error:context.loading?'正在同步此合约 K 线…':!value.candles?.length?'暂无此周期 K 线，请稍后重试':target.monthEvent&&value.monthlyEvent&&!value.monthlyEvent.weekly_anchor?'对应周一锚点暂不可用':target.live?.error||'');
       message(status,{busy:!error&&!target.levelError&&!context.error&&!!context.loading});
     }catch(e){message(e.message);window.SpikeRangeChart.unmount(target.mount);}
@@ -354,15 +356,15 @@
     if(!reuse)host.querySelector('[data-mf-chart-retry]').addEventListener('click',()=>{target?.history?.retry();refresh();});
     const cached=replayCache.get(key);if(cached)draw(cached);else{target.instance=window.SpikeRangeChart.mount(target.mount,{symbol:trade.symbol,source:paper?'OKX':'Binance',bar:period,candles:[],levels:[]},view);refreshReplay();}
   }
-  function showMonthlyEvent(host,symbol,eventId,{period='15m',internal=false,refocus=false,onData=null}={}){
-    if(!monthly||!host||!PERIODS[period]||typeof symbol!=='string'||! /^[A-Z0-9]{1,30}-USDT-SWAP$/.test(symbol)||
+  function showMonthlyEvent(host,symbol,eventId,{period='15m',internal=false,ma=false,refocus=false,onData=null}={}){
+    if(!monthlyEventsEnabled||!host||!PERIODS[period]||typeof symbol!=='string'||! /^[A-Z0-9]{1,30}-USDT-SWAP$/.test(symbol)||
        typeof eventId!=='string'||!eventId||eventId.length>96)return;
     const key=`month-event|${eventId}|${symbol}|${period}`;
     if(target?.host===host&&target.key===key){
-      target.internal=internal;
+      const changed=target.internal!==internal||target.ma!==ma;target.internal=internal;target.ma=ma;
       target.onData=typeof onData==='function'?onData:target.onData;
       if(refocus)target.eventPositioned=false;
-      if(target.context)draw(target.context);
+      if(changed&&target.context)draw(target.context);
       if(target.context?.event_id===eventId)target.onData?.(target.context);
       if(paused){paused=false;if(target.context)draw(target.context);else refreshMonthlyEvent();}
       return;
@@ -371,7 +373,7 @@
     if(target){window.SpikeRangeChart?.unmount(target.mount);target.host.replaceChildren?.();}
     target=null;paused=false;
     host.innerHTML='<div class="mf-chart-caption"><p role="status">正在读取月首周触价时段 K 线…</p><button type="button" data-mf-chart-retry>重新加载</button></div><div class="mf-chart-mount"></div>';
-    target={host,key,row:{symbol},period,internal,ma:false,monthEvent:eventId,eventPositioned:false,onData,
+    target={host,key,row:{symbol},period,internal,ma:!!ma,monthEvent:eventId,eventPositioned:false,onData,
       state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
     host.querySelector('[data-mf-chart-retry]').addEventListener('click',()=>refresh());
     const cached=eventChartCache.get(key);
@@ -446,12 +448,13 @@
   function setMonthly(value){
     monthlyActive=!!value;
     const current=target;
-    if(!current||current.monthEvent||current.replay||!current.context)return Promise.resolve();
+    if(!current||current.replay||!current.context)return Promise.resolve();
+    if(current.monthEvent){draw(current.context);return Promise.resolve();}
     if(!monthlyActive){draw(current.context);return Promise.resolve();}
     if(Array.isArray(current.monthRanges)){draw(current.context);return Promise.resolve();}
     return loadMonthly(current);
   }
   return {show,showReplay,showMonthlyEvent,retry:refresh,hide:stop,pause,setInternal,setMa,setAppearance,setMonthly,fit,latest,zoom};
   }
-  window.SpikeMondayFibChart=Object.assign(create({monthly:true}),{create});
+  window.SpikeMondayFibChart=Object.assign(create({monthly:true,monthlyEnabled:true}),{create});
 })();

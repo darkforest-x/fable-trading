@@ -21,11 +21,11 @@ public sealed class SpikeChartRequest
         // Windows browsers can normalize an empty path to a single root slash.
         // Accept both equivalent forms, never arbitrary paths or a caller URL.
         if (link == null || link.Length > 256) throw new ArgumentException();
-        Match match = Regex.Match(link, @"\Aspike-tradingview://open/?\?symbol=([A-Z0-9]{1,30})-(USDT|USDC|USD)-SWAP&timeframe=(5m|15m|30m|1H|4H|1Dutc)\z");
+        Match match = Regex.Match(link, @"\Aspike-tradingview://open/?\?symbol=([A-Z0-9]{1,30})-(USDT|USDC|USD)-SWAP&timeframe=(1m|2m|3m|5m|15m|30m|1H|4H|12H|1Dutc)\z");
         if (!match.Success) throw new ArgumentException();
         if (layout == null || !Regex.IsMatch(layout, @"\Ahttps://(cn\.|www\.)?tradingview\.com/chart/(?:[A-Za-z0-9]{1,64}/)?\z"))
             throw new ArgumentException();
-        var intervals = new Dictionary<string, string> { {"5m", "5"}, {"15m", "15"}, {"30m", "30"}, {"1H", "60"}, {"4H", "240"}, {"1Dutc", "1D"} };
+        var intervals = new Dictionary<string, string> { {"1m", "1"}, {"2m", "2"}, {"3m", "3"}, {"5m", "5"}, {"15m", "15"}, {"30m", "30"}, {"1H", "60"}, {"4H", "240"}, {"12H", "720"}, {"1Dutc", "1D"} };
         string basis = match.Groups[1].Value, quote = match.Groups[2].Value, timeframe = match.Groups[3].Value;
         return new SpikeChartRequest {
             Symbol = basis + "-" + quote + "-SWAP", Timeframe = timeframe,

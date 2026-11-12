@@ -179,8 +179,12 @@ class MonthFirstWeekBook:
                     due_ms INTEGER NOT NULL, created_ms INTEGER NOT NULL,
                     attempts INTEGER NOT NULL DEFAULT 0,
                     error TEXT, message_id INTEGER, server_timestamp INTEGER,
+                    send_until_ms INTEGER NOT NULL DEFAULT 0,
                     UNIQUE(event_id,channel));
                 CREATE INDEX IF NOT EXISTS notices_pending_idx ON notices(channel,status,due_ms,id);
+                CREATE TABLE IF NOT EXISTS notice_policy (
+                    id INTEGER PRIMARY KEY CHECK(id=1), cutover_ms INTEGER NOT NULL DEFAULT 0);
+                INSERT OR IGNORE INTO notice_policy(id,cutover_ms) VALUES (1,0);
                 CREATE TABLE IF NOT EXISTS quote_cursors (
                     symbol TEXT PRIMARY KEY, candle_ms INTEGER NOT NULL, received_ms INTEGER NOT NULL);
                 CREATE TABLE IF NOT EXISTS worker_state (
@@ -195,6 +199,9 @@ class MonthFirstWeekBook:
                 db.execute("ALTER TABLE anchors ADD COLUMN last_missing_ms INTEGER")
             if "armed_sides" not in columns:
                 db.execute("ALTER TABLE anchors ADD COLUMN armed_sides TEXT NOT NULL DEFAULT '[]'")
+            notice_columns = {row[1] for row in db.execute("PRAGMA table_info(notices)")}
+            if "send_until_ms" not in notice_columns:
+                db.execute("ALTER TABLE notices ADD COLUMN send_until_ms INTEGER NOT NULL DEFAULT 0")
         self.path.chmod(0o600)
 
     @contextmanager
@@ -212,6 +219,17 @@ class MonthFirstWeekBook:
         """A process death after claiming a send is ambiguous; never resend it."""
         with self.db() as db:
             db.execute("UPDATE notices SET status='unknown',error='interrupted_delivery' WHERE status='sending'")
+
+    def ensure_notice_cutover(self, now_ms: int) -> int:
+        """Freeze the H1-reclaim policy without backfilling old touch records."""
+        with self.db() as db:
+            db.execute("UPDATE notice_policy SET cutover_ms=? WHERE id=1 AND cutover_ms=0", (now_ms,))
+            # Existing pending rows came from the immediate-touch policy. Sent,
+            # failed, and ambiguous receipts and subscription state stay intact.
+            db.execute("UPDATE notices SET status='skipped',error='legacy_immediate_touch_policy' "
+                       "WHERE status='pending' AND send_until_ms=0")
+            row = db.execute("SELECT cutover_ms FROM notice_policy WHERE id=1").fetchone()
+            return int(row[0])
 
     def save_anchor(self, anchor: Mapping, symbol: str, now_ms: int, *, state=None,
                     missing_hours=None, history_gaps=None, coverage_complete=None, error=None):
@@ -331,13 +349,20 @@ class MonthFirstWeekBook:
         if not inserted:
             return None
         if source == "live":
+            policy = db.execute("SELECT cutover_ms FROM notice_policy WHERE id=1").fetchone()
+            cutover_ms = int(policy[0]) if policy else 0
+            h1_close_ms = (int(event["candle_ms"]) // HOUR_MS + 1) * HOUR_MS
+            send_until_ms = h1_close_ms + FRESH_MS
             for channel in ("telegram", "bark"):
                 subscription = db.execute("SELECT * FROM subscriptions WHERE channel=?", (channel,)).fetchone()
-                if (subscription and subscription["enabled"] and event["occurred_ms"] > subscription["activated_ms"]
+                if (cutover_ms > 0 and subscription and subscription["enabled"]
+                        and h1_close_ms > subscription["activated_ms"]
+                        and event["occurred_ms"] >= cutover_ms and event["created_ms"] >= cutover_ms
                         and event["created_ms"] <= fresh_until_ms):
-                    db.execute("INSERT OR IGNORE INTO notices(event_id,channel,generation,status,due_ms,created_ms) "
-                               "VALUES (?,?,?,'pending',?,?)",
-                               (event_id, channel, subscription["generation"], event["created_ms"], event["created_ms"]))
+                    db.execute("INSERT OR IGNORE INTO notices(event_id,channel,generation,status,due_ms,created_ms,send_until_ms) "
+                               "VALUES (?,?,?,'pending',?,?,?)",
+                               (event_id, channel, subscription["generation"], h1_close_ms,
+                                event["created_ms"], send_until_ms))
         row = db.execute("SELECT * FROM touches WHERE event_id=?", (event_id,)).fetchone()
         return cls._touch_dict(row)
 
@@ -454,6 +479,25 @@ class MonthFirstWeekBook:
                            (int(enabled), now_ms, generation, channel))
                 db.execute("UPDATE notices SET status='skipped',error='subscription_changed' "
                            "WHERE channel=? AND status='pending'", (channel,))
+                if enabled:
+                    policy = db.execute("SELECT cutover_ms FROM notice_policy WHERE id=1").fetchone()
+                    cutover_ms = int(policy[0]) if policy else 0
+                    current_h1 = now_ms // HOUR_MS * HOUR_MS
+                    rows = db.execute("""SELECT * FROM touches WHERE source='live' AND touch_confirmed=1
+                        AND candle_ms>=? AND occurred_ms<=? AND occurred_ms>=? AND created_ms>=?
+                        AND expires_ms>?""",
+                                      (current_h1, now_ms, cutover_ms, cutover_ms, now_ms))
+                    for event in rows:
+                        h1_close_ms = (int(event["candle_ms"]) // HOUR_MS + 1) * HOUR_MS
+                        if h1_close_ms <= now_ms:
+                            continue
+                        db.execute("INSERT INTO notices(event_id,channel,generation,status,due_ms,created_ms,send_until_ms) "
+                                   "VALUES (?,?,?,'pending',?,?,?) ON CONFLICT(event_id,channel) DO UPDATE SET "
+                                   "generation=excluded.generation,status='pending',due_ms=excluded.due_ms,"
+                                   "created_ms=excluded.created_ms,send_until_ms=excluded.send_until_ms,error=NULL "
+                                   "WHERE notices.status='skipped' AND notices.error='subscription_changed'",
+                                   (event["event_id"], channel, generation, h1_close_ms,
+                                    now_ms, h1_close_ms + FRESH_MS))
         return self.channel_status(channel)
 
     def channel_status(self, channel: str, *, configured: bool | None = None):
@@ -474,10 +518,11 @@ class MonthFirstWeekBook:
             db.execute("""UPDATE notices SET status='skipped',error='expired_or_disabled'
                 WHERE channel=? AND status='pending' AND (generation<>? OR ?=0 OR EXISTS
                 (SELECT 1 FROM touches t WHERE t.event_id=notices.event_id AND
-                 (t.source<>'live' OR t.touch_confirmed<>1 OR t.fresh_until_ms<? OR t.occurred_ms>? OR t.expires_ms<=?)))""",
+                 (t.source<>'live' OR t.touch_confirmed<>1 OR t.occurred_ms>? OR t.expires_ms<=?))
+                 OR send_until_ms=0 OR send_until_ms<?)""",
                        (channel, subscription["generation"], subscription["enabled"], now_ms, now_ms, now_ms))
             row = db.execute("""SELECT n.id AS notice_id,n.event_id,n.channel,n.generation,n.status,
-                n.due_ms,n.created_ms,n.attempts,n.error AS notice_error,t.event_type,t.month,t.symbol,t.side,
+                n.due_ms,n.created_ms,n.send_until_ms,n.attempts,n.error AS notice_error,t.event_type,t.month,t.symbol,t.side,
                 t.level,t.price,t.candle_extreme,t.occurred_ms,t.candle_ms,t.expires_ms,t.fresh_until_ms,
                 t.source,t.touch_confirmed,t.candle_confirmed
                 FROM notices n JOIN touches t USING(event_id)
@@ -490,7 +535,7 @@ class MonthFirstWeekBook:
             db.execute("BEGIN IMMEDIATE")
             subscription = db.execute("SELECT * FROM subscriptions WHERE channel=?", (channel,)).fetchone()
             row = db.execute("""SELECT n.id AS notice_id,n.event_id,n.channel,n.generation,n.status,
-                n.due_ms,n.created_ms,n.attempts,n.error AS notice_error,t.event_type,t.month,t.symbol,t.side,
+                n.due_ms,n.created_ms,n.send_until_ms,n.attempts,n.error AS notice_error,t.event_type,t.month,t.symbol,t.side,
                 t.level,t.price,t.candle_extreme,t.occurred_ms,t.candle_ms,t.expires_ms,t.fresh_until_ms,
                 t.source,t.touch_confirmed,t.candle_confirmed
                 FROM notices n JOIN touches t USING(event_id) WHERE n.id=? AND n.channel=?""",
@@ -499,7 +544,7 @@ class MonthFirstWeekBook:
                 return None
             if (not subscription or not subscription["enabled"] or row["generation"] != subscription["generation"]
                     or row["source"] != "live" or not row["touch_confirmed"]
-                    or row["fresh_until_ms"] < now_ms or row["occurred_ms"] > now_ms
+                    or row["send_until_ms"] < now_ms or row["occurred_ms"] > now_ms
                     or row["expires_ms"] <= now_ms):
                 db.execute("UPDATE notices SET status='skipped',error='expired_or_disabled' WHERE id=? AND status='pending'",
                            (notice_id,))
@@ -509,6 +554,11 @@ class MonthFirstWeekBook:
             if cursor.rowcount != 1:
                 return None
             return {**dict(row), "attempts": row["attempts"] + 1}
+
+    def defer_notice(self, notice_id: int, due_ms: int):
+        """Move a pending notice retry without claiming or consuming it."""
+        with self.db() as db:
+            db.execute("UPDATE notices SET due_ms=? WHERE id=? AND status='pending'", (due_ms, notice_id))
 
     def finish_notice(self, notice_id: int, status: str, *, error=None, message_id=None, server_timestamp=None,
                       due_ms=0, expected="sending"):

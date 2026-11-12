@@ -24,6 +24,7 @@ from .month_first_week_1618 import (EVENT_TYPE, FRESH_MS, HOUR_MS, MINUTE_MS,
                                     make_anchor, month_window)
 from .telegram import credentials as telegram_credentials
 from .monday_fib_bark import configured_credentials as bark_credentials
+from .chart_periods import native_bar
 
 BEIJING = ZoneInfo("Asia/Shanghai")
 HISTORY_LIMIT = 1000  # 31 calendar days plus DST; OKX pages are still bounded to 5 x 300.
@@ -32,6 +33,7 @@ ANCHOR_RETRY_MS = 5 * 60_000
 WORKER_INTERVAL_SECONDS = 1.0
 MAX_SYMBOLS_PER_STEP = 5
 MINUTE_RING_MS = 2 * HOUR_MS
+NOTICE_RETRY_MS = 2_000
 
 
 def _clock(ms):
@@ -56,16 +58,17 @@ def _valid_quote(quote):
 
 def _first_line(event):
     symbol = event["symbol"].removesuffix("-USDT-SWAP")
-    side = "上沿" if event["side"] == "upper" else "下沿"
-    return f"月首周 1.618 · {symbol} {side}触价"
+    side = "上轨" if event["side"] == "upper" else "下轨"
+    return f"月首周 1.618 · {symbol} {side} · 1H 收回"
 
 
 def _event_text(event):
-    return (f"{_first_line(event)}\n"
-            f"纽约首周 {event['month']} · 点位 {event['level']:.10g}\n"
-            f"当前分钟极值 {event['candle_extreme']:.10g}\n"
-            f"{_clock(event['occurred_ms'])} 北京时间\n"
-            "仅为触价提醒，不代表交易或下单")
+    lines = [f"{_first_line(event)}", f"纽约首周 {event['month']} · 点位 {event['level']:.10g}",
+             f"当前分钟极值 {event['candle_extreme']:.10g}",
+             f"{_clock(event['occurred_ms'])} 北京时间"]
+    if event.get("reclaim_close_ms") is not None:
+        lines.append(f"1H收回收盘 {event['reclaim_close']:.10g} · {_clock(event['reclaim_close_ms'])} 北京时间")
+    return "\n".join(lines)
 
 
 class MonthFirstWeek1618Service:
@@ -73,6 +76,7 @@ class MonthFirstWeek1618Service:
         self.book = MonthFirstWeekBook(runtime)
         self.quote_source = quote_source
         self.client = client or quote_source.client
+        self.notice_cutover_ms = self.book.ensure_notice_cutover(self.client.clock())
         self.include_open = getattr(self.client, "include_open", False) is True
         self.sender = sender or requests.post
         self.stop = threading.Event()
@@ -96,6 +100,9 @@ class MonthFirstWeek1618Service:
         self._latest_quotes = {}
         self._active_month = None
         self._closed = False
+        self._notice_lock = threading.Lock()
+        self._notice_reclaims = {}
+        self._notice_reclaims_inflight = set()
 
     def start(self):
         if self.thread and self.thread.is_alive():
@@ -121,6 +128,9 @@ class MonthFirstWeek1618Service:
     def close(self):
         self._closed = True
         self.stop.set()
+        reader = getattr(self, "touch_reclaim_reader", None)
+        if reader is not None:
+            reader.close()
         with self.quote_source.lock:
             if self in self.quote_source.listeners:
                 self.quote_source.listeners.remove(self)
@@ -514,20 +524,78 @@ class MonthFirstWeek1618Service:
         event = self.book.pending_notice(channel, now_ms)
         if not event:
             return False
+        reclaim_state, close, close_ms = self._confirmed_touch_hour_reclaim(event, now_ms)
+        if reclaim_state == "pending":
+            self.book.defer_notice(event["notice_id"], min(event["send_until_ms"], now_ms + NOTICE_RETRY_MS))
+            return True
+        if reclaim_state != "reclaimed":
+            reason = "not_reclaimed_1h_close" if reclaim_state == "not_reclaimed" else "h1_confirmation_unavailable"
+            self.book.finish_notice(event["notice_id"], "skipped", error=reason, expected="pending")
+            return True
+        event = {**event, "reclaim_close": close, "reclaim_close_ms": close_ms}
         creds = telegram_credentials() if channel == "telegram" else bark_credentials(self.book)
         if not creds:
             self.book.finish_notice(event["notice_id"], "failed", error="channel_not_configured", expected="pending")
             return True
-        claimed = self.book.claim_notice(event["notice_id"], channel, now_ms)
+        # H1 history and credential reads can take time. Re-check the 90s
+        # close-based delivery window using a fresh clock immediately before
+        # the atomic claim. max() preserves explicitly supplied test clocks.
+        claim_ms = max(now_ms, self.client.clock())
+        claimed = self.book.claim_notice(event["notice_id"], channel, claim_ms)
         if not claimed:
             return True
-        self._send_notice(channel, claimed, creds, now_ms)
+        claimed["reclaim_close"] = close
+        claimed["reclaim_close_ms"] = close_ms
+        self._send_notice(channel, claimed, creds, claim_ms)
         return True
+
+    def _confirmed_touch_hour_reclaim(self, event, now_ms):
+        """Check the confirmed close of the UTC H1 candle containing the touch."""
+        h1_open_ms = int(event["candle_ms"]) // HOUR_MS * HOUR_MS
+        close_ms = h1_open_ms + HOUR_MS
+        if now_ms < close_ms:
+            return "pending", None, close_ms
+        if now_ms > close_ms + FRESH_MS:
+            return "expired", None, close_ms
+        key = event["event_id"]
+        with self._notice_lock:
+            cached = self._notice_reclaims.get(key)
+            if cached and (cached[0] != "pending" or now_ms < cached[1]):
+                return cached[0], cached[2], close_ms
+            if key in self._notice_reclaims_inflight:
+                return "pending", None, close_ms
+            self._notice_reclaims_inflight.add(key)
+        try:
+            read_now_ms = self.client.clock()
+            raw = self.client.get("/api/v5/market/history-candles", {
+                "instId": event["symbol"], "bar": native_bar("1H"), "limit": "1",
+                "after": str(h1_open_ms + HOUR_MS),
+            })
+            parsed = validate(raw, native_bar("1H"), read_now_ms)
+            source = parsed.get(h1_open_ms)
+            if source is None or source[8] != "1" or h1_open_ms + HOUR_MS > read_now_ms:
+                result = ("pending", read_now_ms + NOTICE_RETRY_MS, None)
+            else:
+                close = float(source[4])
+                reclaimed = close < float(event["level"]) if event["side"] == "upper" else close > float(event["level"])
+                result = ("reclaimed" if reclaimed else "not_reclaimed", close_ms, close)
+            with self._notice_lock:
+                self._notice_reclaims[key] = result
+            return result[0], result[2], close_ms
+        except Exception:
+            retry_ms = max(now_ms, self.client.clock()) + NOTICE_RETRY_MS
+            with self._notice_lock:
+                self._notice_reclaims[key] = ("pending", retry_ms, None)
+            return "pending", None, close_ms
+        finally:
+            with self._notice_lock:
+                self._notice_reclaims_inflight.discard(key)
 
     def _send_notice(self, channel, event, creds, now_ms):
         text = _event_text(event)
-        chart_url = "https://spikeok.com/#monday-fib?" + urlencode(
-            {"symbol": event["symbol"], "monthEvent": event["event_id"]})
+        chart_url = "https://spikeok.com/#signals?" + urlencode({
+            "pane": "reclaim", "tab": "events", "source": "month", "ledger": "1",
+            "symbol": event["symbol"], "monthEvent": event["event_id"], "period": "1H"})
         try:
             if channel == "telegram":
                 token, chat = creds
@@ -552,7 +620,7 @@ class MonthFirstWeek1618Service:
                     params = payload.get("parameters") or {}
                     delay = params.get("retry_after", 30) if isinstance(params, dict) else 30
                     delay = max(5, min(3600, int(delay))) if str(delay).isdigit() else 30
-                    if event["attempts"] < 5 and self.client.clock() <= event["fresh_until_ms"]:
+                    if event["attempts"] < 5 and self.client.clock() <= event["send_until_ms"]:
                         self.book.finish_notice(event["notice_id"], "pending", error="telegram_rate_limited",
                                                 due_ms=now_ms + delay * 1000)
                     else:
@@ -573,7 +641,7 @@ class MonthFirstWeek1618Service:
             if response.status_code == 429:
                 retry = response.headers.get("Retry-After", "30")
                 delay = max(5, min(3600, int(retry))) if str(retry).isdigit() else 30
-                if event["attempts"] < 5 and self.client.clock() <= event["fresh_until_ms"]:
+                if event["attempts"] < 5 and self.client.clock() <= event["send_until_ms"]:
                     self.book.finish_notice(event["notice_id"], "pending", error="bark_rate_limited",
                                             due_ms=now_ms + delay * 1000)
                 else:
@@ -690,6 +758,11 @@ def install(app, service: MonthFirstWeek1618Service):
     """Install loopback read, event-cursor and independently gated TG/Bark APIs."""
     app.state.month_first_week_1618 = service
 
+    @app.get("/api/month-first-week-1618/channels")
+    def month_first_week_channels():
+        return {channel: service.book.channel_status(channel, configured=service._configured(channel))
+                for channel in ("telegram", "bark")}
+
     @app.get("/api/month-first-week-1618")
     def month_first_week_status():
         return service.snapshot()
@@ -707,7 +780,7 @@ def install(app, service: MonthFirstWeek1618Service):
         if payload.enabled and not service._configured(channel):
             raise HTTPException(409, f"本机尚未配置月首周 1.618 {channel} 通知")
         service.book.set_enabled(channel, payload.enabled, service.client.clock())
-        return service.snapshot()["channels"][channel]
+        return service.book.channel_status(channel, configured=service._configured(channel))
 
     @app.put("/api/month-first-week-1618/telegram")
     def month_first_week_telegram(payload: ChannelSetting, request: Request):

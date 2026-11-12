@@ -49,7 +49,7 @@ test('leaving before snapshot completion cancels early work and cannot start a c
  h.calls[0].resolve({ok:true,json:async()=>({items})});await flush();
  assert.equal(h.calls.length,1);assert.equal(h.window.SpikeStartup.take('monday-snapshot',new AbortController().signal),null);
 });
-test('chart reuses warmed candles while fetching the required Monday anchors',async()=>{
+test('chart reuses warmed candles while fetching Monday and monthly levels',async()=>{
  const h=harness({period:'15m'}),draws=[];
  const now=Date.parse('2026-10-23T04:00:00Z'),start=Date.parse('2026-10-19T04:00:00Z');
  h.calls[0].resolve({ok:true,json:async()=>({items})});await flush();
@@ -60,7 +60,8 @@ test('chart reuses warmed candles while fetching the required Monday anchors',as
  const nodes={};const host={querySelector:s=>nodes[s]||(nodes[s]={addEventListener(){}})};
  h.window.SpikeMondayFibChart.show(host,{symbol:'ADA-USDT-SWAP',high:12,low:9},'2026-10-19');await flush();
  assert.equal(h.calls.filter(c=>c.url.includes('/candles?')).length,1);
- assert.equal(h.calls.length,3);assert.match(h.calls[2].url,/\/levels\?symbol=ADA-USDT-SWAP$/);
+ assert.equal(h.calls.length,4);assert.match(h.calls[2].url,/\/api\/monday-fib\/levels\?symbol=ADA-USDT-SWAP$/);
+ assert.equal(h.calls[3].url,'/api/month-first-week-1618/levels?symbol=ADA-USDT-SWAP');
  assert.equal(draws.length,1);assert.equal(draws[0].symbol,'ADA-USDT-SWAP');
  h.window.SpikeMondayFibChart.hide();
 });

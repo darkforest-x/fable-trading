@@ -60,6 +60,15 @@ class FakeClient:
 
     def get(self, path, params=None):
         self.paths.append((path, dict(params or {})))
+        if path == "/api/v5/market/history-candles":
+            assert params["bar"] == "1H"
+            assert params["limit"] == "1"
+            stamp = int(params["after"]) - HOUR_MS
+            row = next((item for item in self.rows if item["t"] == stamp), None)
+            if row is None:
+                return []
+            return [[str(row["t"]), str(row["o"]), str(row["h"]), str(row["l"]),
+                     str(row["c"]), "1", "1", "1", "1"]]
         assert path == "/api/v5/market/candles"
         assert params["bar"] == "1m"
         return self.minutes
@@ -182,6 +191,31 @@ class TestMonthFirstWeekBook:
         assert book.pending_notice("telegram", now) is None
         assert book.channel_status("telegram")["counts"] == {}
 
+    def test_cutover_skips_only_legacy_pending_notices_and_preserves_receipts_and_subscriptions(self, tmp_path):
+        now = ms(2026, 11, 11, 12, 34)
+        service, _, _, window = TestMonthFirstWeekService()._service(tmp_path, now=now)
+        service.book.set_enabled("telegram", True, now - 1000)
+        for symbol in ("BTC-USDT-SWAP", "ETH-USDT-SWAP"):
+            service.book.touch(month=window["month"], symbol=symbol, side="upper", level=110,
+                               price=111, candle_extreme=112, occurred_ms=now + 1,
+                               candle_ms=now // MINUTE_MS * MINUTE_MS, created_ms=now + 1,
+                               expires_ms=window["expires_ms"], source="live", candle_confirmed=False)
+        with service.book.db() as db:
+            db.execute("UPDATE notices SET status='sent',message_id=777 WHERE event_id=?",
+                       ("2026-11|BTC-USDT-SWAP|upper",))
+            db.execute("UPDATE notices SET send_until_ms=0 WHERE event_id=?",
+                       ("2026-11|ETH-USDT-SWAP|upper",))
+
+        # Reopening on the new policy retires a pending legacy immediate notice only.
+        service2, _, _, _ = TestMonthFirstWeekService()._service(tmp_path, now=now + 1000)
+        assert service2.book.channel_status("telegram")["enabled"] is True
+        with service2.book.db() as db:
+            rows = {row["event_id"]: dict(row) for row in db.execute("SELECT * FROM notices")}
+        assert rows["2026-11|BTC-USDT-SWAP|upper"]["status"] == "sent"
+        assert rows["2026-11|BTC-USDT-SWAP|upper"]["message_id"] == 777
+        assert rows["2026-11|ETH-USDT-SWAP|upper"]["status"] == "skipped"
+        assert rows["2026-11|ETH-USDT-SWAP|upper"]["error"] == "legacy_immediate_touch_policy"
+
 
 class TestMonthFirstWeekService:
     def _service(self, tmp_path, *, now, prefix_high=98.0, prefix_low=92.0, include_open=True, sender=None):
@@ -228,14 +262,198 @@ class TestMonthFirstWeekService:
         assert event["source"] == "live"
         assert event["touch_confirmed"] is True
         assert event["candle_confirmed"] is False
+        assert service.book.channel_status("telegram")["counts"] == {"pending": 1}
+        assert not sent  # The 1H candle containing the touch has not closed.
+
+        h1_close = (event["candle_ms"] // HOUR_MS + 1) * HOUR_MS
+        with service.book.db() as db:
+            notice = dict(db.execute("SELECT due_ms,send_until_ms FROM notices WHERE event_id=? AND channel='telegram'",
+                                     (event["event_id"],)).fetchone())
+        assert notice == {"due_ms": h1_close, "send_until_ms": h1_close + FRESH_MS}
+        client.now_ms = h1_close + 1000
+        client.rows = source_rows(window, client.now_ms)
+        with patch("yoyo.monitor.month_first_week_1618_service.telegram_credentials",
+                   return_value=("test-token", "test-chat")):
+            service.step(client.now_ms, deliver=True)
+
         assert service.book.channel_status("telegram")["counts"] == {"sent": 1}
         assert len(sent) == 1
         chart, tradingview = sent[0][1]["json"]["reply_markup"]["inline_keyboard"][0]
-        assert chart["url"] == ("https://spikeok.com/#monday-fib?symbol=BTC-USDT-SWAP"
-                                "&monthEvent=2026-11%7CBTC-USDT-SWAP%7Cupper")
+        assert chart["url"] == ("https://spikeok.com/#signals?pane=reclaim&tab=events&source=month&ledger=1"
+                                "&symbol=BTC-USDT-SWAP&monthEvent=2026-11%7CBTC-USDT-SWAP%7Cupper&period=1H")
         assert "OKX%3ABTCUSDT.P" in tradingview["url"]
         assert "月首周 1.618" in sent[0][1]["json"]["text"].splitlines()[0]
+        assert "BTC 上轨 · 1H 收回" in sent[0][1]["json"]["text"].splitlines()[0]
+        assert "1H收回收盘" in sent[0][1]["json"]["text"]
+        assert "仅为触价提醒" not in sent[0][1]["json"]["text"]
+        assert any(path == "/api/v5/market/history-candles" and params["limit"] == "1"
+                   and params["after"] == str(h1_close) for path, params in client.paths)
         assert service.events_after(0)[0]["event_id"] == "2026-11|BTC-USDT-SWAP|upper"
+
+    def test_touch_hour_equal_to_level_is_not_an_inside_reclaim(self, tmp_path):
+        now = ms(2026, 11, 11, 12, 34)
+        sent = []
+        service, _, client, window = self._service(tmp_path, now=now,
+            sender=lambda *a, **k: sent.append((a, k)) or FakeResponse({"ok": True, "result": {"message_id": 1}}))
+        service.book.set_enabled("telegram", True, now - 1000)
+        h1_open = now // HOUR_MS * HOUR_MS
+        service.book.touch(month=window["month"], symbol="BTC-USDT-SWAP", side="upper", level=100,
+                           price=100, candle_extreme=101, occurred_ms=now + 1,
+                           candle_ms=now // MINUTE_MS * MINUTE_MS, created_ms=now + 1,
+                           expires_ms=window["expires_ms"], source="live", candle_confirmed=False)
+        close_ms = h1_open + HOUR_MS
+        client.now_ms = close_ms + 1000
+        client.rows = source_rows(window, client.now_ms)
+        candle = next(row for row in client.rows if row["t"] == h1_open)
+        candle["c"] = 100.0
+        candle["h"] = 100.0
+
+        assert service.deliver_once("telegram", client.now_ms)
+        assert sent == []
+        assert service.book.channel_status("telegram")["counts"] == {"skipped": 1}
+        assert service.book.notice_statuses(window["month"])["2026-11|BTC-USDT-SWAP|upper"]["telegram"]["error"] == "not_reclaimed_1h_close"
+
+    def test_lower_touch_notifies_only_after_strict_inside_h1_close(self, tmp_path):
+        now = ms(2026, 11, 11, 12, 34)
+        sent = []
+        service, _, client, window = self._service(tmp_path, now=now,
+            sender=lambda *a, **k: sent.append((a, k)) or FakeResponse({"ok": True, "result": {"message_id": 772}}))
+        service.book.set_enabled("telegram", True, now - 1000)
+        h1_open = now // HOUR_MS * HOUR_MS
+        service.book.touch(month=window["month"], symbol="BTC-USDT-SWAP", side="lower", level=100,
+                           price=99, candle_extreme=98, occurred_ms=now + 1,
+                           candle_ms=now // MINUTE_MS * MINUTE_MS, created_ms=now + 1,
+                           expires_ms=window["expires_ms"], source="live", candle_confirmed=False)
+        client.now_ms = h1_open + HOUR_MS + 1000
+        client.rows = source_rows(window, client.now_ms)
+        candle = next(row for row in client.rows if row["t"] == h1_open)
+        candle["c"] = 100.01
+        candle["h"] = 100.01
+
+        with patch("yoyo.monitor.month_first_week_1618_service.telegram_credentials",
+                   return_value=("test-token", "test-chat")):
+            assert service.deliver_once("telegram", client.now_ms)
+        assert len(sent) == 1
+        assert "1H收回收盘 100.01" in sent[0][1]["json"]["text"]
+        assert service.book.channel_status("telegram")["counts"] == {"sent": 1}
+
+    def test_enabling_before_touch_h1_close_schedules_the_recent_live_touch(self, tmp_path):
+        now = ms(2026, 11, 11, 12, 34)
+        sent = []
+        service, _, client, window = self._service(tmp_path, now=now,
+            sender=lambda *a, **k: sent.append((a, k)) or FakeResponse({"ok": True, "result": {"message_id": 773}}))
+        touch_ms = now + 1000
+        service.book.touch(month=window["month"], symbol="BTC-USDT-SWAP", side="upper", level=100,
+                           price=100, candle_extreme=101, occurred_ms=touch_ms,
+                           candle_ms=now // MINUTE_MS * MINUTE_MS, created_ms=touch_ms,
+                           expires_ms=window["expires_ms"], source="live", candle_confirmed=False)
+        assert service.book.channel_status("telegram")["counts"] == {}
+
+        service.book.set_enabled("telegram", True, touch_ms + 1000)
+        h1_open = now // HOUR_MS * HOUR_MS
+        close_ms = h1_open + HOUR_MS
+        with service.book.db() as db:
+            notice = dict(db.execute("SELECT due_ms,send_until_ms FROM notices WHERE event_id=?",
+                                     ("2026-11|BTC-USDT-SWAP|upper",)).fetchone())
+        assert notice == {"due_ms": close_ms, "send_until_ms": close_ms + FRESH_MS}
+
+        client.now_ms = close_ms + 1000
+        client.rows = source_rows(window, client.now_ms)
+        with patch("yoyo.monitor.month_first_week_1618_service.telegram_credentials",
+                   return_value=("test-token", "test-chat")):
+            assert service.deliver_once("telegram", client.now_ms)
+        assert len(sent) == 1
+
+    def test_reenabling_same_open_hour_requeues_subscription_skipped_touch_once(self, tmp_path):
+        now = ms(2026, 11, 11, 12, 34)
+        sent = []
+        service, _, client, window = self._service(tmp_path, now=now,
+            sender=lambda *a, **k: sent.append((a, k)) or FakeResponse({"ok": True, "result": {"message_id": 778}}))
+        service.book.set_enabled("telegram", True, now - 1000)
+        touch_ms = now + 1000
+        service.book.touch(month=window["month"], symbol="BTC-USDT-SWAP", side="upper", level=100,
+                           price=100, candle_extreme=101, occurred_ms=touch_ms,
+                           candle_ms=now // MINUTE_MS * MINUTE_MS, created_ms=touch_ms,
+                           expires_ms=window["expires_ms"], source="live", candle_confirmed=False)
+        event_id = "2026-11|BTC-USDT-SWAP|upper"
+        service.book.set_enabled("telegram", False, touch_ms + 1000)
+        assert service.book.notice_statuses(window["month"])[event_id]["telegram"]["error"] == "subscription_changed"
+
+        service.book.set_enabled("telegram", True, touch_ms + 2000)
+        with service.book.db() as db:
+            row = dict(db.execute("SELECT status,generation,send_until_ms,error FROM notices WHERE event_id=?",
+                                  (event_id,)).fetchone())
+        close_ms = (now // HOUR_MS + 1) * HOUR_MS
+        assert row == {"status": "pending", "generation": 3,
+                       "send_until_ms": close_ms + FRESH_MS, "error": None}
+
+        client.now_ms = close_ms + 1000
+        client.rows = source_rows(window, client.now_ms)
+        with patch("yoyo.monitor.month_first_week_1618_service.telegram_credentials",
+                   return_value=("test-token", "test-chat")):
+            assert service.deliver_once("telegram", client.now_ms)
+        assert len(sent) == 1
+        assert service.book.channel_status("telegram")["counts"] == {"sent": 1}
+
+    def test_telegram_rate_limit_uses_the_close_based_delivery_deadline(self, tmp_path):
+        now = ms(2026, 11, 11, 12, 34)
+        limited = FakeResponse({"error_code": 429, "parameters": {"retry_after": 5}}, status=429)
+        service, _, client, window = self._service(tmp_path, now=now, sender=lambda *a, **k: limited)
+        service.book.set_enabled("telegram", True, now - 1000)
+        h1_open = now // HOUR_MS * HOUR_MS
+        service.book.touch(month=window["month"], symbol="BTC-USDT-SWAP", side="upper", level=100,
+                           price=100, candle_extreme=101, occurred_ms=now + 1,
+                           candle_ms=now // MINUTE_MS * MINUTE_MS, created_ms=now + 1,
+                           expires_ms=window["expires_ms"], source="live", candle_confirmed=False)
+        close_ms = h1_open + HOUR_MS
+        client.now_ms = close_ms + 1000  # After touch+90s, still inside close+90s.
+        client.rows = source_rows(window, client.now_ms)
+        candle = next(row for row in client.rows if row["t"] == h1_open)
+        candle["c"] = 99.0
+        candle["h"] = 99.0
+
+        with patch("yoyo.monitor.month_first_week_1618_service.telegram_credentials",
+                   return_value=("test-token", "test-chat")):
+            assert service.deliver_once("telegram", client.now_ms)
+        assert service.book.channel_status("telegram")["counts"] == {"pending": 1}
+        with service.book.db() as db:
+            notice = dict(db.execute("SELECT due_ms,send_until_ms,error FROM notices WHERE channel='telegram'").fetchone())
+        assert notice["error"] == "telegram_rate_limited"
+        assert notice["send_until_ms"] == close_ms + FRESH_MS
+        assert notice["due_ms"] == client.now_ms + 5000
+
+    def test_claim_rechecks_fresh_close_deadline_after_candle_read(self, tmp_path):
+        now = ms(2026, 11, 11, 12, 34)
+        sent = []
+        service, _, client, window = self._service(tmp_path, now=now,
+            sender=lambda *a, **k: sent.append((a, k)) or FakeResponse({"ok": True, "result": {"message_id": 774}}))
+        service.book.set_enabled("telegram", True, now - 1000)
+        h1_open = now // HOUR_MS * HOUR_MS
+        service.book.touch(month=window["month"], symbol="BTC-USDT-SWAP", side="upper", level=100,
+                           price=100, candle_extreme=101, occurred_ms=now + 1,
+                           candle_ms=now // MINUTE_MS * MINUTE_MS, created_ms=now + 1,
+                           expires_ms=window["expires_ms"], source="live", candle_confirmed=False)
+        close_ms = h1_open + HOUR_MS
+        before_deadline = close_ms + 1000
+        client.now_ms = before_deadline
+        client.rows = source_rows(window, client.now_ms)
+        candle = next(row for row in client.rows if row["t"] == h1_open)
+        candle["c"] = 99.0
+        candle["h"] = 99.0
+        original = client.get
+
+        def candle_read(*args, **kwargs):
+            result = original(*args, **kwargs)
+            if args[0] == "/api/v5/market/history-candles":
+                client.now_ms = close_ms + FRESH_MS + 1
+            return result
+
+        client.get = candle_read
+        with patch("yoyo.monitor.month_first_week_1618_service.telegram_credentials",
+                   return_value=("test-token", "test-chat")):
+            assert service.deliver_once("telegram", before_deadline)
+        assert sent == []
+        assert service.book.channel_status("telegram")["counts"] == {"skipped": 1}
 
     def test_boot_current_minute_touch_is_history_not_a_fresh_notification(self, tmp_path):
         now = ms(2026, 11, 11, 12, 34, 20)
@@ -281,6 +499,10 @@ class TestMonthFirstWeekService:
         app = FastAPI()
         install(app, service)
         routes = {route.path: route.endpoint for route in app.routes if hasattr(route, "path")}
+        service._configured = lambda channel: False
+        channels = routes["/api/month-first-week-1618/channels"]()
+        assert set(channels) == {"telegram", "bark"}
+        assert all("enabled" in row and "configured" in row for row in channels.values())
         status = routes["/api/month-first-week-1618"]()
         assert status["schema"] == "month_first_week_1618.v1"
         assert status["month"] == "2026-11"

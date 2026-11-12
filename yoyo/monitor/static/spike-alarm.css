@@ -252,3 +252,8 @@ html[data-theme=dark] #spike-alarm-replay{--sa-sheet:rgba(22,27,36,.97);border-c
 @media(prefers-reduced-motion:reduce){#spike-alarm-dock *,#spike-alarm-dialog *,#spike-alarm-dialog{animation:none!important;transition:none!important}.sa-edge{opacity:.8}.sa-particles{display:none}}
 #spike-alarm-dock .sa-book-link{align-self:flex-start;margin:2px 0 10px;color:var(--brand-primary);font-size:12px;text-decoration:none}
 #spike-alarm-dock .sa-book-link:hover{text-decoration:underline}
+
+#spike-alarm-settings .sa-month-rule {font-size:12px;color:var(--text-secondary);margin:5px 0 10px;line-height:1.6}
+#spike-alarm-settings .sa-month-rule strong {display:block;color:var(--text-primary);font-size:13px}
+#spike-alarm-settings [data-month-feedback] {margin:5px 0;font-size:11px;color:var(--text-secondary)}
+#spike-alarm-settings .sa-month-ledger {display:inline-block;padding:7px 0;color:var(--brand-primary);font-size:11px}

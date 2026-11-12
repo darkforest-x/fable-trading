@@ -29,7 +29,7 @@ class WindowsChartLinkContract(unittest.TestCase):
         return subprocess.run([str(self.exe), "--validate", link, layout], capture_output=True, text=True, timeout=5)
 
     def test_exact_contract_and_period_survive(self):
-        for period, interval in [("5m", "5"), ("15m", "15"), ("30m", "30"), ("1H", "60"), ("4H", "240"), ("1Dutc", "1D")]:
+        for period, interval in [("1m", "1"), ("2m", "2"), ("3m", "3"), ("5m", "5"), ("15m", "15"), ("30m", "30"), ("1H", "60"), ("4H", "240"), ("12H", "720"), ("1Dutc", "1D")]:
             for symbol, ticker in [("BTC-USDT-SWAP", "BTCUSDT.P"), ("1000PEPE-USDT-SWAP", "1000PEPEUSDT.P"), ("ETH-USDC-SWAP", "ETHUSDC.P")]:
                 with self.subTest(symbol=symbol, period=period):
                     response = self.parse(LINK.replace("BTC-USDT-SWAP", symbol).replace("15m", period))
@@ -44,7 +44,7 @@ class WindowsChartLinkContract(unittest.TestCase):
         self.assertEqual(response.returncode, 0)
         self.assertEqual(json.loads(response.stdout), {"Symbol": "BZ-USDT-SWAP", "Timeframe": "15m",
             "ChartUrl": LAYOUT + "?symbol=OKX%3ABZUSDT.P&interval=15"})
-        for period in ["5m", "15m", "30m", "1H", "4H", "1Dutc"]:
+        for period in ["1m", "2m", "3m", "5m", "15m", "30m", "1H", "4H", "12H", "1Dutc"]:
             with self.subTest(period=period):
                 normalized = self.parse(link.replace("15m", period))
                 original = self.parse(link.replace("open/?", "open?").replace("15m", period))
@@ -58,7 +58,7 @@ class WindowsChartLinkContract(unittest.TestCase):
             LINK.replace("//open?", "//open/path?"), LINK.replace("//open?", "//open//?"),
             LINK.replace("//open?", "//open/%2F?"), LINK.replace("//open?", "//open/../?"),
             LINK + "#fragment", LINK + "&symbol=ETH-USDT-SWAP",
-            LINK + "&url=https://evil.test", LINK.replace("15m", "1m"), LINK.replace("BTC", "BTC%0A"),
+            LINK + "&url=https://evil.test", LINK.replace("15m", "7m"), LINK.replace("BTC", "BTC%0A"),
             LINK + '\" & calc.exe', LINK + "\n", LINK.replace("BTC", "A" * 31), "--other"]:
             with self.subTest(link=link):
                 self.assertEqual(self.parse(link).returncode, 2)

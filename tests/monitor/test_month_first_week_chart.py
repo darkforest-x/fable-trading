@@ -43,7 +43,8 @@ def setup_chart(tmp_path, history, *, source, created):
                created_ms=created, expires_ms=anchor["expires_ms"], source=source, candle_confirmed=True)
     app = FastAPI()
     app.state.monday_chart_history = history
-    install(app, SimpleNamespace(book=book, quote_source=SimpleNamespace(symbols=[SYMBOL])))
+    monday_book = SimpleNamespace(records=lambda week: [], events=lambda month: [])
+    install(app, SimpleNamespace(book=book, quote_source=SimpleNamespace(symbols=[SYMBOL], book=monday_book)))
     return TestClient(app)
 
 
@@ -115,6 +116,7 @@ def test_level_overlay_uses_only_frozen_prices_for_selected_contract(tmp_path):
     assert [r["month"] for r in result["ranges"]] == ["2026-10", "2026-11"]
     assert result["symbol"] == SYMBOL and result["ranges"][0]["expires_ms"] == past["expires_ms"]
     assert http.get(http_path, params={"symbol": "OTHER-USDT-SWAP"}).json()["ranges"] == []
+    assert "/api/touch-reclaims" in {route.path for route in http.app.routes}
     history.levels.read_display = lambda *_: dict(state="missing_monday")
     event = http.get("/api/month-first-week-1618/chart", params=dict(event_id=EVENT, period="30m"))
     assert event.status_code == 200 and event.json()["weekly_ranges"] == []

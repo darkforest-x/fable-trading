@@ -149,7 +149,7 @@ body.cloud-drawer-open{overflow:hidden!important}
 
 /* Stitch 4994f7337f9b4e968ef2edaba94c2b5e: the chart is the page wallpaper,
  * with independent glass controls, never a non-modal dialog in disguise. */
-#monday-reclaim-paper.is-cloud-layout > :not(.rp-cloud-wallpaper,.rp-context,.rp-watch-panel,.is-backtest > .bt-mode,.is-backtest > .bt-panel.is-open){visibility:hidden;pointer-events:none}
+#monday-reclaim-paper.is-cloud-layout > :not(.rp-cloud-wallpaper,.rp-context,.rp-records.is-open,.rp-watch-panel,.is-backtest > .bt-mode,.is-backtest > .bt-panel.is-open){visibility:hidden;pointer-events:none}
 #monday-reclaim-paper #cloud-signal-wallpaper{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;border-radius:0!important;box-shadow:none;background:transparent;z-index:auto;animation:none;overflow:hidden}
 #monday-reclaim-paper.is-backtest #cloud-signal-wallpaper{inset:var(--bt-header) 0 0 var(--bt-sidebar);width:auto;height:auto}
 #monday-reclaim-paper.is-backtest #cloud-signal-wallpaper .cs-drawer-head{top:8px;left:12px;right:12px;justify-content:space-between}
@@ -166,8 +166,10 @@ body.cloud-drawer-open{overflow:hidden!important}
 #cloud-signal-wallpaper .cs-periods button{height:30px;min-height:30px;min-width:35px;padding:0 7px;border-radius:9px}
 #cloud-signal-wallpaper .cs-chart .cv-readout{top:auto;bottom:86px;left:24px;right:75px;max-width:none;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
 #monday-reclaim-paper.is-cloud-layout .rp-context{left:calc(var(--spike-nav-left,24px) + var(--spike-nav-width,112px) + 12px);top:var(--spike-nav-top,18px);width:220px;max-width:none;padding:0 8px;border-radius:22px;z-index:6}
-#monday-reclaim-paper.is-cloud-layout .rp-context :is(.rp-selection-status,.rp-selection-note,.rp-context-tools,.rp-signal-link,.rp-context-score){display:none!important}
-#monday-reclaim-paper.is-cloud-layout .rp-context-line{height:44px}
+#monday-reclaim-paper.is-cloud-layout .rp-context :is(.rp-selection-status,.rp-selection-note,.rp-track-picker,.rp-signal-link,.rp-context-score){display:none!important}
+#monday-reclaim-paper.is-cloud-layout .rp-context{display:flex;align-items:center}
+#monday-reclaim-paper.is-cloud-layout .rp-context-tools{display:contents}
+#monday-reclaim-paper.is-cloud-layout .rp-context-line{height:44px;flex:1;min-width:0}
 #monday-reclaim-paper.is-cloud-layout .rp-symbol-trigger{width:100%;justify-content:space-between}
 #monday-reclaim-paper.is-cloud-layout .rp-watch-panel{top:76px;z-index:9}
 #monday-reclaim-paper.is-chart-focused #cloud-signal-wallpaper :is(.cs-drawer-head,.cs-dock,.cs-plan,.cs-history-status,.cs-layer-menu){visibility:hidden!important;pointer-events:none!important}

@@ -38,7 +38,7 @@ test('monthly levels validate ordered anchors and draw four distinct, low-clutte
  assert.equal(lines[4].historical,false);assert.equal(lines[4].inlineNameVisible,true);
  assert.deepEqual(lines.slice(0,4).map(line=>line.start_ms),Array(4).fill(october.ready_ms));
  assert.deepEqual(lines.slice(4).map(line=>line.end_ms),Array(4).fill(november.expires_ms));
- assert.equal(lines.find(line=>line.label==='月首周上 1.618').lineStyle,2);
+ assert.ok(lines.every(line=>line.lineStyle===0),'all monthly rails are solid');
  assert.throws(()=>validateMonthlyRanges({symbol:row.symbol,ranges:[november,october]},row.symbol),/顺序/);
 });
 test('weekly and monthly overlays share the canonical chart without changing weekly level semantics',()=>{
@@ -66,6 +66,9 @@ test('monthly event frame keeps exact marker and selects only the weekly range c
  assert.ok(frame.levels.slice(0,-4).every(level=>level.week==='2026-11-09'));
  assert.equal(frame.levels.at(-3).start_ms,november.ready_ms);
  assert.equal(frame.level_window.end_ms,november.expires_ms);
+ const withoutMonthly=monthlyEventFrame(data,{symbol:row.symbol,eventId:data.event_id,period:'1H',includeMonthly:false});
+ assert.equal(withoutMonthly.levels.length,9);assert.ok(withoutMonthly.levels.every(level=>!level.monthly));
+ assert.equal(withoutMonthly.marker_ms,data.marker_ms);assert.equal(withoutMonthly.monthlyEvent.event_id,data.event_id);
  assert.throws(()=>validateMonthlyEvent({...data,event_id:'other'},{symbol:row.symbol,eventId:data.event_id,period:'1H'}),/不匹配/);
  assert.throws(()=>validateMonthlyEvent({...data,marker_ms:data.marker_ms+1},{symbol:row.symbol,eventId:data.event_id,period:'1H'}),/标记/);
 });
@@ -109,6 +112,29 @@ test('canonical event chart uses the exact signal, eight labeled rails, first-we
  assert.deepEqual(JSON.parse(JSON.stringify(h.markers.at(-1))),[{time:data.marker_ms/1000,position:'aboveBar',shape:'arrowDown',color:'#b86542',text:'首周触价'}]);
  assert.deepEqual(JSON.parse(JSON.stringify(h.ranges.at(-1))),{from:0,to:2});assert.equal(view.candleColor(drawn.candles[0]),'#30D158');assert.equal(view.candleColor(drawn.candles[1]),'#8B9099');
  assert.match(h.status.textContent,/已标记/);h.api.hide();
+});
+test('monthly event mounts the workspace drawing tools before painting its trigger marker',async()=>{
+ const h=monthlyChartHarness(),data=monthlyEvent(),bound=[];
+ const api=h.api.create({monthly:true,decorate:(instance,frame)=>{
+   bound.push([frame.symbol,frame.bar]);
+   instance.series.setMarkers([]);
+ }});
+ api.showMonthlyEvent(h.host,row.symbol,data.event_id,{period:'1H'});
+ h.pending[0].resolve({ok:true,json:async()=>data});await h.settle();
+ assert.ok(bound.length>0);
+ assert.ok(bound.every(([symbol,period])=>symbol===row.symbol&&period==='1H'));
+ assert.equal(h.markers.at(-1)[0].time,data.marker_ms/1000);
+ api.hide();
+});
+test('monthly event overlay can be hidden without losing its trigger marker or moving averages',async()=>{
+ const h=monthlyChartHarness(),data=monthlyEvent();h.api.setMonthly(false);
+ h.api.showMonthlyEvent(h.host,row.symbol,data.event_id,{period:'1H',ma:true});
+ h.pending[0].resolve({ok:true,json:async()=>data});await h.settle();
+ let drawn=h.rendered.at(-1).data,view=h.rendered.at(-1).view;
+ assert.equal(drawn.levels.length,4);assert.ok(drawn.levels.every(level=>!level.monthly));
+ assert.equal(view.ma,true);assert.equal(h.markers.at(-1).length,1);
+ await h.api.setMonthly(true);drawn=h.rendered.at(-1).data;
+ assert.equal(drawn.levels.filter(level=>level.monthly).length,4);assert.equal(h.markers.at(-1).length,1);h.api.hide();
 });
 test('uncertain monthly event charts are fetched again after closing instead of cached without a marker',async()=>{
  const h=monthlyChartHarness(),data=monthlyEvent({marker_ms:null,candles:[bar(Date.parse('2026-11-12T11:00:00Z')),bar(Date.parse('2026-11-12T12:00:00Z'))]});

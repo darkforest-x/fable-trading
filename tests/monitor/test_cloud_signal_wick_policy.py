@@ -44,13 +44,14 @@ def test_old_rejection_rows_are_ignored_without_rewriting_original_events(tmp_pa
         assert db.execute('SELECT eligible FROM signal_positions').fetchone()[0]==0
 
 
-def test_fresh_whole_candle_beyond_cloud_notifies_once_using_fixed_stop(tmp_path):
+def test_fresh_whole_candle_beyond_cloud_remains_viewable_without_notification(tmp_path):
     now=[T+STEP-1]
     sender=Mock(return_value=Mock(status_code=200,json=lambda:dict(ok=True,code=200)))
     service=engine(tmp_path,now,sender)
     service.activate();now[0]+=2
     bar,point,anchor=example();bar['high']=97.9
     service.record(signal('BTC-USDT-SWAP',bar,point,anchor,now[0]))
-    service.deliver_pending();service.deliver_pending()
-    assert sender.call_count==2
-    assert '固定止损 92.4127（1.5%）' in sender.call_args_list[0].kwargs['json']['text']
+    plan = service.snapshot()['items'][0]
+    assert plan['notifications'] == {'telegram': 'record_only', 'bark': 'record_only'}
+    assert plan['stop'] == pytest.approx(92.4127)
+    sender.assert_not_called()

@@ -89,9 +89,9 @@ test('signal filters and R sort never mutate the source order or plan',()=>{
  assert.equal(select(source,'','-1','oldest').length,1);
  assert.equal(JSON.stringify(source),before);
 });
-test('TradingView uses 720 for 12H and an existing Windows-compatible interval otherwise',()=>{
+test('Windows opens 12H and the other chart periods locally',()=>{
  global.window={SpikeMondayList:{tradingViewURL:require('../../yoyo/monitor/static/monday-list-model.js').tradingViewURL}};
- assert.match(tvURL('BTC-USDT-SWAP','12H','Win32'),/https:.*interval=720$/);
+ assert.match(tvURL('BTC-USDT-SWAP','12H','Win32'),/^spike-tradingview:.*timeframe=12H$/);
  assert.match(tvURL('BTC-USDT-SWAP','4H','Win32'),/^spike-tradingview:.*timeframe=4H$/);
  assert.match(tvURL('BTC-USDT-SWAP','1D','Win32'),/timeframe=1Dutc$/);
  assert.match(tvURL('BTC-USDT-SWAP','1H','MacIntel'),/interval=60$/);

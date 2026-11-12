@@ -6,6 +6,7 @@
   const CANDLE_DEFAULTS=Object.freeze({up:'#8B9099',down:'#8B9099',monday:'#30D158',weekend:'#8B9099'});
   const DEFAULTS=Object.freeze({
     candleEnabled:false,
+    monthlyEnabled:true,
     candleColors:CANDLE_DEFAULTS,
     lines:Object.freeze(Object.fromEntries(LABELS.map(label=>[label,Object.freeze({color:null,width:1,style:'solid'})])))
   });
@@ -27,7 +28,7 @@
       const line=source.lines?.[label]&&typeof source.lines[label]==='object'?source.lines[label]:{};
       return [label,{color:line.color===null?null:hex(line.color),width:[1,2,3].includes(line.width)?line.width:1,style:Object.hasOwn(STYLE_CODES,line.style)?line.style:'solid'}];
     }));
-    return {candleEnabled:source.candleEnabled===true,candleColors,lines};
+    return {candleEnabled:source.candleEnabled===true,monthlyEnabled:source.monthlyEnabled===undefined?true:source.monthlyEnabled===true,candleColors,lines};
   }
   function read(storage){try{
     const saved=JSON.parse(storage.getItem(KEY)),value=normalize(saved);

@@ -319,7 +319,7 @@
 <section id="spike-alarm-settings" class="sa-settings" aria-labelledby="spike-alarm-settings-title" hidden>
 <header class="sa-settings-head"><span class="sa-settings-icon" aria-hidden="true">${bell}</span><h2 id="spike-alarm-settings-title">全市场报警</h2><div class="sa-status" role="status"><i class="sa-dot" aria-hidden="true"></i><span data-sa="connection"></span><span class="sa-health" data-sa="health" hidden></span><i class="sa-spin" aria-hidden="true"></i></div></header>
 <button type="button" class="sa-reconnect" data-sa-action="reconnect" hidden>重新连接</button>
-<div class="sa-tabs" role="group" aria-label="报警中心视图"><button type="button" data-sa-tab="overview" aria-pressed="true">概览</button><button type="button" data-sa-tab="history" aria-pressed="false">历史 <span data-sa="history-count"></span></button></div>
+<div class="sa-tabs" role="group" aria-label="报警中心视图"><button type="button" data-sa-tab="overview" aria-pressed="true">概览</button><button type="button" data-sa-tab="notifications" aria-pressed="false">通知</button><button type="button" data-sa-tab="history" aria-pressed="false">历史 <span data-sa="history-count"></span></button></div>
 <a class="sa-book-link" data-breadth-book href="/?book=breadth-ema20#signals?pane=reclaim">全市场下轨反弹 · 策略小册 ↗</a>
 <div class="sa-body">
 <div class="sa-pane" data-sa-pane="overview">
@@ -328,6 +328,7 @@
 <p class="sa-rule" data-sa="rules" hidden></p>
 <p class="sa-last" data-sa="last"></p>
 </div>
+<div class="sa-pane" data-sa-pane="notifications" hidden><p class="sa-month-rule"><strong>月首周 1H 收回</strong>首次触及 1.618 的那根 1H 收盘回到轨内时提醒。</p><div class="sa-list">${['telegram','bark'].map(channel=>`<div class="sa-row"><span class="sa-row-title">${channel==='telegram'?'Telegram':'Bark'}</span><button type="button" class="sa-switch" role="switch" disabled aria-checked="false" aria-label="月首周 1H 收回 ${channel==='telegram'?'Telegram':'Bark'} 通知" data-month-channel="${channel}"><span></span></button></div>`).join('')}</div><p data-month-feedback role="status"></p><a class="sa-month-ledger" href="#signals?pane=reclaim&amp;tab=events&amp;source=cloud&amp;ledger=1">12H 云带仅记录 · 查看触价 ↗</a></div>
 <div class="sa-pane" data-sa-pane="history" hidden>
 <div class="sa-history-bar"><span data-sa="history-summary"></span></div>
 <p class="sa-settings-error" data-sa="history-error" role="status"></p>
@@ -376,9 +377,46 @@
       dock.querySelector('[data-sa=sound-note]').textContent=on||audioState==='off'?'':soundNotes[audioState];
       speakerButton.title=label;speakerButton.setAttribute('aria-label',label);speakerButton.setAttribute('aria-pressed',String(on));speakerButton.disabled=busy;
     }
+    const monthApi='/api/month-first-week-1618', monthStatus=dock.querySelector('[data-month-feedback]');
+    let savingMonth=false,readingMonth=0;
+    const monthSwitches=()=>Array.from(dock.querySelectorAll('[data-month-channel]'));
+    function setChannel(button,status){
+      button.disabled=!status||(!status.enabled&&!status.configured);
+      button.setAttribute('aria-checked',String(!!status?.enabled));
+      button.title=status&&!status.configured?'渠道未配置':'';
+    }
+    async function loadChannels(feedback=''){
+      if(savingMonth)return;
+      const seq=++readingMonth;
+      monthStatus.textContent='正在读取…';
+      monthSwitches().forEach(b=>b.disabled=true);
+      try{
+        const response=await env.fetch(monthApi+'/channels',{cache:'no-store',credentials:'same-origin'});
+        if(!response.ok)throw Error();
+        const channels=await response.json();
+        if(seq!==readingMonth)return;
+        monthSwitches().forEach(b=>setChannel(b,channels[b.dataset.monthChannel]));
+        monthStatus.textContent=feedback||(Object.values(channels).some(v=>!v.configured)?'未配置的渠道无法开启。':'');
+      }catch{if(seq===readingMonth)monthStatus.textContent='无法读取渠道，重新打开通知可重试。';}
+    }
+    dock.addEventListener('click',async event=>{
+      if(event.target.closest('.sa-month-ledger')){settings(false);return;}
+      const button=event.target.closest('[data-month-channel]');
+      if(!button||savingMonth||button.disabled)return;
+      const channel=button.dataset.monthChannel,enabled=button.getAttribute('aria-checked')!=='true';
+      let feedback='已保存';
+      savingMonth=true;++readingMonth;monthSwitches().forEach(b=>b.disabled=true);monthStatus.textContent='正在保存…';
+      try{
+        const r=await env.fetch(monthApi+'/'+channel,{method:'PUT',credentials:'same-origin',
+          headers:{'Content-Type':'application/json','X-Spike-Action':'update-month-first-week-1618-'+channel},body:JSON.stringify({enabled})});
+        if(!r.ok)throw Error();
+        setChannel(button,await r.json());
+      }catch{feedback='保存失败，请重试。';}
+      finally{savingMonth=false;if(!panel.hidden&&tab==='notifications')loadChannels(feedback);}
+    });
     function settings(open){
       const was=!panel.hidden;panel.hidden=!open;trigger.setAttribute('aria-expanded',String(open));
-      if(open&&!was){refreshHistory();(dock.querySelector(`[data-sa-tab=${tab}]`)).focus();}
+      if(open&&!was){if(tab==='notifications')loadChannels();else refreshHistory();(dock.querySelector(`[data-sa-tab=${tab}]`)).focus();}
     }
     // ---- History (read on demand) ----
     let tab='overview',historySeen=null,lastData=null,fetchedAt=0;const expanded=new Set();
@@ -386,7 +424,7 @@
     const serverNow=()=>lastData?lastData.now_ms+Math.max(0,env.Date.now()-fetchedAt):env.Date.now();
     function refreshHistory(){historySeen=state?state.alerts.map(a=>a.id).join(','):null;historyStore.load();}
     function setTab(next){
-      tab=next;for(const b of dock.querySelectorAll('[data-sa-tab]'))b.setAttribute('aria-pressed',String(b.dataset.saTab===tab));
+      tab=next;if(!panel.hidden){if(next==='notifications')loadChannels();else if(historySeen==null)refreshHistory();}for(const b of dock.querySelectorAll('[data-sa-tab]'))b.setAttribute('aria-pressed',String(b.dataset.saTab===tab));
       for(const pane of dock.querySelectorAll('[data-sa-pane]'))pane.hidden=pane.dataset.saPane!==tab;
     }
     const marks={sent:['✓','ok'],failed:['✕','bad'],unknown:['?','wait'],pending:['…','muted'],no_channel:['—','muted']};
@@ -638,7 +676,7 @@ ${coins.length?`<button type="button" class="sa-h-open" data-sa-chart="${a.id}">
     }
     function render(next){
       state=next;syncSound();
-      if(!panel.hidden&&historySeen!==next.alerts.map(a=>a.id).join(','))refreshHistory();
+      if(!panel.hidden&&tab!=='notifications'&&historySeen!==next.alerts.map(a=>a.id).join(','))refreshHistory();
       const connection=next.connection==='live'?'报警推送已连接':next.connection==='connecting'?'正在连接报警推送…':next.connection==='unsupported'?'此浏览器无法接收报警，请使用新版浏览器。':next.connection==='invalid'?'报警数据异常，正在等待有效推送。':next.connection==='offline'?'报警推送已断开，请重新连接。':'报警推送已断开，正在重连…';
       const strip=dock.querySelector('.sa-status');dock.dataset.tone=next.connection==='live'?'ok':['connecting','reconnecting'].includes(next.connection)?'wait':'bad';
       strip.querySelector('[data-sa=connection]').textContent=statusText[next.connection]||statusText.reconnecting;strip.title=connection;$('.sa-connection').textContent=next.connection==='live'?'':connection;
@@ -683,7 +721,12 @@ ${coins.length?`<button type="button" class="sa-h-open" data-sa-chart="${a.id}">
     });
     $('.sa-open-page').addEventListener('click',()=>{if(deskAlert)controller.acknowledge(deskAlert.id);});
     dialog.addEventListener('cancel',e=>e.preventDefault());
-    doc.addEventListener('click',e=>{if(!dock.contains(e.target)&&!replay.contains(e.target))settings(false);});
+    doc.addEventListener('click',e=>{
+      if(e.target.closest('[data-sa-open-month]')){
+        setTab('notifications');settings(true);
+        dock.querySelector('[data-sa-tab=notifications]').focus();
+      }else if(!dock.contains(e.target)&&!replay.contains(e.target))settings(false);
+    });
     doc.addEventListener('keydown',e=>{if(e.key==='Escape'&&!dialog.open&&!replay.open&&!panel.hidden){settings(false);trigger.focus();}});
     const hide=()=>{controller.stop();audio.stop();motion.stop();historyStore.abort();stopDesk();if(replay.open)replay.close();};env.addEventListener('pagehide',hide);env.addEventListener('pageshow',()=>controller.start());
     // The shared chart skips its fetch while the page is hidden and does not retry by itself. Alarms often fire in

@@ -1,0 +1,55 @@
+/* Stitch 87374a99 / 12cf14b0. Compact non-modal book uses the chart's theme. */
+#monday-reclaim-paper #rp-record-panel {
+  width:min(380px,calc(100% - 28px));border-radius:14px;
+  background:var(--glass-opaque-panel);backdrop-filter:none;-webkit-backdrop-filter:none;
+}
+#monday-reclaim-paper .rp-ledger-heading {gap:2px;padding:7px 10px 5px;border-bottom:1px solid var(--rp-edge);}
+#monday-reclaim-paper .rp-ledger-heading>strong {order:-2;flex:0 1 auto;overflow:hidden;text-overflow:ellipsis;font-size:13px;color:var(--rp-ink);}
+#monday-reclaim-paper .rp-ledger-heading>button,
+#monday-reclaim-paper .rp-ledger-heading .rp-record-sort,
+#monday-reclaim-paper .rp-ledger-heading .rp-record-sort select {width:32px;min-width:32px;height:32px;min-height:32px;}
+#monday-reclaim-paper .rp-ledger-period {order:-1;flex:1;width:auto;min-width:0;justify-content:flex-start;white-space:nowrap;font-size:10px;padding:0 4px;}
+#monday-reclaim-paper .rp-ledger-heading.is-searching .rp-ledger-period {display:none;}
+#monday-reclaim-paper .rp-ledger-filter {gap:4px;}
+#monday-reclaim-paper .rp-ledger-filter .rp-ledger-tabs button {min-height:31px;height:auto;font-size:12px;}
+#monday-reclaim-paper [data-rp-action=records] {display:grid;place-content:center;min-width:36px;min-height:36px;padding:0;border-radius:8px;color:var(--rp-muted);}
+#monday-reclaim-paper [data-rp-action=records][aria-expanded=true] {color:var(--rp-blue);background:var(--rp-selected);}
+#monday-reclaim-paper .tl-controls {width:100%;flex:none;}
+#monday-reclaim-paper .tl-sources,#monday-reclaim-paper .tl-periods {display:flex;gap:1px;}
+#monday-reclaim-paper .tl-sources {border-bottom:1px solid var(--rp-edge);}
+#monday-reclaim-paper .tl-sources button,#monday-reclaim-paper .tl-periods button {
+  min-height:30px;height:auto;flex:1;padding:3px 2px;border:0;border-radius:0;color:var(--rp-muted);font-size:12px;white-space:nowrap;
+}
+#monday-reclaim-paper .tl-sources button[aria-pressed=true] {color:var(--rp-blue);box-shadow:inset 0 -2px var(--rp-blue);font-weight:650;}
+#monday-reclaim-paper .tl-periods {padding-top:4px;gap:3px;}
+#monday-reclaim-paper .tl-periods button[aria-pressed=true] {color:var(--rp-blue);background:var(--rp-selected);border-radius:5px;}
+#monday-reclaim-paper .tl-body {display:flex;flex:1;min-height:0;}
+#monday-reclaim-paper .tl-scroll {width:100%;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:0 10px 8px;}
+#monday-reclaim-paper .tl-scroll>p {color:var(--rp-muted);font-size:11px;margin:9px 4px;}
+#monday-reclaim-paper .tl-row {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;border-bottom:1px solid var(--rp-edge);font-variant-numeric:tabular-nums;}
+#monday-reclaim-paper .tl-row[data-selected=true] {background:var(--rp-selected);box-shadow:inset 2px 0 var(--rp-blue);}
+#monday-reclaim-paper .tl-pick {width:100%;display:flex;flex-direction:column;align-items:stretch;gap:3px;padding:8px;text-align:left;border-radius:4px;}
+#monday-reclaim-paper .tl-line {display:flex;align-items:baseline;gap:7px;min-width:0;}
+#monday-reclaim-paper .tl-line strong {font-size:14px;overflow:hidden;text-overflow:ellipsis;}
+#monday-reclaim-paper .tl-line b {margin-left:auto;font-size:12px;font-weight:550;}
+#monday-reclaim-paper .tl-side,#monday-reclaim-paper .tl-time {font-size:11px;color:var(--rp-muted);}
+#monday-reclaim-paper .tl-side {white-space:nowrap;}
+#monday-reclaim-paper .tl-side[data-side=upper] {color:var(--rp-negative,#b4543a);}
+#monday-reclaim-paper .tl-side[data-side=lower] {color:var(--rp-positive,#187c69);}
+#monday-reclaim-paper .tl-states {display:flex;gap:8px;flex-wrap:wrap;}
+#monday-reclaim-paper .tl-status {font-size:11px;line-height:1.5;color:var(--rp-muted);}
+#monday-reclaim-paper .tl-status[data-status=reclaimed] {color:var(--rp-positive,#187c69);font-weight:600;}
+#monday-reclaim-paper .tl-tv {font-size:11px;padding:8px 5px;color:var(--rp-blue);white-space:nowrap;text-decoration:none;}
+#monday-reclaim-paper .tl-tv:hover {text-decoration:underline;}
+#monday-reclaim-paper .rp-records [hidden] {display:none;}
+@media(max-width:700px) {
+  #monday-reclaim-paper #rp-record-panel {width:auto;height:min(44dvh,430px);max-height:calc(100dvh - 135px);left:8px;right:8px;bottom:calc(var(--chart-dock-bottom,28px) + 61px);top:auto;}
+  #monday-reclaim-paper .tl-sources button,#monday-reclaim-paper .tl-periods button {min-height:33px;}
+  #monday-reclaim-paper .tl-tv {padding:12px 8px;}
+  #monday-reclaim-paper.has-ledger .rp-order-trigger {visibility:hidden;}
+  #monday-reclaim-paper.has-ledger:not(.is-cloud-layout) .rp-context {display:flex;align-items:center;gap:6px;width:auto;max-width:calc(100% - 20px);}
+  #monday-reclaim-paper.has-ledger .rp-context :is(.rp-selection-note,.rp-selection-status) {display:none;}
+  #monday-reclaim-paper.has-ledger .rp-context .rp-context-tools {gap:5px;}
+  #monday-reclaim-paper.has-ledger .rp-track-picker {flex:0 1 auto;}
+  #monday-reclaim-paper.has-ledger .rp-track-picker>span {display:none;}
+}

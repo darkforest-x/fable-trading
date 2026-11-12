@@ -15,11 +15,11 @@ from datetime import datetime
 import json
 import math
 from pathlib import Path
+from typing import Annotated
 import sqlite3
 import threading
 from zoneinfo import ZoneInfo
 
-import requests
 from fastapi import HTTPException, Query
 
 from yoyo.data.candle_hub import validate
@@ -116,14 +116,10 @@ def notification_text(item):
 
 class CloudSignals:
     def __init__(self, runtime, *, client=None, levels=None, sender=None, telegram_creds=None, bark_key=None):
-        from . import telegram, bark
         self.runtime = Path(runtime)
         self.path = self.runtime / 'cloud-signals.sqlite3'
         self.client = client or OKX(runtime=runtime, timeout=(3, 6))
         self.levels = levels or MondayChartLevels(runtime)
-        self.sender = sender or requests.post
-        self.telegram = telegram.credentials() if telegram_creds is None else telegram_creds
-        self.bark = bark.credentials(self.runtime) if bark_key is None else bark_key
         self.stop = threading.Event()
         self.thread = None
         self.lock = threading.Lock()
@@ -200,6 +196,7 @@ class CloudSignals:
             # An interrupted HTTP request may have been delivered. Never resend it.
             for ch in ('telegram', 'bark'):
                 db.execute(f"UPDATE signals SET {ch}='unknown' WHERE {ch}='sending'")
+                db.execute(f"UPDATE signals SET {ch}='record_only' WHERE {ch}='pending'")
 
     def record(self, item, atr=None):
         now = self.client.clock()
@@ -217,12 +214,9 @@ class CloudSignals:
             row = db.execute("SELECT value FROM meta WHERE key='activated_ms'").fetchone()
             fresh = row is not None and row[0] < item['confirmed_ms'] <= now < item['confirmed_ms'] + FRESH_MS
             item = dict(item, historical=not fresh, detected_ms=now)
-            states = ['pending' if fresh and enabled and not existing_group else
-                      'suppressed' if fresh and enabled and existing_group else
-                      'historical' if not fresh else 'no_channel'
-                      for enabled in (self.telegram, self.bark)]
+            channel_state = "record_only" if fresh else "historical"
             added = db.execute('INSERT OR IGNORE INTO signals VALUES (?,?,?,?,?)',
-                              (item['id'], item['confirmed_ms'], json.dumps(item, allow_nan=False), *states)).rowcount == 1
+                              (item['id'], item['confirmed_ms'], json.dumps(item, allow_nan=False), channel_state, channel_state)).rowcount == 1
             if atr is not None and math.isfinite(atr) and atr > 0:
                 db.execute('INSERT OR IGNORE INTO reference_inputs VALUES (?,?)', (item['id'], atr))
             return added
@@ -251,50 +245,6 @@ class CloudSignals:
         return [row_by_id[item['id']] for item in first_eligible(parsed)
                 if item['id'] in row_by_id]
 
-    def deliver_pending(self):
-        now = self.client.clock()
-        with self.db() as db:
-            all_rows = db.execute('SELECT * FROM signals WHERE confirmed_ms<=? ORDER BY confirmed_ms DESC',
-                                  (now,)).fetchall()
-            eligible_ids = {r['id'] for r in self._canonical_rows(all_rows)}
-            rows = [r for r in all_rows if r['id'] in eligible_ids
-                    and (r['telegram'] == 'pending' or r['bark'] == 'pending')]
-        for row in rows:
-            if self.stop.is_set():
-                return
-            item = self.project(json.loads(row['payload']))
-            if item.get('plan_state') != 'ready':
-                continue
-            for channel, credentials in (('telegram', self.telegram), ('bark', self.bark)):
-                with self.db() as db:
-                    db.execute('BEGIN IMMEDIATE')
-                    latest = db.execute('SELECT * FROM signals WHERE confirmed_ms<=? ORDER BY confirmed_ms DESC',
-                                        (self.client.clock(),)).fetchall()
-                    if row['id'] not in {r['id'] for r in self._canonical_rows(latest)}:
-                        continue
-                    expired = self.client.clock() >= item['confirmed_ms'] + FRESH_MS
-                    state = 'expired' if expired else 'sending' if credentials else 'no_channel'
-                    claimed = db.execute(f"UPDATE signals SET {channel}=? WHERE id=? AND {channel}='pending'", (state, item['id'])).rowcount
-                if not claimed or state != 'sending':
-                    continue
-                text = notification_text(item)
-                try:
-                    if channel == 'telegram':
-                        response = self.sender('https://api.telegram.org/bot'+credentials[0]+'/sendMessage',
-                            json=dict(chat_id=credentials[1], text=text, disable_web_page_preview=True),
-                            timeout=(6, 15), allow_redirects=False)
-                        ok = response.status_code == 200 and response.json().get('ok') is True
-                    else:
-                        response = self.sender('https://api.day.app/push',
-                            json=dict(device_key=credentials, title=text.split('\n')[0], body='\n'.join(text.split('\n')[1:]),
-                                      group='cloud-12h', url='https://spikeok.com/#signals?pane=records&cloud='+item['id']),
-                            timeout=(6, 15), allow_redirects=False)
-                        ok = response.status_code == 200 and response.json().get('code') == 200
-                    state = 'sent' if ok else 'unknown' if response.status_code >= 500 else 'failed'
-                except Exception:
-                    state = 'unknown'
-                with self.db() as db:
-                    db.execute(f'UPDATE signals SET {channel}=? WHERE id=?', (state, item['id']))
 
     def scan_symbol(self, symbol, boundary):
         if self.stop.is_set():
@@ -375,10 +325,8 @@ class CloudSignals:
                         if len(self.status['error_samples']) < 8:
                             self.status['error_samples'].append(dict(symbol=jobs[future],
                                 reason='12H 收盘数据滞后' if waiting else '行情读取未完成'))
-                self.deliver_pending()
         with self.lock:
             self.status.update(state='partial' if self.status['errors'] or self.status['waiting'] else 'watching', last_scan_ms=self.client.clock())
-        self.deliver_pending()
 
     def start(self):
         if self.thread is not None:
@@ -401,7 +349,7 @@ class CloudSignals:
         if self.thread:
             self.thread.join(timeout=3)
 
-    def snapshot(self, limit=300, signal_id='', search='', side=0, sort='newest', scope='all'):
+    def snapshot(self, limit=300, signal_id='', search='', side=0, sort='newest', scope='all', offset=0):
         # Origin is immutable. Recency is a display window, not trade validity.
         now = self.client.clock()
         with self.db() as db:
@@ -441,15 +389,15 @@ class CloudSignals:
         elif scope == 'history':
             live_ids = {r['id'] for r in live_rows}
             scoped = [row for row in canonical if row['id'] not in live_ids]
-        items = [present(r) for r in scoped]
-        if sort == 'oldest':
-            items.sort(key=lambda x: (x['confirmed_ms'], x['id']))
-        elif sort == 'rr':
-            items.sort(key=lambda x: (-(x['planned_rr'] if x['planned_rr'] is not None else -math.inf),
-                                      -x['confirmed_ms'], x['id']))
+        if sort == 'rr':
+            ranked = [present(row) for row in scoped]
+            ranked.sort(key=lambda x: (-(x['planned_rr'] if x['planned_rr'] is not None else -math.inf),
+                                       -x['confirmed_ms'], x['id']))
+            items = ranked[offset:offset + limit]
         else:
-            items.sort(key=lambda x: (-x['confirmed_ms'], x['id']))
-        items = items[:limit]
+            oldest = sort == 'oldest'
+            ordered = sorted(scoped, key=lambda r: (r['confirmed_ms'] if oldest else -r['confirmed_ms'], r['id']))
+            items = [present(row) for row in ordered[offset:offset + limit]]
         with self.lock:
             status = dict(self.status)
         selected = None
@@ -470,7 +418,7 @@ class CloudSignals:
                     range_mode='fib', reference_policy=POLICY, eligibility_policy=POSITION_POLICY,
                     scope=scope, counts=counts, activated_ms=activated_ms, fresh_ms=FRESH_MS, next_close_ms=(now//STEP+1)*STEP,
                     status=dict(status, worker_alive=bool(self.thread and self.thread.is_alive()),
-                                channels=dict(telegram=bool(self.telegram), bark=bool(self.bark))))
+                                channels=dict(telegram=False, bark=False)))
 
     def history(self, symbol):
         """All stored plans for exactly one symbol, independent of card filters."""
@@ -518,6 +466,6 @@ def install(app, runtime):
     def snapshot(limit: int = Query(300, ge=1, le=1000), signal_id: str = Query('', max_length=240),
                  search: str = Query('', max_length=40), side: int = Query(0, ge=-1, le=1),
                  sort: str = Query('newest', pattern='^(newest|oldest|rr)$'),
-                 scope: str = Query('all', pattern='^(live|history|all)$')):
-        return service.snapshot(limit, signal_id, search, side, sort, scope)
+                 scope: str = Query('all', pattern='^(live|history|all)$'), offset: Annotated[int, Query(ge=0)] = 0):
+        return service.snapshot(limit, signal_id, search, side, sort, scope, offset)
 

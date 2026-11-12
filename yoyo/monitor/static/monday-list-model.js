@@ -58,11 +58,14 @@
   }
   // Stitch 2e8ce287d9fa44cdbf3036bdf6000937: Windows dispatches locally.
   // Ordinary HTTPS links stay in the browser even with Windows app associations.
-  function tradingViewURL(symbol,platform=''){
+  const tvIntervals={'1m':'1','2m':'2','3m':'3','5m':'5','15m':'15','30m':'30','1H':'60','4H':'240','12H':'720','1Dutc':'1D'};
+  function tradingViewURL(symbol,platform='',period='15m'){
+    const timeframe=period==='1D'?'1Dutc':period;
+    if(!Object.hasOwn(tvIntervals,timeframe))return '';
     if(typeof symbol!=='string'||!/^[A-Z0-9]{1,30}-USDT-SWAP$/.test(symbol))return '';
-    if(/^Win/i.test(platform))return 'spike-tradingview://open?symbol='+encodeURIComponent(symbol)+'&timeframe=15m';
+    if(/^Win/i.test(platform))return 'spike-tradingview://open?symbol='+encodeURIComponent(symbol)+'&timeframe='+timeframe;
     const ticker='OKX:'+symbol.replace('-SWAP','').replaceAll('-','')+'.P';
-    return 'https://www.tradingview.com/chart/?symbol='+encodeURIComponent(ticker)+'&interval=15';
+    return 'https://www.tradingview.com/chart/?symbol='+encodeURIComponent(ticker)+'&interval='+tvIntervals[timeframe];
   }
   // Anchor the first visible row so live reordering does not move the reader.
   function captureListScroll(container){
