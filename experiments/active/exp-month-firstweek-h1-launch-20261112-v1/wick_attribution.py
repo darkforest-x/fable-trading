@@ -28,11 +28,17 @@ def attribution():
             control = group[group["sample"].eq("random")]
             pairs = signal.merge(control,on="pair_id",suffixes=("_s","_r"),validate="one_to_one")
             net = signal.net_pct
+            beijing_day = pd.to_datetime(signal.entry_ms,unit="ms",utc=True).dt.tz_convert("Asia/Shanghai").dt.date
+            daily = net.groupby(beijing_day).mean()
+            strongest_month = net.groupby(signal.source_month).sum().idxmax()
             boot_low, boot_high = bootstrap(net,signal.source_month)
             difference = pairs.net_pct_s-pairs.net_pct_r
             lower, upper = bootstrap(difference,pairs.source_month_s)
             result.append(dict(period=period, side=side, shape=shape, settled=len(net),
                                mean_net_pct=net.mean(),win_pct=100*net.gt(0).mean(),
+                               entry_days=len(daily),equal_entry_day_mean_pct=daily.mean(),
+                               top_total_month=strongest_month,
+                               mean_ex_top_month_pct=net[signal.source_month.ne(strongest_month)].mean(),
                                pf=net[net>0].sum()/-net[net<0].sum(),
                                mean_month_ci_low=boot_low, mean_month_ci_high=boot_high,
                                pairs=len(pairs),common_signal_pct=pairs.net_pct_s.mean(),
