@@ -31,6 +31,18 @@ def main():
     boxes=pd.read_csv(DATA/'all_boxes.csv.gz')
     reads=pd.read_csv(HERE/'first_reads.csv')
     reviewed=audit(labels,refs,boxes)
+    # Once votes are sealed, measure the price path of clear reference shapes,
+    # including those with no model decision; future prices never reach the rater.
+    cases_by_id={r.case_id:r for r in cohort().itertuples()}
+    visual_prices=[]
+    for r in reviewed[reviewed.vote.eq('yes')].itertuples():
+        case=cases_by_id[r.case_id]
+        tape=np.load(DATA/'tapes'/f'{r.case_id}.npy')
+        mark=after_read(case,r.read_ms,tape)
+        visual_prices.append(dict(key=r.key,visual_delay=(r.read_ms-case.known_ms)//MINUTE,
+                                  **{f'visual_{k}':v for k,v in mark.items()}))
+    if visual_prices:
+        reviewed=reviewed.merge(pd.DataFrame(visual_prices),on='key',how='left',validate='one_to_one')
     reviewed.to_csv(HERE/'blind_reconciliation.csv',index=False)
     positives=reviewed[reviewed.vote.eq('yes')]
     shapes=positives.groupby(['case_id','tf']).agg(clear_candidates=('key','size'),matched=('matched','any'),
