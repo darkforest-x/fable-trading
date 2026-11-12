@@ -33,7 +33,7 @@ test('a local reclaim filter reuses the loaded month and closing cancels its sch
  const nodes=new Map();
  function element(selector){
    if(!nodes.has(selector))nodes.set(selector,{
-     children:[],scrollTop:0,innerHTML:'',getBoundingClientRect:()=>({top:0}),
+     classList:{toggle(){}},setAttribute(){},children:[],scrollTop:0,innerHTML:'',getBoundingClientRect:()=>({top:0}),
      querySelector:element,querySelectorAll:()=>[],addEventListener(){},
    });
    return nodes.get(selector);

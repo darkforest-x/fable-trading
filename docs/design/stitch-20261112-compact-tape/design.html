@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SPIKE · 盘口明细 / Compact Tape 极简高密浮层规范</title>
+<!-- Tailwind CSS & Inter Font -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'SF Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              blue: '#0A84FF',
+              blueHover: '#0071E3',
+              purple: '#9353D3',
+              green: '#10B981',
+              red: '#F43F5E',
+              grayBg: '#F8FAFC',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* 极致轻量微晶玻璃与确定边界样式，坚决杜绝厚重假雾化与嵌套白卡 */
+    .glass-base {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    .dark .glass-base {
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(51, 65, 85, 0.6);
+    }
+
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid #E2E8F0;
+    }
+    .dark .glass-panel {
+      background: rgba(15, 20, 31, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid #1E293B;
+    }
+
+    /* 滚动条瘦身 */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.35);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.6);
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-[#F8FAFC] dark:bg-[#0B0F17] text-slate-800 dark:text-slate-100 font-sans antialiased overflow-hidden select-none w-screen h-screen relative">
+<!-- ========================================================================= -->
+<!-- 1. 全视口全屏 K 线图表背景 (Full Viewport Candlestick Canvas)              -->
+<!-- ========================================================================= -->
+<div class="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-auto">
+<!-- SVG 矢量全屏行情壁纸与月首周/周一实线区间 -->
+<svg class="w-full h-full block" preserveaspectratio="none" viewbox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<!-- 网格背景点阵或微线 -->
+<pattern height="60" id="grid" patternunits="userSpaceOnUse" width="60">
+<path class="text-slate-200/50 dark:text-slate-800/40" d="M 60 0 L 0 0 0 60" fill="none" stroke="currentColor" stroke-width="0.75"></path>
+</pattern>
+<!-- EMA 顺势云带渐变 (柔和通透) -->
+<lineargradient id="bullCloud" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#10B981" stop-opacity="0.14"></stop>
+<stop offset="100%" stop-color="#0A84FF" stop-opacity="0.04"></stop>
+</lineargradient>
+</defs>
+<!-- 网格底 -->
+<rect fill="url(#grid)" height="100%" width="100%"></rect>
+<!-- EMA 云带拟合多边形 (顺滑填充) -->
+<path d="M 120,680 Q 380,630 620,490 T 980,360 T 1320,240 L 1320,310 Q 980,430 620,560 T 120,720 Z" fill="url(#bullCloud)"></path>
+<!-- 6 EMA / SMA 均线轨迹 (6条代表均线) -->
+<path d="M 100,690 Q 380,640 620,500 T 980,370 T 1360,250" fill="none" opacity="0.8" stroke="#10B981" stroke-width="1.2"></path>
+<path d="M 100,705 Q 380,655 620,515 T 980,385 T 1360,265" fill="none" opacity="0.6" stroke="#059669" stroke-width="1"></path>
+<path d="M 100,720 Q 380,670 620,535 T 980,405 T 1360,285" fill="none" opacity="0.75" stroke="#0A84FF" stroke-width="1.2"></path>
+<path d="M 100,735 Q 380,685 620,555 T 980,425 T 1360,305" fill="none" opacity="0.5" stroke="#2563EB" stroke-width="1"></path>
+<path d="M 100,750 Q 380,700 620,575 T 980,450 T 1360,335" fill="none" opacity="0.5" stroke="#D97706" stroke-width="1"></path>
+<path d="M 100,770 Q 380,720 620,600 T 980,480 T 1360,370" fill="none" opacity="0.45" stroke="#7C3AED" stroke-width="1"></path>
+<!-- ==================== 月首周定界线 (实线，醒目区分，紫罗兰/品蓝语义) ==================== -->
+<!-- 月首周上沿 +1.618 扩展线 (实线) -->
+<line stroke="#8B5CF6" stroke-width="1.5" x1="0" x2="1440" y1="130" y2="130"></line>
+<text fill="#8B5CF6" font-family="monospace" font-size="11" font-weight="600" text-anchor="end" x="1430" y="125">月首周 上沿 1.618 (0.3950)</text>
+<!-- 月首周高点 (实线) -->
+<line stroke="#A78BFA" stroke-opacity="0.85" stroke-width="1.2" x1="0" x2="1440" y1="190" y2="190"></line>
+<text fill="#A78BFA" font-family="monospace" font-size="10" font-weight="500" text-anchor="end" x="1430" y="185">月首周高点 Month-1 High (0.3720)</text>
+<!-- ==================== 周一基准线 (实线，绿蓝中性) ==================== -->
+<!-- 周一高点 (实线) -->
+<line stroke="#0284C7" stroke-width="1.2" x1="0" x2="1440" y1="280" y2="280"></line>
+<text fill="#0284C7" font-family="monospace" font-size="10" font-weight="500" text-anchor="end" x="1430" y="275">周一高点 Monday High (0.3540)</text>
+<!-- 周一低点 (实线) -->
+<line stroke="#0284C7" stroke-width="1.2" x1="0" x2="1440" y1="520" y2="520"></line>
+<text fill="#0284C7" font-family="monospace" font-size="10" font-weight="500" text-anchor="end" x="1430" y="515">周一低点 Monday Low (0.3180)</text>
+<!-- 周一下沿 -1.618 (实线) -->
+<line stroke="#10B981" stroke-width="1.5" x1="0" x2="1440" y1="670" y2="670"></line>
+<text fill="#10B981" font-family="monospace" font-size="11" font-weight="600" text-anchor="end" x="1430" y="665">周一 下沿 1.618 (0.2960)</text>
+<!-- 月首周下沿 -1.618 (实线) -->
+<line stroke="#8B5CF6" stroke-width="1.5" x1="0" x2="1440" y1="780" y2="780"></line>
+<text fill="#8B5CF6" font-family="monospace" font-size="11" font-weight="600" text-anchor="end" x="1430" y="775">月首周 下沿 1.618 (0.2640)</text>
+<!-- 当前最新实时价虚线 (4px 实 / 4px 空) -->
+<line stroke="#0A84FF" stroke-dasharray="4,4" stroke-width="1.2" x1="0" x2="1440" y1="368" y2="368"></line>
+<!-- 现价标记胶囊 -->
+<rect fill="#0A84FF" height="24" rx="4" width="85" x="1350" y="356"></rect>
+<text fill="#FFFFFF" font-family="monospace" font-size="11" font-weight="700" text-anchor="middle" x="1392" y="372">0.3394</text>
+<!-- K 线蜡烛簇 (示例多空排列) -->
+<g stroke-linecap="round">
+<!-- 历史柱 1 (跌) -->
+<line stroke="#F43F5E" stroke-width="1.5" x1="390" x2="390" y1="600" y2="685"></line>
+<rect fill="#F43F5E" height="50" rx="1.5" width="12" x="384" y="620"></rect>
+<!-- 历史柱 2 (下影刺穿周一下沿后收回) -->
+<line stroke="#10B981" stroke-width="1.5" x1="420" x2="420" y1="630" y2="695"></line>
+<rect fill="#10B981" height="40" rx="1.5" width="12" x="414" y="640"></rect>
+<circle cx="420" cy="695" fill="#10B981" r="3"></circle>
+<text fill="#10B981" font-family="monospace" font-size="9" text-anchor="middle" x="420" y="715">触及反弹</text>
+<!-- 历史柱 3 (涨) -->
+<line stroke="#10B981" stroke-width="1.5" x1="450" x2="450" y1="580" y2="660"></line>
+<rect fill="#10B981" height="55" rx="1.5" width="12" x="444" y="590"></rect>
+<!-- 历史柱 4 (涨) -->
+<line stroke="#10B981" stroke-width="1.5" x1="480" x2="480" y1="540" y2="610"></line>
+<rect fill="#10B981" height="45" rx="1.5" width="12" x="444" y="550"></rect>
+<!-- 历史柱 5 (震荡) -->
+<line stroke="#94A3B8" stroke-width="1.5" x1="510" x2="510" y1="500" y2="570"></line>
+<rect fill="#94A3B8" height="35" rx="1.5" width="12" x="504" y="515"></rect>
+<!-- 历史柱 6 (大阳线) -->
+<line stroke="#10B981" stroke-width="1.5" x1="540" x2="540" y1="440" y2="530"></line>
+<rect fill="#10B981" height="70" rx="1.5" width="12" x="534" y="450"></rect>
+<!-- 柱 7 (调整) -->
+<line stroke="#F43F5E" stroke-width="1.5" x1="570" x2="570" y1="430" y2="490"></line>
+<rect fill="#F43F5E" height="35" rx="1.5" width="12" x="564" y="445"></rect>
+<!-- 柱 8 (蓄势) -->
+<line stroke="#10B981" stroke-width="1.5" x1="600" x2="600" y1="410" y2="475"></line>
+<rect fill="#10B981" height="45" rx="1.5" width="12" x="594" y="420"></rect>
+<!-- 柱 9 (突破) -->
+<line stroke="#10B981" stroke-width="1.5" x1="630" x2="630" y1="360" y2="435"></line>
+<rect fill="#10B981" height="50" rx="1.5" width="12" x="624" y="370"></rect>
+<!-- 柱 10 (高位) -->
+<line stroke="#0A84FF" stroke-width="1.5" x1="660" x2="660" y1="340" y2="400"></line>
+<rect fill="#0A84FF" height="40" rx="1.5" width="12" x="654" y="350"></rect>
+<!-- 连续向右延展蜡烛... -->
+<line stroke="#F43F5E" stroke-width="1.5" x1="690" x2="690" y1="330" y2="390"></line>
+<rect fill="#F43F5E" height="35" rx="1.5" width="12" x="684" y="340"></rect>
+<line stroke="#10B981" stroke-width="1.5" x1="720" x2="720" y1="310" y2="380"></line>
+<rect fill="#10B981" height="45" rx="1.5" width="12" x="714" y="325"></rect>
+<line stroke="#10B981" stroke-width="1.5" x1="750" x2="750" y1="280" y2="350"></line>
+<rect fill="#10B981" height="50" rx="1.5" width="12" x="744" y="290"></rect>
+<line stroke="#10B981" stroke-width="1.5" x1="780" x2="780" y1="250" y2="320"></line>
+<rect fill="#10B981" height="50" rx="1.5" width="12" x="774" y="260"></rect>
+<!-- 当前关键 K 线 (做多突破 12H 收盘确认，标亮蓝) -->
+<line stroke="#0A84FF" stroke-width="2" x1="810" x2="810" y1="230" y2="300"></line>
+<rect fill="#0A84FF" height="50" rx="1.5" width="14" x="803" y="240"></rect>
+<text fill="#0A84FF" font-family="monospace" font-size="10" font-weight="600" text-anchor="middle" x="810" y="222">★收盘确认</text>
+<!-- 延展影线测试 -->
+<line stroke="#F43F5E" stroke-width="1.5" x1="840" x2="840" y1="240" y2="310"></line>
+<rect fill="#F43F5E" height="40" rx="1.5" width="12" x="834" y="250"></rect>
+<line stroke="#10B981" stroke-width="1.5" x1="870" x2="870" y1="260" y2="330"></line>
+<rect fill="#10B981" height="45" rx="1.5" width="12" x="864" y="270"></rect>
+<line stroke="#10B981" stroke-width="1.5" x1="900" x2="900" y1="270" y2="340"></line>
+<rect fill="#10B981" height="45" rx="1.5" width="12" x="894" y="285"></rect>
+<!-- 最新实时跳动柱 -->
+<line stroke="#0A84FF" stroke-width="1.5" x1="930" x2="930" y1="320" y2="390"></line>
+<rect fill="#0A84FF" height="35" opacity="0.95" rx="1.5" width="12" x="924" y="340"></rect>
+</g>
+<!-- 右轴价格标尺数值 (等宽刻度) -->
+<g class="text-slate-400 dark:text-slate-500" fill="currentColor" font-family="monospace" font-size="10" text-anchor="end">
+<text x="1435" y="100">0.4200</text>
+<text x="1435" y="220">0.3600</text>
+<text x="1435" y="340">0.3400</text>
+<text x="1435" y="460">0.3200</text>
+<text x="1435" y="580">0.3000</text>
+<text x="1435" y="700">0.2800</text>
+<text x="1435" y="820">0.2500</text>
+</g>
+<!-- 底部时间标尺 -->
+<g class="text-slate-400 dark:text-slate-500" fill="currentColor" font-family="monospace" font-size="10" text-anchor="middle">
+<text x="420" y="875">11-01 08:00 (月首)</text>
+<text x="540" y="875">11-03 00:00 (周一)</text>
+<text x="660" y="875">11-04 12:00</text>
+<text x="810" y="875">11-06 20:00 (确认)</text>
+<text x="930" y="875">实时未收线</text>
+</g>
+</svg>
+</div>
+<!-- ========================================================================= -->
+<!-- 2. 页面顶部常驻行情与状态胶囊 (Top Header Ribbon)                          -->
+<!-- ========================================================================= -->
+<header class="absolute top-3 left-4 z-40 flex items-center pointer-events-none"><div class="pointer-events-auto h-8 px-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur border border-slate-200/80 dark:border-slate-800 rounded-md text-[13px] flex items-center gap-2 shadow-sm"><div class="flex items-center gap-1 cursor-pointer hover:text-brand-blue transition-colors font-medium text-slate-800 dark:text-slate-100 font-mono"><span>ZEC/USDT</span><span class="material-symbols-outlined text-[14px] text-slate-400">expand_more</span></div><div class="h-3.5 w-px bg-slate-200 dark:bg-slate-700"></div><div class="flex items-center gap-1 cursor-pointer hover:text-brand-blue transition-colors font-mono text-[12px] text-slate-600 dark:text-slate-300"><span>spike</span><span class="material-symbols-outlined text-[13px] text-slate-400">expand_more</span></div><div class="h-3.5 w-px bg-slate-200 dark:bg-slate-700"></div><button class="flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-brand-blue transition-colors" title="信号图表"><span class="material-symbols-outlined text-[16px]">candlestick_chart</span></button><button aria-label="交易簿" class="flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-brand-blue transition-colors" id="toggleLedgerBtn" title="常驻交易簿"><span class="material-symbols-outlined text-[16px]">menu_book</span></button></div></header>
+<!-- ========================================================================= -->
+<!-- 3. 左侧常驻交易簿 (Non-modal Floating Sidebar, 宽度 380px < 400px)         -->
+<!-- ========================================================================= -->
+<aside class="absolute top-14 left-4 z-30 w-[360px] bg-white/95 dark:bg-slate-900/95 backdrop-blur rounded-lg border border-slate-200 dark:border-slate-800 shadow-md flex flex-col overflow-hidden transition-all duration-300 text-xs" id="leftLedgerSidebar"><div class="px-3 pt-2.5 pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between"><div class="flex items-center gap-3"><button class="pb-1 text-[12px] font-medium text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">持仓 0</button><button class="pb-1 text-[12px] font-medium text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">已结束 0</button><button class="pb-1 text-[12px] font-semibold text-brand-blue border-b-2 border-brand-blue flex items-center gap-1"><span>触价</span><span class="font-mono">23</span></button></div><div class="flex items-center gap-1.5 text-slate-400"><button class="hover:text-slate-700 dark:hover:text-slate-200 transition-colors flex items-center" title="搜索"><span class="material-symbols-outlined text-[14px]">search</span></button><button class="hover:text-slate-700 dark:hover:text-slate-200 transition-colors flex items-center" title="排序"><span class="material-symbols-outlined text-[14px]">swap_vert</span></button><button class="hover:text-rose-500 transition-colors flex items-center ml-0.5" id="closeLedgerBtn" title="关闭"><span class="material-symbols-outlined text-[14px]">close</span></button></div></div><div class="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40 flex items-center justify-between"><div class="flex items-center gap-2"><div class="flex items-center gap-1 h-6 px-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded text-[11px] text-slate-600 dark:text-slate-300 cursor-pointer"><span>周一</span><span class="material-symbols-outlined text-[12px] text-slate-400">expand_more</span></div><div class="flex items-center gap-1 h-6 px-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded text-[11px] text-slate-600 dark:text-slate-300 cursor-pointer"><span>全部收回状态</span><span class="material-symbols-outlined text-[12px] text-slate-400">expand_more</span></div></div><span class="text-[10px] font-mono text-slate-400">NY 00:00</span></div><div class="px-3 py-1 border-b border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 font-medium grid grid-cols-12 items-center bg-slate-50/30 dark:bg-slate-900/20"><span class="col-span-6">币种 / 触价</span><span class="col-span-5 text-center font-mono tracking-widest">1H 4H 12H</span><span class="col-span-1 text-right">TV</span></div><div class="divide-y divide-slate-100 dark:divide-slate-800/60 overflow-y-auto max-h-[315px]"><div class="px-3 h-[35px] flex items-center grid grid-cols-12 text-[12px] tabular-nums font-mono hover:bg-brand-blue/5 dark:hover:bg-brand-blue/15 transition-colors cursor-pointer bg-brand-blue/5 dark:bg-brand-blue/10" title="ZEC/USDT 触达: 34.20 | 评分: 0.82 | 1H收回/4H收回/12H实体确认"><div class="col-span-6 flex items-center gap-1.5 overflow-hidden"><span class="font-semibold text-slate-900 dark:text-white">ZEC</span><span class="text-[9px] px-1 py-0.2 rounded bg-rose-50 text-rose-500 font-sans font-medium">下1.618</span><span class="text-slate-700 dark:text-slate-200">34.20</span><span class="text-[10px] text-slate-400">20:00</span></div><div class="col-span-5 flex items-center justify-center gap-2.5 text-[11px]"><span class="text-emerald-500 font-bold" title="1H已收回">✓</span><span class="text-emerald-500 font-bold" title="4H已收回">✓</span><span class="text-brand-blue font-bold text-[12px]" title="12H实体确认">★</span></div><div class="col-span-1 flex justify-end"><a class="text-slate-400 hover:text-brand-blue" href="#" title="在TradingView打开 ZEC"><span class="material-symbols-outlined text-[13px]">open_in_new</span></a></div></div><div class="px-3 h-[35px] flex items-center grid grid-cols-12 text-[12px] tabular-nums font-mono hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors cursor-pointer" title="SOL/USDT 触达: 182.40 | 评分: 0.74 | 1H已收回/4H待收回"><div class="col-span-6 flex items-center gap-1.5 overflow-hidden"><span class="font-semibold text-slate-900 dark:text-white">SOL</span><span class="text-[9px] px-1 py-0.2 rounded bg-emerald-50 text-emerald-600 font-sans font-medium">上1.618</span><span class="text-slate-700 dark:text-slate-200">182.4</span><span class="text-[10px] text-slate-400">19:45</span></div><div class="col-span-5 flex items-center justify-center gap-2.5 text-[11px]"><span class="text-emerald-500 font-bold" title="1H已收回">✓</span><span class="text-amber-500 font-medium" title="4H观察中">◔</span><span class="text-slate-400" title="12H未触发">—</span></div><div class="col-span-1 flex justify-end"><a class="text-slate-400 hover:text-brand-blue" href="#" title="在TradingView打开 SOL"><span class="material-symbols-outlined text-[13px]">open_in_new</span></a></div></div><div class="px-3 h-[35px] flex items-center grid grid-cols-12 text-[12px] tabular-nums font-mono hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors cursor-pointer" title="ETH/USDT 触达: 2640.5 | 评分: 0.91 | 1H已收回/4H已收回/12H已收回"><div class="col-span-6 flex items-center gap-1.5 overflow-hidden"><span class="font-semibold text-slate-900 dark:text-white">ETH</span><span class="text-[9px] px-1 py-0.2 rounded bg-rose-50 text-rose-500 font-sans font-medium">下1.618</span><span class="text-slate-700 dark:text-slate-200">2640</span><span class="text-[10px] text-slate-400">18:30</span></div><div class="col-span-5 flex items-center justify-center gap-2.5 text-[11px]"><span class="text-emerald-500 font-bold" title="1H已收回">✓</span><span class="text-emerald-500 font-bold" title="4H已收回">✓</span><span class="text-emerald-500 font-bold" title="12H已收回">✓</span></div><div class="col-span-1 flex justify-end"><a class="text-slate-400 hover:text-brand-blue" href="#" title="在TradingView打开 ETH"><span class="material-symbols-outlined text-[13px]">open_in_new</span></a></div></div><div class="px-3 h-[35px] flex items-center grid grid-cols-12 text-[12px] tabular-nums font-mono hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors cursor-pointer" title="BTC/USDT 触达: 68900 | 评分: 0.65 | 1H未收回"><div class="col-span-6 flex items-center gap-1.5 overflow-hidden"><span class="font-semibold text-slate-900 dark:text-white">BTC</span><span class="text-[9px] px-1 py-0.2 rounded bg-emerald-50 text-emerald-600 font-sans font-medium">上1.618</span><span class="text-slate-700 dark:text-slate-200">68900</span><span class="text-[10px] text-slate-400">17:00</span></div><div class="col-span-5 flex items-center justify-center gap-2.5 text-[11px]"><span class="text-rose-500 font-bold" title="1H未收回">×</span><span class="text-slate-400" title="4H未触发">—</span><span class="text-slate-400" title="12H未触发">—</span></div><div class="col-span-1 flex justify-end"><a class="text-slate-400 hover:text-brand-blue" href="#" title="在TradingView打开 BTC"><span class="material-symbols-outlined text-[13px]">open_in_new</span></a></div></div><div class="px-3 h-[35px] flex items-center grid grid-cols-12 text-[12px] tabular-nums font-mono hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors cursor-pointer" title="SUI/USDT 触达: 2.15 | 评分: 0.88 | 1H已收回/4H已收回"><div class="col-span-6 flex items-center gap-1.5 overflow-hidden"><span class="font-semibold text-slate-900 dark:text-white">SUI</span><span class="text-[9px] px-1 py-0.2 rounded bg-rose-50 text-rose-500 font-sans font-medium">下1.618</span><span class="text-slate-700 dark:text-slate-200">2.150</span><span class="text-[10px] text-slate-400">16:20</span></div><div class="col-span-5 flex items-center justify-center gap-2.5 text-[11px]"><span class="text-emerald-500 font-bold" title="1H已收回">✓</span><span class="text-emerald-500 font-bold" title="4H已收回">✓</span><span class="text-amber-500 font-medium" title="12H观察中">◔</span></div><div class="col-span-1 flex justify-end"><a class="text-slate-400 hover:text-brand-blue" href="#" title="在TradingView打开 SUI"><span class="material-symbols-outlined text-[13px]">open_in_new</span></a></div></div><div class="px-3 h-[35px] flex items-center grid grid-cols-12 text-[12px] tabular-nums font-mono hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors cursor-pointer" title="DOGE/USDT 触达: 0.1620 | 评分: 0.58 | 1H已收回/4H未收回"><div class="col-span-6 flex items-center gap-1.5 overflow-hidden"><span class="font-semibold text-slate-900 dark:text-white">DOGE</span><span class="text-[9px] px-1 py-0.2 rounded bg-emerald-50 text-emerald-600 font-sans font-medium">上1.618</span><span class="text-slate-700 dark:text-slate-200">0.162</span><span class="text-[10px] text-slate-400">15:10</span></div><div class="col-span-5 flex items-center justify-center gap-2.5 text-[11px]"><span class="text-emerald-500 font-bold" title="1H已收回">✓</span><span class="text-rose-500 font-bold" title="4H未收回">×</span><span class="text-slate-400" title="12H未触发">—</span></div><div class="col-span-1 flex justify-end"><a class="text-slate-400 hover:text-brand-blue" href="#" title="在TradingView打开 DOGE"><span class="material-symbols-outlined text-[13px]">open_in_new</span></a></div></div><div class="px-3 h-[35px] flex items-center grid grid-cols-12 text-[12px] tabular-nums font-mono hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors cursor-pointer" title="NEAR/USDT 触达: 4.850 | 评分: 0.79 | 1H已收回/4H已收回/12H留记录"><div class="col-span-6 flex items-center gap-1.5 overflow-hidden"><span class="font-semibold text-slate-900 dark:text-white">NEAR</span><span class="text-[9px] px-1 py-0.2 rounded bg-rose-50 text-rose-500 font-sans font-medium">下1.618</span><span class="text-slate-700 dark:text-slate-200">4.850</span><span class="text-[10px] text-slate-400">14:15</span></div><div class="col-span-5 flex items-center justify-center gap-2.5 text-[11px]"><span class="text-emerald-500 font-bold" title="1H已收回">✓</span><span class="text-emerald-500 font-bold" title="4H已收回">✓</span><span class="text-slate-400 font-medium" title="12H留记录">—</span></div><div class="col-span-1 flex justify-end"><a class="text-slate-400 hover:text-brand-blue" href="#" title="在TradingView打开 NEAR"><span class="material-symbols-outlined text-[13px]">open_in_new</span></a></div></div><div class="px-3 h-[35px] flex items-center grid grid-cols-12 text-[12px] tabular-nums font-mono hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors cursor-pointer" title="LINK/USDT 触达: 12.30 | 评分: 0.81 | 1H未收回"><div class="col-span-6 flex items-center gap-1.5 overflow-hidden"><span class="font-semibold text-slate-900 dark:text-white">LINK</span><span class="text-[9px] px-1 py-0.2 rounded bg-emerald-50 text-emerald-600 font-sans font-medium">上1.618</span><span class="text-slate-700 dark:text-slate-200">12.30</span><span class="text-[10px] text-slate-400">13:00</span></div><div class="col-span-5 flex items-center justify-center gap-2.5 text-[11px]"><span class="text-rose-500 font-bold" title="1H未收回">×</span><span class="text-slate-400" title="4H未触发">—</span><span class="text-slate-400" title="12H未触发">—</span></div><div class="col-span-1 flex justify-end"><a class="text-slate-400 hover:text-brand-blue" href="#" title="在TradingView打开 LINK"><span class="material-symbols-outlined text-[13px]">open_in_new</span></a></div></div></div><div class="p-1.5 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 text-center font-mono bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between px-3"><span>盘口明细 · 触价实时流</span><span class="text-[9px] text-brand-blue">共 23 标的</span></div></aside>
+<!-- ========================================================================= -->
+<!-- 4. 底部浮动控制坞 & 打开的紧凑设置面板 (Compact Settings & Chart Dock)      -->
+<!-- ========================================================================= -->
+<div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2 pointer-events-none w-full max-w-4xl px-4">
+<!-- 展开的紧凑设置面板 (设置打开态：指标 / K线 / 区间线，无冗余嵌套卡片与厚重阴影) -->
+<div class="pointer-events-auto w-full max-w-xl glass-panel rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 p-3 transition-all duration-200 text-xs" id="compactSettingsPanel">
+<!-- 头部：三个简洁页签「指标 / K线 / 区间线」与快速收折按钮 -->
+<div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2 mb-2.5">
+<div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs">
+<button class="px-2.5 py-1 rounded-md font-semibold bg-white dark:bg-slate-700 text-brand-blue shadow-xs">
+            指标配置
+          </button>
+<button class="px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+            K线呈现
+          </button>
+<button class="px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+            区间线参数
+          </button>
+</div>
+<div class="flex items-center gap-1">
+<span class="text-[11px] font-mono text-slate-400 mr-1">快捷图层</span>
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 w-5 h-5 flex items-center justify-center" id="closeSettingsBtn">
+<span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+</div>
+</div>
+<!-- 面板主体：指标与区间点位开关 (紧凑行显示六均线、区间点位、月首周区间，可独立开启) -->
+<div class="space-y-2">
+<!-- 紧凑行 1：均线与云带系统 -->
+<div class="flex items-center justify-between py-1 px-1.5 rounded hover:bg-slate-50 dark:hover:bg-slate-800/40">
+<div class="flex items-center gap-2">
+<span class="font-medium text-slate-700 dark:text-slate-200">六均线组 (EMA/SMA 20·60·120)</span>
+<span class="text-[10px] text-slate-400 font-mono">密集度 &lt; 0.8%</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-blue"></div>
+</label>
+</div>
+<!-- 紧凑行 2：周一 1.618 区间点位 -->
+<div class="flex items-center justify-between py-1 px-1.5 rounded hover:bg-slate-50 dark:hover:bg-slate-800/40">
+<div class="flex items-center gap-2">
+<span class="font-medium text-slate-700 dark:text-slate-200">周一 1.618 定界水平线</span>
+<span class="text-[10px] px-1 rounded bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-300 font-mono">全部实线</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-blue"></div>
+</label>
+</div>
+<!-- 紧凑行 3：月首周区间（可独立开启，高低和上下 1.618 全部实线，以颜色和标签区分） -->
+<div class="flex items-center justify-between py-1 px-1.5 rounded hover:bg-slate-50 dark:hover:bg-slate-800/40 bg-purple-50/40 dark:bg-purple-950/20 border border-purple-200/50 dark:border-purple-900/40">
+<div class="flex items-center gap-2">
+<span class="font-semibold text-brand-purple flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-brand-purple"></span>
+              月首周 1.618 区间 (独立图层)
+            </span>
+<span class="text-[10px] px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-mono">全实线·品紫</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-purple"></div>
+</label>
+</div>
+</div>
+<!-- 紧凑行 4：轻量绘图工具栏（一排小图标：选择 / 测量 / 趋势线 / 平行通道 / 文本） -->
+<div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+<span class="text-[11px] text-slate-400 font-medium">绘图与量化工具</span>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-brand-blue bg-brand-blue/10" title="光标选择">
+<span class="material-symbols-outlined text-base">near_me</span>
+</button>
+<button class="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300" title="测量距离与 R 乘数">
+<span class="material-symbols-outlined text-base">straighten</span>
+</button>
+<button class="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300" title="趋势线">
+<span class="material-symbols-outlined text-base">timeline</span>
+</button>
+<button class="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300" title="平行通道">
+<span class="material-symbols-outlined text-base">stacked_line_chart</span>
+</button>
+<button class="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300" title="标注重命名">
+<span class="material-symbols-outlined text-base">title</span>
+</button>
+</div>
+</div>
+</div>
+<!-- 底部常驻微光胶囊控制坞 (Bottom Compact Dock) -->
+<div class="pointer-events-auto glass-base px-3 py-1.5 rounded-full flex items-center gap-2 shadow-md">
+<!-- 模式与区间切换 -->
+<div class="flex items-center gap-1 border-r border-slate-200 dark:border-slate-700 pr-2">
+<button class="px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-900 text-white dark:bg-white dark:text-slate-900">
+          区间
+        </button>
+<button class="px-2 py-0.5 rounded-full text-xs font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+          信号
+        </button>
+</div>
+<!-- 分时周期快捷列 -->
+<div class="flex items-center gap-1 font-mono text-xs border-r border-slate-200 dark:border-slate-700 pr-2">
+<button class="px-1.5 py-0.5 text-slate-500 hover:text-slate-900 dark:hover:text-white rounded">5m</button>
+<button class="px-1.5 py-0.5 text-slate-500 hover:text-slate-900 dark:hover:text-white rounded">15m</button>
+<button class="px-1.5 py-0.5 text-slate-500 hover:text-slate-900 dark:hover:text-white rounded">1H</button>
+<button class="px-1.5 py-0.5 text-slate-500 hover:text-slate-900 dark:hover:text-white rounded">4H</button>
+<button class="px-2 py-0.5 bg-brand-blue text-white rounded font-bold">12H</button>
+<button class="px-1.5 py-0.5 text-slate-500 hover:text-slate-900 dark:hover:text-white rounded">1D</button>
+</div>
+<!-- 快速图层开关：月首周 1.618 与 EMA 云带 -->
+<div class="flex items-center gap-1 text-xs border-r border-slate-200 dark:border-slate-700 pr-2">
+<button class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1 border border-emerald-400/30">
+<span class="material-symbols-outlined text-[14px]">check</span>
+<span>EMA云带</span>
+</button>
+</div>
+<!-- 打开/折叠设置面板按钮 (当前保持展开态) -->
+<button class="flex items-center gap-1 text-xs font-medium text-brand-blue bg-brand-blue/10 dark:bg-brand-blue/20 px-2.5 py-1 rounded-full hover:bg-brand-blue/20 transition-colors" id="toggleSettingsBtn">
+<span class="material-symbols-outlined text-[15px]">tune</span>
+<span>设置</span>
+</button>
+<!-- 全屏与最新复位 -->
+<button class="p-1 text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-full" title="自适应居中">
+<span class="material-symbols-outlined text-[16px]">fullscreen</span>
+</button>
+<button class="flex items-center gap-1 text-xs font-semibold bg-brand-blue text-white px-2.5 py-1 rounded-full shadow-xs hover:bg-brand-blueHover active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+<span>最新</span>
+</button>
+</div>
+</div>
+<!-- ========================================================================= -->
+<!-- 5. 交互脚本 (非模态保持打开、主题切换、面板显隐)                             -->
+<!-- ========================================================================= -->
+<script>
+    // 浅色 / 深色主题切换 (带本地持久化与系统级类切换)
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+
+    function initTheme() {
+      const isDark = localStorage.getItem('spike-theme') === 'dark' ||
+        (!localStorage.getItem('spike-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        themeIcon.textContent = 'light_mode';
+      } else {
+        document.documentElement.classList.remove('dark');
+        themeIcon.textContent = 'dark_mode';
+      }
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('spike-theme', isDark ? 'dark' : 'light');
+      themeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
+    });
+    initTheme();
+
+    // 交易簿左侧抽屉显隐控制 (非模态，点击图表或行绝不自动关闭，仅点明确的关闭×收起)
+    const leftSidebar = document.getElementById('leftLedgerSidebar');
+    const toggleLedgerBtn = document.getElementById('toggleLedgerBtn');
+    const closeLedgerBtn = document.getElementById('closeLedgerBtn');
+
+    toggleLedgerBtn.addEventListener('click', () => {
+      leftSidebar.classList.toggle('-translate-x-[420px]');
+    });
+
+    closeLedgerBtn.addEventListener('click', () => {
+      leftSidebar.classList.add('-translate-x-[420px]');
+    });
+
+    // 紧凑设置面板显隐控制
+    const settingsPanel = document.getElementById('compactSettingsPanel');
+    const toggleSettingsBtn = document.getElementById('toggleSettingsBtn');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+
+    toggleSettingsBtn.addEventListener('click', () => {
+      settingsPanel.classList.toggle('hidden');
+    });
+    closeSettingsBtn.addEventListener('click', () => {
+      settingsPanel.classList.add('hidden');
+    });
+  </script>
+</body>
+</html>

@@ -9,13 +9,21 @@
   const stamp=ms=>Number.isFinite(ms)&&ms>0?timeFormat.format(ms):'—';
   const {esc,price}=list;
   const isCloud=source=>source==='cloud';
+  const glyphs={reclaimed:'✓',not_reclaimed:'×',pending:'◷',checking:'…',unavailable:'–'};
+  const meanings={...labels,checking:'核对中'};
+  const option=(value,label)=>`<option value="${value}">${label}</option>`;
   function toolbar(){
-    const buttons=Object.entries(sources).map(([id,label])=>
-      `<button type="button" data-tl-source="${id}" aria-pressed="false">${label}</button>`);
-    const filters=['all',...periods].map(period=>
-      `<button type="button" data-tl-period="${period}" aria-pressed="false">${period==='all'?'全部触价':period+' 收回'}</button>`);
-    return `<div class="tl-sources" role="group" aria-label="触价来源">${buttons.join('')}</div>
-      <div class="tl-periods" role="group" aria-label="按收回周期筛选">${filters.join('')}</div>`;
+    return `<label class="tl-select"><select aria-label="触价来源" data-tl-source>${Object.entries(sources).map(([key,name])=>option(key,name)).join('')}</select></label>
+      <label class="tl-select tl-periods"><select aria-label="收回周期" data-tl-period>${option('all','全部触价')}${periods.map(p=>option(p,p+' 收回')).join('')}</select></label>`;
+  }
+  function bodyHTML(){
+    const key=Object.entries(meanings).map(([mark,label])=>`<span><b data-mark="${mark}">${glyphs[mark]}</b> ${label}</span>`).join('');
+    return `<div class="tl-key" id="rp-touch-key" hidden>${key}</div>
+      <div class="tl-scroll">
+        <div class="tl-columns" aria-hidden="true"><span>币种</span><span class="tl-price">触价</span><span class="tl-period-head">${periods.map(p=>`<span>${p}</span>`).join('')}</span><span class="tl-tv-head">TV</span></div>
+        <div class="tl-rows"></div><button type="button" class="rp-more" data-tl-more hidden>再显示 50 条</button>
+        <p role="status"></p><button type="button" data-tl-retry hidden>重新读取</button>
+      </div>`;
   }
   const eventTime=row=>row.source==='history'?row.candle_ms:row.occurred_ms??row.observed_ms??row.candle_ms;
   function selectRows(items,query,period,sort,scores){
@@ -29,21 +37,26 @@
     const upper=cloud?row.side===-1:row.side==='upper';
     const tvPeriod=cloud?'12H':period==='all'?chartPeriod:period;
     const href=list.tradingViewURL(row.symbol,platform,tvPeriod),when=cloud?row.confirmed_ms:eventTime(row);
-    const states=cloud?'':periods.map(p=>{
-      const value=row.reclaims?.[p],state=value?.status||'unavailable';
-      const label=state==='pending'&&value.reason!=='candle_not_closed'?'核对中':labels[state]||'待核对';
-      const close=Number.isFinite(value?.close)?' · 收盘 '+price(value.close):'';
-      return `<span class="tl-status" data-status="${esc(state)}" title="${esc(p+' '+label+close)}">${p} ${label}</span>`;
-    }).join('');
-    const side=upper?'上轨':'下轨',active=id===selected;
+    const states=cloud?[]:periods.map(p=>{
+      const value=row.reclaims?.[p],status=value?.status||'unavailable';
+      const mark=status==='pending'&&value.reason!=='candle_not_closed'?'checking':status;
+      const description=p+' '+(meanings[mark]||meanings.unavailable);
+      const detail=Number.isFinite(value?.close)?description+' · 收盘 '+price(value.close):description;
+      return {mark,description,detail};
+    });
+    const side=upper?'上轨':'下轨',active=id===selected,level=price(cloud?row.entry:row.level);
+    const scoreText=Number.isFinite(score)?'评分 '+score.toFixed(4):'';
+    const rowName=[coin,side,'触价 '+level,stamp(when),scoreText,...states.map(s=>s.description)].filter(Boolean).join('，');
     return `<article class="tl-row" data-key="${esc(id)}" data-selected="${active}">
-      <button class="tl-pick" type="button" data-tl-pick="${esc(id)}" aria-label="查看 ${esc(coin)} ${side}触价图表" aria-pressed="${active}">
-        <span class="tl-line"><strong>${esc(coin)}</strong><span class="tl-side" data-side="${upper?'upper':'lower'}">${side}</span><b>${price(cloud?row.entry:row.level)}</b></span>
-        <span class="tl-time">${cloud?'12H 云带收回 · ':''}${stamp(when)}${Number.isFinite(score)?' · 评分 '+score.toFixed(4):''}</span>
-        ${states?`<span class="tl-states">${states}</span>`:''}
+      <button class="tl-pick" type="button" data-tl-pick="${esc(id)}" aria-label="查看图表，${esc(rowName)}" aria-pressed="${active}">
+        <span class="tl-pair"><span class="tl-name"><strong>${esc(coin)}</strong><span class="tl-side" data-side="${upper?'upper':'lower'}">${side}</span></span><small>${stamp(when)}</small></span>
+        <span class="tl-price"><b>${level}</b>${scoreText?`<small>${scoreText}</small>`:''}</span>
+        ${cloud?'':`<span class="tl-marks">${states.map(s=>`<span data-mark="${esc(s.mark)}" title="${esc(s.detail)}">${glyphs[s.mark]||glyphs.unavailable}</span>`).join('')}</span>`}
       </button>
       <a class="tl-tv" href="${esc(href)}" ${href.startsWith('https:')?'target="_blank" rel="noopener"':''}
-         aria-label="在 TradingView 打开 ${esc(coin)} ${esc(tvPeriod)}" title="${esc(tvPeriod)} · TradingView">TV ↗</a>
+         aria-label="在 TradingView 打开 ${esc(coin)} ${esc(tvPeriod)}" title="TradingView · ${esc(coin)} ${esc(tvPeriod)}">
+         <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h4v4m0-4L7 9M7 4H4a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V9"/></svg>
+      </a>
     </article>`;
   }
 
@@ -86,6 +99,9 @@
   }
   function create({host,controls,onSource,onPeriod,onPick,onCount,platform}){
     const scroll=host.querySelector('.tl-scroll'),rows=host.querySelector('.tl-rows'),status=host.querySelector('[role=status]'),more=host.querySelector('[data-tl-more]'),retry=host.querySelector('[data-tl-retry]');
+    const sourceSelect=controls.querySelector('[data-tl-source]'),periodSelect=controls.querySelector('[data-tl-period]');
+    const periodField=controls.querySelector('.tl-periods'),periodHead=host.querySelector('.tl-period-head');
+    const keyButton=controls.querySelector('[data-tl-key]'),keyPanel=host.querySelector('.tl-key');
     let context=null,queryKey='',controller=null,timer=null,generation=0,dataset=null,problem='',shown=50,lastMarkup='',rowIndex=new Map();
     function cancel(){generation++;clearTimeout(timer);controller?.abort();controller=null;}
     async function load(target=shown){
@@ -143,9 +159,15 @@
     function set(next){
       const active=next?.visible&&next.source!=='paper'&&!document.hidden;
       controls.hidden=!next?.events;
-      controls.querySelector('.tl-periods').hidden=!['month','week'].includes(next?.source);
-      controls.querySelectorAll('[data-tl-source]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tlSource===next?.source)));
-      controls.querySelectorAll('[data-tl-period]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tlPeriod===next?.period)));
+      sourceSelect.value=next?.source||'week';
+      periodSelect.value=next?.period||'all';
+      const hasReclaims=['week','month'].includes(next?.source);
+      periodHead.hidden=periodField.hidden=keyButton.hidden=!hasReclaims;
+      if(!active||!hasReclaims){
+        keyPanel.hidden=true;
+        keyButton.setAttribute('aria-expanded','false');
+      }
+      host.classList.toggle('is-cloud',next?.source==='cloud');
       host.hidden=!next?.events||next.source==='paper';
       if(!active){if(context){cancel();context=null;}return;}
       const month=next.month||'';
@@ -162,7 +184,12 @@
       if(resume||fetchChanged){clearTimeout(timer);timer=setTimeout(load,isCloud(next.source)&&next.q?200:0);}
       if(repaint)paint();
     }
-    controls.addEventListener('click',e=>{const b=e.target.closest('button');if(b?.dataset.tlSource)onSource(b.dataset.tlSource);if(b?.dataset.tlPeriod)onPeriod(b.dataset.tlPeriod);});
+    sourceSelect.addEventListener('change',()=>onSource(sourceSelect.value));
+    periodSelect.addEventListener('change',()=>onPeriod(periodSelect.value));
+    keyButton.addEventListener('click',()=>{
+      keyPanel.hidden=!keyPanel.hidden;
+      keyButton.setAttribute('aria-expanded',String(!keyPanel.hidden));
+    });
     host.addEventListener('click',e=>{
       const b=e.target.closest('button');if(!b||!context)return;
       if(b===retry){load();return;}
@@ -171,6 +198,6 @@
     });
     return {set,refresh:load};
   }
-  const api={toolbar,create,selectRows,rowHTML,periods,sources};
+  const api={toolbar,bodyHTML,create,selectRows,rowHTML,periods,sources};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else window.SpikeTouchLedger=api;
 })();
