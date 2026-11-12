@@ -90,7 +90,7 @@ def _input_rows() -> pd.DataFrame:
     rows["symbol"] = rows["symbol"].astype(str).str.upper()
     def safe_id(row) -> bool:
         symbol_prefix, separator, date = row.id.partition("|")
-        return (separator == "|" and symbol_prefix == f"{row.symbol}USDT"
+        return (separator == "|" and symbol_prefix == row.symbol
                 and bool(re.fullmatch(r"\d{4}-\d{2}-\d{2}", date))
                 and "/" not in row.id and "\\" not in row.id and "\x00" not in row.id)
     if not rows.apply(safe_id, axis=1).all():
