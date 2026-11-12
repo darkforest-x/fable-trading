@@ -34,11 +34,11 @@ def export(row, tf, stamp, box, title, subtitle, name):
     OUT.mkdir(parents=True,exist_ok=True);sheet.save(OUT/name)
 
 def main():
-    rows=cohort().set_index('case_id',drop=False)
+    rows=pd.concat([pd.read_csv(p/'cohort.csv') for p in (HERE,HERE/'ruler')]).set_index('case_id',drop=False)
     anchors=pd.read_csv(HERE/'primary_anchors.csv')
     selected=set(anchors.loc[anchors.in_primary,'case_id'])
-    boxes=pd.read_csv(DATA/'all_boxes.csv.gz')
-    refs=pd.read_csv(HERE/'blind_reconciliation.csv')
+    boxes=pd.concat([pd.read_csv(p/'all_boxes.csv.gz') for p in (DATA,DATA/'ruler')],ignore_index=True)
+    refs=pd.concat([pd.read_csv(p/'blind_reconciliation.csv') for p in (HERE,HERE/'ruler')],ignore_index=True)
     for name,flag in [('detected',True),('missed',False)]:
         valid=refs[refs.case_id.isin(selected)&refs.vote.eq('yes')&refs.matched.eq(flag)].sort_values(['case_id','tf','read_ms'])
         if valid.empty:

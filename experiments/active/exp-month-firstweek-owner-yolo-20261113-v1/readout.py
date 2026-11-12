@@ -10,13 +10,17 @@ def main():
     anchors = pd.read_csv(HERE / 'primary_anchors.csv')
     primary = anchors[anchors.in_primary]
     assert primary.photo.is_unique and primary.case_id.is_unique
-    cases = cohort().set_index('case_id', drop=False)
+    def combined(name):
+        return pd.concat([pd.read_csv(path/name) for path in (HERE,HERE/'ruler')],ignore_index=True)
+    all_cases = combined('cohort.csv')
+    cases = all_cases[all_cases.coverage.eq('complete')].set_index('case_id', drop=False)
+    assert cases.index.is_unique
     owners = cases[cases.index.isin(primary.case_id)]
     assert owners.role.eq('owner').all()
     usable = cases[cases.pair_id.isin(owners.pair_id)]
     assert usable.groupby('pair_id').role.nunique().eq(2).all()
-    day = pd.read_csv(HERE / 'first_in_day.csv')
-    reads = pd.read_csv(HERE / 'case_comparison.csv')
+    day = combined('first_in_day.csv')
+    reads = combined('case_comparison.csv')
     keys = ['case_id', 'tf']
     cols = keys + ['hours_available', 'found', 'delay', 'read_ms', 'before_pct',
                     'favorable24', 'adverse24', 'change24', 'ref_open']
