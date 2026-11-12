@@ -41,7 +41,17 @@ def main():
     refs=pd.read_csv(HERE/'blind_reconciliation.csv')
     for name,flag in [('detected',True),('missed',False)]:
         valid=refs[refs.case_id.isin(selected)&refs.vote.eq('yes')&refs.matched.eq(flag)].sort_values(['case_id','tf','read_ms'])
-        if valid.empty: continue
+        if valid.empty:
+            if not flag:
+                continue
+            eligible=boxes[boxes.case_id.isin(selected)&boxes.within4&boxes.fresh&boxes.same_side&boxes.structural_pass]
+            if eligible.empty:
+                continue
+            box=eligible.sort_values(['case_id','read_ms','confidence'],ascending=[True,True,False]).iloc[0]
+            export(rows.loc[box.case_id],int(box.tf),int(box.read_ms),box,'前四小时首次同向出框',
+                   '蓝框标出模型看到的核心。截图截至模型实际给出确认的那根收盘。','owner-model.png')
+            print('model example',box.case_id,int(box.tf))
+            continue
         r=valid.iloc[0];row=rows.loc[r.case_id];tf=int(r.tf)
         if flag:
             match=boxes[boxes.case_id.eq(r.case_id)&boxes.tf.eq(tf)&boxes.structural_pass&boxes.same_side&boxes.fresh&boxes.read_ms.eq(r.matched_ms)].copy()
