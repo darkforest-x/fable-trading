@@ -82,10 +82,14 @@ def main():
     pd.DataFrame(rows).to_csv(HERE/'matched.csv',index=False,float_format='%.6f')
     held=ready[ready.state.eq('held')]
     both=held[held.minutes.eq(5)].merge(held[held.minutes.eq(15)],on='id',suffixes=('_5','_15'),validate='one_to_one')
+    direction=np.where(both.side_5.eq('long'),1,-1)
+    advantage5=100*direction*(both.ref_open_15/both.ref_open_5-1)
     result=dict(both=len(both),only5=len(held[held.minutes.eq(5)])-len(both),
                 only15=len(held[held.minutes.eq(15)])-len(both),faster5=int((both.read_ms_5<both.read_ms_15).sum()),
                 tied=int((both.read_ms_5==both.read_ms_15).sum()),
                 median_minutes_earlier5=(both.delay_min_15-both.delay_min_5).median(),
+                median_entry_advantage5_pct=np.median(advantage5),
+                better_entry5=int((advantage5>0).sum()),equal_entry=int((advantage5==0).sum()),
                 gross24_5=both.close24_5.mean(),gross24_15=both.close24_15.mean())
     pd.DataFrame([result]).to_csv(HERE/'overlap.csv',index=False,float_format='%.6f')
 
