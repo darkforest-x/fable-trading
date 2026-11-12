@@ -22,7 +22,7 @@ def summarize(events):
                     delay_med=t.delay.median(),prior_move_med=t.move.median(),room_med=t.room.median(),
                     mean4=t.c4.mean(),pos4=100*t.c4.gt(0).mean(),mean24=t.c24.mean(),med24=t.c24.median(),
                     pos24=100*t.c24.gt(0).mean(),mfe24=t.f24.median(),mae24=t.a24.median(),
-                    large=int(hit.sum()),early20=int((hit & g.read_ms.le(g.first20_ms)).sum())))
+                    large=int(hit.sum()),early20=int((hit & g.read_ms.le(g.first20_ms) & g.move.lt(20.)).sum())))
     return pd.DataFrame(pieces)
 
 def match(g, paths):
