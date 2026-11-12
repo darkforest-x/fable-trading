@@ -19,7 +19,7 @@ def summarize(events):
                 t=g[g.read_ms.notna()]
                 hit=g.first20_ms.notna()
                 pieces.append(dict(period=period,side=side,arm=name,eligible=len(g),n=len(t),
-                    delay_med=t.delay.median(),prior_move_med=t.move.median(),room_med=t.room.median(),
+                    unique_times=len(t.drop_duplicates(['symbol','side','read_ms'])),delay_med=t.delay.median(),prior_move_med=t.move.median(),room_med=t.room.median(),
                     mean4=t.c4.mean(),pos4=100*t.c4.gt(0).mean(),mean24=t.c24.mean(),med24=t.c24.median(),
                     pos24=100*t.c24.gt(0).mean(),mfe24=t.f24.median(),mae24=t.a24.median(),
                     large=int(hit.sum()),early20=int((hit & g.read_ms.le(g.first20_ms) & g.move.lt(20.)).sum())))
@@ -71,6 +71,13 @@ def main():
             delta24=g['diff'].mean(),low=low,high=high,pre2025=g.loc[g.month<'2025-01','diff'].mean(),
             from2025=g.loc[g.month>='2025-01','diff'].mean()))
     pd.DataFrame(matched).to_csv(HERE/'controls.csv',index=False,float_format='%.6f')
+    # Same first six-line confirmation; clouds are labels here, not a delayed second attempt.
+    first=events[events.read_ms.notna() & events.arm.isin(['break5','launch5','break15','launch15'])].copy()
+    first['both_at_first']=first.c5.astype(bool) & first.c15.astype(bool)
+    first['positive24']=first.c24.gt(0)
+    first.groupby(['arm','both_at_first']).agg(n=('id','size'),delay_med=('delay','median'),
+        move_med=('move','median'),mean24=('c24','mean'),positive24=('positive24','mean'),
+        mfe24=('f24','median'),mae24=('a24','median')).to_csv(HERE/'cloud_at_first_dense.csv',float_format='%.6f')
     aligned=events[events.arm=='cloud5_flip']
     print('at H1',aligned[['cloud5_at_h1','cloud15_at_h1']].value_counts().to_dict())
     print(counts[(counts.period=='all')&(counts.side=='both')].to_string(index=False))
