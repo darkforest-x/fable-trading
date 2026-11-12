@@ -14,8 +14,10 @@ def main():
     windows.OUT=windows.OUT/'ruler'
     windows.DATA.mkdir(exist_ok=True)
     tapes=windows.DATA/'tapes'
-    if not tapes.exists():
+    try:
         tapes.symlink_to('../tapes', target_is_directory=True)
+    except FileExistsError:
+        pass
     assert tapes.resolve()==(old_data/'tapes').resolve()
     from importlib import import_module
     import_module(sys.argv[1]).main()
