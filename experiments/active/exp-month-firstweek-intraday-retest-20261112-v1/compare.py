@@ -43,6 +43,13 @@ def main():
     same=events[events.coverage.eq('complete')].copy()
     funnel=same.groupby(['minutes','state']).size().rename('n').reset_index()
     funnel.to_csv(HERE/'funnel.csv', index=False)
+    coverage=same.groupby(['minutes','state']).size().reset_index(name='n')
+    for threshold in (10,20):
+        at=same[f'first_{threshold}_bar_ms']
+        flags=same.assign(moved=at.notna(),early=same.state.eq('held') & same.read_ms.le(at))
+        counts=flags.groupby(['minutes','state'])[['moved','early']].sum().reset_index()
+        coverage=coverage.merge(counts.rename(columns={'moved':f'moved{threshold}','early':f'held_before{threshold}'}))
+    coverage.to_csv(HERE/'move_coverage.csv',index=False)
     ready=same[same.state.isin(['held','failed'])].copy()
     rows=[]
     for period,frame in [('all',ready),('through_2024',ready[ready.read_ms+DAY<=SPLIT]),
