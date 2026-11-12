@@ -79,6 +79,17 @@ def test_gtc_waits_and_zero_fill_cancel_refunds_once(managed):
     assert len(events) == 1 and events[0]['body']['reason'] == 'manual'
 
 
+def test_market_auto_tp_can_recalculate_after_one_tick_without_manual_override(managed):
+    book,_,_=managed
+    request=ticket()
+    reviewed=book.preview(request)
+    quote(book,'100.01')
+    recalculated=book.preview(request)
+    assert reviewed['plan']['take_profit_prices'] != recalculated['plan']['take_profit_prices']
+    receipt=book.enter(uuid.uuid4().hex,request,reviewed['policy_revision'],reviewed['preview_id'],True)
+    assert receipt['status']=='filled'
+
+
 @pytest.mark.parametrize('failure', ['missing', 'stale', 'future', 'restart'])
 def test_resting_limit_survives_unavailable_quotes(managed, failure):
     book, ex, now = managed
@@ -211,6 +222,160 @@ def test_partial_gtc_has_stop_then_final_fill_rebases_once(managed):
     assert not book.snapshot()['pending']
     assert D(book.snapshot()['positions'][0]['quantity'])==D(order['sz'])*D('.01')
     count=len(ex.writes);assert book.reconcile();assert len(ex.writes)==count
+
+
+def test_partial_gtc_preserves_custom_tp_and_rebuilds_automatic_tier(managed):
+    book,ex,_=managed
+    _,key,_=enter(book,ticket(kind='limit',price='100',take_profits=[None,'120']))
+    order=next(iter(ex.orders.values()))
+    half=D(order['sz'])//2
+    ex.fill(order['clOrdId'],half)
+    assert book.reconcile(),book.snapshot()['private_error']
+    pos=book.snapshot()['positions'][0]
+    assert pos['take_profit_overrides']==[None,'120']
+    assert pos['take_profit_prices'][1]=='120'
+    live_targets=[row for row in ex.algos.values() if row['state']=='live' and 'tpTriggerPx' in row]
+    assert len(live_targets)==2
+    assert D(live_targets[1]['tpTriggerPx'])==D('120')
+
+    ex.fill(order['clOrdId'],order['sz'])
+    assert book.reconcile(),book.snapshot()['private_error']
+    final=book.snapshot()['positions'][0]
+    assert not book.snapshot()['pending']
+    assert final['take_profit_overrides']==[None,'120']
+    assert final['take_profit_prices'][1]=='120'
+    assert len([row for row in ex.algos.values() if row['state']=='live' and 'tpTriggerPx' in row])==2
+
+
+def test_partial_fill_freezes_reviewed_auto_tier_when_actual_price_would_cross_custom_tp(managed):
+    book,ex,_=managed
+    request=ticket(kind='limit',price='100')
+    automatic=book.preview(request)['plan']['take_profit_prices']
+    custom=str(D(automatic[0])+D('.50'))
+    request['take_profits']=[None,custom]
+    _,_,preview=enter(book,request)
+    reviewed=preview['plan']['take_profit_prices']
+    order=next(iter(ex.orders.values()))
+    half=D(order['sz'])//2
+    ex.fill(order['clOrdId'],half,price='101')
+    assert book.reconcile(),book.snapshot()['private_error']
+    position=book.snapshot()['positions'][0]
+    assert position['take_profit_prices']==reviewed
+    assert position['take_profit_overrides']==[None,custom]
+    assert position['take_profit_frozen']==[True,False]
+
+
+def test_later_fill_inherits_verified_position_page_stop_and_tp_edit(managed):
+    book,ex,_=managed
+    request=ticket(kind='limit',price='100',take_profits=[None,'120'])
+    _,root,_=enter(book,request)
+    order=next(iter(ex.orders.values()))
+    half=D(order['sz'])//2
+    ex.fill(order['clOrdId'],half)
+    assert book.reconcile(),book.snapshot()['private_error']
+
+    changed=book.change_protection(uuid.uuid4().hex,root,stop='96',take_profits=[None,'118'])
+    assert changed['status']=='verified'
+    edited=book.snapshot()['positions'][0]
+    assert edited['stop']=='96' and edited['take_profit_overrides']==[None,'118']
+    assert not edited['protection_edit_pending']
+
+    ex.fill(order['clOrdId'],order['sz'])
+    assert book.reconcile(),book.snapshot()['private_error']
+    final=book.snapshot()['positions'][0]
+    assert final['stop']=='96'
+    assert final['take_profit_overrides']==[None,'118']
+    assert final['take_profit_prices'][1]=='118'
+    active= [row for row in ex.algos.values() if row['state']=='live']
+    assert any('slTriggerPx' in row and D(row['slTriggerPx'])==D('96') for row in active)
+    assert any('tpTriggerPx' in row and D(row['tpTriggerPx'])==D('118') for row in active)
+
+
+def test_fill_during_unresolved_parent_protection_edit_keeps_full_stop_without_closing(managed):
+    book,ex,_=managed
+    _,root,_=enter(book,ticket(kind='limit',price='100'))
+    order=next(iter(ex.orders.values()))
+    half=D(order['sz'])//2
+    ex.fill(order['clOrdId'],half)
+    assert book.reconcile(),book.snapshot()['private_error']
+    with book.transaction() as (_,state):
+        next(row for row in state['positions'] if row['id']==root)['protection_edit_pending']=True
+        pending_spec=state['intents'][root]['protection_specs'][2]
+        pending_algo=ex.algos[pending_spec['attachAlgoClOrdId']]
+        desired=str(D(pending_algo['tpTriggerPx'])+D('.01'))
+        state['intents'][root]['protection_updates']={'pending-edit':{
+            'status':'pending','fields':{'tp1':{'status':'pending',
+                'command_id':'pending-tp-amend-command',
+                'algo_cl_ord_id':pending_algo['algoClOrdId'],
+                'algo_id':pending_algo['algoId'],
+                'desired':desired}}}}
+    book.outbox.prepare('pending-tp-amend-command','/api/v5/trade/amend-algos',{
+        'instId':pending_algo['instId'],'algoId':pending_algo['algoId'],
+        'reqId':'pending-tp-amend','cxlOnFail':False,
+        'newTpTriggerPx':desired,'newTpOrdPx':'-1'})
+    with book.transaction() as (db,_):
+        db.execute("UPDATE exchange_commands SET phase='attempted' WHERE id=?",
+            ('pending-tp-amend-command',))
+    before=len([row for path,row in ex.writes if path.endswith('/order-algo')])
+    ex.fill(order['clOrdId'],order['sz'])
+    book.reconcile()
+    algo_writes=[row for path,row in ex.writes if path.endswith('/order-algo')]
+    assert len(algo_writes)==before
+    assert not any(row.get('ordType')=='market' for path,row in ex.writes if path.endswith('/order'))
+    position=book.snapshot()['positions'][0]
+    assert D(position['quantity'])==half*D('.01')
+    assert position['protection_edit_pending'] is True
+    stop=next(row for row in ex.algos.values() if row.get('slTriggerPx') and row['state']=='live')
+    assert D(stop['sz'])>=D(order['sz'])
+    with book.read_transaction() as (_,state):
+        deferred=state['intents'][root]
+    assert D(deferred['applied_size'])==half
+    assert D(deferred['observed_fill']['accFillSz'])==D(order['sz'])
+
+    with book.transaction() as (_,state):
+        position=next(row for row in state['positions'] if row['id']==root)
+        position['protection_edit_pending']=False
+        state['intents'][root]['protection_updates']['pending-edit']['status']='verified'
+        state['intents'][root]['protection_updates']['pending-edit']['fields']['tp1']['status']='verified'
+    assert book.reconcile(),book.snapshot()['private_error']
+    final=book.snapshot()['positions'][0]
+    assert D(final['quantity'])==D(order['sz'])*D('.01')
+    assert D(final['remaining'])==D(final['quantity'])
+    active=[row for row in ex.algos.values() if row['state']=='live']
+    assert sum((D(row['sz']) for row in active if row.get('tpTriggerPx')),D(0))==D(order['sz'])
+    assert not any(row.get('ordType')=='market' for path,row in ex.writes if path.endswith('/order'))
+
+
+def test_invalid_tp_rebase_retains_a_verified_full_position_stop(managed):
+    book,ex,_=managed
+    request=ticket(kind='limit',price='100')
+    _,root,_=enter(book,request)
+    order=next(iter(ex.orders.values()))
+    half=D(order['sz'])//2
+    ex.fill(order['clOrdId'],half,price='98')
+    quote(book,'98')
+    assert book.reconcile(),book.snapshot()['private_error']
+    assert book.change_protection(uuid.uuid4().hex,root,take_profits=['98.50',None])['status']=='verified'
+    active_before=len([row for path,row in ex.writes if path.endswith('/order-algo')])
+
+    # A later fill at the accepted limit raises the aggregate entry past the
+    # owner-confirmed TP. The stop already covers the full order quantity.
+    ex.fill(order['clOrdId'],order['sz'],price='100')
+    book.reconcile()
+
+    assert not any(row.get('ordType')=='market' for path,row in ex.writes if path.endswith('/order'))
+    assert len([row for path,row in ex.writes if path.endswith('/order-algo')])==active_before
+    position=book.snapshot()['positions'][0]
+    assert position['id']==root
+    assert D(position['quantity'])==D(order['sz'])*D('.01')
+    assert D(position['entry'])>D(position['take_profit_overrides'][0])
+    assert position['protection_deferred']=='take_profit_invalidated'
+    assert not position['protection_editable']
+    stop=next(row for row in ex.algos.values() if row.get('slTriggerPx') and row['state']=='live')
+    assert D(stop['sz'])>=D(order['sz'])
+    with book.read_transaction() as (_,state):
+        intent=state['intents'][root]
+    assert D(intent['applied_size'])==D(order['sz'])
 
 
 def test_scale_in_replaces_protection_only_after_new_stop_is_verified(managed):

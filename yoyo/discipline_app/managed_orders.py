@@ -7,12 +7,15 @@ Source: OKX v5 place order/algo, cancel order and position history contracts.
 """
 import copy
 from decimal import Decimal
-from .policy import Policy, Rejected, dec, positive, floor_step
+from .policy import (Policy, Rejected, dec, positive, floor_step,
+                     normalize_take_profit_overrides, take_profit_targets,
+                     resolve_take_profit_targets)
 from .okx_execution import ExchangeRejected, ExchangeUncertain, protective_prices, stable_id
 
 
 _ENTRY_CANCEL_REASONS = frozenset({
     'manual', 'stop_crossed', 'parent_closed', 'position_closed', 'protection_unverified',
+    'take_profit_invalidated',
 })
 
 
@@ -38,6 +41,54 @@ class ManagedOrders:
             self.outbox.resolve(identity, 'acknowledged', [dict(sCode='0', ordId=rows[0]['ordId'])])
         else:
             self.outbox.dispatch(identity, self.client)
+
+    def _retained_stop_specs(self, root, parent, pos, instrument):
+        """Return the current owned protection generation only if its SL covers the merged lot."""
+        with self.read_transaction() as (_, state):
+            owner = copy.deepcopy(state['intents'].get(root))
+        if not owner:
+            return None
+        specs = (owner.get('protection_specs') or owner.get('owned_active_specs')
+            or owner.get('payload', {}).get('attachAlgoOrds') or [])
+        stops = [spec for spec in specs if spec.get('slTriggerPx')]
+        if len(stops) != 1:
+            return None
+        try:
+            stop = self._algo(stops[0]['attachAlgoClOrdId'], [])
+        except ExchangeUncertain:
+            # A transient read failure does not prove the verified stop was
+            # canceled. Leave the fill unapplied and retry the same readback.
+            raise
+        except Rejected:
+            return None
+        direction = parent.get('direction')
+        required = dec(pos['remaining']) / dec(instrument['contract_value'])
+        trigger = dec(stop.get('slTriggerPx', '0'))
+        old_trigger = dec(parent.get('stop', '0'))
+        covers_size = ((not owner.get('owned_accounting') and stop.get('closeFraction') == '1')
+            or dec(stop.get('sz', '0')) >= required)
+        valid = (direction in (-1, 1) and covers_size and stop.get('state') == 'live'
+            and stop.get('instId') == pos['symbol'] and stop.get('posSide') == pos['side']
+            and stop.get('side') == ('sell' if pos['side'] == 'long' else 'buy')
+            and stop.get('slOrdPx') == '-1' and stop.get('slTriggerPxType') == 'last'
+            and trigger > 0
+            and (trigger >= old_trigger if direction == 1 else trigger <= old_trigger))
+        return (owner, copy.deepcopy(specs)) if valid else None
+
+    def _commit_retained_fill(self, key, root, pos, order, total, delta, specs):
+        """Commit a TP-invalid fill only after its unchanged owned stop is verified."""
+        merging = dict(position=pos, specs=copy.deepcopy(specs),
+            generation=stable_id(key, 'retained-fill-' + str(total.normalize())),
+            created=self.clock(), filled=str(total), avg=order['avgPx'],
+            fee=str(-dec(order['fee'])), delta=str(delta), retain_existing=True)
+        with self.transaction() as (_, state):
+            state['intents'][key]['merging'] = copy.deepcopy(merging)
+            target = next((row for row in state['positions'] if row['id'] == root), None)
+            if target is None:
+                state['positions'].append(copy.deepcopy(pos))
+            else:
+                target['protection'] = 'awaiting-exchange'
+        self._commit_merge(key, root, merging)
 
     def _managed_order(self, intent):
         key = intent['id']
@@ -116,6 +167,15 @@ class ManagedOrders:
             root = current.get('add_to') or key
             parent = next((copy.deepcopy(p) for p in state['positions'] if p['id'] == root), None)
         merging = current.get('merging')
+        if merging and merging.get('retain_existing'):
+            retained = self._retained_stop_specs(root, parent or merging['position'],
+                merging['position'], instrument)
+            if retained:
+                merging['specs'] = retained[1]
+                self._commit_merge(key, root, merging)
+                return
+            self._emergency_close(merging['position'], instrument)
+            raise Rejected('止盈无法重建且原止损不再覆盖持仓，已提交减仓保护')
         if not merging:
             raw_rows = self.client.get('/api/v5/account/positions')
             raw = self._owned_view(current, raw_rows, instrument)
@@ -165,11 +225,66 @@ class ManagedOrders:
             if liquidation and (dec(pos['stop'])-liquidation)*pos['direction'] <= 0:
                 self._emergency_close(pos,instrument)
                 raise Rejected('合并止损超出强平边界，已提交减仓保护')
+            if parent and parent.get('protection_edit_pending'):
+                if order['state'] not in ('filled','canceled'):
+                    self._cancel_entry(current,reason='protection_unverified')
+                retained = self._retained_stop_specs(root, parent, pos, instrument)
+                if retained:
+                    # Keep the observed cumulative fill durable, but leave
+                    # applied_size untouched. Once the pending edit is read
+                    # back, the normal merge path will rebuild every tier for
+                    # the complete quantity under the latest confirmed parent.
+                    return
+                self._emergency_close(pos,instrument)
+                raise Rejected('父仓保护修改尚未回读，已撤销余单并提交平仓保护')
+            override_input=current['request'].get('take_profits')
+            if parent and (override_input is None or previous > 0):
+                override_input=parent.get('take_profit_overrides')
+            reviewed_targets=(parent.get('take_profit_prices') if parent and previous > 0
+                else current['plan'].get('take_profit_prices'))
+            try:
+                overrides=normalize_take_profit_overrides(override_input,policy,
+                    pos['entry'],pos['side'],instrument['tick'])
+                target_prices,frozen=resolve_take_profit_targets(pos['entry'],pos['quantity'],pos['risk'],
+                    pos['entry_fee'],policy,pos['side'],instrument['tick'],overrides,reviewed_targets)
+            except Rejected as tp_error:
+                if order['state'] not in ('filled','canceled'):
+                    self._cancel_entry(current,reason='take_profit_invalidated')
+                retained = self._retained_stop_specs(root, parent or pos, pos, instrument)
+                if retained:
+                    # A stale or invalid TP request does not invalidate a
+                    # verified stop. Keep the active generation in place and
+                    # account for the fill; a later protection readback may
+                    # repair the TP ladder without dropping stop coverage.
+                    if not pos.get('take_profit_prices'):
+                        active_specs=retained[1]
+                        pos['take_profit_prices']=[spec.get('tpTriggerPx') for spec in active_specs
+                            if spec.get('tpTriggerPx')]
+                    if not pos.get('take_profit_overrides'):
+                        pos['take_profit_overrides']=list(current['plan'].get('take_profit_overrides') or
+                            [None]*len(policy.take_profits))
+                    if not pos.get('take_profit_frozen'):
+                        pos['take_profit_frozen']=list((parent or {}).get('take_profit_frozen') or
+                            [False]*len(policy.take_profits))
+                    pos['take_profit_error']=str(tp_error)
+                    pos['protection_deferred']='take_profit_invalidated'
+                    self._commit_retained_fill(key,root,pos,order,total,delta,retained[1])
+                    return
+                self._emergency_close(pos,instrument)
+                raise Rejected('实际成交均价已使自选止盈失效，已提交撤销剩余委托和平仓保护') from None
+            pos['take_profit_overrides']=overrides
+            pos['take_profit_prices']=target_prices
+            pos['take_profit_frozen']=frozen
             generation = stable_id(key, 'fill-'+str(total.normalize()))
-            prices = protective_prices(pos['entry'],pos['quantity'],pos['risk'],pos['entry_fee'],policy,pos['side'],instrument['tick'])
-            first = floor_step(actual*dec(policy.take_profits[0][1]),dec(instrument['step']))
+            prices = protective_prices(pos['entry'],pos['quantity'],pos['risk'],pos['entry_fee'],policy,
+                pos['side'],instrument['tick'],overrides,resolved_targets=target_prices)
+            amounts=[];allocated=Decimal(0)
+            for i,(_,fraction) in enumerate(policy.take_profits):
+                amount=(actual-allocated if i==len(policy.take_profits)-1 else
+                    floor_step(actual*dec(fraction),dec(instrument['step'])))
+                amounts.append(amount);allocated+=amount
             specs = [dict(attachAlgoClOrdId=stable_id(generation,'stop'),sz=str(actual/dec(instrument['contract_value'])+(Decimal(0) if current.get('owned_accounting') else dec(current['payload']['sz'])-total)),slTriggerPx=pos['stop'],slOrdPx='-1',slTriggerPxType='last')]
-            for i, amount in enumerate((first, actual-first)):
+            for i, amount in enumerate(amounts):
                 specs.append(dict(attachAlgoClOrdId=stable_id(generation,'tp'+str(i)),sz=str(amount/dec(instrument['contract_value'])),tpTriggerPx=prices['targets'][i],tpOrdPx='-1',tpTriggerPxType='last',disabled=amount<dec(instrument['minimum'])))
             merging = dict(position=pos, specs=specs, generation=generation, created=self.clock(), filled=str(total), avg=order['avgPx'], fee=str(-dec(order['fee'])), delta=str(delta))
             with self.transaction() as (_, state):
@@ -285,6 +400,28 @@ class ManagedOrders:
         # A non-positive risk basis cannot produce a meaningful net-R statistic.
         # Settlement still uses the complete exchange PnL, never a fabricated R.
         pos['risk'] = str(max(Decimal(0), cash_risk))
+        override_input=current['request'].get('take_profits')
+        previous_fill=dec(current.get('applied_size','0'))
+        if parent and (override_input is None or previous_fill > 0):
+            override_input=parent.get('take_profit_overrides')
+        try:
+            overrides=normalize_take_profit_overrides(override_input,policy,
+                current['plan']['entry'],pos['side'],instrument['tick'])
+        except Rejected:
+            overrides=[None]*len(policy.take_profits)
+        active_prices=(parent.get('take_profit_prices') if parent and previous_fill > 0
+            else current['plan'].get('take_profit_prices'))
+        if active_prices is None:
+            try:
+                active_prices=take_profit_targets(current['plan']['entry'],current['plan']['quantity'],
+                    current['plan']['risk'],dec(current['plan']['entry'])*dec(current['plan']['quantity'])*dec(policy.fee_rate),
+                    policy,pos['side'],instrument['tick'],overrides)
+            except Rejected:
+                active_prices=[]
+        pos['take_profit_overrides']=overrides
+        pos['take_profit_prices']=active_prices
+        pos['take_profit_frozen']=(parent.get('take_profit_frozen') if parent and previous_fill > 0
+            else [False]*len(policy.take_profits))
         pos.update(remaining='0', pos_id=history['posId'], protection='awaiting-exchange')
         # Keep every owned protection ID until _settle has verified cleanup.
         specs = {s['attachAlgoClOrdId']: s for s in

@@ -50,6 +50,50 @@ final class TradingLogicTests: XCTestCase {
         XCTAssertFalse(bars.last!.confirmed)
     }
 
+    @MainActor
+    func testOptionalEntryTargetsKeepPolicySlotsAndResetOnDirectionChange() throws {
+        let s = try state {
+            $0["positions"] = []
+            $0["supports_custom_protection"] = true
+        }
+        let model = TicketModel()
+        model.choose("ETH-USDT-SWAP")
+        model.targetInputs[1] = " 2400 "
+        let json = try JSONSerialization.data(withJSONObject: model.ticket(s).json)
+        let body = try XCTUnwrap(JSONSerialization.jsonObject(with: json) as? [String: Any])
+        let targets = try XCTUnwrap(body["take_profits"] as? [Any])
+        XCTAssertTrue(targets[0] is NSNull)
+        XCTAssertEqual(targets[1] as? String, "2400")
+        model.direction = "short"
+        XCTAssertNil(model.ticket(s).json["take_profits"])
+        model.targetInputs[0] = "2100"
+        model.choose("BTC-USDT-SWAP")
+        XCTAssertNil(model.ticket(s).json["take_profits"])
+    }
+
+    func testProtectionOnlyChangesEditedLegAndChecksCurrentPosition() throws {
+        let s = try state {
+            var rows = $0["positions"] as! [[String: Any]]
+            rows[0]["stop"] = "90"; rows[0]["entry"] = "100"; rows[0]["side"] = "long"
+            rows[0]["take_profit_prices"] = ["115", "125"]
+            rows[0]["take_profit_editable"] = [true, true]
+            $0["positions"] = rows
+        }
+        let position = try XCTUnwrap(s.positions.first)
+        var draft = ProtectionDraft(position)
+        draft.stop = "90.00"; draft.targets[1] = "130"
+        let update = draft.changes(from: position)
+        XCTAssertNil(update.stop)
+        XCTAssertEqual(update.targets, [nil, "130"])
+        XCTAssertNil(draft.issue(from: position, current: position, last: "102", tick: "0.1"))
+        draft.targets[0] = "131"
+        XCTAssertNotNil(draft.issue(from: position, current: position, last: "102", tick: "0.1"))
+        draft.targets[0] = "115"; draft.stop = "89"
+        XCTAssertNotNil(draft.issue(from: position, current: position, last: "102", tick: "0.1"))
+        draft.stop = "96.01"
+        XCTAssertNotNil(draft.issue(from: position, current: position, last: "102", tick: "0.1"))
+    }
+
     func testExposurePolicyAndFractionalExchangeLeverageDecodeWithLegacyFallback() throws {
         let raw = try base()
         let old = try state { _ in }

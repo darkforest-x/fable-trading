@@ -35,7 +35,7 @@ def main():
         exchange=ManagedExchange(time.time);book=LiveBook(Path(directory)/'fixture.sqlite3',exchange)
         quote(book);book.reconcile();stopped=threading.Event()
         if options.activity:
-            enter(book,ticket(fraction='.265'))
+            enter(book,ticket(fraction='.265', sizing_mode='exposure'))
             with book.transaction() as (_,state):
                 state['closed'].append(dict(id='synthetic-completed',symbol='ETH-USDT-SWAP',side='short',
                     quantity='.05',remaining='0',entry='100',stop='101',original_stop='102',risk='1',

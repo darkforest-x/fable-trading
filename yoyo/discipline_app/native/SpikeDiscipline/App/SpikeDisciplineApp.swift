@@ -228,6 +228,7 @@ struct RootView: View {
             QuickTicketSheet(onBlocked: route).presentationDetents([.large]).presentationDragIndicator(.visible)
         }
         .task { session.restore(); applyQA() }
+        .onChange(of: session.connection) { _, _ in ticket.targetInputs = [:]; ticket.preview = nil }
         .task(id: pollKey) {
             guard let connection = session.connection, scenePhase == .active else { return }
             await notices.poll(connection: connection, session: session)

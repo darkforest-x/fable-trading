@@ -7,10 +7,11 @@ import Observation
 @MainActor @Observable
 final class TicketModel {
     var symbol: String = UserDefaults.standard.string(forKey: "ticket.symbol") ?? "BTC-USDT-SWAP" { didSet { UserDefaults.standard.set(symbol, forKey: "ticket.symbol") } }
-    var direction = "long"
+    var direction = "long" { didSet { if oldValue != direction { targetInputs = [:] } } }
     var kind = "market"
     var price = ""
     var stop = ""
+    var targetInputs: [Int: String] = [:]
     var allocation: Double = 100
     var leverage = 20.0
     var fieldIssue: Trading.FieldIssue?
@@ -64,9 +65,14 @@ final class TicketModel {
         return value.formatted(.number.precision(.fractionLength(0...8)).grouping(.never).locale(Locale(identifier: "en_US")))
     }
     func ticket(_ state: AccountState?, side: String? = nil, stop: String? = nil) -> Ticket {
-        Ticket(symbol: symbol, side: side ?? self.side(state), kind: kind, price: price.trimmingCharacters(in: .whitespaces),
+        let targets = (state?.policy?.takeProfits.indices ?? 0..<0).map { index -> String? in
+            let input = targetInputs[index]?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            return input.isEmpty ? nil : input
+        }
+        let custom = existing(state) == nil && state?.supportsCustomProtection == true && targets.contains { $0 != nil }
+        return Ticket(symbol: symbol, side: side ?? self.side(state), kind: kind, price: price.trimmingCharacters(in: .whitespaces),
                stop: (stop ?? self.stop).trimmingCharacters(in: .whitespaces), fraction: fraction(state), leverage: leverage,
-               sizingMode: sizingMode(state))
+               sizingMode: sizingMode(state), takeProfits: custom ? targets : nil)
     }
     /// Context of an automatic stop: any change invalidates a computed value.
     func stopContext(_ state: AccountState?, connection: Connection?) -> String {
@@ -80,7 +86,7 @@ final class TicketModel {
     /// Switching contract clears price and stop (1.x choose()).
     func choose(_ next: String) {
         manual()
-        symbol = next; allocation = 100; price = ""; stop = ""; fieldIssue = nil; stopApplied = nil
+        symbol = next; allocation = 100; price = ""; stop = ""; targetInputs = [:]; fieldIssue = nil; stopApplied = nil
     }
     func manual() { autoMode = nil; autoWorking = false; autoCalculated = "" }
     func selectAuto(_ side: String) { autoCalculated = ""; autoWorking = true; autoMode = side; autoRevision += 1 }
@@ -93,6 +99,7 @@ final class TicketModel {
     }
     func syncExisting(_ state: AccountState?) {
         guard let e = existing(state) else { return }
+        targetInputs = [:]
         stop = e.stop; leverage = e.leverage; direction = e.side == "short" ? "short" : "long"
     }
 

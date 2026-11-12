@@ -141,9 +141,10 @@ enum Trading {
                         risk: quantity * (distance + cost) + remainingRisk, limited: quantity < requested - step / 2)
     }
 
-    struct FieldIssue: Equatable { enum Field: String { case price, stop, sizing, leverage }; let field: Field; let message: String }
+    struct FieldIssue: Equatable { enum Field: String { case price, stop, targets, sizing, leverage }; let field: Field; let message: String }
 
     static func issue(forMessage message: String) -> FieldIssue? {
+        if message.contains("止盈") { return FieldIssue(field: .targets, message: message) }
         if message.contains("止损") { return FieldIssue(field: .stop, message: message) }
         if message.contains("委托价格") || message.contains("限价") { return FieldIssue(field: .price, message: message) }
         if message.contains("杠杆") { return FieldIssue(field: .leverage, message: message) }
@@ -166,6 +167,19 @@ enum Trading {
             let entry = num(t.kind == "limit" ? t.price : (t.side == "long" ? q?.ask : q?.bid))
             if entry > 0, (entry - num(t.stop)) * (t.side == "long" ? 1 : -1) <= 0 {
                 return FieldIssue(field: .stop, message: t.side == "long" ? "多单止损应低于入场价" : "空单止损应高于入场价")
+            }
+            if let targets = t.takeProfits {
+                var prior = entry
+                for (index, target) in targets.enumerated() {
+                    guard let target else { continue }
+                    if invalid(target) || offTick(target) {
+                        return FieldIssue(field: .targets, message: "止盈 \(index + 1) 请输入符合最小价格步长的正数")
+                    }
+                    if prior > 0, (num(target) - prior) * (t.side == "long" ? 1 : -1) <= 0 {
+                        return FieldIssue(field: .targets, message: t.side == "long" ? "多单止盈需高于入场价，逐档升高" : "空单止盈需低于入场价，逐档降低")
+                    }
+                    prior = num(target)
+                }
             }
         }
         if !(num(t.fraction) > 0) { return FieldIssue(field: .sizing, message: "请选择大于 0 的仓位额度") }

@@ -10,7 +10,8 @@ import pytest
 from yoyo.discipline_app.okx_demo import Credentials
 from yoyo.discipline_app.okx_execution import (OkxExecutionClient, ExchangeUncertain,
     ExchangeRejected, entry_payload, protective_prices, stable_id)
-from yoyo.discipline_app.policy import Policy, Rejected
+from yoyo.discipline_app.policy import (Policy, Rejected, take_profit_targets,
+    resolve_take_profit_targets)
 
 
 def client(handler, **kwargs):
@@ -136,3 +137,62 @@ def test_too_small_split_rejects_before_sending_and_ids_stable():
     assert stable_id('one','entry')==stable_id('one','entry')
     assert stable_id('one','entry')!=stable_id('one','close')
     assert len(stable_id('one','entry'))==32
+
+
+@pytest.mark.parametrize('side,stop,custom', [('long','95','120'),('short','105','80')])
+def test_entry_payload_uses_per_tier_custom_target_and_original_split(side,stop,custom):
+    policy=Policy()
+    instrument=dict(contract_value='.01',step='.01',minimum='.01',tick='.01')
+    ticket=dict(symbol='BTC-USDT-SWAP',side=side,take_profits=[None,custom])
+    sized=dict(quantity='1.03',entry='100',stop=stop,risk='5.356')
+    payload=entry_payload('custom-target',ticket,sized,instrument,policy,'long_short_mode')
+    first,second=payload['attachAlgoOrds'][1:]
+    assert first['tpTriggerPx'] == protective_prices('100','1.03','5.356','.0515',policy,side,'.01')['targets'][0]
+    assert D(second['tpTriggerPx']) == D(custom)
+    assert D(first['sz']) == 61 and D(second['sz']) == 42
+
+
+@pytest.mark.parametrize('side,overrides', [
+    ('long',['130','120']), ('short',['70','80']),
+    ('long',[None,'100']), ('short',[None,'100']),
+    ('long',[None,'120.005']), ('short',[None,'79.995']),
+])
+def test_custom_targets_require_favorable_tick_aligned_prices_in_tier_order(side,overrides):
+    with pytest.raises(Rejected):
+        take_profit_targets('100','1.03','5.356','.0515',Policy(),side,'.01',overrides)
+
+
+def test_custom_target_cannot_collide_with_another_tier_but_auto_rounding_stays_compatible():
+    policy=Policy()
+    automatic=protective_prices('100','1.03','5.356','.0515',policy,'long','.01')['targets']
+    with pytest.raises(Rejected,match='档序'):
+        take_profit_targets('100','1.03','5.356','.0515',policy,'long','.01',
+                            [automatic[1],None])
+    rounded=Policy(take_profits=(('0.00001','.6'),('0.00002','.4')))
+    targets=take_profit_targets('100','10','.0001','0',rounded,'long','.01')
+    assert targets[0] == targets[1]
+
+
+def test_fill_time_manual_collision_freezes_valid_reviewed_auto_tier():
+    policy=Policy()
+    reviewed_auto=take_profit_targets('100','1.03','5.356','.0515',policy,'long','.01')
+    custom_second=str(D(reviewed_auto[0])+D('1'))
+    reviewed=[reviewed_auto[0],custom_second]
+    resolved,frozen=resolve_take_profit_targets('100','1.03','9','.0515',policy,'long','.01',
+        [None,custom_second],reviewed)
+    assert resolved==reviewed
+    assert frozen==[True,False]
+    with pytest.raises(Rejected):
+        resolve_take_profit_targets('117','1.03','9','.0515',policy,'long','.01',
+            [None,custom_second],reviewed)
+
+
+def test_entry_compiler_tracks_the_active_session_policy_tier_count():
+    policy=Policy(take_profits=(('1','.2'),('2','.3'),('4','.5')))
+    ticket=dict(symbol='BTC-USDT-SWAP',side='long',take_profits=[None,None,None])
+    sized=dict(quantity='1.05',entry='100',stop='95',risk='5.46')
+    instrument=dict(contract_value='.01',step='.01',minimum='.01',tick='.01')
+    payload=entry_payload('three-tiers',ticket,sized,instrument,policy,'long_short_mode')
+    algos=payload['attachAlgoOrds']
+    assert len(algos)==4
+    assert [D(row['sz']) for row in algos[1:]]==[21,31,53]

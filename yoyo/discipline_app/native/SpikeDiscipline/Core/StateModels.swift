@@ -70,6 +70,11 @@ struct Position: Codable, Hashable, Identifiable {
     let opened: Double?
     let closed: Double?
     let closeReason: String?
+    let emergencyCloseSubmitted: Bool?
+    let protectionEditable: Bool?
+    let takeProfitPrices: [String?]?
+    let takeProfitEditable: [Bool]?
+    let stages: [Int]?
 }
 
 struct Plan: Codable, Hashable {
@@ -86,6 +91,7 @@ struct Plan: Codable, Hashable {
     let exposureLimited: Bool
     /// Actual exchange leverage can be a fractional tier (for example 66.66x).
     var leverage: Double? = nil
+    var takeProfitPrices: [String]? = nil
 }
 
 struct PendingOrder: Codable, Hashable, Identifiable {
@@ -112,6 +118,7 @@ struct Daily: Codable, Hashable { let key: String; let entries: Int; let lockedR
 struct PolicyProposal: Codable, Hashable { let policy: Policy; let effectiveAfter: Double }
 
 struct AccountState: Codable {
+    let supportsCustomProtection: Bool?
     let mode: String
     let accountId: String?
     let accountName: String?
@@ -166,13 +173,30 @@ struct Ticket: Hashable {
     var fraction: String
     var leverage: Double
     var sizingMode: String = "margin"
+    var takeProfits: [String?]? = nil
     var json: [String: Any] {
-        ["symbol": symbol, "side": side, "kind": kind, "price": price, "stop": stop, "fraction": fraction, "leverage": leverage, "sizing_mode": sizingMode]
+        var body: [String: Any] = ["symbol": symbol, "side": side, "kind": kind, "price": price, "stop": stop, "fraction": fraction, "leverage": leverage, "sizing_mode": sizingMode]
+        if let takeProfits { body["take_profits"] = takeProfits }
+        return body
     }
 }
 
 struct PreviewResult: Codable { let plan: Plan; let policyRevision: Int; let previewId: String? }
 struct RequestStatus: Codable { let id: String?; let status: String; let message: String? }
+struct ProtectionReceipt: Decodable {
+    let id: String
+    let status: String
+    let updated: [String]?
+    let rejected: [String]?
+
+    func labels(_ fields: [String]?) -> String {
+        (fields ?? []).map { field in
+            if field == "stop" { return "止损" }
+            if field.hasPrefix("tp"), let index = Int(field.dropFirst(2)) { return "止盈 \(index + 1)" }
+            return field
+        }.joined(separator: "、")
+    }
+}
 struct StopValue: Codable { let stop: String }
 struct WickStop: Codable { let stopLoss: String }
 

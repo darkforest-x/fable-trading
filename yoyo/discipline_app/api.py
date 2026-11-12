@@ -7,7 +7,7 @@ import hashlib
 import hmac
 from pathlib import Path
 from contextlib import asynccontextmanager
-from typing import Literal, Optional, Union
+from typing import Annotated, Literal, Optional, Union
 from fastapi import FastAPI, Depends, Header, HTTPException, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
@@ -25,6 +25,9 @@ from .wick_stop import WickStops
 from .policy import Rejected
 
 
+ProtectionPrice = Annotated[str, Field(max_length=32)]
+
+
 class Ticket(BaseModel):
     model_config = ConfigDict(extra='forbid')
     symbol: str = Field(pattern=r'^[A-Z0-9]{1,40}-USDT-SWAP$')
@@ -32,6 +35,9 @@ class Ticket(BaseModel):
     kind: Literal['market', 'limit']
     price: str = Field(max_length=32)
     stop: str = Field(max_length=32)
+    # Omit the optional extension so retrying an older ticket reproduces its journal fingerprint.
+    take_profits: Optional[list[Optional[ProtectionPrice]]] = Field(
+        default=None, max_length=8, exclude_if=lambda value: value is None)
     fraction: str = Field(max_length=20)
     sizing_mode: Optional[Literal['risk', 'margin', 'exposure']] = None
     # Legacy policies still require integral leverage. Exposure policies treat
@@ -56,6 +62,11 @@ class Command(BaseModel):
 
 class Tighten(Command):
     stop: str = Field(max_length=32)
+
+
+class ProtectionChange(Command):
+    stop: Optional[str] = Field(default=None, max_length=32)
+    take_profits: Optional[list[Optional[ProtectionPrice]]] = Field(default=None, max_length=8)
 
 
 class Close(Command):
@@ -390,7 +401,8 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
         name = next((r['name'] for r in getattr(book, 'records', []) if r['id']==identity), '主账户')
         # The ledger already emits JSON-safe primitives. Avoid recursively
         # re-encoding ~500 contracts through FastAPI on every polling request.
-        return JSONResponse(dict(current.snapshot(), account_id=identity, account_name=name))
+        return JSONResponse(dict(current.snapshot(), account_id=identity, account_name=name,
+                                 supports_custom_protection=True))
 
     @app.get('/v1/events', dependencies=[Depends(auth)])
     def events(current=Depends(selected)):
@@ -472,6 +484,12 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
     @app.post('/v1/positions/{identity}/stop', dependencies=[Depends(auth)])
     def tighten(identity: str, body: Tighten, current=Depends(selected)):
         return current.tighten(body.request_id, identity, body.stop)
+
+    @app.post('/v1/positions/{identity}/protection', dependencies=[Depends(auth)])
+    def change_protection(identity: str, body: ProtectionChange, current=Depends(selected)):
+        if live and not body.confirmed_live:
+            raise Rejected('请在 App 明确确认本次实盘保护修改')
+        return current.change_protection(body.request_id, identity, body.stop, body.take_profits)
 
     @app.post('/v1/positions/{identity}/entry-stop', dependencies=[Depends(auth)])
     def entry_stop(identity: str, body: Command, current=Depends(selected)):

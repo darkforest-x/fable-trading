@@ -15,7 +15,9 @@ from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 from zoneinfo import ZoneInfo
-from .policy import Policy, Rejected, dec, positive, floor_step, ceil_step, plan, json_number
+from .policy import (Policy, Rejected, dec, positive, floor_step, ceil_step, plan,
+                     json_number, normalize_take_profit_overrides, take_profit_targets,
+                     price_on_step, resolve_take_profit_targets)
 from .closing import close_fraction, close_quantity
 from .scaling import merged_position, remaining_risk
 
@@ -422,7 +424,8 @@ class Book:
         """Fields that change the scale-in baseline or its safe fill limits."""
         keys = ('id', 'symbol', 'side', 'direction', 'quantity', 'remaining',
                 'entry', 'original_stop', 'stop', 'risk', 'margin', 'leverage',
-                'entry_fee', 'breakeven', 'stages', 'policy_revision')
+                'entry_fee', 'breakeven', 'stages', 'take_profit_overrides',
+                'take_profit_prices', 'policy_revision')
         return {key: copy.deepcopy(pos[key]) for key in keys if key in pos}
 
     @staticmethod
@@ -451,7 +454,7 @@ class Book:
 
     def preview_in(self, state, request, reviewed_plan=None, leverage_override=None,
                    extra_quantity_limit=None):
-        if set(request) - {'sizing_mode', 'add_to'} != {'symbol', 'side', 'kind', 'price', 'stop', 'fraction', 'leverage'}:
+        if set(request) - {'sizing_mode', 'add_to', 'take_profits'} != {'symbol', 'side', 'kind', 'price', 'stop', 'fraction', 'leverage'}:
             raise Rejected('订单字段不匹配；仓位与权益必须由服务端计算')
         symbol, side, kind = request['symbol'], request['side'], request['kind']
         if symbol not in state['instruments'] or not state['instruments'][symbol].get('tradable', True) or kind not in ('market', 'limit'):
@@ -479,7 +482,7 @@ class Book:
         q = self.quote(state, symbol)
         direction = 1 if side == 'long' else -1
         entry = positive(request['price'], '委托价格') if kind == 'limit' else positive(q['ask'] if side == 'long' else q['bid']) * (1 + direction * dec(p.slippage_rate))
-        if kind == 'limit' and entry % dec(state['instruments'][symbol]['tick']):
+        if kind == 'limit' and not price_on_step(entry, state['instruments'][symbol]['tick'], '委托价格'):
             raise Rejected('委托价格不符合最小价格单位')
         stop = positive(target['stop'], '止损价格') if target else positive(request['stop'], '初始止损价格')
         inherited = self.inherited_leverage(state, symbol)
@@ -529,6 +532,23 @@ class Book:
                       limit, sizing_mode, inherited,
                       self.remaining_exposure_notional(state, symbol)
                       if sizing_mode == 'exposure' else None)
+        tick = positive(state['instruments'][symbol]['tick'])
+        override_input = request.get('take_profits')
+        if target and override_input is None:
+            override_input = target.get('take_profit_overrides')
+        if target:
+            projected = merged_position(target, result['quantity'], entry,
+                dec(result['quantity']) * entry * dec(p.fee_rate), p)
+            target_entry, target_quantity = projected['entry'], projected['quantity']
+            target_risk, target_fee = projected['risk'], projected['entry_fee']
+        else:
+            target_entry, target_quantity = entry, result['quantity']
+            target_risk = result['risk']
+            target_fee = entry * dec(result['quantity']) * dec(p.fee_rate)
+        overrides = normalize_take_profit_overrides(override_input, p, target_entry, side, tick)
+        result['take_profit_overrides'] = overrides
+        result['take_profit_prices'] = take_profit_targets(
+            target_entry, target_quantity, target_risk, target_fee, p, side, tick, overrides)
         if target:
             result['add_to'] = target['id']
             result['parent_snapshot'] = self.scale_parent_snapshot(target)
@@ -683,8 +703,17 @@ class Book:
             raise Rejected('成交时保证金检查失败')
         if target:
             updates = merged_position(target, quantity, price, fee, p)
+            tick = positive(state['instruments'][order['symbol']]['tick'])
+            override_input = order.get('take_profits')
+            if override_input is None:
+                override_input = target.get('take_profit_overrides')
+            overrides = normalize_take_profit_overrides(override_input, p,
+                updates['entry'], order['side'], tick)
+            active_targets, frozen = resolve_take_profit_targets(updates['entry'], updates['quantity'],
+                updates['risk'], updates['entry_fee'], p, order['side'], tick, overrides, original.get('take_profit_prices'))
             lifecycle_pnl = dec(target.get('pnl', '0')) - fee
-            target.update(updates)
+            target.update(updates, take_profit_overrides=overrides, take_profit_prices=active_targets,
+                take_profit_frozen=frozen)
             target['pnl'] = str(lifecycle_pnl)
             target.pop('current_r', None)
             state['cash'] = str(dec(state['cash']) - fee)
@@ -692,11 +721,17 @@ class Book:
                 price=str(price), quantity=str(quantity), fee=str(fee), plan=original,
                 position=copy.deepcopy(target)))
             return
+        tick = positive(state['instruments'][order['symbol']]['tick'])
+        overrides = normalize_take_profit_overrides(order.get('take_profits'), p, price, order['side'], tick)
+        active_targets, frozen = resolve_take_profit_targets(price, quantity, risk, fee, p,
+            order['side'], tick, overrides, original.get('take_profit_prices'))
         pos = dict(id=order['id'], symbol=order['symbol'], side=order['side'], direction=direction,
             quantity=str(quantity), remaining=str(quantity), entry=str(price), original_stop=str(stop),
             stop=str(stop), risk=str(risk), margin=str(margin), leverage=json_number(leverage), margin_mode=p.margin_mode,
             entry_fee=str(fee), pnl=str(-fee), breakeven=False, stages=[], opened=self.clock(),
-            policy=p.document(), policy_revision=state['policy_revision'], protection='server-paper-only')
+            policy=p.document(), policy_revision=state['policy_revision'], protection='server-paper-only',
+            take_profit_overrides=overrides, take_profit_prices=active_targets,
+            take_profit_frozen=frozen)
         state['cash'] = str(dec(state['cash']) - fee)
         state['positions'].append(pos)
         self.event(db, 'paper_fill', pos)
@@ -742,15 +777,24 @@ class Book:
             if (mark - dec(pos['stop'])) * direction <= 0:
                 self.reduce(db, state, pos, dec(pos['remaining']), positive(q['bid'] if direction == 1 else q['ask']), 'breakeven_crossed')
                 return
+        overrides = pos.get('take_profit_overrides') or [None] * len(p.take_profits)
+        frozen = pos.get('take_profit_frozen') or [False] * len(p.take_profits)
         for i, (target, fraction) in enumerate(p.take_profits):
-            if i in pos['stages'] or r < dec(target):
+            if i in pos['stages']:
+                continue
+            trigger_price = pos['take_profit_prices'][i] if frozen[i] else overrides[i]
+            if trigger_price is not None:
+                if (mark - dec(trigger_price)) * direction < 0:
+                    continue
+            elif r < dec(target):
                 continue
             remaining = dec(pos['remaining'])
             step = dec(state['instruments'][pos['symbol']]['step'])
             amount = remaining if i == len(p.take_profits) - 1 else min(remaining, floor_step(quantity * dec(fraction), step))
             pos['stages'].append(i)
             if amount:
-                self.reduce(db, state, pos, amount, positive(q['bid'] if direction == 1 else q['ask']), f'tp_{target}R')
+                reason = f'tp_price_{trigger_price}' if trigger_price is not None else f'tp_{target}R'
+                self.reduce(db, state, pos, amount, positive(q['bid'] if direction == 1 else q['ask']), reason)
             else:
                 self.event(db, 'tp_below_lot', dict(id=pos['id'], stage=i))
             if dec(pos['remaining']) == 0:
@@ -863,6 +907,66 @@ class Book:
             return dict(id=identity, stop=str(value), mode='paper')
         return self.command(key, dict(action='tighten', id=identity, stop=stop), execute)
 
+    def change_protection(self, key, identity, stop=None, take_profits=None):
+        """Tighten an open paper stop and/or adjust outstanding TP prices."""
+        request = dict(action='change_protection', id=identity, stop=stop, take_profits=take_profits)
+
+        def execute(db, state):
+            pos = next((x for x in state['positions'] if x['id'] == identity), None)
+            if pos is None:
+                raise Rejected('持仓不存在')
+            policy = Policy.parse(pos['policy'])
+            count = len(policy.take_profits)
+            if take_profits is not None and len(take_profits) != count:
+                raise Rejected('止盈档位与当前持仓规则不匹配')
+            selected = stop is not None or (take_profits is not None and any(x is not None for x in take_profits))
+            if not selected:
+                raise Rejected('请至少填写一项要修改的保护价格')
+
+            quote = self.quote(state, pos['symbol'])
+            mark = positive(quote['last'], '最新价格')
+            tick = positive(state['instruments'][pos['symbol']]['tick'], '最小价格单位')
+            if stop is not None:
+                value = positive(stop, '止损价格')
+                if not price_on_step(value, tick, '止损价格') or (value < dec(pos['stop']) if pos['direction'] == 1 else value > dec(pos['stop'])) or (value >= mark if pos['direction'] == 1 else value <= mark):
+                    raise Rejected('止损只能收紧，且不能越过当前价格')
+                pos['stop'] = str(value)
+
+            old_overrides = pos.get('take_profit_overrides') or [None] * count
+            overrides = list(old_overrides)
+            if not isinstance(pos.get('take_profit_prices'), list) or len(pos['take_profit_prices']) != count:
+                pos['take_profit_overrides'] = normalize_take_profit_overrides(
+                    overrides, policy, pos['entry'], pos['side'], tick)
+                pos['take_profit_prices'] = take_profit_targets(pos['entry'], pos['quantity'],
+                    pos['risk'], pos['entry_fee'], policy, pos['side'], tick,
+                    pos['take_profit_overrides'])
+            if any(value is not None for value in take_profits or ()):
+                if len(old_overrides) != count:
+                    raise Rejected('当前持仓的止盈档位无法核对')
+                stages = set(pos.get('stages') or [])
+                for index, raw in enumerate(take_profits):
+                    if raw is None:
+                        continue
+                    if index in stages:
+                        raise Rejected('已完成的止盈档位不能修改')
+                    value = positive(raw, '止盈价格')
+                    if (value <= mark if pos['direction'] == 1 else value >= mark):
+                        raise Rejected('止盈价格必须位于当前价格的有利一侧')
+                    overrides[index] = str(value)
+                normalized = normalize_take_profit_overrides(overrides, policy, pos['entry'], pos['side'], tick)
+                prices = [pos['take_profit_prices'][index] if value is None else normalized[index]
+                          for index, value in enumerate(take_profits)]
+                active_prices = take_profit_targets(pos['entry'], pos['quantity'], pos['risk'],
+                    pos['entry_fee'], policy, pos['side'], tick, prices)
+                pos['take_profit_overrides'] = normalized
+                pos['take_profit_prices'] = active_prices
+            self.event(db, 'protection_changed', dict(id=identity, stop=pos['stop'],
+                take_profit_prices=pos.get('take_profit_prices')))
+            return dict(id=identity, status='verified', stop=pos['stop'],
+                take_profit_prices=pos.get('take_profit_prices'), mode='paper')
+
+        return self.command(key, request, execute)
+
     def entry_stop(self, key, identity):
         with self.read_transaction() as (_, state):
             pos = next((x for x in state['positions'] if x['id'] == identity), None)
@@ -880,6 +984,32 @@ class Book:
     def render_snapshot(self, state):
         self.day(state)
         result = copy.deepcopy(state)
+        for position in result.get('positions', []):
+            policy = Policy.parse(position['policy'])
+            count = len(policy.take_profits)
+            prices = position.get('take_profit_prices')
+            if not isinstance(prices, list) or len(prices) != count:
+                prices = [None] * count
+                if position.get('protection') == 'server-paper-only':
+                    try:
+                        tick = positive(state['instruments'][position['symbol']]['tick'])
+                        overrides = normalize_take_profit_overrides(
+                            position.get('take_profit_overrides'), policy, position['entry'],
+                            position['side'], tick)
+                        prices = take_profit_targets(position['entry'], position['quantity'],
+                            position['risk'], position['entry_fee'], policy, position['side'], tick, overrides)
+                    except (Rejected, KeyError, TypeError):
+                        pass
+            position['take_profit_prices'] = prices
+            editable = (position.get('protection') == 'server-paper-only'
+                or (position.get('protection') == 'exchange-verified' and all(price is not None for price in prices)))
+            position['protection_editable'] = bool(editable and not position.get('protection_edit_pending')
+                and not position.get('take_profit_error'))
+            stages = set(position.get('stages') or [])
+            position['take_profit_editable'] = [
+                bool(position['protection_editable'] and prices[index] is not None and index not in stages)
+                for index in range(count)
+            ]
         if state['policy']:
             result['policy'] = self.policy(state).document()
         result['equity'] = str(self.equity(state))

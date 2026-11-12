@@ -12,6 +12,7 @@ struct TicketForm: View {
     /// Only one visible form presents the confirm sheet and errors (合约 page vs 1.618 sheet).
     var hosts = true
     @State private var leverageSheet = false
+    @State private var showTargets = false
     @FocusState private var focus: Trading.FieldIssue.Field?
     @State private var lastAllocationTick = 4
 
@@ -136,6 +137,28 @@ struct TicketForm: View {
                     .font(.caption.weight(.medium)).foregroundStyle(Color.up)
             }
 
+            if existing == nil, state?.supportsCustomProtection == true, let stages = state?.policy?.takeProfits {
+                DisclosureGroup(isExpanded: $showTargets) {
+                    VStack(spacing: 10) {
+                        ForEach(stages.indices, id: \.self) { index in
+                            let stage = stages[index]
+                            ProtectionPriceRow(title: "止盈 \(index + 1)", detail: index == stages.count - 1 ? "平余仓" : "平 \(Fmt.plainPercent(stage.last))%",
+                                               placeholder: "自动 · \(stage.first ?? "")R",
+                                               value: Binding(get: { ticket.targetInputs[index] ?? "" }, set: {
+                                                   ticket.targetInputs[index] = $0; ticket.fieldIssue = nil
+                                               }))
+                        }
+                    }.padding(.top, 6)
+                } label: {
+                    HStack {
+                        Text("止盈价格").font(.subheadline.weight(.semibold))
+                        Spacer()
+                        Text(ticket.ticket(state).takeProfits == nil ? "自动分档" : "自定义").font(.caption).foregroundStyle(.secondary)
+                    }
+                }.disabled(locked).tint(.accentColor)
+                issue(.targets)
+            }
+
             VStack(alignment: .leading, spacing: 8) {
                 HStack(alignment: .firstTextBaseline) {
                     Text("仓位额度").font(.subheadline.weight(.semibold))
@@ -213,6 +236,7 @@ struct TicketForm: View {
             await runAutoStop(context: context, enabled: autoEnabled)
         }
         .onChange(of: focus) { old, _ in if let old { validate(old, state: state) } }
+        .onChange(of: ticket.fieldIssue?.field) { _, field in if field == .targets { showTargets = true } }
     }
 
     // MARK: pieces
@@ -303,7 +327,8 @@ struct TicketForm: View {
     }
 
     private func review(side: String, state: AccountState?) async {
-        guard session.connection != nil, !ticket.reviewing, account.pendingEntry == nil, let state else { return }
+        guard let owner = session.connection, account.connection == owner,
+              !ticket.reviewing, account.pendingEntry == nil, let state else { return }
         ticket.reviewing = true; ticket.error = nil; Haptics.tap()
         defer { ticket.reviewing = false }
         let order = ticket.ticket(state, side: side)
@@ -317,6 +342,7 @@ struct TicketForm: View {
                 return
             }
             let result = try await account.preview(order)
+            guard session.connection == owner, account.connection == owner else { return }
             let pending = TicketModel.Pending(id: requestId, ticket: order, plan: result.plan, policyRevision: result.policyRevision, previewId: result.previewId)
             if confirmTrades { ticket.preview = pending } else {
                 try await account.submit(order, requestId: requestId, policyRevision: result.policyRevision, previewId: result.previewId)
@@ -331,6 +357,7 @@ struct TicketForm: View {
 
     private func finish() {
         ticket.manual()
+        ticket.targetInputs = [:]
         if ticket.fibTicket { ticket.fibTicket = false }
     }
 }

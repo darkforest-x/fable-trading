@@ -17,7 +17,9 @@ from decimal import Decimal
 from .book import Book, encoded
 from .execution_journal import ExecutionJournal
 from .okx_execution import ExchangeRejected, ExchangeUncertain, entry_payload, protective_prices, stable_id
-from .policy import Policy, Rejected, dec, positive, ceil_step, floor_step, json_number
+from .policy import (Policy, Rejected, dec, positive, ceil_step, floor_step, json_number,
+                     normalize_take_profit_overrides, take_profit_targets,
+                     resolve_take_profit_targets, price_on_step)
 from .leverage_tiers import fit_order
 from .closing import close_fraction, close_quantity
 from .managed_orders import ManagedOrders
@@ -323,6 +325,17 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
                 if any(dec(sized[field]) > dec(saved['plan'][field]) for field in
                        ('quantity','notional','risk','margin')) or dec(sized['leverage']) != dec(saved_leverage):
                     raise Rejected('行情变化使本单超出已确认计划，请重新预览')
+                reviewed_targets = saved['plan'].get('take_profit_prices')
+                current_targets = sized.get('take_profit_prices')
+                reviewed_overrides = saved['plan'].get('take_profit_overrides')
+                current_overrides = sized.get('take_profit_overrides')
+                if (reviewed_targets is not None and current_targets is not None
+                        and reviewed_overrides is not None and current_overrides is not None
+                        and (len(reviewed_targets) != len(current_targets)
+                             or len(reviewed_overrides) != len(current_overrides)
+                             or any(value is not None and dec(reviewed_targets[index]) != dec(current_targets[index])
+                                    for index, value in enumerate(reviewed_overrides)))):
+                    raise Rejected('行情变化使止盈目标偏离预览，请重新预览')
                 payload = entry_payload(key, request, sized, state['instruments'][request['symbol']], self.policy(state), 'long_short_mode')
                 if request['kind'] == 'limit':
                     payload['ordType'] = 'limit'
@@ -477,7 +490,8 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
                 state['account_synced']=False
             try:
                 config, usdt, raw_positions, raw_orders, algos = self._fetch()
-                self._resolve_commands()
+                errors = self._resolve_commands()
+                self._recover_protection_updates()
                 self._shared_leverage(raw_positions, raw_orders, algos)
                 reference = hashlib.sha256(config['uid'].encode()).hexdigest()[:16]
                 with self.transaction() as (_, state):
@@ -492,7 +506,6 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
                     state['account_synced'] = True
                     intents = copy.deepcopy(state['intents'])
                     self.day(state)
-                errors=[]
                 failed_roots=set()
                 # Read cumulative fills before reconciling their aggregate position.
                 for intent in intents.values():
@@ -560,7 +573,124 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
                 return False
             return True
 
+    def _recover_protection_updates(self):
+        """Resolve only user protection amendments that have a durable intent.
+
+        An ambiguous amend is never resent by reconciliation. A prepared amend
+        means the request died before dispatch, so it is fenced as unsent and
+        its requested override is rolled back.
+        """
+        with self.read_transaction() as (_, state):
+            pending = []
+            for owner_id, owner in state.get('intents', {}).items():
+                for request_id, update in owner.get('protection_updates', {}).items():
+                    if update.get('status') == 'pending':
+                        position = next((row for row in state['positions'] if row['id'] == owner_id), None)
+                        pending.append((owner_id, request_id, copy.deepcopy(update),
+                            position.get('direction', 1) if position else 1))
+        for position_id, request_id, update, direction in pending:
+            resolved = {}
+            for field_name, field in update.get('fields', {}).items():
+                if field.get('status') != 'pending':
+                    continue
+                try:
+                    command = self.outbox.inspect(field['command_id'])
+                except Rejected:
+                    resolved[field_name] = ('rejected', None)
+                    continue
+                if command['phase'] == 'prepared':
+                    with self.transaction() as (db, _):
+                        db.execute("UPDATE exchange_commands SET phase='rejected',receipt=?,updated=? WHERE id=? AND phase='prepared'",
+                            (encoded({'code':'unsent'}), self.clock(), field['command_id']))
+                    resolved[field_name] = ('rejected', None)
+                    continue
+                if command['phase'] == 'rejected':
+                    resolved[field_name] = ('rejected', None)
+                    continue
+                if command['phase'] != 'acknowledged':
+                    continue
+                try:
+                    rows = self.client.get('/api/v5/trade/order-algo', algoClOrdId=field['algo_cl_ord_id'])
+                    if len(rows) != 1:
+                        continue
+                    algo = rows[0]
+                    exchange_field = 'slTriggerPx' if field_name == 'stop' else 'tpTriggerPx'
+                    satisfied = ((dec(algo.get(exchange_field, '0')) - dec(field['desired'])) * direction >= 0
+                        if field_name == 'stop' else
+                        dec(algo.get(exchange_field, '0')) == dec(field['desired']))
+                    if not satisfied:
+                        continue
+                    resolved[field_name] = ('verified', algo)
+                except (Rejected, ExchangeUncertain):
+                    continue
+            if resolved:
+                with self.transaction() as (db, state):
+                    owner = state.get('intents', {}).get(position_id)
+                    position = next((row for row in state['positions'] if row['id'] == position_id), None)
+                    if not owner or not position:
+                        continue
+                    live_update = owner.get('protection_updates', {}).get(request_id)
+                    if not live_update or live_update.get('status') != 'pending':
+                        continue
+                    for field_name, (status, algo) in resolved.items():
+                        field = live_update['fields'][field_name]
+                        field['status'] = status
+                        if status == 'verified':
+                            if field_name == 'stop':
+                                position['stop'] = str(algo['slTriggerPx'])
+                            else:
+                                index = int(field_name[2:])
+                                count = len(Policy.parse(position['policy']).take_profits)
+                                prices = list(position.get('take_profit_prices') or [None] * count)
+                                if len(prices) != count:
+                                    prices = [None] * count
+                                prices[index] = str(algo['tpTriggerPx'])
+                                position['take_profit_prices'] = prices
+                                overrides = list(position.get('take_profit_overrides') or [None] * count)
+                                if len(overrides) != count:
+                                    overrides = [None] * count
+                                overrides[index] = str(field['desired'])
+                                position['take_profit_overrides'] = overrides
+                            specs = (owner.get('protection_specs') if owner.get('aggregate') else
+                                owner.get('owned_active_specs') or owner.get('payload', {}).get('attachAlgoOrds'))
+                            if specs:
+                                specs = copy.deepcopy(specs)
+                                for spec in specs:
+                                    if spec.get('attachAlgoClOrdId') == field['algo_cl_ord_id']:
+                                        spec['slTriggerPx' if field_name == 'stop' else 'tpTriggerPx'] = str(field['desired'])
+                                if owner.get('aggregate'):
+                                    owner['protection_specs'] = specs
+                                else:
+                                    owner['owned_active_specs'] = specs
+                        else:
+                            field['error'] = 'unsent_or_rejected'
+                            if field_name.startswith('tp'):
+                                index = int(field_name[2:])
+                                count = len(Policy.parse(position['policy']).take_profits)
+                                overrides = list(position.get('take_profit_overrides') or [None] * count)
+                                if len(overrides) != count:
+                                    overrides = [None] * count
+                                overrides[index] = field.get('previous_override')
+                                position['take_profit_overrides'] = overrides
+                    unresolved = any(field.get('status') == 'pending'
+                        for field in live_update.get('fields', {}).values())
+                    position['protection_edit_pending'] = unresolved
+                    if not unresolved:
+                        rejected_fields = [name for name, field in live_update.get('fields', {}).items()
+                            if field.get('status') == 'rejected']
+                        verified_fields = [name for name, field in live_update.get('fields', {}).items()
+                            if field.get('status') == 'verified']
+                        status = ('partial' if rejected_fields and verified_fields else
+                            'rejected' if rejected_fields else 'verified')
+                        live_update['status'] = status
+                        live_update['result'] = dict(id=position_id, status=status, stop=position['stop'],
+                            take_profit_prices=position.get('take_profit_prices'),
+                            updated=verified_fields, rejected=rejected_fields, mode=self.mode)
+                        self.event(db, 'protection_change_resolved', dict(id=position_id,
+                            request_id=request_id, status=live_update['status']))
+
     def _resolve_commands(self):
+        errors = []
         for record in self.outbox.unresolved():
             path, payload = record['endpoint'], record['payload']
             try:
@@ -583,7 +713,13 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
                 elif path == '/api/v5/trade/amend-algos':
                     rows = self.client.get('/api/v5/trade/order-algo',algoId=payload['algoId'])
                     fields = {'newSlTriggerPx':'slTriggerPx','newTpTriggerPx':'tpTriggerPx','newSz':'sz'}
-                    if len(rows)==1 and all(dec(rows[0].get(old,'0'))==dec(payload[new]) for new,old in fields.items() if new in payload):
+                    satisfied = len(rows)==1 and all(dec(rows[0].get(old,'0'))==dec(payload[new])
+                        for new,old in fields.items() if new in payload)
+                    if len(rows)==1 and 'newSlTriggerPx' in payload:
+                        pending = self._pending_manual_stop(record['id'])
+                        if pending:
+                            satisfied = (dec(rows[0].get('slTriggerPx','0')) - dec(payload['newSlTriggerPx'])) * pending['direction'] >= 0
+                    if satisfied:
                         self.outbox.resolve(record['id'],'acknowledged',[dict(sCode='0',algoId=payload['algoId'])])
                 elif path == '/api/v5/trade/cancel-algos':
                     rows = [self.client.get('/api/v5/trade/order-algo',algoId=item['algoId'])[0] for item in payload]
@@ -592,6 +728,23 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
             except ExchangeRejected:
                 # Not-found is not proof of no order. Keep the unresolved record.
                 continue
+            except ExchangeUncertain as error:
+                if path != '/api/v5/trade/amend-algos':
+                    raise
+                # An ambiguous amendment blocks new entries but must not skip the stop check.
+                errors.append(str(error))
+        return errors
+
+    def _pending_manual_stop(self, command_id):
+        with self.read_transaction() as (_, state):
+            for owner_id, owner in state.get('intents', {}).items():
+                position = next((row for row in state['positions'] if row['id'] == owner_id), None)
+                for update in owner.get('protection_updates', {}).values():
+                    field = update.get('fields', {}).get('stop', {})
+                    if field.get('command_id') == command_id and update.get('status') == 'pending':
+                        return dict(direction=position.get('direction', 1) if position else 1,
+                            desired=field['desired'])
+        return None
 
     def _reconcile_intent(self, intent, positions, algos):
         key, request = intent['id'], intent['request']
@@ -640,12 +793,15 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
             if pos is None:
                 instrument = state['instruments'][request['symbol']]
                 quantity = filled * dec(instrument['contract_value'])
+                policy = Policy.parse(intent['policy'])
                 pos = dict(id=key, symbol=request['symbol'], side=request['side'], direction=1 if request['side']=='long' else -1,
                     quantity=str(quantity), remaining=str(quantity), entry=order['avgPx'], original_stop=intent['plan']['stop'],
                     stop=intent['plan']['stop'], risk=intent['plan']['risk'], margin=intent['plan']['margin'], leverage=request['leverage'],
                     margin_mode='cross', entry_fee=str(-dec(order['fee'])), pnl=order['fee'], breakeven=False, stages=[],
                     opened=int(order['cTime'])/1000, policy=intent['policy'], policy_revision=intent['policy_revision'],
-                    protection='awaiting-exchange', ord_id=order['ordId'], pos_id=raw['posId'] if raw else None)
+                    protection='awaiting-exchange', ord_id=order['ordId'], pos_id=raw['posId'] if raw else None,
+                    take_profit_overrides=[None] * len(policy.take_profits),
+                    take_profit_prices=None, take_profit_frozen=[False] * len(policy.take_profits))
                 state['positions'].append(pos)
                 self.event(db,'live_fill',dict(id=key,entry_fee=pos['entry_fee']))
             state['pending'] = [x for x in state['pending'] if x['id'] != key]
@@ -673,6 +829,13 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
         if invalid_risk or invalid_liquidation:
             self._emergency_close(pos,instrument)
             raise Rejected('实际成交风险或强平距离不符合计划，已提交减仓保护')
+        # Let _protect validate the current stop first, then resolve and
+        # confirm TP targets. A repeated reconcile inherits persisted user
+        # overrides and active prices instead of replaying the entry ticket.
+        if pos.get('take_profit_prices') is None:
+            requested_overrides = request.get('take_profits')
+            pos['take_profit_overrides'] = ([None] * len(policy.take_profits)
+                if requested_overrides is None else requested_overrides)
         if intent.get('owned_active_specs'):
             intent=copy.deepcopy(intent)
             intent['payload']['attachAlgoOrds']=intent['owned_active_specs']
@@ -708,27 +871,100 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
                 raise Rejected('保护单修改等待交易所回读确认')
         return verified
 
+    def _preflight_protection_stop(self, intent, pos, algos, instrument):
+        """Confirm the loss-limiting stop before resolving any TP prices."""
+        specs = intent.get('protection_specs') if intent.get('aggregate') else intent.get('payload', {}).get('attachAlgoOrds')
+        if not specs:
+            raise Rejected('交易所止损保护标识无法核对')
+        try:
+            stop = self._algo(specs[0]['attachAlgoClOrdId'], algos)
+        except (Rejected, ExchangeUncertain) as error:
+            pending = self._protection_update_pending(intent, 'stop')
+            confirmed_missing = isinstance(error, ExchangeRejected) and error.code == '51603'
+            if self.clock() - pos['opened'] > 20 and (not pending or confirmed_missing):
+                self._emergency_close(pos, instrument)
+            raise
+        expected_side = 'sell' if pos['side'] == 'long' else 'buy'
+        if (stop.get('instId') != pos['symbol'] or stop.get('posSide') != pos['side']
+                or stop.get('side') != expected_side):
+            raise Rejected('交易所止损保护与持仓方向不匹配')
+        if stop.get('state') != 'live' or stop.get('slOrdPx') != '-1' or stop.get('slTriggerPxType') != 'last':
+            if self.clock() - pos['opened'] > 20:
+                self._emergency_close(pos, instrument)
+            raise Rejected('交易所止损保护待核对，请查看 OKX 持仓')
+        if intent.get('owned_accounting') and stop.get('closeFraction'):
+            raise Rejected('App 共用仓位止损必须使用明确自有数量')
+        required = dec(pos['remaining']) / dec(instrument['contract_value'])
+        if dec(stop.get('sz') or '0') < required and stop.get('closeFraction') != '1':
+            self._emergency_close(pos, instrument)
+            raise Rejected('止损保护数量不足，已提交减仓保护')
+        if (dec(stop['slTriggerPx']) - dec(pos['stop'])) * pos['direction'] < 0:
+            raise Rejected('交易所止损被放宽，暂停开仓')
+        return stop
+
     def _protect(self, intent, pos, algos, instrument):
         policy = Policy.parse(pos['policy'])
-        prices = protective_prices(pos['entry'],pos['quantity'],pos['risk'],pos['entry_fee'],policy,pos['side'],instrument['tick'])
-        try:
-            rows = [None if x.get('disabled') else self._algo(x['attachAlgoClOrdId'],algos) for x in intent['payload']['attachAlgoOrds']]
-        except (Rejected, ExchangeUncertain):
-            if self.clock()-pos['opened'] > 20:
-                self._emergency_close(pos,instrument)
-            raise
-        stop = rows[0]
+        specs = (intent.get('protection_specs') if intent.get('aggregate') else
+            intent.get('owned_active_specs') or intent.get('payload', {}).get('attachAlgoOrds'))
+        if not specs or len(specs) != len(policy.take_profits) + 1:
+            raise Rejected('交易所保护单标识与当前规则不匹配')
+        stop = self._preflight_protection_stop(intent, pos, algos, instrument)
+        rows = [stop]
+        for index, spec in enumerate(specs[1:], start=1):
+            if spec.get('disabled'):
+                rows.append(None)
+                continue
+            try:
+                rows.append(self._algo(spec['attachAlgoClOrdId'], algos))
+            except (Rejected, ExchangeUncertain) as error:
+                # TP readback trouble must not hide a verified SL or trigger
+                # an emergency market close. Keep the old live TP in place.
+                with self.transaction() as (_, state):
+                    target = next((row for row in state['positions'] if row['id'] == pos['id']), None)
+                    if target is not None:
+                        target['take_profit_error'] = str(error)
+                raise Rejected('交易所止盈回读失败；交易所止损有效，未提交平仓') from None
+
         expected_side = 'sell' if pos['side']=='long' else 'buy'
         if any(x.get('instId') != pos['symbol'] or x.get('posSide') != pos['side'] or x.get('side') != expected_side for x in rows if x):
             raise Rejected('保护单与持仓方向不匹配，暂停开仓')
-        if stop.get('state') != 'live' or stop.get('slOrdPx') != '-1' or stop.get('slTriggerPxType') != 'last':
-            if self.clock()-pos['opened'] > 20:
-                self._emergency_close(pos,instrument)
-            raise Rejected('交易所止损保护待核对，请查看 OKX 持仓')
+        try:
+            overrides = normalize_take_profit_overrides(pos.get('take_profit_overrides'), policy,
+                pos['entry'], pos['side'], instrument['tick'])
+            stored = pos.get('take_profit_prices')
+            if not isinstance(stored, list) or len(stored) != len(policy.take_profits) or not all(stored):
+                stored = None
+            reviewed = stored or [spec.get('tpTriggerPx') for spec in specs[1:]]
+            if not isinstance(reviewed, list) or len(reviewed) != len(policy.take_profits) or not all(reviewed):
+                reviewed = intent.get('plan', {}).get('take_profit_prices')
+            resolved_targets, frozen = resolve_take_profit_targets(pos['entry'], pos['quantity'],
+                pos['risk'], pos['entry_fee'], policy, pos['side'], instrument['tick'],
+                overrides, reviewed)
+            targets = ([overrides[index] if overrides[index] is not None else stored[index]
+                for index in range(len(policy.take_profits))] if stored is not None else resolved_targets)
+            automatic = protective_prices(pos['entry'],pos['quantity'],pos['risk'],pos['entry_fee'],
+                policy,pos['side'],instrument['tick'],resolved_targets=targets)
+            direction = 1 if pos['side'] == 'long' else -1
+            tick = dec(instrument['tick'])
+            targets = [str(positive(target, '止盈价格')) for target in targets]
+            strict = any(value is not None for value in overrides)
+            if (any(not price_on_step(target, tick, '止盈价格') for target in targets)
+                    or any(dec(target) <= dec(pos['entry']) if direction == 1 else dec(target) >= dec(pos['entry'])
+                        for target in targets)
+                    or any((dec(current) - dec(previous)) * direction < 0
+                        or (strict and dec(current) == dec(previous))
+                        for previous, current in zip(targets, targets[1:]))):
+                raise Rejected('已确认止盈价格与当前成交仓位不匹配')
+            prices = dict(breakeven=automatic['breakeven'], targets=targets)
+        except Rejected as error:
+            with self.transaction() as (_, state):
+                target = next((row for row in state['positions'] if row['id'] == pos['id']), None)
+                if target is not None:
+                    target['take_profit_error'] = str(error)
+            raise Rejected('止盈价格与当前成交仓位不匹配；交易所止损有效，未提交平仓') from None
+
         if intent.get('owned_accounting'):
             remaining_contracts = dec(pos['remaining'])/dec(instrument['contract_value'])
-            if stop.get('closeFraction'):
-                raise Rejected('App 共用仓位止损必须使用明确自有数量')
             if dec(stop.get('sz') or '0') > remaining_contracts:
                 stop = self._amend(stable_id(stop['algoClOrdId'], 'size-'+str(remaining_contracts.normalize())), stop,
                                    dict(newSz=str(remaining_contracts)))
@@ -743,28 +979,27 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
                     self.outbox.prepare(identity,'/api/v5/trade/cancel-algos',[dict(instId=pos['symbol'],algoId=algo['algoId'])])
                     self.outbox.dispatch(identity,self.client)
                     rows[index+1] = None
-                    intent['payload']['attachAlgoOrds'][index+1]['disabled'] = True
+                    specs[index+1]['disabled'] = True
                 elif amount != dec(algo['sz']):
                     rows[index+1] = self._amend(stable_id(algo['algoClOrdId'],'size-'+str(amount.normalize())),algo,dict(newSz=str(amount)))
-                intent['payload']['attachAlgoOrds'][index+1]['sz'] = str(amount)
+                specs[index+1]['sz'] = str(amount)
                 room -= amount
             with self.transaction() as (_, state):
                 owner = state['intents'][pos['id']]
                 if owner.get('aggregate'):
-                    owner['protection_specs'] = copy.deepcopy(intent['payload']['attachAlgoOrds'])
+                    owner['protection_specs'] = copy.deepcopy(specs)
                 else:
                     # Keep immutable entry payload for replay; active specs are separate.
-                    owner['owned_active_specs'] = copy.deepcopy(intent['payload']['attachAlgoOrds'])
-        if dec(stop.get('sz') or '0') < dec(pos['remaining'])/dec(instrument['contract_value']) and stop.get('closeFraction') != '1':
-            self._emergency_close(pos,instrument)
-            raise Rejected('止损保护数量不足，已提交减仓保护')
+                    owner['owned_active_specs'] = copy.deepcopy(specs)
         current_stop = dec(stop['slTriggerPx'])
-        if (current_stop-dec(pos['stop']))*pos['direction'] < 0:
-            raise Rejected('交易所止损被放宽，暂停开仓')
         stages = []
+        actual_targets = []
         for index, algo in enumerate(rows[1:]):
+            spec = specs[index+1]
             if algo is None:
                 stages.append(index)
+                previous = (pos.get('take_profit_prices') or [None] * len(policy.take_profits))[index]
+                actual_targets.append(previous or spec.get('tpTriggerPx'))
                 continue
             if algo['state'] == 'effective':
                 # Triggering alone is not a fill. Confirm the corresponding order.
@@ -772,17 +1007,23 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
                 if not order_ids:
                     raise Rejected('止盈已触发，等待实际成交核对')
                 filled = sum((dec(self.client.get('/api/v5/trade/order',instId=pos['symbol'],ordId=oid)[0]['accFillSz']) for oid in order_ids),Decimal(0))
-                if filled < dec(intent['payload']['attachAlgoOrds'][index+1]['sz']):
+                if filled < dec(specs[index+1]['sz']):
                     raise Rejected('止盈尚未全部成交，暂停开仓')
                 stages.append(index)
             elif algo['state'] == 'live':
-                if algo.get('tpOrdPx') != '-1' or dec(algo['sz']) != dec(intent['payload']['attachAlgoOrds'][index+1]['sz']):
+                if algo.get('tpOrdPx') != '-1' or dec(algo['sz']) != dec(specs[index+1]['sz']):
                     raise Rejected('分批止盈数量或委托类型不匹配')
-                if dec(algo['tpTriggerPx']) != dec(prices['targets'][index]):
-                    self._amend(stable_id(intent.get('protection_generation',pos['id']),f'target-{index}'),algo,
-                                dict(newTpTriggerPx=prices['targets'][index],newTpOrdPx='-1'))
+                expected = prices['targets'][index]
+                if dec(algo['tpTriggerPx']) != dec(expected):
+                    if overrides[index] is not None:
+                        if not self._protection_update_pending(intent, f'tp{index}'):
+                            raise Rejected('自选止盈保护与交易所回执不一致，暂停修改')
+                    else:
+                        algo = self._amend(stable_id(intent.get('protection_generation',pos['id']),f'target-{index}'),algo,
+                            dict(newTpTriggerPx=expected,newTpOrdPx='-1'))
             else:
                 raise Rejected('分批止盈保护待核对，请查看 OKX 持仓')
+            actual_targets.append(str(algo['tpTriggerPx']))
         with self.transaction() as (_, state):
             quote = self.quote(state, pos['symbol'])
         mark, quantity = dec(quote['last']), dec(pos['quantity'])
@@ -797,9 +1038,20 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
                 current_stop = dec(stop['slTriggerPx'])
         with self.transaction() as (_, state):
             target = next(x for x in state['positions'] if x['id']==pos['id'])
+            owner = state['intents'][pos['id']]
+            pending = any(change.get('status') == 'pending'
+                for change in owner.get('protection_updates', {}).values())
             target.update(stop=str(current_stop), current_r=str(current_r), stages=stages,
                 breakeven=(current_stop-dec(prices['breakeven']))*pos['direction']>=0,
-                protection='exchange-verified')
+                protection='exchange-verified', take_profit_overrides=overrides,
+                take_profit_prices=actual_targets, take_profit_frozen=frozen,
+                protection_edit_pending=pending, take_profit_error=None)
+
+    @staticmethod
+    def _protection_update_pending(intent, field):
+        return any(update.get('status') == 'pending'
+            and update.get('fields', {}).get(field, {}).get('status') == 'pending'
+            for update in intent.get('protection_updates', {}).values())
 
     def _emergency_close(self,pos,instrument):
         identity=stable_id(pos['id'],'missing-protection-close')
@@ -945,6 +1197,255 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
                         abandoned.append(key)
         return self.close_status(key)
 
+    def change_protection(self, key, identity, stop=None, take_profits=None):
+        """Amend this position's existing exchange-owned SL/TP algos only.
+
+        Each algo amendment has its own durable id. Ambiguous requests remain
+        pending and are resolved by readback; reconciliation never resends
+        them or recreates missing protection.
+        """
+        if not isinstance(key, str) or not 16 <= len(key) <= 80 or not key.isalnum():
+            raise Rejected('请求编号无效')
+        if stop is None and (take_profits is None or not any(value is not None for value in take_profits)):
+            raise Rejected('请至少填写一项要修改的保护价格')
+        if take_profits is not None and not isinstance(take_profits, (list, tuple)):
+            raise Rejected('止盈价格需要按原档序填写')
+        fingerprint = hashlib.sha256(encoded([identity, stop, take_profits]).encode()).hexdigest()
+
+        with self.lock:
+            if not self.reconcile():
+                raise Rejected('账户或持仓保护尚未完成核对，请稍后再试')
+            with self.read_transaction() as (_, state):
+                owner = copy.deepcopy(state.get('intents', {}).get(identity))
+                pos = copy.deepcopy(next((row for row in state['positions'] if row['id'] == identity), None))
+                if not pos:
+                    raise Rejected('持仓不存在或已平仓')
+                if not self.client.write_enabled or state.get('private_error') or not state.get('account_synced') or not 0 <= self.clock() - state['private_at'] <= 15:
+                    raise Rejected('账户尚未完成核对，请稍后再试')
+                if pos.get('protection') != 'exchange-verified' or not owner:
+                    raise Rejected('交易所保护尚未核对完成，暂不能修改')
+                prior = owner.get('protection_updates', {}).get(key)
+                if prior:
+                    if prior.get('fingerprint') != fingerprint:
+                        raise Rejected('同一请求编号不能用于不同保护修改')
+                    if prior.get('status') in ('verified', 'partial'):
+                        return prior['result']
+                    if prior.get('status') == 'rejected':
+                        raise Rejected('该保护修改已被交易所拒绝，请重新提交')
+                    resume = True
+                else:
+                    resume = False
+                unresolved = [row for row in owner.get('protection_updates', {}).values()
+                    if row.get('status') == 'pending']
+                if unresolved and not resume:
+                    raise Rejected('上一笔保护修改仍在核对，请等待交易所回读')
+                instrument = state['instruments'].get(pos['symbol'])
+                quote = state['quotes'].get(pos['symbol'])
+                if not instrument or not quote or not 0 <= self.clock() - quote.get('time', 0) <= 15:
+                    raise Rejected('行情已过期，暂不能修改保护')
+                mark = positive(quote['last'], '最新价格')
+                tick = positive(instrument['tick'], '最小价格单位')
+                policy = Policy.parse(pos['policy'])
+                specs = (owner.get('protection_specs') if owner.get('aggregate') else
+                    owner.get('owned_active_specs') or owner.get('payload', {}).get('attachAlgoOrds'))
+                count = len(policy.take_profits)
+                if count < 1 or (take_profits is not None and len(take_profits) != count):
+                    raise Rejected('止盈价格需要与当前持仓的档位数量一致')
+                if not specs or len(specs) != count + 1:
+                    raise Rejected('当前持仓的交易所保护标识无法核对')
+                if resume:
+                    update = copy.deepcopy(prior)
+                else:
+                    if owner.get('aggregate') and owner.get('merging'):
+                        raise Rejected('持仓保护正在重建，请等待核对完成')
+                    active_overrides = pos.get('take_profit_overrides') or [None] * count
+                    overrides = normalize_take_profit_overrides(active_overrides, policy,
+                        pos['entry'], pos['side'], tick)
+                    active_prices = list(pos.get('take_profit_prices') or [None] * count)
+                    if len(active_prices) != count:
+                        active_prices = [None] * count
+                    changes = {}
+                    if stop is not None:
+                        desired_stop = positive(stop, '止损价格')
+                        current_stop = positive(pos['stop'], '止损价格')
+                        if (not price_on_step(desired_stop, tick, '止损价格')
+                                or (desired_stop < current_stop if pos['direction'] == 1 else desired_stop > current_stop)
+                                or (desired_stop >= mark if pos['direction'] == 1 else desired_stop <= mark)):
+                            raise Rejected('止损只能收紧，且不能越过当前价格')
+                        algo = self._algo(specs[0]['attachAlgoClOrdId'], [])
+                        if (algo.get('state') != 'live' or algo.get('instId') != pos['symbol']
+                                or algo.get('posSide') != pos['side']
+                                or algo.get('side') != ('sell' if pos['side'] == 'long' else 'buy')):
+                            raise Rejected('交易所止损保护暂不能修改')
+                        actual_stop = dec(algo['slTriggerPx'])
+                        if desired_stop < actual_stop if pos['direction'] == 1 else desired_stop > actual_stop:
+                            raise Rejected('止损只能收紧，不能放宽交易所现有保护')
+                        if desired_stop != dec(algo['slTriggerPx']):
+                            changes['stop'] = self._protection_change_field(key, 'stop', algo,
+                                str(desired_stop), previous=algo['slTriggerPx'])
+                    dispatch_order = ['stop'] if 'stop' in changes else []
+                    if take_profits is not None:
+                        stages = set(pos.get('stages') or [])
+                        target_changes = {}
+                        current_targets = list(active_prices)
+                        for index, target in enumerate(current_targets):
+                            if target is None and index + 1 < len(specs):
+                                current_targets[index] = specs[index + 1].get('tpTriggerPx')
+                        if not all(target is not None for target in current_targets):
+                            raise Rejected('当前止盈保护价格无法核对')
+                        for index, raw in enumerate(take_profits):
+                            if raw is None:
+                                continue
+                            if index in stages:
+                                raise Rejected('已完成的止盈档位不能修改')
+                            desired = positive(raw, '止盈价格')
+                            if (not price_on_step(desired, tick, '止盈价格')
+                                    or (desired <= mark if pos['direction'] == 1 else desired >= mark)):
+                                raise Rejected('止盈价格必须符合最小价格单位并位于现价有利一侧')
+                            overrides[index] = str(desired)
+                        overrides = normalize_take_profit_overrides(overrides, policy,
+                            pos['entry'], pos['side'], tick)
+                        targets = list(current_targets)
+                        for index, raw in enumerate(take_profits):
+                            if raw is None:
+                                continue
+                            desired = dec(overrides[index])
+                            if (mark - desired) * pos['direction'] >= 0:
+                                raise Rejected('止盈价格不能已被当前行情穿过')
+                            algo = self._algo(specs[index+1]['attachAlgoClOrdId'], [])
+                            if (algo.get('state') != 'live' or algo.get('instId') != pos['symbol']
+                                    or algo.get('posSide') != pos['side']
+                                    or algo.get('side') != ('sell' if pos['side'] == 'long' else 'buy')
+                                    or algo.get('tpOrdPx') != '-1'):
+                                raise Rejected('该止盈档位已触发或交易所保护暂不能修改')
+                            current_targets[index] = algo['tpTriggerPx']
+                            targets[index] = str(desired)
+                            if desired != dec(algo['tpTriggerPx']):
+                                target_changes[index] = self._protection_change_field(key,
+                                    f'tp{index}', algo, str(desired),
+                                    previous=algo['tpTriggerPx'], previous_override=active_overrides[index])
+                        strict = any(value is not None for value in overrides)
+                        for previous, current in zip(targets, targets[1:]):
+                            difference = (dec(current) - dec(previous)) * pos['direction']
+                            if difference < 0 or (strict and difference == 0):
+                                raise Rejected('止盈目标须按档序排列')
+                        order = self._safe_tp_update_order(current_targets, targets,
+                            target_changes, pos['direction'])
+                        for index in order:
+                            changes[f'tp{index}'] = target_changes[index]
+                            dispatch_order.append(f'tp{index}')
+                    update = dict(fingerprint=fingerprint, status='pending', fields=changes,
+                        dispatch_order=dispatch_order, desired_overrides=overrides,
+                        created=self.clock())
+
+            if not resume:
+                with self.transaction() as (db, state):
+                    owner = state['intents'][identity]
+                    target = next(row for row in state['positions'] if row['id'] == identity)
+                    target['take_profit_overrides'] = list(update['desired_overrides'])
+                    target['protection_edit_pending'] = bool(update['fields'])
+                    owner.setdefault('protection_updates', {})[key] = update
+                    for name, field in update['fields'].items():
+                        command_id = field['command_id']
+                        body = dict(instId=target['symbol'], algoId=field['algo_id'],
+                            reqId=stable_id(command_id, 'amend'), cxlOnFail=False,
+                            **self._protection_price_fields(name, field['desired']))
+                        self.outbox.prepare(command_id, '/api/v5/trade/amend-algos', body, db=db)
+                    if not update['fields']:
+                        update['status'] = 'verified'
+                        update['result'] = dict(id=identity, status='verified', stop=target['stop'],
+                            take_profit_prices=target.get('take_profit_prices'), mode=self.mode)
+                    self.event(db, 'protection_change_requested', dict(id=identity, request_id=key,
+                        fields=list(update['fields'])))
+                if not update['fields']:
+                    return update['result']
+            return self._resume_protection_update(identity, key)
+
+    @staticmethod
+    def _protection_change_field(request_id, name, algo, desired, *, previous, previous_override=None):
+        return dict(command_id=stable_id(request_id, f'protection-{name}'),
+            algo_cl_ord_id=algo['algoClOrdId'], algo_id=algo['algoId'], desired=str(desired),
+            previous=previous,
+            previous_override=previous_override, status='pending')
+
+    @staticmethod
+    def _safe_tp_update_order(current, desired, changes, direction):
+        """Order multiple target moves so every intermediate ladder stays valid."""
+        if not changes:
+            return []
+        current = [dec(value) * direction for value in current]
+        desired = [dec(value) * direction for value in desired]
+        remaining = set(changes)
+        order = []
+        while remaining:
+            safe = [index for index in remaining
+                if (index == 0 or desired[index] > current[index-1])
+                and (index == len(current)-1 or desired[index] < current[index+1])]
+            if not safe:
+                raise Rejected('这些止盈档位无法安全地逐档调整，请分次修改')
+            outward = [index for index in safe if desired[index] > current[index]]
+            index = max(outward) if outward else min(safe)
+            order.append(index)
+            current[index] = desired[index]
+            remaining.remove(index)
+        return order
+
+    @staticmethod
+    def _protection_price_fields(name, value):
+        if name == 'stop':
+            return dict(newSlTriggerPx=value, newSlOrdPx='-1')
+        return dict(newTpTriggerPx=value, newTpOrdPx='-1')
+
+    def _resume_protection_update(self, identity, request_id):
+        with self.read_transaction() as (_, state):
+            update = copy.deepcopy(state['intents'][identity].get('protection_updates', {}).get(request_id))
+            position = copy.deepcopy(next((row for row in state['positions'] if row['id'] == identity), None))
+        if not update or not position:
+            raise Rejected('保护修改记录不存在')
+        if update['status'] in ('verified', 'partial'):
+            return update['result']
+        if update['status'] == 'rejected':
+            raise Rejected('该保护修改已被交易所拒绝，请重新提交')
+        legs = update.get('fields', {})
+        dispatch_order = update.get('dispatch_order') or list(legs)
+        # Older durable records have no explicit order. New records keep the
+        # topological order outside the JSON-sorted fields object.
+        for name in dispatch_order:
+            field = legs.get(name)
+            if field is None:
+                continue
+            if field.get('status') != 'pending':
+                continue
+            algo = self._algo(field['algo_cl_ord_id'], [])
+            fields = self._protection_price_fields(name, field['desired'])
+            try:
+                existing = self.outbox.inspect(field['command_id'])
+                if name == 'stop' and (dec(algo['slTriggerPx']) - dec(field['desired'])) * position['direction'] >= 0:
+                    if existing['phase'] == 'prepared':
+                        # A tighter exchange stop superseded this edit between the two reads.
+                        # Recovery will report any outstanding, unsent legs as unmodified.
+                        break
+                    if existing['phase'] == 'acknowledged':
+                        continue
+                self._amend(field['command_id'], algo, fields)
+            except ExchangeRejected:
+                self._recover_protection_updates()
+                with self.read_transaction() as (_, state):
+                    resolved = copy.deepcopy(state['intents'][identity]['protection_updates'][request_id])
+                if resolved.get('status') == 'partial':
+                    return resolved['result']
+                if resolved.get('status') == 'verified':
+                    return resolved['result']
+                raise Rejected('交易所拒绝保护修改，已保留未变更档位') from None
+        self._recover_protection_updates()
+        with self.read_transaction() as (_, state):
+            result = copy.deepcopy(state['intents'][identity]['protection_updates'][request_id])
+        if result['status'] in ('verified', 'partial'):
+            return result['result']
+        if result['status'] == 'rejected':
+            raise Rejected('交易所拒绝保护修改，已保留原保护')
+        raise ExchangeUncertain('保护修改结果尚未确认，请等待交易所回读')
+
     def cancel(self, key, identity):
         with self.lock:
             with self.read_transaction() as (_,state):
@@ -1034,10 +1535,24 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
     def snapshot(self):
         # The worker persists daily gates. Display reads must not contend for
         # its write lock or create a new ledger revision on every phone poll.
-        with self.read_transaction() as (_, state):
+        with self.read_transaction() as (db, state):
             result=self.render_snapshot(state)
             from .statistics_reset import display_state, history_epoch
             result['closed']=display_state(state)['closed'][-30:]
+            # Acknowledgement proves who submitted the emergency order, even on older ledgers.
+            # It is not evidence that every fill in a position came from that order.
+            by_position = {row['id']: row for row in result['closed']}
+            by_command = {stable_id(root, 'missing-protection-close'): row for root, row in by_position.items()}
+            for command, root in state.get('owned_exit_commands', {}).items():
+                if root in by_position:
+                    by_command[command] = by_position[root]
+            if by_command:
+                params = ','.join('?' for _ in by_command)
+                for (command,) in db.execute(
+                    f"SELECT id FROM exchange_commands WHERE id IN ({params}) AND phase='acknowledged' AND endpoint='/api/v5/trade/order'",
+                    tuple(by_command),
+                ):
+                    by_command[command]['emergency_close_submitted'] = True
             result['statistics_started_at']=history_epoch(state).get('started_at')
             result.pop('statistics_history_epoch',None)
         for field in ('intents','previews','account_reference','close_commands','close_fractions','close_abandoned','statistics_return_basis','owned_receipts','owned_algo_receipts','owned_exit_commands','external_activity','foreign','shared_quantities','shared_quantity_errors'):

@@ -269,6 +269,27 @@ final class AccountStore {
         await refresh()
     }
 
+    func updateProtection(_ position: Position, stop: String?, targets: [String?],
+                          requestId: String, for owner: Connection?) async throws -> ProtectionReceipt {
+        guard let connection, connection == owner, online, quoteFresh(position.symbol),
+              state?.positions.first(where: { $0.id == position.id })?.protectionEditable == true else {
+            throw APIError(status: 409, message: "持仓状态已变化，请刷新后再调整")
+        }
+        var body: [String: Any] = ["request_id": requestId, "confirmed_live": live]
+        if let stop { body["stop"] = stop }
+        if targets.contains(where: { $0 != nil }) { body["take_profits"] = targets }
+        let receipt: ProtectionReceipt = try await API.post("/v1/positions/\(position.id)/protection", body: body, connection: connection)
+        guard receipt.id == position.id, ["verified", "partial"].contains(receipt.status) else {
+            throw APIError(status: 503, message: "修改结果待核对")
+        }
+        await refresh()
+        if connection == self.connection, receipt.status == "verified" {
+            notice = Notice(text: "止盈止损已更新", success: true)
+            Haptics.success()
+        }
+        return receipt
+    }
+
     func preview(_ ticket: Ticket) async throws -> PreviewResult {
         guard let connection else { throw APIError(status: 0, message: "尚未连接") }
         return try await API.post("/v1/preview", body: ticket.json, connection: connection)
@@ -277,6 +298,7 @@ final class AccountStore {
     func autoStop(_ ticket: Ticket) async throws -> String {
         guard let connection else { throw APIError(status: 0, message: "尚未连接") }
         var body = ticket.json; body["stop"] = ""
+        body.removeValue(forKey: "take_profits")
         let value: StopValue = try await API.post("/v1/auto-stop", body: body, connection: connection)
         return value.stop
     }

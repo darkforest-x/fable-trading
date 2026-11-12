@@ -14,7 +14,8 @@ from datetime import datetime, timezone
 from decimal import Decimal
 import httpx
 from .okx_demo import Credentials
-from .policy import Rejected, dec, positive, floor_step, ceil_step, Policy
+from .policy import (Rejected, dec, positive, floor_step, ceil_step, Policy,
+                     take_profit_targets)
 
 
 class ExchangeUncertain(RuntimeError):
@@ -136,7 +137,8 @@ def stable_id(identity, purpose):
     return 'sd' + hashlib.sha256((identity + ':' + purpose).encode()).hexdigest()[:30]
 
 
-def protective_prices(entry, quantity, risk, entry_fee, policy, side, tick):
+def protective_prices(entry, quantity, risk, entry_fee, policy, side, tick, overrides=None,
+                     resolved_targets=None):
     """Net-original-quantity R targets; fixed R includes the entry plan costs.
 
     Inputs are the actual entry price/fee and the immutable accepted risk. No
@@ -149,11 +151,10 @@ def protective_prices(entry, quantity, risk, entry_fee, policy, side, tick):
     breakeven = ((entry + per_fee) / ((1-slip)*(1-fee)) if direction == 1
         else (entry - per_fee) / ((1+slip)*(1+fee)))
     rounding = ceil_step if direction == 1 else floor_step
-    targets = []
-    for multiple, _ in policy.take_profits:
-        raw = ((entry + per_fee + dec(multiple)*risk/quantity)/(1-fee) if direction == 1
-            else (entry - per_fee - dec(multiple)*risk/quantity)/(1+fee))
-        targets.append(str(rounding(positive(raw), tick)))
+    targets = (take_profit_targets(entry, quantity, risk, entry_fee, policy, side, tick, overrides)
+        if resolved_targets is None else [format(positive(value, '止盈价格'), 'f') for value in resolved_targets])
+    if len(targets) != len(policy.take_profits):
+        raise Rejected('止盈档位与当前规则不匹配')
     return dict(breakeven=str(rounding(positive(breakeven), tick)), targets=targets)
 
 
@@ -168,25 +169,32 @@ def entry_payload(identity, ticket, sized, instrument, policy, position_mode):
         raise Rejected('当前账户持仓模式不受支持')
     if policy.margin_mode != 'cross':
         raise Rejected('实盘接入当前仅支持已确认的全仓规则')
-    if len(policy.take_profits) != 2:
-        raise Rejected('实盘接入需要两档止盈规则')
     value, step = positive(instrument['contract_value']), positive(instrument['step'])
     quantity, tick = positive(sized['quantity']), positive(instrument['tick'])
     lots = quantity / value
-    first = floor_step(quantity * dec(policy.take_profits[0][1]), step)
-    last = quantity - first
-    if min(first, last) < positive(instrument['minimum']):
-        raise Rejected('当前仓位不足以按最小合约数量分两档止盈')
+    minimum = positive(instrument['minimum'])
+    amounts, allocated = [], Decimal(0)
+    for index, (_, fraction) in enumerate(policy.take_profits):
+        amount = (quantity - allocated if index == len(policy.take_profits) - 1
+                  else floor_step(quantity * dec(fraction), step))
+        amounts.append(amount)
+        allocated += amount
+    if not amounts or any(amount < minimum for amount in amounts):
+        raise Rejected('当前仓位不足以按止盈比例满足各档最小合约数量')
     entry = positive(sized['entry'])
     price = floor_step(entry, tick) if ticket['side'] == 'long' else ceil_step(entry, tick)
     # Tighten, never widen, the accepted worst execution bound.
-    prices = protective_prices(entry, quantity, sized['risk'], entry*quantity*dec(policy.fee_rate),
-        policy, ticket['side'], tick)
+    reviewed_prices = sized.get('take_profit_prices')
+    if reviewed_prices is None:
+        reviewed_prices = protective_prices(entry, quantity, sized['risk'], entry*quantity*dec(policy.fee_rate),
+            policy, ticket['side'], tick, ticket.get('take_profits'))['targets']
+    if len(reviewed_prices) != len(policy.take_profits):
+        raise Rejected('止盈计划与当前规则不一致，请重新预览')
     algos = [dict(attachAlgoClOrdId=stable_id(identity, 'stop'),
         slTriggerPx=sized['stop'], slOrdPx='-1', slTriggerPxType='last')]
-    for index, amount in enumerate((first, last)):
+    for index, amount in enumerate(amounts):
         algos.append(dict(attachAlgoClOrdId=stable_id(identity, f'tp{index}'),
-            tpTriggerPx=prices['targets'][index], tpOrdPx='-1', tpTriggerPxType='last',
+            tpTriggerPx=str(reviewed_prices[index]), tpOrdPx='-1', tpTriggerPxType='last',
             sz=str(amount/value)))
     return dict(instId=ticket['symbol'], tdMode='cross', clOrdId=stable_id(identity, 'entry'),
         side='buy' if ticket['side']=='long' else 'sell',

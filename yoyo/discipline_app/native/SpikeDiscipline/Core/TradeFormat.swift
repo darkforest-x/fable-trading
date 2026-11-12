@@ -51,7 +51,10 @@ extension Fmt {
     }
 
     static func closeReason(_ reason: String?) -> String {
-        ["exchange": "交易所平仓", "manual": "手动平仓", "stop": "止损触发", "take_profit": "止盈触发"][reason ?? ""]
+        if let reason, reason.hasPrefix("tp_price_") {
+            return "止盈触发 · " + reason.dropFirst("tp_price_".count) + " USDT"
+        }
+        return ["exchange": "交易所平仓", "manual": "手动平仓", "stop": "止损触发", "take_profit": "止盈触发"][reason ?? ""]
             ?? ((reason ?? "").contains("R") ? reason! : "未记录")
     }
 

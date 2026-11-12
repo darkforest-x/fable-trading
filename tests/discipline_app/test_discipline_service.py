@@ -100,6 +100,27 @@ def test_invalid_ticket_names_field_and_does_not_consume_entry(book):
     assert not book.snapshot()['positions']
 
 
+def test_legacy_request_fingerprint_preserves_ticket_shape_with_optional_targets():
+    from yoyo.discipline_app.api import Entry
+    legacy = dict(ticket(), sizing_mode=None)
+    entry = Entry(request_id="legacy-protection-test", policy_revision=1, ticket=legacy)
+    assert entry.model_dump()['ticket'] == legacy
+    assert entry.ticket.model_dump() == legacy
+    entry.ticket.take_profits = [None, '130']
+    assert entry.model_dump()['ticket']['take_profits'] == [None, '130']
+
+
+def test_open_ticket_tp_array_must_match_current_policy_and_reject_bad_price(book):
+    client = TestClient(create_app(book, 'x' * 36, market_enabled=False))
+    headers = {'Authorization': 'Bearer ' + 'x' * 36}
+    for prices in ([None], [None, '120.005'], [None, '1e9999'],
+                   [None, '12345678901234567890123456789012']):
+        response = client.post('/v1/preview', json=ticket(take_profits=prices), headers=headers)
+        assert response.status_code == 409
+    assert book.snapshot()['daily']['entries'] == 0
+    assert book.snapshot()['positions'] == []
+
+
 def test_isolated_rejection_advice_is_feasible_and_cross_keeps_own_guard(tmp_path):
     b = Book(tmp_path / 'isolated.sqlite3', Clock())
     b.configure(replace(Policy(), margin_mode='isolated'))
@@ -184,6 +205,70 @@ def test_gap_over_both_targets_reduces_exactly_original_quantity(book, side, pri
     assert sum(dec(e['quantity']) for e in reductions) == quantity
     assert len(reductions) == 2
     assert book.snapshot()['positions'] == []
+
+
+def test_entry_ticket_previews_and_persists_absolute_take_profit_and_scale_in_inherits(book):
+    chosen = ticket(fraction='.5', take_profits=[None, '130'])
+    preview = book.preview(chosen)
+    assert preview['plan']['take_profit_prices'][1] == '130'
+    opened = book.enter(uuid.uuid4().hex, chosen, preview['policy_revision'])
+    first = book.snapshot()['positions'][0]
+    assert first['take_profit_overrides'] == [None, '130']
+    assert first['take_profit_prices'] == opened['plan']['take_profit_prices']
+
+    add = ticket(fraction='.1')
+    add_preview = book.preview(add)
+    assert add_preview['plan']['take_profit_overrides'] == [None, '130']
+    assert add_preview['plan']['take_profit_prices'][1] == '130'
+    merged = book.enter(uuid.uuid4().hex, add, add_preview['policy_revision'])
+    result = book.snapshot()['positions'][0]
+    assert result['id'] == first['id']
+    assert result['take_profit_overrides'] == [None, '130']
+    assert result['take_profit_prices'] == merged['plan']['take_profit_prices']
+
+
+def test_open_ticket_can_explicitly_reset_an_inherited_tp_tier_to_automatic(book):
+    opened = enter(book, ticket(fraction='.5', take_profits=[None, '130']))
+    position = book.snapshot()['positions'][0]
+    reset = ticket(fraction='.1', take_profits=[None, None])
+    preview = book.preview(reset)
+    assert preview['plan']['take_profit_overrides'] == [None, None]
+    assert preview['plan']['take_profit_prices'][1] != '130'
+    book.enter(uuid.uuid4().hex, reset, preview['policy_revision'])
+    updated = book.snapshot()['positions'][0]
+    assert updated['id'] == position['id'] == opened['id']
+    assert updated['take_profit_overrides'] == [None, None]
+
+
+def test_paper_limit_better_fill_preserves_reviewed_ladder_on_collision_and_edit(book):
+    market(book, '101')
+    request = ticket(kind='limit', price='100', take_profits=['121.5', None])
+    targets = book.preview(request)['plan']['take_profit_prices']
+    enter(book, request)
+    market(book, '99')
+    position = book.snapshot()['positions'][0]
+    assert position['take_profit_prices'] == targets
+    assert position['take_profit_frozen'] == [False, True]
+    book.change_protection(uuid.uuid4().hex, position['id'], take_profits=['122', None])
+    market(book, '121.5')
+    assert book.snapshot()['positions'][0]['stages'] == []
+    market(book, '122')
+    assert book.snapshot()['positions'][0]['stages'] == [0]
+    market(book, targets[1])
+    assert book.snapshot()['closed'][0]['close_reason'] == f'tp_price_{targets[1]}'
+
+
+def test_paper_entry_uses_custom_absolute_tp_trigger_with_original_stage_fraction(book):
+    opened = enter(book, ticket(take_profits=['110', None]))
+    original_quantity = dec(opened['plan']['quantity'])
+    market(book, '109')
+    assert book.snapshot()['positions'][0]['stages'] == []
+    market(book, '110')
+    position = book.snapshot()['positions'][0]
+    assert position['stages'] == [0]
+    reduced = [event['body'] for event in book.events() if event['kind'] == 'paper_reduce']
+    assert reduced[-1]['reason'] == 'tp_price_110'
+    assert dec(reduced[-1]['quantity']) == original_quantity * Decimal('.6') // Decimal('.01') * Decimal('.01')
 
 
 def test_legacy_loss_cooldown_survives_restart_and_midnight(book):
@@ -460,3 +545,31 @@ def test_statistics_route_authenticated_and_period_validated(book):
         client.headers['Authorization'] = 'Bearer test-only-statistics-token-1234567890'
         assert client.get('/v1/statistics?days=7').json()['period_days'] == 7
         assert client.get('/v1/statistics?days=9').status_code == 409
+
+
+def test_legacy_paper_position_derives_targets_and_can_change_remaining_protection(book):
+    opened = enter(book)
+    identity = opened['id']
+    with book.transaction() as (_, state):
+        legacy = next(row for row in state['positions'] if row['id'] == identity)
+        legacy.pop('take_profit_prices', None)
+        legacy.pop('take_profit_overrides', None)
+
+    displayed = book.snapshot()['positions'][0]
+    original = [Decimal(value) for value in displayed['take_profit_prices']]
+    assert displayed['protection_editable'] is True
+    with book.read_transaction() as (_, state):
+        stored = next(row for row in state['positions'] if row['id'] == identity)
+        assert 'take_profit_prices' not in stored
+        assert 'take_profit_overrides' not in stored
+
+    updated = [str(original[0] + Decimal('2')), str(original[1] + Decimal('4'))]
+    result = book.change_protection(uuid.uuid4().hex, identity, stop='96', take_profits=updated)
+    position = book.snapshot()['positions'][0]
+    assert result['mode'] == 'paper' and result['status'] == 'verified'
+    assert position['stop'] == '96'
+    assert position['take_profit_prices'] == updated
+    market(book, str(original[0] + Decimal('1')))
+    assert book.snapshot()['positions'][0]['stages'] == []
+    market(book, updated[0])
+    assert book.snapshot()['positions'][0]['stages'] == [0]

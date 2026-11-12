@@ -8,6 +8,7 @@ struct PositionsView: View {
     @Environment(AccountStore.self) private var account
     var onOpenSymbol: (String) -> Void
     @State private var closeTarget: Position?
+    @State private var protectionTarget: ProtectionSelection?
     @State private var scroll = ScrollPosition(edge: .top)
     @Environment(\.reselect) private var reselect
     @State private var action: String?
@@ -34,6 +35,10 @@ struct PositionsView: View {
                                                  busy: action != nil || account.closeAttempt != nil,
                                                  entryStopBusy: action == "stop:" + position.id,
                                                  onEntryStop: { Task { await entryStop(position) } },
+                                                 onEdit: {
+                                                     guard let owner = account.connection else { return }
+                                                     Haptics.tap(); protectionTarget = ProtectionSelection(position: position, owner: owner)
+                                                 },
                                                  onClose: { requestClose(position) },
                                                  onSymbol: { onOpenSymbol(position.symbol) })
                                 .scrollReveal()
@@ -60,6 +65,11 @@ struct PositionsView: View {
         .sheet(item: $closeTarget) { position in
             ClosePositionSheet(position: position).presentationDetents([.medium, .large]).presentationDragIndicator(.visible)
         }
+        .sheet(item: $protectionTarget) { selection in
+            ProtectionSheet(selection: selection)
+                .presentationDetents([.medium, .large]).presentationDragIndicator(.visible)
+        }
+        .onChange(of: session.connection) { _, _ in protectionTarget = nil }
         .alert("本次操作未完成", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
             Button("好", role: .cancel) {}
         } message: { Text(error ?? "") }
@@ -203,6 +213,7 @@ struct PositionCardView: View {
     let entryStopBusy: Bool
     var compact = false
     var onEntryStop: () -> Void
+    var onEdit: () -> Void
     var onClose: () -> Void
     var onSymbol: () -> Void
     @State private var details = false
@@ -233,6 +244,11 @@ struct PositionCardView: View {
                 .accessibilityLabel("查看 \(coin)/USDT 合约")
                 Spacer()
                 Pill(text: "\(direction == 1 ? "多" : "空") · \(Fmt.leverage(position.leverage))x", color: direction == 1 ? .up : .down)
+                if state.supportsCustomProtection == true {
+                    Button("调整止盈止损", action: onEdit)
+                        .font(.caption.weight(.semibold)).buttonStyle(.pill(.tinted(.accentColor), height: 32))
+                        .disabled(busy || !fresh || position.protectionEditable != true)
+                }
             }
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 2) {
@@ -276,9 +292,20 @@ struct PositionCardView: View {
                 DisclosureGroup(isExpanded: $details.animation(.snappy)) {
                     VStack(alignment: .leading, spacing: 6) {
                         let p = position.policy
-                        Text("\(p.breakevenR)R 成本保本 · " + p.takeProfits.enumerated().map { i, tp in "\(tp.first ?? "")R " + (i == p.takeProfits.count - 1 ? "全平" : "平 \(Fmt.plainPercent(tp.last))%") }.joined(separator: " · "))
+                        Text("\(p.breakevenR)R 成本保本")
+                        ForEach(p.takeProfits.indices, id: \.self) { i in
+                            let stage = p.takeProfits[i]
+                            let prices = position.takeProfitPrices ?? []
+                            let price = prices.indices.contains(i) ? prices[i] : nil
+                            let trigger = price.map { Fmt.price($0, tick: tick) + " USDT" } ?? "\(stage.first ?? "")R"
+                            let portion = i == p.takeProfits.count - 1 ? "平余仓" : "平 \(Fmt.plainPercent(stage.last))%"
+                            Text("止盈 \(i + 1) · \(trigger) · \(portion)")
+                        }
                         Text("初始风险 1R = \(Fmt.amount(position.risk)) USDT · 当前 \(Fmt.amount(position.currentR)) R")
                         Text((state.mode == "okx_live" ? (position.protection == "exchange-verified" ? "交易所保护已核对" : "交易所保护待核对") : "服务端模拟保护") + " · " + (position.breakeven ? "已移成本保本" : "自动保本待触发"))
+                        if state.mode == "okx_live" {
+                            Text("在 OKX 撤销止损会触发应急平仓。需要改价时，请在 App 调整原保护单。")
+                        }
                         Text("浮盈按最新价和剩余仓位估算，未扣费用；收益率＝浮盈 ÷ 剩余仓位开仓保证金。移到开仓价不含手续费。").foregroundStyle(.secondary)
                     }
                     .font(.footnote).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 6)
@@ -324,7 +351,8 @@ struct CompletedRow: View {
                     LabeledContent("开仓时间", value: Fmt.beijing(position.opened))
                     LabeledContent("平仓时间", value: Fmt.beijing(position.closed))
                     LabeledContent(position.totalFee != nil ? "累计交易手续费" : "开仓手续费", value: Fmt.coinQuantity(position.totalFee ?? position.entryFee) + " USDT")
-                    LabeledContent("平仓原因", value: Fmt.closeReason(position.closeReason))
+                    LabeledContent("平仓原因", value: position.emergencyCloseSubmitted == true
+                                   ? "App 已提交应急市价平仓" : Fmt.closeReason(position.closeReason))
                 }
                 .font(.caption.monospacedDigit())
                 .transition(.opacity.combined(with: .move(edge: .top)))

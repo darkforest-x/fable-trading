@@ -3,7 +3,7 @@
 R is the immutable cash risk at entry: initial stop distance plus modeled costs.
 The cost allowance is a labeled paper assumption, not an actual OKX fee schedule.
 """
-from decimal import Decimal, InvalidOperation, ROUND_DOWN, ROUND_UP, ROUND_CEILING
+from decimal import Decimal, InvalidOperation, ROUND_DOWN, ROUND_UP, ROUND_CEILING, localcontext
 from dataclasses import dataclass, asdict, replace
 from typing import Optional
 
@@ -45,6 +45,125 @@ def json_number(value):
     """Return a JSON-native number without discarding fractional leverage."""
     value = dec(value)
     return int(value) if value % 1 == 0 else float(value)
+
+
+def price_on_step(value, step, label='价格'):
+    """Check tick alignment without Decimal context overflow on hostile prices."""
+    value, step = positive(value, label), positive(step, '最小价格单位')
+    if (len(value.as_tuple().digits) > 32 or value.adjusted() > 30 or value.adjusted() < -30):
+        raise Rejected(f'{label}数值过大或精度过高')
+    if step.adjusted() > 30 or step.adjusted() < -30:
+        raise Rejected('最小价格单位无效')
+    exponent_gap = abs(value.as_tuple().exponent - step.as_tuple().exponent)
+    try:
+        with localcontext() as context:
+            context.prec = max(64, len(value.as_tuple().digits) + len(step.as_tuple().digits) + exponent_gap + 8)
+            return value % step == 0
+    except InvalidOperation:
+        raise Rejected(f'{label}格式不正确') from None
+
+
+def normalize_take_profit_overrides(overrides, policy, entry, side, tick):
+    """Validate an optional absolute price per policy TP tier.
+
+    ``None`` keeps that tier on its automatic net-R target.  The array length
+    follows the active session policy so saved or account-specific policies
+    do not rely on a hard-coded tier count.
+    """
+    entry, tick = positive(entry, '入场价格'), positive(tick, '最小价格单位')
+    if side not in ('long', 'short'):
+        raise Rejected('方向无效')
+    count = len(policy.take_profits)
+    if overrides is None:
+        overrides = [None] * count
+    if not isinstance(overrides, (list, tuple)) or len(overrides) != count:
+        raise Rejected('自选止盈档位与当前规则不匹配，请重新预览')
+    result = []
+    for raw in overrides:
+        if raw is None:
+            result.append(None)
+            continue
+        price = positive(raw, '止盈价格')
+        if not price_on_step(price, tick, '止盈价格'):
+            raise Rejected('止盈价格不符合最小价格单位')
+        if (price - entry) * (1 if side == 'long' else -1) <= 0:
+            raise Rejected('多单止盈须高于入场价，空单止盈须低于入场价')
+        result.append(format(price, 'f'))
+    return result
+
+
+def take_profit_targets(entry, quantity, risk, entry_fee, policy, side, tick,
+                        overrides=None):
+    """Resolve active TP prices from net-R policy targets and ticket overrides.
+
+    Automatic tiers use the same fee-aware formula as the exchange protection
+    compiler. Explicit prices are absolute, tick-aligned prices and remain
+    fixed when the position is later re-based by a partial fill.
+    """
+    entry, quantity, risk, entry_fee, tick = map(dec, (entry, quantity, risk, entry_fee, tick))
+    if min(entry, quantity, risk, tick) <= 0 or entry_fee < 0:
+        raise Rejected('止盈计划缺少有效的成交与风险参数')
+    if side not in ('long', 'short'):
+        raise Rejected('方向无效')
+    selected = normalize_take_profit_overrides(overrides, policy, entry, side, tick)
+    fee = dec(policy.fee_rate)
+    direction = 1 if side == 'long' else -1
+    per_fee = entry_fee / quantity
+    rounding = ceil_step if direction == 1 else floor_step
+    targets = []
+    for index, (multiple, _) in enumerate(policy.take_profits):
+        if selected[index] is not None:
+            target = dec(selected[index])
+        else:
+            raw = ((entry + per_fee + dec(multiple) * risk / quantity) / (1-fee)
+                   if direction == 1 else
+                   (entry - per_fee - dec(multiple) * risk / quantity) / (1+fee))
+            target = rounding(positive(raw), tick)
+        if (target - entry) * direction <= 0:
+            raise Rejected('止盈目标须位于有利方向')
+        targets.append(format(target, 'f'))
+    has_override = any(value is not None for value in selected)
+    for previous, current in zip(targets, targets[1:]):
+        difference = (dec(current) - dec(previous)) * direction
+        if difference < 0 or (difference == 0 and has_override):
+            raise Rejected('止盈目标须按档序排列')
+    return targets
+
+
+def resolve_take_profit_targets(entry, quantity, risk, entry_fee, policy, side, tick,
+                                overrides=None, reviewed_targets=None):
+    """Resolve fill-time TP targets, freezing reviewed auto prices only when needed.
+
+    A changed actual fill can move an automatic R target across a hand-entered
+    tier. In that case the reviewed whole ladder is retained only if it is
+    still favorable, tick-aligned, ordered, and preserves every explicit price.
+    The boolean mask marks automatic tiers that were frozen to that ladder.
+    """
+    selected = normalize_take_profit_overrides(overrides, policy, entry, side, tick)
+    try:
+        return take_profit_targets(entry, quantity, risk, entry_fee, policy, side, tick, selected), \
+            [False] * len(selected)
+    except Rejected as error:
+        if error.args != ('止盈目标须按档序排列',) or not any(value is not None for value in selected):
+            raise
+    if not isinstance(reviewed_targets, (list, tuple)) or len(reviewed_targets) != len(selected):
+        raise Rejected('成交后止盈档位冲突，且预览价格不能作为有效保护') from None
+    entry, tick = positive(entry, '入场价格'), positive(tick, '最小价格单位')
+    direction = 1 if side == 'long' else -1
+    frozen = [value is None for value in selected]
+    resolved = []
+    for index, raw in enumerate(reviewed_targets):
+        price = positive(raw, '止盈价格')
+        if not price_on_step(price, tick, '止盈价格') or (price-entry)*direction <= 0:
+            raise Rejected('成交后止盈档位冲突，且预览价格不能作为有利方向的有效保护') from None
+        if selected[index] is not None and price != dec(selected[index]):
+            raise Rejected('成交后手动止盈价格与预览不一致，无法保持原保护') from None
+        resolved.append(format(price, 'f'))
+    for previous, current in zip(resolved, resolved[1:]):
+        difference = (dec(current)-dec(previous))*direction
+        if difference < 0 or (difference == 0 and any(value is not None for value in selected)):
+            raise Rejected('成交后预览止盈档位不再按序，无法保持原保护') from None
+    return resolved, frozen
 
 
 @dataclass(frozen=True)
@@ -237,7 +356,7 @@ def plan(policy, equity, entry, stop, side, fraction, leverage, instrument, quan
             int(instrument['max_leverage'])):
         raise Rejected('杠杆超过币种或交易所上限')
     tick, step = positive(instrument['tick']), positive(instrument['step'])
-    if stop % tick:
+    if not price_on_step(stop, tick, '止损价格'):
         raise Rejected('止损价格不符合最小价格单位')
     unit_cost = entry * (2 * dec(policy.fee_rate) + dec(policy.slippage_rate))
     if sizing_mode not in ('risk', 'margin', 'exposure'):

@@ -27,6 +27,11 @@ struct PreviewSheet: View {
                         let tick = account.state?.instruments[order.symbol]?.tick
                         VStack(spacing: 8) {
                             row("初始止损价格", Fmt.price(plan.stop, tick: tick) + " USDT")
+                            if let prices = plan.takeProfitPrices {
+                                ForEach(prices.indices, id: \.self) { i in
+                                    row("止盈 \(i + 1) 触发价", Fmt.price(prices[i], tick: tick) + " USDT")
+                                }
+                            }
                             row("入场价格边界", Fmt.price(plan.entry, tick: tick) + " USDT")
                             row("名义仓位", Fmt.amount(plan.notional) + " USDT")
                             row("本单名义 / 净值", Fmt.amount(plan.notionalEquityMultiple) + " 倍")
@@ -70,7 +75,7 @@ struct PreviewSheet: View {
         defer { busy = false }
         do {
             try await account.submit(pending.ticket, requestId: pending.id, policyRevision: pending.policyRevision, previewId: pending.previewId)
-            ticket.manual(); ticket.preview = nil; ticket.fibTicket = false
+            ticket.manual(); ticket.targetInputs = [:]; ticket.preview = nil; ticket.fibTicket = false
             dismiss()
         } catch {
             self.error = error.localizedDescription; Haptics.warning()
