@@ -19,9 +19,9 @@ from review import read_raw,load_bars,expiry,BASE,FIVE,HOUR,DAY
 DATA=ROOT/'data/research/month-firstweek-yolo-account-20261113-v1'
 OLD=ROOT/'data/research/month-firstweek-cloud-dense-20261112-v1'
 @lru_cache(maxsize=64)
-def daily(symbol,day):
-    name=f'{symbol}-5m-{day}.zip'
-    source=f'https://data.binance.vision/data/futures/um/daily/klines/{symbol}/5m/{name}'
+def daily(symbol,day,period="5m"):
+    name=f'{symbol}-{period}-{day}.zip'
+    source=f'https://data.binance.vision/data/futures/um/daily/klines/{symbol}/{period}/{name}'
     with urllib.request.urlopen(source,timeout=25) as response:
         archive=zipfile.ZipFile(io.BytesIO(response.read()))
     with archive.open(archive.namelist()[0]) as f:
@@ -74,8 +74,17 @@ def run():
                 try:
                     a=recover(symbol,known-5*DAY,stop+FIVE)
                     ix=np.searchsorted(a[:,0],r.touch_ms);z=a[ix:ix+12];assert len(z)==12
-                    assert np.allclose([z[0,1],z[:,2].max(),z[:,3].min(),z[-1,4]],[o,h,l,close],atol=0,rtol=1e-8)
-                    np.save(path,a,allow_pickle=False);obj['tape_path']=str(path.relative_to(ROOT));obj['description']='recovered warmup and full confirmation window'
+                    obj['description']='recovered warmup and full confirmation window'
+                    if not np.allclose([z[0,1],z[:,2].max(),z[:,3].min(),z[-1,4]],[o,h,l,close],atol=0,rtol=1e-8):
+                        # Some thin equity contracts have officially different opens
+                        # at 1h vs first 5m. Verify each input in its native timeframe.
+                        date=pd.Timestamp(r.touch_ms,unit='ms',tz='UTC').strftime('%Y-%m-%d')
+                        official_h=daily(symbol,date,'1h'); official_5=daily(symbol,date)
+                        assert np.allclose(official_h[official_h[:,0]==r.touch_ms,1:5],[[o,h,l,close]],rtol=1e-10,atol=0)
+                        expected=official_5[(official_5[:,0]>=r.touch_ms)&(official_5[:,0]<known)]
+                        assert expected.shape==z.shape and np.allclose(expected,z,rtol=1e-10,atol=0)
+                        obj['description']='official 1h and 5m natively verified; interval opens or lows differ'
+                    np.save(path,a,allow_pickle=False);obj['tape_path']=str(path.relative_to(ROOT))
                 except Exception as err:
                     obj.update(coverage='unavailable',tape_path='',description=f'{type(err).__name__}: {err}')
             items.append(obj)
