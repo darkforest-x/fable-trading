@@ -94,5 +94,8 @@ def run():
     df=pd.DataFrame(rows).sort_values(['known_ms','symbol'])
     assert df.id.is_unique
     df.to_csv(HERE/'october_population.csv',index=False)
+    baseline=df[df.coverage.eq('complete')].rename(columns={'id':'trade_id'}).copy()
+    baseline['pool']='hourly_baseline';baseline['confirm_close_ms']=baseline.known_ms
+    baseline[['trade_id','symbol','side','confirm_close_ms','pool','near_edge','tape_path','known_ms','month']].to_csv(HERE/'october_hourly_baseline.csv',index=False)
     print(len(c),'touch days',len(df),'H1 alerts',df.groupby(['coverage','description']).size().to_string())
 if __name__=='__main__':run()
