@@ -6,12 +6,12 @@ calendar month so all pools reuse the same immutable records.
 """
 import argparse
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime,timezone
 from functools import lru_cache
 import json
 import os
 from pathlib import Path
 import time
+import tempfile
 from urllib.parse import urlencode
 from urllib.request import Request,urlopen
 import numpy as np
@@ -50,9 +50,9 @@ def month(symbol,period):
             if len(part)<1000:break
         # Include cutoff even for zero-event months; never equate a request
         # error with a valid response containing no published settlements.
-        tmp=path.with_suffix(f'.{os.getpid()}.tmp')
-        tmp.write_text(json.dumps(dict(asof_ms=last,events=result),separators=(',',':')))
-        tmp.replace(path)
+        with tempfile.NamedTemporaryFile('w',dir=CACHE,delete=False) as f:
+            json.dump(dict(asof_ms=last,events=result),f,separators=(',',':'))
+        Path(f.name).replace(path)
     content=json.loads(path.read_text())
     d=np.array([[int(r['fundingTime']),float(r['fundingRate']),float(r['markPrice'])] for r in content['events']],dtype=float).reshape(-1,3)
     assert np.isfinite(d).all() and (d[:,2]>0).all() and (np.diff(d[:,0])>0).all()
@@ -78,7 +78,13 @@ def main():
     for r in pd.concat([photos.rename(columns={'confirm_close_ms':'from_ms'}),pop.rename(columns={'known_ms':'from_ms'})]).itertuples():
         t=pd.Timestamp(int(r.from_ms),unit='ms')
         months.update((r.symbol,str(m)) for m in pd.period_range(t.to_period('M'),(t+pd.Timedelta(days=8)).to_period('M'),freq='M'))
-    with ThreadPoolExecutor(max_workers=args.jobs) as exe:
-        for i,(key,obs) in enumerate(zip(sorted(months),exe.map(lambda k:month(*k),sorted(months)))):
+    # Public UM history is rate-limited per IP. Read sequentially at a
+    # sustainable rate; other processes can still serve already cached records.
+    def prefetch(key):
+        if not (CACHE/f'{key[0]}_{key[1]}.json').exists():
+            time.sleep(2.5)
+        return month(*key)
+    with ThreadPoolExecutor(max_workers=min(args.jobs,1)) as exe:
+        for i,(key,obs) in enumerate(zip(sorted(months),exe.map(prefetch,sorted(months)))):
             if i%25==0:print(i,len(months),key,len(obs[0]),flush=True)
 if __name__=='__main__':main()
