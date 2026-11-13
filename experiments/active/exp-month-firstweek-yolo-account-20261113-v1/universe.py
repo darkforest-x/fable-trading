@@ -23,12 +23,22 @@ OLD=ROOT/'data/research/month-firstweek-cloud-dense-20261112-v1'
 def daily(symbol,day,period="5m"):
     name=f'{symbol}-{period}-{day}.zip'
     source=f'https://data.binance.vision/data/futures/um/daily/klines/{quote(symbol)}/{period}/{quote(name)}'
-    with urllib.request.urlopen(source,timeout=25) as response:
-        archive=zipfile.ZipFile(io.BytesIO(response.read()))
+    try:
+        with urllib.request.urlopen(source,timeout=25) as response:
+            data=response.read()
+    except urllib.error.HTTPError as err:
+        if err.code!=404:raise
+        month=day[:7]
+        name=f'{symbol}-{period}-{month}.zip'
+        source=f'https://data.binance.vision/data/futures/um/monthly/klines/{quote(symbol)}/{period}/{quote(name)}'
+        with urllib.request.urlopen(source,timeout=25) as response:
+            data=response.read()
+    archive=zipfile.ZipFile(io.BytesIO(data))
     with archive.open(archive.namelist()[0]) as f:
         df=pd.read_csv(f,usecols=range(5),header=None)
     df=df.apply(pd.to_numeric,errors='coerce').dropna()
-    return df.to_numpy(dtype=float)
+    start=pd.Timestamp(day,tz='UTC').value//10**6
+    return df[(df.iloc[:,0]>=start)&(df.iloc[:,0]<start+DAY)].to_numpy(dtype=float)
 def recover(symbol,start,end):
     parts=[];dates=pd.date_range(pd.to_datetime(start,unit='ms',utc=True).normalize(),pd.to_datetime(end-1,unit='ms',utc=True).normalize(),freq='D')
     months={d.strftime('%Y-%m'):load_bars(symbol,d.strftime('%Y-%m')) for d in dates.to_period('M').unique()}
