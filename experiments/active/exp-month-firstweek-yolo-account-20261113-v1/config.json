@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-month-firstweek-yolo-account-20261113-v1",
+  "engine": "NautilusTrader 1.231.0",
+  "signals": "primary_signals.csv",
+  "bar_loader": "../exp-month-firstweek-intraday-retest-20261112-v1/bars.py",
+  "outputs": "results",
+  "execution": {
+    "interval_minutes": 5,
+    "signal_clock": "confirm_close_ms is the UTC close time of a completed 5m candle and the next 5m bar open timestamp",
+    "entry": "market at the next 5m open",
+    "stop_fraction": 0.05,
+    "target": "absolute near_edge, resting limit",
+    "max_holding_hours": 168,
+    "end_of_data": "mark at the last continuous 5m close, classify as censored cutoff_mark, and do not charge a hypothetical exit fee",
+    "intrabar_path": "adverse first: long O-L-H-C, short O-H-L-C; monotone native segments",
+    "target_admission": "strictly ahead of entry in the trade direction; otherwise retain as a pretrade skip"
+  },
+  "fees": {
+    "maker": 0.0002,
+    "taker": 0.0005,
+    "entry": "taker",
+    "target": "maker",
+    "stop_and_timeout": "taker",
+    "funding": "actual Binance fundingRate and markPrice at fundingTime"
+  },
+  "accounts": {
+    "initial_equity_usdt": 1000,
+    "risk_fraction_of_current_nav": 0.01,
+    "max_notional_fraction_of_current_nav": 0.20,
+    "leverage": 1,
+    "max_open_positions": 5,
+    "max_positions_per_symbol": 1,
+    "drawdown_budget_floor_fraction_of_high_water": 0.70,
+    "order": "settle funding, settle exits, then admit entries; equal-time entries sort by symbol then trade_id",
+    "marking": "5m OHLC and closes; account NAV includes unrealized price PnL and settled funding"
+  },
+  "required_signal_columns": [
+    "trade_id",
+    "symbol",
+    "side",
+    "confirm_close_ms",
+    "pool",
+    "near_edge",
+    "tape_path"
+  ],
+  "array_format": "Each tape_path is a NumPy array of integer UTC open_ms plus open, high, low, close. The event tape must include the confirmation candle and next-open bar. Registered local bars extend it to 168 hours when available; less coverage is a censored cutoff mark, not an entry exclusion.",
+  "limitations": [
+    "Native execution uses synthetic full liquidity with whole-unit framework sizing; the shared account rescales fills to its fractional base-asset quantity.",
+    "No spread, slippage, exchange lot-size rounding, market impact, liquidation, or maintenance margin is modeled.",
+    "5m OHLC order is a deterministic adverse-first path, not tick data; simultaneous cross-symbol OHLC extrema form a conservative envelope rather than a synchronized path.",
+    "Positions still open at a data cutoff remain marked and reserved through the account cutoff; later target/stop execution is unknown."
+  ]
+}
