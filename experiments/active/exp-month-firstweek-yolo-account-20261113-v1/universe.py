@@ -8,6 +8,7 @@ from functools import lru_cache
 import io
 import sys
 import urllib.request
+from urllib.parse import quote
 import zipfile
 import numpy as np
 import pandas as pd
@@ -21,7 +22,7 @@ OLD=ROOT/'data/research/month-firstweek-cloud-dense-20261112-v1'
 @lru_cache(maxsize=64)
 def daily(symbol,day,period="5m"):
     name=f'{symbol}-{period}-{day}.zip'
-    source=f'https://data.binance.vision/data/futures/um/daily/klines/{symbol}/{period}/{name}'
+    source=f'https://data.binance.vision/data/futures/um/daily/klines/{quote(symbol)}/{period}/{quote(name)}'
     with urllib.request.urlopen(source,timeout=25) as response:
         archive=zipfile.ZipFile(io.BytesIO(response.read()))
     with archive.open(archive.namelist()[0]) as f:
