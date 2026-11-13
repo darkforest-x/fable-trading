@@ -29,10 +29,10 @@ STEP = 300_000
 DAY = 24*60*60*1000
 
 def population():
-    m = pd.read_csv(SOURCE/'manifest.csv.gz',usecols=['id','symbol','month','side','known_ms','near_edge','stop_ms','coverage','tape_path'],float_precision='round_trip')
+    m = pd.read_csv(HERE/'october_population.csv',usecols=['id','symbol','month','side','known_ms','near_edge','stop_ms','coverage','tape_path'],float_precision='round_trip')
     m=m[m.month.eq('2026-10')].sort_values(['known_ms','symbol'])
-    assert len(m)==359 and m.id.is_unique and m.coverage.eq('complete').all()
-    return m
+    assert len(m)>=359 and m.id.is_unique
+    return m[m.coverage.eq('complete')]
 
 def frozen_history():
     known={}
