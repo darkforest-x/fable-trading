@@ -34,13 +34,14 @@ def month(symbol,period):
         result=[];cursor=first
         while cursor<=last:
             url=ENDPOINT+'?'+urlencode(dict(symbol=symbol,startTime=cursor,endTime=last,limit=1000))
-            for attempt in range(4):
+            for attempt in range(5):
                 try:
-                    with urlopen(Request(url,headers={'User-Agent':'fable-offline-research'}),timeout=15) as res:
+                    url_to_read=url if attempt%2==0 else url.replace('fapi.binance.com','www.binance.com')
+                    with urlopen(Request(url_to_read,headers={'User-Agent':'fable-offline-research'}),timeout=15) as res:
                         part=json.load(res)
                     break
                 except OSError:
-                    if attempt==3:raise
+                    if attempt==4:raise
                     time.sleep(2**attempt)
             if not isinstance(part,list):raise RuntimeError(str(part))
             if not part:break
