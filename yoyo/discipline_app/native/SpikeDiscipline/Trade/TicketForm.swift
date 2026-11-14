@@ -11,6 +11,7 @@ struct TicketForm: View {
     var onBlocked: (Trading.Destination) -> Void = { _ in }
     /// Only one visible form presents the confirm sheet and errors (合约 page vs 1.618 sheet).
     var hosts = true
+    var inline = false
     @State private var leverageSheet = false
     @State private var showTargets = false
     @FocusState private var focus: Trading.FieldIssue.Field?
@@ -34,7 +35,7 @@ struct TicketForm: View {
         let estimate = ready ? Trading.estimate(state, ticket.ticket(state)) : nil
         let tick = state?.instruments[ticket.symbol]?.tick
 
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: inline ? 9 : 14) {
             // Direction.
             HStack(spacing: 10) {
                 ForEach(["long", "short"], id: \.self) { value in
@@ -43,13 +44,13 @@ struct TicketForm: View {
                         selectDirection(value, state: state)
                     } label: {
                         HStack(spacing: 6) {
-                            Circle().fill(on ? Color.white : Color.muted.opacity(0.5)).frame(width: 6, height: 6)
+                            if !inline { Circle().fill(on ? Color.white : Color.muted.opacity(0.5)).frame(width: 6, height: 6) }
                             Text(value == "long" ? "做多" : "做空").font(.scaled(size: 16, weight: .bold))
                         }
                         .foregroundStyle(on ? Color.white : Color.muted)
                         .frame(maxWidth: .infinity).frame(height: 44)
-                        .background(on ? hue : Color.field, in: .capsule)
-                        .shadow(color: on ? hue.opacity(0.28) : .clear, radius: 8, y: 3)
+                        .background(on ? hue : Color.field, in: .rect(cornerRadius: inline ? 9 : 22))
+                        .shadow(color: on ? hue.opacity(0.28) : .clear, radius: inline ? 0 : 8, y: inline ? 0 : 3)
                         .contentShape(.capsule)
                     }
                     .buttonStyle(.plain)
@@ -61,9 +62,21 @@ struct TicketForm: View {
             if existing != nil { Text("同向加仓 · 沿用当前止损和杠杆").font(.caption).foregroundStyle(.secondary) }
 
             HStack(spacing: 10) {
-                SoftSegment(selection: $ticket.kind, options: [("market", "市价"), ("limit", "限价")])
+                if inline {
+                    Menu {
+                        Button("市价委托") { ticket.kind = "market"; ticket.fieldIssue = nil }
+                        Button("限价委托") { ticket.kind = "limit"; ticket.fieldIssue = nil }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(ticket.kind == "limit" ? "限价" : "市价").font(.subheadline.weight(.semibold))
+                            Image(systemName: "chevron.down").font(.caption2)
+                        }.frame(maxWidth: .infinity).frame(minHeight: 36).background(Color.field, in: .rect(cornerRadius: 8))
+                    }.disabled(locked).accessibilityLabel("委托类型，" + (ticket.kind == "limit" ? "限价" : "市价"))
+                } else {
+                    SoftSegment(selection: $ticket.kind, options: [("market", "市价"), ("limit", "限价")])
                     .disabled(locked)
                     .onChange(of: ticket.kind) { _, _ in ticket.fieldIssue = nil }
+                }
                 if ticket.sizingMode(state) == "exposure" {
                     HStack(spacing: 5) {
                         Circle().fill(Color.muted.opacity(0.6)).frame(width: 6, height: 6)
@@ -111,27 +124,33 @@ struct TicketForm: View {
                         } label: {
                             HStack(spacing: 4) {
                                 if ticket.autoWorking { ProgressView().controlSize(.mini); Text("计算中") }
-                                else { if ticket.autoMode == side { Circle().fill(Color.up).frame(width: 6, height: 6) }; Text("1R 自动计算") }
+                                else { if ticket.autoMode == side { Circle().fill(Color.up).frame(width: 6, height: 6) }; Text(inline ? "自动 1R" : "1R 自动计算") }
                             }
                             .font(.caption.weight(.semibold))
                         }
                         .buttonStyle(.pill(ticket.autoMode == side ? .tinted(.accentColor) : .soft, height: 28))
                         .disabled(locked || (!ticket.fibTicket && block != nil) || session.connection == nil)
                         .accessibilityLabel(side == "long" ? "多单 1R" : "空单 1R")
-                        if ticket.autoMode != nil {
+                        if !inline && ticket.autoMode != nil {
                             Button("手动") { Haptics.tap(); ticket.manual() }.font(.caption.weight(.semibold)).buttonStyle(.pill(.soft, height: 28)).disabled(locked)
                         }
                     }
                 }
             }) {
-                TextField("输入止损价格", text: $ticket.stop).keyboardType(.decimalPad).focused($focus, equals: .stop)
-                    .disabled(locked || existing != nil)
-                    .onChange(of: ticket.stop) { _, value in
-                        if ticket.stopApplied != context + "|" + value { ticket.manualEdit() }
+                TextField(inline ? "止损价格" : "输入止损价格", text: Binding(
+                    get: { ticket.stop },
+                    set: { value in
+                        ticket.manual()
+                        ticket.stop = value
+                        ticket.stopApplied = nil
+                        ticket.fieldIssue = nil
                     }
+                ))
+                .keyboardType(.decimalPad).focused($focus, equals: .stop)
+                .disabled(locked || existing != nil)
             }
             issue(.stop)
-            if existing == nil, let applied = ticket.stopApplied, applied == context + "|" + ticket.stop, ticket.fieldIssue?.field != .stop {
+            if !inline, existing == nil, let applied = ticket.stopApplied, applied == context + "|" + ticket.stop, ticket.fieldIssue?.field != .stop {
                 Label(ticket.fibTicket ? "\(ticket.fibPeriod.label)插针止损 · 按1R与剩余额度计算" : "\(side == "long" ? "多单" : "空单") 1R 止损已填入，含成本预留",
                       systemImage: "checkmark.circle.fill")
                     .font(.caption.weight(.medium)).foregroundStyle(Color.up)
@@ -160,32 +179,28 @@ struct TicketForm: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                HStack(alignment: .firstTextBaseline) {
+                HStack {
                     Text("仓位额度").font(.subheadline.weight(.semibold))
-                    if ticket.sizingMode(state) == "exposure" {
-                        Text("(独立额度)").font(.caption2).foregroundStyle(.secondary)
-                    }
                     Spacer()
-                    if ticket.sizingMode(state) == "exposure" {
-                        Text(allocationLabel(state)).font(.caption).foregroundStyle(.secondary)
-                    } else {
-                        Text("保证金占净值 \(state == nil ? "—" : Fmt.amount((Double(ticket.fraction(state)) ?? 0) * 100))%").font(.caption).foregroundStyle(.secondary)
-                    }
-                    Text("\(Int(ticket.allocation))").font(.title3.weight(.bold).monospacedDigit()).contentTransition(.numericText(value: ticket.allocation))
-                    Text("%").font(.caption).foregroundStyle(.secondary)
+                    Text("\(Int(ticket.allocation))%").font(.subheadline.weight(.bold).monospacedDigit())
                 }
+                Text(ticket.sizingMode(state) == "exposure" ? allocationLabel(state) : "保证金占净值 \(state == nil ? "—" : Fmt.amount((Double(ticket.fraction(state)) ?? 0) * 100))%")
+                        .font(.caption).foregroundStyle(.secondary)
                 Slider(value: $ticket.allocation, in: 0...100, step: 1)
                     .disabled(locked || state == nil || room <= 0)
                     .onChange(of: ticket.allocation) { _, value in
                         ticket.fieldIssue = nil
                         if Int(value) / 25 != lastAllocationTick { lastAllocationTick = Int(value) / 25; Haptics.select() }
                     }
-                HStack(spacing: 8) {
+                HStack(spacing: inline ? 3 : 8) {
                     ForEach([25, 50, 75, 100], id: \.self) { value in
                         Button { withAnimation(.snappy) { ticket.allocation = Double(value) }; value == 100 ? Haptics.open() : Haptics.press() } label: {
-                            Text("\(value)%").font(.caption.weight(.semibold)).frame(maxWidth: .infinity).frame(height: 30)
+                            Text("\(value)%").font(.caption.weight(.semibold)).lineLimit(1)
+                                .foregroundStyle(Int(ticket.allocation) == value ? Color.accentColor : Color.ink)
+                                .frame(maxWidth: .infinity).frame(minHeight: 30)
+                                .background(Int(ticket.allocation) == value ? Color.accentColor.opacity(0.12) : Color.field, in: .rect(cornerRadius: 6))
                         }
-                        .buttonStyle(.pill(Int(ticket.allocation) == value ? .tinted(.accentColor) : .soft, height: 30))
+                        .buttonStyle(.plain)
                         .disabled(locked || state == nil || room <= 0)
                     }
                 }
@@ -194,19 +209,28 @@ struct TicketForm: View {
                 Text(issue.message).font(.caption.weight(.medium)).foregroundStyle(Color.down)
             }
 
-            HStack {
-                Metric(title: existing != nil ? "本次持仓金额" : "持仓金额", value: Fmt.amount(estimate?.notional), unit: "U")
-                Metric(title: "保证金", value: Fmt.amount(estimate?.margin), unit: "U")
-                Metric(title: existing != nil ? "合并止损金额" : "预计止损", value: Fmt.amount(estimate?.risk), unit: "U")
-            }
-            .padding(12).background(Color.field, in: .rect(cornerRadius: 14))
+            if inline {
+                VStack(spacing: 4) {
+                    amountRow("可用资金", state.flatMap { $0.available }.flatMap(Double.init))
+                    amountRow("名义金额", estimate?.notional)
+                    amountRow("保证金", estimate?.margin)
+                    amountRow(existing == nil ? "预计止损" : "合并止损", estimate?.risk, emphasized: true)
+                }
+            } else {
+                HStack {
+                    Metric(title: existing != nil ? "本次持仓金额" : "持仓金额", value: Fmt.amount(estimate?.notional), unit: "U")
+                    Metric(title: "保证金", value: Fmt.amount(estimate?.margin), unit: "U")
+                    Metric(title: existing != nil ? "合并止损金额" : "预计止损", value: Fmt.amount(estimate?.risk), unit: "U")
+                }
+                .padding(12).background(Color.field, in: .rect(cornerRadius: 14))
 
-            HStack {
-                Text(account.live ? "\(state?.accountName ?? "主账户") · USDT 净值" : "模拟净值").font(.caption).foregroundStyle(.secondary)
-                Spacer()
-                Text(Fmt.amount(state?.equity) + " USDT").font(.subheadline.weight(.semibold).monospacedDigit())
-            }
+                HStack {
+                    Text(account.live ? "\(state?.accountName ?? "主账户") · USDT 净值" : "模拟净值").font(.caption).foregroundStyle(.secondary)
+                    Spacer()
+                    Text(Fmt.amount(state?.equity) + " USDT").font(.subheadline.weight(.semibold).monospacedDigit())
+                }
 
+            }
             Button {
                 Task { await review(side: side, state: state) }
             } label: {
@@ -232,7 +256,7 @@ struct TicketForm: View {
             if Trading.errorCopy(ticket.error ?? "").rules { Button("查看当前规则") { ticket.error = nil; onBlocked(.discipline) } }
             Button("知道了", role: .cancel) { ticket.error = nil }
         } message: { Text(Trading.errorCopy(ticket.error ?? "").detail) }
-        .task(id: "\(context)|\(ticket.autoMode ?? "")|\(ticket.autoRevision)|\(autoEnabled)") {
+        .task(id: "\(context)|\(ticket.autoMode ?? "")|\(ticket.autoRevision)|\(autoEnabled)|\(hosts)") {
             await runAutoStop(context: context, enabled: autoEnabled)
         }
         .onChange(of: focus) { old, _ in if let old { validate(old, state: state) } }
@@ -241,6 +265,15 @@ struct TicketForm: View {
 
     // MARK: pieces
 
+    private func amountRow(_ title: String, _ value: Double?, emphasized: Bool = false) -> some View {
+        HStack(spacing: 4) {
+            Text(title).foregroundStyle(.secondary)
+            Spacer(minLength: 0)
+            Text(Fmt.amount(value) + " U").fontWeight(emphasized ? .bold : .medium)
+                .monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
+        }.font(.caption)
+    }
+
     private func field<Trailing: View, Content: View>(title: String, @ViewBuilder trailing: () -> Trailing, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack { Text(title).font(.subheadline.weight(.semibold)); Spacer(); trailing() }
@@ -248,7 +281,7 @@ struct TicketForm: View {
                 content().font(.title3.weight(.semibold).monospacedDigit())
                 Text("USDT").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
             }
-            .padding(.horizontal, 14).frame(height: 48)
+            .padding(.horizontal, inline ? 9 : 14).frame(height: inline ? 40 : 48)
             .background(Color.field, in: .rect(cornerRadius: 14))
         }
     }
@@ -285,6 +318,7 @@ struct TicketForm: View {
     }
 
     private func runAutoStop(context: String, enabled: Bool) async {
+        guard hosts else { return }
         guard let mode = ticket.autoMode, enabled, session.connection != nil else { ticket.autoWorking = false; return }
         if ticket.fibTicket && ticket.fibPeriod == .h12 {
             // The service computes wick stops only for OKX's own bars (1m…4H, 1D); 12H is display-only.
@@ -364,11 +398,6 @@ struct TicketForm: View {
 
 private extension Optional {
     var isNilValue: Bool { if case .none = self { return true }; return false }
-}
-
-extension TicketModel {
-    /// Typing a stop by hand turns the automatic mode off (1.x onChange of the stop input).
-    func manualEdit() { if !autoWorking { manual() }; stopApplied = nil; fieldIssue = nil }
 }
 
 struct LeverageSheet: View {

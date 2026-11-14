@@ -46,7 +46,8 @@ final class AccountStore {
     /// Quote for `symbol` is within the policy's quote age (1.x `fresh`).
     func quoteFresh(_ symbol: String) -> Bool {
         guard online, let state, let q = state.quotes[symbol] else { return false }
-        return state.serverTime - q.time <= (state.policy?.quoteMaxAgeSeconds ?? 15)
+        let age = now - q.time
+        return age >= 0 && age <= (state.policy?.quoteMaxAgeSeconds ?? 15)
     }
 
     /// Server time advanced by the local clock since the last snapshot (countdowns).

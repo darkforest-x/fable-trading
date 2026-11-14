@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=402, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>天才交易员 · SPIKE 交易终端</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=SF+Pro+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            ios: {
+              bg: '#FFFFFF',
+              darkBg: '#090A0F',
+              surface: '#F8F9FA',
+              darkSurface: '#12141A',
+              card: '#FFFFFF',
+              darkCard: '#171922',
+              border: '#EAECEF',
+              darkBorder: '#232733',
+              subtle: '#8E949F',
+              text: '#11141A',
+              darkText: '#F3F5F7',
+              muted: '#666D7A',
+              darkMuted: '#949CA9',
+              green: '#00B074',
+              greenSoft: '#E6F8F2',
+              greenDarkBg: 'rgba(0, 176, 116, 0.16)',
+              red: '#F6465D',
+              redSoft: '#FEECEF',
+              redDarkBg: 'rgba(246, 70, 93, 0.16)',
+              blue: '#0A84FF',
+              blueSoft: '#EBF4FF'
+            }
+          },
+          fontFamily: {
+            sans: ['"SF Pro Text"', '"SF Pro Display"', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Tabular numeric rendering for precise financial alignments */
+    .num { font-feature-settings: "tnum" 1, "cv01" 1, "cv02" 1; }
+    /* iOS Custom scrollbar */
+    ::-webkit-scrollbar { display: none; }
+    * { -webkit-tap-highlight-color: transparent; outline: none; }
+    input[type=range] { -webkit-appearance: none; background: transparent; }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 18px; width: 18px;
+      border-radius: 50%;
+      background: #0A84FF;
+      border: 2.5px solid #FFFFFF;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+      cursor: pointer;
+      margin-top: -6px;
+    }
+    .dark input[type=range]::-webkit-slider-thumb {
+      border-color: #12141A;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%; height: 6px;
+      border-radius: 9999px;
+      background: #EAECEF;
+    }
+    .dark input[type=range]::-webkit-slider-runnable-track {
+      background: #232733;
+    }
+  </style>
+</head>
+<body class="bg-[#F0F2F5] dark:bg-[#040507] text-ios-text dark:text-ios-darkText font-sans h-full flex justify-center items-center p-0 select-none antialiased">
+
+  <!-- 402pt Native iPhone Canvas Frame -->
+  <div id="appContainer" class="w-[402px] h-[874px] max-h-[874px] bg-white dark:bg-ios-darkBg flex flex-col relative overflow-hidden shadow-2xl rounded-[48px] border-[6px] border-[#2A2E39]/15 dark:border-[#2A2E39]/40">
+
+    <!-- iOS 26 Dynamic Island & Status Area -->
+    <header class="pt-3 px-6 pb-1 flex justify-between items-center text-xs font-semibold z-20 shrink-0">
+      <span class="tracking-tight text-sm font-semibold">9:41</span>
+      <!-- Dynamic Island pill shape -->
+      <div class="w-28 h-7 bg-black rounded-full flex items-center justify-between px-3 text-[10px] text-white/90">
+        <span class="inline-block w-2 h-2 rounded-full bg-ios-green animate-pulse"></span>
+        <span class="text-[10px] text-zinc-300 font-mono">DEMO · 18ms</span>
+      </div>
+      <div class="flex items-center space-x-1.5 text-ios-text dark:text-ios-darkText">
+        <span class="material-symbols-outlined text-[15px]">signal_cellular_alt</span>
+        <span class="material-symbols-outlined text-[15px]">wifi</span>
+        <span class="material-symbols-outlined text-[17px]">battery_full</span>
+      </div>
+    </header>
+
+    <!-- Compact Exchange Header (Symbol Selector, 永续, K-line & System Actions) -->
+    <div class="px-4 py-2 flex items-center justify-between border-b border-ios-border/80 dark:border-ios-darkBorder shrink-0 bg-white dark:bg-ios-darkBg">
+      <div class="flex items-center space-x-2">
+        <!-- Symbol Selector Trigger -->
+        <button id="symbolPickerBtn" class="flex items-center space-x-1.5 active:opacity-70 transition-opacity">
+          <span class="font-bold text-[18px] tracking-tight text-ios-text dark:text-ios-darkText">DEMO-USDT</span>
+          <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">永续</span>
+          <span class="material-symbols-outlined text-zinc-400 text-lg leading-none">arrow_drop_down</span>
+        </button>
+
+        <!-- Margin & Leverage Indicators -->
+        <button class="px-1.5 py-0.5 rounded text-[11px] font-mono font-medium border border-ios-border dark:border-ios-darkBorder text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900 active:scale-95">
+          全仓 20x
+        </button>
+      </div>
+
+      <!-- Quick Toggles: K-Line Chart Drawer, Theme Toggle, Settings -->
+      <div class="flex items-center space-x-2">
+        <button id="klineToggleBtn" title="切换K线" class="w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-90 transition-transform">
+          <span class="material-symbols-outlined text-[20px]">candlestick_chart</span>
+        </button>
+        <button id="themeToggleBtn" title="切换深浅主题" class="w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-90 transition-transform">
+          <span class="material-symbols-outlined text-[19px]">dark_mode</span>
+        </button>
+        <button title="交易偏好" class="w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-90 transition-transform">
+          <span class="material-symbols-outlined text-[20px]">tune</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Mini-Ticker Context Bar -->
+    <div class="px-4 py-1.5 flex items-center justify-between text-[11px] font-mono bg-zinc-50/70 dark:bg-zinc-900/40 border-b border-ios-border/60 dark:border-ios-darkBorder/60 shrink-0">
+      <div class="flex items-center space-x-3">
+        <div class="flex items-baseline space-x-1">
+          <span class="text-zinc-400 text-[10px]">标记价</span>
+          <span class="font-medium text-zinc-700 dark:text-zinc-300">12.342</span>
+        </div>
+        <div class="flex items-baseline space-x-1">
+          <span class="text-zinc-400 text-[10px]">指数</span>
+          <span class="text-zinc-500">12.340</span>
+        </div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <div class="flex items-baseline space-x-1">
+          <span class="text-zinc-400 text-[10px]">资金费率</span>
+          <span class="text-ios-green">+0.0100%</span>
+        </div>
+        <div class="text-zinc-400 text-[10px]">04:12:30</div>
+      </div>
+    </div>
+
+    <!-- Main Trading Floor: 60% Left Inline Ticket + 40% Right Order Book -->
+    <div class="grid grid-cols-12 flex-1 min-h-0 overflow-hidden divide-x divide-ios-border/80 dark:divide-ios-darkBorder">
+
+      <!-- LEFT: ~60% Inline Order Ticket (Cols 1-7, 58.3%) -->
+      <section class="col-span-7 flex flex-col p-3 overflow-y-auto space-y-2.5">
+
+        <!-- Long / Short Master Choice Tabs (开多 vs 开空) -->
+        <div class="grid grid-cols-2 p-0.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-ios-border/50 dark:border-ios-darkBorder/50 shrink-0">
+          <button id="sideLongBtn" class="py-1.5 text-xs font-semibold rounded-md transition-all flex items-center justify-center space-x-1 bg-ios-green text-white shadow-sm">
+            <span>买入开多</span>
+          </button>
+          <button id="sideShortBtn" class="py-1.5 text-xs font-semibold rounded-md transition-all flex items-center justify-center space-x-1 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400">
+            <span>卖出开空</span>
+          </button>
+        </div>
+
+        <!-- Order Type Segment (市价 vs 限价) -->
+        <div class="flex items-center justify-between text-[11px]">
+          <div class="flex items-center space-x-1 p-0.5 rounded-md bg-zinc-100 dark:bg-zinc-900">
+            <button id="typeMarketBtn" class="px-2 py-0.5 rounded font-medium bg-white dark:bg-zinc-800 text-ios-text dark:text-ios-darkText shadow-xs">市价</button>
+            <button id="typeLimitBtn" class="px-2 py-0.5 rounded font-medium text-zinc-500 dark:text-zinc-400">限价</button>
+          </div>
+          <span class="text-[10px] text-zinc-400 font-mono">BBO 对手价撮合</span>
+        </div>
+
+        <!-- Limit Price Input (Shown dynamically or toggled) -->
+        <div id="limitPriceRow" class="hidden flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-ios-border dark:border-ios-darkBorder bg-zinc-50/60 dark:bg-zinc-900/60">
+          <span class="text-[11px] text-zinc-400">委托价格</span>
+          <div class="flex items-center space-x-1 font-mono">
+            <input type="text" value="12.34" class="w-16 text-right bg-transparent font-medium text-xs text-ios-text dark:text-ios-darkText focus:ring-0">
+            <span class="text-[10px] text-zinc-400">USDT</span>
+          </div>
+        </div>
+
+        <!-- Required Stop Loss & 1R Auto Recalculation Section (防情绪化止损) -->
+        <div class="rounded-lg p-2 bg-zinc-50 dark:bg-zinc-900/60 border border-ios-border/80 dark:border-ios-darkBorder space-y-1.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-1 text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+              <span class="material-symbols-outlined text-[13px] text-ios-blue">shield</span>
+              <span>初始止损 (必须)</span>
+            </div>
+            <!-- Auto 1R Button -->
+            <button id="auto1RBtn" class="px-1.5 py-0.5 text-[10px] font-mono font-medium rounded bg-ios-blue/10 text-ios-blue hover:bg-ios-blue/20 active:scale-95 transition-all">
+              ⚡ 自动 1R (12.10)
+            </button>
+          </div>
+
+          <div class="flex items-center justify-between px-2 py-1.5 bg-white dark:bg-zinc-800 rounded border border-ios-border dark:border-ios-darkBorder font-mono">
+            <input id="slInput" type="text" value="12.10" class="w-20 bg-transparent text-xs font-semibold text-ios-red dark:text-ios-red focus:ring-0">
+            <span class="text-[10px] text-zinc-400">-1.94%</span>
+          </div>
+          <div class="flex justify-between items-center text-[10px] text-zinc-400 font-mono pt-0.5">
+            <span>预计亏损: <strong class="text-ios-red font-medium">-10.00 USDT</strong></span>
+            <span>严格 1R 额度</span>
+          </div>
+        </div>
+
+        <!-- Optional Take Profit Expansion Row (仓位止盈) -->
+        <div class="border border-dashed border-ios-border dark:border-ios-darkBorder rounded-lg p-1.5">
+          <button id="tpToggleBtn" class="w-full flex items-center justify-between text-[11px] text-zinc-500 dark:text-zinc-400">
+            <span class="flex items-center space-x-1">
+              <span class="material-symbols-outlined text-[14px]">tune</span>
+              <span>分批止盈 (可选 3R / 5R)</span>
+            </span>
+            <span class="text-[10px] text-ios-blue font-mono">+12.82 (+3.8R)</span>
+          </button>
+        </div>
+
+        <!-- Order Size & Presets + Slider (开仓数量/张数) -->
+        <div class="space-y-1.5 pt-0.5">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="text-zinc-500">数量 (张)</span>
+            <span class="font-mono text-[10px] text-zinc-400">1张 = 10 DEMO</span>
+          </div>
+
+          <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-ios-border dark:border-ios-darkBorder bg-white dark:bg-zinc-800 font-mono">
+            <input id="qtyInput" type="text" value="41" class="w-20 bg-transparent text-xs font-bold text-ios-text dark:text-ios-darkText focus:ring-0">
+            <span class="text-[10px] text-zinc-400">张 (≈ 506.0 U)</span>
+          </div>
+
+          <!-- Quick Risk Presets (25%, 50%, 75%, 100% 额度) -->
+          <div class="grid grid-cols-4 gap-1 text-[10px] font-mono">
+            <button class="py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700">25%</button>
+            <button class="py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700">50%</button>
+            <button class="py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700">75%</button>
+            <button class="py-1 rounded bg-ios-blue/15 text-ios-blue font-semibold">100%</button>
+          </div>
+
+          <!-- Proportion Slider -->
+          <div class="pt-1">
+            <input type="range" min="0" max="100" value="75" class="w-full">
+          </div>
+        </div>
+
+        <!-- Account Balance & Margin Ledger Metadata -->
+        <div class="space-y-1 text-[10px] font-mono text-zinc-500 dark:text-zinc-400 pt-1 border-t border-ios-border/60 dark:border-ios-darkBorder/60">
+          <div class="flex justify-between">
+            <span>可用保证金</span>
+            <span class="text-zinc-700 dark:text-zinc-300 font-medium">1,000.00 USDT</span>
+          </div>
+          <div class="flex justify-between">
+            <span>名义本金占用</span>
+            <span class="text-zinc-700 dark:text-zinc-300">25.30 USDT (20x)</span>
+          </div>
+          <div class="flex justify-between">
+            <span>1R 风险上限</span>
+            <span class="text-ios-blue font-semibold">10.00 USDT (1.0%)</span>
+          </div>
+        </div>
+
+        <!-- Single Unambiguous Selected-Direction Submit Button (44pt touch standard) -->
+        <div class="pt-1">
+          <button id="mainSubmitBtn" class="w-full h-11 rounded-xl font-bold text-sm tracking-wide shadow-md transition-all active:scale-[0.98] flex items-center justify-center space-x-1.5 bg-ios-green hover:bg-ios-green/90 text-white">
+            <span class="material-symbols-outlined text-[18px]">verified_user</span>
+            <span id="submitBtnText">买入开多 · 纪律守护</span>
+          </button>
+          <div class="text-[9px] text-center text-zinc-400 dark:text-zinc-500 pt-1 font-mono">
+            未设初始止损服务端自动阻断提交
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: ~40% Real Order Book (Cols 8-12, 41.7%) -->
+      <section class="col-span-5 flex flex-col p-2.5 bg-zinc-50/50 dark:bg-zinc-900/30 overflow-hidden select-none">
+
+        <!-- Order Book Header (价格 vs 数量张) -->
+        <div class="flex justify-between text-[10px] text-zinc-400 font-mono pb-1 border-b border-ios-border/50 dark:border-ios-darkBorder/50">
+          <span>价格</span>
+          <span>数量(张)</span>
+        </div>
+
+        <!-- Order Book Precision & Mode Bar -->
+        <div class="flex items-center justify-between py-1 text-[9px] text-zinc-400 font-mono">
+          <span class="px-1 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">0.001</span>
+          <span class="flex items-center space-x-0.5 text-zinc-500">
+            <span class="w-1.5 h-1.5 rounded-full bg-ios-green"></span>
+            <span>深度 0.1</span>
+          </span>
+        </div>
+
+        <!-- Asks (卖单/空单梯队 - 上方粉红梯队) -->
+        <div class="flex-1 flex flex-col justify-end space-y-0.5 font-mono text-[11px] overflow-hidden">
+          <!-- Ask row 5 -->
+          <div class="flex justify-between items-center relative py-0.5 px-1 rounded-xs">
+            <div class="absolute right-0 top-0 bottom-0 bg-ios-red/10 dark:bg-ios-red/20 rounded-xs" style="width: 38%;"></div>
+            <span class="text-ios-red font-medium relative z-10">12.352</span>
+            <span class="text-zinc-500 relative z-10 text-[10px]">184</span>
+          </div>
+          <!-- Ask row 4 -->
+          <div class="flex justify-between items-center relative py-0.5 px-1 rounded-xs">
+            <div class="absolute right-0 top-0 bottom-0 bg-ios-red/10 dark:bg-ios-red/20 rounded-xs" style="width: 55%;"></div>
+            <span class="text-ios-red font-medium relative z-10">12.350</span>
+            <span class="text-zinc-500 relative z-10 text-[10px]">420</span>
+          </div>
+          <!-- Ask row 3 -->
+          <div class="flex justify-between items-center relative py-0.5 px-1 rounded-xs">
+            <div class="absolute right-0 top-0 bottom-0 bg-ios-red/10 dark:bg-ios-red/20 rounded-xs" style="width: 72%;"></div>
+            <span class="text-ios-red font-medium relative z-10">12.348</span>
+            <span class="text-zinc-500 relative z-10 text-[10px]">615</span>
+          </div>
+          <!-- Ask row 2 -->
+          <div class="flex justify-between items-center relative py-0.5 px-1 rounded-xs">
+            <div class="absolute right-0 top-0 bottom-0 bg-ios-red/10 dark:bg-ios-red/20 rounded-xs" style="width: 28%;"></div>
+            <span class="text-ios-red font-medium relative z-10">12.345</span>
+            <span class="text-zinc-500 relative z-10 text-[10px]">142</span>
+          </div>
+          <!-- Ask row 1 (Best Ask) -->
+          <div class="flex justify-between items-center relative py-0.5 px-1 rounded-xs bg-ios-red/5">
+            <div class="absolute right-0 top-0 bottom-0 bg-ios-red/15 dark:bg-ios-red/30 rounded-xs" style="width: 90%;"></div>
+            <span class="text-ios-red font-semibold relative z-10">12.342</span>
+            <span class="text-zinc-600 dark:text-zinc-300 font-medium relative z-10 text-[10px]">980</span>
+          </div>
+        </div>
+
+        <!-- Central Current Real Price Anchor (最新成交价带) -->
+        <div class="my-1.5 py-1 px-1.5 rounded-md bg-white dark:bg-zinc-800/90 border border-ios-border/60 dark:border-ios-darkBorder flex items-center justify-between font-mono shadow-xs">
+          <div class="flex items-baseline space-x-1">
+            <span class="text-base font-bold text-ios-green tracking-tight">12.340</span>
+            <span class="material-symbols-outlined text-[13px] text-ios-green font-bold">arrow_upward</span>
+          </div>
+          <span class="text-[10px] text-ios-green font-medium">+2.83%</span>
+        </div>
+
+        <!-- Bids (买单/多单梯队 - 下方翠绿梯队) -->
+        <div class="flex-1 flex flex-col justify-start space-y-0.5 font-mono text-[11px] overflow-hidden">
+          <!-- Bid row 1 (Best Bid) -->
+          <div class="flex justify-between items-center relative py-0.5 px-1 rounded-xs bg-ios-green/5">
+            <div class="absolute right-0 top-0 bottom-0 bg-ios-green/15 dark:bg-ios-green/30 rounded-xs" style="width: 85%;"></div>
+            <span class="text-ios-green font-semibold relative z-10">12.338</span>
+            <span class="text-zinc-600 dark:text-zinc-300 font-medium relative z-10 text-[10px]">892</span>
+          </div>
+          <!-- Bid row 2 -->
+          <div class="flex justify-between items-center relative py-0.5 px-1 rounded-xs">
+            <div class="absolute right-0 top-0 bottom-0 bg-ios-green/10 dark:bg-ios-green/20 rounded-xs" style="width: 44%;"></div>
+            <span class="text-ios-green font-medium relative z-10">12.335</span>
+            <span class="text-zinc-500 relative z-10 text-[10px]">350</span>
+          </div>
+          <!-- Bid row 3 -->
+          <div class="flex justify-between items-center relative py-0.5 px-1 rounded-xs">
+            <div class="absolute right-0 top-0 bottom-0 bg-ios-green/10 dark:bg-ios-green/20 rounded-xs" style="width: 63%;"></div>
+            <span class="text-ios-green font-medium relative z-10">12.332</span>
+            <span class="text-zinc-500 relative z-10 text-[10px]">510</span>
+          </div>
+          <!-- Bid row 4 -->
+          <div class="flex justify-between items-center relative py-0.5 px-1 rounded-xs">
+            <div class="absolute right-0 top-0 bottom-0 bg-ios-green/10 dark:bg-ios-green/20 rounded-xs" style="width: 20%;"></div>
+            <span class="text-ios-green font-medium relative z-10">12.330</span>
+            <span class="text-zinc-500 relative z-10 text-[10px]">160</span>
+          </div>
+          <!-- Bid row 5 -->
+          <div class="flex justify-between items-center relative py-0.5 px-1 rounded-xs">
+            <div class="absolute right-0 top-0 bottom-0 bg-ios-green/10 dark:bg-ios-green/20 rounded-xs" style="width: 40%;"></div>
+            <span class="text-ios-green font-medium relative z-10">12.328</span>
+            <span class="text-zinc-500 relative z-10 text-[10px]">312</span>
+          </div>
+        </div>
+
+        <!-- Order Book Footer Indicator -->
+        <div class="pt-1.5 flex justify-between items-center text-[9px] text-zinc-400 font-mono border-t border-ios-border/50 dark:border-ios-darkBorder/50">
+          <span>买 52%</span>
+          <span>卖 48%</span>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- Bottom Horizontal Position & Orders Master Desk -->
+    <div class="border-t border-ios-border dark:border-ios-darkBorder bg-white dark:bg-ios-darkCard shrink-0 flex flex-col h-[230px]">
+
+      <!-- Section Tabs: 持仓(1) vs 委托(0) vs 历史 + 当前合约过滤 -->
+      <div class="px-4 py-2 flex items-center justify-between border-b border-ios-border/70 dark:border-ios-darkBorder/70">
+        <div class="flex items-center space-x-4">
+          <button id="tabPositionsBtn" class="text-xs font-bold text-ios-text dark:text-ios-darkText border-b-2 border-ios-blue pb-1">
+            持仓 (1)
+          </button>
+          <button id="tabOrdersBtn" class="text-xs font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 pb-1">
+            当前委托 (0)
+          </button>
+          <button id="tabHistoryBtn" class="text-xs font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 pb-1">
+            历史成交
+          </button>
+        </div>
+
+        <div class="flex items-center space-x-1.5 text-[11px] text-zinc-500">
+          <input type="checkbox" id="currContractOnly" checked class="rounded text-ios-blue w-3.5 h-3.5 border-ios-border">
+          <label for="currContractOnly" class="cursor-pointer">仅当前合约</label>
+        </div>
+      </div>
+
+      <!-- Positions List View -->
+      <div id="positionsListView" class="flex-1 overflow-y-auto p-3 space-y-2.5">
+
+        <!-- Position Card Item (DEMO-USDT 20x 多头) -->
+        <div class="p-3 rounded-xl bg-zinc-50/80 dark:bg-zinc-900/60 border border-ios-border/80 dark:border-ios-darkBorder space-y-2">
+
+          <!-- Position Card Header: Symbol, Side badge, P&L in Amount & ROI -->
+          <div class="flex items-start justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="font-bold text-xs text-ios-text dark:text-ios-darkText font-mono">DEMO-USDT</span>
+              <span class="text-[10px] px-1.5 py-0.2 rounded font-semibold bg-ios-green/10 text-ios-green font-mono">多 20x · 全仓</span>
+            </div>
+            <!-- PnL -->
+            <div class="text-right font-mono">
+              <div class="text-xs font-bold text-ios-green">+4.12 USDT</div>
+              <div class="text-[10px] text-ios-green font-medium">+16.28%</div>
+            </div>
+          </div>
+
+          <!-- Position Core Numbers (开仓价、标记价、强平价、已设止损) -->
+          <div class="grid grid-cols-4 gap-1 text-[10px] font-mono text-zinc-400">
+            <div>
+              <div class="text-zinc-400 text-[9px]">持仓数量</div>
+              <div class="text-zinc-800 dark:text-zinc-200 font-medium">40 张</div>
+            </div>
+            <div>
+              <div class="text-zinc-400 text-[9px]">开仓均价</div>
+              <div class="text-zinc-800 dark:text-zinc-200">12.240</div>
+            </div>
+            <div>
+              <div class="text-zinc-400 text-[9px]">强平价格</div>
+              <div class="text-zinc-500">11.450</div>
+            </div>
+            <div>
+              <div class="text-zinc-400 text-[9px]">初始止损</div>
+              <div class="text-ios-blue font-semibold">12.100</div>
+            </div>
+          </div>
+
+          <!-- Dedicated Action Row (止盈止损表单 vs 一键市价平仓) -->
+          <div class="flex items-center justify-end space-x-2 pt-1 border-t border-ios-border/40 dark:border-ios-darkBorder/40">
+            <button id="posTpSlBtn" class="px-3 py-1.5 rounded-lg text-[11px] font-medium border border-ios-border dark:border-ios-darkBorder bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 active:scale-95 transition-transform flex items-center space-x-1">
+              <span class="material-symbols-outlined text-[13px] text-ios-blue">rule</span>
+              <span>止盈止损</span>
+            </button>
+            <button id="posCloseBtn" class="px-3 py-1.5 rounded-lg text-[11px] font-medium bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 active:scale-95 transition-transform">
+              市价平仓
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Accessible Native Footer Navigation (交易 / 监控 / 1.618 / 持仓 / 统计) -->
+    <nav class="h-[62px] px-3 pb-3 border-t border-ios-border/80 dark:border-ios-darkBorder bg-white/95 dark:bg-ios-darkBg/95 backdrop-blur-md flex justify-around items-center shrink-0 z-30">
+
+      <!-- Tab 1: 交易 (Active) -->
+      <button class="flex flex-col items-center justify-center w-14 text-ios-blue font-semibold scale-100 transition-transform">
+        <span class="material-symbols-outlined text-[23px]">candlestick_chart</span>
+        <span class="text-[10px] mt-0.5">交易</span>
+      </button>
+
+      <!-- Tab 2: 监控 -->
+      <button class="flex flex-col items-center justify-center w-14 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+        <span class="material-symbols-outlined text-[23px]">notifications_active</span>
+        <span class="text-[10px] mt-0.5">监控</span>
+      </button>
+
+      <!-- Tab 3: 1.618 -->
+      <button class="flex flex-col items-center justify-center w-14 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+        <span class="material-symbols-outlined text-[23px]">show_chart</span>
+        <span class="text-[10px] mt-0.5">1.618</span>
+      </button>
+
+      <!-- Tab 4: 持仓 -->
+      <button class="flex flex-col items-center justify-center w-14 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors relative">
+        <span class="material-symbols-outlined text-[23px]">account_balance_wallet</span>
+        <span class="text-[10px] mt-0.5">持仓</span>
+        <span class="absolute top-0 right-3.5 w-1.5 h-1.5 rounded-full bg-ios-blue"></span>
+      </button>
+
+      <!-- Tab 5: 统计 -->
+      <button class="flex flex-col items-center justify-center w-14 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+        <span class="material-symbols-outlined text-[23px]">query_stats</span>
+        <span class="text-[10px] mt-0.5">统计</span>
+      </button>
+
+    </nav>
+
+    <!-- iOS Home Indicator -->
+    <div class="h-4 flex justify-center items-center shrink-0 bg-white dark:bg-ios-darkBg">
+      <div class="w-32 h-1 bg-zinc-300 dark:bg-zinc-700 rounded-full"></div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- SLIDE-OVER K-LINE MODAL DRAWER (Header candlestic toggle) -->
+    <!-- ============================================================= -->
+    <div id="klineDrawer" class="absolute inset-0 bg-black/50 backdrop-blur-xs z-50 flex flex-col justify-end hidden opacity-0 transition-opacity duration-200">
+      <div class="w-full h-[82%] bg-white dark:bg-ios-darkCard rounded-t-[28px] border-t border-ios-border dark:border-ios-darkBorder flex flex-col overflow-hidden shadow-2xl">
+
+        <!-- Drawer Drag & Header Bar -->
+        <div class="pt-2 pb-1 px-4 flex flex-col items-center border-b border-ios-border dark:border-ios-darkBorder">
+          <div class="w-10 h-1 bg-zinc-300 dark:bg-zinc-700 rounded-full mb-2"></div>
+          <div class="w-full flex justify-between items-center pb-1">
+            <div class="flex items-center space-x-2">
+              <span class="font-bold text-base font-mono">DEMO-USDT 15m</span>
+              <span class="text-xs text-ios-green font-mono font-semibold">12.340 (+2.83%)</span>
+            </div>
+            <button id="closeKlineDrawerBtn" class="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-300">
+              <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Period selector inside drawer -->
+        <div class="px-4 py-1.5 flex space-x-2 border-b border-ios-border/60 dark:border-ios-darkBorder text-[11px] font-mono">
+          <button class="px-2 py-0.5 rounded bg-ios-blue text-white font-medium">15m</button>
+          <button class="px-2 py-0.5 rounded text-zinc-500 hover:text-zinc-700">1H</button>
+          <button class="px-2 py-0.5 rounded text-zinc-500 hover:text-zinc-700">4H</button>
+          <button class="px-2 py-0.5 rounded text-zinc-500 hover:text-zinc-700">12H</button>
+          <button class="px-2 py-0.5 rounded text-zinc-500 hover:text-zinc-700">1D</button>
+          <div class="flex-1"></div>
+          <span class="text-[10px] text-zinc-400">周一 1.618 扩展线</span>
+        </div>
+
+        <!-- Candlestick SVG Rendering Stage -->
+        <div class="flex-1 relative p-3 flex flex-col justify-center bg-zinc-950">
+          <svg class="w-full h-full" viewBox="0 0 380 260" preserveAspectRatio="none">
+            <!-- Grid lines -->
+            <line x1="0" y1="50" x2="380" y2="50" stroke="#232733" stroke-dasharray="3,3" stroke-width="1"/>
+            <line x1="0" y1="120" x2="380" y2="120" stroke="#232733" stroke-dasharray="3,3" stroke-width="1"/>
+            <line x1="0" y1="190" x2="380" y2="190" stroke="#232733" stroke-dasharray="3,3" stroke-width="1"/>
+
+            <!-- Reference Fibonacci lines -->
+            <line x1="0" y1="40" x2="380" y2="40" stroke="#F6465D" stroke-width="1.2"/>
+            <text x="310" y="36" fill="#F6465D" font-size="9" font-family="monospace">上轨 1.618 (12.80)</text>
+
+            <line x1="0" y1="210" x2="380" y2="210" stroke="#00B074" stroke-width="1.2"/>
+            <text x="310" y="206" fill="#00B074" font-size="9" font-family="monospace">下轨 1.618 (11.90)</text>
+
+            <!-- Candles series (Illustrative Demo) -->
+            <!-- Candle 1 -->
+            <line x1="30" y1="160" x2="30" y2="220" stroke="#F6465D" stroke-width="1.2"/>
+            <rect x="25" y="170" width="10" height="40" fill="#F6465D"/>
+            <!-- Candle 2 -->
+            <line x1="60" y1="150" x2="60" y2="200" stroke="#00B074" stroke-width="1.2"/>
+            <rect x="55" y="160" width="10" height="30" fill="#00B074"/>
+            <!-- Candle 3 -->
+            <line x1="90" y1="140" x2="90" y2="190" stroke="#00B074" stroke-width="1.2"/>
+            <rect x="85" y="145" width="10" height="35" fill="#00B074"/>
+            <!-- Candle 4 (Spike wick touch) -->
+            <line x1="120" y1="130" x2="120" y2="215" stroke="#00B074" stroke-width="1.2"/>
+            <rect x="115" y="135" width="10" height="45" fill="#00B074"/>
+            <!-- Candle 5 -->
+            <line x1="150" y1="110" x2="150" y2="160" stroke="#00B074" stroke-width="1.2"/>
+            <rect x="145" y="115" width="10" height="35" fill="#00B074"/>
+            <!-- Candle 6 -->
+            <line x1="180" y1="100" x2="180" y2="150" stroke="#F6465D" stroke-width="1.2"/>
+            <rect x="175" y="110" width="10" height="30" fill="#F6465D"/>
+            <!-- Candle 7 -->
+            <line x1="210" y1="90" x2="210" y2="140" stroke="#00B074" stroke-width="1.2"/>
+            <rect x="205" y="95" width="10" height="35" fill="#00B074"/>
+            <!-- Candle 8 -->
+            <line x1="240" y1="75" x2="240" y2="125" stroke="#00B074" stroke-width="1.2"/>
+            <rect x="235" y="80" width="10" height="35" fill="#00B074"/>
+            <!-- Candle 9 -->
+            <line x1="270" y1="70" x2="270" y2="115" stroke="#00B074" stroke-width="1.2"/>
+            <rect x="265" y="75" width="10" height="30" fill="#00B074"/>
+            <!-- Current Active Candle 10 -->
+            <line x1="300" y1="65" x2="300" y2="105" stroke="#00B074" stroke-width="1.2"/>
+            <rect x="295" y="70" width="10" height="25" fill="#00B074"/>
+
+            <!-- Current Price dashed guide -->
+            <line x1="0" y1="70" x2="380" y2="70" stroke="#0A84FF" stroke-dasharray="4,4" stroke-width="1"/>
+            <rect x="325" y="62" width="50" height="16" fill="#0A84FF" rx="3"/>
+            <text x="330" y="74" fill="#FFFFFF" font-size="9" font-family="monospace">12.340</text>
+          </svg>
+        </div>
+
+        <!-- Quick Back-to-ticket Bar -->
+        <div class="p-3 bg-white dark:bg-ios-darkCard flex justify-between items-center border-t border-ios-border dark:border-ios-darkBorder">
+          <span class="text-xs text-zinc-500 font-mono">已保留票据参数 · 随时一键下单</span>
+          <button id="returnTicketBtn" class="px-4 py-2 rounded-xl bg-ios-blue text-white text-xs font-semibold active:scale-95 shadow-sm">
+            返回极速交易
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- SLIDE-OVER SYMBOL PICKER DRAWER -->
+    <!-- ============================================================= -->
+    <div id="symbolDrawer" class="absolute inset-0 bg-black/50 backdrop-blur-xs z-50 flex flex-col justify-end hidden opacity-0 transition-opacity duration-200">
+      <div class="w-full h-[65%] bg-white dark:bg-ios-darkCard rounded-t-[28px] border-t border-ios-border dark:border-ios-darkBorder flex flex-col overflow-hidden shadow-2xl p-4">
+        <div class="w-10 h-1 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mb-3"></div>
+        <div class="flex justify-between items-center mb-3">
+          <span class="font-bold text-sm">选择合约标的 (USDT 永续)</span>
+          <button id="closeSymbolDrawerBtn" class="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-300">
+            <span class="material-symbols-outlined text-sm">close</span>
+          </button>
+        </div>
+        <!-- Symbol list item 1 -->
+        <div class="space-y-2 overflow-y-auto font-mono text-xs">
+          <div class="p-2.5 rounded-lg bg-ios-blue/10 border border-ios-blue/20 flex justify-between items-center cursor-pointer">
+            <div>
+              <span class="font-bold text-ios-blue">DEMO-USDT</span>
+              <span class="text-[10px] ml-1 px-1 rounded bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300">20x</span>
+            </div>
+            <div class="text-right">
+              <div class="font-semibold text-ios-green">12.340</div>
+              <div class="text-[10px] text-ios-green">+2.83%</div>
+            </div>
+          </div>
+          <div class="p-2.5 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 flex justify-between items-center cursor-pointer">
+            <div>
+              <span class="font-bold">BTC-USDT</span>
+              <span class="text-[10px] ml-1 px-1 rounded bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300">100x</span>
+            </div>
+            <div class="text-right">
+              <div class="font-semibold text-ios-green">94,820.0</div>
+              <div class="text-[10px] text-ios-green">+1.82%</div>
+            </div>
+          </div>
+          <div class="p-2.5 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 flex justify-between items-center cursor-pointer">
+            <div>
+              <span class="font-bold">ETH-USDT</span>
+              <span class="text-[10px] ml-1 px-1 rounded bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300">100x</span>
+            </div>
+            <div class="text-right">
+              <div class="font-semibold text-ios-red">3,420.5</div>
+              <div class="text-[10px] text-ios-red">-0.45%</div>
+            </div>
+          </div>
+          <div class="p-2.5 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 flex justify-between items-center cursor-pointer">
+            <div>
+              <span class="font-bold">SOL-USDT</span>
+              <span class="text-[10px] ml-1 px-1 rounded bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300">20x</span>
+            </div>
+            <div class="text-right">
+              <div class="font-semibold text-ios-green">184.50</div>
+              <div class="text-[10px] text-ios-green">+3.40%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Vanilla JS for Live Interactions -->
+  <script>
+    // Theme toggle
+    const themeBtn = document.getElementById('themeToggleBtn');
+    themeBtn.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+    });
+
+    // Side selection (Long vs Short)
+    const longBtn = document.getElementById('sideLongBtn');
+    const shortBtn = document.getElementById('sideShortBtn');
+    const submitBtn = document.getElementById('mainSubmitBtn');
+    const submitText = document.getElementById('submitBtnText');
+    const slInput = document.getElementById('slInput');
+
+    longBtn.addEventListener('click', () => {
+      longBtn.className = 'py-1.5 text-xs font-semibold rounded-md transition-all flex items-center justify-center space-x-1 bg-ios-green text-white shadow-sm';
+      shortBtn.className = 'py-1.5 text-xs font-semibold rounded-md transition-all flex items-center justify-center space-x-1 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400';
+      submitBtn.className = 'w-full h-11 rounded-xl font-bold text-sm tracking-wide shadow-md transition-all active:scale-[0.98] flex items-center justify-center space-x-1.5 bg-ios-green hover:bg-ios-green/90 text-white';
+      submitText.textContent = '买入开多 · 纪律守护';
+      slInput.value = '12.10';
+      slInput.className = 'w-20 bg-transparent text-xs font-semibold text-ios-red dark:text-ios-red focus:ring-0';
+    });
+
+    shortBtn.addEventListener('click', () => {
+      shortBtn.className = 'py-1.5 text-xs font-semibold rounded-md transition-all flex items-center justify-center space-x-1 bg-ios-red text-white shadow-sm';
+      longBtn.className = 'py-1.5 text-xs font-semibold rounded-md transition-all flex items-center justify-center space-x-1 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400';
+      submitBtn.className = 'w-full h-11 rounded-xl font-bold text-sm tracking-wide shadow-md transition-all active:scale-[0.98] flex items-center justify-center space-x-1.5 bg-ios-red hover:bg-ios-red/90 text-white';
+      submitText.textContent = '卖出开空 · 纪律守护';
+      slInput.value = '12.58';
+      slInput.className = 'w-20 bg-transparent text-xs font-semibold text-ios-green dark:text-ios-green focus:ring-0';
+    });
+
+    // Order Type (Market vs Limit)
+    const marketBtn = document.getElementById('typeMarketBtn');
+    const limitBtn = document.getElementById('typeLimitBtn');
+    const limitRow = document.getElementById('limitPriceRow');
+
+    marketBtn.addEventListener('click', () => {
+      marketBtn.className = 'px-2 py-0.5 rounded font-medium bg-white dark:bg-zinc-800 text-ios-text dark:text-ios-darkText shadow-xs';
+      limitBtn.className = 'px-2 py-0.5 rounded font-medium text-zinc-500 dark:text-zinc-400';
+      limitRow.classList.add('hidden');
+    });
+
+    limitBtn.addEventListener('click', () => {
+      limitBtn.className = 'px-2 py-0.5 rounded font-medium bg-white dark:bg-zinc-800 text-ios-text dark:text-ios-darkText shadow-xs';
+      marketBtn.className = 'px-2 py-0.5 rounded font-medium text-zinc-500 dark:text-zinc-400';
+      limitRow.classList.remove('hidden');
+    });
+
+    // Auto 1R Recalculator
+    const auto1R = document.getElementById('auto1RBtn');
+    auto1R.addEventListener('click', () => {
+      slInput.classList.add('animate-pulse');
+      setTimeout(() => slInput.classList.remove('animate-pulse'), 500);
+    });
+
+    // K-Line Drawer Toggle
+    const klineToggleBtn = document.getElementById('klineToggleBtn');
+    const klineDrawer = document.getElementById('klineDrawer');
+    const closeKlineDrawerBtn = document.getElementById('closeKlineDrawerBtn');
+    const returnTicketBtn = document.getElementById('returnTicketBtn');
+
+    function openKline() {
+      klineDrawer.classList.remove('hidden');
+      requestAnimationFrame(() => klineDrawer.classList.remove('opacity-0'));
+    }
+    function closeKline() {
+      klineDrawer.classList.add('opacity-0');
+      setTimeout(() => klineDrawer.classList.add('hidden'), 200);
+    }
+
+    klineToggleBtn.addEventListener('click', openKline);
+    closeKlineDrawerBtn.addEventListener('click', closeKline);
+    returnTicketBtn.addEventListener('click', closeKline);
+
+    // Symbol Picker Drawer
+    const symbolPickerBtn = document.getElementById('symbolPickerBtn');
+    const symbolDrawer = document.getElementById('symbolDrawer');
+    const closeSymbolDrawerBtn = document.getElementById('closeSymbolDrawerBtn');
+
+    symbolPickerBtn.addEventListener('click', () => {
+      symbolDrawer.classList.remove('hidden');
+      requestAnimationFrame(() => symbolDrawer.classList.remove('opacity-0'));
+    });
+    closeSymbolDrawerBtn.addEventListener('click', () => {
+      symbolDrawer.classList.add('opacity-0');
+      setTimeout(() => symbolDrawer.classList.add('hidden'), 200);
+    });
+
+    // Submit feedback
+    submitBtn.addEventListener('click', () => {
+      const origText = submitText.textContent;
+      submitText.textContent = '已提交 1R 委托...';
+      submitBtn.classList.add('opacity-80');
+      setTimeout(() => {
+        submitText.textContent = '委托成交 · 持仓守护中';
+        setTimeout(() => {
+          submitText.textContent = origText;
+          submitBtn.classList.remove('opacity-80');
+        }, 1200);
+      }, 500);
+    });
+  </script>
+
+</body>
+</html>

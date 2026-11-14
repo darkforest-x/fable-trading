@@ -10,7 +10,7 @@ def oid(name): return hashlib.md5(('spike-native:'+name).encode()).hexdigest()[:
 I={k:oid(k) for k in ['grpApp','grpTests','refApp','refTests','refCoins','bfCoins','fwApp','fwTests','grpRoot','grpProducts','tgtApp','tgtTests','proj','resApp','resTests','srcApp','srcTests','dep','proxy','cfgPD','cfgPR','cfgAD','cfgAR','cfgTD','cfgTR','listP','listA','listT','embed',
                       'grpWidgets','grpShared','refWidget','tgtWidget','srcWidget','fwWidget','resWidget','cfgWD','cfgWR','listW','depWidget','proxyWidget','bfWidget','copyExt']}
 T='\t\t\t\t'
-VERSION, BUILD = '2.8.5', '26'
+VERSION, BUILD = '2.9.0', '27'
 # Native APNs push needs a paid Apple Developer Program team: the current signing team is a personal
 # team, which cannot provision Push Notifications (device build 2026-11-08). Off = no aps-environment
 # entitlement and no APNS compile flag; the Live Activity is then updated by the app only.

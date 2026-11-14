@@ -7,12 +7,13 @@ struct PositionsView: View {
     @Environment(SessionStore.self) private var session
     @Environment(AccountStore.self) private var account
     var onOpenSymbol: (String) -> Void
-    @State private var closeTarget: Position?
+    @State private var closeTarget: CloseSelection?
     @State private var protectionTarget: ProtectionSelection?
     @State private var scroll = ScrollPosition(edge: .top)
     @Environment(\.reselect) private var reselect
     @State private var action: String?
     @State private var error: String?
+    @State private var selection: AccountSectionTab = .positions
 
     var body: some View {
             ZStack {
@@ -21,16 +22,22 @@ struct PositionsView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     PageHeader(title: "持仓保护")
                     if let entry = account.activeEntry { TradeProgressCard(entry: entry) }
-                    if let attempt = account.closeAttempt { closeRecovery(attempt) }
+                    if let attempt = account.closeAttempt { PositionCloseRecoveryCard(attempt: attempt) }
                     if session.connection == nil {
-                        ConnectPrompt()
+                        AccountDataMessage(title: "未连接交易账户", detail: "连接后可查看持仓与当前委托。", systemImage: "link")
                     } else if let state = account.state {
-                        if state.positions.isEmpty && state.pending.isEmpty {
-                            EmptyCard(systemImage: "briefcase", title: "暂无持仓", note: "开仓后，止损、保本与分批止盈都由服务端持续保护。")
-                        }
-                        if !state.positions.isEmpty {
-                            SectionHeader(title: "当前持仓", count: state.positions.count)
-                            ForEach(state.positions) { position in
+                        let positions = state.positions.uniqued(by: \.id)
+                        AccountSnapshotNote(online: account.online, receivedAt: account.receivedAt)
+                        AccountSectionTabs(selection: $selection,
+                                           positionCount: positions.count,
+                                           orderCount: state.pending.uniqued(by: \.id).count)
+                        if selection == .positions {
+                            if positions.isEmpty {
+                                EmptyCard(systemImage: "briefcase", title: "暂无持仓", note: account.online ? "开仓后，止损、保本与分批止盈都由服务端持续保护。" : "上次快照中暂无持仓，连接恢复后会自动更新。")
+                            } else {
+                                SectionHeader(title: "当前持仓", count: positions.count)
+                            }
+                            ForEach(positions) { position in
                                 PositionCardView(position: position, state: state, online: account.online,
                                                  busy: action != nil || account.closeAttempt != nil,
                                                  entryStopBusy: action == "stop:" + position.id,
@@ -43,12 +50,20 @@ struct PositionsView: View {
                                                  onSymbol: { onOpenSymbol(position.symbol) })
                                 .scrollReveal()
                             }
+                        } else if state.pending.isEmpty {
+                            EmptyCard(systemImage: "tray", title: "暂无当前委托", note: account.online ? "未成交或部分成交的委托会显示在这里。" : "上次快照中暂无委托，连接恢复后会自动更新。")
+                        } else {
+                            pendingOrders(state)
                         }
-                        if !state.pending.isEmpty { pendingOrders(state) }
                         recent(state)
                         if let activity = state.externalActivity, !(activity.current.isEmpty && activity.recent.isEmpty) {
                             ExternalActivityCard(activity: activity, fresh: account.online && state.privateError == nil && state.serverTime - activity.updatedAt <= 15)
                         }
+                    } else if account.cached != nil {
+                        AccountDataMessage(title: "等待实时账户快照",
+                                           detail: account.lastError ?? "启动缓存仅供参考，收到实时数据前不显示为当前账户状态。",
+                                           loading: account.lastError == nil,
+                                           systemImage: "exclamationmark.arrow.triangle.2.circlepath")
                     } else {
                         LoadState(loading: account.lastError == nil, error: account.lastError, stale: false)
                     }
@@ -62,14 +77,17 @@ struct PositionsView: View {
             .contentMargins(.bottom, 96, for: .scrollContent)
             .scrollEdgeEffectHidden(true, for: [.top, .bottom])
             }
-        .sheet(item: $closeTarget) { position in
-            ClosePositionSheet(position: position).presentationDetents([.medium, .large]).presentationDragIndicator(.visible)
+        .sheet(item: $closeTarget) { selection in
+            ClosePositionSheet(selection: selection).presentationDetents([.medium, .large]).presentationDragIndicator(.visible)
         }
         .sheet(item: $protectionTarget) { selection in
             ProtectionSheet(selection: selection)
                 .presentationDetents([.medium, .large]).presentationDragIndicator(.visible)
         }
-        .onChange(of: session.connection) { _, _ in protectionTarget = nil }
+        .onChange(of: session.connection) { _, _ in
+            closeTarget = nil
+            protectionTarget = nil
+        }
         .alert("本次操作未完成", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
             Button("好", role: .cancel) {}
         } message: { Text(error ?? "") }
@@ -78,7 +96,11 @@ struct PositionsView: View {
     private func requestClose(_ position: Position) {
         guard action == nil else { return }
         if account.closeAttempt != nil { error = "请先等待原平仓请求完成核对"; return }
-        Haptics.tap(); closeTarget = position
+        guard let owner = account.connection, account.online,
+              account.state?.positions.contains(where: { $0.id == position.id }) == true else {
+            error = "当前持仓状态已变化，请刷新后重试"; return
+        }
+        Haptics.tap(); closeTarget = CloseSelection(position: position, owner: owner)
     }
 
     private func entryStop(_ position: Position) async {
@@ -89,71 +111,29 @@ struct PositionsView: View {
     }
 
     private func cancel(_ order: PendingOrder) async {
-        guard action == nil else { return }
+        guard action == nil, account.online else { return }
         action = "cancel:" + order.id; Haptics.tap()
         defer { action = nil }
         do { try await account.cancel(orderId: order.id) } catch { self.error = error.localizedDescription; Haptics.warning() }
     }
 
-    private func closeRecovery(_ attempt: AccountStore.CloseAttempt) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
-                ProgressView().controlSize(.small)
-                Text("\(Fmt.coin(attempt.symbol)) · 平仓 \(attempt.percent)%").font(.headline)
-            }
-            Text(account.closeStatus == "ready" ? "原请求尚未发送，可继续提交" : "正在核对原平仓请求")
-                .font(.subheadline).foregroundStyle(.secondary)
-            HStack(spacing: 10) {
-                Button("刷新核对") { Haptics.tap(); account.checkClose() }.buttonStyle(.pill(.soft))
-                if account.closeStatus == "ready" {
-                    Button("以原请求重试") {
-                        Haptics.tap()
-                        Task { do { try await account.close(nil, percent: attempt.percent, recovered: true) } catch { self.error = error.localizedDescription } }
-                    }
-                    .buttonStyle(.pill(.solid(.accentColor)))
-                }
+    private func pendingOrders(_ state: AccountState) -> some View {
+        let orders = state.pending.uniqued(by: \.id)
+        return VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: "待成交委托", count: orders.count, trailing: "北京时间")
+            ForEach(orders) { order in
+                pendingOrderCard(order, state: state)
             }
         }
-        .padding(16).frame(maxWidth: .infinity, alignment: .leading)
-        .glassCard(tint: .amber)
     }
 
-    private func pendingOrders(_ state: AccountState) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "待成交委托", count: state.pending.count, trailing: "北京时间")
-            ForEach(state.pending) { order in
-                let tick = state.instruments[order.symbol]?.tick
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack(spacing: 8) {
-                        CoinLogo(coin: Fmt.coin(order.symbol), size: 26)
-                        Text(Fmt.coin(order.symbol)).font(.headline)
-                        Pill(text: order.side == "long" ? "开多" : "开空", color: order.side == "long" ? .up : .down)
-                        Spacer()
-                        Text((Double(order.filledQuantity ?? "0") ?? 0) > 0 ? "部分成交" : "挂单中").font(.caption.weight(.semibold)).foregroundStyle(Color.amber)
-                    }
-                    HStack {
-                        Metric(title: "委托价", value: Fmt.price(order.price, tick: tick), unit: "USDT")
-                        Metric(title: "委托持仓金额", value: Fmt.amount(order.plan.notional), unit: "USDT")
-                    }
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("委托时间").font(.caption).foregroundStyle(.secondary)
-                            Text(Fmt.beijing(order.created)).font(.caption.monospacedDigit())
-                        }
-                        Spacer()
-                        Button {
-                            Task { await cancel(order) }
-                        } label: {
-                            if action == "cancel:" + order.id { HStack(spacing: 6) { ProgressView().controlSize(.mini); Text("撤单中") } } else { Text("撤单") }
-                        }
-                        .buttonStyle(.pill(.tinted(.down)))
-                        .disabled(action != nil)
-                        .accessibilityLabel("撤销 \(Fmt.coin(order.symbol)) 委托")
-                    }
-                }
-                .padding(16).glassCard()
-            }
-        }
+    private func pendingOrderCard(_ order: PendingOrder, state: AccountState) -> some View {
+        PendingOrderCardView(order: order,
+                             tick: state.instruments[order.symbol]?.tick,
+                             online: account.online,
+                             busy: action != nil,
+                             cancelling: action == "cancel:" + order.id,
+                             onCancel: { Task { await cancel(order) } })
     }
 
     @ViewBuilder private func recent(_ state: AccountState) -> some View {
@@ -231,93 +211,172 @@ struct PositionCardView: View {
         let tick = state.instruments[position.symbol]?.tick, coin = Fmt.coin(position.symbol)
         let tone: Color = (pnl ?? 0) < 0 ? .down : .up
 
+        VStack(alignment: .leading, spacing: compact ? 11 : 14) {
+            if compact {
+                compactContent(state: state, coin: coin, direction: direction, pnl: pnl, roi: roi,
+                               tone: tone, protectedEntry: protectedEntry,
+                               allowed: allowed, fresh: fresh, tick: tick)
+            } else {
+                fullContent(state: state, coin: coin, direction: direction, pnl: pnl, roi: roi,
+                            tone: tone, remaining: remaining, entry: entry, protectedEntry: protectedEntry,
+                            allowed: allowed, fresh: fresh, last: last, tick: tick)
+            }
+        }
+        .padding(16)
+        .glassCard()
+    }
+
+    private func compactContent(state: AccountState, coin: String, direction: Double, pnl: Double?, roi: Double?,
+                                tone: Color, protectedEntry: Bool,
+                                allowed: Bool, fresh: Bool, tick: String?) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                symbolButton(coin: coin)
+                Spacer(minLength: 4)
+                Pill(text: "\(direction == 1 ? "多" : "空") · \(Fmt.leverage(position.leverage))x",
+                     color: direction == 1 ? .up : .down)
+            }
+            pnlRow(pnl: pnl, roi: roi, tone: tone, fresh: fresh, compact: true)
+            HStack(spacing: 10) {
+                Metric(title: "剩余数量", value: Fmt.coinQuantity(position.remaining), unit: coin)
+                Metric(title: "入场", value: Fmt.price(position.entry, tick: tick), unit: "USDT")
+                Metric(title: "止损", value: Fmt.price(position.stop, tick: tick), unit: "USDT")
+            }
+            HStack(spacing: 6) {
+                entryStopButton(protectedEntry: protectedEntry, allowed: allowed, compact: true)
+                if state.supportsCustomProtection == true {
+                    protectionButton(compact: true, fresh: fresh)
+                }
+                closeButton(compact: true)
+            }
+        }
+    }
+
+    private func fullContent(state: AccountState, coin: String, direction: Double, pnl: Double?, roi: Double?,
+                             tone: Color, remaining: Double, entry: Double, protectedEntry: Bool,
+                             allowed: Bool, fresh: Bool, last: Double?, tick: String?) -> some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Button(action: { Haptics.tap(); onSymbol() }) {
-                    HStack(spacing: 8) {
-                        CoinLogo(coin: coin, size: 30)
-                        Text(coin).font(.headline)
-                        Image(systemName: "chevron.right").font(.caption.weight(.bold)).foregroundStyle(.tertiary)
-                    }
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("查看 \(coin)/USDT 合约")
+                symbolButton(coin: coin)
                 Spacer()
-                Pill(text: "\(direction == 1 ? "多" : "空") · \(Fmt.leverage(position.leverage))x", color: direction == 1 ? .up : .down)
+                Pill(text: "\(direction == 1 ? "多" : "空") · \(Fmt.leverage(position.leverage))x",
+                     color: direction == 1 ? .up : .down)
                 if state.supportsCustomProtection == true {
-                    Button("调整止盈止损", action: onEdit)
-                        .font(.caption.weight(.semibold)).buttonStyle(.pill(.tinted(.accentColor), height: 32))
-                        .disabled(busy || !fresh || position.protectionEditable != true)
+                    protectionButton(compact: false, fresh: fresh)
                 }
             }
-            HStack(alignment: .bottom) {
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(alignment: .firstTextBaseline, spacing: 3) {
-                        Text(Fmt.signed(pnl)).font(.scaled(size: 28, weight: .bold, design: .rounded).monospacedDigit()).foregroundStyle(tone)
-                            .contentTransition(.numericText(value: pnl ?? 0)).animation(.snappy, value: pnl)
-                        Text("USDT").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
-                    }
-                    Text("浮动盈亏" + (fresh ? "" : " · 待更新")).font(.caption).foregroundStyle(.secondary)
-                }
-                Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(Fmt.signed(roi) + "%").font(.title3.weight(.bold).monospacedDigit()).foregroundStyle(tone)
-                    Text("收益率").font(.caption).foregroundStyle(.secondary)
-                }
-            }
+            pnlRow(pnl: pnl, roi: roi, tone: tone, fresh: fresh, compact: false)
             HStack {
                 Metric(title: "持仓金额 · U", value: Fmt.amount((last ?? entry) * remaining))
                 Metric(title: "开仓均价", value: Fmt.price(position.entry, tick: tick))
                 Metric(title: "当前止损", value: Fmt.price(position.stop, tick: tick))
             }
             HStack(spacing: 10) {
-                Button(action: onEntryStop) {
-                    HStack(spacing: 6) {
-                        if entryStopBusy { ProgressView().controlSize(.mini); Text("设置中…") } else {
-                            Image(systemName: protectedEntry ? "checkmark.shield.fill" : "shield.lefthalf.filled")
-                            Text(protectedEntry ? "已保护开仓价" : "止损到开仓价")
-                        }
-                    }
-                    .font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity).frame(height: 36)
-                }
-                .buttonStyle(.pill(.soft, height: 38))
-                .disabled(busy || !allowed)
-                Button(action: onClose) {
-                    Text("平仓").font(.subheadline.weight(.bold)).frame(maxWidth: .infinity).frame(height: 36)
-                }
-                .buttonStyle(.pill(.solid(.down), height: 38))
-                .disabled(busy || !online)
+                entryStopButton(protectedEntry: protectedEntry, allowed: allowed, compact: false)
+                closeButton(compact: false)
             }
-            if !compact {
-                DisclosureGroup(isExpanded: $details.animation(.snappy)) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        let p = position.policy
-                        Text("\(p.breakevenR)R 成本保本")
-                        ForEach(p.takeProfits.indices, id: \.self) { i in
-                            let stage = p.takeProfits[i]
-                            let prices = position.takeProfitPrices ?? []
-                            let price = prices.indices.contains(i) ? prices[i] : nil
-                            let trigger = price.map { Fmt.price($0, tick: tick) + " USDT" } ?? "\(stage.first ?? "")R"
-                            let portion = i == p.takeProfits.count - 1 ? "平余仓" : "平 \(Fmt.plainPercent(stage.last))%"
-                            Text("止盈 \(i + 1) · \(trigger) · \(portion)")
-                        }
-                        Text("初始风险 1R = \(Fmt.amount(position.risk)) USDT · 当前 \(Fmt.amount(position.currentR)) R")
-                        Text((state.mode == "okx_live" ? (position.protection == "exchange-verified" ? "交易所保护已核对" : "交易所保护待核对") : "服务端模拟保护") + " · " + (position.breakeven ? "已移成本保本" : "自动保本待触发"))
-                        if state.mode == "okx_live" {
-                            Text("在 OKX 撤销止损会触发应急平仓。需要改价时，请在 App 调整原保护单。")
-                        }
-                        Text("浮盈按最新价和剩余仓位估算，未扣费用；收益率＝浮盈 ÷ 剩余仓位开仓保证金。移到开仓价不含手续费。").foregroundStyle(.secondary)
+            DisclosureGroup(isExpanded: $details.animation(.snappy)) {
+                VStack(alignment: .leading, spacing: 6) {
+                    let p = position.policy
+                    Text("\(p.breakevenR)R 成本保本")
+                    ForEach(p.takeProfits.indices, id: \.self) { i in
+                        let stage = p.takeProfits[i]
+                        let prices = position.takeProfitPrices ?? []
+                        let price = prices.indices.contains(i) ? prices[i] : nil
+                        let trigger = price.map { Fmt.price($0, tick: tick) + " USDT" } ?? "\(stage.first ?? "")R"
+                        let portion = i == p.takeProfits.count - 1 ? "平余仓" : "平 \(Fmt.plainPercent(stage.last))%"
+                        Text("止盈 \(i + 1) · \(trigger) · \(portion)")
                     }
-                    .font(.footnote).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 6)
-                } label: {
-                    Text("自动保护与计算口径").font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
+                    Text("初始风险 1R = \(Fmt.amount(position.risk)) USDT · 当前 \(Fmt.amount(position.currentR)) R")
+                    Text((state.mode == "okx_live" ? (position.protection == "exchange-verified" ? "交易所保护已核对" : "交易所保护待核对") : "服务端模拟保护") + " · " + (position.breakeven ? "已移成本保本" : "自动保本待触发"))
+                    if state.mode == "okx_live" {
+                        Text("在 OKX 撤销止损会触发应急平仓。需要改价时，请在 App 调整原保护单。")
+                    }
+                    Text("浮盈按最新价和剩余仓位估算，未扣费用；收益率＝浮盈 ÷ 剩余仓位开仓保证金。移到开仓价不含手续费。").foregroundStyle(.secondary)
                 }
-                .tint(.secondary)
-                .onChange(of: details) { _, _ in Haptics.select() }
+                .font(.footnote).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 6)
+            } label: {
+                Text("自动保护与计算口径").font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
+            }
+            .tint(.secondary)
+            .onChange(of: details) { _, _ in Haptics.select() }
+        }
+    }
+
+    private func symbolButton(coin: String) -> some View {
+        Button(action: { Haptics.tap(); onSymbol() }) {
+            HStack(spacing: 8) {
+                CoinLogo(coin: coin, size: compact ? 26 : 30)
+                Text(coin).font(compact ? .subheadline.weight(.semibold) : .headline)
+                Image(systemName: "chevron.right").font(.caption.weight(.bold)).foregroundStyle(.tertiary)
             }
         }
-        .padding(16)
-        .glassCard()
+        .buttonStyle(.plain)
+        .accessibilityLabel("查看 \(coin)/USDT 合约")
+    }
+
+    private func pnlRow(pnl: Double?, roi: Double?, tone: Color, fresh: Bool, compact: Bool) -> some View {
+        HStack(alignment: .bottom) {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(alignment: .firstTextBaseline, spacing: 3) {
+                    Text(Fmt.signed(pnl))
+                        .font(.scaled(size: compact ? 24 : 28, weight: .bold, design: .rounded).monospacedDigit())
+                        .foregroundStyle(tone)
+                        .contentTransition(.numericText(value: pnl ?? 0))
+                        .animation(.snappy, value: pnl)
+                    Text("USDT").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                }
+                Text("浮动盈亏" + (fresh ? "" : " · 待更新"))
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 8)
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(Fmt.signed(roi) + "%")
+                    .font((compact ? Font.headline : Font.title3).weight(.bold).monospacedDigit())
+                    .foregroundStyle(tone)
+                Text("收益率").font(.caption).foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func entryStopButton(protectedEntry: Bool, allowed: Bool, compact: Bool) -> some View {
+        Button(action: onEntryStop) {
+            HStack(spacing: 5) {
+                if entryStopBusy { ProgressView().controlSize(.mini) }
+                else { Image(systemName: protectedEntry ? "checkmark.shield.fill" : "shield.lefthalf.filled") }
+                Text(entryStopBusy ? "设置中" : compact ? (protectedEntry ? "已保本" : "保本") : (protectedEntry ? "已保护开仓价" : "止损到开仓价"))
+            }
+            .font((compact ? Font.caption : Font.subheadline).weight(.semibold))
+            .frame(maxWidth: .infinity).frame(height: compact ? 34 : 36)
+        }
+        .buttonStyle(.pill(.soft, height: compact ? 36 : 38))
+        .disabled(busy || !allowed)
+        .accessibilityLabel(protectedEntry ? "已保护开仓价" : "止损到开仓价")
+    }
+
+    private func protectionButton(compact: Bool, fresh: Bool) -> some View {
+        Button(action: onEdit) {
+            HStack(spacing: 4) {
+                Image(systemName: "slider.horizontal.3")
+                Text(compact ? "止盈止损" : "调整止盈止损")
+            }
+            .font(.caption.weight(.semibold))
+            .frame(maxWidth: compact ? .infinity : nil).frame(height: compact ? 34 : 30)
+        }
+        .buttonStyle(.pill(.tinted(.accentColor), height: compact ? 36 : 32))
+        .disabled(busy || !fresh || position.protectionEditable != true)
+        .accessibilityLabel("调整止盈止损")
+    }
+
+    private func closeButton(compact: Bool) -> some View {
+        Button(action: onClose) {
+            Text("平仓")
+                .font((compact ? Font.caption : Font.subheadline).weight(.bold))
+                .frame(maxWidth: .infinity).frame(height: compact ? 34 : 36)
+        }
+        .buttonStyle(.pill(.solid(.down), height: compact ? 36 : 38))
+        .disabled(busy || !online)
+        .accessibilityLabel("平仓")
     }
 }
 

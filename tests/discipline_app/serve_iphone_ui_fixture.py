@@ -322,7 +322,23 @@ def qa_trigger(feed, kind):
     return dict(ok=True, kind=kind)
 
 
+def terminal_quotes(book, price='100'):
+    # Include the two fields the production ticker supplies for sorting and daily changes.
+    universe = [('BTC', '2.50', '680000'), ('ETH', '-1.25', '490000'), ('SOL', '0.00', '135000'),
+                ('DOGE', '1.80', '85000'), ('ARB', '-0.92', '72000'), ('SUI', '3.42', '91000')]
+    instruments, quotes = {}, {}
+    now = book.clock()
+    for coin, change, turnover in universe:
+        symbol = f'{coin}-USDT-SWAP'
+        instruments[symbol] = dict(symbol=symbol, step='.01', minimum='.01', tick='.01',
+                                    contract_value='.01', fee_group='2', max_leverage=100)
+        quotes[symbol] = dict(last=price, bid=price, ask=price, time=now, today_change=change,
+                              volume24h_usdt=turnover)
+    book.update_market(instruments, quotes)
+
+
 def main():
+    fib.quote = terminal_quotes
     original = fib.create_app
     project = fib.project_snapshot
     fib.project_snapshot = lambda raw, now: project(with_extra_touches(raw), now)

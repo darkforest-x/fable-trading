@@ -40,7 +40,7 @@ struct SpikeDisciplineApp: App {
 enum AppTab: String, Hashable, CaseIterable, Identifiable {
     case trade, monitor, fib, positions, stats
     var id: String { rawValue }
-    var title: String { switch self { case .trade: "合约"; case .monitor: "监控"; case .fib: "1.618"; case .positions: "持仓"; case .stats: "统计" } }
+    var title: String { switch self { case .trade: "交易"; case .monitor: "监控"; case .fib: "1.618"; case .positions: "持仓"; case .stats: "统计" } }
     /// Minimal SF Symbols (owner 2026-11-07 “简约”): outline when idle, filled when active.
     func symbol(active: Bool) -> String {
         // Stitch native-2.3.0: one stroke weight, no fills — the active tab only changes colour.
@@ -64,6 +64,7 @@ struct RootView: View {
     @Environment(FibNavigation.self) private var fibNavigation
     @Environment(TicketModel.self) private var ticket
     @Environment(\.scenePhase) private var scenePhase
+    @State private var tradeShowsChart = false
     @State private var tab: AppTab = .fib       // owner 2026-11-07: open on 1.618
     @State private var progress: CGFloat = CGFloat(AppTab.allCases.firstIndex(of: .fib)!)
     @State private var showNotifications = false
@@ -107,7 +108,7 @@ struct RootView: View {
         .scrollPosition(id: $scrolled)
         // The 1.618 page is a full-screen chart: horizontal drags pan the chart, not the pages. 监控 nests its
         // own menu pager (owner 2026-11-09); UIKit gives it drags first and hands edge drags back here.
-        .scrollDisabled(tab == .fib && target == nil)
+        .scrollDisabled((tab == .fib || (tab == .trade && tradeShowsChart)) && target == nil)
         .onScrollGeometryChange(for: CGFloat.self) { geo in
             geo.contentOffset.x / max(geo.containerSize.width, 1)
         } action: { _, value in progress = value }
@@ -144,7 +145,7 @@ struct RootView: View {
         .overlay(alignment: .bottom) {
             if !landscape {
                 GlassTabBar(selection: $tab, onReselect: { reselect[$0, default: 0] += 1 }, progress: progress, badge: notices.unread)
-                    .padding(.horizontal, 28)
+                    .padding(.horizontal, 14)
                     .padding(.bottom, 2)
             }
         }
@@ -249,12 +250,14 @@ struct RootView: View {
     @ViewBuilder private func content(_ page: AppTab) -> some View {
         switch page {
         case .monitor: MonitorView(showNotifications: $showNotifications)
-        case .trade: TradeView(active: tab == .trade && scenePhase == .active && !landscape, onDestination: route)
+        case .trade: TradeView(active: tab == .trade && scenePhase == .active && !landscape, showingChart: $tradeShowsChart, onDestination: route)
         case .fib: FibView(active: tab == .fib && scenePhase == .active && !landscape, onQuick: { row, period in
             guard account.pendingEntry == nil else { return }
             ticket.openQuick(row, period: period, state: account.state)
         })
         case .positions: PositionsView(onOpenSymbol: { symbol in
+            guard !ticket.reviewing, account.pendingEntry == nil else { return }
+            tradeShowsChart = true
             if symbol != ticket.symbol { ticket.choose(symbol); ticket.syncLeverage(account.state); ticket.syncExisting(account.state) }
             withAnimation(.snappy) { tab = .trade }
         })
@@ -325,7 +328,7 @@ struct RootView: View {
     }
 }
 
-/// Floating frosted tab bar (icons only); the accent lens slides with the page scroll.
+/// Floating labeled tab bar; the accent lens slides with the page scroll.
 struct GlassTabBar: View {
     @Binding var selection: AppTab
     var onReselect: (AppTab) -> Void = { _ in }
@@ -347,8 +350,9 @@ struct GlassTabBar: View {
                         let active = selection == page
                         Button {
                             Haptics.tap()
-                            if selection == page { Haptics.tap(); onReselect(page) } else { withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) { selection = page } }
+                            if selection == page { onReselect(page) } else { withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) { selection = page } }
                         } label: {
+                            VStack(spacing: 2) {
                             Image(systemName: page.symbol(active: active))
                                 .font(.scaled(size: 19, weight: active ? .semibold : .regular))
                                 .foregroundStyle(active ? Color.accentColor : Color.muted)
@@ -361,6 +365,10 @@ struct GlassTabBar: View {
                                             .offset(x: 10, y: -8)
                                     }
                                 }
+                                Text(page.title)
+                                    .font(.scaled(size: 10, weight: active ? .bold : .medium))
+                                    .foregroundStyle(active ? Color.ink : Color.muted)
+                            }
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .contentShape(.rect)
                         }

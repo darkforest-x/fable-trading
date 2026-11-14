@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>天才交易员 · 交易对选择器</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "error": "#ffb4ab",
+            "primary-container": "#3e90ff",
+            "on-error": "#690005",
+            "primary-fixed": "#d6e3ff",
+            "on-tertiary-fixed": "#410001",
+            "error-container": "#93000a",
+            "on-secondary": "#003910",
+            "primary": "#aac7ff",
+            "surface-container": "#1e1f23",
+            "secondary-fixed": "#6cff82",
+            "tertiary": "#ffb4aa",
+            "on-tertiary": "#690004",
+            "on-background": "#e3e2e7",
+            "on-surface": "#e3e2e7",
+            "on-secondary-fixed": "#002106",
+            "outline": "#8b91a0",
+            "surface": "#121317",
+            "on-primary": "#003064",
+            "tertiary-fixed": "#ffdad5",
+            "surface-container-low": "#1a1b1f",
+            "on-primary-container": "#002957",
+            "on-tertiary-container": "#5c0003",
+            "on-primary-fixed-variant": "#00468d",
+            "surface-bright": "#38393d",
+            "on-error-container": "#ffdad6",
+            "on-secondary-fixed-variant": "#00531a",
+            "on-tertiary-fixed-variant": "#930007",
+            "primary-fixed-dim": "#aac7ff",
+            "secondary-container": "#09bf49",
+            "on-secondary-container": "#004615",
+            "tertiary-container": "#ff5447",
+            "inverse-surface": "#e3e2e7",
+            "surface-variant": "#343539",
+            "surface-tint": "#aac7ff",
+            "inverse-primary": "#005db8",
+            "secondary-fixed-dim": "#47e266",
+            "background": "#121317",
+            "surface-container-lowest": "#0d0e12",
+            "inverse-on-surface": "#2f3034",
+            "on-primary-fixed": "#001b3e",
+            "surface-container-highest": "#343539",
+            "on-surface-variant": "#c0c6d6",
+            "surface-container-high": "#292a2e",
+            "tertiary-fixed-dim": "#ffb4aa",
+            "outline-variant": "#414754",
+            "secondary": "#47e266",
+            "surface-dim": "#121317"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "1rem",
+            "space-xl": "1.5rem",
+            "space-xs": "0.25rem",
+            "space-md": "0.75rem",
+            "space-sm": "0.5rem",
+            "gutter": "0.75rem",
+            "space-lg": "1rem"
+          },
+          "fontFamily": {
+            "body-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "label-numeric-lg": ["Space Grotesk"],
+            "headline-sm": ["Inter"],
+            "label-numeric-sm": ["Space Grotesk"],
+            "label-caption": ["Inter"],
+            "headline-lg": ["Space Grotesk"],
+            "headline-md": ["Space Grotesk"],
+            "label-numeric-md": ["Space Grotesk"],
+            "body-md": ["Inter"],
+            "headline-lg-mobile": ["Space Grotesk"]
+          },
+          "fontSize": {
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "22px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "label-numeric-lg": ["16px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-sm": ["17px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-numeric-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "label-caption": ["10px", { "lineHeight": "13px", "letterSpacing": "0.04em", "fontWeight": "500" }],
+            "headline-lg": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-md": ["20px", { "lineHeight": "26px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "label-numeric-md": ["14px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "body-md": ["14px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-lg-mobile": ["26px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    /* Hide scrollbars */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased select-none flex justify-center min-h-screen">
+<!-- iPhone Canvas Shell (402pt logical width viewport container) -->
+<div class="w-full max-w-[402px] min-h-screen bg-surface flex flex-col relative pb-24 shadow-2xl overflow-x-hidden">
+<!-- Top System Safe Area Buffer -->
+<div class="h-11 w-full flex items-center justify-between px-6 pt-2 select-none z-40 bg-surface/80 backdrop-blur-xl">
+<span class="font-label-numeric-sm text-label-numeric-sm font-semibold text-on-surface">9:41</span>
+<div class="flex items-center space-x-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[14px]">signal_cellular_4_bar</span>
+<span class="material-symbols-outlined text-[14px]">wifi</span>
+<span class="material-symbols-outlined text-[16px]">battery_full</span>
+</div>
+</div>
+<!-- TopAppBar (Shared Component Implementation) -->
+<!-- Matches: small_center_aligned, headline: 选择合约, leading_icon: close, trailing_icon: tune -->
+<header class="flex justify-between items-center w-full px-margin h-14 bg-surface/80 backdrop-blur-xl sticky top-0 z-40">
+<!-- Leading Cancel / Close Action (44pt target standard) -->
+<button aria-label="关闭" class="w-11 h-11 flex items-center justify-center rounded-full hover:bg-surface-container active:opacity-70 transition-opacity duration-150 text-on-surface-variant" type="button">
+<span class="material-symbols-outlined text-[22px]">close</span>
+</button>
+<!-- Center Title and Subtitle -->
+<div class="flex flex-col items-center justify-center text-center">
+<div class="flex items-center space-x-1">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<h1 class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-tight">选择合约</h1>
+</div>
+<p class="font-label-caption text-label-caption text-outline">OKX USDT 本位永续 · 北京时间 00:00 基准</p>
+</div>
+<!-- Trailing Action: Theme/Settings (44pt target) -->
+<button aria-label="配置与视图" class="w-11 h-11 flex items-center justify-center rounded-full hover:bg-surface-container active:opacity-70 transition-opacity duration-150 text-on-surface-variant" onclick="document.documentElement.classList.toggle('dark')" type="button">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+</button>
+</header>
+<!-- Search & Market Segment Tiers -->
+<section class="px-margin pt-space-xs pb-space-sm space-y-space-sm bg-surface">
+<!-- Search Input Container (Height 38pt) -->
+<div class="relative flex items-center w-full h-[38px] rounded-lg bg-surface-container-low border border-outline-variant/30 px-3 focus-within:border-primary-container transition-colors">
+<span class="material-symbols-outlined text-outline text-[18px] mr-2">search</span>
+<input class="w-full bg-transparent border-none p-0 text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:ring-0 focus:outline-none" id="pairSearchInput" placeholder="搜索合约代码 (如 DEMO, ALPHA, BTC...)" type="text"/>
+<button class="w-6 h-6 flex items-center justify-center text-outline hover:text-on-surface opacity-0 transition-opacity" id="clearSearchBtn" type="button">
+<span class="material-symbols-outlined text-[16px]">cancel</span>
+</button>
+</div>
+<!-- Compact Segments & Sort Trigger Row -->
+<div class="flex items-center justify-between gap-2">
+<!-- Segmented Filter Pills -->
+<div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-0.5" role="tablist">
+<button aria-selected="true" class="h-7 px-3 rounded-full bg-primary text-on-primary font-headline-sm text-[12px] font-semibold flex items-center space-x-1 shadow-sm transition-transform active:scale-95" role="tab" type="button">
+<span>全部</span>
+<span class="font-label-numeric-sm text-[10px] opacity-80">(24)</span>
+</button>
+<button aria-selected="false" class="h-7 px-3 rounded-full bg-surface-container-low border border-outline-variant/40 text-on-surface-variant hover:text-on-surface font-body-sm text-[12px] font-medium flex items-center space-x-1 transition-transform active:scale-95" role="tab" type="button">
+<span class="material-symbols-outlined text-[13px] text-primary">star</span>
+<span>自选</span>
+<span class="font-label-numeric-sm text-[10px] text-outline">(8)</span>
+</button>
+<button aria-selected="false" class="h-7 px-3 rounded-full bg-surface-container-low border border-outline-variant/40 text-on-surface-variant hover:text-on-surface font-body-sm text-[12px] font-medium flex items-center space-x-1 transition-transform active:scale-95" role="tab" type="button">
+<span>最近</span>
+<span class="font-label-numeric-sm text-[10px] text-outline">(5)</span>
+</button>
+</div>
+<!-- Sort Control Dropdown Trigger Button (44pt accessible hit zone) -->
+<button class="h-8 px-2.5 rounded-lg bg-surface-container-low border border-outline-variant/30 flex items-center space-x-1 text-on-surface font-label-numeric-sm text-label-numeric-sm hover:bg-surface-container transition-colors shrink-0 active:scale-95" type="button">
+<span class="text-primary text-[11px] font-semibold">成交额</span>
+<span class="material-symbols-outlined text-primary text-[14px]">arrow_downward</span>
+</button>
+</div>
+<!-- Quick Index & Header Metrics -->
+<div class="flex items-center justify-between text-outline font-label-caption text-label-caption px-1 pt-1">
+<span class="flex items-center space-x-1">
+<span>合约 / 标的指数</span>
+</span>
+<div class="flex items-center space-x-8">
+<span>最新价</span>
+<span class="w-16 text-right">24H 涨跌</span>
+</div>
+</div>
+</section>
+<!-- High Density TradingView-grade Contract Watchlist -->
+<main class="flex-1 px-margin space-y-1 divide-y divide-outline-variant/10" id="contractList">
+<!-- Row 1: DEMO (Active / Current Selected Trading Pair) -->
+<div class="group flex items-center justify-between h-14 -mx-2 px-2 rounded-xl bg-primary/10 border border-primary/30 transition-all duration-150 active:scale-[0.98] cursor-pointer" data-symbol="DEMO">
+<!-- Star Toggle & Symbol Identity -->
+<div class="flex items-center space-x-2.5 min-w-0">
+<button aria-label="收藏 DEMO" class="w-9 h-9 flex items-center justify-center text-primary active:scale-90 transition-transform" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<!-- Avatar Icon Badge -->
+<div class="w-7 h-7 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-label-numeric-sm text-[11px] font-bold shadow-inner shrink-0">
+            DM
+          </div>
+<!-- Symbol Title & Spec Tags -->
+<div class="flex flex-col min-w-0">
+<div class="flex items-center space-x-1.5">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">DEMO</span>
+<span class="font-label-numeric-sm text-[9px] px-1 py-0.2 rounded bg-surface-container-high text-primary font-medium border border-primary/20">永续</span>
+<span class="font-label-caption text-[10px] text-primary flex items-center">
+<span class="material-symbols-outlined text-[12px] mr-0.5">check_circle</span>当前
+              </span>
+</div>
+<div class="font-label-numeric-sm text-[10px] text-outline truncate">
+              100x 逐仓 · 资金费 0.010% · 24h 1.28B
+            </div>
+</div>
+</div>
+<!-- Price & Percent Pill Column -->
+<div class="flex items-center space-x-2 shrink-0">
+<div class="flex flex-col items-end">
+<span class="font-label-numeric-lg text-label-numeric-lg text-on-surface font-bold tabular-nums">91,420.0</span>
+<span class="font-label-numeric-sm text-[10px] text-secondary tabular-nums">+1,630.0</span>
+</div>
+<!-- 72x28 Pill -->
+<div class="w-[72px] h-[28px] rounded-lg bg-secondary-container text-on-secondary-container font-label-numeric-sm text-label-numeric-sm font-bold flex items-center justify-center shadow-sm tabular-nums">
+            +1.82%
+          </div>
+</div>
+</div>
+<!-- Row 2: ALPHA -->
+<div class="group flex items-center justify-between h-14 -mx-2 px-2 rounded-xl hover:bg-surface-container-low transition-all duration-150 active:scale-[0.98] cursor-pointer" data-symbol="ALPHA">
+<div class="flex items-center space-x-2.5 min-w-0">
+<button aria-label="收藏 ALPHA" class="w-9 h-9 flex items-center justify-center text-primary active:scale-90 transition-transform" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<div class="w-7 h-7 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-label-numeric-sm text-[11px] font-bold shrink-0 border border-outline-variant/30">
+            α
+          </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center space-x-1.5">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">ALPHA</span>
+<span class="font-label-numeric-sm text-[9px] px-1 py-0.2 rounded bg-surface-container-high text-outline font-medium">永续</span>
+</div>
+<div class="font-label-numeric-sm text-[10px] text-outline truncate">
+              50x 逐仓 · 资金费 0.008% · 24h 842.1M
+            </div>
+</div>
+</div>
+<div class="flex items-center space-x-2 shrink-0">
+<div class="flex flex-col items-end">
+<span class="font-label-numeric-lg text-label-numeric-lg text-on-surface font-bold tabular-nums">184.50</span>
+<span class="font-label-numeric-sm text-[10px] text-secondary tabular-nums">+11.20</span>
+</div>
+<div class="w-[72px] h-[28px] rounded-lg bg-secondary-container text-on-secondary-container font-label-numeric-sm text-label-numeric-sm font-bold flex items-center justify-center shadow-sm tabular-nums">
+            +6.48%
+          </div>
+</div>
+</div>
+<!-- Row 3: BTC -->
+<div class="group flex items-center justify-between h-14 -mx-2 px-2 rounded-xl hover:bg-surface-container-low transition-all duration-150 active:scale-[0.98] cursor-pointer" data-symbol="BTC">
+<div class="flex items-center space-x-2.5 min-w-0">
+<button aria-label="收藏 BTC" class="w-9 h-9 flex items-center justify-center text-primary active:scale-90 transition-transform" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<div class="w-7 h-7 rounded-full bg-[#f7931a]/20 text-[#f7931a] flex items-center justify-center font-label-numeric-sm text-[11px] font-bold shrink-0 border border-[#f7931a]/30">
+            ₿
+          </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center space-x-1.5">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">BTC</span>
+<span class="font-label-numeric-sm text-[9px] px-1 py-0.2 rounded bg-surface-container-high text-outline font-medium">永续</span>
+</div>
+<div class="font-label-numeric-sm text-[10px] text-outline truncate">
+              125x 全仓 · 资金费 0.012% · 24h 5.89B
+            </div>
+</div>
+</div>
+<div class="flex items-center space-x-2 shrink-0">
+<div class="flex flex-col items-end">
+<span class="font-label-numeric-lg text-label-numeric-lg text-on-surface font-bold tabular-nums">89,842.1</span>
+<span class="font-label-numeric-sm text-[10px] text-tertiary tabular-nums">-845.5</span>
+</div>
+<div class="w-[72px] h-[28px] rounded-lg bg-tertiary-container text-on-tertiary-container font-label-numeric-sm text-label-numeric-sm font-bold flex items-center justify-center shadow-sm tabular-nums">
+            -0.93%
+          </div>
+</div>
+</div>
+<!-- Row 4: ETH -->
+<div class="group flex items-center justify-between h-14 -mx-2 px-2 rounded-xl hover:bg-surface-container-low transition-all duration-150 active:scale-[0.98] cursor-pointer" data-symbol="ETH">
+<div class="flex items-center space-x-2.5 min-w-0">
+<button aria-label="收藏 ETH" class="w-9 h-9 flex items-center justify-center text-outline hover:text-primary active:scale-90 transition-transform" type="button">
+<span class="material-symbols-outlined text-[20px]">star</span>
+</button>
+<div class="w-7 h-7 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-label-numeric-sm text-[11px] font-bold shrink-0 border border-outline-variant/30">
+            Ξ
+          </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center space-x-1.5">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">ETH</span>
+<span class="font-label-numeric-sm text-[9px] px-1 py-0.2 rounded bg-surface-container-high text-outline font-medium">永续</span>
+</div>
+<div class="font-label-numeric-sm text-[10px] text-outline truncate">
+              100x 逐仓 · 资金费 0.009% · 24h 3.42B
+            </div>
+</div>
+</div>
+<div class="flex items-center space-x-2 shrink-0">
+<div class="flex flex-col items-end">
+<span class="font-label-numeric-lg text-label-numeric-lg text-on-surface font-bold tabular-nums">2,640.20</span>
+<span class="font-label-numeric-sm text-[10px] text-secondary tabular-nums">+48.60</span>
+</div>
+<div class="w-[72px] h-[28px] rounded-lg bg-secondary-container text-on-secondary-container font-label-numeric-sm text-label-numeric-sm font-bold flex items-center justify-center shadow-sm tabular-nums">
+            +1.88%
+          </div>
+</div>
+</div>
+<!-- Row 5: SOL -->
+<div class="group flex items-center justify-between h-14 -mx-2 px-2 rounded-xl hover:bg-surface-container-low transition-all duration-150 active:scale-[0.98] cursor-pointer" data-symbol="SOL">
+<div class="flex items-center space-x-2.5 min-w-0">
+<button aria-label="收藏 SOL" class="w-9 h-9 flex items-center justify-center text-primary active:scale-90 transition-transform" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<div class="w-7 h-7 rounded-full bg-primary/20 text-primary flex items-center justify-center font-label-numeric-sm text-[11px] font-bold shrink-0 border border-primary/30">
+            S
+          </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center space-x-1.5">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">SOL</span>
+<span class="font-label-numeric-sm text-[9px] px-1 py-0.2 rounded bg-surface-container-high text-outline font-medium">永续</span>
+</div>
+<div class="font-label-numeric-sm text-[10px] text-outline truncate">
+              50x 逐仓 · 资金费 0.015% · 24h 2.11B
+            </div>
+</div>
+</div>
+<div class="flex items-center space-x-2 shrink-0">
+<div class="flex flex-col items-end">
+<span class="font-label-numeric-lg text-label-numeric-lg text-on-surface font-bold tabular-nums">214.35</span>
+<span class="font-label-numeric-sm text-[10px] text-secondary tabular-nums">+14.75</span>
+</div>
+<div class="w-[72px] h-[28px] rounded-lg bg-secondary-container text-on-secondary-container font-label-numeric-sm text-label-numeric-sm font-bold flex items-center justify-center shadow-sm tabular-nums">
+            +7.39%
+          </div>
+</div>
+</div>
+<!-- Row 6: SUI -->
+<div class="group flex items-center justify-between h-14 -mx-2 px-2 rounded-xl hover:bg-surface-container-low transition-all duration-150 active:scale-[0.98] cursor-pointer" data-symbol="SUI">
+<div class="flex items-center space-x-2.5 min-w-0">
+<button aria-label="收藏 SUI" class="w-9 h-9 flex items-center justify-center text-outline hover:text-primary active:scale-90 transition-transform" type="button">
+<span class="material-symbols-outlined text-[20px]">star</span>
+</button>
+<div class="w-7 h-7 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-label-numeric-sm text-[11px] font-bold shrink-0 border border-outline-variant/30">
+            💧
+          </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center space-x-1.5">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">SUI</span>
+<span class="font-label-numeric-sm text-[9px] px-1 py-0.2 rounded bg-surface-container-high text-outline font-medium">永续</span>
+</div>
+<div class="font-label-numeric-sm text-[10px] text-outline truncate">
+              50x 逐仓 · 资金费 0.005% · 24h 918.4M
+            </div>
+</div>
+</div>
+<div class="flex items-center space-x-2 shrink-0">
+<div class="flex flex-col items-end">
+<span class="font-label-numeric-lg text-label-numeric-lg text-on-surface font-bold tabular-nums">3.4120</span>
+<span class="font-label-numeric-sm text-[10px] text-tertiary tabular-nums">-0.1140</span>
+</div>
+<div class="w-[72px] h-[28px] rounded-lg bg-tertiary-container text-on-tertiary-container font-label-numeric-sm text-label-numeric-sm font-bold flex items-center justify-center shadow-sm tabular-nums">
+            -3.23%
+          </div>
+</div>
+</div>
+<!-- Row 7: DOGE -->
+<div class="group flex items-center justify-between h-14 -mx-2 px-2 rounded-xl hover:bg-surface-container-low transition-all duration-150 active:scale-[0.98] cursor-pointer" data-symbol="DOGE">
+<div class="flex items-center space-x-2.5 min-w-0">
+<button aria-label="收藏 DOGE" class="w-9 h-9 flex items-center justify-center text-primary active:scale-90 transition-transform" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<div class="w-7 h-7 rounded-full bg-[#c2a633]/20 text-[#c2a633] flex items-center justify-center font-label-numeric-sm text-[11px] font-bold shrink-0 border border-[#c2a633]/30">
+            Ð
+          </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center space-x-1.5">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">DOGE</span>
+<span class="font-label-numeric-sm text-[9px] px-1 py-0.2 rounded bg-surface-container-high text-outline font-medium">永续</span>
+</div>
+<div class="font-label-numeric-sm text-[10px] text-outline truncate">
+              75x 逐仓 · 资金费 0.010% · 24h 1.76B
+            </div>
+</div>
+</div>
+<div class="flex items-center space-x-2 shrink-0">
+<div class="flex flex-col items-end">
+<span class="font-label-numeric-lg text-label-numeric-lg text-on-surface font-bold tabular-nums">0.3842</span>
+<span class="font-label-numeric-sm text-[10px] text-secondary tabular-nums">+0.0380</span>
+</div>
+<div class="w-[72px] h-[28px] rounded-lg bg-secondary-container text-on-secondary-container font-label-numeric-sm text-label-numeric-sm font-bold flex items-center justify-center shadow-sm tabular-nums">
+            +10.98%
+          </div>
+</div>
+</div>
+<!-- Row 8: NEAR -->
+<div class="group flex items-center justify-between h-14 -mx-2 px-2 rounded-xl hover:bg-surface-container-low transition-all duration-150 active:scale-[0.98] cursor-pointer" data-symbol="NEAR">
+<div class="flex items-center space-x-2.5 min-w-0">
+<button aria-label="收藏 NEAR" class="w-9 h-9 flex items-center justify-center text-outline hover:text-primary active:scale-90 transition-transform" type="button">
+<span class="material-symbols-outlined text-[20px]">star</span>
+</button>
+<div class="w-7 h-7 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-label-numeric-sm text-[11px] font-bold shrink-0 border border-outline-variant/30">
+            N
+          </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center space-x-1.5">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">NEAR</span>
+<span class="font-label-numeric-sm text-[9px] px-1 py-0.2 rounded bg-surface-container-high text-outline font-medium">永续</span>
+</div>
+<div class="font-label-numeric-sm text-[10px] text-outline truncate">
+              50x 逐仓 · 资金费 0.010% · 24h 462.5M
+            </div>
+</div>
+</div>
+<div class="flex items-center space-x-2 shrink-0">
+<div class="flex flex-col items-end">
+<span class="font-label-numeric-lg text-label-numeric-lg text-on-surface font-bold tabular-nums">5.782</span>
+<span class="font-label-numeric-sm text-[10px] text-outline tabular-nums">0.000</span>
+</div>
+<div class="w-[72px] h-[28px] rounded-lg bg-surface-container-high text-outline font-label-numeric-sm text-label-numeric-sm font-semibold flex items-center justify-center shadow-sm tabular-nums">
+            0.00%
+          </div>
+</div>
+</div>
+<!-- Row 9: AVAX -->
+<div class="group flex items-center justify-between h-14 -mx-2 px-2 rounded-xl hover:bg-surface-container-low transition-all duration-150 active:scale-[0.98] cursor-pointer" data-symbol="AVAX">
+<div class="flex items-center space-x-2.5 min-w-0">
+<button aria-label="收藏 AVAX" class="w-9 h-9 flex items-center justify-center text-outline hover:text-primary active:scale-90 transition-transform" type="button">
+<span class="material-symbols-outlined text-[20px]">star</span>
+</button>
+<div class="w-7 h-7 rounded-full bg-[#e84142]/20 text-[#e84142] flex items-center justify-center font-label-numeric-sm text-[11px] font-bold shrink-0 border border-[#e84142]/30">
+            ▲
+          </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center space-x-1.5">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">AVAX</span>
+<span class="font-label-numeric-sm text-[9px] px-1 py-0.2 rounded bg-surface-container-high text-outline font-medium">永续</span>
+</div>
+<div class="font-label-numeric-sm text-[10px] text-outline truncate">
+              50x 逐仓 · 资金费 0.006% · 24h 510.3M
+            </div>
+</div>
+</div>
+<div class="flex items-center space-x-2 shrink-0">
+<div class="flex flex-col items-end">
+<span class="font-label-numeric-lg text-label-numeric-lg text-on-surface font-bold tabular-nums">34.82</span>
+<span class="font-label-numeric-sm text-[10px] text-tertiary tabular-nums">-1.08</span>
+</div>
+<div class="w-[72px] h-[28px] rounded-lg bg-tertiary-container text-on-tertiary-container font-label-numeric-sm text-label-numeric-sm font-bold flex items-center justify-center shadow-sm tabular-nums">
+            -3.01%
+          </div>
+</div>
+</div>
+<!-- Row 10: LINK -->
+<div class="group flex items-center justify-between h-14 -mx-2 px-2 rounded-xl hover:bg-surface-container-low transition-all duration-150 active:scale-[0.98] cursor-pointer" data-symbol="LINK">
+<div class="flex items-center space-x-2.5 min-w-0">
+<button aria-label="收藏 LINK" class="w-9 h-9 flex items-center justify-center text-primary active:scale-90 transition-transform" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<div class="w-7 h-7 rounded-full bg-[#375bd2]/20 text-[#375bd2] flex items-center justify-center font-label-numeric-sm text-[11px] font-bold shrink-0 border border-[#375bd2]/30">
+            ⬡
+          </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center space-x-1.5">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">LINK</span>
+<span class="font-label-numeric-sm text-[9px] px-1 py-0.2 rounded bg-surface-container-high text-outline font-medium">永续</span>
+</div>
+<div class="font-label-numeric-sm text-[10px] text-outline truncate">
+              75x 逐仓 · 资金费 0.010% · 24h 390.4M
+            </div>
+</div>
+</div>
+<div class="flex items-center space-x-2 shrink-0">
+<div class="flex flex-col items-end">
+<span class="font-label-numeric-lg text-label-numeric-lg text-on-surface font-bold tabular-nums">14.650</span>
+<span class="font-label-numeric-sm text-[10px] text-secondary tabular-nums">+0.420</span>
+</div>
+<div class="w-[72px] h-[28px] rounded-lg bg-secondary-container text-on-secondary-container font-label-numeric-sm text-label-numeric-sm font-bold flex items-center justify-center shadow-sm tabular-nums">
+            +2.95%
+          </div>
+</div>
+</div>
+</main>
+<!-- Fallback / Empty Search State Card (Subtle inline placeholder) -->
+<div class="hidden mx-margin my-6 p-6 rounded-2xl bg-surface-container-low border border-outline-variant/30 flex flex-col items-center text-center space-y-2" id="emptySearchCard">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-outline">
+<span class="material-symbols-outlined text-[24px]">manage_search</span>
+</div>
+<p class="font-headline-sm text-[15px] font-semibold text-on-surface">未找到符合条件的合约代码</p>
+<p class="font-body-sm text-body-sm text-outline max-w-[240px]">请检查输入代码，或点击上方「自选」星标直接关注高频交易标的</p>
+</div>
+<!-- Bottom Action Drawer (One-Tap Fast Quick Filter) -->
+<section class="mt-4 px-margin mb-3">
+<div class="p-3.5 rounded-2xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-primary text-[20px]">bolt</span>
+<div class="flex flex-col">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface font-semibold">快速切换与杠杆预设</span>
+<span class="font-label-caption text-label-caption text-outline">默认执行滑点 ≤ 0.03% 保护</span>
+</div>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="font-label-numeric-sm text-[11px] px-2 py-1 rounded bg-surface-container-high text-primary font-bold">100x</span>
+<span class="font-label-numeric-sm text-[11px] px-2 py-1 rounded bg-surface-container-high text-on-surface-variant font-medium">逐仓</span>
+</div>
+</div>
+</section>
+<!-- BottomNavBar (Shared Component Implementation) -->
+<!-- Matches: destination_count: 5, labels: ["交易", "监控", "1.618", "持仓", "统计"], active: 交易 -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-space-xs pt-space-xs pb-6 bg-surface-container-lowest/85 backdrop-blur-2xl shadow-2xl border-t border-outline-variant/30 max-w-[402px] left-1/2 -translate-x-1/2">
+<!-- Nav Item 1: 交易 (Active) -->
+<a class="flex flex-col items-center justify-center text-primary font-semibold active:scale-95 transition-transform duration-100 min-w-[56px] py-1" href="#">
+<span class="material-symbols-outlined text-[22px]">candlestick_chart</span>
+<span class="font-label-caption text-label-caption mt-0.5">交易</span>
+</a>
+<!-- Nav Item 2: 监控 -->
+<a class="flex flex-col items-center justify-center text-outline font-normal hover:text-primary active:scale-95 transition-transform duration-100 min-w-[56px] py-1" href="#">
+<span class="material-symbols-outlined text-[22px]">query_stats</span>
+<span class="font-label-caption text-label-caption mt-0.5">监控</span>
+</a>
+<!-- Nav Item 3: 1.618 (Fibonacci Engine) -->
+<a class="flex flex-col items-center justify-center text-outline font-normal hover:text-primary active:scale-95 transition-transform duration-100 min-w-[56px] py-1" href="#">
+<span class="material-symbols-outlined text-[22px]">auto_graph</span>
+<span class="font-label-caption text-label-caption mt-0.5">1.618</span>
+</a>
+<!-- Nav Item 4: 持仓 -->
+<a class="flex flex-col items-center justify-center text-outline font-normal hover:text-primary active:scale-95 transition-transform duration-100 min-w-[56px] py-1" href="#">
+<span class="material-symbols-outlined text-[22px]">account_balance_wallet</span>
+<span class="font-label-caption text-label-caption mt-0.5">持仓</span>
+</a>
+<!-- Nav Item 5: 统计 -->
+<a class="flex flex-col items-center justify-center text-outline font-normal hover:text-primary active:scale-95 transition-transform duration-100 min-w-[56px] py-1" href="#">
+<span class="material-symbols-outlined text-[22px]">analytics</span>
+<span class="font-label-caption text-label-caption mt-0.5">统计</span>
+</a>
+</nav>
+<!-- iOS Home Indicator Safe Bar -->
+<div class="fixed bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-on-surface/30 rounded-full z-50 pointer-events-none"></div>
+</div>
+<!-- Micro-interactions: Search filter & star toggling -->
+<script>
+    const searchInput = document.getElementById('pairSearchInput');
+    const clearBtn = document.getElementById('clearSearchBtn');
+    const contractList = document.getElementById('contractList');
+    const emptyCard = document.getElementById('emptySearchCard');
+    const rows = contractList.querySelectorAll('[data-symbol]');
+
+    // Search filter
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim().toUpperCase();
+      clearBtn.style.opacity = query ? '1' : '0';
+      let matchCount = 0;
+
+      rows.forEach(row => {
+        const symbol = row.getAttribute('data-symbol');
+        if (symbol.includes(query)) {
+          row.style.display = 'flex';
+          matchCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      if (matchCount === 0) {
+        emptyCard.classList.remove('hidden');
+      } else {
+        emptyCard.classList.add('hidden');
+      }
+    });
+
+    // Clear search
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      clearBtn.style.opacity = '0';
+      rows.forEach(row => row.style.display = 'flex');
+      emptyCard.classList.add('hidden');
+      searchInput.focus();
+    });
+
+    // Star icon toggle
+    const starButtons = document.querySelectorAll('button[aria-label^="收藏"]');
+    starButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const icon = btn.querySelector('.material-symbols-outlined');
+        const isFilled = icon.style.fontVariationSettings?.includes("'FILL' 1");
+        if (isFilled) {
+          icon.style.fontVariationSettings = "'FILL' 0";
+          btn.classList.remove('text-primary');
+          btn.classList.add('text-outline');
+        } else {
+          icon.style.fontVariationSettings = "'FILL' 1";
+          btn.classList.remove('text-outline');
+          btn.classList.add('text-primary');
+        }
+      });
+    });
+
+    // Contract Row selection
+    rows.forEach(row => {
+      row.addEventListener('click', () => {
+        rows.forEach(r => {
+          r.classList.remove('bg-primary/10', 'border', 'border-primary/30');
+          r.classList.add('hover:bg-surface-container-low');
+          const badge = r.querySelector('.text-primary.flex.items-center');
+          if (badge) badge.remove();
+        });
+
+        row.classList.remove('hover:bg-surface-container-low');
+        row.classList.add('bg-primary/10', 'border', 'border-primary/30');
+
+        // Add "✓ 当前" tag if not exists
+        const nameContainer = row.querySelector('.flex.items-center.space-x-1\\.5');
+        if (nameContainer && !nameContainer.querySelector('.text-primary.flex.items-center')) {
+          const activeTag = document.createElement('span');
+          activeTag.className = 'font-label-caption text-[10px] text-primary flex items-center';
+          activeTag.innerHTML = '<span class="material-symbols-outlined text-[12px] mr-0.5">check_circle</span>当前';
+          nameContainer.appendChild(activeTag);
+        }
+      });
+    });
+  </script>
+</body></html>
