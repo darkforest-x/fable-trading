@@ -1,0 +1,12 @@
+{
+  "question": "Can a single-coin false breakout of the prior hour generate trades on ordinary days with positive realized net returns?",
+  "venue": "OKX USDT perpetual BTC and ETH; 1m archives registered in exp-btc-xau-bb-stoch-timeframes-20260916-v1 and exp-eth5m-stoch-confirm-exits-20261019-v1.",
+  "scope": "Shanghai calendar 2024-01-01 to 2026-04-30 inclusive, the common complete-month interval in the frozen input files. 2024 and 2025-2026 read separately. No threshold search.",
+  "signal": "Wick strictly past only one extreme of the prior 60 completed minutes; close back strictly between both prior extremes. Long at swept low, short at swept high. Never requires a market-wide shock.",
+  "fills": "Next 1m open, exit open 5m or 15m later, same entries, no other exits. Shared one-position budget, earliest signal then BTC on ties, hold the slot 15 minutes for both exit comparisons.",
+  "costs": "5bp taker each side; no extra spread, slippage, funding, lot rounding or order queue. Percentage per unit of entry notional, not a compound account projection.",
+  "control": "One random nonsignal clock in the same asset, UTC four-hour block and prior-volatility bucket, same direction and holding length; seed 20261114, with replacement, paired diagnostics only.",
+  "reproduce": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.intraday_hour_sweep",
+  "production_eligible": false,
+  "training_eligible": false
+}
