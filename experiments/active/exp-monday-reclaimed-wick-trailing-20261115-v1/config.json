@@ -1,0 +1,9 @@
+{
+  "parent": "exp-monday-reclaimed-wick-mfe-20261115-v1",
+  "arm": "Completed 5m close at least 2% in favour of the close-price entry. Trailing distance 2% of best completed close, rounded outwards to study tick. Effective next bar. Keep original wick as initial stop.",
+  "horizon": "Original 72h or continuous data end. Independent, single-position admission per arm; accept only entry strictly after prior exit close and alphabetic ties. Periods start flat.",
+  "cost": "taker 5bp per fill on traded notional, plus 10bp per market leg on entry notional, no funding, unlevered",
+  "control": "Frozen no-target/initial-wick-stop Nautilus trades. Reuse their fills if no tighter stop can be installed before their exit. Otherwise find earlier native stop fills with the established VectorBT first_hit kernel and account for them using Portfolio.from_orders.",
+  "grid": "One arm and one distance specified before comparing, no search.",
+  "production_eligible": false
+}
