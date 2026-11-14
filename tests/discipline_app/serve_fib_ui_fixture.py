@@ -48,21 +48,35 @@ def main():
         app=create_app(book,TOKEN,market_enabled=False,web_directory=options.web_directory)
         control=dict(offline=False,empty=False,latest='BTC',delay_ms=0);started=int(time.time()*1000)
         metrics=dict(streams=0,active=0,auto_stop=0,wick_stop=0)
+        touch_minute = started // 60_000 * 60_000 - 120_000
         class Feed:
-            def read(self):
+            def snapshot(self, anchors=None):
                 time.sleep(control['delay_ms']/1000)
                 if control['offline']:raise FibUnavailable()
                 now=int(time.time()*1000);date=datetime.now(ZoneInfo('America/New_York'));monday=(date-timedelta(days=date.weekday())).replace(hour=0,minute=0,second=0,microsecond=0);week=monday.date().isoformat()
                 rows=[]
                 for coin,side,high,low in [('BTC','upper',101,97),('ETH','lower',2100,1900)]:
-                    symbol=coin+'-USDT-SWAP';event=dict(week=week,symbol=symbol,side=side,source='live',observed_ms=started-(1000 if coin==control['latest'] else 60000))
+                    symbol=coin+'-USDT-SWAP';event=dict(week=week,symbol=symbol,side=side,source='live',candle_ms=touch_minute,
+                        level=high+.618*(high-low) if side=='upper' else low-.618*(high-low),
+                        observed_ms=touch_minute+(30_000 if coin==control['latest'] else 1000))
                     rows.append(dict(symbol=symbol,high=high,low=low,price=100 if coin=='BTC' else 2000,stale=False,touches={side:event}))
-                return project_snapshot(dict(now_ms=now,week=week,timezone='America/New_York',monday_complete=True,stream=dict(connected=True,last_message_ms=now),items=[] if control['empty'] else rows),now)
+                return project_snapshot(dict(now_ms=now,week=week,timezone='America/New_York',monday_complete=True,stream=dict(connected=True,last_message_ms=now),items=[] if control['empty'] else rows),now,wick_anchors=anchors)
+
+            def read(self):
+                return self.snapshot()
+
+            def wick_anchor(self, symbol, side, now_ms):
+                anchors = {}
+                self.snapshot(anchors)
+                edge = 'lower' if side == 'long' else 'upper'
+                if (symbol, edge) not in anchors:
+                    raise FibUnavailable('暂无首次触价')
+                return anchors[symbol, edge]
         app.state.monday_fib=Feed()
         def candle(stamp,step,symbol):
             base=2000 if symbol.startswith('ETH') else 100;i=stamp//step;o=base*(1+.005*math.sin(i/9));c=o+base*.002*math.cos(i/4)
             high,low=max(o,c)+base*.001,min(o,c)-base*.001
-            if stamp==int(time.time())//step*step-2*step:high,low=(2300,1750) if symbol.startswith('ETH') else (106,94)
+            if stamp <= touch_minute//1000 < stamp+step:high,low=(2300,1750) if symbol.startswith('ETH') else (106,94)
             return [str(stamp*1000),str(o),str(high),str(low),str(c),'100','20','2000','1' if stamp+step<=time.time() else '0']
         def candles(instId='BTC-USDT-SWAP',bar='15m',after=0):
             time.sleep(control['delay_ms']/1000)

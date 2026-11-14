@@ -39,6 +39,10 @@ class Relay:
 
 
 class Feed:
+    def wick_anchor(self, symbol, side, now_ms):
+        from yoyo.discipline_app.monday_fib import FibUnavailable
+        raise FibUnavailable('回放数据不含当周首次触价')
+
     def read(self):
         now = int(time.time()*1000)
         window = week_window(now)

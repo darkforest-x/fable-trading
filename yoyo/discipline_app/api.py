@@ -5,6 +5,7 @@ existing monitor. Policy, market prices, cash and clock have no mobile setters.
 """
 import hashlib
 import hmac
+import time
 from pathlib import Path
 from contextlib import asynccontextmanager
 from typing import Annotated, Literal, Optional, Union
@@ -213,11 +214,19 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
 
     @app.get('/v1/market/monday-wick', dependencies=[Depends(auth)])
     def monday_wick(symbol: str = Query(pattern=r'^[A-Z0-9]{1,40}-USDT-SWAP$'),
-                    period: Literal['1m', '5m', '15m', '1H', '4H', '1D'] = '15m',
-                    side: Literal['long', 'short'] = 'long'):
+                    period: Literal['1m', '5m', '15m', '1H', '4H', '12H', '1D'] = '1m',
+                    side: Literal['long', 'short'] = 'long',
+                    source: Literal['week', 'month'] = 'week'):
+        # Older tickets send their chart period. The first wick always uses 1m bars.
+        now_ms = int(time.time() * 1000)
         try:
-            return app.state.wick_stops.read(app.state.monday_fib, app.state.candle_history, symbol, period, side)
-        except FibUnavailable as error:
+            if source == 'month':
+                from .month_wick import month_wick_anchor
+                anchor = month_wick_anchor(app.state.monitor, symbol, side, now_ms)
+            else:
+                anchor = app.state.monday_fib.wick_anchor(symbol, side, now_ms)
+            return app.state.wick_stops.read(app.state.candle_history, symbol, side, anchor, now_ms, source)
+        except (FibUnavailable, MonitorUnavailable) as error:
             raise HTTPException(503, str(error)) from None
 
     @app.get('/v1/market/candles', dependencies=[Depends(auth)])

@@ -54,3 +54,39 @@ def test_public_market_route_does_not_unlock_account_or_writes(tmp_path):
         assert client.get('/v1/state').status_code==401
         assert client.post('/v1/market/monday-fib',json={}).status_code==405
         assert client.post('/v1/auto-stop',json={}).status_code==401
+
+
+def test_persisted_anchor_keeps_its_level_and_candle_when_chart_baseline_is_reloading():
+    raw = source()
+    row = raw['items'][0]
+    row['high'] = row['low'] = None
+    event = row['touches']['upper']
+    event.update(source='live', level=122.36, observed_ms=event['candle_ms']+65_000)
+    anchors = {}
+    assert project_snapshot(raw, raw['now_ms'], wick_anchors=anchors)['items'] == []
+    start = event['candle_ms']
+    assert anchors == {('BTC-USDT-SWAP', 'upper'): (raw['week'], 122.36, start, start+60_000)}
+
+
+@pytest.mark.parametrize('corrupt', [
+    {'week': '2001-01-01'}, {'symbol':'ETH-USDT-SWAP'}, {'side':'lower'},
+    {'level':None}, {'candle_ms':None}, {'observed_ms':1}, {'source':'retest'},
+])
+def test_mismatched_or_incomplete_provenance_is_unavailable(corrupt):
+    raw = source()
+    event = raw['items'][0]['touches']['upper']
+    event.update(level=122.36)
+    event.update(corrupt)
+    anchors = {}
+    project_snapshot(raw, raw['now_ms'], wick_anchors=anchors)
+    assert not anchors
+
+
+def test_history_window_clipped_to_minutes_the_monitor_could_have_seen():
+    raw = source()
+    event = raw['items'][0]['touches']['upper']
+    start = event['candle_ms']
+    event.update(level=122.36, observed_ms=start+85_000)
+    anchors = {}
+    project_snapshot(raw, raw['now_ms'], wick_anchors=anchors)
+    assert anchors['BTC-USDT-SWAP', 'upper'][2:] == (start, start+120_000)
