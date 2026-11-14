@@ -8,6 +8,7 @@ import sqlite3
 from datetime import datetime
 from pathlib import Path
 from statistics import mean, median
+from collections import Counter
 from typing import NamedTuple
 from zoneinfo import ZoneInfo
 
@@ -67,7 +68,7 @@ def outcomes(bars, entry):
     }
 
 
-def measure(db, event, cutoff):
+def read_window(db, event, cutoff):
     signal = event["candle_ms"]
     assert event["confirmed_ms"] == signal + HOUR
     start = signal - 25 * HOUR
@@ -82,6 +83,11 @@ def measure(db, event, cutoff):
     bars = [candles[t] for t in range(start, cutoff, HOUR)]
     history, future = bars[:26], bars[26:]
     assert math.isclose(history[-1].close, event["close"], rel_tol=1e-12)
+    return history, future
+
+
+def measure(db, event, cutoff):
+    history, future = read_window(db, event, cutoff)
     assert min(b.low for b in history[-11:]) == event["prebreak_low"]
     assert all(b.low >= event["prebreak_low"] for b in future)
     return {
@@ -94,6 +100,35 @@ def measure(db, event, cutoff):
     }
 
 
+def compare_unfiltered(db, cutoff, survivors):
+    """Check the same exploratory two-range body cutoff in the full pre-filter snapshot."""
+    counts = Counter()
+    hits = []
+    with (HERE / "original_events.csv").open() as f:
+        for event in csv.DictReader(f):
+            for key in ("candle_ms", "confirmed_ms"):
+                event[key] = int(event[key])
+            for key in ("close", "level"):
+                event[key] = float(event[key])
+            end = event["confirmed_ms"] + 24 * HOUR
+            if end > cutoff:
+                counts["under_24h"] += 1
+                continue
+            history, day = read_window(db, event, end)
+            body = break_features(history, event["level"])["body_prior_atr"]
+            peak_pct = pct(max(b.high for b in day), event["close"])
+            group = "body_ge_2atr" if body >= 2 else "body_lt_2atr"
+            counts[group] += 1
+            if peak_pct >= 30:
+                counts[group + "_hits"] += 1
+                hits.append({
+                    "symbol": event["symbol"], "event_id": event["event_id"],
+                    "in_survivors": event["event_id"] in survivors,
+                    "peak_pct": peak_pct, "body_prior_atr": body,
+                })
+    return {"counts": dict(counts), "hits": hits}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--db", type=Path, default=DEFAULT_CACHE)
@@ -102,12 +137,14 @@ def main():
     db = sqlite3.connect(args.db.resolve().as_uri() + "?mode=ro", uri=True)
     try:
         rows = [measure(db, event, snapshot["asof_ms"]) for event in snapshot["events"]]
+        original = compare_unfiltered(db, snapshot["asof_ms"], {r["event_id"] for r in rows})
     finally:
         db.close()
     with (HERE / "events.csv").open("w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=rows[0].keys(), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
+    (HERE / "original_counts.json").write_text(json.dumps(original, indent=2) + "\n")
 
 
 if __name__ == "__main__":
