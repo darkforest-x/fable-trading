@@ -85,8 +85,14 @@ class ExitPolicy:
     # Close-market E20 5m reclaim sensitivity: after two continuous completed
     # closes beyond the entry bar's wick, exit the survivor at the next open.
     wick_failure_next_open: bool = False
+    # Owner 2026-11-09 trendline/cloud rule: the confirmed hourly direction
+    # exit is live from entry instead of waiting for the trail arm. With
+    # market close entries this is the only mode that may run on 1H bars.
+    hour_exit_from_entry: bool = False
 
     def __post_init__(self):
+        if self.hour_exit_from_entry and not self.opposite_hour_exit:
+            raise ValueError("hour_exit_from_entry requires the opposite-hour exit")
         actual = (self.fill_maker_fee, self.fill_taker_fee)
         if any(v is not None for v in actual):
             if (any(v is None or not math.isfinite(v) or not 0 <= v < 1 for v in actual)
@@ -167,6 +173,10 @@ class ExitPolicy:
             raise ValueError("Partial fraction must be strictly between zero and one")
         if Fraction(str(self.partial_fraction)).denominator > 10000:
             raise ValueError("Partial fraction requires excessive research sizing")
+
+
+def has_targets_policy(policy):
+    return policy.fixed_target_r is not None or policy.target_from_entry
 
 
 def confirmed_pivots(frame, execution_minutes=5, strict=False, pivot_minutes=15):
@@ -987,7 +997,8 @@ class IndependentCloseStrategy(Strategy):
                         state.structural_updates += 1
                         if state.arm_i < 0:
                             state.arm_i = i
-            reverse = p.opposite_hour_exit and state.arm_i >= 0 and self.hour[i] == -side
+            reverse = (p.opposite_hour_exit and (state.arm_i >= 0 or p.hour_exit_from_entry)
+                       and self.hour[i] == -side)
             pivot_exit = False
             if p.confirmed_pivot_exit:
                 pivot_price = self.pivots[0 if side == 1 else 1][i]
@@ -1209,8 +1220,15 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     if limit_entry and not (policy.confirmed_pivot_exit or policy.target_from_entry
                             or policy.fixed_target_r is not None):
         raise ValueError("Resting entry requires initial-stop/pivot or fixed-target management")
-    if execution_minutes not in (1, 5, 60) or (execution_minutes == 60 and not market_open):
-        raise ValueError("Execution resolution must be 1m or 5m, or 60m for market_open static brackets")
+    hourly_close_mode = (policy.hour_exit_from_entry and entry_order_mode == "market"
+                         and policy.intrabar_path is None and not has_targets_policy(policy)
+                         and policy.partial_close_r is None and not policy.rsi_scaleout
+                         and not policy.confirmed_pivot_exit and not policy.structural_pivot_stop
+                         and policy.time_breakeven_minutes is None and not policy.reclaim_next_bar
+                         and batch_bars is None)
+    if execution_minutes not in (1, 5, 60) or (execution_minutes == 60 and not (market_open or hourly_close_mode)):
+        raise ValueError("Execution resolution must be 1m or 5m, or 60m for market_open static brackets "
+                         "or close-market entries with the from-entry hourly exit")
     if batch_bars is not None and (not isinstance(batch_bars, int) or batch_bars < 2):
         raise ValueError("Streaming batch size must be an integer of at least two bars")
     if policy.rsi_scaleout:
