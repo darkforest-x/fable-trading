@@ -1,0 +1,12 @@
+{
+  "question": "How much of the frozen initial altcoin basket rebound remains after 15 minutes, and can BTC capture it at the same clocks?",
+  "source": "exp-monday-breadth-extension-20261108-v1/alt",
+  "input_cohort": "All 25 locked freq36_ALT entries in the previously studied 2026 January-October window, 1486 member observations. No 30-minute wait; source admission and 24-hour spacing unchanged.",
+  "exit": "Scheduled sale at 15 minutes, priced at third completed five-minute close. Baseline is the saved six-hour exit at its original open.",
+  "cost": "5bp taker on both fills; no spread, extra slippage, funding or lot rounding.",
+  "estimand": "Per-entry percentage return on notional, equal weight per eligible basket member, then equal weight per event. No wallet sizing or compounding.",
+  "comparisons": "Same-clock BTC and BTC seven calendar days before at identical UTC weekday/time. The latter does not match volatility or isolate an ALT effect.",
+  "reproduce": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.breadth_first_batch_15min",
+  "production_eligible": false,
+  "training_eligible": false
+}
