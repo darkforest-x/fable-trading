@@ -448,8 +448,9 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
                         error='暂时无法读取账户核验记录')
 
     @app.get('/v1/statistics', dependencies=[Depends(auth)])
-    def statistics(days: int = Query(default=30), current=Depends(selected), x_spike_account: str = Header(default='')):
-        return dict(current.statistics(days), account_id=x_spike_account or 'primary')
+    def statistics(days: int = Query(default=30), since: Optional[float] = Query(default=None, ge=0),
+                   current=Depends(selected), x_spike_account: str = Header(default='')):
+        return dict(current.statistics(days, since), account_id=x_spike_account or 'primary')
 
     @app.post('/v1/preview', dependencies=[Depends(auth)])
     def preview(body: Ticket, current=Depends(selected)):

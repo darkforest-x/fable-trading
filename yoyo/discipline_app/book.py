@@ -1049,7 +1049,7 @@ class Book:
             return [dict(seq=row[0], time=row[1], kind=row[2], body=json.loads(row[3]))
                     for row in db.execute('SELECT seq,time,kind,body FROM journal ORDER BY seq DESC LIMIT ?', (min(limit, 200),))]
 
-    def statistics(self, days=30):
+    def statistics(self, days=30, since=None):
         from .statistics import summarize
         if type(days) is not int or days not in (0, 7, 30):
             raise Rejected('统计区间无效')
@@ -1060,4 +1060,4 @@ class Book:
             for timestamp, kind, body in db.execute("SELECT time,kind,body FROM journal WHERE kind IN ('paper_fill','paper_reduce')"):
                 event = json.loads(body)
                 fees.append((timestamp, event['entry_fee'] if kind == 'paper_fill' else event['fee']))
-            return summarize(state, self.equity(state), fees, self.clock(), days)
+            return summarize(state, self.equity(state), fees, self.clock(), days, since)

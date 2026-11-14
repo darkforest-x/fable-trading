@@ -246,6 +246,7 @@ struct Statistics: Codable {
     let serverTime: Double
     let accountUpdatedAt: Double?
     let periodDays: Int
+    let appliedSince: Double?
     let account: Account
     let closed: StatSummary
     let fees: String

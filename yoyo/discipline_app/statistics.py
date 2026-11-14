@@ -7,8 +7,9 @@ mark-to-market equity series. No historical equity drawdown is inferred.
 from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
+import math
 from zoneinfo import ZoneInfo
-from .policy import dec
+from .policy import dec, Rejected
 
 ZERO = Decimal(0)
 
@@ -29,16 +30,28 @@ def trade_summary(trades):
                 average_net_r=str(avg_r) if avg_r is not None else None)
 
 
-def summarize(state, equity, fee_events, now, days):
-    start = now - days * 86400 if days else None
+def summarize(state, equity, fee_events, now, days, since=None):
+    if since is not None:
+        if type(since) not in (int, float) or not math.isfinite(since) or since < 0:
+            raise Rejected('统计起点无效')
+        since = float(since)
+    days_start = now - days * 86400 if days else None
+    if days_start is None:
+        start = since
+    elif since is None:
+        start = days_start
+    else:
+        start = max(days_start, since)
     closed = sorted((t for t in state['closed'] if (start is None or t['closed'] >= start) and t['closed'] <= now),
                     key=lambda t: (t['closed'], t['id']))
-    realized = sum((dec(t['pnl']) for t in state['closed'] + state['positions']), ZERO)
-    initial = dec(state['cash']) - realized
+    all_realized = sum((dec(t['pnl']) for t in state['closed'] + state['positions']), ZERO)
+    initial = dec(state['cash']) - all_realized
     unrealized = equity - dec(state['cash'])
+    net = sum((dec(t['pnl']) for t in closed), ZERO) if since is not None else equity-initial
+    realized = net if since is not None else all_realized
     account = dict(equity=str(equity), initial_equity=str(initial), realized_pnl=str(realized),
-                   unrealized_pnl=str(unrealized), net_pnl=str(equity-initial),
-                   return_fraction=str((equity-initial)/initial) if initial > 0 else None,
+                   unrealized_pnl=str(unrealized), net_pnl=str(net),
+                   return_fraction=str(net/initial) if initial > 0 else None,
                    open_positions=len(state['positions']), pending_orders=len(state['pending']))
     fees = sum((dec(fee) for timestamp, fee in fee_events
                 if (start is None or timestamp >= start) and timestamp <= now), ZERO)
@@ -50,7 +63,7 @@ def summarize(state, equity, fee_events, now, days):
     for date, value in sorted(daily.items()):
         total += value
         curve.append(dict(date=date, pnl=str(total)))
-    return dict(mode='paper', server_time=now, period_days=days, period_start=start,
+    return dict(mode='paper', server_time=now, period_days=days, period_start=start, applied_since=since,
                 account=account, closed=trade_summary(closed), fees=str(fees), curve=curve,
                 symbols=[dict(symbol=s, **trade_summary([t for t in closed if t['symbol'] == s]))
                          for s in sorted({t['symbol'] for t in closed})],

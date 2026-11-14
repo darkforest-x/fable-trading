@@ -43,6 +43,9 @@ struct SettingsView: View {
                     Button("重新连接") { Haptics.tap(); session.reconnect() }
                 }
                 if session.connection != nil { AccountSection() }
+                if let connection = session.connection {
+                    StatisticsResetSection(connection: connection).id(account.scope)
+                }
                 Section {
                     Toggle(isOn: $confirmTrades) {
                         VStack(alignment: .leading, spacing: 2) {
@@ -151,5 +154,50 @@ struct SettingsView: View {
         defer { barkBusy = false }
         do { notices.data = try await BarkSwitch.set(value, connection: c); Haptics.success() }
         catch { notices.error = error.localizedDescription; Haptics.warning() }
+    }
+}
+
+private struct StatisticsResetSection: View {
+    let connection: Connection
+    @Environment(AccountStore.self) private var account
+    @State private var confirming = false
+    @State private var busy = false
+    @State private var error: String?
+
+    var body: some View {
+        Section {
+            Button {
+                Haptics.tap()
+                confirming = true
+            } label: {
+                HStack {
+                    Label("重置表现统计", systemImage: "arrow.counterclockwise")
+                    Spacer()
+                    if busy { ProgressView().controlSize(.small) }
+                }
+            }
+            .disabled(busy || account.connection != connection)
+            .alert("重新开始统计？", isPresented: $confirming) {
+                Button("取消", role: .cancel) {}
+                Button("重置统计", role: .destructive) {
+                    busy = true
+                    error = nil
+                    Task {
+                        defer { busy = false }
+                        do { try await account.resetStatistics(for: connection); Haptics.success() }
+                        catch { self.error = error.localizedDescription; Haptics.warning() }
+                    }
+                }
+            } message: {
+                Text("本机将从现在起统计当前账户平仓的交易。成交记录、持仓和风控设置均会保留。")
+            }
+        } header: {
+            Text("表现统计")
+        } footer: {
+            if let error { Text(error).foregroundStyle(Color.amber) }
+            else if let since = account.statisticsSince {
+                Text("统计起点  \(Date(timeIntervalSince1970: since).formatted(date: .abbreviated, time: .shortened))")
+            }
+        }
     }
 }

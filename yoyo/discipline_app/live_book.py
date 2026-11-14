@@ -1500,7 +1500,7 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
                 self.event(db, 'entry_stop_verified', dict(id=identity, stop=target['stop']))
             return dict(id=identity, stop=verified['slTriggerPx'], status='verified')
 
-    def statistics(self, days=30):
+    def statistics(self, days=30, since=None):
         from .statistics import summarize
         from .statistics_basis import confirmed_amount
         from .statistics_reset import display_state, history_epoch
@@ -1508,13 +1508,13 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
             raise Rejected('统计区间无效')
         with self.read_transaction() as (db,state):
             state=display_state(state)
-            result=summarize(state,self.equity(state),[],self.clock(),days)
+            result=summarize(state,self.equity(state),[],self.clock(),days,since)
             result['mode']=self.mode
             result['scope']='app_managed_trades'
             result['account_updated_at']=state['private_at']
             # Only a separately confirmed fixed basis can supply the denominator.
             # Current equity/cash and daily risk baselines must never substitute.
-            net = self.managed_pnl(state)
+            net = (dec(result['closed']['net_pnl']) if since is not None else self.managed_pnl(state))
             basis = confirmed_amount(state)
             result['account'].update(
                 initial_equity=str(basis) if basis is not None else None,
@@ -1524,7 +1524,7 @@ class LiveBook(OwnedLots, ManagedOrders, Book):
             result['account']['unrealized_pnl'] = str(sum((self.position_pnl(state, p)-dec(p['pnl']) for p in state['positions']), Decimal(0)))
             result['market_fresh']=not state['private_error'] and 0<=self.clock()-state['private_at']<=15
             epoch=history_epoch(state)
-            start=max(self.clock()-days*86400 if days else 0,epoch.get('started_at',0))
+            start=max(result['period_start'] or 0,epoch.get('started_at',0))
             result['statistics_started_at']=epoch.get('started_at')
             # Fees are complete-lifecycle fees at settlement; no double-counted entry.
             visible_ids={row['id'] for row in state['closed']}

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>天才交易员 - 设置与账户</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed": "#121e1c",
+            "primary-fixed-dim": "#78d8be",
+            "secondary-container": "#fc7a8f",
+            "on-secondary-container": "#730f2a",
+            "on-tertiary-container": "#ecf9f5",
+            "inverse-on-surface": "#f0f1ef",
+            "surface-container": "#edeeec",
+            "tertiary-container": "#677370",
+            "on-surface-variant": "#3e4945",
+            "on-primary-fixed-variant": "#005142",
+            "on-primary-fixed": "#002019",
+            "surface-container-lowest": "#ffffff",
+            "inverse-primary": "#78d8be",
+            "on-tertiary-fixed-variant": "#3d4947",
+            "secondary-fixed": "#ffd9dc",
+            "surface-container-high": "#e7e8e6",
+            "on-primary": "#ffffff",
+            "outline": "#6e7a75",
+            "primary-fixed": "#94f4d9",
+            "on-background": "#191c1b",
+            "secondary": "#a5374d",
+            "tertiary-fixed-dim": "#bcc9c6",
+            "on-primary-container": "#d3fff0",
+            "on-tertiary": "#ffffff",
+            "primary-container": "#087f69",
+            "on-surface": "#191c1b",
+            "error-container": "#ffdad6",
+            "on-secondary": "#ffffff",
+            "secondary-fixed-dim": "#ffb2bb",
+            "inverse-surface": "#2e3130",
+            "on-secondary-fixed-variant": "#851e36",
+            "surface-dim": "#d9dad8",
+            "primary": "#006452",
+            "surface-variant": "#e2e3e1",
+            "surface-bright": "#f9faf8",
+            "on-secondary-fixed": "#400011",
+            "surface-container-low": "#f3f4f2",
+            "tertiary": "#4e5b58",
+            "on-error": "#ffffff",
+            "error": "#ba1a1a",
+            "outline-variant": "#bdc9c4",
+            "surface-tint": "#006b58",
+            "background": "#f9faf8",
+            "on-error-container": "#93000a",
+            "tertiary-fixed": "#d8e5e1",
+            "surface-container-highest": "#e2e3e1",
+            "surface": "#f9faf8"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter-desktop": "2rem",
+            "space-2xl": "3rem",
+            "space-xl": "2rem",
+            "gutter": "1rem",
+            "margin": "1.25rem",
+            "margin-desktop": "3rem",
+            "space-sm": "0.5rem",
+            "gutter-tablet": "1.5rem",
+            "space-lg": "1.5rem",
+            "margin-tablet": "2rem",
+            "space-xs": "0.25rem",
+            "space-md": "1rem"
+          },
+          "fontFamily": {
+            "body-md": ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+            "display-lg-mobile": ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+            "numeric-hero": ["Inter", "sans-serif"],
+            "numeric-hero-mobile": ["Inter", "sans-serif"],
+            "headline-md": ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+            "label-md": ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+            "headline-sm": ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+            "label-lg": ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+            "body-lg": ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+            "label-sm": ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+            "display-lg": ["Inter", "sans-serif"],
+            "headline-lg": ["Inter", "sans-serif"],
+            "body-sm": ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"]
+          },
+          "fontSize": {
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "numeric-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "numeric-hero-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    /* iOS Custom Toggle Switch */
+    .ios-switch-input:checked + .ios-switch-track {
+      background-color: #087f69;
+    }
+    .ios-switch-input:checked + .ios-switch-track .ios-switch-thumb {
+      transform: translateX(18px);
+    }
+    /* iOS Alert Dialog Blur Glass */
+    .ios-alert-backdrop {
+      background-color: rgba(23, 36, 34, 0.38);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    .ios-alert-panel {
+      background-color: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      box-shadow: 0 20px 48px -8px rgba(23, 36, 34, 0.22);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex justify-center selection:bg-primary/20">
+<!-- iPhone Frame Mock Viewport Container (390/393pt standard) -->
+<div class="w-full max-w-[414px] min-h-screen bg-surface flex flex-col relative pb-28 shadow-2xl overflow-x-hidden">
+<!-- Top Status Bar Area (iOS Native Safe Area) -->
+<header class="sticky top-0 z-40 bg-surface/85 backdrop-blur-xl">
+<!-- iOS Status Time & Sensors Mock -->
+<div class="h-11 px-6 flex justify-between items-center text-on-surface">
+<span class="font-label-sm text-label-sm font-semibold tracking-tight">9:41</span>
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[15px]" data-icon="signal_cellular_alt">signal_cellular_alt</span>
+<span class="material-symbols-outlined text-[15px]" data-icon="wifi">wifi</span>
+<span class="material-symbols-outlined text-[17px]" data-icon="battery_full">battery_full</span>
+</div>
+</div>
+<!-- Navigation TopAppBar -->
+<div class="flex justify-between items-center w-full px-4 h-12">
+<button aria-label="返回" class="flex items-center justify-center w-9 h-9 rounded-full hover:bg-surface-container active:scale-95 transition-all text-on-surface">
+<span class="material-symbols-outlined text-[24px]" data-icon="arrow_back_ios_new">arrow_back_ios_new</span>
+</button>
+<div class="flex flex-col items-center">
+<h1 class="font-headline-sm text-headline-sm text-on-surface font-bold tracking-tight">设置与账户</h1>
+<span class="font-body-sm text-[11px] leading-tight text-outline flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+            天才交易员 v2.9.6 · 本地守护引擎
+          </span>
+</div>
+<button aria-label="帮助" class="flex items-center justify-center w-9 h-9 rounded-full bg-surface-container hover:bg-surface-variant active:scale-95 transition-all text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]" data-icon="help">help</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas: iOS Grouped Lists -->
+<main class="flex-1 px-4 pt-3 space-y-5">
+<!-- 分组一：交易账户 -->
+<section class="space-y-1.5">
+<div class="px-3">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">交易账户</span>
+</div>
+<div class="bg-surface-container-lowest rounded-[22px] overflow-hidden shadow-[0_4px_24px_-2px_rgba(23,36,34,0.04),0_1px_3px_0_rgba(8,127,105,0.02)]">
+<!-- 主账户状态行 -->
+<div class="p-4 flex items-center justify-between">
+<div class="flex items-center gap-3.5">
+<div class="w-11 h-11 rounded-2xl bg-surface-container-low flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[24px]" data-icon="token">token</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg font-semibold text-on-surface">OKX 实盘 #01</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed/40 text-primary font-label-sm text-[10px] font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
+                    运行中·正常
+                  </span>
+</div>
+<span class="font-body-sm text-body-sm text-outline mt-0.5">已建立持久毫秒级专线 (低延迟)</span>
+</div>
+</div>
+</div>
+<div class="h-[1px] bg-surface-container/60 mx-4"></div>
+<!-- 切换账户 -->
+<button class="w-full px-4 py-3.5 flex items-center justify-between hover:bg-surface-container-low active:bg-surface-container transition-colors text-left">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="switch_account">switch_account</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface">切换账户</span>
+</div>
+<div class="flex items-center gap-1 text-outline">
+<span class="font-body-sm text-body-sm">2 个可用</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</button>
+<div class="h-[1px] bg-surface-container/60 mx-4"></div>
+<!-- 管理交易账户及隔离密钥 -->
+<button class="w-full px-4 py-3.5 flex items-center justify-between hover:bg-surface-container-low active:bg-surface-container transition-colors text-left">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="vpn_key">vpn_key</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface">管理交易账户及隔离密钥</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- 分组二：【核心新增】表现统计 -->
+<section class="space-y-1.5">
+<div class="px-3">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">表现统计</span>
+</div>
+<div class="bg-surface-container-lowest rounded-[22px] overflow-hidden shadow-[0_4px_24px_-2px_rgba(23,36,34,0.04),0_1px_3px_0_rgba(8,127,105,0.02)]">
+<div class="px-4 py-3 flex items-center justify-between min-h-[56px]">
+<div class="flex items-center gap-3.5 pr-2">
+<!-- 重置图标 arrow.counterclockwise -->
+<div class="w-8 h-8 rounded-xl bg-surface-container-low flex items-center justify-center text-primary-container shrink-0">
+<span class="material-symbols-outlined text-[20px]" data-icon="restart_alt">restart_alt</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-semibold text-on-surface">重置表现统计</span>
+<span class="font-body-sm text-[12px] text-outline leading-tight mt-0.5">只针对当前账户，从此刻重新计算 App 表现</span>
+</div>
+</div>
+<!-- 原生触控入口：具备标准 44pt 触控命中区 -->
+<button aria-label="执行重置" class="h-11 px-3.5 flex items-center justify-center rounded-full bg-surface-container-low hover:bg-surface-container active:scale-95 transition-all text-primary font-label-md text-label-md font-semibold shrink-0" id="open-alert-btn">
+              重置
+            </button>
+</div>
+</div>
+</section>
+<!-- 分组三：交易安全与风控执行 -->
+<section class="space-y-1.5">
+<div class="px-3">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">交易安全与风控执行</span>
+</div>
+<div class="bg-surface-container-lowest rounded-[22px] overflow-hidden shadow-[0_4px_24px_-2px_rgba(23,36,34,0.04),0_1px_3px_0_rgba(8,127,105,0.02)]">
+<!-- 开平仓二次确认 -->
+<div class="px-4 py-3.5 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="verified_user">verified_user</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-on-surface font-medium">开平仓二次确认</span>
+<span class="font-body-sm text-[11px] text-outline">下单前调出安全核验滑块</span>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only ios-switch-input" type="checkbox"/>
+<div class="ios-switch-track w-[46px] h-7 bg-surface-container-highest rounded-full transition-colors duration-200 ease-in-out p-0.5">
+<div class="ios-switch-thumb w-6 h-6 bg-surface-container-lowest rounded-full shadow-md transform transition-transform duration-200 ease-in-out"></div>
+</div>
+</label>
+</div>
+<div class="h-[1px] bg-surface-container/60 mx-4"></div>
+<!-- 严格止损锁定 -->
+<div class="px-4 py-3.5 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="lock_clock">lock_clock</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-on-surface font-medium">严格止损锁定</span>
+<span class="font-body-sm text-[11px] text-outline">入场即委托防爆止损，禁止取消</span>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only ios-switch-input" type="checkbox"/>
+<div class="ios-switch-track w-[46px] h-7 bg-surface-container-highest rounded-full transition-colors duration-200 ease-in-out p-0.5">
+<div class="ios-switch-thumb w-6 h-6 bg-surface-container-lowest rounded-full shadow-md transform transition-transform duration-200 ease-in-out"></div>
+</div>
+</label>
+</div>
+</div>
+<div class="px-3 pt-0.5">
+<p class="font-body-sm text-[11px] text-outline leading-relaxed">
+            * 引擎已在核心层面严格执行 1R 绝对止损与日内最大回撤熔断规则。
+          </p>
+</div>
+</section>
+<!-- 分组四：通知与报警 -->
+<section class="space-y-1.5">
+<div class="px-3">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">通知与报警</span>
+</div>
+<div class="bg-surface-container-lowest rounded-[22px] overflow-hidden shadow-[0_4px_24px_-2px_rgba(23,36,34,0.04),0_1px_3px_0_rgba(8,127,105,0.02)]">
+<div class="px-4 py-3.5 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="notifications_active">notifications_active</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-medium">App 内报警弹窗</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only ios-switch-input" type="checkbox"/>
+<div class="ios-switch-track w-[46px] h-7 bg-surface-container-highest rounded-full transition-colors duration-200 ease-in-out p-0.5">
+<div class="ios-switch-thumb w-6 h-6 bg-surface-container-lowest rounded-full shadow-md transform transition-transform duration-200 ease-in-out"></div>
+</div>
+</label>
+</div>
+<div class="h-[1px] bg-surface-container/60 mx-4"></div>
+<div class="px-4 py-3.5 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="volume_up">volume_up</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-medium">报警声音</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only ios-switch-input" type="checkbox"/>
+<div class="ios-switch-track w-[46px] h-7 bg-surface-container-highest rounded-full transition-colors duration-200 ease-in-out p-0.5">
+<div class="ios-switch-thumb w-6 h-6 bg-surface-container-lowest rounded-full shadow-md transform transition-transform duration-200 ease-in-out"></div>
+</div>
+</label>
+</div>
+</div>
+</section>
+<!-- 分组五：体验与偏好 -->
+<section class="space-y-1.5">
+<div class="px-3">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">体验与偏好</span>
+</div>
+<div class="bg-surface-container-lowest rounded-[22px] overflow-hidden shadow-[0_4px_24px_-2px_rgba(23,36,34,0.04),0_1px_3px_0_rgba(8,127,105,0.02)]">
+<div class="px-4 py-3.5 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="vibration">vibration</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-medium">触感反馈 (Haptics)</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only ios-switch-input" type="checkbox"/>
+<div class="ios-switch-track w-[46px] h-7 bg-surface-container-highest rounded-full transition-colors duration-200 ease-in-out p-0.5">
+<div class="ios-switch-thumb w-6 h-6 bg-surface-container-lowest rounded-full shadow-md transform transition-transform duration-200 ease-in-out"></div>
+</div>
+</label>
+</div>
+<div class="h-[1px] bg-surface-container/60 mx-4"></div>
+<button class="w-full px-4 py-3.5 flex items-center justify-between hover:bg-surface-container-low active:bg-surface-container transition-colors text-left">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="palette">palette</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-medium">外观</span>
+</div>
+<div class="flex items-center gap-1 text-outline">
+<span class="font-body-sm text-body-sm">白瓷浅色 (系统自适应)</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</button>
+</div>
+</section>
+<!-- 底端品牌标记 -->
+<div class="text-center py-4 text-outline/60 font-body-sm text-[11px]">
+        天才交易员 · 纯本地独立运行引擎
+      </div>
+</main>
+<!-- 原生系统确认弹窗覆盖层 (Native iOS Alert View) -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-6 ios-alert-backdrop transition-opacity duration-200" id="ios-alert-modal">
+<div class="w-full max-w-[285px] ios-alert-panel rounded-[20px] overflow-hidden text-center transform scale-100 transition-all duration-200">
+<!-- 弹窗文字内容区 -->
+<div class="px-4 pt-5 pb-4">
+<h2 class="font-headline-sm text-[17px] leading-6 font-bold text-on-surface">重新开始统计？</h2>
+<p class="font-body-sm text-[13px] leading-[18px] text-on-surface-variant mt-2 font-normal">
+            只针对当前账户，将从此刻重新开始计算 App 的累计盈亏与胜率表现。已完成的历史交易账本记录与本地风控额度将完整保留。
+          </p>
+</div>
+<!-- 经典 iOS Alert 双按钮细分割线排布 -->
+<div class="border-t border-[#bdc9c4]/40 flex w-full">
+<!-- 取消按钮 -->
+<button class="flex-1 h-[44px] flex items-center justify-center text-[17px] font-normal text-[#0071E3] hover:bg-surface-container/50 active:bg-surface-container active:opacity-70 transition-colors" id="cancel-alert-btn">
+            取消
+          </button>
+<!-- 纵向分割线 -->
+<div class="w-[1px] bg-[#bdc9c4]/40"></div>
+<!-- 重置统计操作按钮 (突出危险/重置动作) -->
+<button class="flex-1 h-[44px] flex items-center justify-center text-[17px] font-semibold text-secondary hover:bg-surface-container/50 active:bg-surface-container active:opacity-70 transition-colors" id="confirm-alert-btn">
+            重置统计
+          </button>
+</div>
+</div>
+</div>
+<!-- 底部导航栏 BottomNavBar (从 Shared Components 映射) -->
+<nav class="fixed bottom-0 left-0 w-full z-40 flex justify-around items-center px-space-xs pt-space-xs pb-6 bg-surface-container-lowest/85 backdrop-blur-2xl border-t border-outline-variant/30 shadow-2xl">
+<!-- 1. 交易 -->
+<a class="flex flex-col items-center justify-center text-outline font-normal hover:text-primary active:scale-95 transition-transform duration-100 w-16" href="#">
+<span class="material-symbols-outlined text-[24px]" data-icon="candlestick_chart">candlestick_chart</span>
+<span class="text-[10px] leading-tight font-medium mt-1">交易</span>
+</a>
+<!-- 2. 监控 -->
+<a class="flex flex-col items-center justify-center text-outline font-normal hover:text-primary active:scale-95 transition-transform duration-100 w-16" href="#">
+<span class="material-symbols-outlined text-[24px]" data-icon="query_stats">query_stats</span>
+<span class="text-[10px] leading-tight font-medium mt-1">监控</span>
+</a>
+<!-- 3. 1.618 -->
+<a class="flex flex-col items-center justify-center text-outline font-normal hover:text-primary active:scale-95 transition-transform duration-100 w-16" href="#">
+<span class="material-symbols-outlined text-[24px]" data-icon="auto_graph">auto_graph</span>
+<span class="text-[10px] leading-tight font-medium mt-1">1.618</span>
+</a>
+<!-- 4. 持仓 -->
+<a class="flex flex-col items-center justify-center text-outline font-normal hover:text-primary active:scale-95 transition-transform duration-100 w-16" href="#">
+<span class="material-symbols-outlined text-[24px]" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="text-[10px] leading-tight font-medium mt-1">持仓</span>
+</a>
+<!-- 5. 统计 (当前账户/表现统计活跃对应) -->
+<a class="flex flex-col items-center justify-center text-primary font-semibold hover:text-primary active:scale-95 transition-transform duration-100 w-16" href="#">
+<span class="material-symbols-outlined text-[24px]" data-icon="analytics" data-weight="fill" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="text-[10px] leading-tight font-semibold mt-1">统计</span>
+</a>
+</nav>
+</div>
+<!-- 轻量交互控制 (弹窗触发与响应) -->
+<script>
+    const alertModal = document.getElementById('ios-alert-modal');
+    const openBtn = document.getElementById('open-alert-btn');
+    const cancelBtn = document.getElementById('cancel-alert-btn');
+    const confirmBtn = document.getElementById('confirm-alert-btn');
+
+    function closeModal() {
+      alertModal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function openModal() {
+      alertModal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    cancelBtn.addEventListener('click', closeModal);
+    confirmBtn.addEventListener('click', () => {
+      // 执行完成反馈微交互
+      closeModal();
+    });
+
+    openBtn.addEventListener('click', openModal);
+
+    // 点击蒙层关闭
+    alertModal.addEventListener('click', (e) => {
+      if (e.target === alertModal) {
+        closeModal();
+      }
+    });
+  </script>
+</body></html>

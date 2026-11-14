@@ -35,6 +35,7 @@ final class AccountStore {
 
     private(set) var connection: Connection?
     private(set) var scope = ""
+    private(set) var statisticsSince: Double?
     private var terminalEntry: String?
     private var closeNonce = 0
 
@@ -56,10 +57,12 @@ final class AccountStore {
     func attach(_ connection: Connection?) {
         guard connection != self.connection else { return }
         self.connection = connection
+        statisticsSince = nil
         state = nil; online = false; pendingEntry = nil; entryProgress = nil; closeAttempt = nil; closeStatus = "checking"
         guard let connection else { scope = ""; cached = nil; return }
         let digest = SHA256.hash(data: Data((AppConfig.serviceURL.absoluteString + "\n" + connection.token).utf8))
         scope = digest.prefix(16).map { String(format: "%02x", $0) }.joined() + ":\(connection.mode):\(connection.accountId)"
+        statisticsSince = UserDefaults.standard.object(forKey: statisticsStartKey) as? Double
         cached = LaunchCache.read(AccountState.self, "state", scope: scope)
         if let data = UserDefaults.standard.data(forKey: entryKey), let saved = try? JSONDecoder().decode(EntryIntent.self, from: data), Trading.isRequestId(saved.id) {
             pendingEntry = saved
@@ -317,9 +320,32 @@ final class AccountStore {
         return value.stopLoss
     }
 
+    private var statisticsStartKey: String { "spike-statistics-start:" + scope }
+
     func statistics(days: Int) async throws -> Statistics {
         guard let connection else { throw APIError(status: 0, message: "尚未连接") }
-        return try await API.get("/v1/statistics", query: [.init(name: "days", value: String(days))], connection: connection)
+        return try await fetchStatistics(days: days, since: statisticsSince, connection: connection)
+    }
+
+    private func fetchStatistics(days: Int, since: Double?, connection: Connection) async throws -> Statistics {
+        var query = [URLQueryItem(name: "days", value: String(days))]
+        if let since { query.append(.init(name: "since", value: String(since))) }
+        let stats: Statistics = try await API.get("/v1/statistics", query: query, connection: connection)
+        guard self.connection == connection, stats.mode == connection.mode, stats.accountId == connection.accountId,
+              stats.periodDays == days else { throw APIError(status: 0, message: "统计账户或区间已变更") }
+        guard stats.appliedSince == since else { throw APIError(status: 0, message: "服务端尚未应用统计起点，请稍后重试") }
+        return stats
+    }
+
+    /// Commit the device preference only after the service has returned this account's filtered results.
+    func resetStatistics(for connection: Connection) async throws {
+        let baseline = try await fetchStatistics(days: 0, since: nil, connection: connection)
+        let since = baseline.serverTime
+        guard since.isFinite, since > 0 else { throw APIError(status: 0, message: "无法读取统计起点") }
+        let fresh = try await fetchStatistics(days: 0, since: since, connection: connection)
+        UserDefaults.standard.set(since, forKey: statisticsStartKey)
+        statisticsSince = since
+        LaunchCache.write(fresh, "stats-0", scope: scope)
     }
 
     func accounts() async throws -> AccountList {

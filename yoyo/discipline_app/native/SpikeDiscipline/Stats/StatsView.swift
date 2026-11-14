@@ -20,7 +20,7 @@ struct StatsView: View {
     @Environment(\.reselect) private var reselect
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    private var key: String { "\(session.connection?.accountId ?? "")|\(session.connection?.mode ?? "")|\(days)" }
+    private var key: String { "\(account.scope)|\(account.statisticsSince ?? 0)|\(days)" }
 
     var body: some View {
         ZStack {
@@ -29,7 +29,7 @@ struct StatsView: View {
                 CompactPageHeader(title: "表现统计", subtitle: "账户净值 · App 内已平仓交易") {
                     RoundIcon(systemName: "gearshape") { showSettings = true }.accessibilityLabel("设置")
                 }
-                SoftSegment(selection: $days, options: [(7, "近 7 天"), (30, "近 30 天"), (0, "全部历史")])
+                SoftSegment(selection: $days, options: [(7, "近 7 天"), (30, "近 30 天"), (0, account.statisticsSince == nil ? "全部历史" : "重置以来")])
                     .padding(.horizontal, 14)
                     .padding(.vertical, 7)
                     .background(Color(uiColor: .systemBackground))
@@ -80,7 +80,8 @@ struct StatsView: View {
     private func restore() {
         guard let connection = session.connection else { data = nil; return }
         guard let saved = LaunchCache.read(Statistics.self, "stats-\(days)", scope: account.scope),
-              saved.periodDays == days, saved.accountId == connection.accountId, saved.mode == connection.mode else {
+              saved.appliedSince == account.statisticsSince, saved.periodDays == days,
+              saved.accountId == connection.accountId, saved.mode == connection.mode else {
             data = nil
             return
         }
@@ -94,14 +95,13 @@ struct StatsView: View {
         defer { if requested == key { loading = false } }
         do {
             let next = try await account.statistics(days: days)
-            guard next.mode == connection.mode, next.periodDays == days, next.accountId == connection.accountId else { throw APIError(status: 0, message: "统计响应与当前账户不匹配") }
-            guard requested == key else { return }
+            guard requested == key, !Task.isCancelled, session.connection == connection else { return }
             withAnimation(.snappy) { data = next }
             error = nil
             LaunchCache.write(next, "stats-\(days)", scope: account.scope)
         } catch is CancellationError {
         } catch {
-            guard requested == key else { return }
+            guard requested == key, !Task.isCancelled else { return }
             self.error = error.localizedDescription; session.handle(error)
         }
     }
@@ -126,7 +126,7 @@ struct StatsView: View {
         let a = s?.account
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("账户累计净盈亏").font(.subheadline.weight(.semibold)).foregroundStyle(Color.muted)
+                Text(account.statisticsSince == nil ? "账户累计净盈亏" : "已平仓净盈亏").font(.subheadline.weight(.semibold)).foregroundStyle(Color.muted)
                 Spacer()
                 // Syncing after a launch from the cached snapshot (Stitch c8bea04c… “同步最新中”).
                 if stale && session.connection != nil && NetworkWatch.shared.online {
@@ -146,7 +146,7 @@ struct StatsView: View {
                     VStack(alignment: .trailing, spacing: 2) {
                         Text("\((Double(r) ?? 0) > 0 ? "+" : "")\(Fmt.fractionPercent(r, 2))%")
                             .font(.subheadline.weight(.bold).monospacedDigit()).foregroundStyle(tone(r))
-                        Text("总收益率").font(.caption2).foregroundStyle(Color.muted)
+                        Text(account.statisticsSince == nil ? "总收益率" : "区间收益率").font(.caption2).foregroundStyle(Color.muted)
                     }
                 }
             }
