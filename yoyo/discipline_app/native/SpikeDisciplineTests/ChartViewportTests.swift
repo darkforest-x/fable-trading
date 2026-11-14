@@ -51,15 +51,14 @@ final class ChartViewportTests: XCTestCase {
         XCTAssertEqual(withInactiveLines, candleOnly)
     }
 
-    func testReferenceScalePreferencePreservesExplicitReplayAndCallerExclusions() {
-        XCTAssertFalse(ChartReferenceScalePolicy.includesReferences(userPreference: false, callerAllows: true,
-                                                                      explicitReplay: false))
-        XCTAssertTrue(ChartReferenceScalePolicy.includesReferences(userPreference: true, callerAllows: true,
-                                                                     explicitReplay: false))
-        XCTAssertTrue(ChartReferenceScalePolicy.includesReferences(userPreference: false, callerAllows: true,
-                                                                     explicitReplay: true))
-        XCTAssertFalse(ChartReferenceScalePolicy.includesReferences(userPreference: true, callerAllows: false,
-                                                                      explicitReplay: true))
+    func testLiveScaleDoesNotDependOnDisplayingOffscreenReferences() {
+        XCTAssertFalse(ChartReferenceScalePolicy.includesReferences(callerAllows: true, explicitReplay: false))
+        XCTAssertTrue(ChartReferenceScalePolicy.includesReferences(callerAllows: true, explicitReplay: true))
+        XCTAssertFalse(ChartReferenceScalePolicy.includesReferences(callerAllows: false, explicitReplay: true))
+        let prices = [145.0, 123, 100, 98, 145, 67, 79, 102, .infinity, 0]
+        let edges = ChartEdgeCatalog(prices.map { ChartEdgeLevel(title: String($0), price: $0) }, visible: 98...102)
+        XCTAssertEqual(edges.above.map(\.price), [123, 145])
+        XCTAssertEqual(edges.below.map(\.price), [79, 67])
     }
 
     func testExecutionPricesRemainInExplicitReplayDomainWhenReferenceFitIsDisabled() throws {

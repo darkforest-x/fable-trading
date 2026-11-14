@@ -38,7 +38,7 @@ struct SpikeDisciplineApp: App {
 }
 
 enum AppTab: String, Hashable, CaseIterable, Identifiable {
-    case fib, monitor, trade, positions, stats
+    case positions, stats, trade, fib, monitor
     var id: String { rawValue }
     var title: String { switch self { case .trade: "交易"; case .monitor: "监控"; case .fib: "1.618"; case .positions: "持仓"; case .stats: "统计" } }
     /// Minimal SF Symbols (owner 2026-11-07 “简约”): outline when idle, filled when active.
@@ -66,7 +66,7 @@ struct RootView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var tradeShowsChart = false
     @State private var tab: AppTab = .fib       // owner 2026-11-07: open on 1.618
-    @State private var progress: CGFloat = CGFloat(AppTab.allCases.firstIndex(of: .fib)!)
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showNotifications = false
     @State private var showSettings = false
     @State private var bannerDrag: CGFloat = 0
@@ -89,12 +89,13 @@ struct RootView: View {
         GeometryReader { proxy in
         ScrollViewReader { reader in
         ScrollView(.horizontal) {
-            HStack(spacing: 0) {
+            LazyHStack(spacing: 0) {
                 ForEach(AppTab.allCases) { page in
                     content(page)
                         // Only the outer pager locks while chart gestures own the canvas.
                         .environment(\.isScrollEnabled, true)
                         .environment(\.reselect, reselect[page] ?? 0)
+                        .accessibilityHidden(tab != page)
                         // Backgrounds run edge to edge; content keeps the real safe area.
                         .safeAreaPadding(.top, proxy.safeAreaInsets.top)
                         .safeAreaPadding(.bottom, proxy.safeAreaInsets.bottom)
@@ -111,9 +112,6 @@ struct RootView: View {
         // The 1.618 page is a full-screen chart: horizontal drags pan the chart, not the pages. 监控 nests its
         // own menu pager (owner 2026-11-09); UIKit gives it drags first and hands edge drags back here.
         .scrollDisabled((tab == .fib || (tab == .trade && tradeShowsChart)) && target == nil)
-        .onScrollGeometryChange(for: CGFloat.self) { geo in
-            geo.contentOffset.x / max(geo.containerSize.width, 1)
-        } action: { _, value in progress = value }
         .onChange(of: scrolled) { _, value in
             guard let value else { return }
             if let target {
@@ -122,10 +120,14 @@ struct RootView: View {
             }
             if value != tab { tab = value }
         }
-        .onChange(of: tab) { _, value in
+        .onChange(of: tab) { previous, value in
             guard scrolled != value else { return }
             target = value
-            withAnimation(.spring(response: 0.42, dampingFraction: 0.86)) { reader.scrollTo(value, anchor: .leading) }
+            let pages = AppTab.allCases
+            let adjacent = abs(pages.firstIndex(of: previous)! - pages.firstIndex(of: value)!) == 1
+            var transaction = Transaction(animation: adjacent && !reduceMotion ? .easeOut(duration: 0.20) : nil)
+            transaction.disablesAnimations = reduceMotion || !adjacent
+            withTransaction(transaction) { reader.scrollTo(value, anchor: .leading) }
             // Never leave paging locked if the scroll position report is missed.
             Task { try? await Task.sleep(for: .seconds(1.2)); if target == value { target = nil; scrolled = value } }
         }
@@ -146,7 +148,7 @@ struct RootView: View {
         }
         .overlay(alignment: .bottom) {
             if !landscape {
-                GlassTabBar(selection: $tab, onReselect: { reselect[$0, default: 0] += 1 }, progress: progress, badge: notices.unread)
+                GlassTabBar(selection: $tab, onReselect: { reselect[$0, default: 0] += 1 }, badge: notices.unread)
                     .padding(.horizontal, 14)
                     .padding(.bottom, 2)
             }
@@ -221,10 +223,17 @@ struct RootView: View {
                              side: event.side, occurredMs: event.occurredMs)
             }
         ))
+        .accessibilityHidden(showNotifications)
         #if DEBUG
         .sheet(isPresented: .constant(AppConfig.qaWidgets)) { WidgetGallery() }
         #endif
-        .sheet(isPresented: $showNotifications) { NotificationCenterView(onOpen: open) }
+        .sheet(isPresented: $showNotifications) {
+            NotificationCenterView(onOpen: open, onOpenMarket: { symbol in
+                fibNavigation.showLiveChart()
+                fib.focus(symbol)
+                tab = .fib
+            })
+        }
         .sheet(isPresented: $showSettings) { SettingsView() }
 
         .sheet(isPresented: Binding(get: { ticket.fibTicket }, set: { if !$0 { ticket.manual(); ticket.fibTicket = false } })) {
@@ -251,7 +260,7 @@ struct RootView: View {
 
     @ViewBuilder private func content(_ page: AppTab) -> some View {
         switch page {
-        case .monitor: MonitorView(showNotifications: $showNotifications)
+        case .monitor: MonitorView(showNotifications: $showNotifications, active: tab == .monitor && scenePhase == .active)
         case .trade: TradeView(active: tab == .trade && scenePhase == .active && !landscape, showingChart: $tradeShowsChart, onDestination: route)
         case .fib: FibView(active: tab == .fib && scenePhase == .active && !landscape, onQuick: { row, period in
             guard account.pendingEntry == nil else { return }
@@ -324,7 +333,7 @@ struct RootView: View {
 
     private func applyQA() {
         #if DEBUG
-        if let value = AppConfig.qaTab, let qa = AppTab(rawValue: value) { tab = qa; progress = CGFloat(AppTab.allCases.firstIndex(of: qa) ?? 0) }
+        if let value = AppConfig.qaTab, let qa = AppTab(rawValue: value) { tab = qa }
         if let value = AppConfig.qaSegment { UserDefaults.standard.set(value, forKey: "monitor.segment") }
         #endif
     }
@@ -334,25 +343,24 @@ struct RootView: View {
 struct GlassTabBar: View {
     @Binding var selection: AppTab
     var onReselect: (AppTab) -> Void = { _ in }
-    let progress: CGFloat
     let badge: Int
-    @Namespace private var glass
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         GeometryReader { proxy in
             let count = CGFloat(AppTab.allCases.count), inset: CGFloat = 5
             let item = (proxy.size.width - inset * 2) / count
-            let x = inset + item * min(max(progress, 0), count - 1)
+            let x = inset + item * CGFloat(AppTab.allCases.firstIndex(of: selection) ?? 0)
             ZStack(alignment: .leading) {
                 Capsule().fill(Color.accentColor.opacity(0.10))
                     .frame(width: item, height: proxy.size.height - inset * 2)
                     .offset(x: x)
+                    .animation(reduceMotion ? nil : .easeOut(duration: 0.16), value: selection)
                 HStack(spacing: 0) {
                     ForEach(AppTab.allCases) { page in
                         let active = selection == page
                         Button {
-                            Haptics.tap()
-                            if selection == page { onReselect(page) } else { withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) { selection = page } }
+                            if selection == page { Haptics.tap(); onReselect(page) } else { selection = page }
                         } label: {
                             VStack(spacing: 2) {
                                 Image(systemName: page.symbol(active: active))
@@ -360,8 +368,6 @@ struct GlassTabBar: View {
                                     .foregroundStyle(page == .trade ? Color(uiColor: .systemBackground) : active ? Color.accentColor : Color.muted)
                                     .frame(width: 36, height: 23)
                                     .background(page == .trade ? (active ? Color.accentColor : Color.ink) : .clear, in: .capsule)
-                                    .symbolEffect(.bounce, value: active)
-                                    .contentTransition(.symbolEffect(.replace))
                                     .overlay(alignment: .topTrailing) {
                                         if page == .monitor && badge > 0 {
                                             Text(badge > 9 ? "9+" : "\(badge)").font(.scaled(size: 10, weight: .bold)).foregroundStyle(.white)

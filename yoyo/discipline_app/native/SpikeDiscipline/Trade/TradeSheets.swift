@@ -89,154 +89,31 @@ struct SymbolPicker: View {
     @Environment(TicketModel.self) private var ticket
     @Environment(\.dismiss) private var dismiss
     @State private var search = ""
-    @AppStorage("trade.watchlist.filter") private var filter = 0
-    @State private var sort = Trading.ContractSort.volume
-    @State private var ranked: [String] = []
-    @State private var favorites = UserDefaults.standard.stringArray(forKey: "spike-favorites") ?? []
-
-    private var instruments: [String] {
-        account.state?.instruments.values.filter { $0.tradable != false }.map(\.symbol).sorted() ?? []
-    }
-
-    private var recent: Set<String> {
-        guard let state = account.state else { return [] }
-        return Set(state.positions.map(\.symbol) + state.pending.map(\.symbol) + state.closed.map(\.symbol))
-    }
-
-    private func searchKey(_ raw: String) -> String {
-        raw.uppercased().replacingOccurrences(of: ".P", with: "").filter { $0.isLetter || $0.isNumber }
-    }
 
     var body: some View {
-        let searchText = searchKey(search)
-        let recentSymbols = recent
-        let rows = ranked.filter { symbol in
-            (filter == 0 || (filter == 1 && favorites.contains(symbol)) || (filter == 2 && recentSymbols.contains(symbol)))
-                && (searchText.isEmpty || searchKey(symbol).contains(searchText))
-        }
         NavigationStack {
-            VStack(spacing: 0) {
-                HStack(spacing: 8) {
-                    Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                    TextField("搜索币种或合约", text: $search)
-                        .textInputAutocapitalization(.characters).autocorrectionDisabled()
-                    if !search.isEmpty {
-                        Button { search = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary) }
-                            .accessibilityLabel("清除搜索")
-                    }
-                }.padding(.horizontal, 12).frame(minHeight: 42).background(Color.field, in: .rect(cornerRadius: 10))
-                    .padding(.horizontal, 14)
-                HStack(spacing: 6) {
-                    ForEach(Array(["全部", "自选", "最近"].enumerated()), id: \.offset) { i, name in
-                        Button {
-                            filter = i; Haptics.select()
-                        } label: {
-                            Text(name).font(.subheadline.weight(.semibold)).padding(.horizontal, 13)
-                                .frame(minHeight: 31)
-                                .background(filter == i ? Color.primary : Color.field, in: Capsule())
-                                .foregroundStyle(filter == i ? Color(uiColor: .systemBackground) : .primary)
-                                .frame(minHeight: 44)
-                        }.buttonStyle(.plain).accessibilityAddTraits(filter == i ? .isSelected : [])
-                    }
-                    Spacer()
-                    Menu {
-                        Button("24h 估算成交额") { changeSort(.volume) }
-                        Button("今日涨幅") { changeSort(.gainers) }
-                        Button("今日跌幅") { changeSort(.losers) }
-                        Divider()
-                        Button("更新排名") { rank() }
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text(sort == .volume ? "成交额" : sort == .gainers ? "涨幅" : "跌幅").font(.caption)
-                            Image(systemName: "arrow.up.arrow.down").font(.caption)
-                        }.frame(minWidth: 44, minHeight: 44)
-                    }.tint(.primary).accessibilityLabel("行情排序").accessibilityValue(sort == .volume ? "24h 估算成交额" : sort == .gainers ? "今日涨幅" : "今日跌幅")
-                }.padding(.horizontal, 14).padding(.vertical, 3)
-                HStack {
-                    Text("合约").padding(.leading, 4)
-                    Spacer()
-                    Text("最新价 / 今日涨跌")
-                }.font(.caption2).foregroundStyle(.secondary).padding(.horizontal, 16).padding(.bottom, 6)
-                Divider()
-                List {
-                    ForEach(rows, id: \.self) { symbol in row(symbol) }
-                    if rows.isEmpty {
-                        Text(!searchText.isEmpty ? "没有匹配的合约" : filter == 1 ? "在全部合约中点星标即可加入自选" : filter == 2 ? "交易过的合约会显示在这里" : "暂无可交易合约")
-                            .font(.subheadline).foregroundStyle(.secondary).frame(maxWidth: .infinity)
-                            .padding(.vertical, 28).listRowSeparator(.hidden)
-                    }
-                }
-                .listStyle(.plain).scrollDismissesKeyboard(.interactively)
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) { CloseButton { dismiss() } }.sharedBackgroundVisibility(.hidden)
-                ToolbarItem(placement: .principal) {
-                    VStack(spacing: 2) {
-                        Text("选择合约").font(.headline)
-                        Text("USDT 永续 · 北京时间 00:00 基准").font(.caption2).foregroundStyle(.secondary)
-                    }
-                }
-            }
-        }
-        .onChange(of: instruments, initial: true) { _, _ in rank() }
-    }
-
-    private func changeSort(_ value: Trading.ContractSort) {
-        Haptics.select(); sort = value; rank()
-    }
-
-    private func rank() {
-        ranked = Trading.rank(instruments, quotes: account.state?.quotes ?? [:], now: account.now, sort: sort)
-    }
-
-    private func row(_ symbol: String) -> some View {
-        let state = account.state, quote = state?.quotes[symbol]
-        let coin = Fmt.coin(symbol), chosen = symbol == ticket.symbol, favorite = favorites.contains(symbol)
-        let tick = state?.instruments[symbol]?.tick
-        let fresh = account.quoteFresh(symbol)
-        let change = fresh ? quote.flatMap { Trading.dayChange($0, now: account.now) } : nil
-        let delta = change.flatMap { percent -> Double? in
-            guard percent > -100, let value = quote.flatMap({ Double($0.last) }), value > 0 else { return nil }
-            return value * percent / (100 + percent)
-        }
-        return HStack(spacing: 0) {
-            Button {
-                if favorite { favorites.removeAll { $0 == symbol } } else { favorites.append(symbol) }
-                UserDefaults.standard.set(favorites, forKey: "spike-favorites"); Haptics.select()
-            } label: {
-                Image(systemName: favorite ? "star.fill" : "star").font(.subheadline)
-                    .foregroundStyle(favorite ? Color.amber : .secondary)
-                    .frame(width: 44, height: 48).contentShape(.rect)
-            }.buttonStyle(.plain).accessibilityLabel("\(favorite ? "取消自选" : "加入自选") \(coin)")
-            Button {
-                if symbol != ticket.symbol {
-                    ticket.choose(symbol); ticket.syncLeverage(state); ticket.syncExisting(state)
-                }
-                Haptics.select(); dismiss()
-            } label: {
-                HStack(spacing: 8) {
-                    CoinLogo(coin: coin, size: 30)
-                    VStack(alignment: .leading, spacing: 3) {
-                        HStack(spacing: 3) {
-                            Text(coin + "USDT").font(.subheadline.weight(.semibold)).lineLimit(1).minimumScaleFactor(0.75)
-                            if chosen { Image(systemName: "checkmark.circle.fill").font(.caption2).foregroundStyle(Color.accentColor) }
+            MarketWatchlist(search: $search, layout: .full, selectedSymbol: ticket.symbol, onSelect: select)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) { CloseButton { dismiss() } }.sharedBackgroundVisibility(.hidden)
+                    ToolbarItem(placement: .principal) {
+                        VStack(spacing: 2) {
+                            Text("选择合约").font(.headline)
+                            Text("USDT 永续 · 北京时间 00:00 基准").font(.caption2).foregroundStyle(.secondary)
                         }
-                        Text("OKX 永续").font(.caption).foregroundStyle(.secondary)
                     }
-                    Spacer(minLength: 4)
-                    VStack(alignment: .trailing, spacing: 3) {
-                        Text(fresh ? Fmt.price(quote?.last, tick: tick) : "—").font(.body.weight(.semibold))
-                        if let change, let delta {
-                            Text(Fmt.signed(delta, Fmt.decimals(tick: tick)) + "  " + Fmt.signed(change) + "%")
-                                .font(.caption).foregroundStyle(change == 0 ? Color.secondary : (change > 0 ? .up : .down))
-                        } else { Text("—").font(.caption).foregroundStyle(.secondary) }
-                    }.monospacedDigit().lineLimit(1).minimumScaleFactor(0.7)
-                }.frame(minHeight: 54).contentShape(.rect)
-            }.buttonStyle(.plain).accessibilityAddTraits(chosen ? .isSelected : [])
+                }
         }
-        .listRowInsets(EdgeInsets(top: 0, leading: 2, bottom: 0, trailing: 16))
-        .listRowBackground(chosen ? Color.accentColor.opacity(0.06) : Color(uiColor: .systemBackground))
+    }
+
+    private func select(_ symbol: String) {
+        if symbol != ticket.symbol {
+            ticket.choose(symbol)
+            ticket.syncLeverage(account.state)
+            ticket.syncExisting(account.state)
+        }
+        Haptics.select()
+        dismiss()
     }
 }
 

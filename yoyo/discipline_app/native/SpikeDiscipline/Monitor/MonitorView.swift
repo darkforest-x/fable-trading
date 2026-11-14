@@ -20,6 +20,8 @@ struct MonitorView: View {
     @Environment(NotificationStore.self) private var notices
     @AppStorage("monitor.segment") private var segment: MonitorSegment = .paper
     @Binding var showNotifications: Bool
+    var active = true
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var refresh: [MonitorSegment: Int] = [:]
     @State private var page: MonitorSegment?
     @State private var progress: CGFloat = 0
@@ -28,21 +30,21 @@ struct MonitorView: View {
 
     var body: some View {
         ZStack {
-            AmbientBackground()
+            Color(uiColor: .systemBackground).ignoresSafeArea()
             VStack(spacing: 0) {
                 CompactPageHeader(title: "全市场监控") {
                     RoundIcon(systemName: "bell", badge: notices.unread > 0) { notices.markRead(); showNotifications = true }
                         .accessibilityLabel(notices.unread > 0 ? "通知，\(notices.unread) 条未读" : "通知")
                 }
                 PagerSegment(options: MonitorSegment.allCases.map { ($0, $0.title) }, progress: progress) { target in
-                    withAnimation(.spring(response: 0.38, dampingFraction: 0.88)) { page = target }
+                    withAnimation(reduceMotion ? nil : .easeOut(duration: 0.20)) { page = target }
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 7)
                 .background(Color(uiColor: .systemBackground))
                 .overlay(alignment: .bottom) { Color.primary.opacity(0.07).frame(height: 1) }
                 if let connection = session.connection {
-                    pager(connection)
+                    if active { pager(connection) } else { Color.clear }
                 } else {
                     ConnectPrompt().padding(.horizontal, 14)
                     Spacer()
@@ -58,7 +60,7 @@ struct MonitorView: View {
         }
         .onAppear { if page == nil { page = segment; progress = CGFloat(MonitorSegment.allCases.firstIndex(of: segment) ?? 0) } }
         // A push for an alarm sets monitor.segment from outside (RootView).
-        .onChange(of: segment) { _, value in if page != value { withAnimation(.snappy) { page = value } } }
+        .onChange(of: segment) { _, value in if page != value { withAnimation(reduceMotion ? nil : .easeOut(duration: 0.20)) { page = value } } }
         .onChange(of: page) { _, value in if let value, value != segment { Haptics.select(); segment = value } }
     }
 
@@ -80,9 +82,9 @@ struct MonitorView: View {
         .scrollIndicators(.hidden)
         .scrollPosition(id: $page)
         .scrollEdgeEffectHidden(true, for: .all)
-        .onScrollGeometryChange(for: CGFloat.self) { geo in
-            geo.contentOffset.x / max(geo.containerSize.width, 1)
-        } action: { _, value in progress = value }
+        .onScrollGeometryChange(for: Int.self) { geo in
+            Int((geo.contentOffset.x / max(geo.containerSize.width, 1)).rounded())
+        } action: { _, value in progress = CGFloat(value) }
     }
 }
 
@@ -143,7 +145,6 @@ struct PagerSegment<T: Hashable>: View {
                     .accessibilityAddTraits(on ? .isSelected : [])
                 }
             }
-            .animation(.snappy, value: nearest)
         }
         .scrollIndicators(.hidden)
         .frame(height: 34)
@@ -196,9 +197,9 @@ struct Polled<T: Decodable>: ViewModifier {
     func body(content: Content) -> some View {
         content.task(id: key) {
             while !Task.isCancelled {
-                do { let next = try await load(); withAnimation(.snappy) { value = next }; error = nil }
+                do { let next = try await load(); guard !Task.isCancelled else { return }; value = next; error = nil }
                 catch is CancellationError { return }
-                catch { self.error = error.localizedDescription; session.handle(error) }
+                catch { guard !Task.isCancelled else { return }; self.error = error.localizedDescription; session.handle(error) }
                 try? await Task.sleep(for: every)
             }
         }

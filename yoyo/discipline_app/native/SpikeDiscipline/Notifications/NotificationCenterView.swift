@@ -5,8 +5,16 @@ struct NotificationCenterView: View {
     @Environment(NotificationStore.self) private var notices
     @Environment(\.dismiss) private var dismiss
     let onOpen: (NotificationEvent) -> Void
+    let onOpenMarket: (String) -> Void
+    @State private var page: NotificationCenterPage = .notifications
+    @State private var detent: PresentationDetent = .medium
     @State private var filter = "all"
     @State private var showUnpushed = false
+    @State private var marketSearch = ""
+
+    private enum NotificationCenterPage: Hashable {
+        case notifications, market
+    }
 
     private var rows: [NotificationEvent] {
         (notices.data?.events ?? []).uniqued { $0.id }.filter { (filter == "all" || $0.kind == filter) && (showUnpushed || $0.pushed || $0.isLiveMonthTouch || $0.kind == "alarm") }
@@ -14,29 +22,116 @@ struct NotificationCenterView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    SoftSegment(selection: $filter, options: [("all", "全部"), ("alarm", "报警"), ("fib", "周一"), (MonthTouchStyle.kind, "月首周")]).listRowBackground(Color.clear).listRowInsets(.init())
-                    Toggle("显示未推送的触价", isOn: $showUnpushed.animation()).font(.subheadline)
+            VStack(spacing: 0) {
+                centerTabs
+                if page == .notifications {
+                    notificationFeed
+                } else {
+                    MarketWatchlist(search: $marketSearch, layout: .full, selectedSymbol: nil, onSelect: openMarket)
                 }
-                if let error = notices.error { Section { Label(error, systemImage: "exclamationmark.triangle").foregroundStyle(Color.amber) } }
-                ForEach(Fmt.groupByDay(rows, now: notices.data?.nowMs ?? 0) { $0.atMs }, id: \.label) { group in
-                    Section(group.label) {
-                        ForEach(group.rows) { e in
-                            Button { Haptics.open(); onOpen(e); dismiss() } label: { NotificationRow(event: e, now: notices.data?.nowMs ?? 0) }
-                                .buttonStyle(.plain)
-                        }
+            }
+            .background(Color(uiColor: .systemBackground))
+            .navigationTitle("通知中心")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 5) {
+                        Text("通知中心").font(.headline)
+                        if notices.unread > 0 { Circle().fill(Color.accentColor).frame(width: 7, height: 7) }
+                    }
+                    .accessibilityElement(children: .combine)
+                }
+                ToolbarItem(placement: .topBarTrailing) { CloseButton { dismiss() } }
+            }
+        }
+        .presentationDetents([.medium, .large], selection: $detent)
+        .onChange(of: page) { _, destination in
+            if destination == .market { detent = .large }
+        }
+        .presentationBackground(Color(uiColor: .systemBackground))
+    }
+
+    private var centerTabs: some View {
+        HStack(spacing: 2) {
+            tabButton(.notifications, title: notices.unread > 0 ? "通知（\(notices.unread) 未读）" : "通知")
+            tabButton(.market, title: "市场")
+        }
+        .padding(3)
+        .background(Color.field, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+        .padding(.bottom, 4)
+        .background(Color(uiColor: .systemBackground))
+    }
+
+    private func tabButton(_ target: NotificationCenterPage, title: String) -> some View {
+        let selected = page == target
+        return Button {
+            guard !selected else { return }
+            Haptics.select()
+            withAnimation(.snappy) { page = target }
+        } label: {
+            Text(title)
+                .font(.scaled(size: 13, weight: selected ? .semibold : .medium))
+                .foregroundStyle(selected ? Color.ink : Color.muted)
+                .frame(maxWidth: .infinity)
+                .frame(height: 32)
+                .background {
+                    if selected {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(Color(uiColor: .systemBackground))
+                            .shadow(color: .black.opacity(0.08), radius: 4, y: 1)
                     }
                 }
-                if notices.data != nil && rows.isEmpty { Section { Text("暂无通知").foregroundStyle(.secondary) } }
-            }
-            .scrollContentBackground(.hidden)
-            .navigationTitle("通知")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { CloseButton { dismiss() } }.sharedBackgroundVisibility(.hidden) }
+                .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
-        .presentationDetents([.medium, .large])
-        .presentationBackground(.thinMaterial)
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    private var notificationFeed: some View {
+        List {
+            Section {
+                SoftSegment(selection: $filter, options: [("all", "全部"), ("alarm", "报警"), ("fib", "周一"), (MonthTouchStyle.kind, "月首周")], height: 34)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 2, leading: 14, bottom: 2, trailing: 14))
+                    .listRowSeparator(.hidden)
+                Toggle("显示未推送的触价", isOn: $showUnpushed.animation())
+                    .font(.subheadline)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 2, trailing: 16))
+                    .listRowSeparator(.hidden)
+            }
+            Section {
+                MarketWatchlist(search: $marketSearch, layout: .compact, selectedSymbol: nil, onSelect: openMarket)
+                    .listRowBackground(Color(uiColor: .secondarySystemBackground).opacity(0.55))
+                    .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
+                    .listRowSeparator(.hidden)
+            }
+            if let error = notices.error {
+                Section { Label(error, systemImage: "exclamationmark.triangle").foregroundStyle(Color.amber) }
+            }
+            ForEach(Fmt.groupByDay(rows, now: notices.data?.nowMs ?? 0) { $0.atMs }, id: \.label) { group in
+                Section(group.label) {
+                    ForEach(group.rows) { e in
+                        Button { Haptics.open(); onOpen(e); dismiss() } label: { NotificationRow(event: e, now: notices.data?.nowMs ?? 0) }
+                            .buttonStyle(.plain)
+                    }
+                }
+            }
+            if notices.data != nil && rows.isEmpty { Section { Text("暂无通知").foregroundStyle(.secondary) } }
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(Color(uiColor: .systemBackground))
+        .environment(\.defaultMinListRowHeight, 1)
+        .scrollDismissesKeyboard(.interactively)
+    }
+
+    private func openMarket(_ symbol: String) {
+        Haptics.open()
+        dismiss()
+        onOpenMarket(symbol)
     }
 }
 

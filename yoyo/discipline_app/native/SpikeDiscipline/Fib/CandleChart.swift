@@ -147,11 +147,29 @@ struct ChartPriceLevel {
     }
 }
 
-/// Keeps ordinary charts centered on visible OHLC while allowing a user-selected full reference fit.
-/// Explicit replay fits retain their prior domain unless their caller excluded references altogether.
-struct ChartReferenceScalePolicy {
-    static func includesReferences(userPreference: Bool, callerAllows: Bool, explicitReplay: Bool) -> Bool {
-        callerAllows && (userPreference || explicitReplay)
+/// Displaying a price never changes a live chart’s scale. Only explicit replay callers can fit levels.
+enum ChartReferenceScalePolicy {
+    static func includesReferences(callerAllows: Bool, explicitReplay: Bool) -> Bool {
+        callerAllows && explicitReplay
+    }
+}
+
+struct ChartEdgeLevel: Hashable {
+    let title: String
+    let price: Double
+}
+
+struct ChartEdgeCatalog {
+    private(set) var above: [ChartEdgeLevel] = []
+    private(set) var below: [ChartEdgeLevel] = []
+
+    init(_ levels: [ChartEdgeLevel], visible: ClosedRange<Double>) {
+        for level in Set(levels) where level.price.isFinite && level.price > 0 {
+            if level.price > visible.upperBound { above.append(level) }
+            if level.price < visible.lowerBound { below.append(level) }
+        }
+        above.sort { ($0.price, $0.title) < ($1.price, $1.title) }
+        below.sort { $0.price != $1.price ? $0.price > $1.price : $0.title < $1.title }
     }
 }
 
@@ -316,7 +334,7 @@ struct CandleChart: View {
     var highlightColor: Color? = nil
     /// Highlight the event's actual candle when the service resolved one. Nil means the bar is unknown.
     var focusBarTime: Double? = nil
-    /// Caller-level exclusion for event/replay routes; the user's reference-price fit preference is separate.
+    /// Caller-level exclusion for explicit replay fits; live charts always use visible candles.
     var fitReferenceLevels = true
     /// Also mark the first 1.618 touch of each previous week in `history` (found from the bars).
     var markHistory = false
@@ -331,6 +349,7 @@ struct CandleChart: View {
     var onNeedOlder: () -> Void = {}
 
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.displayScale) private var displayScale
     @State private var spacing: CGFloat = 7
     /// Committed horizontal offset in bars (0 = live edge). While `glide` runs, the drawn offset comes from it.
@@ -349,7 +368,7 @@ struct CandleChart: View {
     @State private var viewportInteracted = false
     @State private var resetGeneration = Int.min
     @AppStorage("touch.highScore") private var highScore = 0.5
-    @AppStorage("chart.fitReferencePrices") private var fitReferencePrices = false
+    @AppStorage("chart.fitReferencePrices") private var showOffscreenPrices = true
 
     private let axisWidth: CGFloat = 58
     private let timeHeight: CGFloat = 20
@@ -359,8 +378,7 @@ struct CandleChart: View {
     /// existing index-based viewport and spacing.
     private var timestampReplay: Bool { timestampFocus || (cloud && focusRange != nil) }
     private var fitReferencePricesInDomain: Bool {
-        ChartReferenceScalePolicy.includesReferences(userPreference: fitReferencePrices,
-                                                     callerAllows: fitReferenceLevels,
+        ChartReferenceScalePolicy.includesReferences(callerAllows: fitReferenceLevels,
                                                      explicitReplay: timestampFocus || focusRange != nil)
     }
 
@@ -374,12 +392,11 @@ struct CandleChart: View {
             // The time axis sits just above the floating bottom UI in wallpaper mode.
             let axisY = wallpaper ? plot.maxY - bottomOverlay - 12 : plot.maxY + timeHeight / 2 + 1
             let layout = Layout(bars: bars, spacing: spacing, offset: glide?.offset(at: timeline.date) ?? offset, plot: plot, rightPad: rightPad,
-                                period: period, range: range, history: history, lines: lines, wallpaper: wallpaper,
+                                period: period, range: range, lines: lines, wallpaper: wallpaper,
                                 bottomReserve: wallpaper ? Double((bottomOverlay + 34) / max(plot.height, 1)) : 0,
                                 hasBottomOverlay: bottomOverlay > 0, yShift: yShift, yZoom: yZoom,
                                 timestampAxis: timestampReplay, focusRange: focusRange, executions: executionMarkers,
-                                fitReferenceLevels: fitReferencePricesInDomain,
-                                fitHistoricalLevels: fitReferencePrices && fitReferenceLevels)
+                                fitReferenceLevels: fitReferencePricesInDomain)
             ZStack(alignment: .topLeading) {
                 if wallpaper { (scheme == .dark ? ChartPalette.hex(0x0B0E14) : Color.white) }
                 Canvas(rendersAsynchronously: false) { context, _ in
@@ -415,6 +432,25 @@ struct CandleChart: View {
             .simultaneousGesture(zoom)
             .simultaneousGesture(SpatialTapGesture(count: 2).onEnded { _ in reset(in: plot) })
             .simultaneousGesture(SpatialTapGesture(count: 1).onEnded { value in tap(value.location, layout: layout) })
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(watermark ?? "") \(period.label) K线")
+            .overlay(alignment: .topLeading) {
+                if showOffscreenPrices, !timestampFocus, focusRange == nil, cross == nil, glide == nil,
+                   panStart == nil, zoomStart == nil, axisStart == nil, layout.firstVisible <= layout.lastVisible {
+                    let floor = wallpaper ? axisY - 12 : plot.maxY - 4
+                    if floor > plot.minY + 80 {
+                        let edges = edgeCatalog(layout, floor: floor)
+                        VStack(alignment: .leading, spacing: 0) {
+                            if !edges.above.isEmpty { edgeMenu(edges.above, above: true) }
+                            Spacer(minLength: 0)
+                            if !edges.below.isEmpty { edgeMenu(edges.below, above: false) }
+                        }
+                        .frame(height: floor - plot.minY)
+                        .padding(.top, plot.minY)
+                        .padding(.leading, 5)
+                    }
+                }
+            }
             .onChange(of: layout.firstVisible) { _, first in
                 if first < 12 && bars.count >= 55 { onNeedOlder() }
             }
@@ -449,8 +485,49 @@ struct CandleChart: View {
                 offset += added
             }
         }
-        .accessibilityElement()
-        .accessibilityLabel("\(watermark ?? "") \(period.label) K线")
+
+    }
+
+    private func edgeCatalog(_ layout: Layout, floor: CGFloat) -> ChartEdgeCatalog {
+        let start = bars[layout.firstVisible].time
+        let end = bars[layout.lastVisible].time + period.seconds
+        var levels = lines.compactMap { line -> ChartEdgeLevel? in
+            let level = ChartPriceLevel(price: line.price, startTime: line.startTime, endTime: line.endTime)
+            guard level.overlaps(start: start, end: end) else { return nil }
+            return ChartEdgeLevel(title: line.title, price: line.price)
+        }
+        func append(_ range: FibRange, inner: Bool, prefix: String) {
+            guard range.end > start && range.start < end else { return }
+            levels += range.levels(inner: inner).map { ChartEdgeLevel(title: prefix + $0.title, price: $0.price) }
+        }
+        if let range { append(range, inner: innerLines, prefix: "") }
+        for past in history where past != range && past.end > start && past.start < end {
+            let day = Date(timeIntervalSince1970: past.start).formatted(.dateTime.month(.twoDigits).day(.twoDigits))
+            append(past, inner: false, prefix: day + " · ")
+        }
+        return ChartEdgeCatalog(levels, visible: layout.price(atY: floor)...layout.high)
+    }
+
+    private func edgeMenu(_ levels: [ChartEdgeLevel], above: Bool) -> some View {
+        let title = above ? "上方参考价" : "下方参考价"
+        return Menu {
+            Section(title) {
+                ForEach(levels, id: \.self) { level in
+                    Text("\(level.title)　\(format(level.price))")
+                }
+            }
+        } label: {
+            HStack(spacing: 3) {
+                Image(systemName: above ? "arrow.up" : "arrow.down")
+                Text("\(levels.count) · \(format(levels[0].price))").monospacedDigit()
+            }
+            .font(.caption2.weight(.semibold)).foregroundStyle(Color.muted)
+            .padding(.horizontal, 7).padding(.vertical, 3).background(Color.field, in: .capsule)
+            .frame(minWidth: 44, minHeight: 32).contentShape(.rect)
+        }
+        .menuStyle(.button).buttonStyle(.plain)
+        .accessibilityLabel("\(title)，\(levels.count) 个")
+        .accessibilityHint("查看价格明细")
     }
 
     private func reset() {
@@ -585,7 +662,7 @@ struct CandleChart: View {
                 ChartFrameProbe.shared.end()
                 #endif
                 let bounds = offsetBounds(layout: layout)
-                glide = Glide(origin: offset, speed: value.velocity.width, spacing: spacing, lower: bounds.lower, upper: bounds.upper)
+                glide = reduceMotion ? nil : Glide(origin: offset, speed: value.velocity.width, spacing: spacing, lower: bounds.lower, upper: bounds.upper)
                 #if DEBUG
                 if glide != nil { ChartFrameProbe.shared.begin("glide") }
                 #endif
@@ -673,10 +750,10 @@ struct CandleChart: View {
         let high: Double
 
         init(bars: [Candle], spacing: CGFloat, offset: CGFloat, plot: CGRect, rightPad: CGFloat, period: CandlePeriod, range: FibRange?,
-             history: [FibRange], lines: [ChartLine], wallpaper: Bool, bottomReserve: Double, hasBottomOverlay: Bool,
+             lines: [ChartLine], wallpaper: Bool, bottomReserve: Double, hasBottomOverlay: Bool,
              yShift: Double, yZoom: Double,
              timestampAxis: Bool = false, focusRange: ClosedRange<Double>? = nil, executions: [ExecutionMarker] = [],
-             fitReferenceLevels: Bool = true, fitHistoricalLevels: Bool = false) {
+             fitReferenceLevels: Bool) {
             // Live charts retain their O(visible-bars) layout work; only the short historical replay
             // window materializes a timestamp axis.
             let axis = ChartTimeAxis(times: timestampAxis ? bars.map(\.time) : [], periodSeconds: period.seconds)
@@ -712,14 +789,6 @@ struct CandleChart: View {
                 }
                 for line in lines where line.fitsScale {
                     priceScale.include(ChartPriceLevel(price: line.price, startTime: line.startTime, endTime: line.endTime),
-                                       visibleStart: visibleStart, visibleEnd: visibleEnd)
-                }
-            }
-            if fitHistoricalLevels, let visibleStart, let visibleEnd {
-                for past in history where past.end > visibleStart && past.start < visibleEnd {
-                    priceScale.include(ChartPriceLevel(price: past.lower, startTime: past.start, endTime: past.end),
-                                       visibleStart: visibleStart, visibleEnd: visibleEnd)
-                    priceScale.include(ChartPriceLevel(price: past.upper, startTime: past.start, endTime: past.end),
                                        visibleStart: visibleStart, visibleEnd: visibleEnd)
                 }
             }
@@ -825,7 +894,7 @@ struct CandleChart: View {
         let bodyWidth = max(pixel, snap(max(1, layout.spacing * 0.72))), wickWidth = max(pixel, snap(1))
         let wickInset = snap((bodyWidth - wickWidth) / 2)
         var candlePaths = [Path(), Path(), Path(), Path()], volumePaths = [Path(), Path(), Path(), Path()]
-        let maxVolume = visible.map(\.volume).max() ?? 0
+        let maxVolume = visible.lazy.map(\.volume).max() ?? 0
         let volumeFloor = snap(wallpaper ? axisY - 12 : plot.maxY), volumeHeight = plot.height * (wallpaper ? 0.08 : 0.14)
         for (index, bar) in zip(layout.firstVisible..., visible) {
             let tone = candleTone(bar), left = snap(layout.x(CGFloat(index)) - bodyWidth / 2)
@@ -856,9 +925,9 @@ struct CandleChart: View {
         // Full history can hold hundreds of weeks: draw only those overlapping the visible span.
         let shownFrom = layout.bars[layout.firstVisible].time, shownTo = layout.bars[layout.lastVisible].time + period.seconds
         for past in history where past.end > shownFrom && past.start < shownTo {
-            drawRange(&clipped, past, layout: layout, dark: dark, inner: false, faded: true)
+            drawRange(&clipped, past, layout: layout, dark: dark, inner: false, faded: true, priceFloor: priceFloor)
         }
-        if let range { drawRange(&clipped, range, layout: layout, dark: dark, inner: innerLines, faded: false) }
+        if let range { drawRange(&clipped, range, layout: layout, dark: dark, inner: innerLines, faded: false, priceFloor: priceFloor) }
 
         for tone in 0..<4 where !candlePaths[tone].isEmpty { clipped.fill(candlePaths[tone], with: .color(toneColor(tone))) }
 
@@ -881,6 +950,7 @@ struct CandleChart: View {
 
         for line in lines where line.price > 0 {
             let y = layout.y(line.price)
+            guard y >= plot.minY, y <= priceFloor else { continue }
             var left = line.startTime.map { layout.x(layout.index(atTime: $0)) } ?? plot.minX
             var right = line.endTime.map { layout.x(layout.index(atTime: $0)) } ?? plot.maxX
             left = max(plot.minX, left); right = min(plot.maxX, right)
@@ -945,7 +1015,7 @@ struct CandleChart: View {
     }
 
     /// Web-mobile levels: dark 1.618 lines, grey Monday high/low, plain right-aligned "名称 (价格)" labels.
-    private func drawRange(_ context: inout GraphicsContext, _ range: FibRange, layout: Layout, dark: Bool, inner: Bool, faded: Bool) {
+    private func drawRange(_ context: inout GraphicsContext, _ range: FibRange, layout: Layout, dark: Bool, inner: Bool, faded: Bool, priceFloor: CGFloat) {
         let plot = layout.plot
         let x1 = max(plot.minX, layout.x(layout.index(atTime: range.start))), x2 = min(plot.maxX, layout.x(layout.index(atTime: range.end)))
         guard x2 > x1 + 2 else { return }
@@ -954,7 +1024,7 @@ struct CandleChart: View {
         let levels = range.levels(inner: inner)
         for level in levels {
             let y = layout.y(level.price)
-            guard y >= plot.minY, y <= plot.maxY else { continue }
+            guard y >= plot.minY, y <= priceFloor else { continue }
             let color: Color = level.kind == .upper || level.kind == .lower ? fib : level.kind == .monday ? monday : ChartPalette.reference.opacity(0.6 * alpha)
             context.stroke(Path { $0.move(to: CGPoint(x: x1, y: y)); $0.addLine(to: CGPoint(x: x2, y: y)) },
                            with: .color(color), style: StrokeStyle(lineWidth: 1, dash: level.kind == .mid || level.kind == .inner ? [4, 4] : []))
@@ -962,7 +1032,7 @@ struct CandleChart: View {
         var taken: [CGFloat] = []
         for level in levels.sorted(by: { priority($0.kind) < priority($1.kind) }) where level.kind != .inner || !faded {
             let y = layout.y(level.price), labelY = max(plot.minY + 14, y - 3)
-            guard y >= plot.minY, y <= plot.maxY, !taken.contains(where: { abs($0 - labelY) < 14 }) else { continue }
+            guard y >= plot.minY, y <= priceFloor, !taken.contains(where: { abs($0 - labelY) < 14 }) else { continue }
             let color: Color = level.kind == .upper || level.kind == .lower ? fib : monday
             let text = context.resolve(Text("\(level.title) (\(groupedPrice(level.price)))").font(.system(size: faded ? 10 : 11, weight: .medium)).foregroundStyle(color))
             // The current week always keeps its labels (a 12H / 1D segment is narrower than the text);

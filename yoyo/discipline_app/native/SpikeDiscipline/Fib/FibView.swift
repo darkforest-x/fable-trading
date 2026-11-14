@@ -290,9 +290,11 @@ struct FibView: View {
                 VStack(alignment: .leading, spacing: 1) {
                     HStack(spacing: 3) {
                         Text(symbol.isEmpty ? "选择币种" : Fmt.coin(symbol)).font(.scaled(size: 17, weight: .bold)).foregroundStyle(Color.ink)
-                        Text("/ USDT").font(.scaled(size: 11, weight: .medium)).foregroundStyle(Color.muted)
+                            .lineLimit(1).minimumScaleFactor(0.75).layoutPriority(1)
+                        Text("/ USDT").font(.scaled(size: 11, weight: .medium)).foregroundStyle(Color.muted).fixedSize()
                         Image(systemName: "chevron.down").font(.system(size: 9, weight: .bold)).foregroundStyle(Color.muted)
                     }
+                    .fixedSize(horizontal: true, vertical: false)
                     if let route = navigation.monthlyTouch {
                         let side = replay?.side ?? route.side
                         let time = replay.flatMap { Self.observationTime($0, period: fib.period) } ?? route.occurredMs.map(FibView.touchTime)
@@ -302,6 +304,7 @@ struct FibView: View {
                     } else if let touch {
                         Text("\(touch.side == .upper ? "上沿" : "下沿") · \(FibView.touchTime(touch.time))")
                             .font(.scaled(size: 11, weight: .medium)).foregroundStyle(touch.side == .upper ? ChartPalette.down : ChartPalette.up)
+                            .lineLimit(1).minimumScaleFactor(0.78)
                     } else {
                         Text(stripSource == .monday ? "本周未触价" : monthlyFeed.snapshot == nil ? "月首周信号待读取" : "本月未触价")
                             .font(.scaled(size: 11, weight: .medium)).foregroundStyle(Color.muted)
@@ -311,11 +314,10 @@ struct FibView: View {
                     Text(p.formatted(.number.precision(.fractionLength(decimals(symbol))).grouping(.never)))
                         .font(.scaled(size: 16, weight: .bold).monospacedDigit())
                         .foregroundStyle((chartBars.last.map { $0.close >= $0.open } ?? true) ? ChartPalette.up : ChartPalette.down)
-                        .contentTransition(.numericText(value: p)).animation(.snappy, value: p)
                         .padding(.leading, 4)
                 }
             }
-            .frame(minHeight: 46)
+            .frame(minHeight: 46, alignment: .leading)
             .contentShape(.rect)
         }
         .buttonStyle(CardPressStyle())
@@ -439,7 +441,7 @@ struct TrailingIcon: LabelStyle {
 
 /// 图表设置: layers and candle colours (presets or custom), shared by 1.618 and 合约.
 struct ChartSettingsSheet: View {
-    @AppStorage("chart.fitReferencePrices") private var fitReferencePrices = false
+    @AppStorage("chart.fitReferencePrices") private var showOffscreenPrices = true
     @Environment(FibStore.self) private var fib
     @Environment(ChartStyle.self) private var style
     @Environment(\.dismiss) private var dismiss
@@ -449,11 +451,11 @@ struct ChartSettingsSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    Toggle("同时显示参考价", isOn: $fitReferencePrices)
+                    Toggle("提示屏外参考价", isOn: $showOffscreenPrices)
                 } header: {
-                    Text("价格刻度")
+                    Text("参考价")
                 } footer: {
-                    Text("默认按可见 K 线缩放。开启后，远端参考线也会进入画面。")
+                    Text("图内参考线按真实价格绘制。点图表边缘的箭头可查看屏外价位，K 线比例不变。")
                 }
                 Section("图层") {
                     Toggle("云带", isOn: $fib.showCloud)

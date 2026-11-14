@@ -49,18 +49,18 @@ struct TouchesSection: View {
             }
             .zIndex(2)
             LoadState(loading: !feed.loaded && feed.error == nil, error: feed.error, stale: feed.loaded)
-            SectionHeader(title: "今日触价", count: rows.count, trailing: Self.sorts.first { $0.0 == sort }?.1)
-            if feed.loaded && rows.isEmpty {
+            let visible = rows
+            SectionHeader(title: "今日触价", count: visible.count, trailing: Self.sorts.first { $0.0 == sort }?.1)
+            if feed.loaded && visible.isEmpty {
                 Text(feed.signals.isEmpty ? "今天还没有触价" : "没有符合筛选的触价").font(.footnote).foregroundStyle(Color.muted)
-                    .frame(maxWidth: .infinity).padding(14).glassCard(cornerRadius: 18)
-            } else if !rows.isEmpty {
-                VStack(spacing: 0) {
-                    ForEach(Array(rows.enumerated()), id: \.offset) { index, signal in
+                    .frame(maxWidth: .infinity).padding(.vertical, 14)
+            } else if !visible.isEmpty {
+                LazyVStack(spacing: 0) {
+                    ForEach(visible, id: \.self) { signal in
                         row(signal, now: feed.nowMs)
-                        if index < rows.count - 1 { Divider().padding(.leading, 54) }
+                        Divider().padding(.leading, 54)
                     }
                 }
-                .glassCard(cornerRadius: 18)
             }
         }
         .task(id: refresh) { await feed.watch(connection: connection, session: session) }
@@ -69,7 +69,7 @@ struct TouchesSection: View {
     private var sortButton: some View {
         Button { Haptics.tap(); withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { sortMenu.toggle() } } label: {
             Image(systemName: "arrow.up.arrow.down").font(.system(size: 14, weight: .bold)).foregroundStyle(Color.ink)
-                .frame(width: 36, height: 36).frosted(Circle(), veil: 0.8).contentShape(.circle)
+                .frame(width: 40, height: 40).background(Color.field, in: .circle).contentShape(.circle)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("排序，当前\(Self.sorts.first { $0.0 == sort }?.1 ?? "")")
@@ -167,13 +167,12 @@ struct BTCStatusCard: View {
                 Spacer()
                 Text(price.map { $0.formatted(.number.precision(.fractionLength(1))) } ?? "—")
                     .font(.title3.weight(.bold).monospacedDigit()).foregroundStyle(Color.ink)
-                    .contentTransition(.numericText(value: price ?? 0)).animation(.snappy, value: price)
-                Image(systemName: "chevron.right").font(.caption.weight(.bold)).foregroundStyle(.tertiary)
+                    Image(systemName: "chevron.right").font(.caption.weight(.bold)).foregroundStyle(.tertiary)
             }
             if let range, let price, range.complete { RangeBar(high: range.high, low: range.low, price: price) }
         }
         .padding(14)
-        .glassCard(cornerRadius: 20, tint: status?.tone == ChartPalette.up ? .up : status?.tone == ChartPalette.down ? .down : nil)
+        .background(Color.field.opacity(0.65), in: RoundedRectangle(cornerRadius: 12))
     }
 
     private func loop() async {
@@ -197,10 +196,9 @@ struct BTCStatusCard: View {
             let monday = week.start.timeIntervalSince1970, end = monday + 86_400
             let mondayBars = bars.filter { $0.time >= monday && $0.time < end }
             guard let high = mondayBars.map(\.high).max(), let low = mondayBars.map(\.low).min() else { throw APIError(status: 0, message: "no monday") }
-            withAnimation(.snappy) {
-                range = (high, low, now.timeIntervalSince1970 >= end)
-                price = last.close
-            }
+            guard !Task.isCancelled else { return }
+            range = (high, low, now.timeIntervalSince1970 >= end)
+            price = last.close
             failed = false
         } catch is CancellationError {
         } catch { failed = true }

@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>天才交易员 iOS 2.9.2 · 规范交付画板</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ios: {
+              bg: '#F2F2F7',
+              card: '#FFFFFF',
+              border: '#E5E5EA',
+              separator: '#C6C6C8',
+              label: '#000000',
+              secondary: '#6C6C70',
+              tertiary: '#8E8E93',
+              quaternary: '#AEAEB2',
+              blue: '#007AFF',
+              green: '#34C759',
+              red: '#FF3B30',
+              up: '#10B981',
+              down: '#EF4444',
+              fill: '#E5E5EA',
+              fillLight: '#F2F2F7',
+              pressed: '#E5E5EA'
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'sans-serif'],
+            mono: ['SF Pro Display', 'Menlo', 'Consolas', 'monospace']
+          },
+          boxShadow: {
+            'ios-card': '0 1px 2px rgba(0, 0, 0, 0.04)',
+            'ios-tab': '0 -0.5px 0 rgba(0, 0, 0, 0.15)',
+            'ios-header': '0 0.5px 0 rgba(0, 0, 0, 0.15)'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    /* iOS native hair split line */
+    .hairline-b { border-bottom: 0.5px solid rgba(60, 60, 67, 0.2); }
+    .hairline-t { border-top: 0.5px solid rgba(60, 60, 67, 0.2); }
+    .hairline-r { border-right: 0.5px solid rgba(60, 60, 67, 0.2); }
+    .hairline-l { border-left: 0.5px solid rgba(60, 60, 67, 0.2); }
+    /* Hide scrollbar */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-[#E5E5EA] text-[#1C1C1E] min-h-screen py-10 px-4 md:px-8 font-sans antialiased selection:bg-ios-blue selection:text-white">
+
+  <!-- Board Header -->
+  <header class="max-w-[1360px] mx-auto mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#D1D1D6] pb-5">
+    <div>
+      <div class="flex items-center gap-3">
+        <span class="px-2 py-0.5 rounded text-[11px] font-mono font-medium tracking-wide bg-[#1C1C1E] text-white">PROD SPEC</span>
+        <h1 class="text-2xl font-bold tracking-tight text-[#1C1C1E]">天才交易员 iOS 2.9.2</h1>
+        <span class="text-xs text-ios-tertiary">390×844pt · 白底原生体验</span>
+      </div>
+      <p class="text-xs text-ios-secondary mt-1.5 leading-relaxed max-w-3xl">
+        完整贯彻原生 iOS / TradingView / OKX 高性能白底标准：底部五项等宽导航【持仓 · 统计 · 交易 · 1.618 · 监控】、通知与复用市场选币中心、真实垂直比例图表与边缘离屏价位气泡指示器、精简双向复核开单票据。
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="inline-flex rounded-lg p-0.5 bg-[#D1D1D6] text-xs font-medium">
+        <span class="px-3 py-1 rounded-md bg-white text-black shadow-sm">白底生产规范</span>
+        <span class="px-3 py-1 text-ios-secondary">纯正示例数据</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3-Device Viewport Canvas Grid -->
+  <main class="max-w-[1360px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 justify-items-center items-start">
+
+    <!-- ========================================================================= -->
+    <!-- SCREEN 1: 监控 / 通知中心与市场列表 (Notifications Inbox & Market Watch) -->
+    <!-- ========================================================================= -->
+    <div class="w-[390px] h-[844px] bg-white rounded-[44px] shadow-2xl border-[7px] border-[#1C1C1E] flex flex-col overflow-hidden relative select-none">
+
+      <!-- iOS Status Bar -->
+      <div class="h-11 pt-3 px-6 flex justify-between items-center text-xs font-semibold text-black z-30 shrink-0 bg-white">
+        <span>09:41</span>
+        <div class="w-28 h-4 bg-black rounded-full mx-auto"></div>
+        <div class="flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.25A9.95 9.95 0 0 1 2 12C2 6.48 6.48 2 12 2s10 4.48 10 10c0 2.32-.8 4.45-2.14 6.15l-.62-.64C20.35 16.03 21 14.1 21 12c0-4.97-4.03-9-9-9z"/></svg>
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 0 0-6 0zm-4-4l2 2a7.074 7.074 0 0 1 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+          <span class="text-[10px] font-mono">100%</span>
+        </div>
+      </div>
+
+      <!-- Navigation Header -->
+      <div class="px-4 py-2.5 flex items-center justify-between hairline-b bg-white z-20 shrink-0">
+        <div class="flex items-center gap-1">
+          <h2 class="text-lg font-bold text-black tracking-tight">通知中心</h2>
+          <span class="w-2 h-2 rounded-full bg-ios-blue"></span>
+        </div>
+        <button class="w-7 h-7 rounded-full bg-[#F2F2F7] flex items-center justify-center text-ios-secondary hover:text-black transition-colors" aria-label="关闭">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Top-Level Two Tabs [ 通知 | 市场 ] -->
+      <div class="px-4 pt-2.5 pb-2 shrink-0 bg-white">
+        <div class="grid grid-cols-2 p-0.5 bg-[#F2F2F7] rounded-lg text-xs font-semibold text-center">
+          <button class="py-1.5 rounded-md bg-white text-black shadow-sm transition-all">通知 (3未读)</button>
+          <button class="py-1.5 rounded-md text-ios-secondary hover:text-black transition-all">市场自选 (42)</button>
+        </div>
+      </div>
+
+      <!-- Category Filter Chips -->
+      <div class="px-4 py-1.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar hairline-b bg-white shrink-0 text-[11px]">
+        <button class="px-2.5 py-1 rounded-full bg-black text-white font-medium shrink-0">全部 (18)</button>
+        <button class="px-2.5 py-1 rounded-full bg-[#F2F2F7] text-ios-secondary font-medium shrink-0 hover:bg-[#E5E5EA]">1.618 触价</button>
+        <button class="px-2.5 py-1 rounded-full bg-[#F2F2F7] text-ios-secondary font-medium shrink-0 hover:bg-[#E5E5EA]">急跌·急涨</button>
+        <button class="px-2.5 py-1 rounded-full bg-[#F2F2F7] text-ios-secondary font-medium shrink-0 hover:bg-[#E5E5EA]">保本提示</button>
+        <button class="px-2.5 py-1 rounded-full bg-[#F2F2F7] text-ios-secondary font-medium shrink-0 hover:bg-[#E5E5EA]">风控熔断</button>
+      </div>
+
+      <!-- Scrollable Message & Market Area -->
+      <div class="flex-1 overflow-y-auto no-scrollbar divide-y divide-[#F2F2F7] bg-white">
+
+        <!-- Pinned Section: Reusable Market List Peek -->
+        <div class="bg-[#F9FAFB] p-3 hairline-b">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-bold text-ios-secondary tracking-wider">市场快速检索 (可复用组件)</span>
+            <span class="text-[10px] text-ios-blue cursor-pointer">按24H成交额 ▾</span>
+          </div>
+          <div class="relative mb-2">
+            <input type="text" placeholder="搜索标的 (BTC, ETH, SOL...)" class="w-full h-7 pl-7 pr-3 rounded-md bg-white border border-[#E5E5EA] text-xs text-black placeholder:text-ios-tertiary focus:outline-none focus:border-ios-blue">
+            <svg class="w-3.5 h-3.5 text-ios-tertiary absolute left-2 top-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <div class="space-y-1">
+            <div class="flex items-center justify-between p-1.5 rounded-lg bg-white border border-[#E5E5EA]/70 hover:border-ios-blue cursor-pointer">
+              <div class="flex items-center gap-2">
+                <span class="text-amber-500 text-xs">★</span>
+                <div>
+                  <div class="text-xs font-bold text-black flex items-center gap-1">BTC <span class="text-[9px] px-1 rounded bg-[#F2F2F7] text-ios-secondary font-normal">永续</span></div>
+                  <div class="text-[10px] text-ios-tertiary">24H 12.8B</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-xs font-mono font-semibold text-black">94,820.0</div>
+                <div class="text-[10px] font-mono font-bold text-ios-up">+2.45%</div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between p-1.5 rounded-lg bg-white border border-[#E5E5EA]/70 hover:border-ios-blue cursor-pointer">
+              <div class="flex items-center gap-2">
+                <span class="text-amber-500 text-xs">★</span>
+                <div>
+                  <div class="text-xs font-bold text-black flex items-center gap-1">SOL <span class="text-[9px] px-1 rounded bg-[#F2F2F7] text-ios-secondary font-normal">永续</span></div>
+                  <div class="text-[10px] text-ios-tertiary">24H 3.4B</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-xs font-mono font-semibold text-black">184.50</div>
+                <div class="text-[10px] font-mono font-bold text-ios-up">+5.12%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dense Dated Message Rows -->
+        <div class="p-3 bg-white hover:bg-[#F9FAFB] transition-colors cursor-pointer">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-ios-blue mt-0.5"></span>
+              <span class="text-xs font-bold text-black">周一下轨 1.618 首次触碰</span>
+              <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-mono font-semibold border border-emerald-200">SOL 做多</span>
+            </div>
+            <span class="text-[10px] font-mono text-ios-tertiary shrink-0">10:35:12</span>
+          </div>
+          <p class="text-xs text-ios-secondary mt-1 leading-snug">
+            触及基准 184.50，5m 蜡烛已有效收回上方。模型置信度评分 0.88 (通过)，已同步记录到策略账本。
+          </p>
+          <div class="mt-1.5 flex items-center gap-3 text-[10px] text-ios-tertiary">
+            <span>来源: 纽约周一锚点</span>
+            <span>穿透: -0.42%</span>
+            <span class="text-ios-blue font-medium ml-auto">查看K线走势 ›</span>
+          </div>
+        </div>
+
+        <div class="p-3 bg-white hover:bg-[#F9FAFB] transition-colors cursor-pointer">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-ios-blue mt-0.5"></span>
+              <span class="text-xs font-bold text-black">全市场急跌报警 · 28币共振</span>
+              <span class="text-[10px] px-1.5 py-0.2 rounded bg-rose-50 text-rose-700 font-mono font-semibold border border-rose-200">全市场</span>
+            </div>
+            <span class="text-[10px] font-mono text-ios-tertiary shrink-0">08:30:00</span>
+          </div>
+          <p class="text-xs text-ios-secondary mt-1 leading-snug">
+            首波 22 币 5 分钟内穿透周一下轨。已通过 Telegram / Bark 渠道完成推送，大盘基准反弹率 +0.31%。
+          </p>
+          <div class="mt-1.5 flex items-center gap-3 text-[10px] text-ios-tertiary">
+            <span>回测窗口: 27/30m</span>
+            <span>胜率样本: 65%</span>
+            <span class="text-ios-blue font-medium ml-auto">查看钻取清单 ›</span>
+          </div>
+        </div>
+
+        <div class="p-3 bg-white hover:bg-[#F9FAFB] transition-colors cursor-pointer">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-transparent mt-0.5"></span>
+              <span class="text-xs font-medium text-black">持仓保护 · 触发移动保本</span>
+              <span class="text-[10px] px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 font-mono font-semibold border border-blue-200">ETH 3x</span>
+            </div>
+            <span class="text-[10px] font-mono text-ios-tertiary shrink-0">昨天 22:15</span>
+          </div>
+          <p class="text-xs text-ios-secondary mt-1 leading-snug">
+            浮盈已越过 +1.0R 门槛，硬性止损基准已无缝调整至成本价 2,625.00，锁定初始风险。
+          </p>
+        </div>
+
+        <div class="p-3 bg-white hover:bg-[#F9FAFB] transition-colors cursor-pointer">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-transparent mt-0.5"></span>
+              <span class="text-xs font-medium text-black">月首周 1.618 扩展位锁定</span>
+              <span class="text-[10px] px-1.5 py-0.2 rounded bg-purple-50 text-purple-700 font-mono font-semibold border border-purple-200">BTC</span>
+            </div>
+            <span class="text-[10px] font-mono text-ios-tertiary shrink-0">11-01 08:00</span>
+          </div>
+          <p class="text-xs text-ios-secondary mt-1 leading-snug">
+            11 月首个完整自然周已定界，基准上线 98,250.0 / 下线 91,480.0，全月保持只读有效。
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Bottom Tab Bar (5 Tabs Equal Width, Trade Center) -->
+      <nav class="h-[76px] pb-5 pt-1.5 hairline-t bg-[#F9F9FB] grid grid-cols-5 items-center z-30 shrink-0 text-center">
+        <!-- 1. 持仓 -->
+        <button class="flex flex-col items-center justify-center text-ios-secondary hover:text-black">
+          <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          <span class="text-[10px] font-medium leading-none">持仓</span>
+        </button>
+        <!-- 2. 统计 -->
+        <button class="flex flex-col items-center justify-center text-ios-secondary hover:text-black">
+          <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          <span class="text-[10px] font-medium leading-none">统计</span>
+        </button>
+        <!-- 3. 交易 (Center Highlighted) -->
+        <button class="flex flex-col items-center justify-center text-ios-secondary hover:text-black">
+          <div class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center shadow-sm -mt-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+          </div>
+          <span class="text-[10px] font-medium leading-none mt-0.5">交易</span>
+        </button>
+        <!-- 4. 1.618 -->
+        <button class="flex flex-col items-center justify-center text-ios-secondary hover:text-black">
+          <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+          <span class="text-[10px] font-medium leading-none">1.618</span>
+        </button>
+        <!-- 5. 监控 (Active) -->
+        <button class="flex flex-col items-center justify-center text-ios-blue">
+          <svg class="w-5 h-5 mb-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+          <span class="text-[10px] font-semibold leading-none">监控</span>
+        </button>
+      </nav>
+
+      <!-- iOS Home Indicator -->
+      <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-black/80 rounded-full z-40"></div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- SCREEN 2: 真实垂直比例 K 线与边缘离屏价位指示器 (True-Scale Chart with Edge Indicators) -->
+    <!-- ========================================================================= -->
+    <div class="w-[390px] h-[844px] bg-white rounded-[44px] shadow-2xl border-[7px] border-[#1C1C1E] flex flex-col overflow-hidden relative select-none">
+
+      <!-- iOS Status Bar -->
+      <div class="h-11 pt-3 px-6 flex justify-between items-center text-xs font-semibold text-black z-30 shrink-0 bg-white">
+        <span>09:41</span>
+        <div class="w-28 h-4 bg-black rounded-full mx-auto"></div>
+        <div class="flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.25A9.95 9.95 0 0 1 2 12C2 6.48 6.48 2 12 2s10 4.48 10 10c0 2.32-.8 4.45-2.14 6.15l-.62-.64C20.35 16.03 21 14.1 21 12c0-4.97-4.03-9-9-9z"/></svg>
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 0 0-6 0zm-4-4l2 2a7.074 7.074 0 0 1 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+          <span class="text-[10px] font-mono">100%</span>
+        </div>
+      </div>
+
+      <!-- Top Bar: Symbol Context & Timeframe Pills -->
+      <div class="px-4 py-2 hairline-b bg-white flex items-center justify-between shrink-0 z-20">
+        <div class="flex items-center gap-2">
+          <button class="flex items-center gap-1 text-sm font-bold text-black tracking-tight">
+            SOL
+            <svg class="w-3.5 h-3.5 text-ios-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <span class="text-xs font-mono font-bold text-ios-up">184.50</span>
+          <span class="text-[10px] font-mono font-semibold px-1 rounded bg-emerald-50 text-emerald-700">+3.42%</span>
+        </div>
+        <div class="flex items-center gap-1 bg-[#F2F2F7] p-0.5 rounded-md text-[11px] font-medium text-ios-secondary">
+          <button class="px-1.5 py-0.5 rounded text-black font-semibold">15m</button>
+          <button class="px-1.5 py-0.5 rounded text-ios-secondary">1H</button>
+          <button class="px-1.5 py-0.5 rounded bg-white text-ios-blue font-bold shadow-sm">4H</button>
+          <button class="px-1.5 py-0.5 rounded text-ios-secondary">12H</button>
+          <button class="px-1.5 py-0.5 rounded text-ios-secondary">1D</button>
+        </div>
+      </div>
+
+      <!-- Chart Subheader Stats -->
+      <div class="px-4 py-1.5 bg-[#F9FAFB] hairline-b flex items-center justify-between text-[10px] font-mono text-ios-secondary shrink-0">
+        <div>开 <span class="text-black">181.20</span> 高 <span class="text-black">185.80</span> 低 <span class="text-black">180.40</span></div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span>OKX 深度 14ms</span>
+        </div>
+      </div>
+
+      <!-- Chart Viewport (True-scale candles fill vertical space, No squash) -->
+      <div class="flex-1 relative overflow-hidden bg-white flex">
+
+        <!-- Candlestick Graphic Surface (SVG) -->
+        <div class="flex-1 h-full relative">
+
+          <!-- TOP EDGE INDICATOR (Offscreen levels above) -->
+          <div class="absolute top-2 inset-x-3 z-20 flex justify-between items-center pointer-events-auto">
+            <div class="px-2 py-1 rounded-md bg-[#1C1C1E] text-white text-[10px] font-mono flex items-center gap-1.5 shadow-md border border-white/20">
+              <span class="text-rose-400 font-bold">▲ 2 个离屏关键阻力</span>
+              <span class="text-white/60">|</span>
+              <span>周高 198.50</span>
+              <span class="text-rose-400 font-semibold">+7.6%</span>
+            </div>
+            <div class="px-1.5 py-0.5 rounded bg-white/90 border border-[#C6C6C8] text-[9px] font-mono text-ios-secondary shadow-sm">
+              上轨 1.618 (204.20)
+            </div>
+          </div>
+
+          <!-- SVG Chart Core (Focus on Local Action 176.00 ~ 188.00) -->
+          <svg class="w-full h-full" viewBox="0 0 320 540" preserveAspectRatio="none">
+            <defs>
+              <!-- EMA Cloud Fill -->
+              <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#10B981" stop-opacity="0.12"/>
+                <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.04"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Horizontal Background Grids -->
+            <line x1="0" y1="100" x2="320" y2="100" stroke="#F2F2F7" stroke-width="1"/>
+            <line x1="0" y1="200" x2="320" y2="200" stroke="#F2F2F7" stroke-width="1"/>
+            <line x1="0" y1="300" x2="320" y2="300" stroke="#F2F2F7" stroke-width="1"/>
+            <line x1="0" y1="400" x2="320" y2="400" stroke="#F2F2F7" stroke-width="1"/>
+
+            <!-- In-Range Reference Level 1: 周中轴平衡线 (181.20) -->
+            <line x1="0" y1="320" x2="320" y2="320" stroke="#9CA3AF" stroke-dasharray="3,3" stroke-width="1"/>
+            <text x="8" y="315" fill="#6B7280" font-size="9" font-family="monospace">周基准平衡线 (181.20)</text>
+
+            <!-- In-Range Reference Level 2: 下轨首次触碰点 (184.50) -->
+            <line x1="0" y1="190" x2="320" y2="190" stroke="#007AFF" stroke-width="1"/>
+            <text x="8" y="185" fill="#007AFF" font-size="9" font-family="monospace" font-weight="bold">现价实时线 · 184.50 (已回收)</text>
+
+            <!-- EMA Smooth Cloud Curve -->
+            <path d="M 0,380 C 80,360 160,260 320,180 L 320,220 C 160,300 80,390 0,420 Z" fill="url(#cloudGrad)"/>
+            <path d="M 0,380 C 80,360 160,260 320,180" fill="none" stroke="#10B981" stroke-width="1.5"/>
+            <path d="M 0,420 C 80,390 160,300 320,220" fill="none" stroke="#3B82F6" stroke-width="1.2"/>
+
+            <!-- Candlestick Series (30 Well-proportioned Bars filling space) -->
+            <!-- 1. Bearish -->
+            <line x1="20" y1="120" x2="20" y2="240" stroke="#EF4444" stroke-width="1"/>
+            <rect x="17" y="140" width="6" height="70" fill="#EF4444"/>
+            <!-- 2. Bearish -->
+            <line x1="32" y1="180" x2="32" y2="290" stroke="#EF4444" stroke-width="1"/>
+            <rect x="29" y="200" width="6" height="75" fill="#EF4444"/>
+            <!-- 3. Bullish pinbar -->
+            <line x1="44" y1="230" x2="44" y2="340" stroke="#10B981" stroke-width="1"/>
+            <rect x="41" y="250" width="6" height="30" fill="#10B981"/>
+            <!-- 4. Bearish -->
+            <line x1="56" y1="260" x2="56" y2="370" stroke="#EF4444" stroke-width="1"/>
+            <rect x="53" y="280" width="6" height="70" fill="#EF4444"/>
+            <!-- 5. Bearish down to bottom -->
+            <line x1="68" y1="310" x2="68" y2="440" stroke="#EF4444" stroke-width="1"/>
+            <rect x="65" y="330" width="6" height="90" fill="#EF4444"/>
+            <!-- 6. Heavy Spike wick reversal -->
+            <line x1="80" y1="360" x2="80" y2="490" stroke="#10B981" stroke-width="1.5"/>
+            <rect x="77" y="370" width="6" height="40" fill="#10B981"/>
+            <!-- 7. Recovery bull -->
+            <line x1="92" y1="340" x2="92" y2="420" stroke="#10B981" stroke-width="1"/>
+            <rect x="89" y="350" width="6" height="50" fill="#10B981"/>
+            <!-- 8. Bullish continuation -->
+            <line x1="104" y1="310" x2="104" y2="390" stroke="#10B981" stroke-width="1"/>
+            <rect x="101" y="320" width="6" height="55" fill="#10B981"/>
+            <!-- 9. Small rest -->
+            <line x1="116" y1="310" x2="116" y2="360" stroke="#EF4444" stroke-width="1"/>
+            <rect x="113" y="320" width="6" height="25" fill="#EF4444"/>
+            <!-- 10. Bullish surge -->
+            <line x1="128" y1="260" x2="128" y2="340" stroke="#10B981" stroke-width="1"/>
+            <rect x="125" y="270" width="6" height="55" fill="#10B981"/>
+            <!-- 11. Strong bar -->
+            <line x1="140" y1="230" x2="140" y2="310" stroke="#10B981" stroke-width="1"/>
+            <rect x="137" y="240" width="6" height="50" fill="#10B981"/>
+            <!-- 12. Sideways consolidation -->
+            <line x1="152" y1="220" x2="152" y2="280" stroke="#EF4444" stroke-width="1"/>
+            <rect x="149" y="235" width="6" height="30" fill="#EF4444"/>
+            <!-- 13. Break higher -->
+            <line x1="164" y1="190" x2="164" y2="270" stroke="#10B981" stroke-width="1"/>
+            <rect x="161" y="200" width="6" height="50" fill="#10B981"/>
+            <!-- 14. Continuation -->
+            <line x1="176" y1="180" x2="176" y2="250" stroke="#10B981" stroke-width="1"/>
+            <rect x="173" y="190" width="6" height="45" fill="#10B981"/>
+            <!-- 15. Pullback check -->
+            <line x1="188" y1="190" x2="188" y2="260" stroke="#EF4444" stroke-width="1"/>
+            <rect x="185" y="200" width="6" height="35" fill="#EF4444"/>
+            <!-- 16. Rebound -->
+            <line x1="200" y1="170" x2="200" y2="240" stroke="#10B981" stroke-width="1"/>
+            <rect x="197" y="180" width="6" height="40" fill="#10B981"/>
+            <!-- 17. High test -->
+            <line x1="212" y1="150" x2="212" y2="230" stroke="#10B981" stroke-width="1"/>
+            <rect x="209" y="160" width="6" height="50" fill="#10B981"/>
+            <!-- 18. Upper wick -->
+            <line x1="224" y1="140" x2="224" y2="210" stroke="#EF4444" stroke-width="1"/>
+            <rect x="221" y="160" width="6" height="30" fill="#EF4444"/>
+            <!-- 19. Pause -->
+            <line x1="236" y1="160" x2="236" y2="220" stroke="#10B981" stroke-width="1"/>
+            <rect x="233" y="170" width="6" height="30" fill="#10B981"/>
+            <!-- 20. Momentum bar -->
+            <line x1="248" y1="140" x2="248" y2="210" stroke="#10B981" stroke-width="1"/>
+            <rect x="245" y="150" width="6" height="45" fill="#10B981"/>
+            <!-- 21. Fresh peak bar -->
+            <line x1="260" y1="120" x2="260" y2="190" stroke="#10B981" stroke-width="1"/>
+            <rect x="257" y="130" width="6" height="50" fill="#10B981"/>
+            <!-- 22. Current unclosed bar -->
+            <line x1="272" y1="130" x2="272" y2="200" stroke="#10B981" stroke-width="1.5"/>
+            <rect x="269" y="145" width="6" height="35" fill="#10B981"/>
+            <!-- Live Ticking Marker -->
+            <circle cx="272" cy="145" r="2.5" fill="#007AFF"/>
+          </svg>
+
+          <!-- BOTTOM EDGE INDICATOR (Offscreen levels below) -->
+          <div class="absolute bottom-2 inset-x-3 z-20 flex justify-between items-center pointer-events-auto">
+            <div class="px-2 py-1 rounded-md bg-[#1C1C1E] text-white text-[10px] font-mono flex items-center gap-1.5 shadow-md border border-white/20">
+              <span class="text-emerald-400 font-bold">▼ 1 个离屏极值防线</span>
+              <span class="text-white/60">|</span>
+              <span>周下轨 1.618</span>
+              <span class="text-emerald-400 font-semibold">168.00 (-8.9%)</span>
+            </div>
+            <button class="px-2 py-0.5 rounded bg-ios-blue text-white text-[9px] font-medium shadow-sm">
+              聚焦区间
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Right Price Axis (Narrow & Clear, 48px) -->
+        <div class="w-12 hairline-l bg-[#FAFAFA] flex flex-col justify-between py-6 text-[9px] font-mono text-ios-tertiary text-right pr-1 shrink-0 select-none">
+          <span>192.00</span>
+          <span>188.00</span>
+          <span class="px-1 py-0.5 rounded bg-ios-blue text-white font-bold">184.50</span>
+          <span>181.20</span>
+          <span>178.00</span>
+          <span>174.00</span>
+          <span>170.00</span>
+        </div>
+      </div>
+
+      <!-- Quick Action Floating Dock Above Tab Bar -->
+      <div class="px-4 py-2 bg-white/95 backdrop-blur hairline-t flex items-center justify-between text-xs shrink-0 z-20">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#F2F2F7] text-ios-secondary">模型评分: 0.88</span>
+          <span class="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>多头顺势
+          </span>
+        </div>
+        <button class="px-4 py-1.5 rounded-full bg-ios-blue text-white text-xs font-semibold shadow-sm hover:opacity-90 active:scale-95 transition-all">
+          ⚡ 闪电开单 (1R)
+        </button>
+      </div>
+
+      <!-- Bottom Tab Bar (5 Tabs Equal Width, 1.618 Active) -->
+      <nav class="h-[76px] pb-5 pt-1.5 hairline-t bg-[#F9F9FB] grid grid-cols-5 items-center z-30 shrink-0 text-center">
+        <!-- 1. 持仓 -->
+        <button class="flex flex-col items-center justify-center text-ios-secondary hover:text-black">
+          <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          <span class="text-[10px] font-medium leading-none">持仓</span>
+        </button>
+        <!-- 2. 统计 -->
+        <button class="flex flex-col items-center justify-center text-ios-secondary hover:text-black">
+          <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          <span class="text-[10px] font-medium leading-none">统计</span>
+        </button>
+        <!-- 3. 交易 -->
+        <button class="flex flex-col items-center justify-center text-ios-secondary hover:text-black">
+          <div class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center shadow-sm -mt-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+          </div>
+          <span class="text-[10px] font-medium leading-none mt-0.5">交易</span>
+        </button>
+        <!-- 4. 1.618 (Active) -->
+        <button class="flex flex-col items-center justify-center text-ios-blue">
+          <svg class="w-5 h-5 mb-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+          <span class="text-[10px] font-semibold leading-none">1.618</span>
+        </button>
+        <!-- 5. 监控 -->
+        <button class="flex flex-col items-center justify-center text-ios-secondary hover:text-black">
+          <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="text-[10px] font-medium leading-none">监控</span>
+        </button>
+      </nav>
+
+      <!-- iOS Home Indicator -->
+      <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-black/80 rounded-full z-40"></div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- SCREEN 3: 极简开单票据与真实买卖点位快照 (Simplified Ticket & Dual Action Actions) -->
+    <!-- ========================================================================= -->
+    <div class="w-[390px] h-[844px] bg-white rounded-[44px] shadow-2xl border-[7px] border-[#1C1C1E] flex flex-col overflow-hidden relative select-none">
+
+      <!-- iOS Status Bar -->
+      <div class="h-11 pt-3 px-6 flex justify-between items-center text-xs font-semibold text-black z-30 shrink-0 bg-white">
+        <span>09:41</span>
+        <div class="w-28 h-4 bg-black rounded-full mx-auto"></div>
+        <div class="flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.25A9.95 9.95 0 0 1 2 12C2 6.48 6.48 2 12 2s10 4.48 10 10c0 2.32-.8 4.45-2.14 6.15l-.62-.64C20.35 16.03 21 14.1 21 12c0-4.97-4.03-9-9-9z"/></svg>
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 0 0-6 0zm-4-4l2 2a7.074 7.074 0 0 1 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+          <span class="text-[10px] font-mono">100%</span>
+        </div>
+      </div>
+
+      <!-- Navigation Header: Clean Contract Header with Setting Gear -->
+      <div class="px-4 py-2 flex items-center justify-between hairline-b bg-white z-20 shrink-0">
+        <div class="flex items-center gap-1.5">
+          <button class="flex items-center gap-1 text-base font-bold text-black tracking-tight">
+            BTC / USDT 永续
+            <svg class="w-4 h-4 text-ios-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <span class="text-[10px] font-medium px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700">全仓 20x</span>
+        </div>
+        <button class="w-7 h-7 rounded-full bg-[#F2F2F7] flex items-center justify-center text-ios-secondary hover:text-black">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </button>
+      </div>
+
+      <!-- Ticket Scrollable Body -->
+      <div class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-3.5 bg-white">
+
+        <!-- Live Snapshot Card: Genuine Last Price, Bid/Ask & Spread (No dead fake orderbook) -->
+        <div class="p-3 rounded-xl bg-[#F9FAFB] border border-[#E5E5EA]">
+          <div class="flex items-baseline justify-between">
+            <div>
+              <div class="text-2xl font-mono font-bold text-black tracking-tight">94,820.50</div>
+              <div class="text-[11px] font-mono font-semibold text-ios-up flex items-center gap-1.5 mt-0.5">
+                <span>+2.45%</span>
+                <span class="text-ios-tertiary">·</span>
+                <span class="text-ios-secondary font-normal">标价 94,818.20</span>
+              </div>
+            </div>
+            <!-- Accessible 盘口 Trigger On Demand -->
+            <button class="px-2.5 py-1 rounded bg-white border border-[#D1D1D6] text-[11px] font-medium text-black flex items-center gap-1 shadow-sm active:bg-[#E5E5EA]">
+              <span>盘口深度</span>
+              <svg class="w-3 h-3 text-ios-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+          <!-- Clean Real Spread Row -->
+          <div class="mt-2.5 pt-2 hairline-t grid grid-cols-3 text-[10px] font-mono">
+            <div>
+              <span class="text-ios-tertiary block">买一 (Bid)</span>
+              <span class="text-ios-up font-semibold">94,820.00</span>
+            </div>
+            <div class="text-center">
+              <span class="text-ios-tertiary block">价差 (Spread)</span>
+              <span class="text-black font-semibold">0.50 (0.0005%)</span>
+            </div>
+            <div class="text-right">
+              <span class="text-ios-tertiary block">卖一 (Ask)</span>
+              <span class="text-ios-down font-semibold">94,820.50</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Mode & Guarded Direction Note -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1 p-0.5 rounded-lg bg-[#F2F2F7] text-xs font-semibold">
+            <button class="px-3 py-1 rounded-md bg-white text-black shadow-sm flex items-center gap-1">
+              <svg class="w-3 h-3 text-ios-blue" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              市价执行
+            </button>
+            <button class="px-3 py-1 rounded-md text-ios-secondary hover:text-black">限价委托</button>
+          </div>
+          <!-- Guarded Add-on Status -->
+          <div class="text-[10px] text-ios-secondary flex items-center gap-1 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+            <span>已持有多头 · 加仓需合并止损</span>
+          </div>
+        </div>
+
+        <!-- Stop Loss & Leverage Parameters -->
+        <div class="space-y-2">
+          <!-- Initial Stop Loss Input -->
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <label class="font-medium text-black flex items-center gap-1">
+                初始止损 (Stop Loss) <span class="text-ios-red">*</span>
+              </label>
+              <button class="text-[11px] font-bold text-ios-blue flex items-center gap-0.5 hover:underline">
+                ⚡ 自动 1R (93,120.0)
+              </button>
+            </div>
+            <div class="relative">
+              <input type="text" value="93,120.00" class="w-full h-10 px-3 rounded-lg bg-[#F2F2F7] font-mono text-sm text-black font-semibold border border-transparent focus:bg-white focus:border-ios-blue focus:outline-none">
+              <span class="absolute right-3 top-2.5 text-xs text-ios-tertiary font-mono">USDT (-1.79%)</span>
+            </div>
+          </div>
+
+          <!-- Position Risk Allocation Slider -->
+          <div class="pt-1">
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="text-ios-secondary">单笔风险限额</span>
+              <span class="font-mono font-bold text-black">1.0R = 25.00 USDT</span>
+            </div>
+            <!-- Slider Pills -->
+            <div class="grid grid-cols-4 gap-1.5">
+              <button class="py-1.5 rounded bg-[#F2F2F7] text-xs font-mono font-medium text-ios-secondary hover:bg-[#E5E5EA]">25%</button>
+              <button class="py-1.5 rounded bg-[#F2F2F7] text-xs font-mono font-medium text-ios-secondary hover:bg-[#E5E5EA]">50%</button>
+              <button class="py-1.5 rounded bg-[#F2F2F7] text-xs font-mono font-medium text-ios-secondary hover:bg-[#E5E5EA]">75%</button>
+              <button class="py-1.5 rounded bg-black text-white text-xs font-mono font-bold">100%</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Concise Current Real State Summary (No bloated empty boxes) -->
+        <div class="p-2.5 rounded-lg bg-[#F9FAFB] border border-[#E5E5EA] space-y-1.5 text-xs">
+          <div class="flex justify-between text-ios-secondary">
+            <span>预估拟开数量</span>
+            <span class="font-mono text-black font-medium">0.015 BTC (≈ 1,422.30 USDT)</span>
+          </div>
+          <div class="flex justify-between text-ios-secondary">
+            <span>预计占用保证金</span>
+            <span class="font-mono text-black font-medium">71.12 USDT (全仓 20x)</span>
+          </div>
+          <div class="flex justify-between text-ios-secondary">
+            <span>触发止损预计离场</span>
+            <span class="font-mono text-ios-red font-medium">-25.00 USDT (严格 1R)</span>
+          </div>
+        </div>
+
+        <!-- Two Explicit Bottom Review Actions: Review Long & Review Short -->
+        <div class="pt-2 grid grid-cols-2 gap-2.5">
+          <!-- Buy / Long Action Button -->
+          <button class="h-11 rounded-xl bg-ios-up text-white font-bold text-xs flex flex-col items-center justify-center shadow-sm active:opacity-90 active:scale-[0.98] transition-all">
+            <span class="flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+              买入开多 (Review Long)
+            </span>
+            <span class="text-[9px] font-normal opacity-90 font-mono">市价撮合 · 1R 硬性保护</span>
+          </button>
+
+          <!-- Sell / Short Action Button (Existing Guard Note) -->
+          <button class="h-11 rounded-xl bg-ios-down text-white font-bold text-xs flex flex-col items-center justify-center shadow-sm active:opacity-90 active:scale-[0.98] transition-all">
+            <span class="flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+              卖出开空 (Review Short)
+            </span>
+            <span class="text-[9px] font-normal opacity-90 font-mono">市价撮合 · 需二次确认</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Bottom Tab Bar (5 Tabs Equal Width, 交易 Active) -->
+      <nav class="h-[76px] pb-5 pt-1.5 hairline-t bg-[#F9F9FB] grid grid-cols-5 items-center z-30 shrink-0 text-center">
+        <!-- 1. 持仓 -->
+        <button class="flex flex-col items-center justify-center text-ios-secondary hover:text-black">
+          <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          <span class="text-[10px] font-medium leading-none">持仓</span>
+        </button>
+        <!-- 2. 统计 -->
+        <button class="flex flex-col items-center justify-center text-ios-secondary hover:text-black">
+          <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          <span class="text-[10px] font-medium leading-none">统计</span>
+        </button>
+        <!-- 3. 交易 (Active Center) -->
+        <button class="flex flex-col items-center justify-center text-ios-blue">
+          <div class="w-8 h-8 rounded-full bg-ios-blue text-white flex items-center justify-center shadow-sm -mt-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+          </div>
+          <span class="text-[10px] font-semibold leading-none mt-0.5 text-ios-blue">交易</span>
+        </button>
+        <!-- 4. 1.618 -->
+        <button class="flex flex-col items-center justify-center text-ios-secondary hover:text-black">
+          <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+          <span class="text-[10px] font-medium leading-none">1.618</span>
+        </button>
+        <!-- 5. 监控 -->
+        <button class="flex flex-col items-center justify-center text-ios-secondary hover:text-black">
+          <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="text-[10px] font-medium leading-none">监控</span>
+        </button>
+      </nav>
+
+      <!-- iOS Home Indicator -->
+      <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-black/80 rounded-full z-40"></div>
+    </div>
+
+  </main>
+
+  <!-- Technical Spec & Implementation Notes -->
+  <footer class="max-w-[1360px] mx-auto mt-10 p-5 rounded-2xl bg-white border border-[#D1D1D6] text-xs text-ios-secondary">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div>
+        <div class="font-bold text-black mb-1.5 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-black"></span>
+          1. 统一 5 项等宽底栏架构
+        </div>
+        <p class="leading-relaxed text-[11px]">
+          严格按【持仓 · 统计 · 交易 · 1.618 · 监控】顺序平分 20% 宽度，正中“交易”突出常驻，各功能模块无缝互通，彻底消除冗余导航栏。
+        </p>
+      </div>
+
+      <div>
+        <div class="font-bold text-black mb-1.5 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-ios-blue"></span>
+          2. 监控 / 通知中心与市场选币
+        </div>
+        <p class="leading-relaxed text-[11px]">
+          纯平白底收件箱，内建【通知】与【市场】一级切换，支持搜索、自选星标、24H 成交额排序与分类芯片过滤，高密扁平行触达即切图。
+        </p>
+      </div>
+
+      <div>
+        <div class="font-bold text-black mb-1.5 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          3. 真实比例 K 线与边缘离屏指示
+        </div>
+        <p class="leading-relaxed text-[11px]">
+          K 线不被遥远高低点压扁，仅在当前可视区间呈现参考线；上下离屏关键价位以极简气泡指示器标明数量、差价与百分比，支持自适应聚焦。
+        </p>
+      </div>
+
+      <div>
+        <div class="font-bold text-black mb-1.5 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+          4. 紧凑开单票据与双向执行
+        </div>
+        <p class="leading-relaxed text-[11px]">
+          移除长文本多余盒子，代以真实点位快照与买卖价差。底部采用明确的【买入开多】与【卖出开空】行动条，保留 1R 止损反算与加仓风控约束。
+        </p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

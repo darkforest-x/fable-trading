@@ -27,51 +27,28 @@ struct TicketForm: View {
         let room = Trading.allocationRoom(state, symbol: ticket.symbol)
         let block = Trading.availability(state: state, symbol: ticket.symbol, connected: session.connection != nil, online: account.online, fresh: fresh,
                                          pending: account.pendingEntry != nil || account.closeAttempt != nil, room: room, now: account.now)
-        let locked = ticket.reviewing || account.pendingEntry != nil
+        let locked = ticket.reviewing || account.pendingEntry != nil || ticket.preview != nil
         let context = ticket.stopContext(state, connection: session.connection)
         let autoEnabled = existing == nil && account.pendingEntry == nil
             && (ticket.fibTicket ? session.connection != nil : (account.online && fresh && room > 0 && (state?.blockers.isEmpty ?? false)))
         let ready = ticket.autoReady(context, enabled: autoEnabled)
-        let estimate = ready ? Trading.estimate(state, ticket.ticket(state)) : nil
+        let estimate = ready ? Trading.estimate(state, ticket.ticket(state, side: side)) : nil
         let tick = state?.instruments[ticket.symbol]?.tick
 
         VStack(alignment: .leading, spacing: inline ? 9 : 14) {
-            // Direction.
-            HStack(spacing: 10) {
-                ForEach(["long", "short"], id: \.self) { value in
-                    let on = side == value, hue = value == "long" ? Color.up : Color.down
-                    Button {
-                        selectDirection(value, state: state)
-                    } label: {
-                        HStack(spacing: 6) {
-                            if !inline { Circle().fill(on ? Color.white : Color.muted.opacity(0.5)).frame(width: 6, height: 6) }
-                            Text(value == "long" ? "做多" : "做空").font(.scaled(size: 16, weight: .bold))
-                        }
-                        .foregroundStyle(on ? Color.white : Color.muted)
-                        .frame(maxWidth: .infinity).frame(height: 44)
-                        .background(on ? hue : Color.field, in: .rect(cornerRadius: inline ? 9 : 22))
-                        .shadow(color: on ? hue.opacity(0.28) : .clear, radius: inline ? 0 : 8, y: inline ? 0 : 3)
-                        .contentShape(.capsule)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(locked || existing != nil)
-                    .accessibilityAddTraits(on ? .isSelected : [])
-                }
-            }
-            .animation(.snappy, value: side)
             if existing != nil { Text("同向加仓 · 沿用当前止损和杠杆").font(.caption).foregroundStyle(.secondary) }
 
             HStack(spacing: 10) {
                 if inline {
-                    Menu {
-                        Button("市价委托") { ticket.kind = "market"; ticket.fieldIssue = nil }
-                        Button("限价委托") { ticket.kind = "limit"; ticket.fieldIssue = nil }
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text(ticket.kind == "limit" ? "限价" : "市价").font(.subheadline.weight(.semibold))
-                            Image(systemName: "chevron.down").font(.caption2)
-                        }.frame(maxWidth: .infinity).frame(minHeight: 36).background(Color.field, in: .rect(cornerRadius: 8))
-                    }.disabled(locked).accessibilityLabel("委托类型，" + (ticket.kind == "limit" ? "限价" : "市价"))
+                    HStack(spacing: 2) {
+                        orderKindOption("market", title: "市价", icon: "bolt.fill", locked: locked)
+                        orderKindOption("limit", title: "限价", icon: "tag.fill", locked: locked)
+                    }
+                    .padding(3)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 36)
+                    .background(Color.field, in: .rect(cornerRadius: 9))
+                    .accessibilityElement(children: .contain)
                 } else {
                     SoftSegment(selection: $ticket.kind, options: [("market", "市价"), ("limit", "限价")])
                     .disabled(locked)
@@ -231,19 +208,27 @@ struct TicketForm: View {
                 }
 
             }
-            Button {
-                Task { await review(side: side, state: state) }
-            } label: {
-                HStack(spacing: 8) {
-                    if account.pendingEntry != nil { ProgressView().tint(.white); Text("正在核对订单") }
-                    else if ticket.reviewing { ProgressView().tint(.white); Text("正在校验…") }
-                    else if ticket.autoWorking { ProgressView().tint(.white); Text("计算止损中") }
-                    else { Text(side == "long" ? (existing != nil ? "买入加仓" : "买入开多") : (existing != nil ? "卖出加仓" : "卖出开空")) }
+            HStack(spacing: 8) {
+                directionPicker(side: side, state: state, locked: locked)
+                    .frame(width: inline ? 116 : 132, height: 50)
+                Button {
+                    Task { await review(side: side, state: state) }
+                } label: {
+                    HStack(spacing: 8) {
+                        if account.pendingEntry != nil { ProgressView().tint(.white); Text("正在核对订单") }
+                        else if ticket.reviewing { ProgressView().tint(.white); Text("正在校验…") }
+                        else if ticket.autoWorking { ProgressView().tint(.white); Text("计算止损中") }
+                        else if confirmTrades { Text(side == "long" ? (existing != nil ? "预览加多" : "预览开多") : (existing != nil ? "预览加空" : "预览开空")) }
+                        else { Text(side == "long" ? (existing != nil ? "买入加仓" : "买入开多") : (existing != nil ? "卖出加仓" : "卖出开空")) }
+                    }
+                    .font(.body.weight(.bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+                    .frame(maxWidth: .infinity).frame(height: 50)
                 }
-                .font(.body.weight(.bold)).frame(maxWidth: .infinity).frame(height: 50)
+                .buttonStyle(.pill(.solid(side == "long" ? .up : .down), height: 50))
+                .disabled(block != nil || locked || !ready)
             }
-            .buttonStyle(.pill(.solid(side == "long" ? .up : .down), height: 50))
-            .disabled(block != nil || locked || !ready)
         }
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) { Spacer(); Button("完成") { focus = nil } }
@@ -272,6 +257,65 @@ struct TicketForm: View {
             Text(Fmt.amount(value) + " U").fontWeight(emphasized ? .bold : .medium)
                 .monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
         }.font(.caption)
+    }
+
+    private func orderKindOption(_ kind: String, title: String, icon: String, locked: Bool) -> some View {
+        let selected = ticket.kind == kind
+        return Button {
+            guard !locked, ticket.kind != kind else { return }
+            ticket.kind = kind
+            ticket.fieldIssue = nil
+            Haptics.select()
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: icon).font(.system(size: 11, weight: .bold))
+                Text(title).font(.caption.weight(.semibold))
+            }
+            .foregroundStyle(selected ? Color.ink : Color.muted)
+            .frame(maxWidth: .infinity).frame(height: 30)
+            .background(selected ? Color(uiColor: .secondarySystemBackground) : .clear, in: .rect(cornerRadius: 7))
+            .contentShape(.rect(cornerRadius: 7))
+        }
+        .buttonStyle(.plain)
+        .disabled(locked)
+        .accessibilityLabel(title + "委托")
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    private func directionPicker(side: String, state: AccountState?, locked: Bool) -> some View {
+        HStack(spacing: 2) {
+            directionOption("long", side: side, state: state, locked: locked)
+            directionOption("short", side: side, state: state, locked: locked)
+        }
+        .padding(3)
+        .background(Color.field, in: .rect(cornerRadius: 11))
+        .animation(.snappy, value: side)
+        .accessibilityElement(children: .contain)
+    }
+
+    private func directionOption(_ value: String, side: String, state: AccountState?, locked: Bool) -> some View {
+        let selected = side == value
+        let hue: Color = value == "long" ? .up : .down
+        return Button {
+            selectDirection(value, state: state)
+        } label: {
+            HStack(spacing: 3) {
+                Image(systemName: value == "long" ? "arrow.up" : "arrow.down")
+                    .font(.system(size: 9, weight: .heavy))
+                Text(value == "long" ? "做多" : "做空")
+                    .font(.caption.weight(.bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .foregroundStyle(selected ? Color.white : Color.muted)
+            .frame(maxWidth: .infinity).frame(height: 42)
+            .background(selected ? hue : .clear, in: .rect(cornerRadius: 8))
+            .contentShape(.rect(cornerRadius: 8))
+        }
+        .buttonStyle(.plain)
+        .disabled(locked || ticket.existing(state) != nil)
+        .accessibilityLabel("方向，" + (value == "long" ? "做多" : "做空"))
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     private func field<Trailing: View, Content: View>(title: String, @ViewBuilder trailing: () -> Trailing, @ViewBuilder content: () -> Content) -> some View {

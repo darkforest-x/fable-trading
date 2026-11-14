@@ -140,8 +140,7 @@ struct TradeAccountSection: View {
                 AccountSnapshotNote(online: account.online, receivedAt: account.receivedAt)
                 if selection == .positions {
                     if positions.isEmpty {
-                        emptySelection(title: currentOnly ? "当前合约暂无持仓" : "暂无持仓",
-                                       detail: account.online ? "持仓和盈亏会在收到新的账户快照后显示。" : "上次快照中没有匹配的持仓；连接恢复后会自动更新。")
+                        emptyPositionLine(title: currentOnly ? "当前合约暂无持仓" : "暂无持仓")
                     } else {
                         VStack(spacing: 10) {
                             ForEach(positions) { position in
@@ -209,6 +208,22 @@ struct TradeAccountSection: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .glassCard()
+    }
+
+    private func emptyPositionLine(title: String) -> some View {
+        HStack(spacing: 7) {
+            Image(systemName: "tray")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(Color.muted)
+            Text(title)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 5)
+        .frame(minHeight: 30)
+        .accessibilityElement(children: .combine)
     }
 
     private func requestClose(_ position: Position) {
