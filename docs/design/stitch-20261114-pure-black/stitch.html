@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Spike Ledger Interaction Polish 1830</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "amber-warning": "#f59e0b",
+            "on-tertiary-fixed-variant": "#92002a",
+            "surface-obsidian-glass": "rgba(16, 19, 24, 0.85)",
+            "secondary-fixed": "#6ffbbe",
+            "on-primary-fixed-variant": "#00468d",
+            "primary-fixed-dim": "#aac7ff",
+            "text-tertiary": "#556070",
+            "on-surface-variant": "#c0c6d6",
+            "crimson-bearish": "#f43f5e",
+            "crimson-bearish-surface": "rgba(244, 63, 94, 0.15)",
+            "secondary-fixed-dim": "#4edea3",
+            "tertiary": "#ffb2b7",
+            "error-container": "#93000a",
+            "emerald-bullish": "#10b981",
+            "text-secondary": "#8c96a5",
+            "on-primary": "#003064",
+            "surface": "#111319",
+            "surface-container-high": "#272a30",
+            "secondary-container": "#00a572",
+            "electric-blue": "#0a84ff",
+            "on-tertiary-fixed": "#40000d",
+            "surface-tint": "#aac7ff",
+            "on-tertiary-container": "#5b0017",
+            "on-secondary-fixed-variant": "#005236",
+            "surface-container-lowest": "#0b0e13",
+            "tertiary-fixed-dim": "#ffb2b7",
+            "on-error-container": "#ffdad6",
+            "background": "#111319",
+            "on-secondary-fixed": "#002113",
+            "on-secondary": "#003824",
+            "surface-container-highest": "#32353b",
+            "electric-blue-surface": "rgba(10, 132, 255, 0.15)",
+            "on-error": "#690005",
+            "primary": "#aac7ff",
+            "canvas-base": "#0b0e13",
+            "secondary": "#4edea3",
+            "tertiary-container": "#ff516a",
+            "surface-container": "#1d2025",
+            "surface-liquid-glass": "rgba(255, 255, 255, 0.12)",
+            "on-secondary-container": "#00311f",
+            "on-surface": "#e1e2ea",
+            "text-primary": "#f5f7fa",
+            "on-background": "#e1e2ea",
+            "inverse-primary": "#005db8",
+            "outline-variant": "#414754",
+            "surface-container-low": "#191c21",
+            "surface-dim": "#111319",
+            "surface-variant": "#32353b",
+            "inverse-on-surface": "#2e3036",
+            "on-primary-container": "#002957",
+            "on-primary-fixed": "#001b3e",
+            "tertiary-fixed": "#ffdadb",
+            "error": "#ffb4ab",
+            "on-tertiary": "#67001b",
+            "primary-fixed": "#d6e3ff",
+            "outline": "#8b91a0",
+            "emerald-bullish-surface": "rgba(16, 185, 129, 0.15)",
+            "inverse-surface": "#e1e2ea",
+            "surface-bright": "#36393f",
+            "primary-container": "#3e90ff",
+            "glass-specular-edge": "rgba(255, 255, 255, 0.35)",
+            "glass-border-subtle": "rgba(255, 255, 255, 0.08)",
+            "surface-panel": "#12161f"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "0.5rem",
+            "margin-tablet": "1rem",
+            "gutter-desktop": "1rem",
+            "space-xl": "1rem",
+            "gutter": "0.5rem",
+            "space-md": "0.5rem",
+            "space-xs": "0.25rem",
+            "space-lg": "0.75rem",
+            "gutter-tablet": "0.75rem",
+            "margin-mobile": "0.5rem",
+            "space-sm": "0.375rem",
+            "margin-desktop": "1.5rem"
+          },
+          "fontFamily": {
+            "headline-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "numeric-sm": ["JetBrains Mono"],
+            "headline-lg-mobile": ["Inter"],
+            "micro-tag-caps": ["JetBrains Mono"],
+            "numeric-md": ["JetBrains Mono"],
+            "headline-md": ["Inter"],
+            "body-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-md": ["Inter"],
+            "numeric-lg": ["JetBrains Mono"],
+            "display": ["Inter"]
+          },
+          "fontSize": {
+            "headline-sm": ["15px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg": ["24px", { "lineHeight": "30px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "numeric-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "headline-lg-mobile": ["20px", { "lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "micro-tag-caps": ["10px", { "lineHeight": "12px", "letterSpacing": "0.06em", "fontWeight": "600" }],
+            "numeric-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "headline-md": ["17px", { "lineHeight": "22px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "body-sm": ["11px", { "lineHeight": "15px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+            "body-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "numeric-lg": ["20px", { "lineHeight": "24px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "display": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.025em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Custom terminal specular refraction & scroll suppression */
+    .specular-card {
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.22), inset 0 -1px 0 0 rgba(255, 255, 255, 0.04);
+    }
+    .specular-top {
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.35);
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style id="oled-pure-black-theme">body, html { background-color: #000000 !important; color: #ffffff !important; } .bg-\[\#0b0e13\], .bg-\[\#101319\], .bg-\[\#12161f\], .bg-\[\#191c21\], .bg-\[\#1c1f26\], .bg-canvas-base, .bg-surface, .bg-surface-panel, .bg-background { background-color: #000000 !important; } .bg-\[\#12161f\]\/80, .bg-\[\#101319\]\/85, .bg-surface-obsidian-glass, .bg-surface-obsidian-glass\/95 { background-color: #000000 !important; backdrop-filter: none !important; } .border-\[\#1e222d\], .border-white\/5, .border-white\/10, .border-glass-border-subtle { border-color: #222222 !important; } .divide-\[\#1e222d\]\/60 > :not([hidden]) ~ :not([hidden]) { border-color: #1e1e1e !important; } select, input { background-color: #0c0c0c !important; border-color: #262626 !important; color: #ffffff !important; } .hover\:bg-\[\#272a30\]:hover, .hover\:bg-white\/5:hover { background-color: #161616 !important; } .active\:bg-white\/10:active { background-color: #202020 !important; } .specular-card, .specular-top, [class*="shadow-"] { box-shadow: none !important; } .text-text-secondary { color: #8e8e93 !important; } .text-text-tertiary { color: #5a5a5e !important; } .text-text-primary { color: #ffffff !important; } </style></head>
+<body class="bg-canvas-base text-text-primary antialiased flex justify-center items-center min-h-screen p-0 m-0 overflow-hidden font-body-md select-none" style="background-color: #000000; color: #ffffff;"><div class="w-full min-h-screen bg-[#0b0e13] text-[#e1e2ea] p-4 lg:p-6 flex flex-col items-center justify-start gap-8 font-sans select-none overflow-x-auto" style="background-color: #000000; color: #ffffff;">
+<!-- Global Top Bar for Dual Viewport Showcase -->
+<div class="w-full max-w-[1780px] flex items-center justify-between px-3 py-2 bg-[#12161f]/80 backdrop-blur-md rounded-lg border border-white/5">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-electric-blue text-[20px]">candlestick_chart</span>
+<span class="font-bold text-text-primary text-[15px] tracking-tight">Spike Ledger Interaction Polish 1830</span>
+</div>
+<span class="bg-white/5 border border-white/10 text-text-secondary text-[11px] font-mono px-2 py-0.5 rounded">11/10 08:30 急跌 · 28币</span>
+<span class="bg-emerald-bullish/15 border border-emerald-bullish/30 text-emerald-bullish text-[11px] font-mono px-2 py-0.5 rounded flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-bullish animate-pulse"></span> 全市场报警运行中
+      </span>
+</div>
+<div class="flex items-center gap-4 text-xs font-mono text-text-secondary">
+<span>双端响应架构: Desktop (1440px) + Mobile (390px)</span>
+<span class="text-white/20">|</span>
+<span class="text-electric-blue">延迟: 14ms · UTC+8</span>
+</div>
+</div>
+<!-- Main Dual-Viewport Stage Container -->
+<div class="w-full max-w-[1780px] flex flex-col xl:flex-row items-start justify-center gap-8">
+<!-- ================= DESKTOP WORKSPACE (1440 x 900 frame simulation) ================= -->
+<div class="flex flex-col gap-2 shrink-0">
+<div class="flex items-center justify-between text-xs text-text-secondary font-mono px-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">desktop_windows</span>
+<span class="font-medium text-text-primary">Desktop Workspace</span>
+<span class="text-text-tertiary">(1440 × 880 Canvas · 320px 报警账簿侧边栏)</span>
+</div>
+<span class="bg-white/5 text-[10.5px] px-2 py-0.5 rounded border border-white/5">BTC / 1.618 周下轨触及</span>
+</div>
+<div class="w-[1100px] h-[830px] bg-[#101319] border border-[#1e222d] rounded-xl overflow-hidden shadow-2xl flex flex-col relative" style="background-color: #000000; border-color: #222222; box-shadow: none;">
+<!-- Desktop Top Application Bar -->
+<header class="h-11 bg-[#12161f] border-b border-[#1e222d] flex items-center justify-between px-3 shrink-0">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 font-bold text-sm tracking-tight text-text-primary">
+<span class="material-symbols-outlined text-electric-blue text-[18px]">candlestick_chart</span>
+<span>SPIKE</span>
+</div>
+<div class="h-4 w-[1px] bg-white/10"></div>
+<!-- Symbol Dropdown -->
+<div class="flex items-center gap-1.5 bg-[#191c21] hover:bg-[#272a30] cursor-pointer px-2.5 py-1 rounded border border-[#1e222d] transition-colors">
+<div class="w-4 h-4 rounded-full bg-[#f7931a]/20 text-[#f7931a] flex items-center justify-center text-[10px] font-bold font-mono">₿</div>
+<span class="font-mono font-bold text-xs text-text-primary" id="desktop-selected-symbol">BTC</span>
+<span class="material-symbols-outlined text-xs text-text-secondary">expand_more</span>
+</div>
+<!-- Timeframes -->
+<div class="flex items-center gap-1 text-xs font-mono text-text-secondary">
+<button class="px-2 py-0.5 rounded hover:text-text-primary">5m</button>
+<button class="px-2 py-0.5 rounded hover:text-text-primary">15m</button>
+<button class="px-2 py-0.5 rounded bg-electric-blue/15 text-electric-blue border border-electric-blue/30 font-semibold">1H</button>
+<button class="px-2 py-0.5 rounded hover:text-text-primary">4H</button>
+<button class="px-2 py-0.5 rounded hover:text-text-primary">12H</button>
+<button class="px-2 py-0.5 rounded hover:text-text-primary">1D</button>
+</div>
+<div class="h-4 w-[1px] bg-white/10"></div>
+<!-- Strategy Indicators status -->
+<div class="flex items-center gap-2 text-[11px] font-mono">
+<span class="text-text-secondary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-electric-blue"></span> EMA 12H 云带: <span class="text-text-primary">开启</span>
+</span>
+<span class="text-text-secondary flex items-center gap-1 ml-2">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-bullish"></span> 触轨回测: <span class="text-text-primary">周一 1.618</span>
+</span>
+</div>
+</div>
+<!-- Right Desktop Stats -->
+<div class="flex items-center gap-3 font-mono text-xs">
+<div class="flex items-center gap-1.5 bg-[#191c21] px-2.5 py-1 rounded border border-[#1e222d]">
+<span class="text-text-secondary text-[11px]">DEMO 仓位:</span>
+<span class="text-emerald-bullish font-semibold">多头 100 U (10x)</span>
+</div>
+<div class="text-right text-[11px] text-text-tertiary">
+<span>回测实例: 11/10 08:30</span>
+</div>
+</div>
+</header>
+<!-- Desktop Body (Toolbar + Candlestick Stage + Right 320px Alarm Ledger) -->
+<div class="flex-1 flex overflow-hidden relative">
+<!-- Left 38px TradingView-style Tool Dock -->
+<div class="w-[38px] bg-[#12161f] border-r border-[#1e222d] flex flex-col items-center py-2 gap-3 shrink-0 text-text-secondary">
+<button class="p-1.5 rounded hover:bg-white/5 hover:text-text-primary transition-colors text-electric-blue"><span class="material-symbols-outlined text-[17px]">near_me</span></button>
+<button class="p-1.5 rounded hover:bg-white/5 hover:text-text-primary transition-colors"><span class="material-symbols-outlined text-[17px]">show_chart</span></button>
+<button class="p-1.5 rounded hover:bg-white/5 hover:text-text-primary transition-colors"><span class="material-symbols-outlined text-[17px]">horizontal_rule</span></button>
+<button class="p-1.5 rounded hover:bg-white/5 hover:text-text-primary transition-colors"><span class="material-symbols-outlined text-[17px]">straighten</span></button>
+<button class="p-1.5 rounded hover:bg-white/5 hover:text-text-primary transition-colors"><span class="material-symbols-outlined text-[17px]">format_shapes</span></button>
+<div class="w-4 h-[1px] bg-white/10 my-1"></div>
+<button class="p-1.5 rounded hover:bg-white/5 hover:text-text-primary transition-colors"><span class="material-symbols-outlined text-[17px]">layers</span></button>
+<button class="p-1.5 rounded hover:bg-white/5 hover:text-text-primary transition-colors"><span class="material-symbols-outlined text-[17px]">zoom_in</span></button>
+<button class="p-1.5 rounded hover:bg-white/5 hover:text-text-primary transition-colors mt-auto"><span class="material-symbols-outlined text-[17px]">settings</span></button>
+</div>
+<!-- Middle Candlestick Chart Stage -->
+<div class="flex-1 bg-[#0b0e13] flex flex-col relative overflow-hidden">
+<!-- Chart Floating HUD -->
+<div class="absolute top-3 left-3 z-10 flex items-center gap-3 bg-[#101319]/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-[#1e222d] text-xs font-mono">
+<span class="font-bold text-text-primary" id="desktop-chart-symbol">BTC 1H</span>
+<span class="text-text-secondary">开: <span class="text-text-primary">91,620.0</span></span>
+<span class="text-text-secondary">高: <span class="text-text-primary">92,100.0</span></span>
+<span class="text-text-secondary">低: <span class="text-crimson-bearish">91,420.0</span></span>
+<span class="text-text-secondary">收: <span class="text-emerald-bullish">91,950.0</span></span>
+<span class="text-emerald-bullish font-semibold">+2.15%</span>
+</div>
+<!-- SVG Interactive Chart Visualizer -->
+<div class="flex-1 w-full relative">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 740 500">
+<defs>
+<lineargradient id="deskCloud" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#0a84ff" stop-opacity="0.05"></stop><stop offset="100%" stop-color="#000000" stop-opacity="0"></stop></lineargradient>
+</defs>
+<!-- Horizontal Reference Grid & 72-bar guide -->
+<line opacity="0.4" stroke="#f43f5e" stroke-dasharray="3,3" stroke-width="0.8" x1="0" x2="740" y1="80" y2="80"></line>
+<text fill="#f43f5e" font-family="JetBrains Mono" font-size="10" opacity="0.8" x="10" y="74">上轨 1.618 · 98,250.0</text>
+<line opacity="0.25" stroke="#8c96a5" stroke-dasharray="2,2" stroke-width="0.7" x1="0" x2="740" y1="160" y2="160"></line>
+<text fill="#8c96a5" font-family="JetBrains Mono" font-size="9.5" opacity="0.6" x="10" y="154">周一中枢 · 94,800.0</text>
+<!-- 72-bar dashed guideline -->
+<line opacity="0.5" stroke="#556070" stroke-dasharray="4,4" stroke-width="0.8" x1="0" x2="740" y1="380" y2="380"></line>
+<text fill="#556070" font-family="JetBrains Mono" font-size="9.5" x="610" y="374">72-Bar 指标基准线</text>
+<!-- Lower 1.618 Key Level Line -->
+<line opacity="0.8" stroke="#10b981" stroke-width="1.2" x1="0" x2="740" y1="400" y2="400"></line>
+<text fill="#10b981" font-family="JetBrains Mono" font-size="10" font-weight="600" x="10" y="394">下轨 1.618 · 91,480.0 (触碰触发位)</text>
+<!-- 12H Cloud Curve -->
+<path d="M 0 250 Q 200 210 400 270 T 740 310 L 740 400 L 0 400 Z" fill="url(#deskCloud)"></path>
+<path d="M 0 250 Q 200 210 400 270 T 740 310" fill="none" opacity="0.45" stroke="#0a84ff" stroke-width="1.4"></path>
+<!-- Candlesticks generation (~50 bars wide) -->
+<g stroke-linecap="round">
+<!-- Downward slope to trigger -->
+<line stroke="#f43f5e" stroke-width="1.2" x1="30" x2="30" y1="100" y2="140"></line><rect fill="#f43f5e" height="22" width="8" x="26" y="110"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="50" x2="50" y1="120" y2="160"></line><rect fill="#10b981" height="20" width="8" x="46" y="128"></rect>
+<line stroke="#f43f5e" stroke-width="1.2" x1="70" x2="70" y1="145" y2="185"></line><rect fill="#f43f5e" height="24" width="8" x="66" y="150"></rect>
+<line stroke="#f43f5e" stroke-width="1.2" x1="90" x2="90" y1="160" y2="198"></line><rect fill="#f43f5e" height="22" width="8" x="86" y="166"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="110" x2="110" y1="180" y2="220"></line><rect fill="#10b981" height="20" width="8" x="106" y="186"></rect>
+<line stroke="#f43f5e" stroke-width="1.2" x1="130" x2="130" y1="200" y2="245"></line><rect fill="#f43f5e" height="26" width="8" x="126" y="206"></rect>
+<line stroke="#f43f5e" stroke-width="1.2" x1="150" x2="150" y1="220" y2="265"></line><rect fill="#f43f5e" height="28" width="8" x="146" y="226"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="170" x2="170" y1="240" y2="280"></line><rect fill="#10b981" height="18" width="8" x="166" y="248"></rect>
+<line stroke="#f43f5e" stroke-width="1.2" x1="190" x2="190" y1="260" y2="305"></line><rect fill="#f43f5e" height="25" width="8" x="186" y="268"></rect>
+<line stroke="#f43f5e" stroke-width="1.2" x1="210" x2="210" y1="285" y2="330"></line><rect fill="#f43f5e" height="24" width="8" x="206" y="294"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="230" x2="230" y1="300" y2="345"></line><rect fill="#10b981" height="22" width="8" x="226" y="308"></rect>
+<line stroke="#f43f5e" stroke-width="1.2" x1="250" x2="250" y1="320" y2="368"></line><rect fill="#f43f5e" height="28" width="8" x="246" y="328"></rect>
+<line stroke="#f43f5e" stroke-width="1.2" x1="270" x2="270" y1="335" y2="385"></line><rect fill="#f43f5e" height="28" width="8" x="266" y="345"></rect>
+<line stroke="#f43f5e" stroke-width="1.2" x1="290" x2="290" y1="350" y2="402"></line><rect fill="#f43f5e" height="30" width="8" x="286" y="360"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="310" x2="310" y1="365" y2="410"></line><rect fill="#10b981" height="24" width="8" x="306" y="372"></rect>
+<line stroke="#f43f5e" stroke-width="1.2" x1="330" x2="330" y1="380" y2="425"></line><rect fill="#f43f5e" height="26" width="8" x="326" y="388"></rect>
+<!-- 11/10 08:30 EVENT TRIGGER SPIKE CANDLE (x=360) -->
+<line stroke="#0a84ff" stroke-width="2.2" x1="360" x2="360" y1="390" y2="460"></line>
+<rect fill="#10b981" height="28" stroke="#0a84ff" stroke-width="1.2" width="12" x="354" y="398"></rect>
+<circle cx="360" cy="458" fill="#0a84ff" r="4" stroke="#ffffff" stroke-width="1.5"></circle>
+<!-- Rebound recovery candles -->
+<line stroke="#10b981" stroke-width="1.2" x1="385" x2="385" y1="375" y2="420"></line><rect fill="#10b981" height="26" width="8" x="381" y="382"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="405" x2="405" y1="360" y2="405"></line><rect fill="#10b981" height="24" width="8" x="401" y="368"></rect>
+<line stroke="#f43f5e" stroke-width="1.2" x1="425" x2="425" y1="350" y2="390"></line><rect fill="#f43f5e" height="16" width="8" x="421" y="356"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="445" x2="445" y1="335" y2="378"></line><rect fill="#10b981" height="24" width="8" x="441" y="342"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="465" x2="465" y1="320" y2="360"></line><rect fill="#10b981" height="22" width="8" x="461" y="326"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="485" x2="485" y1="300" y2="345"></line><rect fill="#10b981" height="26" width="8" x="481" y="306"></rect>
+<line stroke="#f43f5e" stroke-width="1.2" x1="505" x2="505" y1="285" y2="330"></line><rect fill="#f43f5e" height="18" width="8" x="501" y="292"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="525" x2="525" y1="270" y2="315"></line><rect fill="#10b981" height="24" width="8" x="521" y="276"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="545" x2="545" y1="255" y2="300"></line><rect fill="#10b981" height="25" width="8" x="541" y="260"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="565" x2="565" y1="240" y2="285"></line><rect fill="#10b981" height="24" width="8" x="561" y="246"></rect>
+<line stroke="#f43f5e" stroke-width="1.2" x1="585" x2="585" y1="230" y2="270"></line><rect fill="#f43f5e" height="15" width="8" x="581" y="236"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="605" x2="605" y1="215" y2="255"></line><rect fill="#10b981" height="22" width="8" x="601" y="222"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="625" x2="625" y1="200" y2="245"></line><rect fill="#10b981" height="24" width="8" x="621" y="206"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="645" x2="645" y1="190" y2="230"></line><rect fill="#10b981" height="22" width="8" x="641" y="195"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="665" x2="665" y1="178" y2="218"></line><rect fill="#10b981" height="20" width="8" x="661" y="184"></rect>
+<line stroke="#10b981" stroke-width="1.2" x1="685" x2="685" y1="168" y2="208"></line><rect fill="#10b981" height="22" width="8" x="681" y="174"></rect>
+</g>
+<!-- Event Vertical Marker Line at 11/10 08:30 -->
+<line stroke="#0a84ff" stroke-dasharray="3,3" stroke-width="1.2" x1="360" x2="360" y1="20" y2="485"></line>
+<rect fill="#0b0e13" height="18" opacity="0.95" rx="3" stroke="#0a84ff" stroke-width="0.8" width="100" x="310" y="22"></rect>
+<text fill="#0a84ff" font-family="JetBrains Mono" font-size="9.5" font-weight="600" text-anchor="middle" x="360" y="35">11/10 08:30 触碰</text>
+</svg>
+</div>
+<!-- Standard Ordinary Chart Bottom Toolbar Dock -->
+<div class="h-8 bg-[#101319] border-t border-[#1e222d] px-3 flex items-center justify-between font-mono text-xs text-text-secondary">
+<div class="flex items-center gap-3">
+<span class="text-text-primary">时区: UTC+8</span>
+<span>分值: <span class="text-emerald-bullish">0.88 (通过)</span></span>
+<span>收线确认: <span class="text-emerald-bullish">5m 收线已回收</span></span>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-text-primary text-[11px] border border-white/5">自适应</button>
+<button class="px-2 py-0.5 rounded bg-emerald-bullish/15 text-emerald-bullish border border-emerald-bullish/30 text-[11px]">最新</button>
+</div>
+</div>
+</div>
+<!-- ================= RIGHT ~320px UNIFIED ALARM LEDGER SIDEBAR (Desktop) ================= -->
+<aside class="w-[320px] bg-[#12161f] border-l border-[#1e222d] flex flex-col shrink-0 overflow-hidden">
+<!-- Exact Ledger Module Template inserted here -->
+<div class="p-2.5 border-b border-[#1e222d] space-y-2">
+<!-- Source Selector Dropdown with '🔔 全市场报警' default -->
+<div class="relative">
+<select class="w-full bg-[#191c21] hover:bg-[#272a30] text-text-primary font-mono text-xs px-2.5 py-1.5 rounded border border-[#1e222d] focus:outline-none focus:border-electric-blue transition-colors cursor-pointer appearance-none pr-8"><option>🔔 全市场报警</option><option selected="">1H 突破 4H 趋势线</option><option>周一触价 · 本周</option><option>月首周触价 · 本月</option><option>12H 云带巡检</option><option>策略记录 · 模拟</option></select>
+<span class="material-symbols-outlined text-xs text-text-secondary absolute right-2.5 top-2.5 pointer-events-none">unfold_more</span>
+</div>
+<!-- Context Line directly below dropdown: alert instance selector with subtle arrows -->
+<div class="flex items-center justify-between bg-[#0b0e13] px-2 py-1.5 rounded border border-[#1e222d] text-xs font-mono"><button class="text-text-tertiary hover:text-text-primary px-1 transition-colors"><span class="material-symbols-outlined text-[14px]">chevron_left</span></button><div class="flex items-center gap-1.5"><span class="text-text-primary font-semibold">11/10 16:00</span><span class="bg-emerald-bullish-surface text-emerald-bullish border border-emerald-bullish/30 text-[9.5px] px-1 rounded font-semibold">1H 收线确认</span><span class="text-text-tertiary">·</span><span class="text-text-secondary">18币</span></div><button class="text-text-tertiary hover:text-text-primary px-1 transition-colors"><span class="material-symbols-outlined text-[14px]">chevron_right</span></button></div>
+<!-- Normal Compact Toolbar Row: Search, Filter/Sort, Count Chip -->
+<div class="space-y-1.5">
+<div class="flex items-center gap-1.5">
+<!-- Search input -->
+<div class="relative flex-1"><span class="material-symbols-outlined text-xs text-text-tertiary absolute left-2 top-2 pointer-events-none">search</span><input class="w-full bg-[#0b0e13] text-text-primary text-[11px] font-mono pl-6 pr-6 py-1 rounded border border-[#1e222d] placeholder:text-text-tertiary focus:outline-none focus:border-electric-blue focus:ring-1 focus:ring-electric-blue/40 transition-colors" id="desktop-search-input" oninput="handleLedgerSearch(this.value, 'desktop')" onkeydown="if(event.key==='Escape'){this.value='';handleLedgerSearch('', 'desktop');}" placeholder="搜索标的..." type="text"/><button class="hidden absolute right-1.5 top-1.5 text-text-tertiary hover:text-text-primary text-[11px] font-mono w-4 h-4 rounded flex items-center justify-center bg-white/5 hover:bg-white/10" id="desktop-search-clear" onclick="document.getElementById('desktop-search-input').value='';handleLedgerSearch('', 'desktop');" title="清空 (Esc)">✕</button></div>
+<!-- Filter Dropdown -->
+<button class="px-2 py-1 bg-[#191c21] hover:bg-[#272a30] text-[11px] font-mono text-text-secondary rounded border border-[#1e222d] flex items-center gap-0.5 shrink-0">
+<span>全部方向</span>
+<span class="material-symbols-outlined text-[11px]">expand_more</span>
+</button>
+<!-- Sort Dropdown -->
+<button class="px-2 py-1 bg-[#191c21] hover:bg-[#272a30] text-[11px] font-mono text-text-secondary rounded border border-[#1e222d] flex items-center gap-0.5 shrink-0">
+<span>时序</span>
+<span class="material-symbols-outlined text-[11px]">expand_more</span>
+</button>
+</div>
+<!-- Total Count Chip -->
+<div class="flex items-center justify-between text-[10.5px] font-mono px-1 text-text-tertiary"><span>共 18 标的 · 上破 13 / 下破 5</span><span class="text-electric-blue">4H 趋势线破位</span></div>
+</div>
+</div>
+<!-- Flat Dense Coin List Rows (Desktop) -->
+<div class="flex-1 overflow-y-auto hide-scrollbar divide-y divide-[#1e222d]/60 font-mono text-xs"><div class="hidden py-10 px-4 text-center text-text-tertiary font-mono text-[11.5px]" id="desktop-empty-state"><span class="material-symbols-outlined text-[20px] mb-1 opacity-50 block mx-auto">search_off</span><p class="text-text-secondary">无 1H 突破 4H 趋势线 确认记录</p><p class="text-[10px] mt-0.5 opacity-70">按 Esc 或点击 ✕ 清空搜索</p></div><div class="p-2 bg-electric-blue-surface/40 border-l-2 border-electric-blue flex items-center justify-between hover:bg-electric-blue-surface/50 cursor-pointer transition-colors"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-[#f7931a]/20 border border-[#f7931a]/40 text-[#f7931a] flex items-center justify-center text-[10px] font-bold shrink-0">₿</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">BTC</span><span class="bg-emerald-bullish-surface text-emerald-bullish border border-emerald-bullish/30 text-[9.5px] px-1 rounded font-semibold">上破</span><span class="text-[10px] text-text-secondary">4H 压制线</span></div><div class="flex items-center gap-1.5 text-[10px] text-text-tertiary mt-1"><span>11/10 16:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11.5px]">收 92,150.0</div><div class="text-text-secondary text-[10px] mt-1">线 91,820.0 · <span class="text-emerald-bullish font-semibold">+0.36%</span></div></div></div><div class="p-2 hover:bg-white/5 cursor-pointer transition-colors flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-[#627eea]/20 border border-[#627eea]/40 text-[#627eea] flex items-center justify-center text-[10px] font-bold shrink-0">Ξ</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">ETH</span><span class="bg-emerald-bullish-surface text-emerald-bullish border border-emerald-bullish/30 text-[9.5px] px-1 rounded font-semibold">上破</span><span class="text-[10px] text-text-secondary">4H 下行通道</span></div><div class="flex items-center gap-1.5 text-[10px] text-text-tertiary mt-1"><span>11/10 16:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11.5px]">收 2,674.50</div><div class="text-text-secondary text-[10px] mt-1">线 2,648.00 · <span class="text-emerald-bullish font-semibold">+1.00%</span></div></div></div><div class="p-2 hover:bg-white/5 cursor-pointer transition-colors flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-[#9945ff]/20 border border-[#9945ff]/40 text-[#14f195] flex items-center justify-center text-[9px] font-bold shrink-0">SOL</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">SOL</span><span class="bg-emerald-bullish-surface text-emerald-bullish border border-emerald-bullish/30 text-[9.5px] px-1 rounded font-semibold">上破</span><span class="text-[10px] text-text-secondary">4H 收敛三角形</span></div><div class="flex items-center gap-1.5 text-[10px] text-text-tertiary mt-1"><span>11/10 15:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11.5px]">收 186.20</div><div class="text-text-secondary text-[10px] mt-1">线 183.50 · <span class="text-emerald-bullish font-semibold">+1.47%</span></div></div></div><div class="p-2 hover:bg-white/5 cursor-pointer transition-colors flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-[#2a82e4]/20 border border-[#2a82e4]/40 text-[#2a82e4] flex items-center justify-center text-[9px] font-bold shrink-0">SUI</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">SUI</span><span class="bg-crimson-bearish-surface text-crimson-bearish border border-crimson-bearish/30 text-[9.5px] px-1 rounded font-semibold">下破</span><span class="text-[10px] text-text-secondary">4H 上升趋势线</span></div><div class="flex items-center gap-1.5 text-[10px] text-text-tertiary mt-1"><span>11/10 15:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11.5px]">收 2.8120</div><div class="text-text-secondary text-[10px] mt-1">线 2.8550 · <span class="text-crimson-bearish font-semibold">-1.51%</span></div></div></div><div class="p-2 hover:bg-white/5 cursor-pointer transition-colors flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-[#c2a633]/20 border border-[#c2a633]/40 text-[#c2a633] flex items-center justify-center text-[9px] font-bold shrink-0">Ð</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">DOGE</span><span class="bg-emerald-bullish-surface text-emerald-bullish border border-emerald-bullish/30 text-[9.5px] px-1 rounded font-semibold">上破</span><span class="text-[10px] text-text-secondary">4H 颈线</span></div><div class="flex items-center gap-1.5 text-[10px] text-text-tertiary mt-1"><span>11/10 14:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11.5px]">收 0.3685</div><div class="text-text-secondary text-[10px] mt-1">线 0.3590 · <span class="text-emerald-bullish font-semibold">+2.65%</span></div></div></div><div class="p-2 hover:bg-white/5 cursor-pointer transition-colors flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-[#e84142]/20 border border-[#e84142]/40 text-[#e84142] flex items-center justify-center text-[8.5px] font-bold shrink-0">AVAX</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">AVAX</span><span class="bg-crimson-bearish-surface text-crimson-bearish border border-crimson-bearish/30 text-[9.5px] px-1 rounded font-semibold">下破</span><span class="text-[10px] text-text-secondary">4H 支撑轨</span></div><div class="flex items-center gap-1.5 text-[10px] text-text-tertiary mt-1"><span>11/10 13:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11.5px]">收 31.85</div><div class="text-text-secondary text-[10px] mt-1">线 32.40 · <span class="text-crimson-bearish font-semibold">-1.70%</span></div></div></div><div class="p-2 hover:bg-white/5 cursor-pointer transition-colors flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center text-[8.5px] font-bold shrink-0">NEAR</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">NEAR</span><span class="bg-emerald-bullish-surface text-emerald-bullish border border-emerald-bullish/30 text-[9.5px] px-1 rounded font-semibold">上破</span><span class="text-[10px] text-text-secondary">4H 压制线</span></div><div class="flex items-center gap-1.5 text-[10px] text-text-tertiary mt-1"><span>11/10 12:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11.5px]">收 5.040</div><div class="text-text-secondary text-[10px] mt-1">线 4.920 · <span class="text-emerald-bullish font-semibold">+2.44%</span></div></div></div><div class="p-2 hover:bg-white/5 cursor-pointer transition-colors flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-[#375bd2]/20 border border-[#375bd2]/40 text-[#375bd2] flex items-center justify-center text-[8.5px] font-bold shrink-0">LINK</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">LINK</span><span class="bg-emerald-bullish-surface text-emerald-bullish border border-emerald-bullish/30 text-[9.5px] px-1 rounded font-semibold">上破</span><span class="text-[10px] text-text-secondary">4H 旗形上线</span></div><div class="flex items-center gap-1.5 text-[10px] text-text-tertiary mt-1"><span>11/10 11:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11.5px]">收 14.15</div><div class="text-text-secondary text-[10px] mt-1">线 13.82 · <span class="text-emerald-bullish font-semibold">+2.39%</span></div></div></div><div class="p-2 hover:bg-white/5 cursor-pointer transition-colors flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-emerald-bullish/20 border border-emerald-bullish/40 text-emerald-bullish flex items-center justify-center text-[8px] font-bold shrink-0">PEPE</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">PEPE</span><span class="bg-emerald-bullish-surface text-emerald-bullish border border-emerald-bullish/30 text-[9.5px] px-1 rounded font-semibold">上破</span><span class="text-[10px] text-text-secondary">4H 下行趋势线</span></div><div class="flex items-center gap-1.5 text-[10px] text-text-tertiary mt-1"><span>11/10 09:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11.5px]">收 0.0000192</div><div class="text-text-secondary text-[10px] mt-1">线 0.0000184 · <span class="text-emerald-bullish font-semibold">+4.35%</span></div></div></div></div>
+<!-- Bottom Sidebar Footer Status -->
+<div class="h-8 bg-[#101319] border-t border-[#1e222d] px-3 flex items-center justify-between text-[11px] font-mono text-text-tertiary"><span>已选: <span class="text-text-primary font-semibold">BTC</span> (1/18)</span><span class="text-emerald-bullish flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-bullish"></span> 1H收线监控已连接</span></div>
+</aside>
+</div>
+</div>
+</div>
+<!-- ================= MOBILE WORKSPACE (390 x 844 iPhone Frame) ================= -->
+<div class="flex flex-col gap-2 shrink-0">
+<div class="flex items-center justify-between text-xs text-text-secondary font-mono px-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">smartphone</span>
+<span class="font-medium text-text-primary">Mobile Device Viewport</span>
+<span class="text-text-tertiary">(390 × 844 · 交易簿 Tab 激活)</span>
+</div>
+<span class="bg-emerald-bullish/10 text-emerald-bullish border border-emerald-bullish/20 text-[10px] px-1.5 py-0.5 rounded font-mono">标准四Tab</span>
+</div>
+<div class="relative w-[390px] h-[844px] bg-[#0b0e13] border border-glass-border-subtle rounded-[48px] overflow-hidden flex flex-col shadow-[0_25px_70px_rgba(0,0,0,0.95)] select-none" style="background-color: #000000; border-color: #222222; box-shadow: 0 0 0 1px #1a1a1a;">
+<!-- Dynamic Island & Status Bar (44px) -->
+<div class="relative z-50 flex items-center justify-between px-6 pt-3 h-11 shrink-0 bg-transparent text-text-primary">
+<span class="font-numeric-sm text-numeric-sm text-text-primary font-semibold tracking-tight">9:41</span>
+<!-- Dynamic Island Pill -->
+<div class="absolute left-1/2 -translate-x-1/2 top-2.5 w-[114px] h-[30px] bg-black rounded-full flex items-center justify-between px-2.5 border border-glass-border-subtle">
+<div class="w-2.5 h-2.5 rounded-full bg-electric-blue/40 flex items-center justify-center animate-pulse">
+<div class="w-1.5 h-1.5 rounded-full bg-electric-blue"></div>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-surface-container-high"></span>
+<div class="w-2.5 h-2.5 rounded-full bg-[#1c1f26] border border-glass-border-subtle flex items-center justify-center">
+<div class="w-1 h-1 rounded-full bg-[#353942]"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center space-x-1.5 text-text-primary">
+<span class="material-symbols-outlined text-[13px] leading-none">signal_cellular_alt</span>
+<span class="material-symbols-outlined text-[13px] leading-none">wifi</span>
+<div class="w-5 h-2.5 border border-text-secondary/70 rounded-[3px] p-[1px] flex items-center">
+<div class="h-full w-3 bg-text-primary rounded-[1px]"></div>
+</div>
+</div>
+</div>
+<!-- Mobile Top App Bar -->
+<header class="bg-surface-obsidian-glass backdrop-blur-xl border-b border-glass-border-subtle docked full-width top-0 z-40 flex justify-between items-center w-full px-3 h-11 mx-auto shrink-0">
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-electric-blue text-[18px]">candlestick_chart</span>
+<span class="font-bold tracking-tight text-text-primary text-[14px]">SPIKE · 1830</span>
+<div class="flex items-center bg-[#191c21] px-1.5 py-0.5 rounded border border-[#1e222d] ml-1">
+<span class="font-mono text-[11px] text-text-primary" id="mobile-selected-badge">BTC</span>
+<span class="material-symbols-outlined text-[11px] text-text-secondary ml-0.5">expand_more</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="bg-electric-blue-surface text-electric-blue border border-electric-blue/40 font-mono text-[10px] px-2 py-0.5 rounded-full tracking-wider">全市场报警 28</span>
+</div>
+</header>
+<!-- Mobile Body Viewport: View A (Alarm Ledger inside 交易簿 Tab) & View B (Chart) -->
+<div class="relative flex-1 w-full overflow-hidden flex flex-col pb-14">
+<!-- TAB CONTENT: 交易簿 (ACTIVE DEFAULT) -->
+<div class="flex-1 w-full flex flex-col overflow-hidden bg-[#101319]" id="tab-orderbook-view">
+<!-- Mobile Alarm Ledger Header Area -->
+<div class="p-2.5 bg-[#12161f] border-b border-[#1e222d] space-y-2 shrink-0">
+<!-- Source Selector Dropdown with '🔔 全市场报警' default -->
+<div class="relative">
+<select class="w-full bg-[#191c21] text-text-primary font-mono text-xs px-2.5 py-1.5 rounded border border-[#1e222d] focus:outline-none focus:border-electric-blue transition-colors cursor-pointer appearance-none pr-8"><option>🔔 全市场报警</option><option selected="">1H 突破 4H 趋势线</option><option>周一触价 · 本周</option><option>月首周触价 · 本月</option><option>12H 云带巡检</option><option>策略记录 · 模拟</option></select>
+<span class="material-symbols-outlined text-xs text-text-secondary absolute right-2.5 top-2.5 pointer-events-none">unfold_more</span>
+</div>
+<!-- Context Line directly below dropdown: alert instance selector with subtle arrows -->
+<div class="flex items-center justify-between bg-[#0b0e13] px-2 py-1 rounded border border-[#1e222d] text-xs font-mono"><button class="text-text-tertiary hover:text-text-primary px-1 transition-colors"><span class="material-symbols-outlined text-[14px]">chevron_left</span></button><div class="flex items-center gap-1.5"><span class="text-text-primary font-semibold">11/10 16:00</span><span class="bg-emerald-bullish-surface text-emerald-bullish border border-emerald-bullish/30 text-[9px] px-1 rounded font-semibold">1H 收线确认</span><span class="text-text-tertiary">·</span><span class="text-text-secondary">18币</span></div><button class="text-text-tertiary hover:text-text-primary px-1 transition-colors"><span class="material-symbols-outlined text-[14px]">chevron_right</span></button></div>
+<!-- Compact Toolbar Row: Search, Filter/Sort, Count Chip -->
+<div class="space-y-1.5">
+<div class="flex items-center gap-1.5">
+<div class="relative flex-1"><span class="material-symbols-outlined text-xs text-text-tertiary absolute left-2 top-2 pointer-events-none">search</span><input class="w-full bg-[#0b0e13] text-text-primary text-[11px] font-mono pl-6 pr-6 py-1 rounded border border-[#1e222d] placeholder:text-text-tertiary focus:outline-none focus:border-electric-blue focus:ring-1 focus:ring-electric-blue/40 transition-colors" id="mobile-search-input" oninput="handleLedgerSearch(this.value, 'mobile')" onkeydown="if(event.key==='Escape'){this.value='';handleLedgerSearch('', 'mobile');}" placeholder="搜索标的..." type="text"/><button class="hidden absolute right-1.5 top-1.5 text-text-tertiary hover:text-text-primary text-[11px] font-mono w-4 h-4 rounded flex items-center justify-center bg-white/5 hover:bg-white/10" id="mobile-search-clear" onclick="document.getElementById('mobile-search-input').value='';handleLedgerSearch('', 'mobile');" title="清空 (Esc)">✕</button></div>
+<button class="px-2 py-1 bg-[#191c21] text-[10.5px] font-mono text-text-secondary rounded border border-[#1e222d] flex items-center gap-0.5 shrink-0">
+<span>全部方向</span>
+<span class="material-symbols-outlined text-[10px]">expand_more</span>
+</button>
+<button class="px-2 py-1 bg-[#191c21] text-[10.5px] font-mono text-text-secondary rounded border border-[#1e222d] flex items-center gap-0.5 shrink-0">
+<span>时序</span>
+<span class="material-symbols-outlined text-[10px]">expand_more</span>
+</button>
+</div>
+<div class="flex items-center justify-between text-[10px] font-mono text-text-tertiary px-0.5"><span>共 18 标的 · 上破 13 / 下破 5</span><span class="text-electric-blue">4H 趋势线破位</span></div>
+</div>
+</div>
+<!-- Mobile Coin Flat Dense List (Identical to Desktop) -->
+<div class="flex-1 overflow-y-auto hide-scrollbar divide-y divide-[#1e222d]/60 font-mono text-xs"><div class="hidden py-10 px-4 text-center text-text-tertiary font-mono text-[11.5px]" id="mobile-empty-state"><span class="material-symbols-outlined text-[20px] mb-1 opacity-50 block mx-auto">search_off</span><p class="text-text-secondary">无 1H 突破 4H 趋势线 确认记录</p><p class="text-[10px] mt-0.5 opacity-70">按 Esc 或点击 ✕ 清空搜索</p></div><div class="p-2 bg-electric-blue-surface/40 border-l-2 border-electric-blue flex items-center justify-between active:bg-electric-blue-surface/60 cursor-pointer min-h-[44px]" onclick="selectMobileCoin('BTC', '92,150.0', '+0.36%')"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-[#f7931a]/20 border border-[#f7931a]/40 text-[#f7931a] flex items-center justify-center text-[10px] font-bold shrink-0">₿</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">BTC</span><span class="bg-emerald-bullish-surface text-emerald-bullish border border-emerald-bullish/30 text-[9px] px-1 rounded font-semibold">上破</span><span class="text-[9.5px] text-text-secondary">4H 压制线</span></div><div class="flex items-center gap-1.5 text-[9.5px] text-text-tertiary mt-1"><span>11/10 16:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11px]">收 92,150.0</div><div class="text-text-secondary text-[9.5px] mt-1">线 91,820.0 · <span class="text-emerald-bullish font-semibold">+0.36% ›</span></div></div></div><div class="p-2 hover:bg-white/5 active:bg-white/10 cursor-pointer transition-colors flex items-center justify-between min-h-[44px]" onclick="selectMobileCoin('ETH', '2,674.50', '+1.00%')"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-[#627eea]/20 border border-[#627eea]/40 text-[#627eea] flex items-center justify-center text-[10px] font-bold shrink-0">Ξ</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">ETH</span><span class="bg-emerald-bullish-surface text-emerald-bullish border border-emerald-bullish/30 text-[9px] px-1 rounded font-semibold">上破</span><span class="text-[9.5px] text-text-secondary">4H 下行通道</span></div><div class="flex items-center gap-1.5 text-[9.5px] text-text-tertiary mt-1"><span>11/10 16:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11px]">收 2,674.50</div><div class="text-text-secondary text-[9.5px] mt-1">线 2,648.00 · <span class="text-emerald-bullish font-semibold">+1.00% ›</span></div></div></div><div class="p-2 hover:bg-white/5 active:bg-white/10 cursor-pointer transition-colors flex items-center justify-between min-h-[44px]" onclick="selectMobileCoin('SOL', '186.20', '+1.47%')"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-[#9945ff]/20 border border-[#9945ff]/40 text-[#14f195] flex items-center justify-center text-[9px] font-bold shrink-0">SOL</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">SOL</span><span class="bg-emerald-bullish-surface text-emerald-bullish border border-emerald-bullish/30 text-[9px] px-1 rounded font-semibold">上破</span><span class="text-[9.5px] text-text-secondary">4H 收敛三角形</span></div><div class="flex items-center gap-1.5 text-[9.5px] text-text-tertiary mt-1"><span>11/10 15:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11px]">收 186.20</div><div class="text-text-secondary text-[9.5px] mt-1">线 183.50 · <span class="text-emerald-bullish font-semibold">+1.47% ›</span></div></div></div><div class="p-2 hover:bg-white/5 active:bg-white/10 cursor-pointer transition-colors flex items-center justify-between min-h-[44px]" onclick="selectMobileCoin('SUI', '2.8120', '-1.51%')"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-[#2a82e4]/20 border border-[#2a82e4]/40 text-[#2a82e4] flex items-center justify-center text-[9px] font-bold shrink-0">SUI</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">SUI</span><span class="bg-crimson-bearish-surface text-crimson-bearish border border-crimson-bearish/30 text-[9px] px-1 rounded font-semibold">下破</span><span class="text-[9.5px] text-text-secondary">4H 上升趋势线</span></div><div class="flex items-center gap-1.5 text-[9.5px] text-text-tertiary mt-1"><span>11/10 15:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11px]">收 2.8120</div><div class="text-text-secondary text-[9.5px] mt-1">线 2.8550 · <span class="text-crimson-bearish font-semibold">-1.51% ›</span></div></div></div><div class="p-2 hover:bg-white/5 active:bg-white/10 cursor-pointer transition-colors flex items-center justify-between min-h-[44px]" onclick="selectMobileCoin('DOGE', '0.3685', '+2.65%')"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-[#c2a633]/20 border border-[#c2a633]/40 text-[#c2a633] flex items-center justify-center text-[9px] font-bold shrink-0">Ð</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">DOGE</span><span class="bg-emerald-bullish-surface text-emerald-bullish border border-emerald-bullish/30 text-[9px] px-1 rounded font-semibold">上破</span><span class="text-[9.5px] text-text-secondary">4H 颈线</span></div><div class="flex items-center gap-1.5 text-[9.5px] text-text-tertiary mt-1"><span>11/10 14:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11px]">收 0.3685</div><div class="text-text-secondary text-[9.5px] mt-1">线 0.3590 · <span class="text-emerald-bullish font-semibold">+2.65% ›</span></div></div></div><div class="p-2 hover:bg-white/5 active:bg-white/10 cursor-pointer transition-colors flex items-center justify-between min-h-[44px]" onclick="selectMobileCoin('AVAX', '31.85', '-1.70%')"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-[#e84142]/20 border border-[#e84142]/40 text-[#e84142] flex items-center justify-center text-[8.5px] font-bold shrink-0">AVAX</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">AVAX</span><span class="bg-crimson-bearish-surface text-crimson-bearish border border-crimson-bearish/30 text-[9px] px-1 rounded font-semibold">下破</span><span class="text-[9.5px] text-text-secondary">4H 支撑轨</span></div><div class="flex items-center gap-1.5 text-[9.5px] text-text-tertiary mt-1"><span>11/10 13:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11px]">收 31.85</div><div class="text-text-secondary text-[9.5px] mt-1">线 32.40 · <span class="text-crimson-bearish font-semibold">-1.70% ›</span></div></div></div><div class="p-2 hover:bg-white/5 active:bg-white/10 cursor-pointer transition-colors flex items-center justify-between min-h-[44px]" onclick="selectMobileCoin('NEAR', '5.040', '+2.44%')"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center text-[8.5px] font-bold shrink-0">NEAR</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">NEAR</span><span class="bg-emerald-bullish-surface text-emerald-bullish border border-emerald-bullish/30 text-[9px] px-1 rounded font-semibold">上破</span><span class="text-[9.5px] text-text-secondary">4H 压制线</span></div><div class="flex items-center gap-1.5 text-[9.5px] text-text-tertiary mt-1"><span>11/10 12:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11px]">收 5.040</div><div class="text-text-secondary text-[9.5px] mt-1">线 4.920 · <span class="text-emerald-bullish font-semibold">+2.44% ›</span></div></div></div><div class="p-2 hover:bg-white/5 active:bg-white/10 cursor-pointer transition-colors flex items-center justify-between min-h-[44px]" onclick="selectMobileCoin('LINK', '14.15', '+2.39%')"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-[#375bd2]/20 border border-[#375bd2]/40 text-[#375bd2] flex items-center justify-center text-[8.5px] font-bold shrink-0">LINK</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">LINK</span><span class="bg-emerald-bullish-surface text-emerald-bullish border border-emerald-bullish/30 text-[9px] px-1 rounded font-semibold">上破</span><span class="text-[9.5px] text-text-secondary">4H 旗形上线</span></div><div class="flex items-center gap-1.5 text-[9.5px] text-text-tertiary mt-1"><span>11/10 11:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11px]">收 14.15</div><div class="text-text-secondary text-[9.5px] mt-1">线 13.82 · <span class="text-emerald-bullish font-semibold">+2.39% ›</span></div></div></div><div class="p-2 hover:bg-white/5 active:bg-white/10 cursor-pointer transition-colors flex items-center justify-between min-h-[44px]" onclick="selectMobileCoin('PEPE', '0.0000192', '+4.35%')"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-emerald-bullish/20 border border-emerald-bullish/40 text-emerald-bullish flex items-center justify-center text-[8px] font-bold shrink-0">PEPE</div><div><div class="flex items-center gap-1.5 leading-none"><span class="font-bold text-text-primary text-[12px]">PEPE</span><span class="bg-emerald-bullish-surface text-emerald-bullish border border-emerald-bullish/30 text-[9px] px-1 rounded font-semibold">上破</span><span class="text-[9.5px] text-text-secondary">4H 下行趋势线</span></div><div class="flex items-center gap-1.5 text-[9.5px] text-text-tertiary mt-1"><span>11/10 09:00</span><span class="bg-[#191c21] text-text-secondary px-1 rounded border border-[#1e222d]">1H收线已确认</span></div></div></div><div class="text-right leading-none"><div class="font-bold text-text-primary text-[11px]">收 0.0000192</div><div class="text-text-secondary text-[9.5px] mt-1">线 0.0000184 · <span class="text-emerald-bullish font-semibold">+4.35% ›</span></div></div></div></div>
+<!-- Mobile Ledger Footnote -->
+<div class="px-3 py-1.5 bg-[#0b0e13] border-t border-[#1e222d] flex items-center justify-between text-[10px] font-mono text-text-tertiary shrink-0"><span>点击任意币种跳转主图查看走势</span><span class="text-emerald-bullish font-semibold">UTC+8 16:00 收线</span></div>
+</div>
+<!-- TAB CONTENT: 图表 (Chart View) -->
+<div class="flex-1 w-full hidden flex-col overflow-hidden bg-[#0b0e13]" id="tab-chart-view">
+<!-- Mobile Chart Symbol Subheader -->
+<div class="h-8 px-3 flex items-center justify-between border-b border-glass-border-subtle bg-canvas-base/80 backdrop-blur-md shrink-0 text-micro-tag-caps font-mono">
+<div class="flex items-center space-x-1">
+<span class="bg-surface-liquid-glass text-text-primary px-1.5 py-0.5 rounded border border-glass-border-subtle font-bold" id="mobile-chart-symbol-badge">BTC</span>
+<span class="text-text-tertiary">/</span>
+<span class="text-emerald-bullish">下轨 1.618 触碰</span>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-bullish animate-ping"></span>
+<span class="text-emerald-bullish">11/10 08:30 报警</span>
+</div>
+</div>
+<!-- Mobile Candlestick SVG Stage -->
+<div class="relative flex-1 w-full overflow-hidden bg-canvas-base">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 390 320">
+<line opacity="0.5" stroke="#f43f5e" stroke-dasharray="3,3" stroke-width="0.8" x1="0" x2="390" y1="40" y2="40"></line>
+<text fill="#f43f5e" font-family="JetBrains Mono" font-size="8.5" opacity="0.85" x="6" y="35">上轨 1.618 · 98,250.0</text>
+<path d="M 0 160 Q 90 140 180 170 T 300 205 T 390 185 L 390 240 L 0 240 Z" fill="url(#cloudBand)"></path>
+<path d="M 0 160 Q 90 140 180 170 T 300 205 T 390 185" fill="none" opacity="0.4" stroke="#0a84ff" stroke-width="1.2"></path>
+<line opacity="0.8" stroke="#10b981" stroke-width="1" x1="0" x2="390" y1="250" y2="250"></line>
+<text fill="#10b981" font-family="JetBrains Mono" font-size="9" font-weight="600" x="6" y="245">下轨 1.618 · 91,480.0 (触碰区)</text>
+<!-- Mobile Candles -->
+<g stroke-linecap="round">
+<line stroke="#f43f5e" stroke-width="0.9" x1="18" x2="18" y1="80" y2="110"></line><rect fill="#f43f5e" height="16" width="4" x="16" y="85"></rect>
+<line stroke="#f43f5e" stroke-width="0.9" x1="36" x2="36" y1="100" y2="130"></line><rect fill="#f43f5e" height="15" width="4" x="34" y="105"></rect>
+<line stroke="#10b981" stroke-width="0.9" x1="54" x2="54" y1="120" y2="150"></line><rect fill="#10b981" height="14" width="4" x="52" y="125"></rect>
+<line stroke="#f43f5e" stroke-width="0.9" x1="72" x2="72" y1="140" y2="170"></line><rect fill="#f43f5e" height="16" width="4" x="70" y="145"></rect>
+<line stroke="#f43f5e" stroke-width="0.9" x1="90" x2="90" y1="160" y2="195"></line><rect fill="#f43f5e" height="18" width="4" x="88" y="166"></rect>
+<line stroke="#10b981" stroke-width="0.9" x1="108" x2="108" y1="180" y2="215"></line><rect fill="#10b981" height="15" width="4" x="106" y="185"></rect>
+<line stroke="#f43f5e" stroke-width="0.9" x1="126" x2="126" y1="200" y2="235"></line><rect fill="#f43f5e" height="18" width="4" x="124" y="206"></rect>
+<line stroke="#f43f5e" stroke-width="0.9" x1="144" x2="144" y1="220" y2="255"></line><rect fill="#f43f5e" height="19" width="4" x="142" y="226"></rect>
+<line stroke="#10b981" stroke-width="0.9" x1="162" x2="162" y1="235" y2="265"></line><rect fill="#10b981" height="12" width="4" x="160" y="240"></rect>
+<line stroke="#f43f5e" stroke-width="0.9" x1="180" x2="180" y1="245" y2="275"></line><rect fill="#f43f5e" height="16" width="4" x="178" y="250"></rect>
+<!-- Trigger Wick at X=198 -->
+<line stroke="#0a84ff" stroke-width="1.8" x1="198" x2="198" y1="240" y2="292"></line>
+<rect fill="#10b981" height="16" stroke="#0a84ff" stroke-width="1" width="6" x="195" y="244"></rect>
+<circle cx="198" cy="290" fill="#0a84ff" r="3.5" stroke="#ffffff" stroke-width="1.2"></circle>
+<line stroke="#10b981" stroke-width="0.9" x1="216" x2="216" y1="230" y2="260"></line><rect fill="#10b981" height="16" width="4" x="214" y="234"></rect>
+<line stroke="#10b981" stroke-width="0.9" x1="234" x2="234" y1="215" y2="245"></line><rect fill="#10b981" height="15" width="4" x="232" y="220"></rect>
+<line stroke="#10b981" stroke-width="0.9" x1="252" x2="252" y1="200" y2="230"></line><rect fill="#10b981" height="14" width="4" x="250" y="206"></rect>
+<line stroke="#f43f5e" stroke-width="0.9" x1="270" x2="270" y1="190" y2="220"></line><rect fill="#f43f5e" height="12" width="4" x="268" y="194"></rect>
+<line stroke="#10b981" stroke-width="0.9" x1="288" x2="288" y1="175" y2="205"></line><rect fill="#10b981" height="15" width="4" x="286" y="180"></rect>
+<line stroke="#10b981" stroke-width="0.9" x1="306" x2="306" y1="160" y2="195"></line><rect fill="#10b981" height="16" width="4" x="304" y="166"></rect>
+<line stroke="#10b981" stroke-width="0.9" x1="324" x2="324" y1="145" y2="180"></line><rect fill="#10b981" height="15" width="4" x="322" y="150"></rect>
+<line stroke="#10b981" stroke-width="0.9" x1="342" x2="342" y1="130" y2="165"></line><rect fill="#10b981" height="16" width="4" x="340" y="135"></rect>
+</g>
+<!-- Event Vertical Marker Line at 11/10 08:30 -->
+<line stroke="#0a84ff" stroke-dasharray="3,3" stroke-width="1.2" x1="198" x2="198" y1="10" y2="315"></line>
+<rect fill="#0b0e13" height="16" opacity="0.95" rx="3" stroke="#0a84ff" stroke-width="0.8" width="84" x="156" y="10"></rect>
+<text fill="#0a84ff" font-family="JetBrains Mono" font-size="8.5" font-weight="600" text-anchor="middle" x="198" y="21.5">11/10 08:30</text>
+</svg>
+</div>
+<!-- Mobile Chart Compact Bottom Toolbar -->
+<div class="h-8 px-3 bg-surface-obsidian-glass/95 backdrop-blur-xl border-t border-glass-border-subtle flex items-center justify-between shrink-0 font-mono text-[11px]">
+<div class="flex items-center space-x-1.5 text-text-secondary">
+<span class="hover:text-text-primary px-1">5m</span>
+<span class="hover:text-text-primary px-1">15m</span>
+<span class="text-electric-blue font-semibold bg-electric-blue-surface px-1.5 py-0.5 rounded border border-electric-blue/40">1H</span>
+<span class="hover:text-text-primary px-1">4H</span>
+<span class="hover:text-text-primary px-1">12H</span>
+</div>
+<div class="flex items-center space-x-1 text-micro-tag-caps font-micro-tag-caps">
+<button class="text-text-secondary border border-glass-border-subtle px-2 py-0.5 rounded bg-surface-liquid-glass hover:text-text-primary flex items-center gap-1" onclick="switchMobileTab('orderbook')">
+<span class="material-symbols-outlined text-[11px]">format_list_bulleted</span> 返回报警账簿
+                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Mobile Standard 4-Tab Bottom Navigation Bar (图表, 交易簿 [active], 策略, 我的) -->
+<nav class="absolute bottom-0 left-0 w-full z-50 flex justify-around items-center h-14 px-margin-mobile pb-safe bg-surface-obsidian-glass backdrop-blur-xl border-t border-glass-border-subtle shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35),0_-8px_32px_rgba(0,0,0,0.7)] docked full-width" style="background-color: #000000; border-color: #222222; box-shadow: none; backdrop-filter: none;">
+<!-- Tab 1: 图表 -->
+<button class="flex flex-col items-center justify-center text-text-secondary opacity-70 hover:text-text-primary transition-opacity active:scale-95 transition-transform duration-150" id="tab-nav-chart" onclick="switchMobileTab('chart')">
+<span class="material-symbols-outlined text-[19px]">show_chart</span>
+<span class="text-micro-tag-caps font-micro-tag-caps mt-0.5">图表</span>
+</button>
+<!-- Tab 2: 交易簿 (ACTIVE) -->
+<button class="flex flex-col items-center justify-center text-electric-blue font-semibold scale-100 active:scale-95 transition-transform duration-150" id="tab-nav-orderbook" onclick="switchMobileTab('orderbook')">
+<span class="material-symbols-outlined text-[19px]" style="font-variation-settings: 'FILL' 1;">format_list_bulleted</span>
+<span class="text-micro-tag-caps font-micro-tag-caps mt-0.5">交易簿</span>
+</button>
+<!-- Tab 3: 策略 (Inactive) -->
+<button class="flex flex-col items-center justify-center text-text-secondary opacity-70 hover:text-text-primary transition-opacity active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-[19px]">rule</span>
+<span class="text-micro-tag-caps font-micro-tag-caps mt-0.5">策略</span>
+</button>
+<!-- Tab 4: 我的 (Inactive) -->
+<button class="flex flex-col items-center justify-center text-text-secondary opacity-70 hover:text-text-primary transition-opacity active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-[19px]">more_horiz</span>
+<span class="text-micro-tag-caps font-micro-tag-caps mt-0.5">更多</span>
+</button>
+</nav>
+<!-- iOS Home Indicator -->
+<div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/25 rounded-full z-50 pointer-events-none"></div>
+</div>
+</div>
+</div>
+<!-- Interactive Tab & Coin Selection Logic -->
+<script>
+    function switchMobileTab(tab) {
+      const chartView = document.getElementById('tab-chart-view');
+      const orderbookView = document.getElementById('tab-orderbook-view');
+      const navChart = document.getElementById('tab-nav-chart');
+      const navOrderbook = document.getElementById('tab-nav-orderbook');
+
+      if (tab === 'chart') {
+        chartView.classList.remove('hidden');
+        chartView.classList.add('flex');
+        orderbookView.classList.add('hidden');
+        orderbookView.classList.remove('flex');
+
+        navChart.classList.remove('text-text-secondary', 'opacity-70');
+        navChart.classList.add('text-electric-blue', 'font-semibold');
+        navChart.querySelector('span').style.fontVariationSettings = "'FILL' 1";
+
+        navOrderbook.classList.add('text-text-secondary', 'opacity-70');
+        navOrderbook.classList.remove('text-electric-blue', 'font-semibold');
+        navOrderbook.querySelector('span').style.fontVariationSettings = "'FILL' 0";
+      } else {
+        orderbookView.classList.remove('hidden');
+        orderbookView.classList.add('flex');
+        chartView.classList.add('hidden');
+        chartView.classList.remove('flex');
+
+        navOrderbook.classList.remove('text-text-secondary', 'opacity-70');
+        navOrderbook.classList.add('text-electric-blue', 'font-semibold');
+        navOrderbook.querySelector('span').style.fontVariationSettings = "'FILL' 1";
+
+        navChart.classList.add('text-text-secondary', 'opacity-70');
+        navChart.classList.remove('text-electric-blue', 'font-semibold');
+        navChart.querySelector('span').style.fontVariationSettings = "'FILL' 0";
+      }
+    }
+
+    function selectMobileCoin(symbol, price, rebound) {
+      document.getElementById('mobile-selected-badge').textContent = symbol;
+      document.getElementById('mobile-chart-symbol-badge').textContent = symbol;
+      document.getElementById('desktop-selected-symbol').textContent = symbol;
+      document.getElementById('desktop-chart-symbol').textContent = symbol + ' 1H';
+      switchMobileTab('chart');
+    }
+  </script>
+</div></body></html>

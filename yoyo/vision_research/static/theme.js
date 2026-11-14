@@ -8,7 +8,7 @@
   let current=read();
   function apply(){
     document.documentElement.setAttribute('data-theme',current);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',current==='dark'?'#101318':'#f7f8f6');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',current==='dark'?'#000000':'#f7f8f6');
   }
   function toggle(){
     current=current==='dark'?'light':'dark';

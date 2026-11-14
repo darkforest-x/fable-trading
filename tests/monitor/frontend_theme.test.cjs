@@ -14,7 +14,7 @@ function page({stored=null,blocked=false,design='apple-glass'}={}){
 }
 test('first visit keeps light appearance and explicit dark applies before render',()=>{
  assert.equal(page().attrs['data-theme'],'light');
- const p=page({stored:'dark'});assert.equal(p.attrs['data-theme'],'dark');assert.equal(p.meta.content,'#101318');
+ const p=page({stored:'dark'});assert.equal(p.attrs['data-theme'],'dark');assert.equal(p.meta.content,'#000000');
 });
 test('one icon action switches only light/dark and survives reload',()=>{
  const p=page();p.click();assert.equal(p.attrs['data-theme'],'dark');assert.equal(p.stored(),'dark');
