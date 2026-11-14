@@ -38,7 +38,7 @@ struct SpikeDisciplineApp: App {
 }
 
 enum AppTab: String, Hashable, CaseIterable, Identifiable {
-    case positions, stats, trade, fib, monitor
+    case stats, positions, trade, fib, monitor
     var id: String { rawValue }
     var title: String { switch self { case .trade: "交易"; case .monitor: "监控"; case .fib: "1.618"; case .positions: "持仓"; case .stats: "统计" } }
     /// Minimal SF Symbols (owner 2026-11-07 “简约”): outline when idle, filled when active.
@@ -73,7 +73,7 @@ struct RootView: View {
     /// Landscape is allowed only on the 1.618 / 合约 charts (owner 2026-11-08 item 6).
     @State private var landscape = false
     @State private var reselect: [AppTab: Int] = [:]
-    @AppStorage("trade.period") private var tradePeriod: CandlePeriod = .m15
+    @AppStorage("trade.period") private var tradePeriod: CandlePeriod = .m5
     @AppStorage("fib.strip.signalSource") private var fibStripSourceKey = FibCoinStripSource.monday.rawValue
     private var chartTab: Bool { tab == .fib || tab == .trade }
     private var landscapeChart: Bool { landscape && chartTab }

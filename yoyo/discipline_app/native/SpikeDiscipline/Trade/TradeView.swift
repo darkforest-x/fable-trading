@@ -18,7 +18,9 @@ struct TradeView: View {
     @Environment(\.dynamicTypeSize) private var textSize
     @State private var chartSettings = false
     @State private var candles = CandleStore()
-    @AppStorage("trade.period") private var period: CandlePeriod = .m15
+    @AppStorage("trade.period") private var period: CandlePeriod = .m5
+    @AppStorage("trade.inlineChartExpanded") private var inlineChartExpanded = true
+    private var needsCandles: Bool { active && (inlineChartExpanded || showingChart) }
     @State private var follow = 0
     @Environment(\.reselect) private var reselect
 
@@ -50,30 +52,36 @@ struct TradeView: View {
                     .padding(.bottom, 68)
                 } else {
                     ScrollView {
-                        VStack(alignment: .leading, spacing: 12) {
-                            if let block { GuardStrip(text: block.text) { route(block.destination) } }
-                            let narrow = proxy.size.width < 355 || textSize >= .xxLarge
-                            if narrow {
-                                DisclosureGroup("五档盘口") { orderBook }
-                                orderForm
-                            } else {
-                                HStack(alignment: .top, spacing: 12) {
-                                    orderForm.frame(maxWidth: .infinity)
-                                    Divider()
-                                    orderBook.frame(width: (proxy.size.width - 54) * 0.38)
+                        VStack(spacing: 0) {
+                            TradeInlineChart(symbol: ticket.symbol, tick: tick, candles: candles,
+                                             period: $period, expanded: $inlineChartExpanded,
+                                             height: min(205, max(146, proxy.size.height * 0.22)),
+                                             onOpen: { showingChart = true })
+                            VStack(alignment: .leading, spacing: 12) {
+                                if let block { GuardStrip(text: block.text) { route(block.destination) } }
+                                let narrow = proxy.size.width < 355 || textSize >= .xxLarge
+                                if narrow {
+                                    DisclosureGroup("五档盘口") { orderBook }
+                                    orderForm
+                                } else {
+                                    HStack(alignment: .top, spacing: 12) {
+                                        orderForm.frame(maxWidth: .infinity)
+                                        Divider()
+                                        orderBook.frame(width: (proxy.size.width - 54) * 0.38)
+                                    }
                                 }
+                                if let entry = account.activeEntry { TradeProgressCard(entry: entry) }
+                                Divider()
+                                TradeAccountSection(symbol: ticket.symbol, onOpenSymbol: { symbol in
+                                    guard !ticket.reviewing, account.pendingEntry == nil else { return }
+                                    if symbol != ticket.symbol {
+                                        ticket.choose(symbol); ticket.syncLeverage(account.state); ticket.syncExisting(account.state)
+                                    }
+                                    Haptics.open(); showingChart = true
+                                })
                             }
-                            if let entry = account.activeEntry { TradeProgressCard(entry: entry) }
-                            Divider()
-                            TradeAccountSection(symbol: ticket.symbol, onOpenSymbol: { symbol in
-                                guard !ticket.reviewing, account.pendingEntry == nil else { return }
-                                if symbol != ticket.symbol {
-                                    ticket.choose(symbol); ticket.syncLeverage(account.state); ticket.syncExisting(account.state)
-                                }
-                                Haptics.open(); showingChart = true
-                            })
+                            .padding(.horizontal, 14).padding(.top, 12).padding(.bottom, 82)
                         }
-                        .padding(.horizontal, 14).padding(.top, 12).padding(.bottom, 82)
                     }
                     .scrollDismissesKeyboard(.interactively)
                     .scrollIndicators(.hidden)
@@ -96,16 +104,23 @@ struct TradeView: View {
         }
         .onChange(of: reselect) { _, _ in follow += 1 }   // tab tapped again → back to the latest bar
         .task(id: active) {
-            guard active else { candles.stopAndSave(); return }
+            guard active else { return }
             if fib.current == nil { _ = try? await fib.refresh() }
         }
         .task(id: "\(showingChart)|\(active)|\(session.connection?.token.hashValue ?? 0)") {
             guard active, showingChart, let connection = session.connection else { return }
             await touches.watch(connection: connection, session: session)   // touch-marker scores
         }
-        .onChange(of: "\(ticket.symbol)|\(period.rawValue)|\(active)|\(session.connection?.token.hashValue ?? 0)") { _, _ in showCandles() }
-        .onChange(of: showingChart) { _, _ in showCandles() }
-        .onAppear { showCandles(); ticket.syncLeverage(state) }
+        .onChange(of: CandleSubscription(symbol: ticket.symbol, period: period, visible: needsCandles,
+                                          connection: session.connection), initial: true) { _, subscription in
+            if subscription.visible && !subscription.symbol.isEmpty {
+                candles.show(symbol: subscription.symbol, period: subscription.period, connection: subscription.connection)
+            } else {
+                candles.stopAndSave()
+            }
+        }
+        .onDisappear { candles.stopAndSave() }
+        .onAppear { ticket.syncLeverage(state) }
         .onChange(of: "\(ticket.symbol)|\(state?.policyRevision ?? -1)|\(ticket.cap(state))|\(state?.sharedLeverage?[ticket.symbol] ?? -1)") { _, _ in ticket.syncLeverage(state) }
         .onChange(of: "\(existing?.id ?? "")|\(existing?.stop ?? "")|\(existing?.leverage ?? 0)") { _, _ in ticket.syncExisting(state) }
     }
@@ -143,7 +158,6 @@ struct TradeView: View {
                 if showingChart {
                     headerIcon("rotate.right", "横屏查看") { Orientation.rotate(landscape: true) }
                 } else {
-                    headerIcon("chart.xyaxis.line", "合约 K 线") { showingChart = true }
                     headerIcon("ellipsis.circle", "交易设置") { showSettings = true }
                 }
             }
@@ -168,9 +182,11 @@ struct TradeView: View {
         }.buttonStyle(.plain).accessibilityLabel(label)
     }
 
-    private func showCandles() {
-        guard active, showingChart, !ticket.symbol.isEmpty else { candles.stopAndSave(); return }
-        candles.show(symbol: ticket.symbol, period: period, connection: session.connection)
+    private struct CandleSubscription: Equatable {
+        let symbol: String
+        let period: CandlePeriod
+        let visible: Bool
+        let connection: Connection?
     }
 
     private func route(_ destination: Trading.Destination) {
