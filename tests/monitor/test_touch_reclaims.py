@@ -204,3 +204,21 @@ def test_touch_candle_remains_authoritative_when_websocket_observation_crosses_h
     event["observed_ms"] = ms(2026, 11, 12, 13, 0) + 10_000
     target = TouchReclaimReader._target(event, "1H")
     assert target == (ms(2026, 11, 12, 12), ms(2026, 11, 12, 13))
+
+
+def test_h1_only_projection_batches_without_queuing_unneeded_periods():
+    event = monday_event("upper", touch=ms(2026, 11, 12, 10, 30))
+    now = ms(2026, 11, 12, 12, 0)
+    history = FakeHistory(now, {("AAA-USDT-SWAP", "1H"): [bar("1H", expected_open(event, "1H"), 99.0)]})
+    client, reader = make_app(history, [event], [])
+    try:
+        projected = reader.project([{**event, "event_id": "2026-11-09|AAA-USDT-SWAP|upper"}], now,
+                                   periods=("1H",))
+        assert set(projected[0]["reclaims"]) == {"1H"}
+        assert reader.wait_for_idle(2)
+        settled = reader.project([{**event, "event_id": "2026-11-09|AAA-USDT-SWAP|upper"}], now,
+                                 periods=("1H",))
+        assert settled[0]["reclaims"]["1H"]["status"] == "reclaimed"
+        assert len(history.calls) == 1 and history.calls[0][1] == "1H"
+    finally:
+        reader.close()

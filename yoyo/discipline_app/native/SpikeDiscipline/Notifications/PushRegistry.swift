@@ -135,11 +135,11 @@ final class PushRegistry: NSObject, UNUserNotificationCenterDelegate {
         let info = response.notification.request.content.userInfo
         let kind = info["kind"] as? String ?? info["type"] as? String ?? "fib"
         let symbol = info["symbol"] as? String
-        let eventId = info["event_id"] as? String
+        let eventId = info[kind == NotificationEvent.monthReclaimKind ? "touch_event_id" : "event_id"] as? String
         let month = info["month"] as? String
         let side = info["side"] as? String
         let occurredMs = (info["occurred_ms"] as? NSNumber)?.doubleValue
-        let candleMs = (info["candle_ms"] as? NSNumber)?.doubleValue
+        let candleMs = (info[kind == NotificationEvent.monthReclaimKind ? "touch_candle_ms" : "candle_ms"] as? NSNumber)?.doubleValue
         await MainActor.run { openRequest = (kind, symbol, eventId, month, side, occurredMs, candleMs) }
     }
 }

@@ -76,6 +76,7 @@ class MonthFirstWeek1618Service:
         self.book = MonthFirstWeekBook(runtime)
         self.quote_source = quote_source
         self.client = client or quote_source.client
+        self.touch_reclaim_reader = None
         self.notice_cutover_ms = self.book.ensure_notice_cutover(self.client.clock())
         self.include_open = getattr(self.client, "include_open", False) is True
         self.sender = sender or requests.post
@@ -508,6 +509,11 @@ class MonthFirstWeek1618Service:
     def _run(self):
         while not self.stop.is_set():
             self.step()
+            try:
+                self.sync_hour_reclaims(self.client.clock())
+            except Exception:
+                # A reclaim lookup is a read-only notification side path.
+                pass
             self.stop.wait(WORKER_INTERVAL_SECONDS)
 
     def _deliver_loop(self, channel):
@@ -532,6 +538,10 @@ class MonthFirstWeek1618Service:
             reason = "not_reclaimed_1h_close" if reclaim_state == "not_reclaimed" else "h1_confirmation_unavailable"
             self.book.finish_notice(event["notice_id"], "skipped", error=reason, expected="pending")
             return True
+        observed_ms = max(now_ms, self.client.clock())
+        if (event["source"] == "live" and observed_ms <= close_ms + FRESH_MS
+                and event["expires_ms"] > max(observed_ms, close_ms)):
+            self.book.record_hour_reclaim(event, reclaim_state, close, close_ms, observed_ms)
         event = {**event, "reclaim_close": close, "reclaim_close_ms": close_ms}
         creds = telegram_credentials() if channel == "telegram" else bark_credentials(self.book)
         if not creds:
@@ -548,6 +558,47 @@ class MonthFirstWeek1618Service:
         claimed["reclaim_close_ms"] = close_ms
         self._send_notice(channel, claimed, creds, claim_ms)
         return True
+
+    def sync_hour_reclaims(self, now_ms=None):
+        """Persist only the just-closed hour's eligible live outcomes for the phone push cursor."""
+        now_ms = self.client.clock() if now_ms is None else int(now_ms)
+        close_ms = now_ms // HOUR_MS * HOUR_MS
+        if now_ms > close_ms + FRESH_MS:
+            return 0
+        candidates = self.book.unprocessed_live_touches_for_hour_close(close_ms)
+        if not candidates:
+            return 0
+
+        reader = self.touch_reclaim_reader
+        if reader is not None:
+            outcomes = reader.project(candidates, now_ms, periods=("1H",))
+        else:
+            # Unit/degraded mode fallback. Production installs the shared batched reader.
+            outcomes = []
+            for event in candidates:
+                status, close, checked_close_ms = self._confirmed_touch_hour_reclaim(event, now_ms)
+                outcomes.append({"event": event, "reclaims": {"1H": dict(
+                    status=status, close=close, close_ms=checked_close_ms)}})
+        inserted = 0
+        for projected in outcomes:
+            event = projected.get("event") if isinstance(projected, dict) else None
+            if event is None and isinstance(projected, dict) and isinstance(projected.get("event_id"), str):
+                event = projected
+            if not isinstance(event, dict):
+                continue
+            outcome = (projected.get("reclaims") or {}).get("1H")
+            if not isinstance(outcome, dict) or outcome.get("close_ms") != close_ms:
+                continue
+            status, close = outcome.get("status"), outcome.get("close")
+            if status not in {"reclaimed", "not_reclaimed"}:
+                continue
+            observed_ms = max(now_ms, self.client.clock())
+            if (observed_ms > close_ms + FRESH_MS or int(event["expires_ms"]) <= max(observed_ms, close_ms)):
+                continue
+            result = self.book.record_hour_reclaim(event, status, close, close_ms, observed_ms)
+            if result:
+                inserted += 1
+        return inserted
 
     def _confirmed_touch_hour_reclaim(self, event, now_ms):
         """Check the confirmed close of the UTC H1 candle containing the touch."""
@@ -674,6 +725,16 @@ class MonthFirstWeek1618Service:
         anchors = {row["symbol"]: row for row in loaded["anchors"]}
         events = loaded["touches"]
         events.sort(key=lambda event: (event["occurred_ms"], event["id"]), reverse=True)
+        if self.touch_reclaim_reader is not None and events:
+            events = self.touch_reclaim_reader.project(events, now_ms, periods=("1H",))
+        hour_reclaims = loaded["hour_reclaims"]
+        reclaims_by_touch = {row["touch_event_id"]: row for row in hour_reclaims}
+        for event in events:
+            outcome = reclaims_by_touch.get(event["event_id"])
+            if outcome:
+                event["reclaims"] = {"1H": dict(bar="1H", status=outcome["status"],
+                                                close=outcome["close"], close_ms=outcome["close_ms"],
+                                                source="OKX")}
         statuses = self.book.notice_statuses(window["month"])
         touch_map = {}
         for event in events:
@@ -739,6 +800,7 @@ class MonthFirstWeek1618Service:
                        "pending_count": pending},
             "channels": channels,
             "touches": events,
+            "hour_reclaims": hour_reclaims,
             "items": items,
         }
 
@@ -748,6 +810,12 @@ class MonthFirstWeek1618Service:
     def latest_event_id(self):
         return self.book.latest_event_id()
 
+    def hour_reclaims_after(self, after_id=0, limit=500):
+        return self.book.hour_reclaims_after(after_id, limit)
+
+    def latest_hour_reclaim_id(self):
+        return self.book.latest_hour_reclaim_id()
+
 
 class ChannelSetting(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -755,7 +823,7 @@ class ChannelSetting(BaseModel):
 
 
 def install(app, service: MonthFirstWeek1618Service):
-    """Install loopback read, event-cursor and independently gated TG/Bark APIs."""
+    """Install loopback reads, cursor APIs and independently gated TG/Bark APIs."""
     app.state.month_first_week_1618 = service
 
     @app.get("/api/month-first-week-1618/channels")
@@ -771,6 +839,12 @@ def install(app, service: MonthFirstWeek1618Service):
     def month_first_week_events(after_id: int = Query(0, ge=0), limit: int = Query(500, ge=1, le=500)):
         return {"schema": "month_first_week_1618.events.v1", "latest_id": service.latest_event_id(),
                 "events": service.events_after(after_id, limit)}
+
+    @app.get("/api/month-first-week-1618/reclaim-events")
+    def month_first_week_reclaim_events(after_id: int = Query(0, ge=0), limit: int = Query(500, ge=1, le=500)):
+        return {"schema": "month_first_week_1618.reclaim_events.v1",
+                "latest_id": service.latest_hour_reclaim_id(),
+                "events": service.hour_reclaims_after(after_id, limit)}
 
     def update_subscription(channel, action, payload, request):
         if (request.headers.get("origin") != f"{request.url.scheme}://{request.url.netloc}"

@@ -88,11 +88,30 @@ struct SymbolPicker: View {
     @Environment(AccountStore.self) private var account
     @Environment(TicketModel.self) private var ticket
     @Environment(\.dismiss) private var dismiss
+    var body: some View { ContractPickerSheet(symbol: ticket.symbol, onSelect: select) }
+
+    private func select(_ symbol: String) {
+        if symbol != ticket.symbol {
+            ticket.choose(symbol)
+            ticket.syncLeverage(account.state)
+            ticket.syncExisting(account.state)
+        }
+        Haptics.select()
+        dismiss()
+    }
+}
+
+/// Both chart and ticket use the same market surface; only the chart supplies touch sort keys.
+struct ContractPickerSheet: View {
+    @Environment(\.dismiss) private var dismiss
     @State private var search = ""
+    let symbol: String
+    var touchRanking: FibMarketRanking? = nil
+    let onSelect: (String) -> Void
 
     var body: some View {
         NavigationStack {
-            MarketWatchlist(search: $search, layout: .full, selectedSymbol: ticket.symbol, onSelect: select)
+            MarketWatchlist(search: $search, layout: .full, selectedSymbol: symbol, touchRanking: touchRanking, onSelect: onSelect)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) { CloseButton { dismiss() } }.sharedBackgroundVisibility(.hidden)
@@ -104,16 +123,6 @@ struct SymbolPicker: View {
                     }
                 }
         }
-    }
-
-    private func select(_ symbol: String) {
-        if symbol != ticket.symbol {
-            ticket.choose(symbol)
-            ticket.syncLeverage(account.state)
-            ticket.syncExisting(account.state)
-        }
-        Haptics.select()
-        dismiss()
     }
 }
 

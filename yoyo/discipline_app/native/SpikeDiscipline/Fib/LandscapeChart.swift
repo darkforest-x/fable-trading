@@ -21,16 +21,20 @@ struct LandscapeChart: View {
     @Environment(\.colorScheme) private var scheme
     @State private var candles = CandleStore()
     @State private var monthlyReplay = MonthFirstWeekChartFeed()
+    @State private var trendlineReplay = TrendlineChartFeed()
+    @State private var trendlineLineFeed = TrendlineLineFeed()
     @State private var follow = 0
     @State private var settings = false
 
     var body: some View {
         GeometryReader { proxy in
             let route = navigation.monthlyTouch
-            let chartSymbol = route?.symbol ?? symbol
+            let trendlineRoute = navigation.trendlineEvent
+            let chartSymbol = trendlineRoute?.symbol ?? route?.symbol ?? symbol
             let replay = replaySnapshot
             let row = fib.current?.items.first { $0.symbol == chartSymbol }
-            let bars = route == nil ? candles.bars : (replay?.chartCandles ?? [])
+            let bars = trendlineRoute != nil ? (trendlineChartSnapshot?.candles ?? [])
+                : route == nil ? candles.bars : (replay?.chartCandles ?? [])
             let currentRange = replay == nil
                 ? (row.flatMap { fib.range(for: $0) } ?? history.currentRange(for: chartSymbol))
                 : replay?.chartWeeklyRanges.last
@@ -40,28 +44,45 @@ struct LandscapeChart: View {
             let overlayLines = replay?.chartMonthlyLines ?? (route == nil && showMonthlyOverlays
                 ? FibCoinStripProjection.monthlyLines(source: .monthFirstWeek, ranges: monthlyLevels.ranges[chartSymbol] ?? [],
                                                        bars: bars, period: period) : [])
+            let baseLines = route == nil ? lines + overlayLines : overlayLines
+            let eventTrendline: ChartLine? = {
+                guard style.showTrendline, let trendlineRoute, let first = bars.first, let last = bars.last else { return nil }
+                return trendlineRoute.event.chartLine(endingAt: (last.time + period.seconds) * 1000,
+                                                      startingAt: first.time * 1000)
+            }()
+            let currentTrendline: ChartLine? = {
+                guard style.showTrendline, trendlineRoute == nil, let last = bars.last,
+                      route == nil || replay != nil else { return nil }
+                return trendlineLineFeed.chartLine(endingAt: (last.time + period.seconds) * 1000,
+                                                   historicalTime: replay?.markerMs)
+            }()
+            let chartLines = baseLines + [eventTrendline, currentTrendline].compactMap { $0 }
             let chartMarkers = replay?.chartMarkers ?? (route == nil ? touches.markers(row) : [])
-            let chartGeneration = route.map { $0.id * 100 + (CandlePeriod.allCases.firstIndex(of: period) ?? 0) + (replay == nil ? 0 : 1) }
-                ?? candles.generation
+            let chartGeneration = generation(for: trendlineRoute, monthlyRoute: route, period: period,
+                                             firstBarTime: bars.first?.time, replay: replay)
             let insets = proxy.safeAreaInsets
             ZStack {
                 CandleChart(bars: bars, generation: chartGeneration, period: period, decimals: decimals(row),
                             range: currentRange, history: past,
                             innerLines: fib.showInternal, averages: fib.showAverages, cloud: fib.showCloud,
-                            lines: route == nil ? lines + overlayLines : overlayLines,
+                            lines: chartLines,
                             markers: chartMarkers,
-                            focusRange: replay?.chartFocusRange, timestampFocus: replay != nil,
+                            focusRange: replay?.chartFocusRange ?? trendlineFocusRange, timestampFocus: replay != nil || trendlineRoute != nil,
                             highlightedBarTimes: replay?.chartHighlightedBarTimes ?? [],
                             highlightRange: replay?.chartHighlightedBarTimes == nil ? replay?.chartHighlightRange : nil,
                             highlightColor: replay == nil ? nil : ChartPalette.hex(0x30D158),
-                            focusBarTime: replay?.locatedMarkerMs.map { $0 / 1000 }, fitReferenceLevels: replay == nil,
-                            markHistory: replay == nil, colors: style.colors,
+                            focusBarTime: trendlineRoute != nil ? trendlineChartSnapshot.map { $0.markerMs / 1000 }
+                                : replay?.locatedMarkerMs.map { $0 / 1000 }, fitReferenceLevels: replay == nil,
+                            markHistory: replay == nil && trendlineRoute == nil, colors: style.colors,
                             watermark: chartSymbol.isEmpty ? nil : Fmt.coin(chartSymbol) + "USDT", followToken: follow, wallpaper: true,
                             topInset: insets.top + 54, bottomOverlay: insets.bottom + 46,
-                            onNeedOlder: { if route == nil { candles.loadOlder() } })
+                            onNeedOlder: { if route == nil && trendlineRoute == nil { candles.loadOlder() } })
                     .padding(.trailing, insets.trailing)   // price axis clear of the trailing edge; candles run edge to edge
                 if bars.isEmpty {
-                    if route != nil {
+                    if trendlineRoute != nil {
+                        if trendlineReplay.loading { ProgressView("正在读取历史 K 线").font(.footnote).foregroundStyle(Color.muted) }
+                        else { Text(trendlineReplay.error ?? "趋势线突破历史 K 线暂不可用").font(.footnote).foregroundStyle(Color.muted) }
+                    } else if route != nil {
                         if monthlyReplay.loading { ProgressView("正在读取触价 K 线").font(.footnote).foregroundStyle(Color.muted) }
                         else { Text(monthlyReplay.error ?? "月首周 K 线暂不可用").font(.footnote).foregroundStyle(Color.muted) }
                     } else if candles.error == nil { ProgressView() }
@@ -78,16 +99,16 @@ struct LandscapeChart: View {
         }
         .background((scheme == .dark ? ChartPalette.hex(0x0B0E14) : Color.white).ignoresSafeArea())
         .sheet(isPresented: $settings) { ChartSettingsSheet().presentationDetents([.large]).presentationDragIndicator(.visible) }
-        .task(id: "\(symbol)|\(period.rawValue)|\(navigation.monthlyTouch?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
-            guard navigation.monthlyTouch == nil else { candles.stop(); return }
+        .task(id: "\(symbol)|\(period.rawValue)|\(navigation.monthlyTouch?.id ?? 0)|\(navigation.trendlineEvent?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
+            guard navigation.monthlyTouch == nil, navigation.trendlineEvent == nil else { candles.stop(); return }
             candles.show(symbol: symbol, period: period, connection: session.connection)
         }
-        .task(id: "\(symbol)|\(style.showHistory)|\(Int((candles.bars.first?.time ?? 0) / 86_400))|\(session.connection?.token.hashValue ?? 0)") {
-            guard navigation.monthlyTouch == nil, style.showHistory else { return }
+        .task(id: historyTaskKey) {
+            guard navigation.monthlyTouch == nil, navigation.trendlineEvent == nil, style.showHistory else { return }
             await history.load(symbol, from: candles.bars.first?.time, connection: session.connection)
         }
-        .task(id: "\(symbol)|\(session.connection?.token.hashValue ?? 0)") {
-            guard navigation.monthlyTouch == nil, let connection = session.connection else { return }
+        .task(id: "\(symbol)|\(navigation.trendlineEvent?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
+            guard navigation.monthlyTouch == nil, navigation.trendlineEvent == nil, let connection = session.connection else { return }
             await history.watchCurrent(symbol, connection: connection)
         }
         .task(id: session.connection?.token.hashValue ?? 0) {
@@ -102,6 +123,15 @@ struct LandscapeChart: View {
             guard let request = navigation.monthlyTouch, let connection = session.connection else { return }
             await monthlyReplay.load(request: .event(request.eventId), period: period, connection: connection)
         }
+        .task(id: "\(navigation.trendlineEvent?.id ?? 0)|\(period.rawValue)|\(session.connection?.token.hashValue ?? 0)") {
+            guard let route = navigation.trendlineEvent else { return }
+            await trendlineReplay.load(route: route, period: period, connection: session.connection)
+        }
+        .task(id: "\(symbol)|\(period.rawValue)|\(style.showTrendline)|\(navigation.trendlineEvent?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
+            guard style.showTrendline, navigation.trendlineEvent == nil,
+                  let connection = session.connection else { return }
+            await trendlineLineFeed.watch(symbol: symbol, connection: connection, session: session)
+        }
         .onDisappear { candles.stopAndSave() }
     }
 
@@ -110,6 +140,34 @@ struct LandscapeChart: View {
               monthlyReplay.snapshot?.eventId == request.eventId,
               monthlyReplay.snapshot?.bar == period.rawValue else { return nil }
         return monthlyReplay.snapshot
+    }
+
+    private var historyTaskKey: String {
+        let oldestDay = Int((candles.bars.first?.time ?? 0) / 86_400)
+        let token = session.connection?.token.hashValue ?? 0
+        return "\(symbol)|\(style.showHistory)|\(navigation.trendlineEvent?.id ?? 0)|\(oldestDay)|\(token)"
+    }
+
+    private var trendlineChartSnapshot: TrendlineChartSnapshot? {
+        guard let route = navigation.trendlineEvent,
+              trendlineReplay.snapshot?.routeId == route.id,
+              trendlineReplay.snapshot?.period == period else { return nil }
+        return trendlineReplay.snapshot
+    }
+
+    private var trendlineFocusRange: ClosedRange<Double>? {
+        guard let route = navigation.trendlineEvent else { return nil }
+        let marker = (trendlineChartSnapshot?.markerMs ?? route.event.candleMs) / 1000
+        let halfWindow = max(period.seconds * 12, 43_200)
+        return (marker - halfWindow)...(marker + halfWindow)
+    }
+
+    private func generation(for trendlineRoute: TrendlineEventRoute?, monthlyRoute: MonthlyTouchRoute?,
+                            period: CandlePeriod, firstBarTime: Double?, replay: MonthFirstWeekChartSnapshot?) -> Int {
+        let periodIndex = CandlePeriod.allCases.firstIndex(of: period) ?? 0
+        if let trendlineRoute { return trendlineRoute.id * 100 + periodIndex + Int(firstBarTime ?? 0) }
+        if let monthlyRoute { return monthlyRoute.id * 100 + periodIndex + (replay == nil ? 0 : 1) }
+        return candles.generation
     }
 
     private func decimals(_ row: FibContract?) -> Int {
@@ -154,7 +212,7 @@ struct LandscapeChart: View {
             .buttonStyle(.plain).accessibilityLabel("图表设置")
             Button {
                 Haptics.tap()
-                if navigation.monthlyTouch != nil { navigation.showLiveChart() }
+                if navigation.monthlyTouch != nil || navigation.trendlineEvent != nil { navigation.showLiveChart() }
                 follow += 1
             } label: {
                 Image(systemName: "arrow.right.to.line").font(.system(size: 14, weight: .semibold)).foregroundStyle(Color.ink).frame(width: 34, height: 34)

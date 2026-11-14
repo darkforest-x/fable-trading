@@ -297,6 +297,34 @@ def _lines_by_contiguous_4h_segment(bars: Sequence[_Bar], asof_ms: int) -> list[
     return lines
 
 
+def current_resistance_line(four_hour: Sequence[Mapping[str, Any]], asof_ms: int) -> dict[str, Any] | None:
+    """Return the current known V1.9 4H resistance line, if one is active.
+
+    This uses the same closed-bar state machine and source-gap resets as
+    ``events``. A valid breakout is not required for a line to be returned;
+    callers can therefore draw the current candidate on an ordinary chart.
+    """
+    cutoff = _integer(asof_ms, "asof_ms")
+    source = _closed_bars(four_hour, FOUR_HOUR_MS, cutoff)
+    if not source:
+        return None
+    active = [line for line in _lines_by_contiguous_4h_segment(source, cutoff)
+              if line.known_ms <= cutoff and (line.retired_ms is None or cutoff < line.retired_ms)]
+    if not active:
+        return None
+    line = max(active, key=lambda item: (item.known_ms, item.b.time))
+    return {
+        "a_ms": line.a.time,
+        "a_price": line.a.price,
+        "b_ms": line.b.time,
+        "b_price": line.b.price,
+        "known_ms": line.known_ms,
+        "born_ms": line.born_ms,
+        "retired_ms": line.retired_ms,
+        "asof_ms": cutoff,
+    }
+
+
 def events(symbol: str, four_hour: Sequence[Mapping[str, Any]], hourly: Sequence[Mapping[str, Any]],
            asof_ms: int) -> list[dict[str, Any]]:
     """Return first 1H close-crossing events for known, active 4H resistance lines.

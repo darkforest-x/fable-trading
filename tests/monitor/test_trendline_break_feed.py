@@ -219,6 +219,36 @@ def test_read_only_api_returns_all_by_default_and_supports_full_pagination(tmp_p
     feed.close()
 
 
+def test_current_line_api_uses_only_the_scanned_symbol_and_distinguishes_no_line_from_unavailable(tmp_path):
+    client = CandleClient(_history())
+    feed = _feed(tmp_path, client)
+    feed.run_once(asof_ms=ASOF_MS)
+    before = len(client.calls)
+
+    app = FastAPI()
+    install(app, feed)
+    http = TestClient(app)
+    response = http.get("/api/trendline-line", params={"symbol": SYMBOL})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["schema"] == "trendline_line.v1" and body["status"] == "ready"
+    assert body["symbol"] == SYMBOL and body["line"] is None
+    assert body["coverage"]["h4_rows"] == 3000
+    assert len(client.calls) == before  # The handler uses the completed scan cache.
+    assert http.get("/api/trendline-line", params={"symbol": "../BTC"}).status_code == 422
+    feed.close()
+
+    short_client = CandleClient(_history(bars_4h=100))
+    short = _feed(tmp_path / "short", short_client)
+    short.run_once(asof_ms=ASOF_MS)
+    unavailable = short.current_line(SYMBOL)
+    assert unavailable["status"] == "unavailable"
+    assert unavailable["reason"] == "insufficient_4h_history"
+    assert unavailable["line"] is None
+    short.close()
+
+
 def test_validity_requires_complete_history_and_strictly_lower_closed_hourly_low():
     step = BAR_MS["1H"]
     candle_ms = ASOF_MS - 4 * step

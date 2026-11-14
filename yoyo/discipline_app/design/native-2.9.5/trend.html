@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Spike iOS 2.9.5 · 趋势突破与月首周收回</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        ios: {
+          bg: '#F2F2F7',
+          card: '#FFFFFF',
+          text: '#1C1C1E',
+          muted: '#8E8E93',
+          border: '#E5E5EA',
+          blue: '#007AFF',
+          purple: '#AF52DE',
+          green: '#34C759',
+          red: '#FF3B30',
+          amber: '#FF9500',
+          subtle: '#F9F9FB',
+        }
+      },
+      fontFamily: {
+        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'SF Pro Display', 'PingFang SC', 'Helvetica Neue', 'sans-serif'],
+        mono: ['SF Mono', 'ui-monospace', 'Menlo', 'Monaco', 'monospace']
+      }
+    }
+  }
+}
+</script>
+<style>
+  /* iOS 18/26 HIG Native Specs */
+  body {
+    -webkit-tap-highlight-color: transparent;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+</style>
+</head>
+<body class="bg-[#E5E7EB] text-ios-text font-sans antialiased min-h-screen py-8 px-4 flex flex-col items-center justify-start selection:bg-ios-blue/15">
+
+  <!-- Header Spec Banner -->
+  <header class="w-full max-w-[1280px] mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3 px-2">
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-ios-blue text-white font-bold text-xs">S</span>
+        <h1 class="text-xl font-bold tracking-tight text-gray-900">Spike iOS 2.9.5 · 趋势突破与月首周收回</h1>
+        <span class="bg-gray-200 text-gray-700 text-[11px] px-2 py-0.5 rounded-full font-medium">390pt Native SwiftUI Spec</span>
+      </div>
+      <p class="text-xs text-gray-500 mt-1">配套当前收件箱重设 · 横滑分类「趋势线」· 锚定 4H 趋势线叠加 K 线 · 月首周 1.618「1H 已收回」双态联动</p>
+    </div>
+    <div class="flex items-center gap-3 text-xs text-gray-600">
+      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-ios-blue"></span>周一 1.618</span>
+      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-ios-purple"></span>月首周 1.618</span>
+      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-ios-green"></span>上破 / 首次触及</span>
+      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-ios-red"></span>下破 / 止损</span>
+    </div>
+  </header>
+
+  <!-- Triple-Phone Showcase Grid -->
+  <main class="w-full max-w-[1280px] grid grid-cols-1 lg:grid-cols-3 gap-8 items-start justify-center">
+
+    <!-- Screen 1: 全市场监控 · 趋势线突破列表 (390pt Viewport) -->
+    <section class="flex flex-col items-center">
+      <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-ios-blue"></span>
+        01. 监控流 · 1H 突破 4H 趋势线
+      </div>
+
+      <!-- iPhone Mockup 390x844 Frame -->
+      <div class="w-[390px] h-[844px] bg-white rounded-[48px] shadow-2xl border-[7px] border-[#1C1C1E] relative overflow-hidden flex flex-col justify-between">
+
+        <!-- iOS Status Bar & Dynamic Island -->
+        <div class="pt-3 px-7 flex justify-between items-center text-xs font-semibold text-black shrink-0 select-none z-30 bg-white">
+          <span>9:41</span>
+          <div class="w-24 h-5 bg-black rounded-full mx-auto"></div>
+          <div class="flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.28 19.58 10.59 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg>
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"/></svg>
+            <div class="w-5 h-2.5 border border-black rounded-sm p-0.5 flex items-center"><div class="w-full h-full bg-black rounded-2xs"></div></div>
+          </div>
+        </div>
+
+        <!-- Navigation Top Bar -->
+        <div class="px-4 pt-2 pb-1 bg-white border-b border-ios-border shrink-0">
+          <div class="flex items-center justify-between h-11">
+            <div class="flex items-baseline gap-2">
+              <h2 class="text-[22px] font-bold tracking-tight text-gray-900">全市场监控</h2>
+              <span class="text-[12px] font-medium text-ios-muted">OKX 永续</span>
+            </div>
+            <!-- Notification Icon with Unread Pill -->
+            <button class="touch-target relative flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition-colors" aria-label="收件箱">
+              <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-ios-blue ring-2 ring-white"></span>
+            </button>
+          </div>
+
+          <!-- Horizontal Sliding Chips (加入「趋势线」) -->
+          <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar py-2 -mx-4 px-4 text-[13px] font-medium select-none">
+            <button class="px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 shrink-0">全部 (48)</button>
+            <button class="px-3.5 py-1.5 rounded-full bg-gray-900 text-white font-semibold shrink-0 shadow-sm flex items-center gap-1.5">
+              <span>趋势线</span>
+              <span class="text-[11px] bg-white/20 px-1.5 py-0.2 rounded-full">12</span>
+            </button>
+            <button class="px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 shrink-0 flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-ios-blue"></span>周一 1.618
+            </button>
+            <button class="px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 shrink-0 flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-ios-purple"></span>月首周 1.618
+            </button>
+            <button class="px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 shrink-0">急跌报警</button>
+          </div>
+        </div>
+
+        <!-- Section Title & Subheader -->
+        <div class="px-4 py-2 bg-ios-subtle/80 flex items-center justify-between border-b border-ios-border text-[12px] text-ios-muted shrink-0">
+          <div class="flex items-center gap-1.5">
+            <span class="font-bold text-gray-900 text-[13px]">1H 突破 4H 趋势线</span>
+            <span class="text-[11px] bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-200/60 font-medium">1H 收线确认 · 未破前低</span>
+          </div>
+          <span class="tabular-nums">北京时间 / 距离</span>
+        </div>
+
+        <!-- Feed List (Dense, 44pt touch rows) -->
+        <div class="flex-1 overflow-y-auto hide-scrollbar divide-y divide-gray-100 bg-white">
+
+          <!-- Item 1: BTC (Selected / Focusable row) -->
+          <div class="px-4 py-2.5 flex items-center justify-between hover:bg-gray-50 active:bg-blue-50/50 transition-colors touch-target cursor-pointer bg-blue-50/30">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-amber-500/10 text-amber-600 font-bold flex items-center justify-center text-xs">
+                ₿
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-[15px] text-gray-900 tracking-tight">BTC</span>
+                  <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200">上破</span>
+                  <span class="text-[11px] text-ios-muted">4H 下行压制线</span>
+                </div>
+                <div class="text-[11px] text-ios-muted flex items-center gap-1 mt-0.5">
+                  <span class="tabular-nums">11/14 16:00 确认</span>
+                  <span>·</span>
+                  <span>线价 91,820</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-bold text-[14px] text-gray-900 tabular-nums">92,450.0</div>
+              <div class="text-[11px] text-emerald-600 font-medium tabular-nums">+0.68% 顺破</div>
+            </div>
+          </div>
+
+          <!-- Item 2: SOL -->
+          <div class="px-4 py-2.5 flex items-center justify-between hover:bg-gray-50 active:bg-blue-50/50 transition-colors touch-target cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-purple-500/10 text-purple-600 font-bold flex items-center justify-center text-xs">
+                S
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-[15px] text-gray-900 tracking-tight">SOL</span>
+                  <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200">上破</span>
+                  <span class="text-[11px] text-ios-muted">4H 三角收敛上轨</span>
+                </div>
+                <div class="text-[11px] text-ios-muted flex items-center gap-1 mt-0.5">
+                  <span class="tabular-nums">11/14 15:00 确认</span>
+                  <span>·</span>
+                  <span>线价 183.50</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-bold text-[14px] text-gray-900 tabular-nums">186.20</div>
+              <div class="text-[11px] text-emerald-600 font-medium tabular-nums">+1.47% 顺破</div>
+            </div>
+          </div>
+
+          <!-- Item 3: ETH -->
+          <div class="px-4 py-2.5 flex items-center justify-between hover:bg-gray-50 active:bg-blue-50/50 transition-colors touch-target cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-blue-500/10 text-blue-600 font-bold flex items-center justify-center text-xs">
+                Ξ
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-[15px] text-gray-900 tracking-tight">ETH</span>
+                  <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200">上破</span>
+                  <span class="text-[11px] text-ios-muted">4H 宽幅通道顶</span>
+                </div>
+                <div class="text-[11px] text-ios-muted flex items-center gap-1 mt-0.5">
+                  <span class="tabular-nums">11/14 12:00 确认</span>
+                  <span>·</span>
+                  <span>线价 2,648.0</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-bold text-[14px] text-gray-900 tabular-nums">2,674.5</div>
+              <div class="text-[11px] text-emerald-600 font-medium tabular-nums">+1.00% 顺破</div>
+            </div>
+          </div>
+
+          <!-- Item 4: AVAX (Downbreak 下破) -->
+          <div class="px-4 py-2.5 flex items-center justify-between hover:bg-gray-50 active:bg-blue-50/50 transition-colors touch-target cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-red-500/10 text-red-600 font-bold flex items-center justify-center text-xs">
+                A
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-[15px] text-gray-900 tracking-tight">AVAX</span>
+                  <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-200">下破</span>
+                  <span class="text-[11px] text-ios-muted">4H 支撑上升轨</span>
+                </div>
+                <div class="text-[11px] text-ios-muted flex items-center gap-1 mt-0.5">
+                  <span class="tabular-nums">11/14 11:00 确认</span>
+                  <span>·</span>
+                  <span>线价 32.40</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-bold text-[14px] text-gray-900 tabular-nums">31.85</div>
+              <div class="text-[11px] text-rose-600 font-medium tabular-nums">-1.70% 顺破</div>
+            </div>
+          </div>
+
+          <!-- Item 5: SUI -->
+          <div class="px-4 py-2.5 flex items-center justify-between hover:bg-gray-50 active:bg-blue-50/50 transition-colors touch-target cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-cyan-500/10 text-cyan-600 font-bold flex items-center justify-center text-xs">
+                💧
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-[15px] text-gray-900 tracking-tight">SUI</span>
+                  <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200">上破</span>
+                  <span class="text-[11px] text-ios-muted">4H 震荡颈线位</span>
+                </div>
+                <div class="text-[11px] text-ios-muted flex items-center gap-1 mt-0.5">
+                  <span class="tabular-nums">11/14 09:00 确认</span>
+                  <span>·</span>
+                  <span>线价 2.855</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-bold text-[14px] text-gray-900 tabular-nums">2.892</div>
+              <div class="text-[11px] text-emerald-600 font-medium tabular-nums">+1.29% 顺破</div>
+            </div>
+          </div>
+
+          <!-- Item 6: DOGE -->
+          <div class="px-4 py-2.5 flex items-center justify-between hover:bg-gray-50 active:bg-blue-50/50 transition-colors touch-target cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-yellow-500/10 text-yellow-600 font-bold flex items-center justify-center text-xs">
+                Ð
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-[15px] text-gray-900 tracking-tight">DOGE</span>
+                  <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200">上破</span>
+                  <span class="text-[11px] text-ios-muted">4H 下降趋势线</span>
+                </div>
+                <div class="text-[11px] text-ios-muted flex items-center gap-1 mt-0.5">
+                  <span class="tabular-nums">11/14 07:00 确认</span>
+                  <span>·</span>
+                  <span>线价 0.359</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-bold text-[14px] text-gray-900 tabular-nums">0.3685</div>
+              <div class="text-[11px] text-emerald-600 font-medium tabular-nums">+2.65% 顺破</div>
+            </div>
+          </div>
+
+          <!-- Item 7: NEAR -->
+          <div class="px-4 py-2.5 flex items-center justify-between hover:bg-gray-50 active:bg-blue-50/50 transition-colors touch-target cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center text-xs">
+                N
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-[15px] text-gray-900 tracking-tight">NEAR</span>
+                  <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200">上破</span>
+                  <span class="text-[11px] text-ios-muted">4H 阶段高点连线</span>
+                </div>
+                <div class="text-[11px] text-ios-muted flex items-center gap-1 mt-0.5">
+                  <span class="tabular-nums">11/14 05:00 确认</span>
+                  <span>·</span>
+                  <span>线价 4.920</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-bold text-[14px] text-gray-900 tabular-nums">5.040</div>
+              <div class="text-[11px] text-emerald-600 font-medium tabular-nums">+2.44% 顺破</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Native iOS 5-Tab Bar (合约 · 监控[激活] · 1.618 · 持仓 · 统计) -->
+        <nav class="h-[76px] bg-white/95 backdrop-blur-md border-t border-ios-border px-3 pb-4 pt-1.5 flex items-center justify-around shrink-0 select-none z-30">
+          <div class="flex flex-col items-center justify-center touch-target text-gray-400">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+            <span class="text-[10px] font-medium">合约</span>
+          </div>
+          <div class="flex flex-col items-center justify-center touch-target text-ios-blue">
+            <svg class="w-5 h-5 mb-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            <span class="text-[10px] font-bold">监控</span>
+          </div>
+          <div class="flex flex-col items-center justify-center touch-target text-gray-400">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+            <span class="text-[10px] font-medium">1.618</span>
+          </div>
+          <div class="flex flex-col items-center justify-center touch-target text-gray-400">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            <span class="text-[10px] font-medium">持仓</span>
+          </div>
+          <div class="flex flex-col items-center justify-center touch-target text-gray-400">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <span class="text-[10px] font-medium">统计</span>
+          </div>
+        </nav>
+
+        <!-- iOS Home Indicator -->
+        <div class="absolute bottom-1 inset-x-0 flex justify-center pointer-events-none z-40">
+          <div class="w-32 h-1 bg-black/30 rounded-full"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Screen 2: 原生白底 K 线图叠加 4H 趋势线 & 指标开关 (390pt Viewport) -->
+    <section class="flex flex-col items-center">
+      <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        02. 原生 K 线 · 叠加真实 4H 趋势线
+      </div>
+
+      <!-- iPhone Mockup 390x844 Frame -->
+      <div class="w-[390px] h-[844px] bg-white rounded-[48px] shadow-2xl border-[7px] border-[#1C1C1E] relative overflow-hidden flex flex-col justify-between">
+
+        <!-- Status Bar -->
+        <div class="pt-3 px-7 flex justify-between items-center text-xs font-semibold text-black shrink-0 select-none z-30 bg-white">
+          <span>9:41</span>
+          <div class="w-24 h-5 bg-black rounded-full mx-auto"></div>
+          <div class="flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.28 19.58 10.59 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg>
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"/></svg>
+            <div class="w-5 h-2.5 border border-black rounded-sm p-0.5 flex items-center"><div class="w-full h-full bg-black rounded-2xs"></div></div>
+          </div>
+        </div>
+
+        <!-- K-Line Top Bar (Symbol, Period & Chart Setting Modal Anchor) -->
+        <div class="px-4 pt-1 pb-2 bg-white border-b border-ios-border shrink-0 z-20">
+          <div class="flex items-center justify-between h-10">
+            <div class="flex items-center gap-2">
+              <button class="flex items-center gap-1 text-gray-900 font-bold text-[17px] tracking-tight">
+                <span>BTC/USDT</span>
+                <span class="text-xs text-ios-muted">永续</span>
+                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+              </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <!-- Period Selector Inline -->
+              <div class="flex items-center bg-gray-100 rounded-lg p-0.5 text-xs font-semibold text-gray-600">
+                <span class="px-2 py-0.5 rounded text-gray-500">15m</span>
+                <span class="px-2 py-0.5 rounded bg-white text-ios-blue shadow-xs">1H</span>
+                <span class="px-2 py-0.5 rounded text-gray-500">4H</span>
+                <span class="px-2 py-0.5 rounded text-gray-500">1D</span>
+              </div>
+              <!-- Settings Menu Trigger (44pt) -->
+              <button class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 hover:bg-gray-200" aria-label="指标设置">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Price & Metrics Row -->
+          <div class="flex items-baseline justify-between mt-1">
+            <div class="flex items-baseline gap-2">
+              <span class="text-2xl font-black text-gray-900 tabular-nums tracking-tight">92,450.0</span>
+              <span class="text-xs font-semibold text-emerald-600 tabular-nums">+2.45%</span>
+            </div>
+            <!-- Indicator Status Pill (4H Trendline Active) -->
+            <div class="flex items-center gap-1.5 text-[11px] font-medium bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200/80">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span>4H 趋势线：压制破位 (91,820)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Candlestick Canvas with Time/Price Anchored 4H Trendline -->
+        <div class="flex-1 relative bg-white overflow-hidden select-none">
+
+          <!-- Grid Lines (Subtle) -->
+          <div class="absolute inset-0 flex flex-col justify-between pointer-events-none py-4 px-3 border-b border-gray-100">
+            <div class="border-b border-dashed border-gray-100 w-full flex justify-end"><span class="text-[9px] text-gray-300 tabular-nums">94,000.0</span></div>
+            <div class="border-b border-dashed border-gray-100 w-full flex justify-end"><span class="text-[9px] text-gray-300 tabular-nums">93,000.0</span></div>
+            <div class="border-b border-dashed border-gray-100 w-full flex justify-end"><span class="text-[9px] text-gray-300 tabular-nums">92,000.0</span></div>
+            <div class="border-b border-dashed border-gray-100 w-full flex justify-end"><span class="text-[9px] text-gray-300 tabular-nums">91,000.0</span></div>
+            <div class="border-b border-dashed border-gray-100 w-full flex justify-end"><span class="text-[9px] text-gray-300 tabular-nums">90,000.0</span></div>
+          </div>
+
+          <!-- Main SVG Candlesticks & 4H Trendline Overlay -->
+          <svg class="w-full h-full" viewBox="0 0 390 420" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="trendGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#007AFF" stop-opacity="0.8"/>
+                <stop offset="100%" stop-color="#34C759" stop-opacity="0.9"/>
+              </linearGradient>
+            </defs>
+
+            <!-- 1. Horizontal Monday Reference (1.618 周一参考位) -->
+            <line x1="0" y1="310" x2="390" y2="310" stroke="#007AFF" stroke-width="1" stroke-dasharray="3,3" opacity="0.45"/>
+            <text x="8" y="306" fill="#007AFF" font-size="9" font-weight="600" opacity="0.8">周一 下轨 1.618 (90,480.0)</text>
+
+            <!-- 2. True 4H Descending Resistance Trendline (锚定高点与斜率的压制线) -->
+            <!-- Anchored from Bar 4 (93,800 @ y=70) through Bar 14 (92,600 @ y=150) extending down to breakout -->
+            <line x1="20" y1="65" x2="360" y2="280" stroke="#FF3B30" stroke-width="1.75" stroke-dasharray="4,3" opacity="0.75"/>
+            <!-- Breakout Reversal Tangent Line (1H 收线破位点) -->
+            <line x1="220" y1="190" x2="385" y2="120" stroke="#34C759" stroke-width="2" stroke-linecap="round"/>
+
+            <!-- Candlestick Series (1H Bars across 4H trendline) -->
+            <!-- Bar 1 (Red) -->
+            <line x1="30" y1="110" x2="30" y2="170" stroke="#FF3B30" stroke-width="1"/>
+            <rect x="26" y="125" width="8" height="35" fill="#FF3B30" rx="1"/>
+
+            <!-- Bar 2 (Red) -->
+            <line x1="50" y1="140" x2="50" y2="195" stroke="#FF3B30" stroke-width="1"/>
+            <rect x="46" y="150" width="8" height="35" fill="#FF3B30" rx="1"/>
+
+            <!-- Bar 3 (Green) -->
+            <line x1="70" y1="160" x2="70" y2="210" stroke="#34C759" stroke-width="1"/>
+            <rect x="66" y="170" width="8" height="30" fill="#34C759" rx="1"/>
+
+            <!-- Bar 4 (Red) -->
+            <line x1="90" y1="180" x2="90" y2="230" stroke="#FF3B30" stroke-width="1"/>
+            <rect x="86" y="190" width="8" height="32" fill="#FF3B30" rx="1"/>
+
+            <!-- Bar 5 (Red) -->
+            <line x1="110" y1="200" x2="110" y2="260" stroke="#FF3B30" stroke-width="1"/>
+            <rect x="106" y="215" width="8" height="38" fill="#FF3B30" rx="1"/>
+
+            <!-- Bar 6 (Pin Bar Reversal near low) -->
+            <line x1="130" y1="240" x2="130" y2="330" stroke="#34C759" stroke-width="1"/>
+            <rect x="126" y="250" width="8" height="22" fill="#34C759" rx="1"/>
+
+            <!-- Bar 7 (Green) -->
+            <line x1="150" y1="230" x2="150" y2="280" stroke="#34C759" stroke-width="1"/>
+            <rect x="146" y="235" width="8" height="35" fill="#34C759" rx="1"/>
+
+            <!-- Bar 8 (Green) -->
+            <line x1="170" y1="210" x2="170" y2="260" stroke="#34C759" stroke-width="1"/>
+            <rect x="166" y="215" width="8" height="32" fill="#34C759" rx="1"/>
+
+            <!-- Bar 9 (Consolidation Red) -->
+            <line x1="190" y1="205" x2="190" y2="250" stroke="#FF3B30" stroke-width="1"/>
+            <rect x="186" y="210" width="8" height="25" fill="#FF3B30" rx="1"/>
+
+            <!-- Bar 10 (Touch 4H Line Red Wick) -->
+            <line x1="210" y1="180" x2="210" y2="235" stroke="#FF3B30" stroke-width="1"/>
+            <rect x="206" y="195" width="8" height="30" fill="#FF3B30" rx="1"/>
+
+            <!-- Bar 11 (Breakout Confirmation 1H Close Bar: Bright Green) -->
+            <line x1="235" y1="150" x2="235" y2="215" stroke="#34C759" stroke-width="1.5"/>
+            <rect x="230" y="155" width="10" height="42" fill="#34C759" rx="1.5"/>
+            <!-- 1H Confirmed Tag Marker -->
+            <circle cx="235" cy="155" r="3.5" fill="#34C759" stroke="#FFFFFF" stroke-width="1.5"/>
+
+            <!-- Bar 12 (Continuation Green) -->
+            <line x1="258" y1="135" x2="258" y2="190" stroke="#34C759" stroke-width="1"/>
+            <rect x="254" y="142" width="8" height="36" fill="#34C759" rx="1"/>
+
+            <!-- Bar 13 (Continuation Green) -->
+            <line x1="280" y1="120" x2="280" y2="175" stroke="#34C759" stroke-width="1"/>
+            <rect x="276" y="128" width="8" height="35" fill="#34C759" rx="1"/>
+
+            <!-- Bar 14 (Pullback Test to Trendline - Support Validated) -->
+            <line x1="302" y1="125" x2="302" y2="185" stroke="#FF3B30" stroke-width="1"/>
+            <rect x="298" y="132" width="8" height="28" fill="#FF3B30" rx="1"/>
+
+            <!-- Bar 15 (Impulse Green) -->
+            <line x1="324" y1="95" x2="324" y2="155" stroke="#34C759" stroke-width="1"/>
+            <rect x="320" y="105" width="8" height="40" fill="#34C759" rx="1"/>
+
+            <!-- Bar 16 (Current Live Candle) -->
+            <line x1="346" y1="80" x2="346" y2="140" stroke="#34C759" stroke-width="1.25"/>
+            <rect x="342" y="90" width="8" height="35" fill="#34C759" rx="1"/>
+
+            <!-- Price Horizontal Cursor Line (Realtime Price) -->
+            <line x1="0" y1="90" x2="390" y2="90" stroke="#1C1C1E" stroke-width="0.75" stroke-dasharray="2,2"/>
+          </svg>
+
+          <!-- Floating Inline Indicators Settings Sheet (Indicator Settings Overlay) -->
+          <div class="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur-md rounded-2xl border border-ios-border p-3 shadow-lg">
+            <div class="flex items-center justify-between pb-2 border-b border-gray-100 text-xs">
+              <span class="font-bold text-gray-900 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-ios-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                叠加指标与锚定参数
+              </span>
+              <span class="text-[11px] text-ios-muted">设置内开关 · 不占主图</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mt-2.5 text-[12px]">
+              <!-- Indicator Toggle 1: 4H 趋势线 (ON) -->
+              <div class="flex items-center justify-between p-2 rounded-xl bg-gray-50 border border-gray-100">
+                <span class="font-medium text-gray-800">4H 趋势线</span>
+                <span class="w-9 h-5 bg-ios-green rounded-full p-0.5 flex justify-end items-center cursor-pointer">
+                  <span class="w-4 h-4 bg-white rounded-full shadow-sm"></span>
+                </span>
+              </div>
+              <!-- Indicator Toggle 2: 周一 1.618 (ON) -->
+              <div class="flex items-center justify-between p-2 rounded-xl bg-gray-50 border border-gray-100">
+                <span class="font-medium text-gray-800">周一 1.618</span>
+                <span class="w-9 h-5 bg-ios-blue rounded-full p-0.5 flex justify-end items-center cursor-pointer">
+                  <span class="w-4 h-4 bg-white rounded-full shadow-sm"></span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Detail Summary Strip -->
+            <div class="mt-2.5 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-ios-muted">
+              <span>锚定基准：前高 93,800 / 前低 90,480</span>
+              <span class="text-emerald-600 font-semibold">1H 收盘确认有效</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Order / Review Action Dock (iOS Restraint) -->
+        <div class="px-4 py-2.5 bg-white border-t border-ios-border flex items-center justify-between gap-3 shrink-0">
+          <div class="text-[11px] text-ios-muted">
+            <div>突破位：<span class="text-gray-900 font-semibold tabular-nums">91,820.0</span></div>
+            <div>防守前低：<span class="text-gray-900 font-semibold tabular-nums">90,480.0</span></div>
+          </div>
+          <button class="px-5 py-2.5 bg-ios-blue text-white font-semibold text-xs rounded-xl shadow-sm hover:bg-blue-600 active:scale-98 transition-all flex items-center gap-1.5 touch-target">
+            <span>查看 4H 完整大图</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          </button>
+        </div>
+
+        <!-- 5-Tab Bar (合约 · 监控 · 1.618[激活] · 持仓 · 统计) -->
+        <nav class="h-[76px] bg-white/95 backdrop-blur-md border-t border-ios-border px-3 pb-4 pt-1.5 flex items-center justify-around shrink-0 select-none z-30">
+          <div class="flex flex-col items-center justify-center touch-target text-gray-400">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+            <span class="text-[10px] font-medium">合约</span>
+          </div>
+          <div class="flex flex-col items-center justify-center touch-target text-gray-400">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            <span class="text-[10px] font-medium">监控</span>
+          </div>
+          <div class="flex flex-col items-center justify-center touch-target text-ios-blue">
+            <svg class="w-5 h-5 mb-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+            <span class="text-[10px] font-bold">1.618</span>
+          </div>
+          <div class="flex flex-col items-center justify-center touch-target text-gray-400">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            <span class="text-[10px] font-medium">持仓</span>
+          </div>
+          <div class="flex flex-col items-center justify-center touch-target text-gray-400">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <span class="text-[10px] font-medium">统计</span>
+          </div>
+        </nav>
+
+        <!-- Home Indicator -->
+        <div class="absolute bottom-1 inset-x-0 flex justify-center pointer-events-none z-40">
+          <div class="w-32 h-1 bg-black/30 rounded-full"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Screen 3: 月首周 1.618 ·「1H 已收回」双态与收件箱联动 (390pt Viewport) -->
+    <section class="flex flex-col items-center">
+      <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-ios-purple"></span>
+        03. 月首周 1.618 ·「1H 已收回」收件箱
+      </div>
+
+      <!-- iPhone Mockup 390x844 Frame (Displaying Sheet Modal State) -->
+      <div class="w-[390px] h-[844px] bg-gray-900 rounded-[48px] shadow-2xl border-[7px] border-[#1C1C1E] relative overflow-hidden flex flex-col justify-end">
+
+        <!-- Faint Background Wallpaper (Behind Sheet) -->
+        <div class="absolute inset-0 bg-gradient-to-b from-gray-950 via-gray-900 to-black p-4 opacity-40 pointer-events-none flex flex-col justify-between">
+          <div class="pt-6 flex justify-between text-xs text-gray-400">
+            <span>Spike Mobile 2.9.5</span>
+            <span>OKX WS: 12ms</span>
+          </div>
+          <div class="text-center text-xs text-gray-600">背景底层图表沉浸运行</div>
+        </div>
+
+        <!-- iOS 398x860pt Standard Native Sheet Modal (White, 36px top roundness) -->
+        <div class="w-full h-[795px] bg-white rounded-t-[36px] shadow-2xl flex flex-col justify-between relative overflow-hidden z-20 border-t border-white/60">
+
+          <!-- Top Grabber Handle -->
+          <div class="pt-2.5 pb-1 flex justify-center shrink-0">
+            <div class="w-9 h-1.5 bg-gray-300 rounded-full"></div>
+          </div>
+
+          <!-- Sheet Navigation Bar (通知 / 市场 唯一主导航) -->
+          <div class="px-5 pt-1 pb-2 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-4">
+              <!-- Tab 1: 通知 (Active: Bold Black + Underline) -->
+              <button class="relative pb-1">
+                <span class="text-[22px] font-extrabold text-gray-900 tracking-tight">通知</span>
+                <span class="absolute bottom-0 left-0 right-0 h-[2.5px] bg-gray-900 rounded-full"></span>
+              </button>
+              <!-- Tab 2: 市场 (Inactive: Muted Gray) -->
+              <button class="pb-1">
+                <span class="text-[22px] font-medium text-gray-400 tracking-tight hover:text-gray-600 transition-colors">市场</span>
+              </button>
+            </div>
+
+            <!-- Dismiss Round Button (44pt touch area) -->
+            <button class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 touch-target" aria-label="关闭">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+
+          <!-- Filter Chips (全部 · 报警 · 周一 · 月首周[激活]) -->
+          <div class="px-5 py-2 flex items-center justify-between border-b border-ios-border shrink-0">
+            <div class="flex items-center gap-1.5 overflow-x-auto hide-scrollbar text-[12px] font-medium">
+              <button class="px-3 py-1 rounded-full bg-gray-100 text-gray-600">全部</button>
+              <button class="px-3 py-1 rounded-full bg-gray-100 text-gray-600">报警</button>
+              <button class="px-3 py-1 rounded-full bg-gray-100 text-gray-600 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-ios-blue"></span>周一
+              </button>
+              <!-- Active Filter: 月首周 (Solid Black or Purple-accent) -->
+              <button class="px-3 py-1 rounded-full bg-gray-900 text-white font-semibold flex items-center gap-1 shadow-xs">
+                <span class="w-1.5 h-1.5 rounded-full bg-ios-purple"></span>月首周
+              </button>
+            </div>
+
+            <!-- Context Menu Filter Trigger -->
+            <button class="touch-target text-gray-500 hover:text-gray-900 flex items-center justify-center" title="过滤未推送">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+            </button>
+          </div>
+
+          <!-- Notification Feed List with Explicit '首次触价' vs '1H 已收回' Status -->
+          <div class="flex-1 overflow-y-auto hide-scrollbar divide-y divide-gray-100 bg-white">
+
+            <!-- Date Section: 今天 -->
+            <div class="px-5 pt-3 pb-1.5 bg-ios-subtle text-[11px] font-semibold text-ios-muted uppercase tracking-wider">
+              今天 · 11月14日
+            </div>
+
+            <!-- Item A: ETH 月首周 1.618「1H 已收回」双态事件 (Highlighted) -->
+            <div class="px-5 py-3 flex items-start justify-between hover:bg-purple-50/40 active:bg-purple-100/50 transition-colors touch-target cursor-pointer bg-purple-50/20">
+              <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-purple-100 text-ios-purple flex items-center justify-center shrink-0 mt-0.5">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-bold text-[15px] text-gray-900">ETH</span>
+                    <span class="text-xs font-semibold text-gray-800">触及下轨 1.618</span>
+                    <!-- Dual State Badge: 1H 已收回 (Purple/Green pill) -->
+                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      1H 已收回
+                    </span>
+                  </div>
+                  <div class="text-[12px] text-gray-500 mt-1 flex items-center gap-2">
+                    <span class="text-ios-purple font-medium">月首周 1.618</span>
+                    <span>·</span>
+                    <span>收盘于区间内 2,640.2</span>
+                  </div>
+                  <div class="text-[11px] text-ios-blue font-medium mt-1 flex items-center gap-1">
+                    <span>独立打开事件 K 线</span>
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                  </div>
+                </div>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="text-[12px] text-gray-400 font-medium tabular-nums">16:42</span>
+              </div>
+            </div>
+
+            <!-- Item B: BTC 月首周 1.618「首次触价」(未收回/等待收线) -->
+            <div class="px-5 py-3 flex items-start justify-between hover:bg-gray-50 active:bg-gray-100 transition-colors touch-target cursor-pointer">
+              <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-purple-50 text-ios-purple flex items-center justify-center shrink-0 mt-0.5">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-bold text-[15px] text-gray-900">BTC</span>
+                    <span class="text-xs font-semibold text-gray-800">触及上轨 1.618</span>
+                    <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                      首次触价 · 等待1H收线
+                    </span>
+                  </div>
+                  <div class="text-[12px] text-gray-500 mt-1 flex items-center gap-2">
+                    <span class="text-ios-purple font-medium">月首周 1.618</span>
+                    <span>·</span>
+                    <span>现价 94,820.0</span>
+                  </div>
+                </div>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="text-[12px] text-gray-400 font-medium tabular-nums">14:15</span>
+              </div>
+            </div>
+
+            <!-- Item C: SOL 周一 1.618 (Blue Accent Item) -->
+            <div class="px-5 py-3 flex items-start justify-between hover:bg-blue-50/30 active:bg-blue-100/50 transition-colors touch-target cursor-pointer">
+              <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-blue-50 text-ios-blue flex items-center justify-center shrink-0 mt-0.5">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-bold text-[15px] text-gray-900">SOL</span>
+                    <span class="text-xs font-semibold text-gray-800">触及下轨 1.618</span>
+                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-blue-50 text-ios-blue border border-blue-200">
+                      15m 已收回
+                    </span>
+                  </div>
+                  <div class="text-[12px] text-gray-500 mt-1 flex items-center gap-2">
+                    <span class="text-ios-blue font-medium">周一 1.618</span>
+                    <span>·</span>
+                    <span>184.50 假突破收线</span>
+                  </div>
+                </div>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="text-[12px] text-gray-400 font-medium tabular-nums">11:08</span>
+              </div>
+            </div>
+
+            <!-- Date Section: 昨天 -->
+            <div class="px-5 pt-3 pb-1.5 bg-ios-subtle text-[11px] font-semibold text-ios-muted uppercase tracking-wider">
+              昨天 · 11月13日
+            </div>
+
+            <!-- Item D: SUI 月首周 1.618「1H 已收回」 -->
+            <div class="px-5 py-3 flex items-start justify-between hover:bg-gray-50 active:bg-gray-100 transition-colors touch-target cursor-pointer">
+              <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-purple-100 text-ios-purple flex items-center justify-center shrink-0 mt-0.5">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-bold text-[15px] text-gray-900">SUI</span>
+                    <span class="text-xs font-semibold text-gray-800">触及下轨 1.618</span>
+                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                      1H 已收回 (22:18)
+                    </span>
+                  </div>
+                  <div class="text-[12px] text-gray-500 mt-1 flex items-center gap-2">
+                    <span class="text-ios-purple font-medium">月首周 1.618</span>
+                    <span>·</span>
+                    <span>4H 支撑位假突破</span>
+                  </div>
+                </div>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="text-[12px] text-gray-400 font-medium tabular-nums">22:18</span>
+              </div>
+            </div>
+
+            <!-- Item E: DOGE 趋势线突破事件联动通知 -->
+            <div class="px-5 py-3 flex items-start justify-between hover:bg-gray-50 active:bg-gray-100 transition-colors touch-target cursor-pointer">
+              <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-bold text-[15px] text-gray-900">DOGE</span>
+                    <span class="text-xs font-semibold text-gray-800">1H 上破 4H 趋势线</span>
+                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200">
+                      1H 收线确认
+                    </span>
+                  </div>
+                  <div class="text-[12px] text-gray-500 mt-1 flex items-center gap-2">
+                    <span class="text-gray-700 font-medium">趋势突破</span>
+                    <span>·</span>
+                    <span>线价 0.3590 → 现价 0.3685</span>
+                  </div>
+                </div>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="text-[12px] text-gray-400 font-medium tabular-nums">19:40</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Sheet Bottom Dismiss Footer Bar -->
+          <div class="px-5 py-3.5 bg-ios-subtle border-t border-ios-border flex items-center justify-between text-xs text-ios-muted shrink-0">
+            <span>通知保留最近 48 小时历史</span>
+            <button class="text-ios-blue font-semibold hover:underline">清空已读</button>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Design Token & Architecture Specification Ledger -->
+  <footer class="w-full max-w-[1280px] mt-10 p-6 bg-white rounded-3xl border border-gray-200/80 shadow-sm text-xs text-gray-600">
+    <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-gray-100 gap-2">
+      <span class="font-bold text-gray-900 text-sm">Spike iOS 2.9.5 · 系统工程与交付契约规范</span>
+      <span class="text-gray-400">HIG 390×844pt Native Layout · Tabular Numeric Precision</span>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+      <div>
+        <h4 class="font-bold text-gray-900 mb-1.5 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-ios-blue"></span>
+          1. 监控流加入「趋势线」分类
+        </h4>
+        <p class="leading-relaxed text-gray-500">顶部横滑筛选行原位插入「趋势线」Chips，关联「1H 突破 4H 趋势线」高密列表。展示币种、上破/下破徽标、1H收盘时间、当前价与突破线价，44pt 触控靶区一键无缝定焦 K 线。</p>
+      </div>
+      <div>
+        <h4 class="font-bold text-gray-900 mb-1.5 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          2. 锚定时间的真实 4H 趋势线
+        </h4>
+        <p class="leading-relaxed text-gray-500">K 线主图内直接绘制跨 4H 蜡烛顶底的趋势线，设置抽屉内嵌「指标开关」，杜绝增加主图顶部常驻工具条，保证 390pt 下垂直看盘有效区域大于 70%。</p>
+      </div>
+      <div>
+        <h4 class="font-bold text-gray-900 mb-1.5 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-ios-purple"></span>
+          3. 月首周 1.618「1H 已收回」双态
+        </h4>
+        <p class="leading-relaxed text-gray-500">通知收件箱明确切分「首次触价」与「1H 已收回」两类事实状态。周一蓝（#007AFF）、月首周紫（#AF52DE），点击单项独立唤起带事件标记的原生 K 线。</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

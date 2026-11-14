@@ -87,15 +87,18 @@ class TouchReclaimReader:
             close_ms = bar_ms + step_ms(period)
         return bar_ms, close_ms
 
-    def project(self, events, now_ms):
-        """Add three non-persisted outcomes to a page of touch facts."""
+    def project(self, events, now_ms, periods=PERIODS):
+        """Add selected non-persisted close outcomes to touch facts, batched by symbol/period."""
+        periods = tuple(periods)
+        if not periods or any(period not in PERIODS for period in periods):
+            raise ValueError("invalid touch reclaim periods")
         results = []
         requested = {}
         targets_by_event = {}
         for event in events:
             event_id = event["event_id"]
             targets = {}
-            for period in PERIODS:
+            for period in periods:
                 target = self._target(event, period)
                 if target is None:
                     targets[period] = None
@@ -112,7 +115,7 @@ class TouchReclaimReader:
 
         for event in events:
             reclaims = {}
-            for period in PERIODS:
+            for period in periods:
                 target = targets_by_event[event["event_id"]].get(period)
                 if target is None:
                     reclaims[period] = {"bar": period, "status": "unavailable",

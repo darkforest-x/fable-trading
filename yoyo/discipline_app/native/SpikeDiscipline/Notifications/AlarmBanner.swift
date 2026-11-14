@@ -10,9 +10,10 @@ struct AlarmBanner: View {
     @State private var pulse = false
     private var alarm: Bool { event.kind == "alarm" }
 
-    private var monthly: Bool { event.kind == MonthTouchStyle.kind }
+    private var monthly: Bool { event.isMonthlyNotice }
     private var tint: Color { monthly ? MonthTouchStyle.tint : (alarm ? .down : .blue) }
     private var title: String {
+        if event.isMonthReclaim { return "月首周 1.618 · 1H 收回" + MonthTouchStyle.edge(event.side) }
         if alarm { return "全市场插针 · \(Fmt.edge(event.side))" }
         return (monthly ? "月首周 1.618" : "周一 1.618") + " · " + MonthTouchStyle.edge(event.side)
     }

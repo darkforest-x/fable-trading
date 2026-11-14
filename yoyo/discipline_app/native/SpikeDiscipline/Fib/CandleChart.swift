@@ -21,6 +21,8 @@ struct ChartLine: Equatable, Identifiable {
     var dashed = false
     var startTime: Double? = nil
     var endTime: Double? = nil
+    /// Optional second endpoint for a time-anchored sloped line; `price` is its start price.
+    var endPrice: Double? = nil
     var lineWidth: CGFloat = 1.4
     /// Reference overlays can be drawn without changing the candle auto-scale.
     var fitsScale = true
@@ -959,20 +961,48 @@ struct CandleChart: View {
         }
 
         for line in lines where line.price > 0 {
-            let y = layout.y(line.price)
-            guard y >= plot.minY, y <= priceFloor else { continue }
-            var left = line.startTime.map { layout.x(layout.index(atTime: $0)) } ?? plot.minX
-            var right = line.endTime.map { layout.x(layout.index(atTime: $0)) } ?? plot.maxX
-            left = max(plot.minX, left); right = min(plot.maxX, right)
-            if replayEntryTitle != nil, let span = focusRange {
-                left = max(left, layout.x(layout.index(atTime: span.lowerBound)))
-                right = min(right, layout.x(layout.index(atTime: span.upperBound)))
+            let dash: [CGFloat] = line.dashed ? [5, 4] : []
+            if let startTime = line.startTime, let endTime = line.endTime,
+               let endPrice = line.endPrice, endTime > startTime, endPrice > 0 {
+                let visibleStart = layout.bars[layout.firstVisible].time
+                let visibleEnd = layout.bars[layout.lastVisible].time + period.seconds
+                var clippedStart = max(startTime, visibleStart)
+                var clippedEnd = min(endTime, visibleEnd)
+                if replayEntryTitle != nil, let span = focusRange {
+                    clippedStart = max(clippedStart, span.lowerBound)
+                    clippedEnd = min(clippedEnd, span.upperBound)
+                }
+                guard clippedEnd > clippedStart else { continue }
+                let slope = (endPrice - line.price) / (endTime - startTime)
+                let startPrice = line.price + slope * (clippedStart - startTime)
+                let finishPrice = line.price + slope * (clippedEnd - startTime)
+                let startPoint = CGPoint(x: min(plot.maxX, max(plot.minX, layout.x(layout.index(atTime: clippedStart)))),
+                                         y: layout.y(startPrice))
+                let endPoint = CGPoint(x: min(plot.maxX, max(plot.minX, layout.x(layout.index(atTime: clippedEnd)))),
+                                       y: layout.y(finishPrice))
+                guard endPoint.x > startPoint.x else { continue }
+                clipped.stroke(Path { $0.move(to: startPoint); $0.addLine(to: endPoint) },
+                               with: .color(line.color), style: StrokeStyle(lineWidth: line.lineWidth, dash: dash))
+                if endPoint.y >= plot.minY, endPoint.y <= priceFloor {
+                    clipped.draw(Text("\(line.title) \(format(finishPrice))").font(.system(size: 10, weight: .semibold)).foregroundStyle(line.color),
+                                 at: CGPoint(x: max(startPoint.x + 4, endPoint.x - 4), y: endPoint.y - 3), anchor: .bottomTrailing)
+                }
+            } else {
+                let y = layout.y(line.price)
+                guard y >= plot.minY, y <= priceFloor else { continue }
+                var left = line.startTime.map { layout.x(layout.index(atTime: $0)) } ?? plot.minX
+                var right = line.endTime.map { layout.x(layout.index(atTime: $0)) } ?? plot.maxX
+                left = max(plot.minX, left); right = min(plot.maxX, right)
+                if replayEntryTitle != nil, let span = focusRange {
+                    left = max(left, layout.x(layout.index(atTime: span.lowerBound)))
+                    right = min(right, layout.x(layout.index(atTime: span.upperBound)))
+                }
+                guard right > left else { continue }
+                clipped.stroke(Path { $0.move(to: CGPoint(x: left, y: y)); $0.addLine(to: CGPoint(x: right, y: y)) },
+                               with: .color(line.color), style: StrokeStyle(lineWidth: line.lineWidth, dash: dash))
+                clipped.draw(Text("\(line.title) \(format(line.price))").font(.system(size: 10, weight: .semibold)).foregroundStyle(line.color),
+                             at: CGPoint(x: left + 4, y: y - 3), anchor: .bottomLeading)
             }
-            guard right > left else { continue }
-            clipped.stroke(Path { $0.move(to: CGPoint(x: left, y: y)); $0.addLine(to: CGPoint(x: right, y: y)) },
-                           with: .color(line.color), style: StrokeStyle(lineWidth: line.lineWidth, dash: line.dashed ? [5, 4] : []))
-            clipped.draw(Text("\(line.title) \(format(line.price))").font(.system(size: 10, weight: .semibold)).foregroundStyle(line.color),
-                         at: CGPoint(x: left + 4, y: y - 3), anchor: .bottomLeading)
         }
 
         drawMarkers(&clipped, layout: layout)

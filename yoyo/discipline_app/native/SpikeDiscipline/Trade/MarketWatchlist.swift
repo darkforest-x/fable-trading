@@ -11,15 +11,22 @@ struct MarketWatchlist: View {
     @Binding var search: String
     let layout: MarketWatchlistLayout
     let selectedSymbol: String?
+    var touchRanking: FibMarketRanking? = nil
     let onSelect: (String) -> Void
 
     @AppStorage("trade.watchlist.filter") private var filter = 0
     @AppStorage("trade.watchlist.sort") private var sortValue = "volume"
+    @AppStorage("fib.watchlist.sort.v1") private var fibSort = "latest"
     @State private var ranked: [String] = []
     @State private var favorites = UserDefaults.standard.stringArray(forKey: "spike-favorites") ?? []
 
     private static let filters = ["全部", "自选", "最近"]
-    private var sort: Trading.ContractSort { Trading.ContractSort(rawValue: sortValue) ?? .volume }
+    private var activeSort: String {
+        guard let touchRanking else { return sortValue }
+        return fibSort == "score" && touchRanking.source != .monday ? "latest" : fibSort
+    }
+    private var sort: Trading.ContractSort { Trading.ContractSort(rawValue: activeSort) ?? .volume }
+    private var touchSort: Bool { touchRanking?.sorts.contains(where: { $0.0 == activeSort }) == true }
 
     private var catalog: [String: Instrument] { account.state?.instruments ?? [:] }
 
@@ -58,6 +65,7 @@ struct MarketWatchlist: View {
         }
         .background(Color(uiColor: .systemBackground))
         .onChange(of: catalog, initial: true) { _, _ in rank() }
+        .onChange(of: touchRanking) { _, _ in rank() }
     }
 
     private var compactHeader: some View {
@@ -198,14 +206,34 @@ struct MarketWatchlist: View {
             favorite: favorites.contains(symbol),
             selected: symbol == selectedSymbol,
             compact: compact,
-            selectsContract: selectedSymbol != nil,
+            selectsContract: selectedSymbol != nil && touchRanking == nil,
+            touchSubtitle: touchDetail(symbol),
             onToggleFavorite: { toggleFavorite(symbol) },
             onSelect: { onSelect(symbol) }
         )
     }
 
+    private func touchDetail(_ symbol: String) -> String? {
+        guard touchSort, let touchRanking else { return nil }
+        guard let t = touchRanking.selectedTouch(symbol, sort: activeSort) else {
+            return activeSort == "score" ? "暂无评分" : touchRanking.source.title + " · 未触价"
+        }
+        let stamp = Fmt.clock(t.at)
+        if activeSort == "score", let score = t.score { return "评分 " + String(format: "%.2f", score) + " · " + stamp }
+        return touchRanking.source.title + " · " + (t.side == .upper ? "上轨 " : "下轨 ") + stamp
+    }
+
     private func sortMenu(compact: Bool) -> some View {
         Menu {
+            if let touchRanking {
+                Section(touchRanking.source.title + " 1.618") {
+                    ForEach(touchRanking.sorts, id: \.0) { option in
+                        Button { Haptics.select(); fibSort = option.0; rank() } label: {
+                            if activeSort == option.0 { Label(option.1, systemImage: "checkmark") } else { Text(option.1) }
+                        }
+                    }
+                }
+            }
             Button("24h 估算成交额") { changeSort(.volume) }
             Button("今日涨幅") { changeSort(.gainers) }
             Button("今日跌幅") { changeSort(.losers) }
@@ -222,13 +250,14 @@ struct MarketWatchlist: View {
             .frame(minHeight: 34)
             .contentShape(Rectangle())
         }
-        .tint(.primary)
+        .buttonStyle(.plain)
         .accessibilityLabel("行情排序")
         .accessibilityValue(sortTitle)
     }
 
     private var sortTitle: String {
-        switch sort {
+        if let match = touchRanking?.sorts.first(where: { $0.0 == activeSort }) { return match.1 }
+        return switch sort {
         case .volume: "24H 成交额"
         case .gainers: "今日涨幅"
         case .losers: "今日跌幅"
@@ -237,12 +266,17 @@ struct MarketWatchlist: View {
 
     private func changeSort(_ value: Trading.ContractSort) {
         Haptics.select()
-        sortValue = value.rawValue
+        if touchRanking != nil { fibSort = value.rawValue } else { sortValue = value.rawValue }
         rank()
     }
 
     private func rank() {
         let symbols = catalog.values.compactMap { $0.tradable == false ? nil : $0.symbol }
+        if touchSort, let touchRanking {
+            let universe = catalog.isEmpty ? Array(touchRanking.bySymbol.keys) : symbols
+            ranked = touchRanking.ranked(universe, sort: activeSort)
+            return
+        }
         ranked = Trading.rank(symbols, quotes: account.state?.quotes ?? [:], now: account.now, sort: sort)
     }
 
@@ -268,6 +302,7 @@ private struct MarketWatchlistRow: View {
     let selected: Bool
     let compact: Bool
     let selectsContract: Bool
+    let touchSubtitle: String?
     let onToggleFavorite: () -> Void
     let onSelect: () -> Void
 
@@ -322,7 +357,7 @@ private struct MarketWatchlistRow: View {
                                     .foregroundStyle(Color.accentColor)
                             }
                         }
-                        Text(compact ? turnover : "OKX 永续 · \(turnover)")
+                        Text(touchSubtitle ?? (compact ? turnover : "OKX 永续 · \(turnover)"))
                             .font(.scaled(size: compact ? 9 : 10))
                             .foregroundStyle(Color.muted)
                             .lineLimit(1)

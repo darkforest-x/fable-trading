@@ -892,6 +892,45 @@ class TrendlineBreakFeed:
                 "asof_ms": asof_ms, "last_complete_asof_ms": last_complete,
                 "last_error": last_error, "lookback_days": self.lookback_days}
 
+    def current_line(self, symbol: str) -> dict[str, Any]:
+        """Return the exact current 4H line only when its full rolling window is covered."""
+        normalized = str(symbol).upper()
+        if not _SYMBOL_RE.fullmatch(normalized):
+            raise ValueError("invalid_symbol")
+        cutoff_ms = self._current_cutoff_ms()
+        with self.lock:
+            state = dict(self._symbol_state.get(normalized, {}))
+            packed = self._bars.get(normalized, {}).get("4H")
+
+        def unavailable(reason: str) -> dict[str, Any]:
+            return {"schema": "trendline_line.v1", "symbol": normalized, "status": "unavailable",
+                    "reason": reason, "line": None, "asof_ms": cutoff_ms,
+                    "coverage": {"latest_4h_close_ms": (state.get("h4_latest_ms", 0) + BAR_MS["4H"]
+                                                            if state.get("h4_latest_ms") is not None else None),
+                                 "h4_rows": state.get("h4_rows", 0),
+                                 "h4_gaps": state.get("h4_gaps", 0)}}
+
+        if not state or packed is None:
+            return unavailable("symbol_not_scanned")
+        if state.get("computed_asof_ms") != cutoff_ms:
+            return unavailable("stale_scan")
+        if not state.get("h4_current"):
+            return unavailable("stale_4h_data")
+
+        from .trendline_break_rules import FOUR_HOUR_MS, WINDOW, current_resistance_line
+        bars = _unpack(packed)
+        recent = bars[-WINDOW:]
+        if len(recent) < WINDOW:
+            return unavailable("insufficient_4h_history")
+        if any(right["t"] - left["t"] != FOUR_HOUR_MS for left, right in zip(recent, recent[1:])):
+            return unavailable("gap_in_4h_window")
+
+        line = current_resistance_line(_rule_bars(bars), cutoff_ms)
+        return {"schema": "trendline_line.v1", "symbol": normalized, "status": "ready",
+                "reason": None, "line": line, "asof_ms": cutoff_ms,
+                "coverage": {"latest_4h_close_ms": state["h4_latest_ms"] + BAR_MS["4H"],
+                             "h4_rows": state["h4_rows"], "h4_gaps": state["h4_gaps"]}}
+
 
 def install(app: FastAPI, feed: TrendlineBreakFeed) -> None:
     @app.get("/api/trendline-breaks")
@@ -900,4 +939,9 @@ def install(app: FastAPI, feed: TrendlineBreakFeed) -> None:
         # By default serve the full 30-day result. Larger lists can be read in
         # bounded pages; the worker owns every fetch and event calculation.
         return feed.snapshot(limit=limit, offset=offset)
+
+    @app.get("/api/trendline-line")
+    def trendline_line(symbol: str = Query(..., pattern=r"^[A-Z0-9]{1,32}-USDT-SWAP$")):
+        # No fallback to a different contract or chart-side line reconstruction.
+        return feed.current_line(symbol)
 

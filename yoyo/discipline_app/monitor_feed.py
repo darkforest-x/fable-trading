@@ -78,6 +78,10 @@ def _ms(value):
     return int(value) if value is not None and value > 0 else None
 
 
+def _nonnegative_int(value):
+    return int(value) if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
+
+
 def _symbol(value):
     return value if isinstance(value, str) and SYMBOL.fullmatch(value) else None
 
@@ -372,6 +376,104 @@ def project_touch_scores(rows):
         raise MonitorUnavailable('触价评分暂不可用') from error
 
 
+TRENDLINE_EVENT_FIELDS = (
+    'event_id', 'symbol', 'confirmed_ms', 'candle_ms', 'level', 'close', 'a_ms', 'a_price', 'b_ms', 'b_price',
+    'prebreak_low', 'prebreak_low_start_ms', 'prebreak_low_end_ms', 'prebreak_low_bars',
+    'validity_schema', 'validity_status', 'validity_checked_ms', 'validity_reason', 'rally_target',
+    'invalidated_ms', 'invalidated_low', 'rally_confirmed_ms', 'feed_asof_ms', 'feed_updated_ms',
+)
+TRENDLINE_COVERAGE_FIELDS = (
+    'symbols_total', 'covered', 'errors', 'no_data', 'gap_symbols', 'insufficient_history',
+    'missing_4h', 'missing_1h', 'stale_4h', 'stale_1h', 'lookback_days', 'lookback_start_ms',
+    'latest_4h_close_ms', 'latest_1h_close_ms', 'oldest_covered_4h_close_ms',
+    'oldest_covered_1h_close_ms', 'h1_history_bars', 'h4_history_bars',
+)
+
+
+def project_trendline_breaks(raw):
+    """Validate and whitelist the existing 1H-close / 4H-resistance event feed."""
+    states = frozenset(('warming', 'scanning', 'ready', 'partial', 'degraded', 'stopped'))
+    if (not isinstance(raw, dict) or not isinstance(raw.get('items'), list)
+            or raw.get('state') not in states or not isinstance(raw.get('coverage'), dict)
+            or not isinstance(raw.get('progress'), dict)):
+        raise MonitorUnavailable('趋势线突破数据格式无效')
+    items = []
+    for row in raw['items']:
+        if not isinstance(row, dict):
+            raise MonitorUnavailable('趋势线突破记录格式无效')
+        symbol = _symbol(row.get('symbol'))
+        event_id = row.get('event_id')
+        stamps = {key: _ms(row.get(key)) for key in ('confirmed_ms', 'candle_ms', 'a_ms', 'b_ms')}
+        prices = {key: _num(row.get(key)) for key in ('level', 'close', 'a_price', 'b_price')}
+        if (not symbol or not isinstance(event_id, str) or not re.fullmatch(r'[0-9a-f]{24}', event_id)
+                or any(value is None for value in stamps.values())
+                or any(value is None or value <= 0 for value in prices.values())
+                or not (stamps['a_ms'] < stamps['b_ms'] < stamps['candle_ms']
+                        and stamps['confirmed_ms'] == stamps['candle_ms'] + 60 * 60_000
+                        and prices['a_price'] > prices['b_price'] and prices['close'] > prices['level'])
+                or row.get('validity_schema') != 2 or row.get('validity_status') != 'valid'):
+            raise MonitorUnavailable('趋势线突破记录格式无效')
+        item = {key: row[key] for key in TRENDLINE_EVENT_FIELDS if key in row}
+        item.update(symbol=symbol, **stamps, **prices)
+        items.append(item)
+    coverage = {key: raw['coverage'][key] for key in TRENDLINE_COVERAGE_FIELDS if key in raw['coverage']}
+    progress_raw = raw['progress']
+    progress = {key: progress_raw[key] for key in ('done', 'total', 'percent') if key in progress_raw}
+    offset = _nonnegative_int(raw.get('offset', 0))
+    total = _nonnegative_int(raw.get('total'))
+    limit = _nonnegative_int(raw.get('limit')) if raw.get('limit') is not None else None
+    next_offset = _nonnegative_int(raw.get('next_offset'))
+    return {
+        'items': items,
+        'total': total if total is not None else len(items),
+        'offset': offset if offset is not None else 0,
+        'limit': limit,
+        'next_offset': next_offset,
+        'has_more': bool(raw.get('has_more')),
+        'state': raw['state'],
+        'coverage': coverage,
+        'progress': progress,
+        'asof_ms': _ms(raw.get('asof_ms')),
+        'last_complete_asof_ms': _ms(raw.get('last_complete_asof_ms')),
+        'lookback_days': _ms(raw.get('lookback_days')),
+    }
+
+
+def project_trendline_line(raw, symbol):
+    """Project one symbol's active 4H line; never infer a missing line from chart candles."""
+    symbol = _symbol(symbol)
+    if (not symbol or not isinstance(raw, dict) or raw.get('schema') != 'trendline_line.v1'
+            or raw.get('symbol') != symbol or raw.get('status') not in ('ready', 'unavailable')
+            or not isinstance(raw.get('coverage'), dict)):
+        raise MonitorUnavailable('4H 趋势线数据格式无效')
+    line = raw.get('line')
+    if raw['status'] == 'unavailable':
+        if line is not None:
+            raise MonitorUnavailable('4H 趋势线数据格式无效')
+        projected_line = None
+    elif line is None:
+        projected_line = None
+    else:
+        if not isinstance(line, dict):
+            raise MonitorUnavailable('4H 趋势线数据格式无效')
+        stamps = {key: _ms(line.get(key)) for key in ('a_ms', 'b_ms', 'known_ms', 'asof_ms')}
+        prices = {key: _num(line.get(key)) for key in ('a_price', 'b_price')}
+        if (any(value is None for value in stamps.values())
+                or any(value is None or value <= 0 for value in prices.values())
+                or stamps['a_ms'] >= stamps['b_ms'] or prices['a_price'] <= prices['b_price']
+                or stamps['known_ms'] > stamps['asof_ms']):
+            raise MonitorUnavailable('4H 趋势线数据格式无效')
+        projected_line = {key: line[key] for key in ('a_ms', 'a_price', 'b_ms', 'b_price',
+                                                       'known_ms', 'born_ms', 'retired_ms', 'asof_ms')
+                          if key in line}
+        projected_line.update(stamps, **prices)
+    coverage = {key: raw['coverage'][key] for key in ('latest_4h_close_ms', 'h4_rows', 'h4_gaps')
+                if key in raw['coverage']}
+    return {'schema': 'trendline_line.v1', 'symbol': symbol, 'status': raw['status'],
+            'reason': raw.get('reason') if isinstance(raw.get('reason'), str) else None,
+            'line': projected_line, 'asof_ms': _ms(raw.get('asof_ms')), 'coverage': coverage}
+
+
 def _http(path, body=None):
     if body is None:
         # Saved backtest K-lines and the frozen breadth ledger are slow first reads on the monitor.
@@ -492,6 +594,26 @@ class MonitorFeed:
                 or not isinstance(raw.get('events'), list)):
             raise MonitorUnavailable('月首周 1.618 事件格式无效')
         return raw['events']
+
+    def month_first_week_1618_reclaim_events(self, after_id=0, limit=500):
+        """Read confirmed H1 outcomes on a separate cursor from the immutable touch stream."""
+        if type(after_id) is not int or after_id < 0 or type(limit) is not int or not 1 <= limit <= 500:
+            raise MonitorUnavailable('月首周 1H 收回游标无效')
+        path = '/api/month-first-week-1618/reclaim-events?' + urlencode(
+            {'after_id': after_id, 'limit': limit})
+        try:
+            raw = self._fetch(path)
+        except (OSError, ValueError) as error:
+            raise MonitorUnavailable('月首周 1H 收回事件暂不可用') from error
+        if (not isinstance(raw, dict) or raw.get('schema') != 'month_first_week_1618.reclaim_events.v1'
+                or not isinstance(raw.get('events'), list)
+                or type(raw.get('latest_id')) is not int or raw['latest_id'] < after_id):
+            raise MonitorUnavailable('月首周 1H 收回事件格式无效')
+        from .notification_journal import valid_month_h1_reclaim_record
+        events = [event for event in raw['events'] if valid_month_h1_reclaim_record(event)]
+        if len(events) != len(raw['events']):
+            raise MonitorUnavailable('月首周 1H 收回事件字段无效')
+        return events
 
     def _asset(self, path):
         """Read one published JSON or gzip JSON asset through the injectable monitor source."""
@@ -694,6 +816,20 @@ class MonitorFeed:
     def touch_scores(self):
         """Recent page (every call, 15 s cache) + this week's older pages (5 min cache)."""
         return self._read('touch-scores', None, self._load_touch_scores)
+
+    def trendline_breaks(self, limit=None, offset=0):
+        query = {"offset": int(offset)}
+        if limit is not None:
+            query["limit"] = int(limit)
+        path = '/api/trendline-breaks?' + urlencode(query)
+        return self._read(path, project_trendline_breaks, ttl=5)
+
+    def trendline_line(self, symbol):
+        symbol = _symbol(symbol)
+        if not symbol:
+            raise MonitorUnavailable('合约代码无效')
+        path = '/api/trendline-line?' + urlencode({'symbol': symbol})
+        return self._read(path, lambda raw: project_trendline_line(raw, symbol), ttl=30)
 
     def _load_touch_scores(self):
         snapshot = self._fetch('/api/monday-reclaim-paper?' + urlencode(dict(list_period='today', track='live-wick6x3')))

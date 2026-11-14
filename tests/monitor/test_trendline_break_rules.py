@@ -173,3 +173,12 @@ def test_default_engine_builds_v19_descending_resistance_line() -> None:
     assert (lines[0].a.x, lines[0].b.x) == (30, 110)
     assert lines[0].known_ms == 120 * rules.FOUR_HOUR_MS
 
+    active = rules.current_resistance_line(
+        [{"time": bar.time, "open": bar.open, "high": bar.high, "low": bar.low, "close": bar.close}
+         for bar in bars], bars[-1].time + rules.FOUR_HOUR_MS)
+
+    assert active is not None
+    assert (active["a_ms"], active["a_price"]) == (lines[0].a.time, lines[0].a.price)
+    assert (active["b_ms"], active["b_price"]) == (lines[0].b.time, lines[0].b.price)
+    assert active["known_ms"] == lines[0].known_ms
+

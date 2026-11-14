@@ -17,7 +17,9 @@ import sqlite3
 import time
 
 MONTH_TOUCH_TYPE = "month_first_week_touch"
+MONTH_H1_RECLAIM_TYPE = "month_first_week_1h_reclaim"
 MONTH_TOUCH_TTL_MS = 90_000
+HOUR_MS = 3_600_000
 SYMBOL = re.compile(r"[A-Z0-9]{1,40}-USDT-SWAP")
 MONTH = re.compile(r"\d{4}-(0[1-9]|1[0-2])")
 
@@ -51,6 +53,49 @@ def valid_month_touch(event: dict) -> bool:
     return True
 
 
+def valid_month_h1_reclaim_record(event: dict) -> bool:
+    """Validate a distinct monthly H1-close record without treating it as a touch."""
+    if (not isinstance(event, dict) or event.get("type") != MONTH_H1_RECLAIM_TYPE
+            or event.get("kind") != MONTH_H1_RECLAIM_TYPE):
+        return False
+    if type(event.get("id")) is not int or event["id"] <= 0:
+        return False
+    month, symbol, side = event.get("month"), event.get("symbol"), event.get("side")
+    touch_event_id = event.get("touch_event_id")
+    source = event.get("source")
+    if (not isinstance(month, str) or not MONTH.fullmatch(month)
+            or not isinstance(symbol, str) or not SYMBOL.fullmatch(symbol)
+            or side not in ("upper", "lower") or source not in ("live", "history")
+            or event.get("provenance") != source
+            or touch_event_id != f"{month}|{symbol}|{side}"
+            or event.get("event_id") != f"{touch_event_id}|1H_RECLAIM"):
+        return False
+    if event.get("status") not in ("reclaimed", "not_reclaimed"):
+        return False
+    timestamps = ("touch_candle_ms", "touch_occurred_ms", "touch_expires_ms",
+                  "close_ms", "created_ms", "fresh_until_ms")
+    if any(type(event.get(key)) is not int or event[key] <= 0 for key in timestamps):
+        return False
+    if (event["close_ms"] != (event["touch_candle_ms"] // HOUR_MS + 1) * HOUR_MS
+            or event["touch_occurred_ms"] > event["close_ms"]
+            or event["touch_expires_ms"] <= event["close_ms"]
+            or event["created_ms"] < event["close_ms"]
+            or event["fresh_until_ms"] != event["close_ms"] + MONTH_TOUCH_TTL_MS
+            or event["created_ms"] > event["fresh_until_ms"]):
+        return False
+    level, close = event.get("level"), event.get("close")
+    if (isinstance(level, bool) or not isinstance(level, (int, float)) or not math.isfinite(level) or level <= 0
+            or isinstance(close, bool) or not isinstance(close, (int, float)) or not math.isfinite(close) or close <= 0):
+        return False
+    reclaimed = close < level if side == "upper" else close > level
+    return (event["status"] == "reclaimed") == reclaimed
+
+
+def valid_month_h1_reclaim(event: dict) -> bool:
+    """Only a strict, confirmed return inside the 1.618 level is a close event."""
+    return valid_month_h1_reclaim_record(event) and event.get("status") == "reclaimed"
+
+
 class NotificationJournal:
     """SQLite cursor, immutable event copy, and independent APNs delivery rows."""
 
@@ -72,6 +117,18 @@ class NotificationJournal:
                     PRIMARY KEY(source_id,device_hash),
                     FOREIGN KEY(source_id) REFERENCES month_touch_events(source_id));
                 CREATE INDEX IF NOT EXISTS month_touch_apns_due ON month_touch_apns(status,due_ms);
+                CREATE TABLE IF NOT EXISTS month_h1_reclaim_events(
+                    source_id INTEGER PRIMARY KEY,event_id TEXT NOT NULL UNIQUE,payload TEXT NOT NULL,
+                    source TEXT NOT NULL,status TEXT NOT NULL,close_ms INTEGER NOT NULL,
+                    created_ms INTEGER NOT NULL,fresh_until_ms INTEGER NOT NULL,touch_expires_ms INTEGER NOT NULL);
+                CREATE TABLE IF NOT EXISTS month_h1_reclaim_apns(
+                    source_id INTEGER NOT NULL,device_hash TEXT NOT NULL,status TEXT NOT NULL,
+                    attempts INTEGER NOT NULL DEFAULT 0,updated_ms INTEGER NOT NULL,
+                    due_ms INTEGER NOT NULL,error TEXT,
+                    PRIMARY KEY(source_id,device_hash),
+                    FOREIGN KEY(source_id) REFERENCES month_h1_reclaim_events(source_id));
+                CREATE INDEX IF NOT EXISTS month_h1_reclaim_apns_due
+                    ON month_h1_reclaim_apns(status,due_ms);
             """)
         self.path.chmod(0o600)
 
@@ -95,6 +152,11 @@ class NotificationJournal:
             row = db.execute("SELECT value FROM meta WHERE key='month_touch_cursor'").fetchone()
         return int(row[0]) if row else None
 
+    def h1_reclaim_cursor(self):
+        with self.connect() as db:
+            row = db.execute("SELECT value FROM meta WHERE key='month_h1_reclaim_cursor'").fetchone()
+        return int(row[0]) if row else None
+
     def seed_cursor(self, events):
         """On a new install, skip facts that existed when the app service started."""
         existing = self.cursor()
@@ -105,6 +167,19 @@ class NotificationJournal:
         with self.connect() as db:
             db.execute("INSERT OR IGNORE INTO meta(key,value) VALUES('month_touch_cursor',?)", (str(value),))
             row = db.execute("SELECT value FROM meta WHERE key='month_touch_cursor'").fetchone()
+        return int(row[0])
+
+    def seed_h1_reclaim_cursor(self, events):
+        """Skip close facts that were already present when this push worker started."""
+        existing = self.h1_reclaim_cursor()
+        if existing is not None:
+            return existing
+        before_start = [e["id"] for e in events
+                        if valid_month_h1_reclaim_record(e) and e["created_ms"] <= self.started_ms]
+        value = max(before_start, default=0)
+        with self.connect() as db:
+            db.execute("INSERT OR IGNORE INTO meta(key,value) VALUES('month_h1_reclaim_cursor',?)", (str(value),))
+            row = db.execute("SELECT value FROM meta WHERE key='month_h1_reclaim_cursor'").fetchone()
         return int(row[0])
 
     def ingest(self, events, devices, now_ms):
@@ -145,10 +220,55 @@ class NotificationJournal:
             db.execute("UPDATE meta SET value=? WHERE key='month_touch_cursor'", (str(latest),))
             return inserted
 
+    def ingest_h1_reclaims(self, events, devices, now_ms):
+        """Persist close outcomes and enqueue only fresh live reclaims for opted-in devices."""
+        rows = [event for event in events if valid_month_h1_reclaim_record(event)]
+        rows.sort(key=lambda event: event["id"])
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            cursor = db.execute("SELECT value FROM meta WHERE key='month_h1_reclaim_cursor'").fetchone()
+            if cursor is None:
+                return 0
+            current = int(cursor[0])
+            latest = current
+            inserted = 0
+            for event in rows:
+                source_id = event["id"]
+                if source_id <= current:
+                    continue
+                latest = max(latest, source_id)
+                db.execute("INSERT OR IGNORE INTO month_h1_reclaim_events"
+                           "(source_id,event_id,payload,source,status,close_ms,created_ms,fresh_until_ms,touch_expires_ms) "
+                           "VALUES (?,?,?,?,?,?,?,?,?)",
+                           (source_id, event["event_id"], self._json(event), event["source"], event["status"],
+                            event["close_ms"], event["created_ms"], event["fresh_until_ms"],
+                            event["touch_expires_ms"]))
+                if (not valid_month_h1_reclaim(event) or event["source"] != "live"
+                        or now_ms < event["close_ms"] or now_ms > event["fresh_until_ms"]
+                        or now_ms >= event["touch_expires_ms"]):
+                    continue
+                inserted += 1
+                for device in devices:
+                    if not device.get("month_first_week_touch", True):
+                        continue
+                    token = device.get("token")
+                    if not isinstance(token, str):
+                        continue
+                    device_hash = hashlib.sha256(token.encode()).hexdigest()
+                    db.execute("INSERT OR IGNORE INTO month_h1_reclaim_apns"
+                               "(source_id,device_hash,status,due_ms,updated_ms) VALUES (?,?,'pending',?,?)",
+                               (source_id, device_hash, now_ms, now_ms))
+            if rows:
+                latest = max(latest, rows[-1]["id"])
+            db.execute("UPDATE meta SET value=? WHERE key='month_h1_reclaim_cursor'", (str(latest),))
+            return inserted
+
     def recover(self):
         """Ambiguous sends are terminal; no automatic duplicate notification after restart."""
         with self.connect() as db:
             db.execute("UPDATE month_touch_apns SET status='unknown',error='process_interrupted_during_delivery',updated_ms=? WHERE status='sending'",
+                       (int(time.time() * 1000),))
+            db.execute("UPDATE month_h1_reclaim_apns SET status='unknown',error='process_interrupted_during_delivery',updated_ms=? WHERE status='sending'",
                        (int(time.time() * 1000),))
 
     def claim(self, now_ms):
@@ -169,6 +289,26 @@ class NotificationJournal:
             result["attempts"] += 1
             return result
 
+    def claim_h1_reclaim(self, now_ms):
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            db.execute("UPDATE month_h1_reclaim_apns SET status='skipped',error='signal_expired',updated_ms=? "
+                       "WHERE status='pending' AND source_id IN (SELECT source_id FROM month_h1_reclaim_events "
+                       "WHERE fresh_until_ms<? OR touch_expires_ms<=? OR source<>'live' OR status<>'reclaimed')",
+                       (now_ms, now_ms, now_ms))
+            row = db.execute("""SELECT d.*,e.payload,e.event_id,e.fresh_until_ms,e.close_ms
+                FROM month_h1_reclaim_apns d JOIN month_h1_reclaim_events e USING(source_id)
+                WHERE d.status='pending' AND d.due_ms<=? AND e.fresh_until_ms>=?
+                ORDER BY d.due_ms,e.source_id LIMIT 1""", (now_ms, now_ms)).fetchone()
+            if row is None:
+                return None
+            db.execute("UPDATE month_h1_reclaim_apns SET status='sending',attempts=attempts+1,updated_ms=? "
+                       "WHERE source_id=? AND device_hash=?", (now_ms, row["source_id"], row["device_hash"]))
+            result = dict(row)
+            result["event"] = json.loads(result.pop("payload"))
+            result["attempts"] += 1
+            return result
+
     def finish(self, source_id, device_hash, status, *, error=None, due_ms=0, now_ms=None):
         if status not in {"pending", "sent", "failed", "unknown", "skipped"}:
             raise ValueError("invalid notification status")
@@ -176,10 +316,21 @@ class NotificationJournal:
             db.execute("UPDATE month_touch_apns SET status=?,error=?,due_ms=?,updated_ms=? WHERE source_id=? AND device_hash=?",
                        (status, error, due_ms, int(now_ms if now_ms is not None else time.time() * 1000), source_id, device_hash))
 
+    def finish_h1_reclaim(self, source_id, device_hash, status, *, error=None, due_ms=0, now_ms=None):
+        if status not in {"pending", "sent", "failed", "unknown", "skipped"}:
+            raise ValueError("invalid notification status")
+        with self.connect() as db:
+            db.execute("UPDATE month_h1_reclaim_apns SET status=?,error=?,due_ms=?,updated_ms=? "
+                       "WHERE source_id=? AND device_hash=?",
+                       (status, error, due_ms, int(now_ms if now_ms is not None else time.time() * 1000),
+                        source_id, device_hash))
+
     def skip_pending_for_device(self, token, *, now_ms=None):
         device_hash = hashlib.sha256(token.encode()).hexdigest()
         with self.connect() as db:
             db.execute("UPDATE month_touch_apns SET status='skipped',error='device_preference_disabled',updated_ms=? WHERE device_hash=? AND status='pending'",
+                       (int(now_ms if now_ms is not None else time.time() * 1000), device_hash))
+            db.execute("UPDATE month_h1_reclaim_apns SET status='skipped',error='device_preference_disabled',updated_ms=? WHERE device_hash=? AND status='pending'",
                        (int(now_ms if now_ms is not None else time.time() * 1000), device_hash))
 
     def delivery_status(self, event_id):
@@ -218,8 +369,47 @@ class NotificationJournal:
             result[event_id] = {"apns": status, "apns_counts": counts}
         return result
 
+    def h1_reclaim_delivery_statuses(self, event_ids):
+        ids = list(dict.fromkeys(value for value in event_ids if isinstance(value, str) and value))
+        result = {event_id: {"apns": "not_subscribed", "apns_counts": {}} for event_id in ids}
+        if not ids:
+            return result
+        counts_by_event = {event_id: {} for event_id in ids}
+        with self.connect() as db:
+            for offset in range(0, len(ids), 900):
+                batch = ids[offset:offset + 900]
+                placeholders = ",".join("?" for _ in batch)
+                rows = db.execute(
+                    "SELECT e.event_id,d.status,COUNT(*) AS n FROM month_h1_reclaim_apns d "
+                    "JOIN month_h1_reclaim_events e USING(source_id) "
+                    f"WHERE e.event_id IN ({placeholders}) GROUP BY e.event_id,d.status", batch).fetchall()
+                for row in rows:
+                    counts_by_event[row["event_id"]][row["status"]] = row["n"]
+        for event_id, counts in counts_by_event.items():
+            if counts.get("sent"):
+                status = "sent"
+            elif counts.get("pending") or counts.get("sending"):
+                status = "pending"
+            elif counts.get("unknown"):
+                status = "unknown"
+            elif counts.get("failed"):
+                status = "failed"
+            elif counts.get("skipped"):
+                status = "skipped"
+            else:
+                status = "not_subscribed"
+            result[event_id] = {"apns": status, "apns_counts": counts}
+        return result
+
     def status(self):
         with self.connect() as db:
             counts = {row["status"]: row["count"] for row in db.execute("SELECT status,COUNT(*) AS count FROM month_touch_apns GROUP BY status")}
             cursor = db.execute("SELECT value FROM meta WHERE key='month_touch_cursor'").fetchone()
+        return {"counts": counts, "cursor": int(cursor[0]) if cursor else None}
+
+    def h1_reclaim_status(self):
+        with self.connect() as db:
+            counts = {row["status"]: row["count"] for row in db.execute(
+                "SELECT status,COUNT(*) AS count FROM month_h1_reclaim_apns GROUP BY status")}
+            cursor = db.execute("SELECT value FROM meta WHERE key='month_h1_reclaim_cursor'").fetchone()
         return {"counts": counts, "cursor": int(cursor[0]) if cursor else None}

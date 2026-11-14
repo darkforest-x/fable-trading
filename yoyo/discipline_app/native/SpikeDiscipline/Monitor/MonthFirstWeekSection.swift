@@ -82,8 +82,18 @@ struct MonthFirstWeekSection: View {
             HStack(spacing: 10) {
                 CoinLogo(coin: Fmt.coin(event.symbol), size: 32).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(Fmt.coin(event.symbol)).font(.headline)
-                    Text(event.source == "history" ? "历史回补" : "实时触及").font(.caption).foregroundStyle(.secondary)
+                    HStack(spacing: 5) {
+                        Text(Fmt.coin(event.symbol)).font(.headline)
+                        if event.confirmedHour != nil {
+                            Text("1H 已收回").font(.caption2.weight(.semibold)).foregroundStyle(Color.up)
+                                .padding(.horizontal, 6).padding(.vertical, 2).background(Color.up.opacity(0.10), in: Capsule())
+                        }
+                    }
+                    if let t = event.confirmedHour?.closeMs {
+                        Text("收盘 " + Fmt.clock(t, now: now)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                    } else {
+                        Text(event.source == "history" ? "历史回补" : "实时触及").font(.caption).foregroundStyle(.secondary)
+                    }
                 }
                 Spacer(minLength: 4)
                 VStack(alignment: .trailing, spacing: 4) {

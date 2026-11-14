@@ -45,6 +45,12 @@ enum Fmt {
     }
     private static let dayKey = formatter("yyyy-MM-dd"), hm = formatter("HH:mm"), mdhm = formatter("MM-dd HH:mm"), md = formatter("M月d日")
 
+    /// Inbox rows are already grouped by their Beijing date.
+    static func hourMinute(_ ms: Double?) -> String {
+        guard let ms, ms.isFinite, ms > 0 else { return "—" }
+        return hm.string(from: Date(timeIntervalSince1970: ms / 1000))
+    }
+
     static func clock(_ ms: Double?, now: Double = Date().timeIntervalSince1970 * 1000) -> String {
         guard let ms, ms > 0 else { return "—" }
         let d = Date(timeIntervalSince1970: ms / 1000), n = Date(timeIntervalSince1970: now / 1000)

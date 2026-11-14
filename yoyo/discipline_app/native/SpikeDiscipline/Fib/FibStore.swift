@@ -37,6 +37,13 @@ final class FibStore {
         showAverages = saved.averages
         showCloud = saved.cloud ?? true   // owner 2026-11-07: 1.618 shows the cloud band by default
         preferences = saved.preferences
+        // Merge the old chart-only stars once. A later unstar in either picker must stay removed.
+        let defaults = UserDefaults.standard
+        if !defaults.bool(forKey: "fib.watchlist.starsMigrated.v1") {
+            let shared = defaults.stringArray(forKey: "spike-favorites") ?? []
+            defaults.set(Array(Set(shared + saved.preferences.favorites)).sorted(), forKey: "spike-favorites")
+            defaults.set(true, forKey: "fib.watchlist.starsMigrated.v1")
+        }
         if let data = saved.snapshot, let cached = try? API.decoder.decode(FibSnapshot.self, from: data), Self.currentWeek(cached, now: Date()) {
             snapshot = cached
         }

@@ -338,6 +338,23 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
         except MonitorUnavailable as error:
             raise HTTPException(503, str(error)) from None
 
+    @app.get('/v1/monitor/trendline-breaks', dependencies=[Depends(auth)])
+    def monitor_trendline_breaks(limit: Optional[int] = Query(default=None, ge=1, le=10000),
+                                 offset: int = Query(default=0, ge=0, le=100000)):
+        """The monitor's existing, verified upward 1H-close / 4H-resistance events."""
+        try:
+            return app.state.monitor.trendline_breaks(limit, offset)
+        except MonitorUnavailable as error:
+            raise HTTPException(503, str(error)) from None
+
+    @app.get('/v1/monitor/trendline-line', dependencies=[Depends(auth)])
+    def monitor_trendline_line(symbol: str = Query(..., pattern=r'^[A-Z0-9]{1,32}-USDT-SWAP$')):
+        """Exact current V1.9 4H resistance line for one contract, when its window is covered."""
+        try:
+            return app.state.monitor.trendline_line(symbol)
+        except MonitorUnavailable as error:
+            raise HTTPException(503, str(error)) from None
+
     @app.get('/v1/monitor/notifications', dependencies=[Depends(auth)])
     def monitor_notifications():
         try:

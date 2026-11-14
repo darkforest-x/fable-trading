@@ -7,6 +7,8 @@ struct TouchesSection: View {
     @Environment(AccountStore.self) private var account
     @Environment(SessionStore.self) private var session
     @Environment(TouchFeed.self) private var feed
+    @Environment(FibStore.self) private var fib
+    @Environment(FibNavigation.self) private var navigation
     @Environment(\.openChart) private var openChart
     let connection: Connection
     let refresh: Int
@@ -31,8 +33,16 @@ struct TouchesSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SoftSegment(selection: $source, options: [("monday", "周一 1.618"), ("month", "月首周 1.618")], height: 36)
-            if source == "month" {
+            SoftSegment(selection: $source, options: [("monday", "周一 1.618"), ("month", "月首周 1.618"), ("trendline", "趋势线")], height: 36)
+            if source == "trendline" {
+                TrendlineBreakSection(connection: connection, refresh: refresh) { event in
+                    Haptics.open()
+                    fib.period = .h1
+                    openChart(event.symbol)
+                    navigation.openTrendlineEvent(event)
+                    UserDefaults.standard.set("trendline", forKey: "touch.source")
+                }
+            } else if source == "month" {
                 MonthFirstWeekSection(connection: connection, refresh: refresh)
             } else {
                 mondaySection

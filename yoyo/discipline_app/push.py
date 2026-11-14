@@ -29,7 +29,9 @@ import threading
 import time
 from pathlib import Path
 from zoneinfo import ZoneInfo
-from .notification_journal import MONTH_TOUCH_TYPE, NotificationJournal, valid_month_touch
+from .notification_journal import (MONTH_H1_RECLAIM_TYPE, MONTH_TOUCH_TYPE,
+                                   NotificationJournal, valid_month_h1_reclaim,
+                                   valid_month_h1_reclaim_record, valid_month_touch)
 
 TOPIC = 'com.spike.discipline.native'
 DEVICE = re.compile(r'[0-9a-f]{64,200}')
@@ -277,6 +279,7 @@ class PushService:
         if self.apns.configured:
             self._notify(value)
             self._deliver_month_first_week(value)
+            self._deliver_month_h1_reclaims(value)
             self._activities(value)
 
     def _sync_month_first_week(self, devices):
@@ -297,6 +300,21 @@ class PushService:
             # optional cursor endpoint is temporarily unavailable.
             events = [e for e in touches if isinstance(e, dict) and type(e.get('id')) is int and e['id'] > cursor]
         self.month_journal.ingest(events, devices['devices'], int(self._clock() * 1000))
+
+        reclaim_reader = getattr(self.monitor, 'month_first_week_1618_reclaim_events', None)
+        reclaim_rows = snapshot.get('hour_reclaims') or []
+        if self.month_journal.h1_reclaim_cursor() is None:
+            self.month_journal.seed_h1_reclaim_cursor(reclaim_rows)
+        reclaim_cursor = self.month_journal.h1_reclaim_cursor()
+        try:
+            reclaim_events = reclaim_reader(reclaim_cursor, 500) if callable(reclaim_reader) else [
+                event for event in reclaim_rows if isinstance(event, dict)
+                and type(event.get('id')) is int and event['id'] > reclaim_cursor]
+        except Exception:
+            # The snapshot is the safe, untruncated catch-up bridge for this bounded monthly ledger.
+            reclaim_events = [event for event in reclaim_rows if isinstance(event, dict)
+                              and type(event.get('id')) is int and event['id'] > reclaim_cursor]
+        self.month_journal.ingest_h1_reclaims(reclaim_events, devices['devices'], int(self._clock() * 1000))
 
     def _deliver_month_first_week(self, devices):
         now_ms = int(self._clock() * 1000)
@@ -360,16 +378,97 @@ class PushService:
                 devices=[d for d in value['devices'] if d.get('token') not in dead],
                 activities=[a for a in value['activities'] if a.get('token') not in dead]))
 
+    def _deliver_month_h1_reclaims(self, devices):
+        now_ms = int(self._clock() * 1000)
+        devices = self.devices.load()
+        by_hash = {hashlib.sha256(d['token'].encode()).hexdigest(): d for d in devices['devices']
+                   if isinstance(d.get('token'), str)}
+        dead = set()
+        while True:
+            row = self.month_journal.claim_h1_reclaim(now_ms)
+            if not row:
+                break
+            device = by_hash.get(row['device_hash'])
+            if not device or not device.get('month_first_week_touch', True):
+                self.month_journal.finish_h1_reclaim(row['source_id'], row['device_hash'], 'skipped',
+                                                     error='device_preference_disabled_or_removed', now_ms=now_ms)
+                continue
+            event = row['event']
+            current_devices = self.devices.load()['devices']
+            current_device = next((d for d in current_devices if d.get('token') == device['token']), None)
+            if not current_device or not current_device.get('month_first_week_touch', True):
+                self.month_journal.finish_h1_reclaim(row['source_id'], row['device_hash'], 'skipped',
+                                                     error='device_preference_disabled_or_removed', now_ms=now_ms)
+                continue
+            if (not valid_month_h1_reclaim(event) or event['source'] != 'live'
+                    or event['provenance'] != 'live' or now_ms < event['close_ms']
+                    or now_ms > event['fresh_until_ms'] or now_ms >= event['touch_expires_ms']):
+                self.month_journal.finish_h1_reclaim(row['source_id'], row['device_hash'], 'skipped',
+                                                     error='signal_expired_or_not_live', now_ms=now_ms)
+                continue
+            edge = '上沿' if event['side'] == 'upper' else '下沿'
+            local = datetime.fromtimestamp(event['close_ms'] / 1000, timezone.utc).astimezone(
+                ZoneInfo('Asia/Shanghai')).strftime('%m-%d %H:%M')
+            title = f"月首周 1.618 · {event['symbol'].split('-')[0]} 1H 收回"
+            body = f"{event['month']} · {edge} · 收盘 {event['close']:.10g} · {local}"
+            payload = dict(aps=dict(alert=dict(title=title, body=body), sound='default'),
+                           kind=MONTH_H1_RECLAIM_TYPE, type=MONTH_H1_RECLAIM_TYPE,
+                           source=event['source'], provenance=event['source'], event_scope='month',
+                           event_id=event['event_id'], touch_event_id=event['touch_event_id'],
+                           month=event['month'], symbol=event['symbol'], side=event['side'],
+                           level=event['level'], close=event['close'], close_ms=event['close_ms'],
+                           at_ms=event['close_ms'], created_ms=event['created_ms'],
+                           fresh_until_ms=event['fresh_until_ms'],
+                           touch_candle_ms=event['touch_candle_ms'],
+                           touch_occurred_ms=event['touch_occurred_ms'],
+                           touch_expires_ms=event['touch_expires_ms'])
+            try:
+                status, reason = self.apns.send(device['token'], payload, device['environment'],
+                                                collapse=event['event_id'])
+            except Exception:
+                status, reason = 0, ''
+            if 200 <= status < 300:
+                self.month_journal.finish_h1_reclaim(row['source_id'], row['device_hash'], 'sent', now_ms=now_ms)
+            elif (status == 429 and row['attempts'] < 3
+                  and now_ms + 10_000 <= min(event['fresh_until_ms'], event['touch_expires_ms'])):
+                self.month_journal.finish_h1_reclaim(row['source_id'], row['device_hash'], 'pending',
+                                                     error='apns_rate_limited', due_ms=now_ms + 10_000,
+                                                     now_ms=now_ms)
+            elif status == 410 or reason in ('BadDeviceToken', 'Unregistered'):
+                self.month_journal.finish_h1_reclaim(row['source_id'], row['device_hash'], 'failed',
+                                                     error='apns_device_unregistered', now_ms=now_ms)
+                dead.add(device['token'])
+            elif 400 <= status < 500:
+                self.month_journal.finish_h1_reclaim(row['source_id'], row['device_hash'], 'failed',
+                                                     error='apns_rejected_' + str(status), now_ms=now_ms)
+            else:
+                self.month_journal.finish_h1_reclaim(row['source_id'], row['device_hash'], 'unknown',
+                                                     error='apns_delivery_uncertain_no_automatic_resend', now_ms=now_ms)
+        if dead:
+            self.devices.update(lambda value: value.update(
+                devices=[d for d in value['devices'] if d.get('token') not in dead],
+                activities=[a for a in value['activities'] if a.get('token') not in dead]))
+
     def enrich_notifications(self, snapshot, month_snapshot):
         """Add monthly facts and APNs receipts to the existing inbox without rewriting its old events."""
         result = dict(snapshot)
         events = list(snapshot.get('events') or [])
         touches = [event for event in month_snapshot.get('touches') or [] if valid_month_touch(event)]
         deliveries = self.month_journal.delivery_statuses(event['event_id'] for event in touches)
+        reclaim_records = [event for event in month_snapshot.get('hour_reclaims') or []
+                           if valid_month_h1_reclaim_record(event)]
+        reclaim_deliveries = self.month_journal.h1_reclaim_delivery_statuses(
+            event['event_id'] for event in reclaim_records)
+        reclaim_by_touch = {event['touch_event_id']: event for event in reclaim_records}
         for event in touches:
             delivery = deliveries[event['event_id']]
             event_channels = dict(event.get('channels') or {})
             event_channels['apns'] = delivery['apns']
+            reclaim = reclaim_by_touch.get(event['event_id'])
+            reclaims = dict(event.get('reclaims') or {})
+            if reclaim:
+                reclaims['1H'] = dict(bar='1H', status=reclaim['status'], close=reclaim['close'],
+                                     close_ms=reclaim['close_ms'], source='OKX')
             events.append(dict(id=f"{MONTH_TOUCH_TYPE}:{event['event_id']}", event_id=event['event_id'],
                                type=MONTH_TOUCH_TYPE, kind=MONTH_TOUCH_TYPE, month=event['month'],
                                symbol=event['symbol'], side=event['side'], level=event['level'], price=event['price'],
@@ -379,7 +478,28 @@ class PushService:
                                fresh_until_ms=event['fresh_until_ms'], source=event['source'],
                                touch_confirmed=event['touch_confirmed'], candle_confirmed=event['candle_confirmed'],
                                pushed=delivery['apns'] == 'sent', apns_status=delivery['apns'],
+                               reclaims=reclaims,
                                channels=event_channels))
+        for event in reclaim_records:
+            # The validated record's created_ms proves it was admitted during the
+            # original freshness window. Keep that fact in the monthly inbox after
+            # the delivery window expires; current freshness is enforced only by
+            # the APNs/foreground delivery gates.
+            if event['source'] != 'live' or event['status'] != 'reclaimed':
+                continue
+            delivery = reclaim_deliveries[event['event_id']]
+            events.append(dict(id=f"{MONTH_H1_RECLAIM_TYPE}:{event['event_id']}",
+                               event_id=event['event_id'], touch_event_id=event['touch_event_id'],
+                               type=MONTH_H1_RECLAIM_TYPE, kind=MONTH_H1_RECLAIM_TYPE,
+                               month=event['month'], source=event['source'],
+                               event_scope='month', provenance=event['source'],
+                               symbol=event['symbol'], side=event['side'], level=event['level'],
+                               close=event['close'], close_ms=event['close_ms'], at_ms=event['close_ms'],
+                               created_ms=event['created_ms'], fresh_until_ms=event['fresh_until_ms'],
+                               touch_candle_ms=event['touch_candle_ms'],
+                               touch_occurred_ms=event['touch_occurred_ms'],
+                               touch_expires_ms=event['touch_expires_ms'], status='reclaimed',
+                               pushed=delivery['apns'] == 'sent', apns_status=delivery['apns']))
         events.sort(key=lambda e: -(e.get('at_ms') or 0))
         # The monthly source is bounded to one row per symbol, side and calendar month.
         # A burst of weekly notices must not empty the monthly inbox filter.
@@ -387,6 +507,9 @@ class PushService:
         channels = dict(result.get('channels') or {})
         month_channel = dict(apns_configured=self.apns.configured,
                              apns_status=self.month_journal.status())
+        channels['month_first_week_1h_reclaim'] = dict(
+            apns_configured=self.apns.configured,
+            apns_status=self.month_journal.h1_reclaim_status())
         configured_bark = (month_snapshot.get('channels') or {}).get('bark')
         if isinstance(configured_bark, dict):
             counts = configured_bark.get('counts') if isinstance(configured_bark.get('counts'), dict) else {}

@@ -200,6 +200,13 @@ struct RootView: View {
         .onChange(of: PushRegistry.shared.openRequestKey) { _, _ in
             guard let request = PushRegistry.shared.openRequest else { return }
             PushRegistry.shared.openRequest = nil
+            if request.kind == NotificationEvent.monthReclaimKind {
+                guard let parent = request.eventId else { return }
+                fib.period = .h1
+                openMonthlyTouch(eventId: parent, symbol: request.symbol, month: request.month,
+                                 side: request.side.flatMap(Edge.init(rawValue:)), occurredMs: request.candleMs)
+                return
+            }
             if request.kind == "month_first_week_touch" {
                 openMonthlyTouch(eventId: request.eventId, symbol: request.symbol, month: request.month,
                                  side: request.side.flatMap(Edge.init(rawValue:)), occurredMs: request.occurredMs ?? request.candleMs)
@@ -265,6 +272,10 @@ struct RootView: View {
         case .fib: FibView(active: tab == .fib && scenePhase == .active && !landscape, onQuick: { entry, period in
             guard account.pendingEntry == nil else { return }
             ticket.openQuick(entry, period: period, state: account.state)
+        }, onTrendlineBack: {
+            UserDefaults.standard.set(MonitorSegment.touches.rawValue, forKey: "monitor.segment")
+            UserDefaults.standard.set("trendline", forKey: "touch.source")
+            withAnimation(.snappy) { tab = .monitor }
         })
         case .positions: PositionsView(onOpenSymbol: { symbol in
             guard !ticket.reviewing, account.pendingEntry == nil else { return }
@@ -295,6 +306,13 @@ struct RootView: View {
 
     private func open(_ event: NotificationEvent) {
         withAnimation(.snappy) { notices.banner = nil }
+        if event.isMonthReclaim {
+            guard let parent = event.touchEventId else { return }
+            fib.period = .h1
+            openMonthlyTouch(eventId: parent, symbol: event.symbol, month: event.month,
+                             side: event.side, occurredMs: event.touchCandleMs)
+            return
+        }
         if event.kind == "month_first_week_touch" {
             openMonthlyTouch(eventId: event.eventId, symbol: event.symbol, month: event.month,
                              side: event.side, occurredMs: event.occurredMs ?? event.candleMs ?? event.atMs)

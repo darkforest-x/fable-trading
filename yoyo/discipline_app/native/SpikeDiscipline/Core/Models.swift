@@ -232,6 +232,25 @@ struct NotificationEvent: Codable, Identifiable, Hashable {
     var candleConfirmed: Bool? = nil
     var apnsStatus: String? = nil
 
+    static let monthReclaimKind = "month_first_week_1h_reclaim"
+    var touchEventId: String? = nil
+    var touchCandleMs: Double? = nil
+    var closeMs: Double? = nil
+    var close: Double? = nil
+    var reclaims: [String: MonthReclaimClose]? = nil
+    var confirmedTouchHour: MonthReclaimClose? {
+        guard kind == "month_first_week_touch", let level,
+              let hour = reclaims?["1H"], hour.confirms(side: side, level: level) else { return nil }
+        return hour
+    }
+    var isMonthReclaim: Bool { kind == Self.monthReclaimKind }
+    var isMonthlyNotice: Bool { isMonthReclaim || kind == "month_first_week_touch" }
+    var isLiveReclaim: Bool {
+        guard isMonthReclaim, (source == "live"), let at = closeMs, at.isFinite,
+              at == atMs, let close = close, close.isFinite, close > 0,
+              let level, level.isFinite, level > 0, let touchEventId, !touchEventId.isEmpty else { return false }
+        return side == .upper ? close < level : close > level
+    }
     var isLiveMonthTouch: Bool { kind == "month_first_week_touch" && source == "live" && touchConfirmed == true }
 }
 
@@ -256,6 +275,17 @@ struct NotificationSnapshot: Codable {
     let channels: Channels
 }
 
+struct MonthReclaimClose: Codable, Hashable {
+    let status: String?
+    let close: Double?
+    let closeMs: Double?
+    func confirms(side: Edge, level: Double) -> Bool {
+        guard status == "reclaimed", let close, close.isFinite, close > 0,
+              let closeMs, closeMs.isFinite, closeMs > 0, level.isFinite, level > 0 else { return false }
+        return side == .upper ? close < level : close > level
+    }
+}
+
 struct MonthFirstWeekTouch: Codable, Identifiable, Hashable {
     let id: Int
     let eventId: String
@@ -274,6 +304,11 @@ struct MonthFirstWeekTouch: Codable, Identifiable, Hashable {
     let source: String
     let touchConfirmed: Bool
     let candleConfirmed: Bool
+    var reclaims: [String: MonthReclaimClose]? = nil
+    var confirmedHour: MonthReclaimClose? {
+        guard let h = reclaims?["1H"], h.confirms(side: side, level: level) else { return nil }
+        return h
+    }
 }
 
 struct MonthFirstWeekItem: Codable, Identifiable, Hashable {

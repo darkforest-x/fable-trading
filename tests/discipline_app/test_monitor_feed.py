@@ -12,7 +12,7 @@ from yoyo.discipline_app.api import create_app
 from yoyo.discipline_app.book import Book
 from yoyo.discipline_app.monitor_feed import (MonitorFeed, MonitorUnavailable, TRACKS, project_alerts,
                                               project_cloud, project_notifications, project_paper,
-                                              project_paper_history, project_touch_scores)
+                                              project_paper_history, project_touch_scores, project_trendline_breaks, project_trendline_line)
 from yoyo.discipline_app import monitor_feed as monitor_feed_module
 from yoyo.discipline_app.strategy_book import (BookUnavailable, downsample, project_breadth_ema20,
                                                project_cloud_backtest, project_cloud_booklet,
@@ -374,10 +374,12 @@ def client(tmp_path):
                 '/api/monday-fib': fib_raw, '/api/monday-reclaim-paper/history': history_raw,
                 '/static/strategy-booklet/research.json': research_raw,
                 '/static/strategy-booklet/live-wick6x3-history.json': booklet_history_raw,
-                '/api/strategy-backtest': backtest_raw, '/api/strategy-backtest/candles': candles_raw}
+                '/api/strategy-backtest': backtest_raw, '/api/strategy-backtest/candles': candles_raw, '/api/trendline-breaks': trendline_breaks_raw}
 
     def fetch(path, body=None):
         calls.append((path, body) if body is not None else path)
+        if path.startswith('/api/trendline-line?'):
+            return trendline_line_raw(path.split('symbol=',1)[1])
         if path == '/api/monday-fib/bark':
             return {}
         return payloads[path.split('?')[0]]()
@@ -588,3 +590,108 @@ def test_alarm_projection_keeps_every_coin_and_the_trigger_count():
     raw['alerts'][0].pop('trigger_n'); raw['alerts'][0].pop('complete')
     alarm = project_alerts(raw)['alerts'][0]
     assert (alarm['trigger_n'], alarm['complete']) == (117, True), 'older monitor: the trigger count defaults to n'
+
+TREND_EVENT_ID = '0123456789abcdef01234567'
+
+
+def trendline_breaks_raw():
+    candle_ms = 1_790_000_100_000
+    return dict(items=[dict(event_id=TREND_EVENT_ID, symbol='AAA-USDT-SWAP', confirmed_ms=candle_ms + 3_600_000,
+                            candle_ms=candle_ms, level=100.0, close=101.0,
+                            a_ms=candle_ms - 20 * 3_600_000, a_price=110.0,
+                            b_ms=candle_ms - 10 * 3_600_000, b_price=105.0,
+                            prebreak_low=98.0, prebreak_low_start_ms=candle_ms - 10 * 3_600_000,
+                            prebreak_low_end_ms=candle_ms, prebreak_low_bars=11,
+                            validity_schema=2, validity_status='valid', validity_checked_ms=candle_ms + 4 * 3_600_000,
+                            validity_reason='validated', rally_target=111.1,
+                            feed_asof_ms=candle_ms + 4 * 3_600_000, feed_updated_ms=candle_ms + 4 * 3_600_000,
+                            private='must not cross the discipline boundary')],
+                total=1, offset=0, limit=None, next_offset=None, has_more=False, state='ready',
+                coverage=dict(symbols_total=2, covered=2, errors=0, gap_symbols=0, insufficient_history=0,
+                              stale_4h=0, stale_1h=0, issues=[dict(symbol='PRIVATE-USDT-SWAP', code='trace')]),
+                progress=dict(done=2, total=2, percent=100, symbol='PRIVATE-USDT-SWAP'),
+                asof_ms=1_790_014_500_000, last_complete_asof_ms=1_790_014_500_000,
+                last_error='private stack', lookback_days=30)
+
+
+def trendline_line_raw(symbol):
+    return dict(schema='trendline_line.v1', symbol=symbol, status='ready', reason=None,
+                line=dict(a_ms=1_790_000_100_000, a_price=110.0,
+                          b_ms=1_790_000_200_000, b_price=105.0,
+                          known_ms=1_790_000_300_000, born_ms=1_790_000_280_000,
+                          retired_ms=None, asof_ms=1_790_014_500_000,
+                          private='must not cross the discipline boundary'),
+                asof_ms=1_790_014_500_000,
+                coverage=dict(latest_4h_close_ms=1_790_014_400_000, h4_rows=1000, h4_gaps=0,
+                              issues=['private']))
+
+
+def test_trendline_break_and_current_line_proxies_keep_exact_public_coordinates_only(client):
+    http, book, calls, _ = client
+    before = book.snapshot()
+    response = http.get('/v1/monitor/trendline-breaks', headers=AUTH)
+    assert response.status_code == 200
+    page = response.json()
+    assert page['state'] == 'ready' and page['total'] == 1
+    event = page['items'][0]
+    assert event['event_id'] == TREND_EVENT_ID and event['symbol'] == 'AAA-USDT-SWAP'
+    assert event['level'] == 100 and event['close'] == 101
+    assert event['a_ms'] < event['b_ms'] < event['candle_ms'] < event['confirmed_ms']
+    assert event['validity_status'] == 'valid' and event['prebreak_low_bars'] == 11
+    assert not set(walk(page)) & {'private', 'issues', 'last_error'}
+
+    line = http.get('/v1/monitor/trendline-line', params={'symbol': 'AAA-USDT-SWAP'}, headers=AUTH)
+    assert line.status_code == 200
+    value = line.json()
+    assert value['status'] == 'ready' and value['symbol'] == 'AAA-USDT-SWAP'
+    assert value['line']['a_price'] == 110 and value['line']['b_price'] == 105
+    assert value['line']['known_ms'] < value['line']['asof_ms']
+    assert not set(walk(value)) & {'private', 'issues'}
+    assert http.get('/v1/monitor/trendline-line?symbol=../BTC', headers=AUTH).status_code == 422
+    assert http.post('/v1/monitor/trendline-breaks', headers=AUTH, json={}).status_code == 405
+    assert any(isinstance(call, str) and call.startswith('/api/trendline-breaks?') for call in calls)
+    assert any(isinstance(call, str) and call.startswith('/api/trendline-line?symbol=AAA-USDT-SWAP') for call in calls)
+    after = book.snapshot()
+    assert before['positions'] == after['positions'] and before['pending'] == after['pending']
+    assert before['daily'] == after['daily']
+
+
+def test_trendline_projections_reject_fake_direction_and_preserve_no_candidate_as_ready_none():
+    raw = trendline_breaks_raw()
+    raw['items'][0]['close'] = 99.0
+    with pytest.raises(MonitorUnavailable):
+        project_trendline_breaks(raw)
+    raw_line = trendline_line_raw('AAA-USDT-SWAP')
+    raw_line['line'] = None
+    projected = project_trendline_line(raw_line, 'AAA-USDT-SWAP')
+    assert projected['status'] == 'ready' and projected['line'] is None
+    raw_line['status'] = 'unavailable'
+    raw_line['reason'] = 'stale_scan'
+    unavailable = project_trendline_line(raw_line, 'AAA-USDT-SWAP')
+    assert unavailable['status'] == 'unavailable' and unavailable['line'] is None
+
+
+def test_month_h1_reclaim_feed_uses_separate_validated_cursor():
+    candle_ms = 1_700_000_000_000
+    close_ms = (candle_ms // 3_600_000 + 1) * 3_600_000
+    touch_event_id = '2026-11|AAA-USDT-SWAP|upper'
+    event = dict(id=1, event_id=f'{touch_event_id}|1H_RECLAIM', touch_event_id=touch_event_id,
+                 type='month_first_week_1h_reclaim', kind='month_first_week_1h_reclaim',
+                 month='2026-11', symbol='AAA-USDT-SWAP', side='upper', level=100.0, close=99.0,
+                 close_ms=close_ms, created_ms=close_ms + 1, fresh_until_ms=close_ms + 90_000,
+                 touch_candle_ms=candle_ms, touch_occurred_ms=candle_ms + 60_000,
+                 touch_expires_ms=close_ms + 3_600_000, status='reclaimed', source='live', provenance='live')
+    calls = []
+
+    def fetch(path):
+        calls.append(path)
+        return dict(schema='month_first_week_1618.reclaim_events.v1', latest_id=1, events=[event])
+
+    feed = MonitorFeed(fetch, ttl=60)
+    assert feed.month_first_week_1618_reclaim_events(after_id=0, limit=2) == [event]
+    assert calls == ['/api/month-first-week-1618/reclaim-events?after_id=0&limit=2']
+
+    invalid = dict(event, provenance='history')
+    with pytest.raises(MonitorUnavailable):
+        MonitorFeed(lambda _path: dict(schema='month_first_week_1618.reclaim_events.v1',
+                                       latest_id=1, events=[invalid])).month_first_week_1618_reclaim_events()

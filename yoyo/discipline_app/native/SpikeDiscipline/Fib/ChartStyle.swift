@@ -20,9 +20,18 @@ final class ChartStyle {
     var mondayColor: Color { didSet { save() } }
     var mondayHighlight: Bool { didSet { save() } }
     var showHistory: Bool { didSet { save() } }
+    var showTrendline: Bool { didSet { save() } }
 
     private static let key = "chart.style.v1"
-    private struct Saved: Codable { var palette = "workbench"; var up = "169873"; var down = "D7355D"; var monday = "30D158"; var mondayHighlight = true; var history = true }
+    private struct Saved: Codable {
+        var palette = "workbench"
+        var up = "169873"
+        var down = "D7355D"
+        var monday = "30D158"
+        var mondayHighlight = true
+        var history = true
+        var trendline: Bool? = nil
+    }
 
     init() {
         let saved = UserDefaults.standard.data(forKey: Self.key).flatMap { try? JSONDecoder().decode(Saved.self, from: $0) } ?? Saved()
@@ -32,11 +41,12 @@ final class ChartStyle {
         mondayColor = Color(hex: saved.monday) ?? ChartPalette.hex(0x30D158)
         mondayHighlight = saved.mondayHighlight
         showHistory = saved.history
+        showTrendline = saved.trendline ?? true
     }
 
     private func save() {
         let value = Saved(palette: palette.rawValue, up: customUp.hexString, down: customDown.hexString, monday: mondayColor.hexString,
-                          mondayHighlight: mondayHighlight, history: showHistory)
+                          mondayHighlight: mondayHighlight, history: showHistory, trendline: showTrendline)
         if let data = try? JSONEncoder().encode(value) { UserDefaults.standard.set(data, forKey: Self.key) }
     }
 

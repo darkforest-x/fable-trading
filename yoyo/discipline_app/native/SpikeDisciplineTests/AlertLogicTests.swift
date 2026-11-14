@@ -24,6 +24,31 @@ final class AlertLogicTests: XCTestCase {
                           touchConfirmed: touchConfirmed, candleConfirmed: candleConfirmed, apnsStatus: "not_subscribed")
     }
 
+    func testMonthCloseIsIndependentFromItsTouchAndUsesCloseTime() throws {
+        func event(_ side: Edge = .upper, close: Double = 99, source: String = "live") throws -> NotificationEvent {
+            let json = """
+            {"id":"reclaim","kind":"month_first_week_1h_reclaim","symbol":"SOL-USDT-SWAP","side":"\(side.rawValue)","pushed":false,"source":"\(source)",
+             "at_ms":\(now),"close_ms":\(now),"close":\(close),"level":100,"fresh_until_ms":\(now+90000),
+             "occurred_ms":\(now-1200000),"touch_event_id":"2026-11|SOL-USDT-SWAP|\(side.rawValue)"}
+            """
+            let decoder = JSONDecoder(); decoder.keyDecodingStrategy = .convertFromSnakeCase
+            return try decoder.decode(NotificationEvent.self, from: Data(json.utf8))
+        }
+        let record = try event()
+        func ids(_ rows: [NotificationEvent], at: Double, seen: Set<String>? = ["touch"]) -> [String] {
+            AlertLogic.fresh(rows, seen: seen, now: at, prefs: AlertPrefs()).alerts.map(\.id)
+        }
+        XCTAssertEqual(ids([record], at: now), ["reclaim"])
+        XCTAssertTrue(try event(.lower, close: 101).isLiveReclaim)
+        XCTAssertFalse(try event(.lower, close: 100).isLiveReclaim)
+        XCTAssertTrue(ids([try event(close: 101), try event(source: "history")], at: now).isEmpty)
+        XCTAssertTrue(ids([record], at: now - 1).isEmpty)
+        XCTAssertTrue(ids([record], at: now + 90001).isEmpty)
+        XCTAssertTrue(ids([record], at: now, seen: nil).isEmpty)
+        XCTAssertTrue(ids([record], at: now, seen: ["reclaim"]).isEmpty)
+        XCTAssertTrue(AlertLogic.fresh([record], seen: [], now: now, prefs: AlertPrefs(monthFirstWeekTouch: false)).alerts.isEmpty)
+    }
+
     func testFirstSnapshotOnlySeeds() {
         let seeded = AlertLogic.fresh([alarm("alarm:1"), fib("fib:a", at: now)], seen: nil, now: now, prefs: AlertPrefs())
         XCTAssertTrue(seeded.alerts.isEmpty)

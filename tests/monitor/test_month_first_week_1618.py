@@ -313,6 +313,72 @@ class TestMonthFirstWeekService:
         assert service.book.channel_status("telegram")["counts"] == {"skipped": 1}
         assert service.book.notice_statuses(window["month"])["2026-11|BTC-USDT-SWAP|upper"]["telegram"]["error"] == "not_reclaimed_1h_close"
 
+    def test_h1_reclaim_feed_records_live_history_and_equal_close_once(self, tmp_path):
+        now = ms(2026, 11, 11, 12, 34)
+        service, _, client, window = self._service(tmp_path, now=now)
+        class BatchReader:
+            def project(self, events, now_ms, periods=("1H",)):
+                assert periods == ("1H",)
+                projected = []
+                for event in events:
+                    close_ms = (event["candle_ms"] // HOUR_MS + 1) * HOUR_MS
+                    close = 95.0
+                    reclaimed = close < event["level"] if event["side"] == "upper" else close > event["level"]
+                    projected.append({**event, "reclaims": {"1H": dict(
+                        bar="1H", status="reclaimed" if reclaimed else "not_reclaimed",
+                        close=close, close_ms=close_ms, source="OKX")}})
+                return projected
+
+        service.touch_reclaim_reader = BatchReader()
+        touch_ms = now // MINUTE_MS * MINUTE_MS
+        for symbol, side, level, source in (
+                ("BTC-USDT-SWAP", "upper", 100.0, "live"),
+                ("ETH-USDT-SWAP", "upper", 100.0, "history"),
+                ("SOL-USDT-SWAP", "upper", 95.0, "live")):
+            service.book.touch(month=window["month"], symbol=symbol, side=side, level=level,
+                               price=level, candle_extreme=level + 1, occurred_ms=now,
+                               candle_ms=touch_ms, created_ms=now, expires_ms=window["expires_ms"],
+                               source=source, candle_confirmed=False)
+        close_ms = (touch_ms // HOUR_MS + 1) * HOUR_MS
+        client.now_ms = close_ms + 1000
+        client.rows = source_rows(window, client.now_ms)
+
+        assert service.sync_hour_reclaims(client.now_ms) == 2
+        assert service.sync_hour_reclaims(client.now_ms) == 0  # one immutable outcome per touch
+        snapshot = service.snapshot()
+        by_touch = {event["event_id"]: event for event in snapshot["touches"]}
+        live = by_touch["2026-11|BTC-USDT-SWAP|upper"]["reclaims"]["1H"]
+        history = by_touch["2026-11|ETH-USDT-SWAP|upper"]["reclaims"]["1H"]
+        equal = by_touch["2026-11|SOL-USDT-SWAP|upper"]["reclaims"]["1H"]
+        assert live == dict(bar="1H", status="reclaimed", close=95.0, close_ms=close_ms, source="OKX")
+        assert history["status"] == "reclaimed" and by_touch["2026-11|ETH-USDT-SWAP|upper"]["source"] == "history"
+        assert equal["status"] == "not_reclaimed" and equal["close"] == 95.0
+
+        app = FastAPI()
+        install(app, service)
+        routes = {route.path: route.endpoint for route in app.routes if hasattr(route, "path")}
+        page = routes["/api/month-first-week-1618/reclaim-events"](after_id=0, limit=500)
+        assert page["schema"] == "month_first_week_1618.reclaim_events.v1"
+        assert len(page["events"]) == 2  # history facts annotate touches but do not become separate close events
+        assert all(row["kind"] == row["type"] == "month_first_week_1h_reclaim" for row in page["events"])
+        assert all(row["source"] == row["provenance"] == "live" for row in page["events"])
+        assert {row["status"] for row in page["events"]} == {"reclaimed", "not_reclaimed"}
+
+        # Outcomes whose H1 close is no longer fresh or whose monthly touch already expired are not recorded.
+        stale_candle = touch_ms - 3 * HOUR_MS
+        service.book.touch(month=window["month"], symbol="XRP-USDT-SWAP", side="upper", level=100.0,
+                           price=100.0, candle_extreme=101.0, occurred_ms=stale_candle,
+                           candle_ms=stale_candle, created_ms=now, expires_ms=window["expires_ms"],
+                           source="history", candle_confirmed=True)
+        expiring_candle = ((client.now_ms - 1000) // HOUR_MS + 1) * HOUR_MS
+        service.book.touch(month=window["month"], symbol="DOGE-USDT-SWAP", side="upper", level=100.0,
+                           price=100.0, candle_extreme=101.0, occurred_ms=client.now_ms - 1000,
+                           candle_ms=client.now_ms - 1000, created_ms=now, expires_ms=expiring_candle,
+                           source="live", candle_confirmed=False)
+        assert service.sync_hour_reclaims(client.now_ms) == 0
+        assert all(row["symbol"] not in {"XRP-USDT-SWAP", "DOGE-USDT-SWAP"}
+                   for row in service.book.hour_reclaims())
+
     def test_lower_touch_notifies_only_after_strict_inside_h1_close(self, tmp_path):
         now = ms(2026, 11, 11, 12, 34)
         sent = []

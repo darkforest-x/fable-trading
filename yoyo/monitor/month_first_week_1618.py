@@ -25,6 +25,7 @@ MINUTE_MS = 60_000
 FRESH_MS = 90_000
 VERSION = "month_first_week_1618.v1"
 EVENT_TYPE = "month_first_week_touch"
+H1_RECLAIM_TYPE = "month_first_week_1h_reclaim"
 SYMBOL_RE = re.compile(r"^[A-Z0-9]{1,32}-USDT-SWAP$")
 
 
@@ -166,6 +167,20 @@ class MonthFirstWeekBook:
                     candle_confirmed INTEGER NOT NULL,
                     UNIQUE(month,symbol,side));
                 CREATE INDEX IF NOT EXISTS touches_month_idx ON touches(month,id);
+                CREATE INDEX IF NOT EXISTS touches_candle_ms_idx ON touches(candle_ms);
+                CREATE TABLE IF NOT EXISTS hour_reclaims (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    event_id TEXT NOT NULL UNIQUE,
+                    touch_event_id TEXT NOT NULL UNIQUE,
+                    month TEXT NOT NULL, symbol TEXT NOT NULL, side TEXT NOT NULL,
+                    level REAL NOT NULL, touch_candle_ms INTEGER NOT NULL,
+                    touch_occurred_ms INTEGER NOT NULL, touch_expires_ms INTEGER NOT NULL,
+                    status TEXT NOT NULL,
+                    close REAL, close_ms INTEGER NOT NULL,
+                    created_ms INTEGER NOT NULL, fresh_until_ms INTEGER NOT NULL,
+                    source TEXT NOT NULL);
+                CREATE INDEX IF NOT EXISTS hour_reclaims_month_idx ON hour_reclaims(month,id);
+                CREATE INDEX IF NOT EXISTS hour_reclaims_touch_candle_idx ON hour_reclaims(touch_candle_ms);
                 CREATE TABLE IF NOT EXISTS subscriptions (
                     channel TEXT PRIMARY KEY CHECK(channel IN ('telegram','bark')),
                     enabled INTEGER NOT NULL DEFAULT 0,
@@ -387,14 +402,17 @@ class MonthFirstWeekBook:
         return inserted
 
     def load_state(self, month: str):
-        """Load month anchors, consumed first touches and quote watermarks in one read."""
+        """Load month anchors, touches, H1 outcomes and quote watermarks in one read."""
         with self.db() as db:
             anchors = [self._anchor_dict(row) for row in db.execute(
                 "SELECT * FROM anchors WHERE month=? ORDER BY symbol", (month,))]
             touches = [self._touch_dict(row) for row in db.execute(
                 "SELECT * FROM touches WHERE month=? ORDER BY id", (month,))]
+            hour_reclaims = [self._hour_reclaim_dict(row) for row in db.execute(
+                "SELECT * FROM hour_reclaims WHERE month=? ORDER BY id", (month,))]
             cursors = [dict(row) for row in db.execute("SELECT * FROM quote_cursors")]
-            return {"anchors": anchors, "touches": touches, "quote_cursors": cursors}
+            return {"anchors": anchors, "touches": touches,
+                    "hour_reclaims": hour_reclaims, "quote_cursors": cursors}
 
     def notice_statuses(self, month: str):
         with self.db() as db:
@@ -445,6 +463,93 @@ class MonthFirstWeekBook:
     def latest_event_id(self) -> int:
         with self.db() as db:
             return int(db.execute("SELECT COALESCE(MAX(id),0) FROM touches").fetchone()[0])
+
+    def unprocessed_live_touches_for_hour_close(self, close_ms: int):
+        """Read only live touches in the just-closed H1 window that are still notification-eligible."""
+        if type(close_ms) is not int or close_ms <= 0 or close_ms % HOUR_MS:
+            raise ValueError("invalid H1 close")
+        with self.db() as db:
+            rows = db.execute("""SELECT t.* FROM touches t
+                LEFT JOIN hour_reclaims r ON r.touch_event_id=t.event_id
+                WHERE t.candle_ms>=? AND t.candle_ms<? AND t.touch_confirmed=1 AND t.source='live'
+                  AND t.expires_ms>? AND r.touch_event_id IS NULL
+                ORDER BY t.id ASC""", (close_ms - HOUR_MS, close_ms, close_ms))
+            return [self._touch_dict(row) for row in rows]
+
+    def record_hour_reclaim(self, touch: Mapping, status: str, close: float | None,
+                            close_ms: int, created_ms: int):
+        """Persist one confirmed close outcome; a positive event is distinct from its touch."""
+        source, month, symbol, side = (touch.get("source"), touch.get("month"),
+                                       touch.get("symbol"), touch.get("side"))
+        touch_event_id = touch.get("event_id")
+        level = touch.get("level")
+        touch_candle_ms, touch_occurred_ms, touch_expires_ms = (
+            touch.get("candle_ms"), touch.get("occurred_ms"), touch.get("expires_ms"))
+        if (source not in {"live", "history"} or not isinstance(month, str)
+                or not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", month)
+                or not isinstance(symbol, str) or not SYMBOL_RE.fullmatch(symbol)
+                or side not in {"upper", "lower"}
+                or touch_event_id != f"{month}|{symbol}|{side}"
+                or isinstance(level, bool) or not isinstance(level, (int, float))
+                or not math.isfinite(level) or level <= 0
+                or status not in {"reclaimed", "not_reclaimed"}
+                or any(type(value) is not int or value <= 0 for value in
+                       (touch_candle_ms, touch_occurred_ms, touch_expires_ms))
+                or type(close_ms) is not int or close_ms <= 0
+                or type(created_ms) is not int or created_ms < close_ms):
+            raise ValueError("invalid monthly 1H reclaim")
+        if close_ms != (touch_candle_ms // HOUR_MS + 1) * HOUR_MS or touch_expires_ms <= close_ms:
+            raise ValueError("monthly 1H close does not match its source touch")
+        if isinstance(close, bool) or not isinstance(close, (int, float)) or not math.isfinite(close) or close <= 0:
+            raise ValueError("invalid monthly 1H close")
+        reclaimed = close < level if side == "upper" else close > level
+        if (status == "reclaimed") != reclaimed:
+            raise ValueError("monthly 1H reclaim status disagrees with strict close rule")
+        close_value = float(close)
+        event_id = f"{touch_event_id}|1H_RECLAIM"
+        fresh_until_ms = close_ms + FRESH_MS
+        if created_ms > fresh_until_ms:
+            raise ValueError("monthly 1H reclaim arrived after its notification window")
+        with self.db() as db:
+            db.execute("""INSERT OR IGNORE INTO hour_reclaims
+                (event_id,touch_event_id,month,symbol,side,level,touch_candle_ms,touch_occurred_ms,
+                 touch_expires_ms,status,close,close_ms,created_ms,fresh_until_ms,source)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (event_id, touch_event_id, month, symbol, side, float(level), touch_candle_ms,
+                 touch_occurred_ms, touch_expires_ms, status, close_value,
+                 close_ms, created_ms, fresh_until_ms, source))
+            row = db.execute("SELECT * FROM hour_reclaims WHERE touch_event_id=?", (touch_event_id,)).fetchone()
+            return self._hour_reclaim_dict(row) if row else None
+
+    @staticmethod
+    def _hour_reclaim_dict(row):
+        value = dict(row)
+        value.update(type=H1_RECLAIM_TYPE, kind=H1_RECLAIM_TYPE,
+                     provenance=value["source"])
+        return value
+
+    def hour_reclaims(self, month: str | None = None, limit: int | None = None):
+        with self.db() as db:
+            if month is None:
+                sql, params = "SELECT * FROM hour_reclaims ORDER BY id DESC", ()
+            else:
+                sql, params = "SELECT * FROM hour_reclaims WHERE month=? ORDER BY id DESC", (month,)
+            if limit is not None:
+                sql += " LIMIT ?"
+                params += (int(limit),)
+            return [self._hour_reclaim_dict(row) for row in db.execute(sql, params)]
+
+    def hour_reclaims_after(self, after_id: int = 0, limit: int = 500):
+        """Return every recorded outcome in cursor order; push consumers filter to live reclaims."""
+        if type(after_id) is not int or after_id < 0 or type(limit) is not int or not 1 <= limit <= 5000:
+            raise ValueError("invalid monthly H1 reclaim cursor")
+        with self.db() as db:
+            rows = db.execute("SELECT * FROM hour_reclaims WHERE id>? ORDER BY id ASC LIMIT ?", (after_id, limit))
+            return [self._hour_reclaim_dict(row) for row in rows]
+
+    def latest_hour_reclaim_id(self):
+        with self.db() as db:
+            return int(db.execute("SELECT COALESCE(MAX(id),0) FROM hour_reclaims").fetchone()[0])
 
     def record_quote(self, symbol: str, candle_ms: int, received_ms: int) -> tuple[bool, dict | None]:
         """Persist one cursor per new minute and detect process/socket gaps."""

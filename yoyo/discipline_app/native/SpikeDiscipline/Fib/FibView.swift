@@ -12,8 +12,11 @@ struct FibView: View {
     @Environment(FibNavigation.self) private var navigation
     let active: Bool
     var onQuick: (FibQuickEntry, CandlePeriod) -> Void
+    var onTrendlineBack: () -> Void = {}
     @State private var candles = CandleStore()
     @State private var monthlyReplay = MonthFirstWeekChartFeed()
+    @State private var trendlineReplay = TrendlineChartFeed()
+    @State private var trendlineLineFeed = TrendlineLineFeed()
     @State private var monthlyFeed = MonthFirstWeekFeed()
     @State private var chooser = false
     @State private var settings = false
@@ -25,8 +28,34 @@ struct FibView: View {
     static let pinned = ["BTC-USDT-SWAP", "ETH-USDT-SWAP"]
 
     var body: some View {
-        liveChartWorkspace
-        .sheet(isPresented: $chooser) { FibChooser().presentationDetents([.large]).presentationDragIndicator(.visible) }
+        GeometryReader { proxy in
+            if let route = navigation.trendlineEvent {
+                let bottom = proxy.safeAreaInsets.bottom
+                ZStack(alignment: .top) {
+                    chart(top: proxy.safeAreaInsets.top + 58, bottom: bottom + 116)
+                        .environment(\.colorScheme, .dark)
+                        .ignoresSafeArea()
+                    VStack(spacing: 8) {
+                        trendlineEventHeader(route)
+                            .padding(.horizontal, 12)
+                            .padding(.top, 4)
+                        Spacer(minLength: 8)
+                        trendlineEventDock.padding(.horizontal, 12)
+                        Text(trendlineIndicatorText)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(trendlineReplay.error == nil ? ChartPalette.up : Color.muted)
+                            .lineLimit(1)
+                            .padding(.horizontal, 10).padding(.vertical, 6)
+                            .background(ChartPalette.hex(0x11151B).opacity(0.9), in: Capsule())
+                            .padding(.bottom, bottom + 76)
+                    }
+                }
+                .background(ChartPalette.hex(0x0B0E13))
+            } else {
+                liveChartWorkspace
+            }
+        }
+        .sheet(isPresented: $chooser) { FibChooser(source: stripSource, monthFeed: monthlyFeed).presentationDetents([.large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $settings) { ChartSettingsSheet().presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
         .onChange(of: reselect) { _, _ in follow += 1 }   // tab tapped again → back to the latest bar
         .task(id: active) {
@@ -41,22 +70,33 @@ struct FibView: View {
             guard active, stripSource == .monthFirstWeek, let connection = session.connection else { return }
             await monthlyFeed.watch(connection: connection, session: session)
         }
-        .task(id: "\(chartSymbol)|\(active)|\(navigation.monthlyTouch?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
-            guard active, navigation.monthlyTouch == nil, let connection = session.connection else { return }
+        .task(id: "\(chartSymbol)|\(active)|\(navigation.monthlyTouch?.id ?? 0)|\(navigation.trendlineEvent?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
+            guard active, navigation.monthlyTouch == nil, navigation.trendlineEvent == nil,
+                  let connection = session.connection else { return }
             await history.watchCurrent(chartSymbol, connection: connection)
         }
         // Full history (owner 2026-11-09): weeks back to the oldest loaded bar; older bars → older weeks.
-        .task(id: "\(chartSymbol)|\(style.showHistory)|\(active)|\(navigation.monthlyTouch?.id ?? 0)|\(Int((candles.bars.first?.time ?? 0) / 86_400))|\(session.connection?.token.hashValue ?? 0)") {
-            guard active, navigation.monthlyTouch == nil, style.showHistory else { return }
+        .task(id: "\(chartSymbol)|\(style.showHistory)|\(active)|\(navigation.monthlyTouch?.id ?? 0)|\(navigation.trendlineEvent?.id ?? 0)|\(Int((candles.bars.first?.time ?? 0) / 86_400))|\(session.connection?.token.hashValue ?? 0)") {
+            guard active, navigation.monthlyTouch == nil, navigation.trendlineEvent == nil, style.showHistory else { return }
             await history.load(chartSymbol, from: candles.bars.first?.time, connection: session.connection)
         }
-        .task(id: "\(active)|\(stripSourceKey)|\(chartSymbol)|\(navigation.monthlyTouch?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
-            guard active, stripSource == .monthFirstWeek, navigation.monthlyTouch == nil else { return }
+        .task(id: "\(active)|\(stripSourceKey)|\(chartSymbol)|\(navigation.monthlyTouch?.id ?? 0)|\(navigation.trendlineEvent?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
+            guard active, stripSource == .monthFirstWeek, navigation.monthlyTouch == nil, navigation.trendlineEvent == nil else { return }
             await monthlyLevels.watch(chartSymbol, connection: session.connection)
         }
         .task(id: "\(active)|\(navigation.monthlyTouch?.id ?? 0)|\(fib.period.rawValue)|\(session.connection?.token.hashValue ?? 0)") {
-            guard active, let request = navigation.monthlyTouch, let connection = session.connection else { return }
+            guard active, navigation.trendlineEvent == nil, let request = navigation.monthlyTouch,
+                  let connection = session.connection else { return }
             await monthlyReplay.load(request: .event(request.eventId), period: fib.period, connection: connection)
+        }
+        .task(id: "\(active)|\(navigation.trendlineEvent?.id ?? 0)|\(fib.period.rawValue)|\(session.connection?.token.hashValue ?? 0)") {
+            guard active, let route = navigation.trendlineEvent else { return }
+            await trendlineReplay.load(route: route, period: fib.period, connection: session.connection)
+        }
+        .task(id: "\(active)|\(chartSymbol)|\(style.showTrendline)|\(navigation.trendlineEvent?.id ?? 0)|\(session.connection?.token.hashValue ?? 0)") {
+            guard active, style.showTrendline, navigation.trendlineEvent == nil,
+                  let connection = session.connection else { return }
+            await trendlineLineFeed.watch(symbol: chartSymbol, connection: connection, session: session)
         }
         .onChange(of: chartKey) { _, _ in showCandles() }
         .onChange(of: active) { _, now in if now { showCandles() } }
@@ -76,7 +116,7 @@ struct FibView: View {
             Divider()
             chart(top: 0, bottom: 0)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            if navigation.monthlyTouch == nil, fib.current == nil, fib.error != nil, candles.bars.isEmpty {
+            if navigation.monthlyTouch == nil, navigation.trendlineEvent == nil, fib.current == nil, fib.error != nil, candles.bars.isEmpty {
                 offlineNote
             }
             Divider()
@@ -86,10 +126,10 @@ struct FibView: View {
         .background(Color(uiColor: .systemBackground))
     }
 
-    private var chartSymbol: String { navigation.monthlyTouch?.symbol ?? fib.chartSymbol }
+    private var chartSymbol: String { navigation.trendlineEvent?.symbol ?? navigation.monthlyTouch?.symbol ?? fib.chartSymbol }
     private var stripSource: FibCoinStripSource { FibCoinStripSource(rawValue: stripSourceKey) ?? .monday }
     private var chartKey: String {
-        "\(chartSymbol)|\(fib.period.rawValue)|\(session.connection?.token.hashValue ?? 0)|\(navigation.monthlyTouch?.id ?? 0)"
+        "\(chartSymbol)|\(fib.period.rawValue)|\(session.connection?.token.hashValue ?? 0)|\(navigation.monthlyTouch?.id ?? 0)|\(navigation.trendlineEvent?.id ?? 0)"
     }
 
     private var replaySnapshot: MonthFirstWeekChartSnapshot? {
@@ -100,11 +140,35 @@ struct FibView: View {
     }
 
     private var chartBars: [Candle] {
-        navigation.monthlyTouch == nil ? candles.bars : (replaySnapshot?.chartCandles ?? [])
+        if navigation.trendlineEvent != nil { return trendlineChartSnapshot?.candles ?? [] }
+        return navigation.monthlyTouch == nil ? candles.bars : (replaySnapshot?.chartCandles ?? [])
+    }
+
+    private var trendlineChartSnapshot: TrendlineChartSnapshot? {
+        guard let route = navigation.trendlineEvent,
+              trendlineReplay.snapshot?.routeId == route.id,
+              trendlineReplay.snapshot?.period == fib.period else { return nil }
+        return trendlineReplay.snapshot
+    }
+
+    private var trendlineFocusRange: ClosedRange<Double>? {
+        guard let route = navigation.trendlineEvent else { return nil }
+        let marker = (trendlineChartSnapshot?.markerMs ?? route.event.candleMs) / 1000
+        let halfWindow = max(fib.period.seconds * 12, 43_200)
+        return (marker - halfWindow)...(marker + halfWindow)
+    }
+
+    private var trendlineIndicatorText: String {
+        guard style.showTrendline else { return "4H 趋势线已关闭" }
+        if navigation.trendlineEvent != nil {
+            if trendlineReplay.error != nil { return "历史 1H K 线暂不可用" }
+            return trendlineChartSnapshot == nil ? "正在读取历史 1H K 线" : "1H 收盘确认有效 · 4H 下降线"
+        }
+        return trendlineLineFeed.availabilityLabel
     }
 
     private func showCandles() {
-        guard navigation.monthlyTouch == nil else { candles.stop(); return }
+        guard navigation.monthlyTouch == nil, navigation.trendlineEvent == nil else { candles.stop(); return }
         let symbol = chartSymbol
         guard active, !symbol.isEmpty else { candles.stop(); return }
         candles.show(symbol: symbol, period: fib.period, connection: session.connection)
@@ -140,39 +204,122 @@ struct FibView: View {
 
     private func chart(top: CGFloat, bottom: CGFloat) -> some View {
         let row = fib.selected, symbol = chartSymbol, replay = replaySnapshot
+        let trendlineRoute = navigation.trendlineEvent
         let currentRange = replay == nil
             ? (row.flatMap { fib.range(for: $0) } ?? history.currentRange(for: symbol))
             : replay?.chartWeeklyRanges.last
         let eventHistory = replay.map { Array($0.chartWeeklyRanges.dropLast()) } ?? []
         let past = replay == nil ? (style.showHistory ? (history.ranges[symbol] ?? []) : [])
             : (style.showHistory ? eventHistory : [])
-        let lines = replay?.chartMonthlyLines ?? (navigation.monthlyTouch == nil
+        var lines = replay?.chartMonthlyLines ?? (navigation.monthlyTouch == nil
             ? FibCoinStripProjection.monthlyLines(source: stripSource, ranges: monthlyLevels.ranges[symbol] ?? [],
                                                    bars: chartBars, period: fib.period) : [])
+        if style.showTrendline, let trendlineRoute, let first = chartBars.first, let last = chartBars.last,
+           let line = trendlineRoute.event.chartLine(endingAt: (last.time + fib.period.seconds) * 1000,
+                                                      startingAt: first.time * 1000) {
+            lines.append(line)
+        } else if style.showTrendline, trendlineRoute == nil, let last = chartBars.last,
+                  navigation.monthlyTouch == nil,
+                  let line = trendlineLineFeed.chartLine(endingAt: (last.time + fib.period.seconds) * 1000) {
+            lines.append(line)
+        } else if style.showTrendline, trendlineRoute == nil, navigation.monthlyTouch != nil,
+                  let markerMs = replay?.markerMs, let last = chartBars.last,
+                  let line = trendlineLineFeed.chartLine(endingAt: (last.time + fib.period.seconds) * 1000,
+                                                         historicalTime: markerMs) {
+            lines.append(line)
+        }
         let markers = replay?.chartMarkers ?? (navigation.monthlyTouch == nil ? touches.markers(row) : [])
-        let generation = navigation.monthlyTouch.map { $0.id * 100 + (CandlePeriod.allCases.firstIndex(of: fib.period) ?? 0) + (replay == nil ? 0 : 1) }
-            ?? candles.generation
+        let periodIndex = CandlePeriod.allCases.firstIndex(of: fib.period) ?? 0
+        let firstBarTime = Int(chartBars.first?.time ?? 0)
+        let generation: Int
+        if let trendlineRoute { generation = trendlineRoute.id * 100 + periodIndex + firstBarTime }
+        else if let monthlyRoute = navigation.monthlyTouch { generation = monthlyRoute.id * 100 + periodIndex + (replay == nil ? 0 : 1) }
+        else { generation = candles.generation }
+        let focusBarTime = trendlineRoute == nil ? replay?.locatedMarkerMs.map { $0 / 1000 }
+            : trendlineChartSnapshot.map { $0.markerMs / 1000 }
         return ZStack {
             CandleChart(bars: chartBars, generation: generation, period: fib.period, decimals: decimals(symbol),
                         range: currentRange, history: past, innerLines: fib.showInternal, averages: fib.showAverages,
                         cloud: fib.showCloud, lines: lines, markers: markers,
-                        focusRange: replay?.chartFocusRange, timestampFocus: replay != nil,
+                        focusRange: replay?.chartFocusRange ?? trendlineFocusRange,
+                        timestampFocus: replay != nil || trendlineRoute != nil,
                         highlightedBarTimes: replay?.chartHighlightedBarTimes ?? [],
                         highlightRange: replay?.chartHighlightedBarTimes == nil ? replay?.chartHighlightRange : nil,
                         highlightColor: replay == nil ? nil : ChartPalette.hex(0x30D158),
-                        focusBarTime: replay?.locatedMarkerMs.map { $0 / 1000 }, fitReferenceLevels: replay == nil,
-                        markHistory: replay == nil, colors: style.colors,
+                        focusBarTime: focusBarTime, fitReferenceLevels: replay == nil,
+                        markHistory: replay == nil && trendlineRoute == nil, colors: style.colors,
                         watermark: symbol.isEmpty ? nil : Fmt.coin(symbol) + "USDT", followToken: follow, wallpaper: true,
                         topInset: top, bottomOverlay: bottom,
-                        onNeedOlder: { if replay == nil { candles.loadOlder() } })
+                        onNeedOlder: { if replay == nil && trendlineRoute == nil { candles.loadOlder() } })
             if chartBars.isEmpty && !symbol.isEmpty {
-                if navigation.monthlyTouch != nil {
+                if trendlineRoute != nil {
+                    if trendlineReplay.loading { ProgressView("正在读取历史 1H K 线").font(.footnote).foregroundStyle(Color.muted) }
+                    else { Text(trendlineReplay.error ?? "趋势线突破历史 K 线暂不可用").font(.footnote).foregroundStyle(Color.muted) }
+                } else if navigation.monthlyTouch != nil {
                     if monthlyReplay.loading { ProgressView("正在读取触价 K 线").font(.footnote).foregroundStyle(Color.muted) }
                     else { Text(monthlyReplay.error ?? "月首周 K 线暂不可用").font(.footnote).foregroundStyle(Color.muted) }
                 } else if candles.error == nil { ProgressView() }
                 else { Text(candles.error ?? "").font(.footnote).foregroundStyle(Color.muted) }
             }
         }
+        .overlay(alignment: .topLeading) {
+            if style.showTrendline && trendlineRoute == nil {
+                Text(trendlineIndicatorText)
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(trendlineLineFeed.error == nil && trendlineLineFeed.snapshot?.status != "unavailable"
+                                     ? ChartPalette.down : Color.muted)
+                    .lineLimit(1).padding(.horizontal, 8).padding(.vertical, 5)
+                    .background(Color(uiColor: .systemBackground).opacity(0.9), in: Capsule())
+                    .padding(.top, top + 6).padding(.leading, 10)
+            }
+        }
+    }
+
+    private func trendlineEventHeader(_ route: TrendlineEventRoute) -> some View {
+        HStack(spacing: 9) {
+            Button { Haptics.tap(); onTrendlineBack() } label: {
+                Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(.white).frame(width: 34, height: 34).contentShape(.circle)
+            }
+            .buttonStyle(.plain).accessibilityLabel("返回趋势线列表")
+            CoinLogo(coin: Fmt.coin(route.symbol), size: 28)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("\(Fmt.coin(route.symbol)) · 1H 上破 4H 趋势线")
+                    .font(.system(size: 13, weight: .bold)).foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.8)
+                Text("\(Fmt.clock(route.event.confirmedMs)) · 线价 \(Fmt.price(route.event.level)) · 收盘 \(Fmt.price(route.event.close))")
+                    .font(.system(size: 10, weight: .medium, design: .monospaced)).foregroundStyle(ChartPalette.hex(0xA7B0BC))
+                    .lineLimit(1).minimumScaleFactor(0.8)
+            }
+            Spacer(minLength: 0)
+            Text("有效上破")
+                .font(.system(size: 10, weight: .bold)).foregroundStyle(ChartPalette.up)
+                .padding(.horizontal, 8).padding(.vertical, 5)
+                .background(ChartPalette.up.opacity(0.13), in: Capsule())
+        }
+        .padding(.horizontal, 10).padding(.vertical, 8)
+        .background(ChartPalette.hex(0x11151B).opacity(0.96), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.white.opacity(0.1), lineWidth: 1))
+    }
+
+    private var trendlineEventDock: some View {
+        @Bindable var fib = fib
+        return HStack(spacing: 3) {
+            PeriodChips(selection: $fib.period).layoutPriority(1)
+            Button { Haptics.tap(); settings = true } label: {
+                Image(systemName: "slider.horizontal.3").font(.system(size: 13, weight: .bold)).foregroundStyle(Color.ink)
+                    .frame(width: 30, height: 34).contentShape(.rect)
+            }
+            .buttonStyle(.plain).accessibilityLabel("图表设置")
+            Button { Haptics.tap(); navigation.showLiveChart(); follow += 1 } label: {
+                Text("最新").font(.system(size: 12, weight: .bold)).foregroundStyle(ChartPalette.up)
+                    .padding(.horizontal, 9).frame(height: 32).background(ChartPalette.up.opacity(0.12), in: Capsule())
+            }
+            .buttonStyle(.plain).accessibilityLabel("返回实时图表")
+        }
+        .padding(4)
+        .background(ChartPalette.hex(0x11151B).opacity(0.96), in: Capsule())
+        .overlay(Capsule().strokeBorder(Color.white.opacity(0.1), lineWidth: 1))
     }
 
     /// The source switch reuses the existing strip; moving chips change source while BTC / ETH stay pinned.
@@ -332,7 +479,7 @@ struct FibView: View {
             .contentShape(.rect)
         }
         .buttonStyle(CardPressStyle())
-        .accessibilityLabel("最新触价列表，当前 \(Fmt.coin(symbol))")
+        .accessibilityLabel("选择合约，当前 \(Fmt.coin(symbol))")
     }
 
     /// One slim bar: period chips, chart settings, follow, and a small 开单 pill.
@@ -473,6 +620,7 @@ struct ChartSettingsSheet: View {
                     Toggle("六均线", isOn: $fib.showAverages)
                     Toggle("内部线 0.705 · 0.618 · 0.5", isOn: $fib.showInternal)
                     Toggle("历史周区间", isOn: $style.showHistory)
+                    Toggle("4H 趋势线", isOn: $style.showTrendline)
                 }
                 Section("K 线配色") {
                     SoftSegment(selection: $style.palette, options: ChartStyle.Palette.allCases.map { ($0, $0.title) })

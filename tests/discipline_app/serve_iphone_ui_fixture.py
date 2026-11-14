@@ -341,7 +341,7 @@ def main():
     fib.quote = terminal_quotes
     original = fib.create_app
     project = fib.project_snapshot
-    fib.project_snapshot = lambda raw, now: project(with_extra_touches(raw), now)
+    fib.project_snapshot = lambda raw, now, **kwargs: project(with_extra_touches(raw), now, **kwargs)
 
     def create_app(*args, **kwargs):
         feed = synthetic_monitor()
