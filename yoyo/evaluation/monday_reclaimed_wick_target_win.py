@@ -75,7 +75,7 @@ def symbol_events(args):
     buckets = np.floor(np.log2(ranges.where(ranges > 0) * 100)).where(contiguous).to_numpy()
     known = np.isin(times, events.open_ms)
     boundaries = np.flatnonzero(np.diff(times) != STEP)
-    arrays = [np.ascontiguousarray(bars[name].to_numpy()[:, None]) for name in OHLC]
+    arrays = [np.ascontiguousarray(bars[name].to_numpy(dtype=float, copy=True)[:, None]) for name in OHLC]
     n = len(bars)
     workspace = (np.empty((n, 1)), np.empty((n, 1), dtype=np.int64), np.empty(1, dtype=np.int64))
     rows = []
