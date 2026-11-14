@@ -4,10 +4,7 @@ Signal attributes use the touch 5m OHLC only, entry uses the first post-score
 1m close. Trail updates use completed subsequent exchange-aligned 5m closes.
 Forward OHLC and touch-to-peak measurements are evaluation labels only.
 """
-import gzip
 import json
-from pathlib import Path
-import sqlite3
 
 import numpy as np
 import pandas as pd
@@ -105,7 +102,9 @@ def evaluate(row, catalog):
         near_hits=part[hi]>=row.target if side==1 else part[hi]<=row.target
         d=dict(id=row.id,h=h,full=len(part)==60*h,mfe_pct=max(0.,favorable.max()),
                mae_pct=max(0.,-adverse.min()),net_close_pct=side*(part.close.iloc[-1]/entry-1)*100-.05*(1+part.close.iloc[-1]/entry)-.2,
-               near_monday_edge_hit=near_hits.any(),minutes_to_peak=(favorable.idxmax().value//1_000_000-start)/MIN)
+               edge_already_reached_at_entry=side*(row.target-entry)<=0,
+               near_monday_edge_hit_after_entry=side*(row.target-entry)>0 and near_hits.any(),
+               minutes_to_peak=(favorable.idxmax().value//1_000_000-start)/MIN)
         for pct in (2,5,10):
             d[f"hit_{pct}"]=bool(favorable.max()>=pct)
         movement.append(d)
