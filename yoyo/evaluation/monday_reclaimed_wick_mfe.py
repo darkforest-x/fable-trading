@@ -132,7 +132,7 @@ def _october_events(historical_ids: set[str], old_scores: pd.DataFrame,
     else:
         drift = pd.DataFrame(columns=["event", "score_delta_vs_frozen"])
     rows = rows[~rows.event.isin(historical_ids)].copy()
-    rows = rows[rows.entry_open_time >= pd.Timestamp("2026-09-24T00:00:00Z")]
+    rows = rows[rows.entry_open_time >= pd.Timestamp("2026-09-23T00:00:00Z")]
     rows = rows.rename(columns={"event": "event_id", "t": "touch_open_raw",
                                 "score_stored": "score", "close": "expected_close"})
     old_score_for_row = rows.event_id.map(old_score_map)
@@ -663,9 +663,10 @@ def process_symbol(symbol: str, records: list[dict[str, Any]], job: dict[str, An
     start = time.perf_counter()
     dest = EXP / "symbols" / symbol
     dest.mkdir(parents=True, exist_ok=True)
+    (dest / "error.json").unlink(missing_ok=True)
     hist_records = [r for r in records if r["event_source"] == "frozen_historical_ledger"]
     oct_records = [r for r in records if r["event_source"] == "frozen_live_october_score_extension"]
-    frame, tick, coverage = _symbol_bars(symbol, job, has_historical=bool(hist_records),
+    frame, tick, coverage = _symbol_bars(symbol, job, has_historical=bool(hist_records) or bool(oct_records),
                                          has_october=bool(oct_records))
     index = frame.index
     raw_events = []
@@ -714,8 +715,8 @@ def process_symbol(symbol: str, records: list[dict[str, Any]], job: dict[str, An
         events_df["entry_time"] = pd.to_datetime(events_df.entry_time, utc=True)
         native_rows, fills, audit = evaluate_symbol_events(
             close_frame, events_df, bar_minutes=5,
-            fee_rate=float(config["taker_fee_rate"]),
-            slippage_bp_per_fill=float(config["slippage_bp_per_fill"]), symbol=symbol,
+            fee_rate=float(config["costs"]["taker_each_fill"]),
+            slippage_bp_per_fill=float(config["costs"]["slippage_bp_per_fill"]), symbol=symbol,
         )
         # Reuse the pre-planned horizon/censor bounds; the helper independently
         # derives them from the same event close index.
@@ -836,7 +837,7 @@ def summarize() -> dict[str, Any]:
         "by_period_side": metrics,
         "bar_data": {
             "historical": "Binance UM 5m prepared inputs through 2026-09-23",
-            "extension": "Binance UM 5m prepared live-october inputs through 2026-10-27 23:55 UTC",
+            "extension": "Binance UM 5m prepared live-october inputs through 2026-10-31 23:55 UTC, with a 2026-10-28 gap",
             "known_break": "2026-10-28 daily archive missing; windows crossing any 5m gap are censored at the prior bar",
             "latest_score_touch_open": str(trades.entry_open_time.max()),
             "last_observed_bar_open": str(source_coverage.last_open_time.max()),

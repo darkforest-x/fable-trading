@@ -7,7 +7,7 @@
     "column": "stored",
     "parity_source": "experiments/active/exp-monday-limit-be-scalein-20261026-v1/scores.csv.gz",
     "rule": "score > 0.5 (strict)",
-    "extension": "experiments/active/exp-monday-limit-live-october-20261101-v1/scored.csv.gz score_stored, only event IDs absent from the historical candidate ledger and with touch open time >= 2026-09-24T00:00:00Z; old stored score always wins on overlapping IDs",
+    "extension": "experiments/active/exp-monday-limit-live-october-20261101-v1/scored.csv.gz score_stored, only event IDs absent from the historical candidate ledger and with touch open time >= 2026-09-23T00:00:00Z; old stored score always wins on overlapping IDs",
     "last_score_touch": "2026-10-27T23:55:00Z"
   },
   "universe": {
@@ -45,9 +45,9 @@
   "data_boundaries": {
     "historical_start": "2020-01-06 score week; per-symbol listed history can begin later.",
     "historical_source_end": "2026-09-23",
-    "extension_start": "2026-09-24",
-    "extension_last_bar_open": "2026-10-27T23:55:00Z",
-    "known_gap": "Binance daily 5m archive missing 2026-10-28; never bridge a missing 5m interval.",
+    "extension_start": "2026-09-23",
+    "extension_last_bar_open": "2026-10-31T23:55:00Z (series resume after the 2026-10-28 gap)",
+    "known_gap": "Binance daily 5m archive missing 2026-10-28; 2026-10-29 onward data resumes. Never bridge a missing 5m interval.",
     "censor_rule": "A window with a missing 5m bar or source end before 72h is censored at its last continuous bar unless the native initial stop already closed the position. Censored marks are not counted as realized outcomes."
   },
   "training_eligible": false,
