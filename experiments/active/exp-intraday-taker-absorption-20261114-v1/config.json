@@ -1,0 +1,10 @@
+{
+  "question": "Does unusually one-sided aggressive flow that fails to push the candle close in its own direction lead to a tradable move in the opposing direction?",
+  "source": "exp-btcusdtp-genuine-flow-coverage-20260907-v34; all 24 original Binance USD-M BTCUSDT 5m files, 2023 and 2024.",
+  "signal": "Absolute buy-minus-sell taker quote volume divided by total quote volume exceeds the 90th percentile of the preceding 288 bars. Close above open with net aggressive selling gives a long; close below open with net aggressive buying gives a short.",
+  "fills": "Next 5m open; exit 5 or 15 minutes after entry; same signals with minimum 15-minute separation. Same seeded random nonsignal, same side and same 4h block/lagged volatility bin as exp-intraday-hour-sweep-20261114-v1. No tuning.",
+  "costs": "5bp each side, regular-tier OKX fee assumption applied to Binance prices. No spread, slippage, lot rounding or funding. Percent return on notional; no account projection.",
+  "reproduce": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.intraday_taker_absorption",
+  "production_eligible": false,
+  "training_eligible": false
+}

@@ -67,9 +67,7 @@ def select(rows):
     return pd.concat([actual, control], ignore_index=True)
 
 
-def run():
-    minutes = pd.concat([minute_opportunities(s, f) for s, f in SOURCES.items()])
-    rows = select(minutes)
+def settle(rows, output):
     legs = pd.concat([rows.assign(hold=h, exit_price=rows[f"exit{h}"]) for h in (5, 15)], ignore_index=True)
     prices = np.stack([legs.entry, legs.exit_price])
     sizes = np.stack([legs.side, -legs.side])
@@ -83,10 +81,15 @@ def run():
     legs["fee_pct"] = 100 * (trades.entry_fees + trades.exit_fees).to_numpy() / legs.entry
     legs["day"] = pd.to_datetime(legs.event, unit="ms", utc=True).dt.tz_convert("Asia/Shanghai").dt.strftime("%Y-%m-%d")
     legs[["day", "event", "entry_ms", "arm", "symbol", "side", "hold", "entry", "exit_price",
-          "fee_pct", "net_pct"]].to_csv(OUT / "trades.csv.gz", index=False)
+          "fee_pct", "net_pct"]].to_csv(output / "trades.csv.gz", index=False)
     summary = legs.groupby(["arm", "hold", legs.day.str[:4].rename("year")]).net_pct.agg(
         trades="size", mean_net_pct="mean", median_net_pct="median", positive_fraction=lambda a: a.gt(0).mean())
-    summary.to_csv(OUT / "summary.csv")
+    summary.to_csv(output / "summary.csv")
+
+
+def run():
+    minutes = pd.concat([minute_opportunities(s, f) for s, f in SOURCES.items()])
+    settle(select(minutes), OUT)
 
 
 if __name__ == "__main__":
