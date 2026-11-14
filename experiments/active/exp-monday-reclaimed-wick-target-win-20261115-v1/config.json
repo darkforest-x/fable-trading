@@ -1,0 +1,13 @@
+{
+  "source": "exp-monday-reclaimed-wick-mfe-20261115-v1",
+  "gross_target_pct": [1, 1.5, 2, 3, 5, 10],
+  "baseline": "Frozen Nautilus no-target fills, identical inputs. No breakeven adjustment.",
+  "universe": "All frozen 5m Binance UM altcoin wick-reclaim entries, stored touch-close score strictly >0.5. Uses current study ledger, BTC/ETH and the four 1m majors are absent.",
+  "ordering": "When flat, take the earliest eligible 5m close, tie by symbol then event_id; require strictly later than the prior exit bar close. Each target and evaluation window starts flat.",
+  "exit": "Original wick extreme or 72h close, resting fixed-price TP. Touch fill, stop first on ambiguous 5m bars unless opening gap already crosses target. Signal bar excluded. Target rounded outwards to frozen study tick.",
+  "costs": {"maker": 0.0002, "taker": 0.0005, "market_slip_bp": 10, "funding": false},
+  "control": "One deterministically drawn other bar per event where available, same symbol, side, UTC 6h block, same trailing 1h high-low range bucket (doubling buckets starting at 1%), same relative stop width, identical target, fees and capacity. No scored wick required. Exclude all actual signal closes of that symbol, require at least 30m separation. Signal versus random is diagnostic; eligibility at control time does not depend on its future return.",
+  "split": "Choose on 2025 entries only, purging final 72h, require net win rate >=50% plus positive average net, order by mean net among qualifying candidates. Evaluate frozen choice on 2026 through last recorded signal 2026-10-27. Full 2025+ as a supplementary continuous schedule. Both years previously studied in other analyses.",
+  "uncertainty": "Weekly cluster bootstrap 95% intervals, resampling all selected complete trades with replacement by NY event-entry Monday week, 5000 draws, fixed seed 152026.",
+  "production_eligible": false
+}
