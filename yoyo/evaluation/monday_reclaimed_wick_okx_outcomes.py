@@ -4,6 +4,7 @@ Post-entry 1m OHLC is used only for outcomes. MFE bounds cover both possible
 orders on the stop minute. Giveback counts require a *later* minute, or an
 observable adverse close after the minute's favourable extreme.
 """
+import argparse
 import json
 import numpy as np
 import pandas as pd
@@ -12,12 +13,23 @@ from yoyo.evaluation.monday_reclaimed_wick_okx import EXP, ROOT
 from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy, run_native
 
 
-def simulate(row, cfg):
+def simulate(row, cfg, post_score=False):
     bars = pd.read_csv(ROOT/row.path)
     bars.index = pd.to_datetime(bars.open_time, unit="ms", utc=True) + pd.Timedelta(minutes=1)
     frame = bars[["open", "high", "low", "close", "volume"]]
     start = frame.index.get_loc(pd.to_datetime(row.entry_ms, unit="ms", utc=True))
     assert start == 4 and abs(frame.close.iloc[start] - row.entry) < row.tick/100
+    if post_score:
+        # The first observable full minute-close at or after the archived score.
+        decision = pd.to_datetime(row.scored_ms, unit="ms", utc=True).ceil("min")
+        after = frame.index.get_loc(decision)
+        pending = frame.iloc[start+1:after+1]
+        invalid = (pending.low <= row.stop).any() if row.side == 1 else (pending.high >= row.stop).any()
+        if invalid:
+            return []
+        start = after
+        row = row._replace(entry=float(frame.close.iloc[start]), entry_ms=int(decision.timestamp()*1000))
+        frame = frame.iloc[:min(len(frame), start + 1 + 6*60)]
     risk = row.side*(row.entry-row.stop)
     order = dict(trade_id=str(row.id), side=int(row.side), entry=row.entry, stop=row.stop,
                  risk=risk, entry_i=start, end_i=len(frame)-1)
@@ -35,7 +47,7 @@ def simulate(row, cfg):
     # Commission uses actual leg notionals; slip assumes 10bp of entry notional per market leg.
     be = (2*fee + 2*slip)/(1-row.side*fee)*100
     rows = []
-    for h in cfg["horizons_hours"] + [0]:
+    for h in ([1,6] if post_score else cfg["horizons_hours"] + [0]):
         last = min(start+60*h, len(frame)-1) if h else len(frame)-1
         exit_i = int(trade.exit_i)
         stopped = stop_hit and exit_i <= last
@@ -68,15 +80,16 @@ def simulate(row, cfg):
     return rows
 
 
-def run():
+def run(post_score=False):
     cfg = json.loads((EXP / "config.json").read_text())
     signals = pd.read_csv(EXP / "selection.csv")
     eligible = signals[signals.status.eq("selected")]
-    rows = [record for row in eligible.itertuples() for record in simulate(row,cfg)]
+    rows = [record for row in eligible.itertuples() for record in simulate(row,cfg,post_score)]
     df = pd.DataFrame(rows)
-    df.to_csv(EXP/"outcomes.csv", index=False)
+    prefix = "post-score-" if post_score else ""
+    df.to_csv(EXP/(prefix+"outcomes.csv"), index=False)
     summary = []
-    for h in cfg["horizons_hours"]+[0]:
+    for h in ([1,6] if post_score else cfg["horizons_hours"]+[0]):
         g = df[df.horizon_h.eq(h) & df.full_clock]
         d = dict(horizon_h=h, n=len(g), stopped=int(g.stopped.sum()), mfe_median=float(g.mfe_pct.median()),
                  risk_median=float(g.risk_pct.median()), net_mean=float(g.mark_or_exit_net_pct.mean()))
@@ -85,9 +98,11 @@ def run():
             d[f"back{k}"] = int(g[f"back{k}"].sum())
             d[f"back{k}_stopped"] = int((g[f"back{k}"] & g.stopped).sum())
         summary.append(d)
-    (EXP/"summary.json").write_text(json.dumps(summary,indent=2)+"\n")
+    (EXP/(prefix+"summary.json")).write_text(json.dumps(summary,indent=2)+"\n")
     print(pd.DataFrame(summary).to_string(index=False))
 
 
 if __name__ == "__main__":
-    run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--post-score", action="store_true")
+    run(parser.parse_args().post_score)
