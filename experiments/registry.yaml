@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-reclaimed-wick-target-win-20261115-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: bd9e364cb3
+    status: rejected
+    question: With at most one open altcoin reclaim, can a nearer fixed target give at least 50% net winners and positive mean net return?
+    single_variable: Fixed full take-profit at 1, 1.5, 2, 3, 5 or 10 percent. Frozen score >0.5, touch-close inside 1.618, wick-tip stop and 72h maximum.
+    result: "From 2025 to 2026-10-27, 1% TP won 467/749 (62.35%, mean -0.447%), 1.5% won 404/732 (55.19%, -0.462%), 2% won 368/716 (51.40%, -0.368%). 10% won 120/442 (27.15%, +0.069%). None passed the predeclared 2025 net win-rate/mean screen. All three high-win targets had negative means in 2026 as well."
+    notes: "VectorBT 1.2.0. One slot resets per target and window, chronological then alphabetic, strict after prior exit. Stop first on ambiguous bars. Fee taker 5bp, maker 2bp and slippage 10bp per market fill, funding excluded. Frozen historical no-TP comparison and deterministically time/volatility-matched random diagnostic. Same-bar target fills assume resting limit filled when touched. Identical exits on 4534 non-target completed comparisons with archived original stop/timeout. All 1532 historical events, 1262 with a matched control. Recent 6h post-score OKX cross-check is a separate small sample."
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-reclaimed-wick-target-win-20261115-v1/metrics.csv
+
   - experiment_id: exp-monday-reclaimed-wick-mfe-20261115-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 759e52bad2
