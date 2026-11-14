@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-reclaimed-wick-mfe-20261115-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 759e52bad2
+    status: inconclusive
+    question: How much favourable excursion occurs after a first weekly-side 1.618 wick with score strictly above 0.5 closes back inside, before the wick-tip stop, and how often do excursions return to cost breakeven?
+    single_variable: Fixed close-market signal and initial wick stop, no target or protection changes, 1/6/24/72h excursion marks. Independent Binance altcoin events with frozen stored scores.
+    result: "2020–October 2026: 1532 eligible entries, 1528 conclusive at 72h, full-period mean net +0.73%. From 2025: 1003 conclusive, median peak +2.47%, 682 stopped, 208 net winners, mean net -0.86%. In that group 553/348/211 reached 2/5/10% before the stop candle, and 492/239/95 then retraced to cost breakeven. With one position at a time and alphabetic ties, 343 completed; 72 reached 10%, 72h mean net -0.58%."
+    notes: "The 5m signal bar is excluded from all excursions. Treating the stop bar as favourable-first puts the 2025+ median peak at 2.86% and gives 216 touches of 10%. Timing of fills at signal close is a benchmark. Five-basis-point taker fee and ten-basis-point slippage on each side, no funding, no leverage. Recent OKX 1m results and actual exploratory 2% stop update in exp-monday-reclaimed-wick-okx-20261115-v1."
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-reclaimed-wick-mfe-20261115-v1/summary.json
+
   - experiment_id: exp-monday-reclaimed-wick-okx-20261115-v1
     source_repo: darkforest-x/fable-trading
     source_commit: ffd6633a09
