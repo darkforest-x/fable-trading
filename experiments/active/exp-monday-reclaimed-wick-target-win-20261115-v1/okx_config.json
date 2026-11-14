@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp-monday-reclaimed-wick-target-win-20261115-v1-okx",
+  "source_experiment_id": "exp-monday-reclaimed-wick-okx-20261115-v1",
+  "candidate_source": "post-score-outcomes.csv, horizon_h=6; one row per valid post-score entry; 17 unique entries",
+  "entry_rule": "first completed 1m close at or after archived score publication; entry at that close; exclude a candidate if the original wick stop was touched before entry",
+  "stop": "original touch 5m wick low for long or high for short, no buffer",
+  "holding_horizon_minutes": 360,
+  "take_profit_pct": [1.0, 1.5, 2.0, 3.0, 5.0, 10.0],
+  "control": "no fixed take profit; original wick stop or 6h close",
+  "target_tick_rounding": "outward to a valid OKX tick so the nominal minimum percentage is not reduced",
+  "ohlc_execution": "native monday_wick_r_engine.first_hit; observed open precedence; original stop before TP on an ambiguous same-minute double touch; market stop gaps fill at the observed open",
+  "costs": {
+    "entry_fee": "taker 5bp",
+    "entry_slippage": "fixed 10bp of original entry notional",
+    "take_profit_fee": "maker 2bp",
+    "take_profit_slippage": "0bp",
+    "stop_or_timed_exit_fee": "taker 5bp",
+    "stop_or_timed_exit_slippage": "fixed 10bp of original entry notional",
+    "funding": "excluded"
+  },
+  "slot_rule": "Each target scenario is replayed independently. Sort by post-score entry time, then symbol alphabetically, then signal ID. Accept an entry only when its entry_ms is strictly greater than the prior position exit_ms; same-time candidates are resolved alphabetically.",
+  "sizing": "Each accepted trade is normalized to 1 quote-currency unit of reference entry notional for VectorBT accounting; no compounding or capital-path claim.",
+  "data_access": "Read-only local 1m OHLC gzip cache referenced by the source selection.csv. No API requests or online writes.",
+  "vectorbt": "isolated local vectorbt-python environment; Portfolio.from_orders; independent trade columns after single-slot schedule filtering"
+}
