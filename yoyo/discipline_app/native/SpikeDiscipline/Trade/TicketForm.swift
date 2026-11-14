@@ -36,19 +36,14 @@ struct TicketForm: View {
         let tick = state?.instruments[ticket.symbol]?.tick
 
         VStack(alignment: .leading, spacing: inline ? 9 : 14) {
+            if inline {
+                inlineDirectionTabs(side: side, state: state, locked: locked)
+            }
             if existing != nil { Text("同向加仓 · 沿用当前止损和杠杆").font(.caption).foregroundStyle(.secondary) }
 
             HStack(spacing: 10) {
                 if inline {
-                    HStack(spacing: 2) {
-                        orderKindOption("market", title: "市价", icon: "bolt.fill", locked: locked)
-                        orderKindOption("limit", title: "限价", icon: "tag.fill", locked: locked)
-                    }
-                    .padding(3)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 36)
-                    .background(Color.field, in: .rect(cornerRadius: 9))
-                    .accessibilityElement(children: .contain)
+                    inlineOrderKindMenu(locked: locked)
                 } else {
                     SoftSegment(selection: $ticket.kind, options: [("market", "市价"), ("limit", "限价")])
                     .disabled(locked)
@@ -161,7 +156,9 @@ struct TicketForm: View {
                     Spacer()
                     Text("\(Int(ticket.allocation))%").font(.subheadline.weight(.bold).monospacedDigit())
                 }
-                Text(ticket.sizingMode(state) == "exposure" ? allocationLabel(state) : "保证金占净值 \(state == nil ? "—" : Fmt.amount((Double(ticket.fraction(state)) ?? 0) * 100))%")
+                Text(ticket.sizingMode(state) == "exposure"
+                     ? (inline ? inlineAllocationLabel(state, room: room) : allocationLabel(state))
+                     : (inline ? inlineMarginAllocationLabel(state, room: room) : "保证金占净值 \(state == nil ? "—" : Fmt.amount((Double(ticket.fraction(state)) ?? 0) * 100))%"))
                         .font(.caption).foregroundStyle(.secondary)
                 Slider(value: $ticket.allocation, in: 0...100, step: 1)
                     .disabled(locked || state == nil || room <= 0)
@@ -191,7 +188,7 @@ struct TicketForm: View {
                     amountRow("可用资金", state.flatMap { $0.available }.flatMap(Double.init))
                     amountRow("名义金额", estimate?.notional)
                     amountRow("保证金", estimate?.margin)
-                    amountRow(existing == nil ? "预计止损" : "合并止损", estimate?.risk, emphasized: true)
+                    inlineRiskRow(existing: existing, estimate: estimate, state: state)
                 }
             } else {
                 HStack {
@@ -209,8 +206,10 @@ struct TicketForm: View {
 
             }
             HStack(spacing: 8) {
-                directionPicker(side: side, state: state, locked: locked)
-                    .frame(width: inline ? 116 : 132, height: 50)
+                if !inline {
+                    directionPicker(side: side, state: state, locked: locked)
+                        .frame(width: 132, height: 50)
+                }
                 Button {
                     Task { await review(side: side, state: state) }
                 } label: {
@@ -218,8 +217,7 @@ struct TicketForm: View {
                         if account.pendingEntry != nil { ProgressView().tint(.white); Text("正在核对订单") }
                         else if ticket.reviewing { ProgressView().tint(.white); Text("正在校验…") }
                         else if ticket.autoWorking { ProgressView().tint(.white); Text("计算止损中") }
-                        else if confirmTrades { Text(side == "long" ? (existing != nil ? "预览加多" : "预览开多") : (existing != nil ? "预览加空" : "预览开空")) }
-                        else { Text(side == "long" ? (existing != nil ? "买入加仓" : "买入开多") : (existing != nil ? "卖出加仓" : "卖出开空")) }
+                        else { Text(entryActionTitle(side: side, existing: existing)) }
                     }
                     .font(.body.weight(.bold))
                     .lineLimit(1)
@@ -250,36 +248,125 @@ struct TicketForm: View {
 
     // MARK: pieces
 
-    private func amountRow(_ title: String, _ value: Double?, emphasized: Bool = false) -> some View {
-        HStack(spacing: 4) {
-            Text(title).foregroundStyle(.secondary)
-            Spacer(minLength: 0)
-            Text(Fmt.amount(value) + " U").fontWeight(emphasized ? .bold : .medium)
-                .monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
-        }.font(.caption)
+    private func inlineDirectionTabs(side: String, state: AccountState?, locked: Bool) -> some View {
+        HStack(spacing: 10) {
+            inlineDirectionTab("long", side: side, state: state, locked: locked)
+            inlineDirectionTab("short", side: side, state: state, locked: locked)
+        }
+        .animation(.snappy, value: side)
+        .accessibilityElement(children: .contain)
     }
 
-    private func orderKindOption(_ kind: String, title: String, icon: String, locked: Bool) -> some View {
-        let selected = ticket.kind == kind
+    private func inlineDirectionTab(_ value: String, side: String, state: AccountState?, locked: Bool) -> some View {
+        let selected = side == value
+        let hue: Color = value == "long" ? .up : .down
         return Button {
-            guard !locked, ticket.kind != kind else { return }
-            ticket.kind = kind
-            ticket.fieldIssue = nil
-            Haptics.select()
+            selectDirection(value, state: state)
         } label: {
-            HStack(spacing: 4) {
-                Image(systemName: icon).font(.system(size: 11, weight: .bold))
-                Text(title).font(.caption.weight(.semibold))
+            Text(value == "long" ? "做多" : "做空")
+                .font(.scaled(size: 16, weight: .bold))
+                .foregroundStyle(selected ? Color.white : Color.muted)
+                .frame(maxWidth: .infinity).frame(height: 44)
+                .background(selected ? hue : Color.field, in: .rect(cornerRadius: 9))
+                .contentShape(.capsule)
+        }
+        .buttonStyle(.plain)
+        .disabled(locked || ticket.existing(state) != nil)
+        .accessibilityLabel("方向，\(value == "long" ? "做多" : "做空")")
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    private func inlineOrderKindMenu(locked: Bool) -> some View {
+        Menu {
+            Button { setOrderKind("market", locked: locked) } label: {
+                Label("市价委托", systemImage: "bolt.fill")
             }
-            .foregroundStyle(selected ? Color.ink : Color.muted)
-            .frame(maxWidth: .infinity).frame(height: 30)
-            .background(selected ? Color(uiColor: .secondarySystemBackground) : .clear, in: .rect(cornerRadius: 7))
-            .contentShape(.rect(cornerRadius: 7))
+            Button { setOrderKind("limit", locked: locked) } label: {
+                Label("限价委托", systemImage: "tag.fill")
+            }
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: ticket.kind == "limit" ? "tag.fill" : "bolt.fill")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(ticket.kind == "limit" ? Color.accentColor : Color.amber)
+                Text(ticket.kind == "limit" ? "限价" : "市价").font(.subheadline.weight(.semibold))
+                Image(systemName: "chevron.down").font(.system(size: 9, weight: .bold)).foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity).frame(height: 36)
+            .background(Color.field, in: .rect(cornerRadius: 8))
+            .frame(minHeight: 44)
+            .contentShape(.rect(cornerRadius: 8))
         }
         .buttonStyle(.plain)
         .disabled(locked)
-        .accessibilityLabel(title + "委托")
-        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityLabel("委托类型，\(ticket.kind == "limit" ? "限价" : "市价")")
+    }
+
+    private func setOrderKind(_ kind: String, locked: Bool) {
+        guard !locked, ticket.kind != kind else { return }
+        ticket.kind = kind
+        ticket.fieldIssue = nil
+        Haptics.select()
+    }
+
+    private func inlineAllocationLabel(_ state: AccountState?, room: Double) -> String {
+        guard state != nil else { return "剩余名义额度 —" }
+        let pool = Trading.isMajor(ticket.symbol) ? Fmt.coin(ticket.symbol) : "山寨共享"
+        return "\(pool)名义剩余 \(Fmt.amount(floor(room), 0)) U"
+    }
+
+    private func inlineMarginAllocationLabel(_ state: AccountState?, room: Double) -> String {
+        guard let state, let equity = Double(state.equity), equity.isFinite, equity > 0 else { return "剩余保证金额度 —" }
+        return "\(Fmt.marginMode(state.policy?.marginMode)) · 保证金剩余 \(Fmt.amount(room * equity, 0)) U"
+    }
+
+    private func inlineRiskRow(existing: Position?, estimate: Trading.Estimate?, state: AccountState?) -> some View {
+        let equity = state.flatMap { Double($0.equity) } ?? .nan
+        let risk = estimate.flatMap { value -> Double? in
+            guard value.risk.isFinite, value.risk >= 0 else { return nil }
+            return value.risk
+        }
+        let riskPercent = risk.flatMap { value -> Double? in
+            guard equity.isFinite, equity > 0 else { return nil }
+            let percent = value / equity * 100
+            return percent.isFinite && percent > 0 ? percent : nil
+        }
+        let title = existing == nil ? "预计止损" : "合并止损"
+        let loss = risk.map { ($0 > 0 ? "−" : "") + Fmt.amount($0) + " U" } ?? "—"
+        let accessibilityLabel = riskPercent.map {
+            "\(title)，\(loss)，约占净值 \(Fmt.amount($0, 1))%"
+        } ?? "\(title)，\(loss)"
+
+        return HStack(spacing: 5) {
+            Text(title).foregroundStyle(.secondary)
+            Spacer(minLength: 4)
+            Text(loss)
+                .fontWeight(.semibold).monospacedDigit()
+                .foregroundStyle((risk ?? 0) > 0 ? Color.down : Color.muted)
+        }
+        .font(.caption)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel)
+    }
+
+    private func entryActionTitle(side: String, existing: Position?) -> String {
+        if confirmTrades {
+            return side == "long"
+                ? (existing == nil ? "预览开多" : "预览加多")
+                : (existing == nil ? "预览开空" : "预览加空")
+        }
+        return side == "long"
+            ? (existing == nil ? "买入开多" : "买入加仓")
+            : (existing == nil ? "卖出开空" : "卖出加仓")
+    }
+
+    private func amountRow(_ title: String, _ value: Double?) -> some View {
+        HStack(spacing: 4) {
+            Text(title).foregroundStyle(.secondary)
+            Spacer(minLength: 0)
+            Text(Fmt.amount(value) + " U").fontWeight(.medium)
+                .monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
+        }.font(.caption)
     }
 
     private func directionPicker(side: String, state: AccountState?, locked: Bool) -> some View {

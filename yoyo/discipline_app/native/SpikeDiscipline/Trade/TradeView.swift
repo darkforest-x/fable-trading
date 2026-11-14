@@ -13,8 +13,6 @@ struct TradeView: View {
     @Binding var showingChart: Bool
     var onDestination: (Trading.Destination) -> Void
     @State private var showSettings = false
-    @State private var showMarketDepth = false
-    @State private var quoteDetailsExpanded = false
     @State private var picker = false
     @State private var discipline = false
     @Environment(\.dynamicTypeSize) private var textSize
@@ -55,8 +53,16 @@ struct TradeView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             if let block { GuardStrip(text: block.text) { route(block.destination) } }
                             let narrow = proxy.size.width < 355 || textSize >= .xxLarge
-                            quoteSummary(narrow: narrow)
-                            orderForm
+                            if narrow {
+                                DisclosureGroup("五档盘口") { orderBook }
+                                orderForm
+                            } else {
+                                HStack(alignment: .top, spacing: 12) {
+                                    orderForm.frame(maxWidth: .infinity)
+                                    Divider()
+                                    orderBook.frame(width: (proxy.size.width - 54) * 0.38)
+                                }
+                            }
                             if let entry = account.activeEntry { TradeProgressCard(entry: entry) }
                             Divider()
                             TradeAccountSection(symbol: ticket.symbol, onOpenSymbol: { symbol in
@@ -80,11 +86,6 @@ struct TradeView: View {
         .sheet(isPresented: $picker) { SymbolPicker().presentationDragIndicator(.visible) }
         .sheet(isPresented: $discipline) { NavigationStack { DisciplineView() }.presentationDragIndicator(.visible) }
         .sheet(isPresented: $chartSettings) { ChartSettingsSheet().presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
-        .sheet(isPresented: $showMarketDepth) {
-            orderBook
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
-        }
         .task(id: "\(showingChart)|\(ticket.symbol)|\(style.showHistory)|\(active)|\(Int((candles.bars.first?.time ?? 0) / 86_400))|\(session.connection?.token.hashValue ?? 0)") {
             guard active, showingChart, style.showHistory else { return }
             await history.load(ticket.symbol, from: candles.bars.first?.time, connection: session.connection)
@@ -104,8 +105,6 @@ struct TradeView: View {
         }
         .onChange(of: "\(ticket.symbol)|\(period.rawValue)|\(active)|\(session.connection?.token.hashValue ?? 0)") { _, _ in showCandles() }
         .onChange(of: showingChart) { _, _ in showCandles() }
-        .onChange(of: active) { _, isActive in if !isActive { showMarketDepth = false } }
-        .onChange(of: ticket.symbol) { _, _ in quoteDetailsExpanded = false }
         .onAppear { showCandles(); ticket.syncLeverage(state) }
         .onChange(of: "\(ticket.symbol)|\(state?.policyRevision ?? -1)|\(ticket.cap(state))|\(state?.sharedLeverage?[ticket.symbol] ?? -1)") { _, _ in ticket.syncLeverage(state) }
         .onChange(of: "\(existing?.id ?? "")|\(existing?.stop ?? "")|\(existing?.leverage ?? 0)") { _, _ in ticket.syncExisting(state) }
@@ -124,111 +123,7 @@ struct TradeView: View {
             guard symbol == ticket.symbol, active, !ticket.reviewing, ticket.preview == nil, account.pendingEntry == nil, account.closeAttempt == nil, !ticket.fibTicket else { return }
             ticket.kind = "limit"; ticket.price = price; ticket.fieldIssue = nil
             Haptics.select()
-            showMarketDepth = false
         }
-    }
-
-    private func quoteSummary(narrow: Bool) -> some View {
-        let symbol = ticket.symbol
-        let quote = account.state?.quotes[symbol]
-        let fresh = account.quoteFresh(symbol)
-        let tick = account.state?.instruments[symbol]?.tick
-        let change = quote.flatMap { Trading.dayChange($0, now: account.now) }
-        let bid = fresh ? quoteNumber(quote?.bid) : nil
-        let ask = fresh ? quoteNumber(quote?.ask) : nil
-        let spread: (Double, Double)? = {
-            guard let bid, let ask, ask >= bid else { return nil }
-            let distance = ask - bid, midpoint = (ask + bid) / 2
-            guard midpoint > 0 else { return nil }
-            return (distance, distance / midpoint * 100)
-        }()
-
-        return VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .center, spacing: 8) {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(Fmt.price(quote?.last, tick: tick))
-                        .font(.system(size: 23, weight: .bold, design: .rounded).monospacedDigit())
-                        .foregroundStyle(fresh ? Fmt.tone(change).color : Color.muted)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.72)
-                    HStack(spacing: 5) {
-                        Text(quoteCaption(quote: quote, fresh: fresh))
-                            .foregroundStyle(.secondary)
-                        if fresh, let change {
-                            Text(Fmt.signedPercent(change))
-                                .fontWeight(.semibold)
-                                .foregroundStyle(Fmt.tone(change).color)
-                        }
-                    }
-                    .font(.caption2.monospacedDigit())
-                }
-                Spacer(minLength: 4)
-                Button { Haptics.open(); showMarketDepth = true } label: {
-                    HStack(spacing: 5) {
-                        Text("盘口深度").font(.caption.weight(.semibold))
-                        Image(systemName: "chevron.right").font(.system(size: 9, weight: .bold))
-                    }
-                    .padding(.horizontal, 10).frame(height: 32)
-                    .background(Color.field, in: .rect(cornerRadius: 8))
-                }
-                .buttonStyle(.plain)
-                .disabled(!active || showingChart || ticket.fibTicket)
-                .accessibilityLabel("查看五档盘口")
-            }
-
-            if narrow {
-                DisclosureGroup(isExpanded: $quoteDetailsExpanded) {
-                    quoteRows(tick: tick, bid: bid, ask: ask, spread: spread)
-                        .padding(.top, 8)
-                } label: {
-                    Text("买卖点位与价差")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                }
-                .tint(Color.muted)
-            } else {
-                quoteRows(tick: tick, bid: bid, ask: ask, spread: spread)
-            }
-        }
-        .padding(12)
-        .background(Color.field.opacity(0.45), in: .rect(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.muted.opacity(0.2), lineWidth: 0.6))
-        .accessibilityElement(children: .contain)
-    }
-
-    private func quoteRows(tick: String?, bid: Double?, ask: Double?, spread: (Double, Double)?) -> some View {
-        HStack(alignment: .top, spacing: 6) {
-            quoteValue(title: "买一", value: bid.map { Fmt.price(String($0), tick: tick) }, color: .up, alignment: .leading)
-            quoteValue(title: "价差", value: spread.map { "\(Fmt.price(String($0.0), tick: tick)) (\(Fmt.amount($0.1, 4))%)" }, color: .ink, alignment: .center)
-            quoteValue(title: "卖一", value: ask.map { Fmt.price(String($0), tick: tick) }, color: .down, alignment: .trailing)
-        }
-        .font(.caption2.monospacedDigit())
-        .padding(.top, 8)
-        .overlay(alignment: .top) { Rectangle().fill(Color.muted.opacity(0.22)).frame(height: 0.5) }
-    }
-
-    private func quoteValue(title: String, value: String?, color: Color, alignment: HorizontalAlignment) -> some View {
-        VStack(alignment: alignment, spacing: 3) {
-            Text(title).font(.system(size: 10, weight: .medium)).foregroundStyle(Color.muted)
-            Text(value ?? "—")
-                .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                .foregroundStyle(value == nil ? Color.muted : color)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-        }
-        .frame(maxWidth: .infinity, alignment: Alignment(horizontal: alignment, vertical: .center))
-    }
-
-    private func quoteNumber(_ text: String?) -> Double? {
-        guard let value = text.flatMap(Double.init), value.isFinite, value > 0 else { return nil }
-        return value
-    }
-
-    private func quoteCaption(quote: Quote?, fresh: Bool) -> String {
-        guard session.connection != nil else { return "未连接" }
-        guard account.online else { return "行情断开" }
-        guard quote != nil else { return "等待行情" }
-        return fresh ? "最新价" : "上次报价 · 已过期"
     }
 
     private var terminalHeader: some View {

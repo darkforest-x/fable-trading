@@ -34,9 +34,9 @@ import SwiftUI
     var body: some View {
         VStack(spacing: 5) {
             header
-            columnHeader
 
             if let book = currentBook {
+                columnHeader
                 let largest = (book.asks + book.bids).compactMap { Double($0.contracts) }.max() ?? 1
                 VStack(spacing: 2) {
                     // OKX sends asks lowest-first. Reverse them so the best sell price sits
@@ -51,15 +51,11 @@ import SwiftUI
                     }
                 }
             } else {
-                VStack(spacing: 2) {
-                    ForEach(0..<5, id: \.self) { _ in emptyRow(side: .sell) }
-                    latestRow
-                    ForEach(0..<5, id: \.self) { _ in emptyRow(side: .buy) }
-                }
+                latestRow
             }
         }
         .padding(7)
-        .frosted(RoundedRectangle(cornerRadius: 18, style: .continuous), veil: 0.78)
+        .background(Color.field.opacity(0.26), in: .rect(cornerRadius: 12))
         .onChange(of: streamKey, initial: true) { _, key in
             model.start(key: key, symbol: symbol, url: MarketDepthEndpoint.url, enabled: streamEnabled)
         }
@@ -71,14 +67,14 @@ import SwiftUI
     private var header: some View {
         HStack(spacing: 4) {
             Text("盘口")
-                .font(.system(size: 11, weight: .bold))
+                .font(.caption.weight(.bold))
                 .foregroundStyle(Color.ink)
             Spacer(minLength: 2)
             Circle()
                 .fill(statusColor)
                 .frame(width: 5, height: 5)
             Text(headerStatus)
-                .font(.system(size: 9, weight: .semibold))
+                .font(.caption2.weight(.semibold))
                 .foregroundStyle(Color.muted)
                 .lineLimit(1)
         }
@@ -89,12 +85,12 @@ import SwiftUI
             Text("价格")
                 .frame(maxWidth: .infinity, alignment: .leading)
             Text("数量(张)")
-                .frame(width: 48, alignment: .trailing)
+                .frame(width: 44, alignment: .trailing)
         }
-        .font(.system(size: 9, weight: .medium))
+        .font(.caption2)
         .foregroundStyle(Color.muted)
         .padding(.horizontal, 5)
-        .frame(height: 14)
+        .frame(minHeight: 16)
     }
 
     private var headerStatus: String {
@@ -115,31 +111,37 @@ import SwiftUI
         currentBook == nil ? (online && quoteFresh && active ? Color.amber : Color.muted.opacity(0.55)) : Color.up
     }
 
+    private var priceColor: Color {
+        guard currentQuoteAvailable else { return .muted }
+        let tone = Fmt.tone(todayChangePct)
+        return tone == .flat ? .ink : tone.color
+    }
+
     private var latestRow: some View {
         VStack(spacing: 1) {
             Text(currentQuoteAvailable ? Fmt.price(latestPrice, tick: tick) : "—")
-                .font(.system(size: 14, weight: .heavy, design: .rounded).monospacedDigit())
-                .foregroundStyle(currentQuoteAvailable ? Fmt.tone(todayChangePct).color : Color.muted)
+                .font(.scaled(size: 16, weight: .bold).monospacedDigit())
+                .foregroundStyle(priceColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-                .contentTransition(.numericText(value: Double(latestPrice ?? "") ?? 0))
             if currentQuoteAvailable, let todayChangePct {
                 Text("今日 \(Fmt.signedPercent(todayChangePct))")
-                    .font(.system(size: 9, weight: .semibold).monospacedDigit())
+                    .font(.caption2.weight(.semibold).monospacedDigit())
                     .foregroundStyle(Fmt.tone(todayChangePct).color)
                     .lineLimit(1)
             } else {
                 Text(currentQuoteAvailable ? "最新价" : quoteStatusCaption)
-                    .font(.system(size: 9, weight: .medium))
+                    .font(.caption2)
                     .foregroundStyle(Color.muted)
                     .lineLimit(1)
             }
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 44)
+        .frame(minHeight: 44)
         .background(Color.field.opacity(0.7), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         .accessibilityElement(children: .combine)
         .accessibilityLabel(currentQuoteAvailable ? "最新价 \(Fmt.price(latestPrice, tick: tick))" : quoteStatusCaption)
+        .accessibilityValue(currentQuoteAvailable ? todayChangePct.map { "今日 " + Fmt.signedPercent($0) } ?? "" : "")
     }
 
     private var quoteStatusCaption: String {
@@ -155,29 +157,31 @@ import SwiftUI
 
     private func levelButton(_ level: MarketDepthLevel, side: Side, largest: Double) -> some View {
         let value = Trading.priceAtTick(level.price, tick: tick)
-        let selectable = currentQuoteAvailable && currentBook != nil && canSelectPrice && value != nil
+        let selectable = currentQuoteAvailable && canSelectPrice && value != nil
         return Button {
             guard selectable, let value,
-                  let latest = currentBook, latest.symbol == symbol, latest.isTouchable(at: Date()) else { return }
+                  let latest = currentBook,
+                  (side == .sell ? latest.asks : latest.bids).contains(where: { $0.price == level.price }) else { return }
             onSelectPrice(value)
         } label: {
             HStack(spacing: 4) {
                 Text(Fmt.price(level.price, tick: tick))
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Text(Fmt.coinQuantity(level.contracts))
-                    .frame(width: 48, alignment: .trailing)
+                    .frame(width: 44, alignment: .trailing)
+                    .foregroundStyle(Color.ink)
             }
-            .font(.system(size: 11, weight: .semibold).monospacedDigit())
+            .font(.scaled(size: 12, weight: .semibold).monospacedDigit())
             .foregroundStyle(side.color)
             .lineLimit(1)
             .minimumScaleFactor(0.7)
             .padding(.horizontal, 5)
-            .frame(height: 28)
+            .frame(minHeight: 32)
             .background {
                 GeometryReader { geo in
                     let fraction = min(1, (Double(level.contracts) ?? 0) / largest)
                     RoundedRectangle(cornerRadius: 3)
-                        .fill(side.color.opacity(0.15))
+                        .fill(side.color.opacity(0.11))
                         .frame(width: geo.size.width * fraction)
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
@@ -189,19 +193,6 @@ import SwiftUI
         .accessibilityLabel("\(side.label) \(level.price)，\(Fmt.coinQuantity(level.contracts)) 张")
         .accessibilityHint(selectable ? "点按仅填入限价" : "当前不可选择")
     }
-
-    private func emptyRow(side: Side) -> some View {
-        HStack(spacing: 4) {
-            Text("—").frame(maxWidth: .infinity, alignment: .leading)
-            Text("—").frame(width: 48, alignment: .trailing)
-        }
-        .font(.system(size: 11, weight: .medium).monospacedDigit())
-        .foregroundStyle(side.color.opacity(0.35))
-        .padding(.horizontal, 5)
-        .frame(height: 28)
-        .background(side.color.opacity(0.06), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
-    }
-
 }
 
 struct MarketDepthLevel: Equatable, Identifiable {
