@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-reclaimed-wick-trailing-20261115-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 641b7fe207
+    status: rejected
+    question: Can a 2% close-armed trailing stop give a positive mean and at least 50% net winners on strictly reclaimed Monday touches?
+    single_variable: Add monotonic trailing protection 2 percent from best completed 5m close after a close moves at least 2 percent in favour. Original wick, fixed 72h cap, costs, selection and single-position admission remain the same.
+    result: "2025 to 2026-10-27 single position, 261 wins in 655 (39.85%, mean net -0.519%); frozen no-target policy 69 in 343 (20.12%, -0.584%). Trail 2025 108/284 (-0.956% per trade), 2026 155/373 (-0.172%). 2020-24 104/252 (41.27%, -0.023%). Does not reach 50%."
+    notes: "Only wick-reclaimed signals. No searching thresholds. 1532 frozen events; VectorBT native first_hit and Portfolio.from_orders for 799 trailing fills; remaining 733 reuse original fills. Effective next bar, stop gaps at open, same costs as source and no funding. Lower-frequency 5m Binance history differs from recent OKX delayed 1m execution; see exp-monday-okx-recent-touch-trend-20261115-v1."
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-reclaimed-wick-trailing-20261115-v1/metrics.csv
+
   - experiment_id: exp-monday-okx-recent-touch-trend-20261115-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 25ad2cb199
