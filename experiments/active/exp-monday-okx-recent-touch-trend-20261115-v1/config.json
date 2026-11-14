@@ -1,0 +1,11 @@
+{
+  "cutoff_utc":"2026-11-14T20:05:00Z",
+  "weeks":["2026-11-02","2026-11-09"],
+  "signals":"All scored touch-close first weekly-side touches strictly >0.5 in OKX monitoring, irrespective of whether the touch candle reclaimed; only instCategory=1, normal, excluding BTC and ETH for performance.",
+  "entry":"First completed 1m close at or after the logged score. A wick-tip stop breached before entry invalidates a trade but still retain its visible post-score movement.",
+  "horizon":"6h and 24h equal-horizon marks; also show observed up to 72h, latest entries censored at cutoff. Gross MFE from delayed entry does not include signal or entry bar.",
+  "exits":"Original wick extreme versus single trend-following arm. After first completed exchange-aligned 5m close >=2% favourable, trail 2% off best subsequent completed 5m close, keep original wick stop as floor/ceiling; replacement live only from subsequent minute. Time exit at 6h (common window); longer observation 72h with censored open positions.",
+  "engine":"NautilusTrader 1.231.0 native stop schedules, confirmed 1m bars. Market entry and market exits, OKX Lv1 taker 5bp each, debit 10bp per market leg on entry notional, no funding, 1x return on notional.",
+  "ordering":"For a single position accept earliest eligible scored entry strictly later than prior exit's minute close, ties alphabetic, use common 6h horizon. Aggregate all hypothetical opportunities separately.",
+  "production_eligible":false
+}

@@ -211,10 +211,10 @@ class StopScheduleStrategy(Strategy):
 
 
 def run_schedule(frame, entries, schedules, tick, symbol="X", taker=0.0005, maker=0.0002,
-                 batch_bars=50_000):
+                 batch_bars=50_000, execution_minutes=5):
     """Run independent close-entry trades whose stops follow ``schedules``.
 
-    frame: 5m OHLC, tz-aware UTC CLOSE-time index, prices on the ``tick`` grid.
+    frame: execution_minutes OHLC, tz-aware UTC CLOSE-time index, prices on the ``tick`` grid.
     entries: trade_id, entry_i, side (+1/-1), entry (== close at entry_i),
       stop (fixed, tick aligned, beyond entry), schedule (key into schedules).
     schedules: key -> (bar_i int array sorted, next-bar cross level array,
@@ -273,7 +273,9 @@ def run_schedule(frame, entries, schedules, tick, symbol="X", taker=0.0005, make
                          use_message_queue=True, reject_stop_orders=True, bar_execution=True,
                          liquidity_consumption=False)
         engine.add_instrument(instrument)
-        bar_type = BarType.from_str(f"{instrument.id}-5-MINUTE-LAST-EXTERNAL")
+        if execution_minutes not in (1, 5):
+            raise ValueError("Expected one-minute or five-minute OHLC")
+        bar_type = BarType.from_str(f"{instrument.id}-{execution_minutes}-MINUTE-LAST-EXTERNAL")
         strategy = StopScheduleStrategy(instrument, bar_type, frame.index.asi8, closes, rows, schedules, tick)
         engine.add_strategy(strategy)
         entry_at = sorted(strategy.by_entry)
