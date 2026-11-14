@@ -13,7 +13,7 @@ from yoyo.evaluation.monday_reclaimed_wick_okx import EXP, ROOT
 from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy, run_native
 
 
-def simulate(row, cfg, post_score=False):
+def simulate(row, cfg, post_score=False, arm_at_two=False):
     bars = pd.read_csv(ROOT/row.path)
     bars.index = pd.to_datetime(bars.open_time, unit="ms", utc=True) + pd.Timedelta(minutes=1)
     frame = bars[["open", "high", "low", "close", "volume"]]
@@ -35,6 +35,21 @@ def simulate(row, cfg, post_score=False):
                  risk=risk, entry_i=start, end_i=len(frame)-1)
     fee = cfg["taker_fee_bps_each"]/10000
     slip = cfg["slippage_bps_each"]/10000
+    be = (2*fee+2*slip)/(1-row.side*fee)*100
+    if arm_at_two:
+        if not post_score:
+            raise ValueError("The exploratory stop update uses only the post-score entry")
+        # Adapt the native scheduled stop at the first completed minute close
+        # that can place it, after a favourable excursion of at least 2%.
+        price = frame.high if row.side == 1 else frame.low
+        best = (row.side*(price.iloc[start+1:-1]/row.entry-1)).cummax()
+        ticks = row.entry*(1+row.side*be/100)/row.tick
+        be_price = (np.ceil(ticks) if row.side == 1 else np.floor(ticks))*row.tick
+        placeable = row.side*(frame.close.loc[best.index]-be_price) >= row.tick*(1-1e-7)
+        hits = best.index[(best >= 0.02) & placeable]
+        if len(hits):
+            order.update(stop_update_i=frame.index.get_loc(hits[0]), stop_update=be_price)
+
     policy = ExitPolicy(trail_arm_r=1e12, opposite_hour_exit=False, round_trip_cost=0,
                         fill_maker_fee=0.0002, fill_taker_fee=fee)
     trades, _, audit = run_native(frame, np.full(len(frame), np.nan), np.zeros(len(frame)),
@@ -43,9 +58,15 @@ def simulate(row, cfg, post_score=False):
     assert len(trades) == 1 and audit["positions"] == 1
     trade = trades.iloc[0]
     stop_hit = int(trade.reason) == 1
+    adjusted_stop = int(trade.reason) == 9
+    if arm_at_two:
+        assert stop_hit or adjusted_stop or int(trade.exit_i) == len(frame)-1
+        return [dict(id=int(row.id), symbol=row.symbol, entry_ms=int(row.entry_ms),
+                     native_exit_reason=int(trade.reason), net_pct=trade.net_notional_bp/100-200*slip,
+                     update_scheduled="stop_update_i" in order,
+                     observed_minutes=int(trade.exit_i)-start)]
     assert stop_hit or int(trade.exit_i) == len(frame)-1
     # Commission uses actual leg notionals; slip assumes 10bp of entry notional per market leg.
-    be = (2*fee + 2*slip)/(1-row.side*fee)*100
     rows = []
     for h in ([1,6] if post_score else cfg["horizons_hours"] + [0]):
         last = min(start+60*h, len(frame)-1) if h else len(frame)-1
@@ -80,12 +101,21 @@ def simulate(row, cfg, post_score=False):
     return rows
 
 
-def run(post_score=False):
+def run(post_score=False, arm_at_two=False):
     cfg = json.loads((EXP / "config.json").read_text())
     signals = pd.read_csv(EXP / "selection.csv")
     eligible = signals[signals.status.eq("selected")]
-    rows = [record for row in eligible.itertuples() for record in simulate(row,cfg,post_score)]
+    rows = [record for row in eligible.itertuples() for record in simulate(row,cfg,post_score,arm_at_two)]
     df = pd.DataFrame(rows)
+    if arm_at_two:
+        base = pd.read_csv(EXP/"post-score-outcomes.csv")
+        base = base.loc[base.horizon_h.eq(6), ["id","mark_or_exit_net_pct"]]
+        joined = df.merge(base, on="id", validate="one_to_one", how="outer", indicator=True)
+        assert joined["_merge"].eq("both").all()
+        joined["difference_pct"] = joined.net_pct - joined.mark_or_exit_net_pct
+        joined.drop(columns="_merge").to_csv(EXP/"post-score-be2-comparison.csv", index=False)
+        print(joined.groupby("native_exit_reason")[["net_pct","mark_or_exit_net_pct","difference_pct"]].agg(["count","mean"]))
+        return
     prefix = "post-score-" if post_score else ""
     df.to_csv(EXP/(prefix+"outcomes.csv"), index=False)
     summary = []
@@ -105,4 +135,6 @@ def run(post_score=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--post-score", action="store_true")
-    run(parser.parse_args().post_score)
+    parser.add_argument("--arm-at-two", action="store_true")
+    args = parser.parse_args()
+    run(args.post_score,args.arm_at_two)
