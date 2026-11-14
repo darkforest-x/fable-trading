@@ -21325,3 +21325,63 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: "所有68/68公告首发时间取本机官方HTML的Article.datePublished，dateModified仅审计；首根12H要求完整12根原生H1，不完整即排除。此为部分公告目录，不是全市场退市样本； funding 与强平未建模。延后对照仅保留原路径存活到延后开盘的25/41个事件。"
+
+  - experiment_id: exp-trendline4h-breakout-runs-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8a112f7905 (census code uncommitted)
+    status: inconclusive
+    question: How many 4H main-trendline V1.2 closing breaks on OKX USDT perpetuals were followed by a large run before a fixed stop, versus matched random 4H bars?
+    single_variable: None (descriptive census). Owner-default V1.2 resistance line, entry at break close, stops = break-bar low or 1 ATR14, 180-bar horizon, 5 same-symbol random bars within +-180 bars per event; definitions frozen in config.json before computing.
+    result: 528 live perps, 2024-01 to 2026-11-09, 4776 breaks (4560 with full horizon, 442 symbols). 1-ATR stop - gain>=30 percent before stop 8.32 vs 7.61 percent random, >=50 percent 4.22 vs 3.70 (month-block p 0.15), >=100 percent 1.25 vs 1.02, peak R>=10 10.03 vs 7.07 (p 0.008), >=20 4.77 vs 2.96, >=46 0.97 vs 0.59; median peak R 1.05 vs 0.87. Bar-low stop - >=50 percent 3.64 vs 2.06 (p 0.001), R>=46 1.57 vs 1.34; 35 percent stopped on the next bar. PIEVERSE 2026-11-01 break reproduced (TV log parity, 8 lines/8 breaks).
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-trendline4h-breakout-runs-20261109-v1/summary.json
+    notes: Peak-before-stop is a hindsight exit, not a realised return; no exit rule, sizing or slippage. Taker 5bp/side reported only as R cost (median 0.04R ATR stop, 0.07R bar-low stop). Survivorship not removed (live list 2026-11-09). Strict pivot ties (6982 tie-only pivots) unverified against TradingView beyond PIEVERSE. Event median risk 2.65 percent vs control 2.92 percent inflates event R slightly. Data data/crypto/market/okx_swap_4h_20261109. Pine counterpart yoyo/evaluation/pine/spike_signal_cloud_v1_8.pine.
+
+  - experiment_id: exp-trendline4h-break-success-patterns-20261110-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8a112f7905 (feature code uncommitted)
+    status: inconclusive
+    question: Which features known at a V1.2 4H closing break separate breaks that ran +30 percent before a 1-ATR stop from those that did not, and do they replicate in 2026 against matched random bars?
+    single_variable: None (exploratory scan of 22 causal features; quintile cuts fixed on 2024-2025, applied unchanged to 2026; outcome from exp-trendline4h-breakout-runs-20261109-v1).
+    result: Only BTC 4H cloud bull plus break-bar volume >= 0.917x its 20-bar mean replicated - 12.6 / 9.5 percent success (dev / 2026) vs 8.8 / 6.9 percent for random bars in the same cell (lift 1.43 / 1.38), +4.6pp vs other 2026 breaks, day-block CI [0.6, 9.2]. Breaks under a bearish BTC cloud underperform random. Overall breaks vs random 9.7 vs 8.6 (dev), 6.8 vs 6.5 (2026). 2026-09-18 cluster broke one bar before the BTC cloud turned bull.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-trendline4h-break-success-patterns-20261110-v1/summary.json
+    notes: Hindsight peak-before-stop outcome, not realised returns. 22 features tested, so the replicated pair should be treated as a hypothesis for the forthcoming Nautilus test, not a validated filter. Survivorship not removed.
+
+  - experiment_id: exp-trendline4h-cloudflip-1h-exit-20261109-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8a112f7905 (backtest code and adapter extension uncommitted)
+    status: inconclusive
+    question: Do the owner's 2026-11-09 trendline/cloud longs make money after real fees on OKX - (A) 4H V1.2 break then 4H EMA20/50 bullish flip within 10 bars, stop at the window low, exit on the first 1H bearish cloud close; (B) first 1H close across a live 4H line with a bullish 1H cloud, stop at the 11-bar 1H low, same exit - and do they beat matched cloud-only controls?
+    single_variable: None (two owner-specified rules, each against its matched control; definitions frozen in config.json before outcomes). NautilusTrader 1.231.0 on OKX 1H bars, taker 5bp / maker 2bp actual fills, no slippage or funding, run once.
+    result: A 1402 trades, win 27.1 percent, mean +0.234R / +64bp, PF 1.37, median -0.80R; control (4H flip without a break) -0.307R / -96bp; diff +0.54R CI [0.13, 1.10], +160bp CI [46, 298]. By year +370 / -26 / +24bp; excluding the top 10 trades the sum is -138R (XLM 2024-11-06 alone +232R). B 3581 trades, win 27.8 percent, +0.005R / -9bp, PF 1.01; control -0.43R / -45bp; bp diff not significant. Exploratory BTC 4H cloud at entry - A bull +447 / +70 / +124bp vs bear +99 / -190 / -126bp, controls bull -88 / -59 / -80bp; B bull +65 / +66 / +81bp, bear +114 / -211 / -128bp. PIEVERSE 2026-11-02 and PEPE 2026-09-18 entries were both stopped out before the rally.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-trendline4h-cloudflip-1h-exit-20261109-v1/results.csv
+    notes: BTC-cloud split is post hoc (idea from exp-trendline4h-break-success-patterns-20261110-v1 on 2024-2025 excursions), so it is a hypothesis needing forward validation, not a rule. Overlapping same-day trades are correlated. Survivorship not removed. Adapter extension hour_exit_from_entry in yoyo/layers/l3_backtest/nautilus_independent.py with tests/evaluation/test_nautilus_hour_exit_from_entry.py.
+
+  - experiment_id: exp-trendline4h-line-quality-20261110-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8a112f7905 (prototype and Pine V1.9 uncommitted)
+    status: accepted
+    question: Why do many V1.2/V1.8 4H trendlines look wrong, and does line selection V1.3 (fit ranking plus a 5-ATR floating cap) draw better lines in TradingView?
+    single_variable: Line selection only - equal-touch candidates rank by mean gap (line minus high, ATR) instead of span, and candidates whose mean gap exceeds 5 ATR are rejected. Break rule, touches, spans and drawing unchanged. Visual audit on a seeded 24-line 2026 sample plus all 528 OKX perps.
+    result: Visual audit found about 9 of 24 V1.2 lines floating above price, spanning V-shapes or anchored on spike wicks. With TradingView pivot ties, lines floating >5 ATR fall from 30.8 to 3.4 percent (>7 ATR 11.2 to 0), median gap 3.89 to 3.02 ATR, median span 174 to 128 bars, lines 6196 to 4461. Separately found V1.8's request.security engine read wrong history inside methods and accepted pierced lines; V1.9 keeps its own history arrays and matches Python line-for-line on LPT (9/9) and PIEVERSE (3/3), with engine fit equal to a chart-side recount.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-trendline4h-line-quality-20261110-v1/summary_stats.json
+    notes: Visual quality is the owner's call; the 5-ATR cap and fit ranking were chosen from a 24-line eyeball sample. Pine yoyo/evaluation/pine/spike_signal_cloud_v1_9.pine, private TV script SPIKE · 云带信号 V1.9. Earlier break census/backtests used V1.2 with strict pivot ties and are not rewritten.

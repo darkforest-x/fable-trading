@@ -1,0 +1,46 @@
+{
+  "experiment_id": "exp-trendline4h-cloudflip-1h-exit-20261109-v1",
+  "owner_rule_2026_11_09": "4h级别，当趋势线突破时，10根k内，出现云带反转，入场，止损默认这11根k的最低点，止盈等到1h云带反转",
+  "question": "Does the owner's 4H trendline-break + 4H cloud-flip long, stopped at the window low and exited on the 1H cloud flip, make money after real fees, and does the trendline add anything over the same cloud flip without a break?",
+  "registered_before_results": "2026-11-09; variant_2 added before any trade outcome of either arm was computed",
+  "data": {
+    "signal_bars": "data/crypto/market/okx_swap_4h_20261109 (OKX 4H, 528 live USDT perps, 2024-01 to 2026-11-09)",
+    "execution_bars": "data/crypto/market/okx_swap_1h_windows_20261109 (OKX 1H, fetched per trade window: 300 bars before entry to 480 bars after)"
+  },
+  "signal": {
+    "trendline_break": "V1.2 resistance line, owner defaults, break = second consecutive 4H close > line + 0.15 ATR14 (bar x)",
+    "cloud": "EMA20 / EMA50 of 4H close, recursive EMA seeded with the first close (as the cloud indicator draws it)",
+    "cloud_flip": "first 4H bar e in [x, x+10] with spread[e-1] <= 0 < spread[e]; no flip in the window = no trade",
+    "entry": "market at the close of 4H bar e (= close of the 1H bar ending at the same time), long only",
+    "stop": "lowest low of 4H bars x..e (the break bar through the entry bar, at most 11 bars; the causal reading of 'these 11 bars'), resting stop-market",
+    "exit": "market at the first completed 1H close after entry with 1H EMA20 < EMA50 (state, not event; trades entered while 1H is already bearish exit at the next 1H close and are counted)",
+    "no_other_management": "no target, no trailing, no breakeven"
+  },
+  "control": {
+    "name": "cloud flip without a trendline break",
+    "pool": "4H bullish cloud flips in the same symbol with no V1.2 break in [e-10, e], within +-180 4H bars of the signal",
+    "draws_per_signal": 2,
+    "seed": 20261109,
+    "matched": "same symbol, time block, entry trigger, stop window length (e-x+1 bars ending at entry) and the same 1H exit"
+  },
+  "costs": {
+    "taker_fee": 0.0005,
+    "maker_fee": 0.0002,
+    "source": "OKX Lv1 read 2026-10-23",
+    "slippage": "none (reported separately)",
+    "funding": "not modelled"
+  },
+  "engine": "NautilusTrader 1.231.0 via yoyo/layers/l3_backtest/nautilus_independent.run_native, 1H execution bars, opposite_hour_exit active from entry (adapter extension hour_exit_from_entry)",
+  "warmup": "signals and controls require e >= 60 4H bars after the symbol's first bar",
+  "censoring": "a trade still open at the end of its fetched window or at the last bar is closed there and flagged",
+  "variant_2": {
+    "owner_message_2026_11_09": "或者1h级别突破4h趋势线的时候 同时1h也是同向信号？",
+    "lines": "every V1.2 4H resistance line (lines.csv), scanned from its born close to its end close (4H break, age-out or replacement); not only lines that later broke on 4H",
+    "line_level": "time-linear through the two 4H anchor open times (as V1.8 draws it), evaluated at the 1H bar open time",
+    "signal": "first 1H close above the line after it is born (previous 1H close at or below the line); the 1H cloud (EMA20>EMA50 on 1H close) must be bullish at that same close, else the line gives no trade",
+    "entry": "market at that 1H close",
+    "stop": "lowest low of the 11 1H bars ending at the entry bar",
+    "exit": "same as main arm: first later 1H close with 1H EMA20 < EMA50",
+    "control": "2 random 1H bars per signal, same symbol, within +-720 1H bars, 1H cloud bullish at that close, at least 11 bars away from any variant-2 signal; same stop and exit; seed 20261109"
+  }
+}

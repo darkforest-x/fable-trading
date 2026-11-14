@@ -1,0 +1,34 @@
+{
+  "experiment_id": "exp-trendline4h-breakout-runs-20261109-v1",
+  "question": "How many 4H main-trendline (V1.2) closing breaks on OKX USDT perpetuals were followed by a large run, and is that more frequent than matched random 4H bars?",
+  "kind": "descriptive excursion census (no P&L backtest, no exit rule, no parameter search)",
+  "registered_before_results": "2026-11-09, written before any event was computed",
+  "data": {
+    "source": "OKX public history-candles bar=4H, confirmed candles only",
+    "path": "data/crypto/market/okx_swap_4h_20261109",
+    "universe": "every live USDT-settled SWAP on 2026-11-09 (delisted contracts absent; survivorship not removed)",
+    "start": "2024-01-01T00:00:00Z"
+  },
+  "signal": {
+    "indicator": "yoyo/evaluation/pine/auto_trendline_4h_v1_2.pine (owner defaults: swing 3, minSpan 72, gap 24, nearAtr 0.65), resistance side only",
+    "event": "收盘上破 = second consecutive 4H close above line + 0.15 ATR14",
+    "pivot_ties": "strict on both sides; bars that only qualify with ties are counted, not used",
+    "entry": "close of the break bar (known at that close)"
+  },
+  "stops": {
+    "bar_low": "low of the break bar",
+    "atr1": "entry - 1 x ATR14 at the break bar"
+  },
+  "min_risk_pct": 0.3,
+  "horizon_bars": 180,
+  "excursion": "max high strictly before the first bar whose low <= stop; the stop bar's own high is excluded (stop assumed first). Peak gain % and peak R = (peak - entry) / (entry - stop).",
+  "thresholds": {"gain_pct": [30, 50, 100], "peak_r": [10, 20, 46]},
+  "control": {
+    "draws_per_event": 5,
+    "pool": "same symbol, bars within +-180 4H bars of the event, full horizon available, excluding the event bar",
+    "seed": 20261109,
+    "same_entry_stop_horizon": true
+  },
+  "complete_horizon_only_for_comparison": "events with < 180 forward bars are listed separately (includes the owner's PIEVERSE example) and excluded from event-vs-control rates",
+  "costs": "taker 5bp per side reported as R cost per event; excursions are gross and descriptive, not realised returns"
+}

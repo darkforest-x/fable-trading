@@ -1,0 +1,14 @@
+{
+ "experiment_id": "exp-trendline4h-break-success-patterns-20261110-v1",
+ "success": "peak gain >= 30% before a 1-ATR stop within 180 4H bars (census definition)",
+ "split": "dev = breaks before 2026-01-01 (n 2359, base 9.7%), check = 2026 (n 2316, base 6.8% on full-horizon)",
+ "features_scanned": 22,
+ "replicated": {
+  "btc_4h_cloud_bull_and_break_volume_ge_0.917x_20bar_avg": {"share": "40-42%", "break_success_dev_check": [12.6, 9.5], "random_same_cell_dev_check": [8.8, 6.9], "lift_vs_random": [1.43, 1.38], "vs_other_breaks_pp_dev_check": [4.7, 4.6], "day_block_ci95_check": [0.6, 9.2]},
+  "btc_cloud_bear": "breaks underperform random in both periods (lift 0.68-0.90)",
+  "low_volume_break_lt_0.63x": "4.1-6.1% success, worst quintile in both periods"
+ },
+ "not_replicated": ["touches", "line span", "line age", "symbol age", "drop size", "distance above line", "ATR expansion", "30-bar range", "drawdown from 180-bar high", "42-bar return", "cloud spread", "breaks in prior 24h (weak, non-monotone)"],
+ "cluster_days": "70 days with >=15 breaks, 11 good (>=15% of breaks +30%); good days had BTC 4H cloud bull (median) and BTC 7d return 4.9% vs 1.7%. 2026-09-18 (19 breaks, PEPE) broke while BTC cloud was bearish; BTC flipped bull on 2026-09-19 00:00.",
+ "caveats": "peak-before-stop is a hindsight exit; 22 features tested; volume cutoff picked on dev only; same-day breaks are correlated (day-block CI); survivorship not removed"
+}
