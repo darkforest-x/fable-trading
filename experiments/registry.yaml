@@ -15,6 +15,51 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-intraday-hour-sweep-20261114-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8392221f41
+    status: rejected
+    question: Can BTC and ETH trade a one-minute sweep and reclaim of a trailing one-hour extreme without a breadth alarm?
+    single_variable: Fixed next-open reversal and one available 15-minute position slot. Compare 5- and 15-minute exits.
+    result: 35956 entries on OKX, January 2024 through April 2026. Mean signal net -0.09875% at 5m and -0.09753% at 15m, versus -0.11423% and -0.13388% in 35955 matched controls. Negative in every calendar year. Median 42 entries on 769 Shanghai dates with no archived breadth alarm.
+    notes: Matched controls use symbol, direction, UTC four-hour block and preceding volatility. Entry at next open. VectorBT charges 5bp per fill on both sides. No spread, slippage, contract rounding or funding. Counts without alarms use the all_5m_extended breadth census. Returns are per unit notional.
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-intraday-hour-sweep-20261114-v1/summary.csv
+
+  - experiment_id: exp-intraday-taker-absorption-20261114-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ad5a614bff
+    status: rejected
+    question: Does BTC closing against an extreme one-sided aggressive flow predict a tradable reversal?
+    single_variable: Fixed prior-day 90th percentile of absolute imbalance and opposing 5m candle. Compare 5- and 15-minute exits.
+    result: 440 entries in 2023 and 2024 on Binance USD-M. Mean net -0.10603% at 5m and -0.10264% at 15m, versus -0.10495% and -0.09670% in 440 matched controls. Both years negative. Median zero entries on 680 Shanghai dates with no archived breadth alarm.
+    notes: Matched controls use symbol, direction, UTC four-hour block and preceding volatility. Entry at next open. VectorBT charges 5bp per fill on both sides. No spread, slippage, contract rounding or funding. Counts without alarms use the all_5m_extended breadth census. Returns are per unit notional.
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-intraday-taker-absorption-20261114-v1/summary.csv
+
+  - experiment_id: exp-intraday-relative-break-20261114-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: a9de9c37d3
+    status: rejected
+    question: Do individual altcoin volume breakouts and first retests continue when BTC is quiet?
+    single_variable: Fix quiet BTC and individual high-volume break and retest, then compare 5- and 15-minute exits.
+    result: 4625 entries across BNB, DOGE, SOL and XRP on Binance USD-M, January 2023 through September 2026 UTC. Mean net -0.10760% at 5m and -0.12390% at 15m, versus -0.07376% and -0.03043% in 4620 controls. All four calendar years negative at 15m. Median 3 entries on 1243 complete Shanghai dates with no archived breadth alarm.
+    notes: Matched controls use symbol, direction, UTC four-hour block and preceding volatility. Entry at next open. VectorBT charges 5bp per fill on both sides. No spread, slippage, contract rounding or funding. Counts without alarms use the all_5m_extended breadth census. Returns are per unit notional.
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-intraday-relative-break-20261114-v1/summary.csv
+
   - experiment_id: exp-breadth-first-batch-15min-20261114-v1
     source_repo: darkforest-x/fable-trading
     source_commit: ec5b990294
