@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-breadth-first-batch-15min-20261114-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ec5b990294
+    status: inconclusive
+    question: Does a 15-minute sale capture the initial altcoin breadth rebound, and does BTC capture it at the same clocks?
+    single_variable: Exit time on unchanged freq36_ALT members versus the original six-hour exit. Separately compare BTC at the same and one-week-earlier clocks.
+    result: 25 historical 2026 entries through October 27. First-batch equal-weight mean +0.2211% at 15m (16 positive, worst -1.5844%, excluding best +0.0668%) versus +0.7909% at 6h (16 positive). Same-time BTC +0.0589% (14 positive), previous-week BTC -0.0906% (9 positive).
+    notes: Binance USD-M, VectorBT market fills with 5bp each side. Entry at next 5m open, scheduled 15-minute sale at third closing print. No spread, slippage, funding, contract rounding or small-wallet fill proof. 1486 constituents in 25 events. Previously studied 2026 history. BTC calendar reference does not control for volatility.
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-breadth-first-batch-15min-20261114-v1/event_returns.csv
+
   - experiment_id: exp-month-firstweek-owner-yolo-20261113-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 422f260622
