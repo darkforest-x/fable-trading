@@ -1,0 +1,11 @@
+{
+  "question": "When BTC is quiet, does an individual liquid altcoin's volume breakout and immediate successful retest give a tradable continuation?",
+  "source": "Binance USD-M 1m frozen files, data/research/ma6_knot_1m_20261011/series; native 5m aggregation. BNB, DOGE, SOL, XRP, BTC benchmark only. Entry dates Shanghai 2023-01-01 to end of tape (2026-09-30 UTC).",
+  "signal": "BTC 5m absolute open-to-close return no larger than its prior 288-bar median. The alt opens at/on the inside of the relevant previous 12-bar boundary, closes beyond it, absolute body return exceeds prior 288-bar median, and volume at least twice prior 12-bar median. Immediate next 5m bar touches the old boundary and closes outside. Both directions.",
+  "fills": "After confirmed retest, next 5m open. Scheduled exit at either 5 or 15 minutes. Tied clocks sorted by symbol; single occupied slot 15 minutes for both arms. No search, no stop. No global alarm trigger.",
+  "control": "Same-symbol nonsignal entry in same UTC 4h block and same categorical prior 1h volatility. Same side and duration. Independent comparisons, random seed 20261114.",
+  "costs": "5bp per market fill (user OKX schedule for comparison). Binance prices, no extra slippage, spread, funding, or contract rounding. Per-notional returns.",
+  "reproduce": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.intraday_relative_break",
+  "production_eligible": false,
+  "training_eligible": false
+}
