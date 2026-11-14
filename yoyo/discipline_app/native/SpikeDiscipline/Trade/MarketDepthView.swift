@@ -16,7 +16,6 @@ import SwiftUI
     let onSelectPrice: (String) -> Void
 
     @State private var model = MarketDepthModel()
-    @State private var viewEpoch = UUID()
 
     private var online: Bool { NetworkWatch.shared.online }
     private var streamEnabled: Bool { active && quoteFresh && online }
@@ -24,7 +23,7 @@ import SwiftUI
         guard streamEnabled, let value = Double(latestPrice ?? "") else { return false }
         return value.isFinite && value > 0
     }
-    private var streamKey: String { "\(symbol)|\(streamEnabled)|\(viewEpoch.uuidString)" }
+    private var streamKey: String { "\(symbol)|\(streamEnabled)" }
     private var currentBook: MarketDepthSnapshot? {
         guard streamEnabled, model.status == .live,
               let snapshot = model.snapshot, snapshot.symbol == symbol,
@@ -38,16 +37,17 @@ import SwiftUI
             columnHeader
 
             if let book = currentBook {
+                let largest = (book.asks + book.bids).compactMap { Double($0.contracts) }.max() ?? 1
                 VStack(spacing: 2) {
                     // OKX sends asks lowest-first. Reverse them so the best sell price sits
                     // immediately above the center price, with higher asks above it.
                     ForEach(Array(book.asks.reversed()), id: \.price) { level in
-                        levelButton(level, side: .sell)
+                        levelButton(level, side: .sell, largest: largest)
                     }
                     latestRow
                     // OKX sends bids highest-first; the best buy price belongs next to center.
                     ForEach(book.bids, id: \.price) { level in
-                        levelButton(level, side: .buy)
+                        levelButton(level, side: .buy, largest: largest)
                     }
                 }
             } else {
@@ -60,21 +60,9 @@ import SwiftUI
         }
         .padding(7)
         .frosted(RoundedRectangle(cornerRadius: 18, style: .continuous), veil: 0.78)
-        .task(id: streamKey) {
-            let token = UUID()
-            let url = MarketDepthEndpoint.url
-            await withTaskCancellationHandler {
-                await model.watch(token: token, key: streamKey, symbol: symbol, url: url, enabled: streamEnabled)
-            } onCancel: {
-                Task { @MainActor in model.stop(token: token) }
-            }
+        .onChange(of: streamKey, initial: true) { _, key in
+            model.start(key: key, symbol: symbol, url: MarketDepthEndpoint.url, enabled: streamEnabled)
         }
-        .onAppear {
-            let epoch = UUID()
-            viewEpoch = epoch
-            model.select(key: "\(symbol)|\(streamEnabled)|\(epoch.uuidString)")
-        }
-        .onChange(of: streamKey) { _, key in model.select(key: key) }
         .onDisappear { model.deactivate(key: streamKey) }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("\(Fmt.coin(symbol)) 永续盘口")
@@ -165,13 +153,12 @@ import SwiftUI
         var label: String { self == .sell ? "卖价" : "买价" }
     }
 
-    private func levelButton(_ level: MarketDepthLevel, side: Side) -> some View {
+    private func levelButton(_ level: MarketDepthLevel, side: Side, largest: Double) -> some View {
         let value = Trading.priceAtTick(level.price, tick: tick)
         let selectable = currentQuoteAvailable && currentBook != nil && canSelectPrice && value != nil
         return Button {
             guard selectable, let value,
                   let latest = currentBook, latest.symbol == symbol, latest.isTouchable(at: Date()) else { return }
-            Haptics.tap()
             onSelectPrice(value)
         } label: {
             HStack(spacing: 4) {
@@ -186,7 +173,15 @@ import SwiftUI
             .minimumScaleFactor(0.7)
             .padding(.horizontal, 5)
             .frame(height: 28)
-            .background(side.color.opacity(0.13), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+            .background {
+                GeometryReader { geo in
+                    let fraction = min(1, (Double(level.contracts) ?? 0) / largest)
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(side.color.opacity(0.15))
+                        .frame(width: geo.size.width * fraction)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+            }
             .contentShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
         }
         .buttonStyle(.plain)
@@ -223,7 +218,7 @@ struct MarketDepthSnapshot: Equatable {
     let receivedAt: Date
 
     /// `books5` publishes changed snapshots at 100 ms and may send a no-change refresh around
-    /// 60 s later. Keep the quiet-book allowance below that documented refresh interval.
+    /// 60 s later. Allow a small delivery margin for that refresh.
     func isTouchable(at now: Date) -> Bool {
         let exchangeAgeMs = now.timeIntervalSince1970 * 1000 - timestampMs
         let receiveAge = now.timeIntervalSince(receivedAt)
@@ -295,15 +290,27 @@ final class MarketDepthModel {
 
     private(set) var snapshot: MarketDepthSnapshot?
     private(set) var status: Status = .idle
+    private var streamTask: Task<Void, Never>?
     private var desiredKey: String?
     private var activeToken: UUID?
     private var activeSocket: URLSessionWebSocketTask?
+
+    func start(key: String, symbol: String, url: URL, enabled: Bool) {
+        select(key: key)
+        guard enabled, streamTask == nil else { return }
+        let token = UUID()
+        streamTask = Task { [weak self] in
+            await self?.watch(token: token, key: key, symbol: symbol, url: url, enabled: true)
+        }
+    }
 
     /// Synchronously retires the old key before SwiftUI starts the new task. A cancelled task that
     /// wakes later cannot claim another key or cancel the socket it does not own.
     func select(key: String) {
         guard desiredKey != key else { return }
         desiredKey = key
+        streamTask?.cancel()
+        streamTask = nil
         let priorSocket = activeSocket
         activeSocket = nil
         activeToken = nil
@@ -315,6 +322,8 @@ final class MarketDepthModel {
     func deactivate(key: String) {
         guard desiredKey == key else { return }
         desiredKey = nil
+        streamTask?.cancel()
+        streamTask = nil
         let priorSocket = activeSocket
         activeSocket = nil
         activeToken = nil
@@ -324,7 +333,7 @@ final class MarketDepthModel {
     }
 
     func watch(token: UUID, key: String, symbol: String, url: URL, enabled: Bool) async {
-        guard desiredKey == key, activeToken == nil else { return }
+        guard !Task.isCancelled, desiredKey == key, activeToken == nil else { return }
         guard enabled, Self.validSwapSymbol(symbol), ["wss", "ws"].contains(url.scheme?.lowercased() ?? "") else {
             status = .idle
             return
@@ -371,16 +380,6 @@ final class MarketDepthModel {
                 guard !Task.isCancelled, desiredKey == key, activeToken == token else { return }
             }
         }
-    }
-
-    func stop(token: UUID) {
-        guard activeToken == token else { return }
-        let priorSocket = activeSocket
-        activeSocket = nil
-        activeToken = nil
-        snapshot = nil
-        status = .idle
-        priorSocket?.cancel(with: .goingAway, reason: nil)
     }
 
     private func receive(socket: URLSessionWebSocketTask, symbol: String, key: String, token: UUID) async throws {

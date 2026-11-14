@@ -87,6 +87,23 @@ final class MarketDepthTests: XCTestCase {
         XCTAssertNil(model.snapshot)
     }
 
+    @MainActor
+    func testChangesStartOnlyTheNewestSubscription() async throws {
+        let model = MarketDepthModel()
+        let url = try XCTUnwrap(URL(string: "ws://127.0.0.1:1/ws/v5/public"))
+        model.start(key: "initial", symbol: symbol, url: url, enabled: false)
+        model.start(key: "first", symbol: symbol, url: url, enabled: true)
+        model.start(key: "second", symbol: "ETH-USDT-SWAP", url: url, enabled: true)
+        model.deactivate(key: "first")
+
+        for _ in 0..<100 where model.status == .idle {
+            await Task.yield()
+        }
+        XCTAssertNotEqual(model.status, .idle)
+        model.deactivate(key: "second")
+        XCTAssertEqual(model.status, .idle)
+    }
+
     private func decode(channel: String,
                         symbol: String,
                         asks: [[String]],
