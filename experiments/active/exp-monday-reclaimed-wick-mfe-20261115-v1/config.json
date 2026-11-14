@@ -1,0 +1,55 @@
+{
+  "experiment_id": "exp-monday-reclaimed-wick-mfe-20261115-v1",
+  "question": "For first weekly Monday 1.618 touches whose Binance UM 5m wick strictly crosses the level and whose same candle close strictly reclaims it, what do independent close-market entries with the same-candle extreme stop do over a maximum 72 hours?",
+  "single_variable": "Observation/entry cohort only: original frozen stored score > 0.5, altcoins excluding BTC/ETH, first touch per symbol/NY week/direction, strict same-candle wick penetration and close reclaim. Entry at completed 5m close; stop at same candle low/high; no target, trailing, or stop move.",
+  "frozen_score": {
+    "source": "experiments/active/exp-monday-limit-score-leak-audit-20261027-v1/scores_causal.csv.gz",
+    "column": "stored",
+    "parity_source": "experiments/active/exp-monday-limit-be-scalein-20261026-v1/scores.csv.gz",
+    "rule": "score > 0.5 (strict)",
+    "extension": "experiments/active/exp-monday-limit-live-october-20261101-v1/scored.csv.gz score_stored, only event IDs absent from the historical candidate ledger and with touch open time >= 2026-09-24T00:00:00Z; old stored score always wins on overlapping IDs",
+    "last_score_touch": "2026-10-27T23:55:00Z"
+  },
+  "universe": {
+    "historical_candidates": "experiments/active/exp-monday-limit-reclaim-20261024-v1/symbols/*/trades.csv.gz signal rows (reclaim_minutes=5, exit_mode=near_monday_edge)",
+    "historical_bars": "data/crypto/market/kline_preholdout_binance_um5m + kline_binance_um5m_forward_20260922 + research-spike_v128_recent_20260923",
+    "extension_bars": "experiments/active/exp-monday-limit-live-october-20261101-v1/symbols/<symbol>/new_bars.csv.gz",
+    "assets": "crypto_5m Binance UM altcoins; exclude BTCUSDT, ETHUSDT and non-crypto_5m jobs",
+    "touch_selection": "First weekly 1.618 OHLC touch per symbol/NY week/direction from the frozen candidate ledger. Do not replace a non-reclaim first touch with a later touch.",
+    "strict_event": "Long: touch-bar low < unrounded 1.618 level and close > level. Short: high > level and close < level. Equality does not qualify."
+  },
+  "entry_and_exit": {
+    "entry": "Market at completed signal 5m close; signal candle excluded from post-entry MFE and from stop matching.",
+    "initial_stop": "Touch candle low for long / high for short; fixed for the whole trade.",
+    "target": "None",
+    "max_holding": "72 hours from the completed signal candle close; close at the 72h market close if no stop has fired.",
+    "horizon_marks": ["1h", "6h", "24h", "72h"],
+    "overlap": "Independent HEDGING events can overlap; no shared balance, capacity limit, funding or portfolio return."
+  },
+  "engine": {
+    "name": "NautilusTrader",
+    "version": "1.231.0",
+    "entrypoint": "yoyo.layers.l3_backtest.nautilus_independent.run_native",
+    "order_path": "Market entry at completed 5m close; native initial stop-market; terminal market close at horizon.",
+    "stop_bar_mfe": "Conservative primary MFE excludes the stop-hit candle. Report OHLC/OLHC favorable-first stop-candle MFE sensitivities; a static single stop has no competing barrier, so terminal stop fill itself is path invariant."
+  },
+  "costs": {
+    "fee_source": "Owner-read OKX Lv1, 2026-10-23",
+    "taker_each_fill": 0.0005,
+    "maker_each_fill": 0.0002,
+    "execution_fee": "All entry, stop and timeout fills are market/taker; use 5bp on each actual fill.",
+    "slippage_bp_per_fill": 10,
+    "slippage": "Separate 10bp debit per fill on original entry notional; both entry and stop/timeout exit incur it.",
+    "funding": "not modeled"
+  },
+  "data_boundaries": {
+    "historical_start": "2020-01-06 score week; per-symbol listed history can begin later.",
+    "historical_source_end": "2026-09-23",
+    "extension_start": "2026-09-24",
+    "extension_last_bar_open": "2026-10-27T23:55:00Z",
+    "known_gap": "Binance daily 5m archive missing 2026-10-28; never bridge a missing 5m interval.",
+    "censor_rule": "A window with a missing 5m bar or source end before 72h is censored at its last continuous bar unless the native initial stop already closed the position. Censored marks are not counted as realized outcomes."
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}
