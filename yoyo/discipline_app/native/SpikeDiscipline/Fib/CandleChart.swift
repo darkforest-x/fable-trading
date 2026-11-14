@@ -110,6 +110,104 @@ struct ChartReplayViewportFit {
     }
 }
 
+/// Candle indices and OHLC bounds for the part of the series occupying the current horizontal viewport.
+/// The initial price scale uses these bounds; reference annotations can be added separately by preference.
+struct ChartVisibleBarWindow {
+    static func indices(count: Int, left: CGFloat, right: CGFloat) -> ClosedRange<Int>? {
+        guard count > 0, left.isFinite, right.isFinite, right >= left else { return nil }
+        let first = max(0, Int(floor(left))), last = min(count - 1, Int(ceil(right)))
+        return first <= last ? first...last : nil
+    }
+
+    static func ohlc(_ bars: [Candle], indices: ClosedRange<Int>?) -> ChartOHLCBounds? {
+        guard let indices, indices.lowerBound >= 0, indices.upperBound < bars.count else { return nil }
+        var low = Double.infinity, high = -Double.infinity
+        for bar in bars[indices] where bar.low.isFinite && bar.high.isFinite {
+            low = min(low, bar.low); high = max(high, bar.high)
+        }
+        guard low.isFinite, high.isFinite, low <= high else { return nil }
+        return ChartOHLCBounds(low: low, high: high)
+    }
+}
+
+struct ChartOHLCBounds: Equatable {
+    let low: Double
+    let high: Double
+}
+
+/// A drawable price annotation with the time window where its value is active.
+struct ChartPriceLevel {
+    let price: Double
+    var startTime: Double? = nil
+    var endTime: Double? = nil
+
+    func overlaps(start: Double, end: Double) -> Bool {
+        guard price.isFinite, price > 0, start.isFinite, end.isFinite, end > start else { return false }
+        return (endTime ?? .infinity) > start && (startTime ?? -.infinity) < end
+    }
+}
+
+/// Keeps ordinary charts centered on visible OHLC while allowing a user-selected full reference fit.
+/// Explicit replay fits retain their prior domain unless their caller excluded references altogether.
+struct ChartReferenceScalePolicy {
+    static func includesReferences(userPreference: Bool, callerAllows: Bool, explicitReplay: Bool) -> Bool {
+        callerAllows && (userPreference || explicitReplay)
+    }
+}
+
+/// The final y-domain after visible OHLC, optional in-window annotations, plot padding and manual transforms.
+struct ChartPriceDomain: Equatable {
+    let low: Double
+    let high: Double
+}
+
+/// Allocation-free y-scale accumulator used by the renderer on each frame.
+struct ChartPriceScale {
+    private var low: Double
+    private var high: Double
+
+    init(ohlc: ChartOHLCBounds?) {
+        low = ohlc?.low ?? .infinity
+        high = ohlc?.high ?? -.infinity
+    }
+
+    mutating func include(_ level: ChartPriceLevel, visibleStart: Double?, visibleEnd: Double?) {
+        guard let visibleStart, let visibleEnd, level.overlaps(start: visibleStart, end: visibleEnd) else { return }
+        include(level.price)
+    }
+
+    mutating func include(_ price: Double) {
+        guard price.isFinite, price > 0 else { return }
+        low = min(low, price); high = max(high, price)
+    }
+
+    func domain(topFraction: Double, bottomFraction: Double, yZoom: Double = 1, yShift: Double = 0) -> ChartPriceDomain {
+        var lo = low, hi = high
+        if !lo.isFinite || !hi.isFinite { lo = 0; hi = 1 }
+        if hi - lo < hi * 1e-6 { let pad = max(hi * 0.001, 1e-9); lo -= pad; hi += pad }
+        let top = max(0, topFraction), bottom = max(0, bottomFraction)
+        let span = hi - lo
+        let usable = max(0.2, 1 - top - bottom)
+        let full = span / usable
+        let l0 = lo - full * bottom, h0 = hi + full * top
+        let zoom = yZoom.isFinite && yZoom > 0 ? yZoom : 1
+        let shift = yShift.isFinite ? yShift : 0
+        let half = (h0 - l0) / 2 * zoom, center = (l0 + h0) / 2 + shift * (h0 - l0)
+        return ChartPriceDomain(low: center - half, high: center + half)
+    }
+}
+
+struct ChartPlotReserve {
+    static func bottomFraction(wallpaper: Bool, hasBottomOverlay: Bool, bottomReserve: Double, plotHeight: Double) -> Double {
+        guard wallpaper else { return 0.07 }
+        let existing = min(0.6, bottomReserve + 0.04)
+        guard !hasBottomOverlay else { return existing }
+        // Volume occupies the bottom 8% above the time labels. Leave four points above its tallest bar.
+        let volumeClearance = 0.08 + 28 / max(plotHeight, 1)
+        return min(0.6, max(existing, volumeClearance))
+    }
+}
+
 /// A sparse source-bar time axis. Bar indices remain available to drawing code, but their horizontal
 /// coordinates follow elapsed periods so missing source candles stay visible as empty time slots.
 struct ChartTimeAxis {
@@ -218,7 +316,7 @@ struct CandleChart: View {
     var highlightColor: Color? = nil
     /// Highlight the event's actual candle when the service resolved one. Nil means the bar is unknown.
     var focusBarTime: Double? = nil
-    /// Far monthly extensions remain in the level legend/drawing but do not flatten the candle price scale.
+    /// Caller-level exclusion for event/replay routes; the user's reference-price fit preference is separate.
     var fitReferenceLevels = true
     /// Also mark the first 1.618 touch of each previous week in `history` (found from the bars).
     var markHistory = false
@@ -251,6 +349,7 @@ struct CandleChart: View {
     @State private var viewportInteracted = false
     @State private var resetGeneration = Int.min
     @AppStorage("touch.highScore") private var highScore = 0.5
+    @AppStorage("chart.fitReferencePrices") private var fitReferencePrices = false
 
     private let axisWidth: CGFloat = 58
     private let timeHeight: CGFloat = 20
@@ -259,6 +358,11 @@ struct CandleChart: View {
     /// Historical cloud replays have a bounded focus range; live and non-cloud charts keep their
     /// existing index-based viewport and spacing.
     private var timestampReplay: Bool { timestampFocus || (cloud && focusRange != nil) }
+    private var fitReferencePricesInDomain: Bool {
+        ChartReferenceScalePolicy.includesReferences(userPreference: fitReferencePrices,
+                                                     callerAllows: fitReferenceLevels,
+                                                     explicitReplay: timestampFocus || focusRange != nil)
+    }
 
     var body: some View {
         // Paused unless a fling is gliding; then it redraws once per display frame.
@@ -270,10 +374,12 @@ struct CandleChart: View {
             // The time axis sits just above the floating bottom UI in wallpaper mode.
             let axisY = wallpaper ? plot.maxY - bottomOverlay - 12 : plot.maxY + timeHeight / 2 + 1
             let layout = Layout(bars: bars, spacing: spacing, offset: glide?.offset(at: timeline.date) ?? offset, plot: plot, rightPad: rightPad,
-                                period: period, range: range, lines: lines, wallpaper: wallpaper,
-                                bottomReserve: wallpaper ? Double((bottomOverlay + 34) / max(plot.height, 1)) : 0, yShift: yShift, yZoom: yZoom,
+                                period: period, range: range, history: history, lines: lines, wallpaper: wallpaper,
+                                bottomReserve: wallpaper ? Double((bottomOverlay + 34) / max(plot.height, 1)) : 0,
+                                hasBottomOverlay: bottomOverlay > 0, yShift: yShift, yZoom: yZoom,
                                 timestampAxis: timestampReplay, focusRange: focusRange, executions: executionMarkers,
-                                fitReferenceLevels: fitReferenceLevels)
+                                fitReferenceLevels: fitReferencePricesInDomain,
+                                fitHistoricalLevels: fitReferencePrices && fitReferenceLevels)
             ZStack(alignment: .topLeading) {
                 if wallpaper { (scheme == .dark ? ChartPalette.hex(0x0B0E14) : Color.white) }
                 Canvas(rendersAsynchronously: false) { context, _ in
@@ -567,9 +673,10 @@ struct CandleChart: View {
         let high: Double
 
         init(bars: [Candle], spacing: CGFloat, offset: CGFloat, plot: CGRect, rightPad: CGFloat, period: CandlePeriod, range: FibRange?,
-             lines: [ChartLine], wallpaper: Bool, bottomReserve: Double, yShift: Double, yZoom: Double,
+             history: [FibRange], lines: [ChartLine], wallpaper: Bool, bottomReserve: Double, hasBottomOverlay: Bool,
+             yShift: Double, yZoom: Double,
              timestampAxis: Bool = false, focusRange: ClosedRange<Double>? = nil, executions: [ExecutionMarker] = [],
-             fitReferenceLevels: Bool = true) {
+             fitReferenceLevels: Bool = true, fitHistoricalLevels: Bool = false) {
             // Live charts retain their O(visible-bars) layout work; only the short historical replay
             // window materializes a timestamp axis.
             let axis = ChartTimeAxis(times: timestampAxis ? bars.map(\.time) : [], periodSeconds: period.seconds)
@@ -586,49 +693,49 @@ struct CandleChart: View {
             } else if bars.isEmpty {
                 visible = nil
             } else {
-                let first = max(0, Int(floor(left))), last = min(bars.count - 1, Int(ceil(right)))
-                visible = first <= last ? first...last : nil
+                visible = ChartVisibleBarWindow.indices(count: bars.count, left: left, right: right)
             }
             self.bars = bars; self.spacing = spacing; self.plot = plot; self.period = period
             self.timestampAxis = timestampAxis; timeAxis = axis
             timelineEnd = end; rightIndex = right
             firstVisible = visible?.lowerBound ?? 0
             lastVisible = visible?.upperBound ?? -1
-            var lo = Double.infinity, hi = -Double.infinity
-            if firstVisible <= lastVisible {
-                for bar in bars[firstVisible...lastVisible] { lo = min(lo, bar.low); hi = max(hi, bar.high) }
+            let visibleStart = visible.map { bars[$0.lowerBound].time }
+            let visibleEnd = visible.map { bars[$0.upperBound].time + period.seconds }
+            var priceScale = ChartPriceScale(ohlc: ChartVisibleBarWindow.ohlc(bars, indices: visible))
+            if fitReferenceLevels {
+                if let range {
+                    priceScale.include(ChartPriceLevel(price: range.lower, startTime: range.start, endTime: range.end),
+                                       visibleStart: visibleStart, visibleEnd: visibleEnd)
+                    priceScale.include(ChartPriceLevel(price: range.upper, startTime: range.start, endTime: range.end),
+                                       visibleStart: visibleStart, visibleEnd: visibleEnd)
+                }
+                for line in lines where line.fitsScale {
+                    priceScale.include(ChartPriceLevel(price: line.price, startTime: line.startTime, endTime: line.endTime),
+                                       visibleStart: visibleStart, visibleEnd: visibleEnd)
+                }
             }
-            if fitReferenceLevels, let range, firstVisible <= lastVisible,
-               bars[lastVisible].time + period.seconds > range.start, bars[firstVisible].time < range.end {
-                lo = min(lo, max(0, range.lower)); hi = max(hi, range.upper)
-            }
-            if fitReferenceLevels, firstVisible <= lastVisible {
-                let visibleStart = bars[firstVisible].time
-                let visibleEnd = bars[lastVisible].time + period.seconds
-                for line in lines where line.fitsScale && line.price > 0 {
-                    let lineStart = line.startTime ?? -Double.infinity
-                    let lineEnd = line.endTime ?? Double.infinity
-                    guard lineEnd > visibleStart, lineStart < visibleEnd else { continue }
-                    lo = min(lo, line.price); hi = max(hi, line.price)
+            if fitHistoricalLevels, let visibleStart, let visibleEnd {
+                for past in history where past.end > visibleStart && past.start < visibleEnd {
+                    priceScale.include(ChartPriceLevel(price: past.lower, startTime: past.start, endTime: past.end),
+                                       visibleStart: visibleStart, visibleEnd: visibleEnd)
+                    priceScale.include(ChartPriceLevel(price: past.upper, startTime: past.start, endTime: past.end),
+                                       visibleStart: visibleStart, visibleEnd: visibleEnd)
                 }
             }
             if timestampAxis {
                 for fill in executions where fill.time.isFinite && fill.price.isFinite && fill.price > 0 {
                     let position = axis.position(atTime: fill.time)
-                    if left <= position && position <= right { lo = min(lo, fill.price); hi = max(hi, fill.price) }
+                    if left <= position && position <= right { priceScale.include(fill.price) }
                 }
             }
-            if !lo.isFinite || !hi.isFinite { lo = 0; hi = 1 }
-            if hi - lo < hi * 1e-6 { let pad = max(hi * 0.001, 1e-9); lo -= pad; hi += pad }
-            let span = hi - lo
-            // Fractions of the plot kept clear: top for the controls/readout, bottom for floating UI.
+            // Fractions of the plot kept clear: top for controls/readout, bottom for overlays and volume.
             let topFrac = wallpaper ? 0.06 : 0.07 + 28 / max(Double(plot.height) - 28, 1)
-            let botFrac = wallpaper ? min(0.6, bottomReserve + 0.04) : 0.07
-            let usable = max(0.2, 1 - topFrac - botFrac)
-            let full = span / usable
-            let l0 = lo - full * botFrac, h0 = hi + full * topFrac
-            let half = (h0 - l0) / 2 * yZoom, center = (l0 + h0) / 2 + yShift * (h0 - l0)
-            low = center - half; high = center + half
+            let botFrac = ChartPlotReserve.bottomFraction(wallpaper: wallpaper, hasBottomOverlay: hasBottomOverlay,
+                                                          bottomReserve: bottomReserve, plotHeight: Double(plot.height))
+            let domain = priceScale.domain(topFraction: topFrac, bottomFraction: botFrac,
+                                           yZoom: yZoom, yShift: yShift)
+            low = domain.low; high = domain.high
         }
 
         func x(_ index: CGFloat) -> CGFloat {

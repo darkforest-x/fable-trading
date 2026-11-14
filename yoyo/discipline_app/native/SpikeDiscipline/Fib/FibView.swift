@@ -1,9 +1,6 @@
 import SwiftUI
 
-/// 1.618 (owner 2026-11-08, replicating the web mobile workbench): a full-screen chart with floating
-/// controls only — the coin strip (today's touches, BTC / ETH pinned), the coin card (tap to open
-/// 最新触价), and one bottom bar with periods, chart settings, follow and a small 开单 pill.
-/// Previous weeks' ranges and custom candle colours come from ChartStyle / MondayHistory.
+/// Live chart and touch replays share the same contract selector and period controls.
 struct FibView: View {
     @Environment(SessionStore.self) private var session
     @Environment(AccountStore.self) private var account
@@ -28,26 +25,7 @@ struct FibView: View {
     static let pinned = ["BTC-USDT-SWAP", "ETH-USDT-SWAP"]
 
     var body: some View {
-        GeometryReader { proxy in
-            let top = proxy.safeAreaInsets.top, bottom = proxy.safeAreaInsets.bottom
-            ZStack(alignment: .top) {
-                chart(top: top, bottom: bottom).ignoresSafeArea()
-                VStack(alignment: .leading, spacing: 8) {
-                    coinStrip
-                    HStack(alignment: .top, spacing: 8) {
-                        coinCard
-                        Spacer(minLength: 8)
-                        rotateButton
-                    }
-                    Spacer(minLength: 0)
-                    if navigation.monthlyTouch == nil, fib.current == nil && fib.error != nil && candles.bars.isEmpty { offlineNote }
-                    dock
-                }
-                .padding(.horizontal, 12)
-                .padding(.top, 4)
-                .padding(.bottom, 78)
-            }
-        }
+        liveChartWorkspace
         .sheet(isPresented: $chooser) { FibChooser().presentationDetents([.large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $settings) { ChartSettingsSheet().presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
         .onChange(of: reselect) { _, _ in follow += 1 }   // tab tapped again → back to the latest bar
@@ -83,6 +61,29 @@ struct FibView: View {
         .onChange(of: chartKey) { _, _ in showCandles() }
         .onChange(of: active) { _, now in if now { showCandles() } }
         .onAppear { if active { showCandles() } }
+    }
+
+    private var liveChartWorkspace: some View {
+        VStack(spacing: 0) {
+            coinStrip.padding(.horizontal, 8)
+            Divider()
+            HStack(spacing: 8) {
+                coinCard
+                Spacer(minLength: 0)
+                rotateButton
+            }
+            .padding(.horizontal, 12)
+            Divider()
+            chart(top: 0, bottom: 0)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            if navigation.monthlyTouch == nil, fib.current == nil, fib.error != nil, candles.bars.isEmpty {
+                offlineNote
+            }
+            Divider()
+            dock
+        }
+        .padding(.bottom, 68)
+        .background(Color(uiColor: .systemBackground))
     }
 
     private var chartSymbol: String { navigation.monthlyTouch?.symbol ?? fib.chartSymbol }
@@ -162,7 +163,7 @@ struct FibView: View {
                         focusBarTime: replay?.locatedMarkerMs.map { $0 / 1000 }, fitReferenceLevels: replay == nil,
                         markHistory: replay == nil, colors: style.colors,
                         watermark: symbol.isEmpty ? nil : Fmt.coin(symbol) + "USDT", followToken: follow, wallpaper: true,
-                        topInset: top + 58, bottomOverlay: bottom + 78 + 50,
+                        topInset: top, bottomOverlay: bottom,
                         onNeedOlder: { if replay == nil { candles.loadOlder() } })
             if chartBars.isEmpty && !symbol.isEmpty {
                 if navigation.monthlyTouch != nil {
@@ -197,8 +198,7 @@ struct FibView: View {
             HStack(spacing: 2) { ForEach(Self.pinned, id: \.self) { stripChip($0, edge: nil, compact: true) } }
                 .padding(.trailing, 4)
         }
-        .frame(height: 48)
-        .frosted(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .frame(height: 44)
     }
 
     private var stripSourcePicker: some View {
@@ -271,10 +271,13 @@ struct FibView: View {
 
     /// Turns the chart to landscape (owner 2026-11-08 item 6); also works with the rotation lock on.
     private var rotateButton: some View {
-        RoundIcon(systemName: "rotate.right", size: 36) { Orientation.rotate(landscape: true) }.accessibilityLabel("横屏查看")
+        Button { Haptics.tap(); Orientation.rotate(landscape: true) } label: {
+            Image(systemName: "rotate.right").frame(width: 44, height: 44).contentShape(.rect)
+        }
+        .buttonStyle(.plain).accessibilityLabel("横屏查看")
     }
 
-    /// Floating coin card (tap → 最新触价 list): logo, coin, live price and this week's touch.
+    /// Contract selector (tap → 最新触价 list): logo, coin, live price and this week's touch.
     private var coinCard: some View {
         let symbol = chartSymbol, replay = replaySnapshot
         let monthTouch = stripSource == .monthFirstWeek ? monthlyFeed.events
@@ -312,8 +315,8 @@ struct FibView: View {
                         .padding(.leading, 4)
                 }
             }
-            .padding(.leading, 8).padding(.trailing, 14).padding(.vertical, 8)
-            .frosted(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .frame(minHeight: 46)
+            .contentShape(.rect)
         }
         .buttonStyle(CardPressStyle())
         .accessibilityLabel("最新触价列表，当前 \(Fmt.coin(symbol))")
@@ -345,8 +348,8 @@ struct FibView: View {
             .disabled(locked || navigation.monthlyTouch != nil || row == nil || !fib.fresh || !fib.live)
             .accessibilityLabel("快捷开单 1R")
         }
-        .padding(5)
-        .frosted(Capsule())
+        .padding(.horizontal, 8)
+        .frame(minHeight: 46)
     }
 
     private var offlineNote: some View {
@@ -436,6 +439,7 @@ struct TrailingIcon: LabelStyle {
 
 /// 图表设置: layers and candle colours (presets or custom), shared by 1.618 and 合约.
 struct ChartSettingsSheet: View {
+    @AppStorage("chart.fitReferencePrices") private var fitReferencePrices = false
     @Environment(FibStore.self) private var fib
     @Environment(ChartStyle.self) private var style
     @Environment(\.dismiss) private var dismiss
@@ -444,6 +448,13 @@ struct ChartSettingsSheet: View {
         @Bindable var style = style
         NavigationStack {
             Form {
+                Section {
+                    Toggle("同时显示参考价", isOn: $fitReferencePrices)
+                } header: {
+                    Text("价格刻度")
+                } footer: {
+                    Text("默认按可见 K 线缩放。开启后，远端参考线也会进入画面。")
+                }
                 Section("图层") {
                     Toggle("云带", isOn: $fib.showCloud)
                     Toggle("六均线", isOn: $fib.showAverages)

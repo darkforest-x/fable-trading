@@ -33,15 +33,21 @@ struct TradeView: View {
                 terminalHeader
                 Divider()
                 if showingChart {
-                    ZStack(alignment: .bottom) {
-                        chart(existing: existing, top: 0, bottom: 0)
-                        VStack(spacing: 8) {
+                    VStack(spacing: 0) {
+                        chart(existing: existing)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        Divider()
+                        HStack(spacing: 6) {
                             dock
                             Button { Haptics.select(); showingChart = false } label: {
-                                Label("返回交易", systemImage: "arrow.uturn.backward").font(.subheadline.weight(.bold))
-                            }.buttonStyle(.pill(.frosted, height: 40))
-                        }.padding(.bottom, 76)
+                                Text("返回交易").font(.scaled(size: 13, weight: .semibold)).fixedSize()
+                            }
+                            .buttonStyle(.pill(.soft, height: 34))
+                        }
+                        .padding(.horizontal, 8)
+                        .frame(minHeight: 46)
                     }
+                    .padding(.bottom, 68)
                 } else {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 12) {
@@ -134,12 +140,10 @@ struct TradeView: View {
                 }.buttonStyle(.plain).disabled(ticket.reviewing || account.pendingEntry != nil)
                     .accessibilityLabel("选择合约，当前 " + Fmt.coin(ticket.symbol))
                 Spacer(minLength: 2)
-                headerIcon(showingChart ? "slider.horizontal.3" : "chart.xyaxis.line", showingChart ? "返回交易" : "合约 K 线") {
-                    showingChart.toggle()
-                }
                 if showingChart {
                     headerIcon("rotate.right", "横屏查看") { Orientation.rotate(landscape: true) }
                 } else {
+                    headerIcon("chart.xyaxis.line", "合约 K 线") { showingChart = true }
                     headerIcon("ellipsis.circle", "交易设置") { showSettings = true }
                 }
             }
@@ -181,7 +185,7 @@ struct TradeView: View {
 
     // MARK: chart
 
-    private func chart(existing: Position?, top: CGFloat, bottom: CGFloat) -> some View {
+    private func chart(existing: Position?) -> some View {
         let symbol = ticket.symbol
         let row = fib.current?.items.first { $0.symbol == symbol }
         let currentRange = row.flatMap { fib.range(for: $0) } ?? history.currentRange(for: symbol)
@@ -198,7 +202,7 @@ struct TradeView: View {
                         innerLines: fib.showInternal, averages: fib.showAverages, cloud: fib.showCloud,
                         lines: lines, markers: touches.markers(row), markHistory: true,
                         colors: style.colors, watermark: Fmt.coin(symbol) + "USDT", followToken: follow, wallpaper: true,
-                        topInset: top + 12, bottomOverlay: bottom + 155,
+                        topInset: 0, bottomOverlay: 0,
                         onNeedOlder: { candles.loadOlder() })
             if candles.bars.isEmpty {
                 if candles.error == nil { ProgressView() } else { Text(candles.error ?? "").font(.footnote).foregroundStyle(Color.muted) }
@@ -219,8 +223,6 @@ struct TradeView: View {
             }
             .buttonStyle(.plain).accessibilityLabel("跟随最新")
         }
-        .padding(5)
-        .frosted(Capsule())
     }
 
 }

@@ -1,9 +1,9 @@
 import SwiftUI
 
 enum MonitorSegment: String, CaseIterable, Identifiable {
-    case paper, alerts, cloud, touches
+    case touches, cloud, paper, alerts
     var id: String { rawValue }
-    var title: String { switch self { case .paper: "模拟盘"; case .alerts: "报警"; case .cloud: "云带"; case .touches: "触价" } }
+    var title: String { switch self { case .touches: "触价"; case .cloud: "12H 云带"; case .paper: "模拟盘"; case .alerts: "极值插针" } }
 }
 
 /// 监控 (owner 2026-11-06): 1.618 paper accounts, market alarms and the 12H cloud board — read-only.
@@ -27,19 +27,20 @@ struct MonitorView: View {
     @Environment(\.reselect) private var reselect
 
     var body: some View {
-        ZStack(alignment: .top) {
+        ZStack {
             AmbientBackground()
-            VStack(alignment: .leading, spacing: 8) {
-                VStack(alignment: .leading, spacing: 8) {
-                    PageHeader(title: "监控") {
-                        RoundIcon(systemName: "bell", badge: notices.unread > 0) { notices.markRead(); showNotifications = true }
-                            .accessibilityLabel(notices.unread > 0 ? "通知，\(notices.unread) 条未读" : "通知")
-                    }
-                    PagerSegment(options: MonitorSegment.allCases.map { ($0, $0.title) }, progress: progress) { target in
-                        withAnimation(.spring(response: 0.38, dampingFraction: 0.88)) { page = target }
-                    }
+            VStack(spacing: 0) {
+                CompactPageHeader(title: "全市场监控") {
+                    RoundIcon(systemName: "bell", badge: notices.unread > 0) { notices.markRead(); showNotifications = true }
+                        .accessibilityLabel(notices.unread > 0 ? "通知，\(notices.unread) 条未读" : "通知")
+                }
+                PagerSegment(options: MonitorSegment.allCases.map { ($0, $0.title) }, progress: progress) { target in
+                    withAnimation(.spring(response: 0.38, dampingFraction: 0.88)) { page = target }
                 }
                 .padding(.horizontal, 14)
+                .padding(.vertical, 7)
+                .background(Color(uiColor: .systemBackground))
+                .overlay(alignment: .bottom) { Color.primary.opacity(0.07).frame(height: 1) }
                 if let connection = session.connection {
                     pager(connection)
                 } else {
@@ -47,6 +48,7 @@ struct MonitorView: View {
                     Spacer()
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
         .environment(\.openStrategy, OpenStrategyAction { sheet = $0 })
         .sheet(item: $sheet) { item in
@@ -124,40 +126,27 @@ struct PagerSegment<T: Hashable>: View {
     private var nearest: Int { min(options.count - 1, max(0, Int(progress.rounded()))) }
 
     var body: some View {
-        VStack(spacing: 7) {
-            GeometryReader { proxy in
-                let width = (proxy.size.width - 6) / CGFloat(max(options.count, 1))
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Color(light: .white, dark: Color.white.opacity(0.16)))
-                        .shadow(color: .black.opacity(0.08), radius: 6, y: 2)
-                        .frame(width: width, height: proxy.size.height - 6)
-                        .offset(x: 3 + width * min(CGFloat(options.count - 1), max(0, progress)))
-                    HStack(spacing: 0) {
-                        ForEach(Array(options.enumerated()), id: \.offset) { index, option in
-                            let on = index == nearest
-                            Button { guard !on else { return }; select(option.0) } label: {
-                                Text(option.1).font(.scaled(size: 14, weight: on ? .semibold : .medium))
-                                    .foregroundStyle(on ? Color.ink : Color.muted)
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity).contentShape(.capsule)
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityAddTraits(on ? .isSelected : [])
-                        }
+        ScrollView(.horizontal) {
+            HStack(spacing: 6) {
+                ForEach(Array(options.enumerated()), id: \.offset) { index, option in
+                    let on = index == nearest
+                    Button { guard !on else { return }; select(option.0) } label: {
+                        Text(option.1)
+                            .font(.scaled(size: 12, weight: on ? .semibold : .medium))
+                            .foregroundStyle(on ? Color(uiColor: .systemBackground) : Color.ink)
+                            .padding(.horizontal, 11)
+                            .frame(height: 32)
+                            .background(on ? Color.ink : Color.field, in: .capsule)
+                            .contentShape(.capsule)
                     }
-                    .padding(3)
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(on ? .isSelected : [])
                 }
             }
-            .frame(height: 36)
-            .background(Color.field, in: .capsule)
-            HStack(spacing: 5) {
-                ForEach(0..<options.count, id: \.self) { index in
-                    let weight = max(0, 1 - abs(progress - CGFloat(index)))
-                    Capsule().fill(Color.accentColor.opacity(0.2 + 0.8 * weight))
-                        .frame(width: 8 + 14 * weight, height: 3)
-                }
-            }
-            .accessibilityHidden(true)
+            .animation(.snappy, value: nearest)
         }
+        .scrollIndicators(.hidden)
+        .frame(height: 34)
     }
 }
 

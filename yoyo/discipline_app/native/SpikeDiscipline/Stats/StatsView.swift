@@ -18,38 +18,53 @@ struct StatsView: View {
     @State private var picked: String?
     @State private var scroll = ScrollPosition(edge: .top)
     @Environment(\.reselect) private var reselect
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var key: String { "\(session.connection?.accountId ?? "")|\(session.connection?.mode ?? "")|\(days)" }
 
     var body: some View {
         ZStack {
             AmbientBackground()
-            ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    PageHeader(title: "统计") {
-                        RoundIcon(systemName: "gearshape") { showSettings = true }.accessibilityLabel("设置")
-                    }
-                    if session.connection == nil { ConnectPrompt() }
-                    hero
-                    SoftSegment(selection: $days, options: [(7, "7天"), (30, "30天"), (0, "全部")])
-                    tiles
-                    curve
-                    directions
-                    symbols
-                    Button { Haptics.open(); discipline = true } label: { disciplineRow }.buttonStyle(CardPressStyle())
+            VStack(spacing: 0) {
+                CompactPageHeader(title: "表现统计", subtitle: "账户净值 · App 内已平仓交易") {
+                    RoundIcon(systemName: "gearshape") { showSettings = true }.accessibilityLabel("设置")
                 }
-                .padding(.horizontal, 14)
-                .padding(.bottom, 24)
+                SoftSegment(selection: $days, options: [(7, "近 7 天"), (30, "近 30 天"), (0, "全部历史")])
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 7)
+                    .background(Color(uiColor: .systemBackground))
+                    .overlay(alignment: .bottom) { Color.primary.opacity(0.07).frame(height: 1) }
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 10) {
+                        if session.connection == nil { ConnectPrompt() }
+                        LoadState(loading: loading, error: error, stale: data != nil)
+                        hero
+                        curve
+                        directions
+                        symbols
+                        Button { Haptics.open(); discipline = true } label: { disciplineRow }.buttonStyle(CardPressStyle())
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.top, 10)
+                    .padding(.bottom, 24)
+                }
+                .scrollPosition($scroll)
+                .refreshable { await load(); Haptics.success() }
+                .contentMargins(.bottom, 96, for: .scrollContent)
+                .scrollEdgeEffectHidden(true, for: [.top, .bottom])
             }
-            .scrollPosition($scroll)
-            .refreshable { await load(); Haptics.success() }
-            .contentMargins(.bottom, 96, for: .scrollContent)
-            .scrollEdgeEffectHidden(true, for: [.top, .bottom])
         }
         .sheet(isPresented: $discipline) {
             NavigationStack { DisciplineView() }.presentationDragIndicator(.visible)
         }
-        .onChange(of: days) { _, _ in Haptics.select(); picked = nil; restore() }
+        .onChange(of: days) { _, _ in Haptics.select(); picked = nil }
+        .onChange(of: key) { _, _ in
+            data = nil
+            error = nil
+            loading = false
+            picked = nil
+            restore()
+        }
         .onChange(of: reselect) { _, _ in withAnimation(.snappy) { scroll.scrollTo(edge: .top) } }
         .onAppear { if data == nil { restore() } }
         .task(id: "\(key)|\(active)") {
@@ -63,9 +78,12 @@ struct StatsView: View {
 
     /// Last statistics of this account and range from a previous launch (display only, LaunchCache).
     private func restore() {
-        guard let connection = session.connection,
-              let saved = LaunchCache.read(Statistics.self, "stats-\(days)", scope: account.scope),
-              saved.periodDays == days, saved.accountId == connection.accountId, saved.mode == connection.mode else { return }
+        guard let connection = session.connection else { data = nil; return }
+        guard let saved = LaunchCache.read(Statistics.self, "stats-\(days)", scope: account.scope),
+              saved.periodDays == days, saved.accountId == connection.accountId, saved.mode == connection.mode else {
+            data = nil
+            return
+        }
         data = saved
     }
 
@@ -73,7 +91,7 @@ struct StatsView: View {
         guard let connection = session.connection else { return }
         let requested = key
         loading = true
-        defer { loading = false }
+        defer { if requested == key { loading = false } }
         do {
             let next = try await account.statistics(days: days)
             guard next.mode == connection.mode, next.periodDays == days, next.accountId == connection.accountId else { throw APIError(status: 0, message: "统计响应与当前账户不匹配") }
@@ -83,6 +101,7 @@ struct StatsView: View {
             LaunchCache.write(next, "stats-\(days)", scope: account.scope)
         } catch is CancellationError {
         } catch {
+            guard requested == key else { return }
             self.error = error.localizedDescription; session.handle(error)
         }
     }
@@ -107,7 +126,7 @@ struct StatsView: View {
         let a = s?.account
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("净值").font(.subheadline.weight(.medium)).foregroundStyle(Color.muted)
+                Text("账户累计净盈亏").font(.subheadline.weight(.semibold)).foregroundStyle(Color.muted)
                 Spacer()
                 // Syncing after a launch from the cached snapshot (Stitch c8bea04c… “同步最新中”).
                 if stale && session.connection != nil && NetworkWatch.shared.online {
@@ -117,32 +136,42 @@ struct StatsView: View {
                     tint: stale ? .amber : live ? .down : .up)
             }
             HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text(Fmt.amount(equity)).font(.scaled(size: 38, weight: .bold, design: .rounded).monospacedDigit()).foregroundStyle(Color.ink)
-                    .contentTransition(.numericText(value: Double(equity ?? "0") ?? 0)).animation(.snappy, value: equity)
+                Text(Fmt.signed(a?.netPnl.flatMap(Double.init)))
+                    .font(.scaled(size: 31, weight: .bold, design: .rounded).monospacedDigit())
+                    .foregroundStyle(tone(a?.netPnl))
+                    .contentTransition(.numericText(value: Double(a?.netPnl ?? "0") ?? 0)).animation(.snappy, value: a?.netPnl)
                 Text("USDT").font(.subheadline.weight(.semibold)).foregroundStyle(Color.muted)
-            }
-            HStack(spacing: 6) {
-                Text("累计 \(Fmt.signed(a?.netPnl.flatMap(Double.init))) USDT").font(.subheadline.weight(.bold).monospacedDigit()).foregroundStyle(tone(a?.netPnl))
+                Spacer(minLength: 2)
                 if let r = a?.returnFraction {
-                    Text("\((Double(r) ?? 0) > 0 ? "+" : "")\(Fmt.fractionPercent(r, 2))%").font(.caption.weight(.bold).monospacedDigit())
-                        .foregroundStyle(tone(r)).padding(.horizontal, 7).padding(.vertical, 3).background(tone(r).opacity(0.1), in: .capsule)
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("\((Double(r) ?? 0) > 0 ? "+" : "")\(Fmt.fractionPercent(r, 2))%")
+                            .font(.subheadline.weight(.bold).monospacedDigit()).foregroundStyle(tone(r))
+                        Text("总收益率").font(.caption2).foregroundStyle(Color.muted)
+                    }
                 }
             }
-            Divider().padding(.vertical, 2)
-            HStack(spacing: 0) {
-                heroMetric("已实现", a?.realizedPnl)
-                Divider().frame(height: 32).padding(.horizontal, 14)
-                heroMetric("浮动", a?.unrealizedPnl)
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: dynamicTypeSize >= .xxLarge ? 2 : 3),
+                      alignment: .leading, spacing: 8) {
+                heroMetric("账户净值", equity, signed: false)
+                heroMetric("已实现", a?.realizedPnl, signed: true)
+                heroMetric("浮动", a?.unrealizedPnl, signed: true)
             }
+            .padding(9)
+            .background(Color.field, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            Divider().padding(.vertical, 2)
+            tiles
         }
-        .padding(18).glassCard(cornerRadius: 26)
+        .padding(14).glassCard(cornerRadius: 20)
     }
 
-    private func heroMetric(_ title: String, _ value: String?) -> some View {
+    private func heroMetric(_ title: String, _ value: String?, signed: Bool) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(title).font(.caption).foregroundStyle(Color.muted)
             HStack(alignment: .firstTextBaseline, spacing: 3) {
-                Text(Fmt.signed(value.flatMap(Double.init))).font(.headline.monospacedDigit()).foregroundStyle(tone(value))
+                Text(signed ? Fmt.signed(value.flatMap(Double.init)) : Fmt.amount(value))
+                    .font(.subheadline.weight(.semibold).monospacedDigit())
+                    .foregroundStyle(signed ? tone(value) : Color.ink)
+                    .lineLimit(1).minimumScaleFactor(0.72)
                 Text("USDT").font(.caption2.weight(.medium)).foregroundStyle(Color.muted)
             }
         }
@@ -162,29 +191,30 @@ struct StatsView: View {
 
     private var tiles: some View {
         let s = data?.closed
-        return LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 7), count: dynamicTypeSize >= .xxLarge ? 2 : 4)
+        return LazyVGrid(columns: columns, spacing: 8) {
             tile("list.bullet", .accentColor, "已平仓", s.map { "\($0.count)" } ?? "—", "笔")
             tile("scope", .up, "胜率", Fmt.fractionPercent(s?.winRate), "%")
             tile("scalemass", .indigo, "盈亏比", Fmt.amount(s?.payoffRatio), nil)
             tile("sum", .amber, "平均 R", Fmt.signed(s?.averageNetR.flatMap(Double.init)), nil)
         }
+        .padding(8)
+        .background(Color.field, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 
     private func tile(_ icon: String, _ tint: Color, _ title: String, _ value: String, _ unit: String?) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon).font(.system(size: 16, weight: .semibold)).foregroundStyle(tint)
-                .frame(width: 40, height: 40).background(tint.opacity(0.12), in: .circle)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(title).font(.caption).foregroundStyle(Color.muted)
-                HStack(alignment: .firstTextBaseline, spacing: 2) {
-                    Text(value).font(.title3.weight(.bold).monospacedDigit()).foregroundStyle(Color.ink).contentTransition(.numericText())
-                        .lineLimit(1).minimumScaleFactor(0.6)
-                    if let unit { Text(unit).font(.caption.weight(.medium)).foregroundStyle(Color.muted).fixedSize() }
-                }
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 4) {
+                Image(systemName: icon).font(.system(size: 11, weight: .semibold)).foregroundStyle(tint)
+                Text(title).font(.scaled(size: 9, weight: .medium)).foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.72)
             }
-            Spacer(minLength: 0)
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                Text(value).font(.scaled(size: 13, weight: .bold).monospacedDigit()).foregroundStyle(Color.ink).contentTransition(.numericText())
+                    .lineLimit(1).minimumScaleFactor(0.65)
+                if let unit { Text(unit).font(.scaled(size: 9, weight: .medium)).foregroundStyle(Color.muted).fixedSize() }
+            }
         }
-        .padding(12).glassCard(cornerRadius: 20)
+        .frame(maxWidth: .infinity, minHeight: 39, alignment: .leading)
         .accessibilityElement(children: .combine)
     }
 

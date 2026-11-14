@@ -1,5 +1,9 @@
 import SwiftUI
 
+private enum PositionsPage: Hashable {
+    case positions, orders, recent
+}
+
 /// 持仓 (1.x 持仓 tab): order progress, close recovery, positions with 止损到开仓价 / 平仓,
 /// working orders with 撤单, recent completions and read-only external activity.
 /// Every write goes through AccountStore (persisted identities, no resend on timeout).
@@ -13,70 +17,82 @@ struct PositionsView: View {
     @Environment(\.reselect) private var reselect
     @State private var action: String?
     @State private var error: String?
-    @State private var selection: AccountSectionTab = .positions
+    @State private var selection: PositionsPage = .positions
 
     var body: some View {
-            ZStack {
-                AmbientBackground()
-                ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
-                    PageHeader(title: "持仓保护")
-                    if let entry = account.activeEntry { TradeProgressCard(entry: entry) }
-                    if let attempt = account.closeAttempt { PositionCloseRecoveryCard(attempt: attempt) }
-                    if session.connection == nil {
-                        AccountDataMessage(title: "未连接交易账户", detail: "连接后可查看持仓与当前委托。", systemImage: "link")
-                    } else if let state = account.state {
-                        let positions = state.positions.uniqued(by: \.id)
-                        AccountSnapshotNote(online: account.online, receivedAt: account.receivedAt)
-                        AccountSectionTabs(selection: $selection,
-                                           positionCount: positions.count,
-                                           orderCount: state.pending.uniqued(by: \.id).count)
-                        if selection == .positions {
-                            if positions.isEmpty {
-                                EmptyCard(systemImage: "briefcase", title: "暂无持仓", note: account.online ? "开仓后，止损、保本与分批止盈都由服务端持续保护。" : "上次快照中暂无持仓，连接恢复后会自动更新。")
-                            } else {
-                                SectionHeader(title: "当前持仓", count: positions.count)
-                            }
-                            ForEach(positions) { position in
-                                PositionCardView(position: position, state: state, online: account.online,
-                                                 busy: action != nil || account.closeAttempt != nil,
-                                                 entryStopBusy: action == "stop:" + position.id,
-                                                 onEntryStop: { Task { await entryStop(position) } },
-                                                 onEdit: {
-                                                     guard let owner = account.connection else { return }
-                                                     Haptics.tap(); protectionTarget = ProtectionSelection(position: position, owner: owner)
-                                                 },
-                                                 onClose: { requestClose(position) },
-                                                 onSymbol: { onOpenSymbol(position.symbol) })
-                                .scrollReveal()
-                            }
-                        } else if state.pending.isEmpty {
-                            EmptyCard(systemImage: "tray", title: "暂无当前委托", note: account.online ? "未成交或部分成交的委托会显示在这里。" : "上次快照中暂无委托，连接恢复后会自动更新。")
-                        } else {
-                            pendingOrders(state)
-                        }
-                        recent(state)
-                        if let activity = state.externalActivity, !(activity.current.isEmpty && activity.recent.isEmpty) {
-                            ExternalActivityCard(activity: activity, fresh: account.online && state.privateError == nil && state.serverTime - activity.updatedAt <= 15)
-                        }
-                    } else if account.cached != nil {
-                        AccountDataMessage(title: "等待实时账户快照",
-                                           detail: account.lastError ?? "启动缓存仅供参考，收到实时数据前不显示为当前账户状态。",
-                                           loading: account.lastError == nil,
-                                           systemImage: "exclamationmark.arrow.triangle.2.circlepath")
-                    } else {
-                        LoadState(loading: account.lastError == nil, error: account.lastError, stale: false)
+        ZStack {
+            AmbientBackground()
+            VStack(spacing: 0) {
+                CompactPageHeader(title: "持仓保护", subtitle: headerSubtitle) {
+                    RoundIcon(systemName: "clock.arrow.circlepath", size: 34) {
+                        withAnimation(.snappy) { selection = .recent }
                     }
+                    .accessibilityLabel("查看最近完成")
                 }
-                .padding(.horizontal, 14)
-                .padding(.bottom, 24)
+                pageTabs
+                if let state = account.state { accountSummary(state) }
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        if let entry = account.activeEntry { TradeProgressCard(entry: entry) }
+                        if let attempt = account.closeAttempt { PositionCloseRecoveryCard(attempt: attempt) }
+                        if session.connection == nil {
+                            AccountDataMessage(title: "未连接交易账户", detail: "连接后可查看持仓与当前委托。", systemImage: "link")
+                        } else if let state = account.state {
+                            let positions = state.positions.uniqued(by: \.id)
+                            let orders = state.pending.uniqued(by: \.id)
+                            AccountSnapshotNote(online: account.online, receivedAt: account.receivedAt)
+                            switch selection {
+                            case .positions:
+                                if positions.isEmpty {
+                                    EmptyCard(systemImage: "briefcase", title: "暂无持仓", note: account.online ? "开仓后，止损、保本与分批止盈都由服务端持续保护。" : "上次快照中暂无持仓，连接恢复后会自动更新。")
+                                } else {
+                                    SectionHeader(title: "当前持仓", count: positions.count)
+                                    ForEach(positions) { position in
+                                        PositionCardView(position: position, state: state, online: account.online,
+                                                         busy: action != nil || account.closeAttempt != nil,
+                                                         entryStopBusy: action == "stop:" + position.id,
+                                                         onEntryStop: { Task { await entryStop(position) } },
+                                                         onEdit: {
+                                                             guard let owner = account.connection else { return }
+                                                             Haptics.tap(); protectionTarget = ProtectionSelection(position: position, owner: owner)
+                                                         },
+                                                         onClose: { requestClose(position) },
+                                                         onSymbol: { onOpenSymbol(position.symbol) })
+                                        .scrollReveal()
+                                    }
+                                }
+                            case .orders:
+                                if orders.isEmpty {
+                                    EmptyCard(systemImage: "tray", title: "暂无当前委托", note: account.online ? "未成交或部分成交的委托会显示在这里。" : "上次快照中暂无委托，连接恢复后会自动更新。")
+                                } else {
+                                    pendingOrders(state)
+                                }
+                            case .recent:
+                                recent(state)
+                            }
+                            if let activity = state.externalActivity, !(activity.current.isEmpty && activity.recent.isEmpty) {
+                                ExternalActivityCard(activity: activity, fresh: account.online && state.privateError == nil && state.serverTime - activity.updatedAt <= 15)
+                            }
+                        } else if account.cached != nil {
+                            AccountDataMessage(title: "等待实时账户快照",
+                                               detail: account.lastError ?? "启动缓存仅供参考，收到实时数据前不显示为当前账户状态。",
+                                               loading: account.lastError == nil,
+                                               systemImage: "exclamationmark.arrow.triangle.2.circlepath")
+                        } else {
+                            LoadState(loading: account.lastError == nil, error: account.lastError, stale: false)
+                        }
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.top, 10)
+                    .padding(.bottom, 24)
+                }
+                .scrollPosition($scroll)
+                .onChange(of: reselect) { _, _ in withAnimation(.snappy) { scroll.scrollTo(edge: .top) } }
+                .refreshable { await account.refresh(session: session); Haptics.success() }
+                .contentMargins(.bottom, 96, for: .scrollContent)
+                .scrollEdgeEffectHidden(true, for: [.top, .bottom])
             }
-            .scrollPosition($scroll)
-            .onChange(of: reselect) { _, _ in withAnimation(.snappy) { scroll.scrollTo(edge: .top) } }
-            .refreshable { await account.refresh(session: session); Haptics.success() }
-            .contentMargins(.bottom, 96, for: .scrollContent)
-            .scrollEdgeEffectHidden(true, for: [.top, .bottom])
-            }
+        }
         .sheet(item: $closeTarget) { selection in
             ClosePositionSheet(selection: selection).presentationDetents([.medium, .large]).presentationDragIndicator(.visible)
         }
@@ -91,6 +107,65 @@ struct PositionsView: View {
         .alert("本次操作未完成", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
             Button("好", role: .cancel) {}
         } message: { Text(error ?? "") }
+    }
+
+    private var headerSubtitle: String {
+        guard let state = account.state else {
+            return session.connection == nil ? "连接交易账户后查看持仓与委托" : "等待实时账户快照"
+        }
+        let running = state.positions.uniqued(by: \.id).count
+        return (account.online ? "账户已连接" : "上次账户快照") + " · \(running) 笔持仓"
+    }
+
+    private var pageTabs: some View {
+        let state = account.state
+        let positions = state?.positions.uniqued(by: \.id).count
+        let orders = state?.pending.uniqued(by: \.id).count
+        let closed = state.map { min(5, $0.closed.uniqued(by: \.id).count) }
+        return SoftSegment(selection: $selection, options: [
+            (.positions, tabTitle("当前持仓", count: positions)),
+            (.orders, tabTitle("待成交委托", count: orders)),
+            (.recent, tabTitle("最近完成", count: closed))
+        ], height: 38)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 7)
+        .background(Color(uiColor: .systemBackground))
+        .overlay(alignment: .bottom) { Color.primary.opacity(0.07).frame(height: 1) }
+    }
+
+    private func tabTitle(_ title: String, count: Int?) -> String {
+        count.map { "\(title) (\($0))" } ?? title
+    }
+
+    private func accountSummary(_ state: AccountState) -> some View {
+        let riskFraction = Double(state.policy?.riskFraction ?? "0") ?? 0
+        let standardRisk = (Double(state.equity) ?? 0) * riskFraction
+        return HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(account.online ? (state.mode == "okx_live" ? "OKX 实盘净值" : "模拟账户净值") : "上次账户净值")
+                    .font(.caption.weight(.medium)).foregroundStyle(account.online ? Color.muted : Color.amber)
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(Fmt.amount(state.equity))
+                        .font(.scaled(size: 23, weight: .bold, design: .rounded).monospacedDigit())
+                        .foregroundStyle(Color.ink)
+                        .lineLimit(1).minimumScaleFactor(0.72)
+                    Text("USDT").font(.caption.weight(.semibold)).foregroundStyle(Color.muted)
+                }
+            }
+            Spacer(minLength: 8)
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("标准 1R").font(.caption.weight(.medium)).foregroundStyle(Color.muted)
+                HStack(alignment: .firstTextBaseline, spacing: 3) {
+                    Text(standardRisk > 0 ? Fmt.amount(standardRisk) : "—")
+                        .font(.subheadline.weight(.bold).monospacedDigit()).foregroundStyle(Color.accentColor)
+                    if standardRisk > 0 { Text("U").font(.caption2.weight(.semibold)).foregroundStyle(Color.muted) }
+                }
+            }
+        }
+        .padding(13)
+        .glassCard(cornerRadius: 18)
+        .padding(.horizontal, 14)
+        .padding(.top, 9)
     }
 
     private func requestClose(_ position: Position) {
@@ -137,10 +212,12 @@ struct PositionsView: View {
     }
 
     @ViewBuilder private func recent(_ state: AccountState) -> some View {
-        let rows = state.closed.sorted { ($0.closed ?? 0) > ($1.closed ?? 0) }.prefix(5)
-        if !rows.isEmpty {
+        let rows = Array(state.closed.uniqued(by: \.id).sorted { ($0.closed ?? 0) > ($1.closed ?? 0) }.prefix(5))
+        if rows.isEmpty {
+            EmptyCard(systemImage: "clock", title: "暂无最近完成", note: "平仓后，最近完成记录会显示在这里。")
+        } else {
             VStack(alignment: .leading, spacing: 10) {
-                SectionHeader(title: "最近完成", trailing: "北京时间")
+                SectionHeader(title: "最近完成", count: rows.count, trailing: "北京时间")
                 VStack(spacing: 0) {
                     ForEach(Array(rows.enumerated()), id: \.element.id) { index, position in
                         CompletedRow(position: position, tick: state.instruments[position.symbol]?.tick)
@@ -163,6 +240,7 @@ struct Metric: View {
             Text(title).font(.caption).foregroundStyle(.secondary)
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(value).font(.subheadline.weight(.semibold).monospacedDigit()).foregroundStyle(tone)
+                    .lineLimit(1).minimumScaleFactor(0.72)
                 if let unit { Text(unit).font(.caption2).foregroundStyle(.secondary) }
             }
         }
@@ -197,6 +275,7 @@ struct PositionCardView: View {
     var onClose: () -> Void
     var onSymbol: () -> Void
     @State private var details = false
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         let q = state.quotes[position.symbol], entry = Double(position.entry) ?? 0, remaining = Double(position.remaining) ?? 0
@@ -242,13 +321,7 @@ struct PositionCardView: View {
                 Metric(title: "入场", value: Fmt.price(position.entry, tick: tick), unit: "USDT")
                 Metric(title: "止损", value: Fmt.price(position.stop, tick: tick), unit: "USDT")
             }
-            HStack(spacing: 6) {
-                entryStopButton(protectedEntry: protectedEntry, allowed: allowed, compact: true)
-                if state.supportsCustomProtection == true {
-                    protectionButton(compact: true, fresh: fresh)
-                }
-                closeButton(compact: true)
-            }
+            actionRow(state: state, protectedEntry: protectedEntry, allowed: allowed, fresh: fresh, compact: true)
         }
     }
 
@@ -261,20 +334,20 @@ struct PositionCardView: View {
                 Spacer()
                 Pill(text: "\(direction == 1 ? "多" : "空") · \(Fmt.leverage(position.leverage))x",
                      color: direction == 1 ? .up : .down)
-                if state.supportsCustomProtection == true {
-                    protectionButton(compact: false, fresh: fresh)
-                }
             }
             pnlRow(pnl: pnl, roi: roi, tone: tone, fresh: fresh, compact: false)
-            HStack {
-                Metric(title: "持仓金额 · U", value: Fmt.amount((last ?? entry) * remaining))
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: dynamicTypeSize >= .xxLarge ? 2 : 3),
+                      alignment: .leading, spacing: 11) {
                 Metric(title: "开仓均价", value: Fmt.price(position.entry, tick: tick))
-                Metric(title: "当前止损", value: Fmt.price(position.stop, tick: tick))
+                Metric(title: "最新成交价", value: Fmt.price(last.map { String($0) }, tick: tick))
+                Metric(title: "当前止损", value: Fmt.price(position.stop, tick: tick), tone: protectedEntry ? .accentColor : .down)
+                Metric(title: "剩余数量", value: Fmt.coinQuantity(position.remaining), unit: coin)
+                Metric(title: "开仓保证金", value: Fmt.amount(position.margin), unit: "USDT")
+                Metric(title: "下一止盈", value: nextTarget(tick: tick), tone: .up)
             }
-            HStack(spacing: 10) {
-                entryStopButton(protectedEntry: protectedEntry, allowed: allowed, compact: false)
-                closeButton(compact: false)
-            }
+            .padding(11)
+            .background(Color.field, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            actionRow(state: state, protectedEntry: protectedEntry, allowed: allowed, fresh: fresh, compact: false)
             DisclosureGroup(isExpanded: $details.animation(.snappy)) {
                 VStack(alignment: .leading, spacing: 6) {
                     let p = position.policy
@@ -288,6 +361,7 @@ struct PositionCardView: View {
                         Text("止盈 \(i + 1) · \(trigger) · \(portion)")
                     }
                     Text("初始风险 1R = \(Fmt.amount(position.risk)) USDT · 当前 \(Fmt.amount(position.currentR)) R")
+                    Text("当前持仓金额 \(Fmt.amount((last ?? entry) * remaining)) USDT")
                     Text((state.mode == "okx_live" ? (position.protection == "exchange-verified" ? "交易所保护已核对" : "交易所保护待核对") : "服务端模拟保护") + " · " + (position.breakeven ? "已移成本保本" : "自动保本待触发"))
                     if state.mode == "okx_live" {
                         Text("在 OKX 撤销止损会触发应急平仓。需要改价时，请在 App 调整原保护单。")
@@ -300,6 +374,36 @@ struct PositionCardView: View {
             }
             .tint(.secondary)
             .onChange(of: details) { _, _ in Haptics.select() }
+        }
+    }
+
+    private func nextTarget(tick: String?) -> String {
+        let completed = Set(position.stages ?? [])
+        let prices = position.takeProfitPrices ?? []
+        guard let index = position.policy.takeProfits.indices.first(where: {
+            !completed.contains($0) && prices.indices.contains($0) && prices[$0] != nil
+        }), let price = prices[index] else { return "—" }
+        let r = position.policy.takeProfits[index].first.map { " · \($0)R" } ?? ""
+        return Fmt.price(price, tick: tick) + r
+    }
+
+    @ViewBuilder private func actionRow(state: AccountState, protectedEntry: Bool, allowed: Bool,
+                                        fresh: Bool, compact: Bool) -> some View {
+        let spacing: CGFloat = compact ? 6 : 8
+        if dynamicTypeSize >= .xxLarge {
+            VStack(spacing: 8) {
+                HStack(spacing: spacing) {
+                    entryStopButton(protectedEntry: protectedEntry, allowed: allowed, compact: compact)
+                    if state.supportsCustomProtection == true { protectionButton(compact: compact, fresh: fresh) }
+                }
+                closeButton(compact: compact)
+            }
+        } else {
+            HStack(spacing: spacing) {
+                entryStopButton(protectedEntry: protectedEntry, allowed: allowed, compact: compact)
+                if state.supportsCustomProtection == true { protectionButton(compact: compact, fresh: fresh) }
+                closeButton(compact: compact)
+            }
         }
     }
 
@@ -316,7 +420,9 @@ struct PositionCardView: View {
     }
 
     private func pnlRow(pnl: Double?, roi: Double?, tone: Color, fresh: Bool, compact: Bool) -> some View {
-        HStack(alignment: .bottom) {
+        let currentR = position.currentR.flatMap(Double.init)
+        let rTone: Color = currentR.map { $0 > 0 ? Color.up : $0 < 0 ? Color.down : Color.muted } ?? .muted
+        return HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(alignment: .firstTextBaseline, spacing: 3) {
                     Text(Fmt.signed(pnl))
@@ -324,16 +430,27 @@ struct PositionCardView: View {
                         .foregroundStyle(tone)
                         .contentTransition(.numericText(value: pnl ?? 0))
                         .animation(.snappy, value: pnl)
+                        .lineLimit(1).minimumScaleFactor(0.72)
                     Text("USDT").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                 }
                 Text("浮动盈亏" + (fresh ? "" : " · 待更新"))
                     .font(.caption).foregroundStyle(.secondary)
             }
-            Spacer(minLength: 8)
+            Spacer(minLength: 4)
+            if !compact {
+                VStack(alignment: .center, spacing: 2) {
+                    Text(Fmt.signed(currentR) + " R")
+                        .font(.subheadline.weight(.bold).monospacedDigit()).foregroundStyle(rTone)
+                        .lineLimit(1).minimumScaleFactor(0.75)
+                    Text("当前 R").font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            Spacer(minLength: 4)
             VStack(alignment: .trailing, spacing: 2) {
                 Text(Fmt.signed(roi) + "%")
                     .font((compact ? Font.headline : Font.title3).weight(.bold).monospacedDigit())
                     .foregroundStyle(tone)
+                    .lineLimit(1).minimumScaleFactor(0.75)
                 Text("收益率").font(.caption).foregroundStyle(.secondary)
             }
         }
@@ -344,7 +461,7 @@ struct PositionCardView: View {
             HStack(spacing: 5) {
                 if entryStopBusy { ProgressView().controlSize(.mini) }
                 else { Image(systemName: protectedEntry ? "checkmark.shield.fill" : "shield.lefthalf.filled") }
-                Text(entryStopBusy ? "设置中" : compact ? (protectedEntry ? "已保本" : "保本") : (protectedEntry ? "已保护开仓价" : "止损到开仓价"))
+                Text(entryStopBusy ? "设置中" : (protectedEntry ? "已保本" : "保本"))
             }
             .font((compact ? Font.caption : Font.subheadline).weight(.semibold))
             .frame(maxWidth: .infinity).frame(height: compact ? 34 : 36)
@@ -358,7 +475,7 @@ struct PositionCardView: View {
         Button(action: onEdit) {
             HStack(spacing: 4) {
                 Image(systemName: "slider.horizontal.3")
-                Text(compact ? "止盈止损" : "调整止盈止损")
+                Text("止盈止损")
             }
             .font(.caption.weight(.semibold))
             .frame(maxWidth: compact ? .infinity : nil).frame(height: compact ? 34 : 30)

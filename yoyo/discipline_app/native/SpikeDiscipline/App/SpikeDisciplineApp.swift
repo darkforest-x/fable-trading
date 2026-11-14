@@ -38,14 +38,14 @@ struct SpikeDisciplineApp: App {
 }
 
 enum AppTab: String, Hashable, CaseIterable, Identifiable {
-    case trade, monitor, fib, positions, stats
+    case fib, monitor, trade, positions, stats
     var id: String { rawValue }
     var title: String { switch self { case .trade: "交易"; case .monitor: "监控"; case .fib: "1.618"; case .positions: "持仓"; case .stats: "统计" } }
     /// Minimal SF Symbols (owner 2026-11-07 “简约”): outline when idle, filled when active.
     func symbol(active: Bool) -> String {
         // Stitch native-2.3.0: one stroke weight, no fills — the active tab only changes colour.
         switch self {
-        case .trade: "arrow.up.arrow.down"
+        case .trade: "arrow.left.arrow.right"
         case .monitor: "bell"
         case .fib: "chart.line.uptrend.xyaxis"
         case .positions: "checkmark.shield"
@@ -92,6 +92,8 @@ struct RootView: View {
             HStack(spacing: 0) {
                 ForEach(AppTab.allCases) { page in
                     content(page)
+                        // Only the outer pager locks while chart gestures own the canvas.
+                        .environment(\.isScrollEnabled, true)
                         .environment(\.reselect, reselect[page] ?? 0)
                         // Backgrounds run edge to edge; content keeps the real safe area.
                         .safeAreaPadding(.top, proxy.safeAreaInsets.top)
@@ -322,7 +324,7 @@ struct RootView: View {
 
     private func applyQA() {
         #if DEBUG
-        if let value = AppConfig.qaTab, let qa = AppTab(rawValue: value) { tab = qa; progress = CGFloat(AppTab.allCases.firstIndex(of: qa) ?? 1) }
+        if let value = AppConfig.qaTab, let qa = AppTab(rawValue: value) { tab = qa; progress = CGFloat(AppTab.allCases.firstIndex(of: qa) ?? 0) }
         if let value = AppConfig.qaSegment { UserDefaults.standard.set(value, forKey: "monitor.segment") }
         #endif
     }
@@ -353,18 +355,20 @@ struct GlassTabBar: View {
                             if selection == page { onReselect(page) } else { withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) { selection = page } }
                         } label: {
                             VStack(spacing: 2) {
-                            Image(systemName: page.symbol(active: active))
-                                .font(.scaled(size: 19, weight: active ? .semibold : .regular))
-                                .foregroundStyle(active ? Color.accentColor : Color.muted)
-                                .symbolEffect(.bounce, value: active)
-                                .contentTransition(.symbolEffect(.replace))
-                                .overlay(alignment: .topTrailing) {
-                                    if page == .monitor && badge > 0 {
-                                        Text(badge > 9 ? "9+" : "\(badge)").font(.scaled(size: 10, weight: .bold)).foregroundStyle(.white)
-                                            .padding(.horizontal, 5).frame(minWidth: 17, minHeight: 17).background(.red, in: .capsule)
-                                            .offset(x: 10, y: -8)
+                                Image(systemName: page.symbol(active: active))
+                                    .font(.scaled(size: page == .trade ? 16 : 19, weight: active || page == .trade ? .semibold : .regular))
+                                    .foregroundStyle(page == .trade ? Color(uiColor: .systemBackground) : active ? Color.accentColor : Color.muted)
+                                    .frame(width: 36, height: 23)
+                                    .background(page == .trade ? (active ? Color.accentColor : Color.ink) : .clear, in: .capsule)
+                                    .symbolEffect(.bounce, value: active)
+                                    .contentTransition(.symbolEffect(.replace))
+                                    .overlay(alignment: .topTrailing) {
+                                        if page == .monitor && badge > 0 {
+                                            Text(badge > 9 ? "9+" : "\(badge)").font(.scaled(size: 10, weight: .bold)).foregroundStyle(.white)
+                                                .padding(.horizontal, 5).frame(minWidth: 17, minHeight: 17).background(.red, in: .capsule)
+                                                .offset(x: 10, y: -8)
+                                        }
                                     }
-                                }
                                 Text(page.title)
                                     .font(.scaled(size: 10, weight: active ? .bold : .medium))
                                     .foregroundStyle(active ? Color.ink : Color.muted)
