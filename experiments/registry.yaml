@@ -21,7 +21,7 @@ experiments:
     status: inconclusive
     question: How far do OKX altcoin first weekly 1.618 touches go after strict penetration, touch-close score above 0.5 and a close back inside with the original wick extreme as the stop?
     single_variable: Fixed wick-stop rule with no profit target or stop update. Entry at the 5m close; sensitivity at first minute close after score publication.
-    result: Of 37 qualified crypto scores through 2026-11-14 18 UTC, 21 reclaimed across 9 entry times. Over 6h, 17 original stops, median MFE 2.02%, 11 reached 2%, 2 reached 5%, and 2 reached 10%. Ten of the 11 came back to cost breakeven, eight later stopped out. At the post-publication minute 4 had already invalidated; 13 of the other 17 stopped by 6h and only 4 reached 2%.
+    result: Of 37 qualified crypto scores through 2026-11-14 18 UTC, 21 reclaimed across 9 entry times. Over 6h, 17 original stops, median MFE 2.02%, 11 reached 2%, 2 reached 5%, and 2 reached 10%. Ten of the 11 came back to cost breakeven, eight later stopped out. At the post-publication minute 4 had already invalidated; 13 of the other 17 stopped by 6h and only 4 reached 2%. In an exploratory native stop-update replay of those 17, arming at +2% moved mean net from -0.72% to -1.51%; 3 breakeven exits included one saved loser and an original +15.28% winner.
     notes: Independent positions; 14 entries share two adjacent bars. Minute OHLC post-entry only, conservative stop-bar MFE. Taker 5bp each fill and slippage 10bp per leg, no funding. Earlier paper scores were reconstructed. Original entry clock and delayed clock are alternative benchmarks. No capital path or production change.
     holdout_consumed: false
     production_eligible: false
