@@ -83,6 +83,9 @@ def create_app(runtime=None, start_monitor=True):
     vidya_retest = VidyaRetestService(runtime)
     from yoyo.monitor.monday_fib_service import MondayFibService, install as install_monday_fib
     monday_fib = MondayFibService(runtime)
+    from yoyo.monitor.trendline_break_feed import TrendlineBreakFeed, install as install_trendline_breaks
+    # Share the active market catalogue and CandleHub's background request budget.
+    trendline_breaks = TrendlineBreakFeed(runtime, symbols_source=lambda: monday_fib.symbols)
     from yoyo.monitor.month_first_week_1618_service import (MonthFirstWeek1618Service,
         install as install_month_first_week_1618)
     # Share MondayFib's confirmed OKX universe, open candle client, public
@@ -124,6 +127,7 @@ def create_app(runtime=None, start_monitor=True):
                 spike_alert.start()
                 breadth_paper.start()
                 app.state.cloud_signals.start()
+                trendline_breaks.start()
             if start_monitor:
                 app.state.start_yolo_workbench()
             # Owner 2026-11-06 retired the paper desk's background feed: no
@@ -132,6 +136,7 @@ def create_app(runtime=None, start_monitor=True):
             # the paper ledger is kept unchanged.
             yield
         finally:
+            trendline_breaks.close()
             app.state.cloud_signals.close()
             app.state.monday_candles.close()
             app.state.market_workstation.close()
@@ -182,6 +187,7 @@ def create_app(runtime=None, start_monitor=True):
     install_month_chart(app, month_first_week_1618)
     from yoyo.monitor.cloud_signals import install as install_cloud_signals
     install_cloud_signals(app, runtime)
+    install_trendline_breaks(app, trendline_breaks)
     from yoyo.monitor.strategy_backtest import install as install_strategy_backtest
     install_strategy_backtest(app)
     from yoyo.monitor.breadth_replay import install as install_breadth_replay
