@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {fibRangeFor,fibLevels,fibSelection,fibSide,latestFibTouch,parseFibSnapshot,touchLabel,type FibSnapshot,type FibContract} from '../../yoyo/discipline_app/mobile/src/fibData.ts';
+import {wickStopQuery,wickStopValue} from '../../yoyo/discipline_app/mobile/src/wickStopQuery.ts';
 const row=(symbol:string,side:'upper'|'lower',at:number,source:'live'|'history'='live'):FibContract=>({symbol,high:110,low:90,upper:122.36,lower:77.64,price:100,stale:false,touches:{[side]:{side,occurred_ms:at,source}}});
 const snapshot=(items:FibContract[],week='2026-10-19'):FibSnapshot=>({week,now_ms:5000,timezone:'America/New_York',week_start_ms:1000,monday_end_ms:2000,next_week_ms:10000,monday_complete:true,connected:true,last_message_ms:5000,items});
 test('workbench levels: four by default, 内部线 adds 0.705 / 0.618 / 0.5 inside the Monday range',()=>{
@@ -31,6 +32,17 @@ test('direction uses newest side; history labels preserve hourly uncertainty',()
  assert.equal(latestFibTouch(two).side,'lower');
  assert.match(touchLabel({side:'upper',source:'history',occurred_ms:1000},5000),/时内/);
  assert.match(touchLabel({side:'lower',source:'live',occurred_ms:4999},5000),/刚刚/);
+});
+
+test('mobile 1.618 quick stop always requests 1m and identifies the weekly source',()=>{
+ assert.deepEqual(Object.fromEntries(new URLSearchParams(wickStopQuery('BTC-USDT-SWAP','short','week'))),{
+  symbol:'BTC-USDT-SWAP',period:'1m',side:'short',source:'week'
+ });
+ const result={stop_loss:'123.4',first_touch_ms:1_000,timeframe:'1m',week:'2026-10-19'};
+ assert.equal(wickStopValue(result,'week','2026-10-19'),'123.4');
+ assert.throws(()=>wickStopValue({...result,week:'2026-10-26'},'week','2026-10-19'),/周期已变化/);
+ assert.throws(()=>wickStopValue({...result,first_touch_ms:undefined},'week','2026-10-19'),/周期已变化/);
+ assert.throws(()=>wickStopValue({...result,timeframe:'15m'},'week','2026-10-19'),/周期已变化/);
 });
 
 

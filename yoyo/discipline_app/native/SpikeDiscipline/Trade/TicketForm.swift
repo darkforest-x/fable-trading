@@ -123,7 +123,7 @@ struct TicketForm: View {
             }
             issue(.stop)
             if !inline, existing == nil, let applied = ticket.stopApplied, applied == context + "|" + ticket.stop, ticket.fieldIssue?.field != .stop {
-                Label(ticket.fibTicket ? "\(ticket.fibPeriod.label)插针止损 · 按1R与剩余额度计算" : "\(side == "long" ? "多单" : "空单") 1R 止损已填入，含成本预留",
+                Label(ticket.fibTicket ? "\(ticket.fibSource.title) 1m首触至收回极值止损 · 按1R与剩余额度计算" : "\(side == "long" ? "多单" : "空单") 1R 止损已填入，含成本预留",
                       systemImage: "checkmark.circle.fill")
                     .font(.caption.weight(.medium)).foregroundStyle(Color.up)
             }
@@ -451,12 +451,6 @@ struct TicketForm: View {
     private func runAutoStop(context: String, enabled: Bool) async {
         guard hosts else { return }
         guard let mode = ticket.autoMode, enabled, session.connection != nil else { ticket.autoWorking = false; return }
-        if ticket.fibTicket && ticket.fibPeriod == .h12 {
-            // The service computes wick stops only for OKX's own bars (1m…4H, 1D); 12H is display-only.
-            ticket.autoWorking = false; ticket.autoMode = nil; ticket.stop = ""
-            ticket.fieldIssue = Trading.FieldIssue(field: .stop, message: "12H 暂无插针止损，请切到 4H 或手动填写")
-            return
-        }
         ticket.autoWorking = true
         try? await Task.sleep(for: .milliseconds(350))
         guard !Task.isCancelled else { return }
@@ -464,7 +458,7 @@ struct TicketForm: View {
             let state = account.state
             let value = try await withThrowingTaskGroup(of: String.self) { group in
                 group.addTask { @MainActor in
-                    ticket.fibTicket ? try await account.wickStop(symbol: ticket.symbol, period: ticket.fibPeriod.rawValue, side: mode)
+                    ticket.fibTicket ? try await account.wickStop(symbol: ticket.symbol, side: mode, source: ticket.fibSource, periodKey: ticket.fibPeriodKey)
                         : try await account.autoStop(ticket.ticket(state, side: mode, stop: ""))
                 }
                 group.addTask { try await Task.sleep(for: .seconds(12)); throw APIError(status: 0, message: "止损读取超时，请重试或手动填写") }

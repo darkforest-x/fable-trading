@@ -304,9 +304,16 @@ final class AccountStore {
         return value.stop
     }
 
-    func wickStop(symbol: String, period: String, side: String) async throws -> String {
+    func wickStop(symbol: String, side: String, source: FibCoinStripSource, periodKey: String) async throws -> String {
         guard let connection else { throw APIError(status: 0, message: "尚未连接") }
-        let value: WickStop = try await API.get("/v1/market/monday-wick", query: [.init(name: "symbol", value: symbol), .init(name: "period", value: period), .init(name: "side", value: side)], connection: connection)
+        let value: WickStop = try await API.get("/v1/market/monday-wick", query: [.init(name: "symbol", value: symbol), .init(name: "period", value: "1m"), .init(name: "side", value: side), .init(name: "source", value: source.queryValue)], connection: connection)
+        guard let firstTouchMs = value.firstTouchMs, firstTouchMs.isFinite, firstTouchMs > 0, value.timeframe == "1m" else {
+            throw APIError(status: 502, message: "服务未返回有效的 1m 首触数据，请重试或手动填写")
+        }
+        let returnedPeriod = source == .monday ? value.week : value.month
+        guard returnedPeriod == periodKey else {
+            throw APIError(status: 409, message: "1.618 首触周期已变化，请重新打开当前信号或手动填写")
+        }
         return value.stopLoss
     }
 

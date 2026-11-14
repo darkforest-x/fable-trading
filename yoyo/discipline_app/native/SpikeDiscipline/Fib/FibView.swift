@@ -11,7 +11,7 @@ struct FibView: View {
     @Environment(MonthFirstWeekLevels.self) private var monthlyLevels
     @Environment(FibNavigation.self) private var navigation
     let active: Bool
-    var onQuick: (FibContract, CandlePeriod) -> Void
+    var onQuick: (FibQuickEntry, CandlePeriod) -> Void
     @State private var candles = CandleStore()
     @State private var monthlyReplay = MonthFirstWeekChartFeed()
     @State private var monthlyFeed = MonthFirstWeekFeed()
@@ -224,6 +224,17 @@ struct FibView: View {
                                               excluding: Set(Self.pinned))
     }
 
+    private var quickEntry: FibQuickEntry? {
+        guard navigation.monthlyTouch == nil else { return nil }
+        if stripSource == .monthFirstWeek {
+            return FibCoinStripProjection.monthlyQuickEntry(events: monthlyFeed.events,
+                                                            month: monthlyFeed.snapshot?.month,
+                                                            symbol: chartSymbol,
+                                                            nowMs: monthlyFeed.snapshot?.nowMs ?? 0)
+        }
+        return FibCoinStripProjection.mondayQuickEntry(row: fib.selected, week: fib.current?.week, live: fib.live)
+    }
+
     private var stripEmptyState: some View {
         let title: String
         if stripSource == .monday {
@@ -280,8 +291,8 @@ struct FibView: View {
     /// Contract selector (tap → 最新触价 list): logo, coin, live price and this week's touch.
     private var coinCard: some View {
         let symbol = chartSymbol, replay = replaySnapshot
-        let monthTouch = stripSource == .monthFirstWeek ? monthlyFeed.events
-            .filter { $0.month == monthlyFeed.snapshot?.month && $0.symbol == symbol }.max { $0.occurredMs < $1.occurredMs } : nil
+        let monthTouch = stripSource == .monthFirstWeek
+            ? FibCoinStripProjection.latestTouch(monthlyFeed.events, month: monthlyFeed.snapshot?.month, symbol: symbol) : nil
         let touch = stripSource == .monthFirstWeek ? monthTouch.map { (side: $0.side, time: $0.occurredMs) }
             : fib.selected?.latestTouch.map { (side: $0.side, time: $0.occurredMs) }
         return Button { Haptics.open(); navigation.showLiveChart(); chooser = true } label: {
@@ -328,7 +339,7 @@ struct FibView: View {
     private var dock: some View {
         @Bindable var fib = fib
         let locked = account.pendingEntry != nil || account.closeAttempt != nil || session.connection == nil
-        let row = fib.selected
+        let entry = quickEntry
         return HStack(spacing: 2) {
             PeriodChips(selection: $fib.period)
             Button { Haptics.open(); settings = true } label: {
@@ -343,11 +354,11 @@ struct FibView: View {
                 Image(systemName: "arrow.right.to.line").font(.system(size: 13, weight: .bold)).foregroundStyle(Color.ink).frame(width: 30, height: 34).contentShape(.rect)
             }
             .buttonStyle(.plain).accessibilityLabel("跟随最新")
-            Button { if let row { Haptics.open(); onQuick(row, fib.period) } } label: {
+            Button { if let entry { Haptics.open(); onQuick(entry, fib.period) } } label: {
                 HStack(spacing: 3) { Image(systemName: "bolt.fill"); Text("开单") }.font(.system(size: 13, weight: .bold)).lineLimit(1).fixedSize()
             }
             .buttonStyle(.pill(.solid(.accentColor), height: 34))
-            .disabled(locked || navigation.monthlyTouch != nil || row == nil || !fib.fresh || !fib.live)
+            .disabled(locked || entry == nil)
             .accessibilityLabel("快捷开单 1R")
         }
         .padding(.horizontal, 8)

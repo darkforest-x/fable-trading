@@ -198,7 +198,13 @@ struct ProtectionReceipt: Decodable {
     }
 }
 struct StopValue: Codable { let stop: String }
-struct WickStop: Codable { let stopLoss: String }
+struct WickStop: Codable {
+    let stopLoss: String
+    let firstTouchMs: Double?
+    let timeframe: String?
+    let week: String?
+    let month: String?
+}
 
 struct AccountSummary: Codable, Identifiable, Hashable {
     let id: String

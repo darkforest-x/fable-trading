@@ -2,7 +2,7 @@ import {usePullRefresh} from './usePullRefresh';
 import {refreshVisible} from './refreshEvent';
 import {FibHome} from './FibHome';
 import {fibSide,type FibContract} from './fibData';
-import {PERIODS,type CandlePeriod} from './candleData';
+import type {CandlePeriod} from './candleData';
 import {useAutoStop} from './useAutoStop';
 import {priceAtTick,parseEntryIntent,entryResolved,entryPollDelay,type EntryIntent} from './entryFlow';
 import {entryAvailability} from './entryAvailability';
@@ -63,6 +63,7 @@ export default function App(){
  const pushedOrigin=useRef<Tab>('统计');
  const [fibTicket,setFibTicket]=useState(false);
  const [fibPeriod,setFibPeriod]=useState<CandlePeriod>('15m');
+ const [fibPeriodKey,setFibPeriodKey]=useState('');
  const [quickAuto,setQuickAuto]=useState<{symbol:string;side:'long'|'short'}|null>(null);
  const [navDirection,setNavDirection]=useState(1);
  const [tab,setTab]=useState<Tab>('1.618'),[connection,setConnection]=useState<Connection|null>(null),[state,setState]=useState<State|null>(null),[online,setOnline]=useState(false);
@@ -151,9 +152,9 @@ export default function App(){
   ?`${isMajor?small(symbol):'山寨共享'} 剩余 ${fmt(room,2)} U`
   :`保证金占净值 ${state?fmt(Number(fraction)*100,2):'—'}%`;
  const leverageCaption=inheritedLeverage!==undefined||existing?'沿用':exposureSizing?(isMajor?'交易所':'交易所最高'):'杠杆';
- const stopContext=JSON.stringify([connection?.cacheScope,connection?.accountId,connection?.mode,symbol,selectedSide,kind,price,allocation,leverage,state?.policy_revision,fibTicket?fibPeriod:null]);
+ const stopContext=JSON.stringify([connection?.cacheScope,connection?.accountId,connection?.mode,symbol,selectedSide,kind,price,allocation,leverage,state?.policy_revision,fibTicket?fibPeriod:null,fibTicket?fibPeriodKey:null]);
  const [stopFeedback,setStopFeedback]=useState<{side:'long'|'short';value:string;context:string}|null>(null);
- const automatic=useAutoStop({connection,key:stopContext,period:fibTicket?fibPeriod:undefined,ticket:{symbol,side:'long',kind,price,stop:'',fraction,leverage,sizing_mode:sizingMode},enabled:!existing&&!pendingEntry&&(fibTicket?!!connection:tab==='合约'&&online&&fresh&&room>0&&!state?.blockers.length),
+ const automatic=useAutoStop({connection,key:stopContext,source:fibTicket?'week':undefined,periodKey:fibTicket?fibPeriodKey:undefined,ticket:{symbol,side:'long',kind,price,stop:'',fraction,leverage,sizing_mode:sizingMode},enabled:!existing&&!pendingEntry&&(fibTicket?!!connection:tab==='合约'&&online&&fresh&&room>0&&!state?.blockers.length),
   onApply:(value,side)=>{setStop(value);setFieldError(fieldIssue({symbol,side,kind,price,stop:value,fraction,leverage,sizing_mode:sizingMode},displayState));setStopFeedback({side,value,context:stopContext})},onError:message=>{if(fibTicket)setStop('');setFieldError(issueForMessage(message)??{field:'stop',message})}});
  const stopApplied=!!stopFeedback&&stopFeedback.context===stopContext&&stopFeedback.value===stop;
  const autoStopSide=automatic.working?automatic.mode:null;
@@ -301,7 +302,7 @@ export default function App(){
 
  function nav(next:Tab){if(fibTicket)automatic.manual();setFibTicket(false);setQuickAuto(null);if(next!==tab){feedback('light');if(PUSHED.includes(next)&&!PUSHED.includes(tab))pushedOrigin.current=tab;setNavDirection(PUSHED.includes(next)?1:PUSHED.includes(tab)?-1:MAIN_TABS.indexOf(next as typeof MAIN_TABS[number])>MAIN_TABS.indexOf(tab as typeof MAIN_TABS[number])?1:-1)}setTab(next);setError('');setMessage(null)}
  function choose(next:string,withFeedback=true){automatic.manual();if(next!==symbol&&withFeedback)feedback('light');setSymbol(next);setAllocation(100);setPrice('');setStop('');setFieldError(null)}
- function openFibTicket(row:FibContract,period:CandlePeriod){if(busy||pendingEntryRef.current)return;choose(row.symbol,false);setFibPeriod(period);setKind('market');setDirection(fibSide(row));setStopFeedback(null);setFibTicket(true);setQuickAuto({symbol:row.symbol,side:fibSide(row)});feedback('light')}
+ function openFibTicket(row:FibContract,period:CandlePeriod,week:string){if(busy||pendingEntryRef.current)return;choose(row.symbol,false);setFibPeriod(period);setFibPeriodKey(week);setKind('market');setDirection(fibSide(row));setStopFeedback(null);setFibTicket(true);setQuickAuto({symbol:row.symbol,side:fibSide(row)});feedback('light')}
  function openPositionSymbol(next:string){if(tab==='合约')feedback('light');if(next!==symbol)choose(next,false);nav('合约');requestAnimationFrame(()=>{window.scrollTo({top:0});document.querySelector<HTMLButtonElement>('.symbol-picker')?.focus({preventScroll:true})})}
  function openMonitorSymbol(next:string){if(busy||pendingEntryRef.current){notify('当前有请求在核对，稍后再切换合约');return}if(state&&!state.instruments[next]){notify(`${small(next)} 不在当前可交易合约列表`);return}openPositionSymbol(next)}
  function openNotification(event:NotificationEvent){
@@ -324,7 +325,7 @@ export default function App(){
  const riskPercent=Number(p?.risk_fraction??0.05)*100;
  const steps=[{r:p?.breakeven_r??'1',label:'成本保本'},{r:p?.take_profits[0][0]??'3',label:`平原始 ${Number(p?.take_profits[0][1]??.6)*100}%`},{r:p?.take_profits.at(-1)?.[0]??'5',label:'全部余仓'}];
  const quickLatest=useRef(openFibTicket);quickLatest.current=openFibTicket;
- const stableQuick=useCallback((row:FibContract,period:CandlePeriod)=>quickLatest.current(row,period),[]);
+ const stableQuick=useCallback((row:FibContract,period:CandlePeriod,week:string)=>quickLatest.current(row,period,week),[]);
  const mainRef=useRef<HTMLElement>(null);
  const pullStatus=usePullRefresh(mainRef,fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal||editing||busy||notifyOpen,async()=>{await Promise.all([refresh(),refreshVisible()])},tab);
  const swipe=useSwipeNav(tab,fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal||editing||busy||notifyOpen,nav);
@@ -346,7 +347,7 @@ export default function App(){
      <div className={`field stop-field ${stopApplied?'stop-applied':''}`}>
       <div className="entry-field-heading"><label htmlFor="entry-stop">{existing?'当前止损':'初始止损'}</label>{existing?<span className="inherited-stop">沿用</span>:<button type="button" aria-label={selectedSide==='long'?'多单 1R':'空单 1R'} aria-busy={!!autoStopSide} aria-pressed={automatic.mode===selectedSide} className={`quick-stop ${autoStopSide?'calculating':automatic.mode===selectedSide?'applied':''}`} disabled={ticketLocked||(!fibTicket&&blocked)||!connection} onClick={()=>autoStop(selectedSide)}>{autoStopSide?<><Spinner/>计算中</>:<>{automatic.mode===selectedSide&&<i/>}1R 自动计算</>}</button>}{automatic.mode&&<button className="manual-stop" aria-label="转为手动" disabled={ticketLocked} onClick={()=>{automatic.manual();feedback('light')}}>手动</button>}</div>
       <div className="input-shell entry-input"><input id="entry-stop" disabled={ticketLocked} data-field="stop" aria-invalid={fieldError?.field==='stop'} onBlur={()=>validateField('stop')} aria-label="初始止损" aria-describedby={fieldError?.field==='stop'?'field-stop-error':stopApplied?'stop-applied-status':undefined} readOnly={!!existing} inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={e=>{if(e.key==='Enter')e.currentTarget.blur()}} value={stop} onChange={e=>{automatic.manual();setStop(e.target.value);setStopFeedback(null);setFieldError(null)}} placeholder="输入止损价格"/><span>USDT</span></div>
-      {fieldError?.field==='stop'&&<span id="field-stop-error" className="field-error" role="status">{fieldError.message}</span>}<span id="stop-applied-status" className={fibTicket&&stopApplied&&fieldError?.field!=='stop'?'wick-stop-status':'sr-only'} role="status" aria-live="polite">{stopApplied?(fibTicket?`${PERIODS[fibPeriod]}插针止损 · 按1R与剩余额度计算`:`${stopFeedback?.side==='long'?'多单':'空单'} 1R 止损已填入，含成本预留`):''}</span>
+      {fieldError?.field==='stop'&&<span id="field-stop-error" className="field-error" role="status">{fieldError.message}</span>}<span id="stop-applied-status" className={fibTicket&&stopApplied&&fieldError?.field!=='stop'?'wick-stop-status':'sr-only'} role="status" aria-live="polite">{stopApplied?(fibTicket?'周一 1m首触至收回极值止损 · 按1R与剩余额度计算':`${stopFeedback?.side==='long'?'多单':'空单'} 1R 止损已填入，含成本预留`):''}</span>
      </div>
      <div className="budget"><div className="slider-heading"><label htmlFor="position-size">仓位额度</label><span className="margin-caption">{roomCaption}</span><output htmlFor="position-size">{allocation}<small>%</small></output></div><input data-field="sizing" aria-describedby={fieldError?.field==='sizing'?'field-sizing-error':undefined} id="position-size" aria-label="仓位额度" aria-valuetext={`${allocation}% 可用额度，${roomCaption}`} type="range" min="0" max="100" step="1" disabled={ticketLocked||!state||room<=0} value={allocation} onChange={e=>{sliderFeedback(allocation,Number(e.target.value));setAllocation(Number(e.target.value));setFieldError(null)}} style={{'--fill':`${allocation}%`} as CSSProperties}/><div className="allocation-presets" aria-label="仓位额度快捷选择">{[25,50,75,100].map(value=><button type="button" key={value} aria-pressed={allocation===value} disabled={ticketLocked||!state||room<=0} onClick={()=>{setAllocation(value);setFieldError(null);feedback(value===100?'heavy':'medium')}}>{value}%</button>)}</div></div>
      {fieldError&&['sizing','leverage'].includes(fieldError.field)&&<p id="field-sizing-error" className="field-error" role="status">{fieldError.message}</p>}<div className="ticket-estimate" aria-live="polite">{[[existing?'本次持仓金额':'持仓金额',estimate?.notional],['保证金',estimate?.margin],[existing?'合并止损金额':'预计止损',estimate?.risk]].map(([label,value])=><div key={String(label)}><span>{String(label)}</span><b>{fmt(value as number|undefined)}<small> U</small></b></div>)}</div>

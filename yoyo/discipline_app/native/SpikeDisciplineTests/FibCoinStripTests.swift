@@ -5,8 +5,44 @@ final class FibCoinStripTests: XCTestCase {
     func testMonthlySourceHasCompactTwoWaySwitch() {
         XCTAssertEqual(FibCoinStripSource.monday.title, "周一")
         XCTAssertEqual(FibCoinStripSource.monthFirstWeek.title, "月首周")
+        XCTAssertEqual(FibCoinStripSource.monday.queryValue, "week")
+        XCTAssertEqual(FibCoinStripSource.monthFirstWeek.queryValue, "month")
         XCTAssertEqual(FibCoinStripSource.monday.next, .monthFirstWeek)
         XCTAssertEqual(FibCoinStripSource.monthFirstWeek.next, .monday)
+        XCTAssertTrue(FibView.choices.contains(.h12))
+    }
+
+    func testMonthlyQuickEntryUsesTheSelectedMonthTouchAndKeepsConfirmedTouchesAvailableAfterPushExpiry() {
+        let event = touch(id: 1, month: "2026-11", symbol: "HUMA-USDT-SWAP", occurredMs: 100)
+        let entry = FibCoinStripProjection.monthlyQuickEntry(events: [event], month: "2026-11",
+                                                             symbol: "HUMA-USDT-SWAP", nowMs: 500_000)
+
+        XCTAssertEqual(entry, FibQuickEntry(symbol: "HUMA-USDT-SWAP", side: "long", source: .monthFirstWeek,
+                                             periodKey: "2026-11"))
+        XCTAssertNil(FibCoinStripProjection.monthlyQuickEntry(events: [event], month: "2026-10",
+                                                              symbol: "HUMA-USDT-SWAP", nowMs: 500_000))
+        XCTAssertNil(FibCoinStripProjection.monthlyQuickEntry(events: [event], month: "2026-11",
+                                                              symbol: "AKE-USDT-SWAP", nowMs: 500_000))
+        let unconfirmed = MonthFirstWeekTouch(id: event.id, eventId: event.eventId, type: event.type, month: event.month,
+                                              symbol: event.symbol, side: event.side, level: event.level, price: event.price,
+                                              candleExtreme: event.candleExtreme, occurredMs: event.occurredMs,
+                                              candleMs: event.candleMs, createdMs: event.createdMs, expiresMs: event.expiresMs,
+                                              freshUntilMs: event.freshUntilMs, source: event.source, touchConfirmed: false,
+                                              candleConfirmed: event.candleConfirmed)
+        XCTAssertNil(FibCoinStripProjection.monthlyQuickEntry(events: [unconfirmed], month: "2026-11",
+                                                              symbol: "HUMA-USDT-SWAP", nowMs: 500_000))
+    }
+
+    func testMondayQuickEntryUsesTheWeeklyTouchAndExplicitWeekSource() {
+        let row = FibContract(symbol: "BTC-USDT-SWAP", high: 110, low: 90, upper: 122, lower: 78,
+                              price: 100, stale: false,
+                              touches: ["upper": FibTouch(side: .upper, source: "history", occurredMs: 10)])
+
+        XCTAssertEqual(FibCoinStripProjection.mondayQuickEntry(row: row, week: "2026-11-09", live: true),
+                       FibQuickEntry(symbol: "BTC-USDT-SWAP", side: "short", source: .monday,
+                                     periodKey: "2026-11-09"))
+        XCTAssertNil(FibCoinStripProjection.mondayQuickEntry(row: row, week: "2026-11-09", live: false))
+        XCTAssertNil(FibCoinStripProjection.mondayQuickEntry(row: row, week: nil, live: true))
     }
 
     func testMonthlyStripUsesNewestEventPerCoinAndKeepsPinnedCoinsOutOfRollingChips() {

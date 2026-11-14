@@ -17,7 +17,7 @@ const FIB_PERIODS:CandlePeriod[]=['1m','5m','15m','1H','4H'];
 const touchTime=(ms:number)=>new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(ms).replace(/\//g,'/');
 const CandlePanel=lazy(()=>import('./CandlePanel'));
 const noCollapse=()=>{};
-export const FibHome=memo(function FibHome({connection,state,onQuick,onOpenReplay,locked,active,covered,focus}:{connection:Connection|null;state:State|null;onQuick:(row:FibContract,period:CandlePeriod)=>void;onOpenReplay:()=>void;locked:boolean;active:boolean;covered:boolean;focus?:{symbol:string;nonce:number}}){
+export const FibHome=memo(function FibHome({connection,state,onQuick,onOpenReplay,locked,active,covered,focus}:{connection:Connection|null;state:State|null;onQuick:(row:FibContract,period:CandlePeriod,week:string)=>void;onOpenReplay:()=>void;locked:boolean;active:boolean;covered:boolean;focus?:{symbol:string;nonce:number}}){
  const [cache]=useState(()=>browserFibCache(SERVICE_URL)),[saved]=useState(()=>cache.read());
  const [data,setData]=useState<FibSnapshot|null>(saved?.data??null),[symbol,setSymbol]=useState(saved?.symbol??''),[error,setError]=useState(''),[fresh,setFresh]=useState(false);
  const [period,setPeriod]=useState<CandlePeriod>(saved?.period??'15m'),[chooser,setChooser]=useState(false);
@@ -42,6 +42,7 @@ export const FibHome=memo(function FibHome({connection,state,onQuick,onOpenRepla
  },[revision,enabled,cache]);
  useEffect(()=>{if(!active)return;setClock(Date.now());const timer=setInterval(()=>setClock(Date.now()),30000);return()=>clearInterval(timer)},[active]);
  const current=data&&currentFibWeek(data,Math.max(clock,Date.now()))?data:null;
+ const currentWeek=current?.week??'';
  const visibleRows=current?.items.filter(r=>visibleFibSymbol(listPrefs,current.week,r.symbol))??[];
  const row=visibleRows.find(r=>r.symbol===symbol)??visibleRows[0],touch=row?latestFibTouch(row):null;
  const selectedSymbol=row?.symbol??'';
@@ -78,7 +79,7 @@ export const FibHome=memo(function FibHome({connection,state,onQuick,onOpenRepla
      <label className="fib-toggle"><span>六均线</span><input type="checkbox" role="switch" aria-label="六均线 SMA / EMA 20 · 60 · 120" checked={chartPrefs.averages} onChange={()=>toggleChart('averages')}/><i aria-hidden="true"/></label>
      <button className="fib-follow" onClick={follow}><Icon name="refresh" size={14}/>跟随最新</button>
     </div>
-    <div className="fib-actions"><button className="fib-quick-main" disabled={locked||!fresh||!live} onClick={()=>onQuick(row,period)}><Icon name="arrow" size={16}/>快捷开单<span>· 1R</span></button><button className="fib-replay-chip" onClick={onOpenReplay}><i/>模拟盘</button></div>
+    <div className="fib-actions"><button className="fib-quick-main" disabled={locked||!fresh||!live} onClick={()=>onQuick(row,period,currentWeek)}><Icon name="arrow" size={16}/>快捷开单<span>· 1R</span></button><button className="fib-replay-chip" onClick={onOpenReplay}><i/>模拟盘</button></div>
    </>:<div className="fib-empty"><Icon name="fib" size={34}/><h2>{error?'监控暂不可用':current?'本周暂无触价':'正在读取触价记录'}</h2><p>{error?'稍后重试，已有交易保护保持独立运行。':current&&!current.monday_complete?'纽约周一结束后锁定高低点。':'首次触及区间外 1.618 的合约会显示在这里。'}</p>{error&&<button onClick={()=>setRevision(n=>n+1)}>重新加载</button>}<button className="fib-replay-chip" onClick={onOpenReplay}><i/>模拟盘</button></div>}
   </div>
   {chooser&&<FibChooser rows={visibleRows} symbol={selectedSymbol} week={current?.week??''} clock={clock} favorites={listPrefs.favorites} onSelect={select} onFavorite={coin=>updatePrefs(p=>favoriteFibSymbol(p,coin))} onDelete={coin=>updatePrefs(p=>hideFibSymbol(p,current?.week??'',coin))} onRestore={coin=>updatePrefs(p=>restoreFibSymbol(p,current?.week??'',coin))} onDismiss={()=>setChooser(false)}/>}

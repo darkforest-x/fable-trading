@@ -18,6 +18,8 @@ final class TicketModel {
     var stopApplied: String?               // "<context>|<value>" when an automatic stop was filled in
     var fibTicket = false                  // 1.618 快捷开单 sheet is open
     var fibPeriod: CandlePeriod = .m15
+    var fibSource: FibCoinStripSource = .monday
+    var fibPeriodKey = ""
 
     // Auto-stop (useAutoStop.ts): mode = side being calculated; ready once the value for this context lands.
     var autoMode: String?
@@ -77,7 +79,8 @@ final class TicketModel {
     /// Context of an automatic stop: any change invalidates a computed value.
     func stopContext(_ state: AccountState?, connection: Connection?) -> String {
         [connection?.accountId ?? "", connection?.mode ?? "", symbol, side(state), kind, price, "\(Int(allocation))", "\(leverage)",
-         "\(state?.policyRevision ?? 0)", fibTicket ? fibPeriod.rawValue : "-"].joined(separator: "|")
+         "\(state?.policyRevision ?? 0)", fibTicket ? fibPeriod.rawValue : "-",
+         fibTicket ? fibSource.queryValue : "-", fibTicket ? fibPeriodKey : "-"].joined(separator: "|")
     }
     func autoReady(_ context: String, enabled: Bool) -> Bool { autoMode == nil || (enabled && autoCalculated == context + ":" + (autoMode ?? "")) }
 
@@ -103,11 +106,12 @@ final class TicketModel {
         stop = e.stop; leverage = e.leverage; direction = e.side == "short" ? "short" : "long"
     }
 
-    /// 1.618 快捷开单: market, side from the latest touch (upper → short), wick stop for the chart period.
-    func openQuick(_ row: FibContract, period: CandlePeriod, state: AccountState?) {
-        choose(row.symbol)
-        fibPeriod = period; kind = "market"
-        direction = row.latestTouch?.side == .upper ? "short" : "long"
+    /// 1.618 quick entry uses the selected signal source's symbol and side; its stop uses 1m extremes
+    /// from that source's first touch through recovery, independent of the displayed chart period.
+    func openQuick(_ entry: FibQuickEntry, period: CandlePeriod, state: AccountState?) {
+        choose(entry.symbol)
+        fibPeriod = period; fibSource = entry.source; fibPeriodKey = entry.periodKey; kind = "market"
+        direction = entry.side
         fibTicket = true
         syncLeverage(state)
         if existing(state) == nil { selectAuto(direction) } else { syncExisting(state) }

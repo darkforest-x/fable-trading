@@ -117,7 +117,7 @@ struct SymbolPicker: View {
     }
 }
 
-/// 1.618 快捷开单 sheet: the same ticket with the wick stop for the chart period.
+/// 1.618 quick-order sheet: the same ticket with the source-specific 1m first-touch-to-recovery extreme stop.
 struct QuickTicketSheet: View {
     @Environment(SessionStore.self) private var session
     @Environment(AccountStore.self) private var account

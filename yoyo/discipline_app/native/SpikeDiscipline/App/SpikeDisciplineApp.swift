@@ -262,9 +262,9 @@ struct RootView: View {
         switch page {
         case .monitor: MonitorView(showNotifications: $showNotifications, active: tab == .monitor && scenePhase == .active)
         case .trade: TradeView(active: tab == .trade && scenePhase == .active && !landscape, showingChart: $tradeShowsChart, onDestination: route)
-        case .fib: FibView(active: tab == .fib && scenePhase == .active && !landscape, onQuick: { row, period in
+        case .fib: FibView(active: tab == .fib && scenePhase == .active && !landscape, onQuick: { entry, period in
             guard account.pendingEntry == nil else { return }
-            ticket.openQuick(row, period: period, state: account.state)
+            ticket.openQuick(entry, period: period, state: account.state)
         })
         case .positions: PositionsView(onOpenSymbol: { symbol in
             guard !ticket.reviewing, account.pendingEntry == nil else { return }

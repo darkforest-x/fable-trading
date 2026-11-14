@@ -100,6 +100,13 @@ def test_history_minute_recovery_keeps_its_exact_minute_interval():
         "2026-11", 80.0, minute_ms, minute_ms + MINUTE_MS)
 
 
+def test_history_minute_at_hour_boundary_uses_created_ms_to_avoid_h1_widening():
+    hour_ms = NOW // HOUR_MS * HOUR_MS
+    monitor = Monitor(snapshot(side="upper", source="history", candle_ms=hour_ms))
+    assert month_wick_anchor(monitor, SYMBOL, "short", NOW) == (
+        "2026-11", 110.0, hour_ms, hour_ms + MINUTE_MS)
+
+
 def test_minute_touch_is_clipped_at_month_expiry():
     initial = snapshot(side="upper", source="history")
     expiry = initial["window"]["expires_ms"]
