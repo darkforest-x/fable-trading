@@ -1,0 +1,258 @@
+{
+  "experiment_id": "exp-monday-reclaimed-wick-target-win-20261115-v1-okx",
+  "source_experiment_id": "exp-monday-reclaimed-wick-okx-20261115-v1",
+  "vectorbt_version": "1.2.0",
+  "first_hit": "yoyo.evaluation.monday_wick_r_engine.first_hit",
+  "portfolio": "Portfolio.from_orders; 1 quote-currency unit reference notional per accepted trade; no compounding",
+  "local_data_coverage": {
+    "candidate_count": 17,
+    "readable_paths": [
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/LIGHT-USDT-SWAP-1792918200000-1m.csv.gz",
+        "rows": 4325,
+        "first_open_ms": 1792917900000,
+        "last_close_ms": 1793177400000
+      },
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/ANIME-USDT-SWAP-1793091300000-1m.csv.gz",
+        "rows": 4325,
+        "first_open_ms": 1793091000000,
+        "last_close_ms": 1793350500000
+      },
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/STABLE-USDT-SWAP-1793116800000-1m.csv.gz",
+        "rows": 4325,
+        "first_open_ms": 1793116500000,
+        "last_close_ms": 1793376000000
+      },
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/LUNA-USDT-SWAP-1793306700000-1m.csv.gz",
+        "rows": 4325,
+        "first_open_ms": 1793306400000,
+        "last_close_ms": 1793565900000
+      },
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/ZEN-USDT-SWAP-1793306700000-1m.csv.gz",
+        "rows": 4325,
+        "first_open_ms": 1793306400000,
+        "last_close_ms": 1793565900000
+      },
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/AEVO-USDT-SWAP-1793307000000-1m.csv.gz",
+        "rows": 4325,
+        "first_open_ms": 1793306700000,
+        "last_close_ms": 1793566200000
+      },
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/ATH-USDT-SWAP-1793307000000-1m.csv.gz",
+        "rows": 4325,
+        "first_open_ms": 1793306700000,
+        "last_close_ms": 1793566200000
+      },
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/DOGE-USDT-SWAP-1793307000000-1m.csv.gz",
+        "rows": 4325,
+        "first_open_ms": 1793306700000,
+        "last_close_ms": 1793566200000
+      },
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/FARTCOIN-USDT-SWAP-1793307000000-1m.csv.gz",
+        "rows": 4325,
+        "first_open_ms": 1793306700000,
+        "last_close_ms": 1793566200000
+      },
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/NOT-USDT-SWAP-1793307000000-1m.csv.gz",
+        "rows": 4325,
+        "first_open_ms": 1793306700000,
+        "last_close_ms": 1793566200000
+      },
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/RECALL-USDT-SWAP-1793307000000-1m.csv.gz",
+        "rows": 4325,
+        "first_open_ms": 1793306700000,
+        "last_close_ms": 1793566200000
+      },
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/SAHARA-USDT-SWAP-1793307000000-1m.csv.gz",
+        "rows": 4325,
+        "first_open_ms": 1793306700000,
+        "last_close_ms": 1793566200000
+      },
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/UNI-USDT-SWAP-1793307000000-1m.csv.gz",
+        "rows": 4325,
+        "first_open_ms": 1793306700000,
+        "last_close_ms": 1793566200000
+      },
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/PIPPIN-USDT-SWAP-1793307900000-1m.csv.gz",
+        "rows": 4325,
+        "first_open_ms": 1793307600000,
+        "last_close_ms": 1793567100000
+      },
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/SIGN-USDT-SWAP-1794071400000-1m.csv.gz",
+        "rows": 4325,
+        "first_open_ms": 1794071100000,
+        "last_close_ms": 1794330600000
+      },
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/RECALL-USDT-SWAP-1794553500000-1m.csv.gz",
+        "rows": 2100,
+        "first_open_ms": 1794553200000,
+        "last_close_ms": 1794679200000
+      },
+      {
+        "path": "data/research/monday-reclaimed-wick-okx-20261115/SLX-USDT-SWAP-1794638100000-1m.csv.gz",
+        "rows": 690,
+        "first_open_ms": 1794637800000,
+        "last_close_ms": 1794679200000
+      }
+    ],
+    "missing_paths": []
+  },
+  "scenarios": [
+    {
+      "scenario": "no_tp",
+      "target_pct": null,
+      "candidate_n": 17,
+      "entered_n": 8,
+      "skipped_busy_n": 9,
+      "take_profit_n": 0,
+      "stop_n": 4,
+      "six_hour_exit_n": 4,
+      "ambiguous_same_bar_n": 0,
+      "win_n": 4,
+      "win_rate_pct": 50.0,
+      "mean_net_pct": 1.9183358379928384,
+      "median_net_pct": -0.5854480878073697,
+      "mean_gross_pct": 2.218746055608255,
+      "mean_fee_pct": 0.1004102176154166,
+      "mean_slippage_pct": 0.2
+    },
+    {
+      "scenario": "tp_1pct",
+      "target_pct": 1.0,
+      "candidate_n": 17,
+      "entered_n": 8,
+      "skipped_busy_n": 9,
+      "take_profit_n": 7,
+      "stop_n": 1,
+      "six_hour_exit_n": 0,
+      "ambiguous_same_bar_n": 0,
+      "win_n": 7,
+      "win_rate_pct": 87.5,
+      "mean_net_pct": 0.5877426721734822,
+      "median_net_pct": 0.8407956802605383,
+      "mean_gross_pct": 0.7739111567768537,
+      "mean_fee_pct": 0.07366848460337125,
+      "mean_slippage_pct": 0.1125
+    },
+    {
+      "scenario": "tp_1.5pct",
+      "target_pct": 1.5,
+      "candidate_n": 17,
+      "entered_n": 8,
+      "skipped_busy_n": 9,
+      "take_profit_n": 6,
+      "stop_n": 2,
+      "six_hour_exit_n": 0,
+      "ambiguous_same_bar_n": 0,
+      "win_n": 6,
+      "win_rate_pct": 75.0,
+      "mean_net_pct": 0.4101296892755324,
+      "median_net_pct": 1.3362645494901817,
+      "mean_gross_pct": 0.6127809597366115,
+      "mean_fee_pct": 0.07765127046107742,
+      "mean_slippage_pct": 0.125
+    },
+    {
+      "scenario": "tp_2pct",
+      "target_pct": 2.0,
+      "candidate_n": 17,
+      "entered_n": 8,
+      "skipped_busy_n": 9,
+      "take_profit_n": 4,
+      "stop_n": 3,
+      "six_hour_exit_n": 1,
+      "ambiguous_same_bar_n": 0,
+      "win_n": 5,
+      "win_rate_pct": 62.5,
+      "mean_net_pct": -0.0669468894377285,
+      "median_net_pct": 1.0195657178986317,
+      "mean_gross_pct": 0.1679453803880544,
+      "mean_fee_pct": 0.08489226982578268,
+      "mean_slippage_pct": 0.15000000000000002
+    },
+    {
+      "scenario": "tp_3pct",
+      "target_pct": 3.0,
+      "candidate_n": 17,
+      "entered_n": 8,
+      "skipped_busy_n": 9,
+      "take_profit_n": 2,
+      "stop_n": 4,
+      "six_hour_exit_n": 2,
+      "ambiguous_same_bar_n": 0,
+      "win_n": 4,
+      "win_rate_pct": 50.0,
+      "mean_net_pct": -0.5031369418927873,
+      "median_net_pct": -0.5854480878073697,
+      "mean_gross_pct": -0.23556941088992972,
+      "mean_fee_pct": 0.09256753100285747,
+      "mean_slippage_pct": 0.17500000000000002
+    },
+    {
+      "scenario": "tp_5pct",
+      "target_pct": 5.0,
+      "candidate_n": 17,
+      "entered_n": 8,
+      "skipped_busy_n": 9,
+      "take_profit_n": 2,
+      "stop_n": 4,
+      "six_hour_exit_n": 2,
+      "ambiguous_same_bar_n": 0,
+      "win_n": 4,
+      "win_rate_pct": 50.0,
+      "mean_net_pct": -0.004189237461753176,
+      "median_net_pct": -0.5854480878073697,
+      "mean_gross_pct": 0.26337818684892433,
+      "mean_fee_pct": 0.09256742431067717,
+      "mean_slippage_pct": 0.17500000000000002
+    },
+    {
+      "scenario": "tp_10pct",
+      "target_pct": 10.0,
+      "candidate_n": 17,
+      "entered_n": 8,
+      "skipped_busy_n": 9,
+      "take_profit_n": 2,
+      "stop_n": 4,
+      "six_hour_exit_n": 2,
+      "ambiguous_same_bar_n": 0,
+      "win_n": 4,
+      "win_rate_pct": 50.0,
+      "mean_net_pct": 1.2448020397030162,
+      "median_net_pct": -0.5854480878073697,
+      "mean_gross_pct": 1.5123688729448943,
+      "mean_fee_pct": 0.09256683324187664,
+      "mean_slippage_pct": 0.17500000000000002
+    }
+  ],
+  "fees_and_slippage": {
+    "entry_fee": "taker 5bp",
+    "entry_slippage": "fixed 10bp of original entry notional",
+    "take_profit_fee": "maker 2bp",
+    "take_profit_slippage": "0bp",
+    "stop_or_timed_exit_fee": "taker 5bp",
+    "stop_or_timed_exit_slippage": "fixed 10bp of original entry notional",
+    "funding": "excluded"
+  },
+  "limitations": [
+    "17 post-score events are a small exploratory sample, not a validated target rule.",
+    "Same-minute stop/TP double touches are resolved to the original stop first.",
+    "The single-slot sequence is replayed separately for each target; no funded account or compounding path is modeled.",
+    "Funding, contract lot conversion, liquidation, and spread are excluded."
+  ]
+}
