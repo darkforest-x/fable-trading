@@ -21445,3 +21445,18 @@ experiments:
     artifacts: []
     canonical_report: experiments/active/exp-trendline4h-line-quality-20261110-v1/summary_stats.json
     notes: Visual quality is the owner's call; the 5-ATR cap and fit ranking were chosen from a 24-line eyeball sample. Pine yoyo/evaluation/pine/spike_signal_cloud_v1_9.pine, private TV script SPIKE · 云带信号 V1.9. Earlier break census/backtests used V1.2 with strict pivot ties and are not rewritten.
+
+  - experiment_id: exp-trendline-1h-survivors-20261114-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9d43aa5e7f
+    status: inconclusive
+    question: Among the 30 active 1H breaks of 4H resistance at 2026-11-14 20:00 Beijing, which rose like BERA, and what could be seen at confirmation?
+    single_variable: Descriptive fixed-cohort observation of peak excursions and breakout-bar features, with the original 267 events used to check survivor selection.
+    result: Of 25 survivors with a full 24h, two reached +30 percent (BERA +32.41 and DOOD +129.55), 23 peaked below +10 percent, and five additional events were still immature. Nine events in eight symbols ever reached +30 percent by cutoff. Among all 252 mature original events, three of 60 with a positive body at least twice the prior 24-hour mean true range reached +30 percent within 24h, versus zero of 192 others. ORDER was removed later despite peaking +195.64 percent on day one.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-trendline-1h-survivors-20261114-v1/events.csv
+    notes: All comparisons start after the signal candle closes. Thresholds are descriptive, selected after seeing BERA. The original set overlaps the survivor sample. OPG has two signals. Since-confirmation peaks have unequal follow-up. Only closed OKX 1H bars were used, and each time window must be contiguous. Price excursions do not assume or simulate fills.
