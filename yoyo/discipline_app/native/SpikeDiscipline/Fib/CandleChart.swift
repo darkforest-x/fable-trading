@@ -358,6 +358,7 @@ struct CandleChart: View {
     @State private var yShift: Double = 0
     @State private var yZoom: Double = 1
     @State private var panStart: (offset: CGFloat, shift: Double)?
+    @State private var gestureEdges: ChartEdgeCatalog?
     @State private var axisStart: Double?
     @State private var zoomStart: CGFloat?
     @State private var cross: CGPoint?
@@ -435,16 +436,21 @@ struct CandleChart: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("\(watermark ?? "") \(period.label) K线")
             .overlay(alignment: .topLeading) {
-                if showOffscreenPrices, !timestampFocus, focusRange == nil, cross == nil, glide == nil,
-                   panStart == nil, zoomStart == nil, axisStart == nil, layout.firstVisible <= layout.lastVisible {
+                if showOffscreenPrices, !timestampFocus, focusRange == nil, layout.firstVisible <= layout.lastVisible {
                     let floor = wallpaper ? axisY - 12 : plot.maxY - 4
                     if floor > plot.minY + 80 {
-                        let edges = edgeCatalog(layout, floor: floor)
+                        let moving = panStart != nil || zoomStart != nil || axisStart != nil || cross != nil || glide != nil
+                        let edges = (moving ? gestureEdges : nil) ?? edgeCatalog(layout, floor: floor)
                         VStack(alignment: .leading, spacing: 0) {
                             if !edges.above.isEmpty { edgeMenu(edges.above, above: true) }
                             Spacer(minLength: 0)
                             if !edges.below.isEmpty { edgeMenu(edges.below, above: false) }
                         }
+                        // Keep native menus mounted across touch-down and coast; only the resting
+                        // viewport exposes actionable reference prices.
+                        .opacity(moving ? 0 : 1)
+                        .allowsHitTesting(!moving)
+                        .accessibilityHidden(moving)
                         .frame(height: floor - plot.minY)
                         .padding(.top, plot.minY)
                         .padding(.leading, 5)
@@ -644,6 +650,10 @@ struct CandleChart: View {
                 }
                 if panStart == nil {
                     stopGlide()
+                    if showOffscreenPrices, !timestampFocus, focusRange == nil, layout.firstVisible <= layout.lastVisible {
+                        let floor = layout.plot.maxY - (wallpaper ? bottomOverlay + 24 : 4)
+                        if floor > layout.plot.minY + 80 { gestureEdges = edgeCatalog(layout, floor: floor) }
+                    }
                     panStart = (offset, yShift)
                     viewportInteracted = true
                     #if DEBUG
