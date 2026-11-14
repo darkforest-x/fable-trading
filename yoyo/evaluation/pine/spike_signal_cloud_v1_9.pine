@@ -1,0 +1,867 @@
+//@version=6
+// SPIKE signal-center port, V1.9 (2026-11-10). Private visual reference; no orders.
+// V1.9: 4H line selection V1.3 - equal-touch candidates rank by fit (mean gap
+// line-high in ATR) instead of span, and lines floating > maxGap ATR are rejected.
+// Also fixes V1.8's engine: history lookups inside request.security methods
+// returned wrong bars, so pierced lines could pass; history now lives in arrays.
+// V1.8: merges the 4H main trendline (auto_trendline_4h_v1_2.pine, default on).
+// Line selection is verbatim V1.2 on native 4H bars via request.security, so the
+// same 4H line is drawn in bar_time on every supported chart period (5m-1D).
+// Cloud signals, ranges, plans, markers and alerts from V1.7 are unchanged.
+// Source contracts: cloud_signals.py, cloud_signal_rules.py, cloud-signal-chart.js.
+// Signals: confirmed UTC12H, EMA20/50, NY Monday; first per week.
+// NY Monday extrema use complete5m first, then complete30m/1h history.
+// Coarser full-day extrema must agree with any overlapping lower-timeframe evidence.
+// Entry is retrospective touched 1.618, NOT an executable post-confirmation fill.
+// Peak R is descriptive OHLC excursion after confirmation; no costs/realized P&L.
+// V1.7: adds the original current-timeframe Stoch5/3/3 check/cross display.
+// V1.6 intrabar exits, entries and reference calculations are unchanged.
+// Entries still require12H confirmation. Use prior confirmed EMA state for intrabar thresholds.
+// No user-imposed week/date window. TradingView data/object limits still apply.
+// Retains cached calendar and active-plan updates; panning rebuilds visible drawings.
+// Native candle bodies; wick-only color overlays, no time-based key boxes.
+// Reference stops are input percentages of1.618 entry, not of margin or leverage.
+// Pine docs: /concepts/other-timeframes-and-data/, /visuals/lines-and-boxes/.
+indicator("SPIKE · 云带信号 V1.9", shorttitle="SPIKE 云带 V1.9", overlay=true, behind_chart=false,
+     max_lines_count=500, max_boxes_count=500, max_labels_count=500, max_bars_back=5000)
+
+string ZONE = "America/New_York"
+int STEP = 43200000
+string gStop = "止损设置"
+float btcEthStopPercent = input.float(1.5, "BTC / ETH 止损（%）", minval=0.1, maxval=50.0, step=0.1, group=gStop, display=display.none,
+     tooltip="BTC、ETH 专用。填写1.5表示参考入场价的1.5%，不是杠杆收益率。多单止损=入场×(1−百分比)，空单止损=入场×(1+百分比)。")
+float otherStopPercent = input.float(3.0, "其他币种止损（%）", minval=0.1, maxval=50.0, step=0.1, group=gStop, display=display.none,
+     tooltip="除BTC、ETH之外的币种，默认3%。修改后所有历史参考框、目标R和最高R按新止损重新计算，不代表实际成交或已实现收益。")
+float STOP_PCT = (syminfo.basecurrency == "BTC" or syminfo.basecurrency == "ETH" ? btcEthStopPercent : otherStopPercent) / 100.0
+string gView = "显示"
+bool showCloud = input.bool(true, "EMA 20/50 云带", group=gView, display=display.none)
+bool showRanges = input.bool(true, "周一区间与上下 1.618", group=gView, display=display.none,
+     tooltip="纽约周一完整区间，周二起生效。优先288根5m；较早历史使用完整48根30m或24根1h，高低点须与重叠的低周期数据一致。取消固定周数限制，随回看绘制；历史仍受TradingView行情与订阅限制。")
+bool showPlans = input.bool(true, "历史交易参考框", group=gView, display=display.none)
+bool showKeys = input.bool(true, "信号关键 K 高亮", group=gView, display=display.none)
+bool showR = input.bool(true, "小号 R 数字（5 / 10 / 最高）", group=gView, display=display.none)
+bool showInfo = input.bool(false, "最新参考详情", group=gView,
+     tooltip="确认后才显示，参考价回标到关键 K 触及的 1.618，不是收盘后能成交的价格。止损比例在“止损设置”调整，默认BTC/ETH为1.5%、其他币种为3%，均从参考入场价计算。最高R从确认后统计，盘中首次止损或EMA20/50反向即结束，不等12H收盘。历史仅有12H OHLC时退出定位到该K区间，同K先后不明保留范围；开盘已反向则开盘即结束。")
+// Display-only Fanshen markers, ported from monday_range_v2_43.pine.
+string gMarkers = "区间外勾叉"
+bool showMarkers = input.bool(true, "显示区间外勾叉", group=gMarkers, display=display.none,
+     tooltip="沿用区间翻身：当前图表周期 Stoch(5,3,3)，K/D 均低于20时金叉画绿勾，均高于80时死叉画红叉；对应方向影线必须越过所选边界，刚好贴线不算。未收盘K的勾叉会随价格变化，收盘后确认。仅为图表标记，不改变12H入场、退出、参考框或警报。")
+string markerRangeMode = input.string("1.618之外", "勾叉区间", options=["1.618之外", "周一高低点区间外"], group=gMarkers, display=display.none,
+     tooltip="1.618之外：下侧1.618下方的绿勾、上侧1.618上方的红叉。周一高低点区间外：周一低点下方的绿勾、高点上方的红叉。使用完整纽约周一；K线须从周一结束后开始，缺少完整区间时隐藏。")
+bool showWeekendMarkers = input.bool(false, "周末显示勾叉", group=gMarkers, display=display.none,
+     tooltip="沿用原默认：纽约周六、周日隐藏，以该K线开盘时间判断。开启后仍须符合所选区间条件。")
+string gCandle = "K 线颜色"
+bool colorCandles = input.bool(true, "自定义 K 线颜色", group=gCandle, display=display.none)
+color upColor = input.color(#8B9099, "普通上涨", group=gCandle, display=display.none)
+color downColor = input.color(#8B9099, "普通下跌", group=gCandle, display=display.none)
+color mondayColor = input.color(#30D158, "周一", group=gCandle, display=display.none)
+color weekendColor = input.color(#8B9099, "周末", group=gCandle, display=display.none)
+color keyColor = input.color(#0A84FF, "信号关键 K", group=gCandle, display=display.none)
+string gStyle = "云带与参考框"
+color cloudUp = input.color(color.new(#37A989, 80), "多头云带", group=gStyle, display=display.none)
+color cloudDown = input.color(color.new(#D16A81, 82), "空头云带", group=gStyle, display=display.none)
+color rewardColor = input.color(color.new(#10B981, 77), "收益区域", group=gStyle, display=display.none)
+color riskColor = input.color(color.new(#F43F5E, 73), "止损区域", group=gStyle, display=display.none)
+color rColor = input.color(#009B6B, "R 数字", group=gStyle, display=display.none)
+int textSize = input.int(9, "数字字号", minval=7, maxval=14, group=gStyle, display=display.none)
+bool darkChart = color.r(chart.bg_color) + color.g(chart.bg_color) + color.b(chart.bg_color) < 384
+color cloudBullFill = darkChart and cloudUp == color.new(#37A989, 80) ? color.new(#2DB88F, 76) : cloudUp
+color cloudBearFill = darkChart and cloudDown == color.new(#D16A81, 82) ? color.new(#D2647C, 77) : cloudDown
+color profitFill = darkChart and rewardColor == color.new(#10B981, 77) ? color.new(#10B981, 72) : rewardColor
+color lossFill = darkChart and riskColor == color.new(#F43F5E, 73) ? color.new(#F43F5E, 70) : riskColor
+color rInk = darkChart and rColor == #009B6B ? #23E6AD : rColor
+string gLevels = "四条区间线"
+color extremaColor = input.color(#9399A2, "周一高低点", group=gLevels, display=display.none)
+bool autoFibColor = input.bool(true, "1.618 随图表深浅自动配色", group=gLevels, display=display.none)
+color customFibColor = input.color(#17191D, "1.618 自定义颜色", group=gLevels, display=display.none)
+int levelWidth = input.int(1, "线宽", minval=1, maxval=3, group=gLevels, display=display.none)
+string levelStyle = input.string("实线", "线型", options=["实线", "虚线", "点线"], group=gLevels, display=display.none)
+// 4H main trendline inputs, carried over from auto_trendline_4h_v1_2.pine.
+string gTrend = "4H 主趋势线"
+bool showTrend = input.bool(true, "显示 4H 主趋势线", group=gTrend, display=display.none,
+     tooltip="在「4H 主趋势线 V1.2」规则上改进：触点数相同时选贴得最紧的线（而不是最长的），平均悬空超过上限的线不画。其余沿用：只用已收盘的4H K线，首末触点相隔≥72根、中间至少一次独立回踩贴线、整段无实体/影线明显穿线才建线；连续两根4H收盘高于线+0.15 ATR记为上破。在4H上计算，任意图表周期都显示同一条线。仅为图表参考，不改变12H入场、退出或参考框。")
+bool showSupport = input.bool(false, "同时画上升支撑", group=gTrend, display=display.none)
+color resistanceColor = input.color(#92DCE5, "下降压力", group=gTrend, display=display.none)
+color supportColor = input.color(#EAAE67, "上升支撑", group=gTrend, display=display.none)
+// Default cyan is for dark charts; on light charts the default becomes near-black.
+color resInk = not darkChart and resistanceColor == #92DCE5 ? #2B2F36 : resistanceColor
+bool leftGuide = input.bool(true, "向左延长 12 天作参考", group=gTrend, display=display.none)
+bool showEvents = input.bool(false, "标出建线与收盘突破", group=gTrend, display=display.none)
+int swing = input.int(3, "高低点左右确认根数", minval=1, maxval=12, group=gTrend, display=display.none)
+int minSpan = input.int(72, "首末触点最小间隔（4H 根数）", minval=12, maxval=240, group=gTrend, display=display.none)
+int gap = input.int(24, "独立触点最小间隔（4H 根数）", minval=4, maxval=60, group=gTrend, display=display.none)
+float nearAtr = input.float(0.65, "贴线容差（ATR）", minval=0.05, maxval=1.5, step=0.05, group=gTrend, display=display.none)
+float maxGap = input.float(5.0, "最大悬空距离（ATR）", minval=1.0, maxval=30.0, step=0.5, group=gTrend, display=display.none,
+     tooltip="线从首个触点到当前，平均高出K线高点多少个ATR。超过即不画，避免线浮在价格上方或跨过V形底。调到30基本不限制（排序仍按贴合度）。")
+bool debug = input.bool(false, "输出核对日志", group="核对", display=display.none)
+
+// Calendar state consumes every available source bar. Complete5m is preferred.
+// Full30m/1h tiles exactly partition the SAME NY day, extending history when
+// lower-timeframe data is absent. Conflicting overlapping extrema fail closed.
+// Monday is 00:00 NY to Tuesday 00:00 NY, DST-aware. No partial-week fallback.
+mondayEngine(int sourceStep) =>
+    var int start = na
+    var int finish = na
+    var int expires = na
+    var int count = 0
+    var int expected = na
+    var bool complete = false
+    var float hi = na
+    var float lo = na
+    // Source time is ascending. Recompute NY calendar boundaries only when
+    // entering a new week (including gaps); expires remains DST-aware.
+    if na(start) or time >= expires
+        int d = dayofmonth(time, ZONE) - (dayofweek(time, ZONE) + 5) % 7
+        start := timestamp(ZONE, year(time, ZONE), month(time, ZONE), d, 0, 0)
+        finish := timestamp(ZONE, year(time, ZONE), month(time, ZONE), d + 1, 0, 0)
+        expires := timestamp(ZONE, year(time, ZONE), month(time, ZONE), d + 7, 0, 0)
+        count := 0
+        expected := start
+        complete := true
+        hi := na
+        lo := na
+    if time >= start and time_close <= finish
+        complete := complete and time == expected and time_close - time == sourceStep
+        expected := time_close
+        count += 1
+        hi := na(hi) ? high : math.max(hi, high)
+        lo := na(lo) ? low : math.min(lo, low)
+    bool ready = complete and expected == finish and count == int(86400000 / sourceStep) and hi > lo
+    [start, finish, expires, hi, lo, ready, count, expected, complete]
+
+type WeekRange
+    int start
+    int ready
+    int expires
+    float hi
+    float lo
+
+type Plan
+    int keyAt
+    int at
+    int side
+    float entry
+    float stop
+    float target
+    float risk
+    float rr
+    float lowerR = 0.0
+    float upperR = 0.0
+    int through = 0
+    int ended = 0
+    int reason = 0
+    int drawEnd = 0
+    float exitPrice = na
+    int exitBarEnd = 0
+    int timing = 0
+
+// The reference AND its payload must survive realtime rollback. Keep these
+// qualifiers off Plan so historical engine state still commits once per12H.
+type ExitLatch
+    varip int at
+    varip float lowerR
+    varip float upperR
+    varip int ended
+    varip int reason
+    varip int through
+    varip float exitPrice
+    varip int exitBarEnd
+    varip int timing
+
+type Snapshot
+    int closeAt
+    array<WeekRange> weeks
+    array<Plan> plans
+    int sourceStart
+    int total
+
+// All thresholds use the PREVIOUS confirmed12H EMA values. This is the live
+// EMA at price P, not a recursive EMA over intrabar ticks or lower-TF candles.
+method advance(Plan p, float prev20, float prev50) =>
+    float a20 = 2.0 / 21
+    float a50 = 2.0 / 51
+    float crossPrice = ((1 - a50) * prev50 - (1 - a20) * prev20) / (a20 - a50)
+    float eps = 2.220446049250313e-16 * math.max(1.0, math.abs(prev20), math.abs(prev50)) * 8 / (a20 - a50)
+    float adverse = p.side == 1 ? low : high
+    float favorable = p.side == 1 ? high : low
+    bool openStop = (open - p.stop) * p.side <= 0
+    bool openFlip = (open - crossPrice) * p.side < -eps
+    bool hitStop = (adverse - p.stop) * p.side <= 0
+    bool hitFlip = (adverse - crossPrice) * p.side < -eps
+    float openR = (open - p.entry) * p.side / p.risk
+    if openStop or openFlip or hitStop or hitFlip
+        bool atOpen = openStop or openFlip
+        // If both barriers lie on the adverse side, the nearer one is crossed
+        // first. An opening gap through both keeps stop precedence.
+        bool cloudFirst = atOpen ? not openStop : hitFlip and (not hitStop or (crossPrice - p.stop) * p.side > 0)
+        p.reason := cloudFirst ? 2 : 1
+        p.exitPrice := atOpen ? open : cloudFirst ? crossPrice : p.stop
+        p.lowerR := math.max(p.lowerR, openR)
+        p.upperR := atOpen ? p.lowerR : math.max(p.lowerR, (favorable - p.entry) * p.side / p.risk)
+        p.ended := atOpen or not barstate.isrealtime ? time : timenow
+        p.exitBarEnd := atOpen ? time : time_close
+        p.timing := atOpen ? 1 : barstate.isrealtime ? 3 : 2
+        p.through := p.ended
+    else
+        p.lowerR := math.max(p.lowerR, (favorable - p.entry) * p.side / p.risk)
+        p.upperR := p.lowerR
+        p.through := time_close
+
+// Inputs: current chart bar's directional extreme and completed own-week range.
+// Exactly the original strict wick boundary gate; no close/body/EMA/WVF filter.
+markerOutside(bool ready, float extreme, int side, float hi, float lo, bool useFib) =>
+    float upper = useFib ? lo + 1.618 * (hi - lo) : hi
+    float lower = useFib ? hi - 1.618 * (hi - lo) : lo
+    ready and hi > lo and (side == 1 ? extreme < lower : extreme > upper)
+
+markerDayAllows(int weekday) =>
+    showWeekendMarkers or (weekday != dayofweek.saturday and weekday != dayofweek.sunday)
+
+// ---- 4H main trendline engine (line V1.3, from auto_trendline_4h_v1_2.pine) ----
+// The engine runs inside request.security on native 4H bars and returns the
+// current line's geometry/lifecycle; the chart draws in bar_time.
+// V1.9 fix: in that requested context, `[]` lookups made from methods/functions
+// (high[k], atr[k], time[k]) did not return the requested bars - a chart-side
+// recount on OKX:LPTUSDT.P found accepted lines pierced on 49 bars (2026-11-10).
+// The engine now keeps its own bar history in arrays filled once per confirmed
+// 4H bar, and every lookup reads those arrays by bar index.
+const int TL_WINDOW = 360
+const int TL_TAIL = 24
+const int TL_GUIDE = 72
+const int FOUR_H = 14400000
+const int TL_KEEP = 800
+
+type Pivot
+    int x
+    int t
+    float y
+    float vol
+
+type Candidate
+    Pivot a
+    Pivot b
+    int touches
+    float fit = 0.0
+
+// Signed bar history (sign*wick, sign*body top, ATR, open time) by bar index.
+type Bars
+    array<float> wick
+    array<float> body
+    array<float> atr
+    array<int> t
+    int first = na
+
+method val(Bars self, array<float> arr, int x) =>
+    int i = x - self.first
+    i >= 0 and i < arr.size() ? arr.get(i) : na
+
+method level(Candidate self, int x) =>
+    self.b.y + (self.b.y - self.a.y) * (x - self.b.x) / (self.b.x - self.a.x)
+
+// Line V1.3: equal touch counts prefer the line price hugs most closely
+// (smaller mean gap), not the longest span, which pulled anchors back to
+// pre-crash tops and drew lines across V-shapes.
+method outranks(Candidate self, Candidate other) =>
+    na(other) or self.touches > other.touches or (self.touches == other.touches and self.fit < other.fit)
+
+// Signed prices let the identical upper-envelope check handle both directions.
+// Inspect each bar's own ATR, wick and body from the first anchor up to bar x.
+// Also measures fit = mean (line - wick)/ATR over the same bars; a line that
+// floats more than maxGap ATR above price on average is rejected.
+method clean(Candidate self, Bars hist, int x) =>
+    bool ok = true
+    float gapSum = 0.0
+    int gapN = 0
+    for xi = self.a.x to x
+        float limit = self.level(xi)
+        float w = hist.val(hist.wick, xi)
+        float bd = hist.val(hist.body, xi)
+        float a = hist.val(hist.atr, xi)
+        if w > limit + 0.30 * a or bd > limit + 0.10 * a
+            ok := false
+            break
+        if a > 0
+            gapSum += math.max(limit - w, 0) / a
+            gapN += 1
+    self.fit := gapN > 0 ? gapSum / gapN : 0.0
+    ok and self.fit <= maxGap
+
+// Reserve space for both endpoints. Several candles in one rebound get one vote.
+f_pick(array<Pivot> pivots, Pivot b, float closing, Bars hist, int x) =>
+    Candidate best = na
+    for [idx, a] in pivots
+        if idx == pivots.size() - 1
+            break
+        if b.x - a.x >= math.max(minSpan, 2 * gap) and a.y - b.y >= 2 * b.vol
+            Candidate test = Candidate.new(a, b, 2)
+            int lastTouch = a.x
+            for j = idx + 1 to pivots.size() - 1
+                Pivot mid = pivots.get(j)
+                if mid.x > b.x - gap
+                    break
+                if mid.x - lastTouch >= gap and math.abs(mid.y - test.level(mid.x)) <= nearAtr * mid.vol
+                    test.touches += 1
+                    lastTouch := mid.x
+            if test.touches >= 3 and closing <= test.level(x)
+                if test.clean(hist, x) and test.outranks(best)
+                    best := test
+    best
+
+// One state per written call. Only confirmed 4H bars can start or end a line.
+// A short settling window collects pivots from the same retest before locking the slope.
+// Returns signed geometry in time (pivot bar open times) plus lifecycle counters.
+// Inputs are this bar's signed wick/body/close, ATR and the confirmed pivot (if any).
+f_track(bool enabled, int sign, float pivotPrice, float closing, float wickNow, float bodyNow, float atrNow) =>
+    var Bars hist = Bars.new(array.new<float>(), array.new<float>(), array.new<float>(), array.new<int>())
+    var array<Pivot> pivots = array.new<Pivot>()
+    var Candidate pending = na
+    var int due = na
+    var Candidate current = na
+    var int ended = na
+    var int endedAt = na
+    var bool extendBroken = false
+    var int beyond = 0
+    var int seq = 0
+    var int breaks = 0
+    var int bornAt = na
+    var int startAt = na
+    int x = bar_index
+    if enabled and barstate.isconfirmed
+        if na(hist.first)
+            hist.first := x
+        hist.wick.push(wickNow)
+        hist.body.push(bodyNow)
+        hist.atr.push(atrNow)
+        hist.t.push(time)
+        if hist.wick.size() > TL_KEEP
+            hist.wick.shift()
+            hist.body.shift()
+            hist.atr.shift()
+            hist.t.shift()
+            hist.first += 1
+        if not na(current) and na(ended)
+            float value = current.level(x)
+            beyond := closing > value + 0.15 * atrNow ? beyond + 1 : 0
+            bool broken = beyond >= 2
+            if broken or x - current.a.x >= TL_WINDOW
+                ended := x
+                endedAt := time
+                extendBroken := broken
+                breaks += broken ? 1 : 0
+                beyond := 0
+                pending := na
+                due := na
+        // Once aged out after a break, the line keeps only its own price/time region.
+        if not na(ended) and x == ended + TL_WINDOW
+            extendBroken := false
+
+        float pivotAtr = hist.val(hist.atr, x - swing)
+        int pi = x - swing - hist.first
+        if not na(pivotPrice) and not na(pivotAtr) and pi >= 0
+            Pivot b = Pivot.new(x - swing, hist.t.get(pi), pivotPrice, pivotAtr)
+            while pivots.size() > 0 and x - pivots.first().x > TL_WINDOW
+                pivots.shift()
+            // A distant, older active line may give way to an independent newer structure.
+            bool active = not na(current) and na(ended)
+            bool search = active ? current.level(x) - closing > 3 * atrNow : na(ended) or b.x - ended >= gap
+            if search and pivots.size() >= 2
+                Candidate test = f_pick(pivots, b, closing, hist, x)
+                if not na(test)
+                    bool distinct = not active or (test.a.x > current.b.x and test.level(x) < current.level(x))
+                    if distinct and test.outranks(pending)
+                        if na(pending)
+                            due := x + 2 * swing
+                        pending := test
+            pivots.push(b)
+
+        if not na(pending) and x >= due
+            bool active = not na(current) and na(ended)
+            bool stillRelevant = not active or (current.level(x) - closing > 3 * atrNow and pending.level(x) < current.level(x))
+            if stillRelevant and x - pending.a.x <= TL_WINDOW and closing <= pending.level(x) and pending.clean(hist, x)
+                current := pending
+                int start = math.max(0, current.a.x - (leftGuide ? TL_GUIDE : 0))
+                startAt := current.a.t - (current.a.x - start) * FOUR_H
+                bornAt := time
+                seq += 1
+                ended := na
+                endedAt := na
+                extendBroken := false
+                beyond := 0
+            pending := na
+            due := na
+    bool has = enabled and not na(current)
+    float known = has and (na(ended) or extendBroken or x <= ended + TL_TAIL) ? sign * current.level(x) : na
+    [seq, breaks, startAt, has ? current.a.t : na, has ? sign * current.a.y : na, has ? current.b.t : na,
+         has ? sign * current.b.y : na, bornAt, endedAt, extendBroken, known, has ? current.fit : na]
+
+trendEngine() =>
+    float atr4 = ta.atr(14)
+    float ph = ta.pivothigh(high, swing, swing)
+    float pl = ta.pivotlow(low, swing, swing)
+    [rSeq, rBreaks, rStart, rAt, rAy, rBt, rBy, rBorn, rEnded, rExt, rKnown, rFit] =
+         f_track(showTrend, 1, ph, close, high, math.max(open, close), atr4)
+    [sSeq, sBreaks, sStart, sAt, sAy, sBt, sBy, sBorn, sEnded, sExt, sKnown, sFit] =
+         f_track(showTrend and showSupport, -1, -pl, -close, -low, -math.min(open, close), atr4)
+    [rSeq, rBreaks, rStart, rAt, rAy, rBt, rBy, rBorn, rEnded, rExt, rKnown, rFit,
+         sSeq, sBreaks, sStart, sAt, sAy, sBt, sBy, sBorn, sEnded, sExt, sKnown, sFit]
+
+// Chart-side record of each 4H line the engine has published.
+type TrendRec
+    int seq
+    int startAt
+    int aAt
+    float aY
+    int bAt
+    float bY
+    int endedAt
+    bool extended
+    int cutAt
+
+method levelAt(TrendRec self, int t) =>
+    self.bY + (self.bY - self.aY) * float(t - self.bAt) / float(self.bAt - self.aAt)
+
+// The engine always carries the CURRENT line, so a chart whose history starts
+// after the line was born still adopts it on its first bar.
+trendSync(array<TrendRec> recs, int seq, int startAt, int aAt, float aY, int bAt, float bY, int bornAt, int endedAt, bool extended) =>
+    if seq > 0 and not na(aAt)
+        if recs.size() == 0 or recs.last().seq != seq
+            if recs.size() > 0
+                TrendRec prev = recs.last()
+                prev.cutAt := bornAt
+                prev.extended := false
+            recs.push(TrendRec.new(seq, startAt, aAt, aY, bAt, bY, na, false, na))
+            if recs.size() > 300
+                recs.shift()
+        TrendRec cur = recs.last()
+        cur.endedAt := endedAt
+        cur.extended := extended
+
+// Full independent native12H engine. Chart timeframe/viewport never enter it.
+cloudEngine() =>
+    [st, readyAt, expires, rawHigh, rawLow, fiveReady, monCount, monExpected, monComplete] = request.security(syminfo.tickerid, "5", mondayEngine(300000),
+         lookahead=barmerge.lookahead_off, calc_bars_count=200000)
+    [st30, ready30, expires30, high30, low30, thirtyReady, count30, expected30, complete30] = request.security(syminfo.tickerid, "30", mondayEngine(1800000),
+         lookahead=barmerge.lookahead_off, calc_bars_count=200000)
+    [st60, ready60, expires60, high60, low60, hourlyReady, count60, expected60, complete60] = request.security(syminfo.tickerid, "60", mondayEngine(3600000),
+         lookahead=barmerge.lookahead_off, calc_bars_count=200000)
+    bool hasFive30 = st == st30 and not na(rawHigh)
+    bool corroborated = thirtyReady and (not hasFive30 or (rawHigh == high30 and rawLow == low30))
+    bool hasFive60 = st == st60 and not na(rawHigh)
+    bool hasThirty60 = st30 == st60 and not na(high30)
+    bool hourlyValid = hourlyReady and (not hasFive60 or (rawHigh == high60 and rawLow == low60)) and
+         (not hasThirty60 or (high30 == high60 and low30 == low60))
+    int sourceMinutes = fiveReady ? 5 : corroborated ? 30 : hourlyValid ? 60 : 0
+    float mh = fiveReady ? rawHigh : corroborated ? high30 : hourlyValid ? high60 : na
+    float ml = fiveReady ? rawLow : corroborated ? low30 : hourlyValid ? low60 : na
+    if not fiveReady and corroborated
+        st := st30
+        readyAt := ready30
+        expires := expires30
+    else if not fiveReady and hourlyValid
+        st := st60
+        readyAt := ready60
+        expires := expires60
+    var float e20 = na
+    var float e50 = na
+    var int count = 0
+    var int sourceStart = time
+    var int usedWeek = na
+    var int total = 0
+    var array<WeekRange> weeks = array.new<WeekRange>()
+    var array<Plan> plans = array.new<Plan>()
+    var array<int> active = array.new<int>()
+    // Preserve the first observed intrabar exit across Pine realtime rollback.
+    // New12H begins a fresh latch; finalized history stays in plans.
+    varip int liveBar = na
+    varip array<ExitLatch> liveExits = array.new<ExitLatch>()
+    if na(liveBar) or liveBar != time
+        liveBar := time
+        liveExits.clear()
+    bool contiguous = not na(time[1]) and time == time[1] + STEP
+    if not contiguous
+        e20 := close
+        e50 := close
+        count := 0
+    float prev20 = e20
+    float prev50 = e50
+    e20 += (close - e20) * 2.0 / 21
+    e50 += (close - e50) * 2.0 / 51
+    count += 1
+    if not na(mh) and not na(ml) and time_close >= readyAt and time_close <= expires
+        if weeks.size() == 0 or weeks.last().start != st
+            weeks.push(WeekRange.new(st, readyAt, expires, mh, ml))
+    // Ended plans remain in history, but never need another excursion update.
+    // Keep indices, not aliased UDTs: requested contexts copy collection state.
+    int activeIndex = active.size() - 1
+    while activeIndex >= 0
+        Plan p = plans.get(active.get(activeIndex))
+        if time >= p.at
+            ExitLatch latched = na
+            if barstate.isrealtime and liveExits.size() > 0
+                for q in liveExits
+                    if q.at == p.at
+                        latched := q
+            if not na(latched)
+                p.lowerR := latched.lowerR
+                p.upperR := latched.upperR
+                p.ended := latched.ended
+                p.reason := latched.reason
+                p.through := latched.through
+                p.exitPrice := latched.exitPrice
+                p.exitBarEnd := latched.exitBarEnd
+                p.timing := latched.timing
+            else if time != p.through
+                p.ended := p.through
+                p.reason := 3
+            else
+                p.advance(prev20, prev50)
+                if barstate.isrealtime and p.ended > 0
+                    liveExits.push(ExitLatch.new(p.at, p.lowerR, p.upperR, p.ended,
+                         p.reason, p.through, p.exitPrice, p.exitBarEnd, p.timing))
+        if p.ended != 0
+            active.remove(activeIndex)
+        activeIndex -= 1
+    float upper = mh + 0.618 * (mh - ml)
+    float lower = ml - 0.618 * (mh - ml)
+    bool eligible = count >= 50 and time % STEP == 0 and time_close - time == STEP and
+         not na(mh) and readyAt <= time and time_close <= expires and (na(usedWeek) or usedWeek != st)
+    int side = eligible ? (e20 > e50 and low < lower and lower < close and close < upper ? 1 :
+         e20 < e50 and lower < close and close < upper and upper < high ? -1 : 0) : 0
+    if side != 0 and (not barstate.isrealtime or time_close <= timenow)
+        float entry = side == 1 ? lower : upper
+        float stop = entry * (1 - side * STOP_PCT)
+        float target = side == 1 ? upper : lower
+        float risk = (entry - stop) * side
+        if math.min(entry, stop, target, risk, (target - entry) * side) > 0
+            usedWeek := st
+            total += 1
+            if plans.size() > 0
+                Plan prior = plans.last()
+                prior.drawEnd := math.min(prior.drawEnd, time_close)
+            Plan created = Plan.new(time, time_close, side, entry, stop, target, risk,
+                 (target - entry) * side / risk, 0.0, 0.0, time_close, 0, 0, time_close + 12 * STEP)
+            plans.push(created)
+            active.push(plans.size() - 1)
+    // Materialize the endpoint AND its preceding source bars. The callers use
+    // s[1] while12H is open; endpoint bar-state flags can change on viewport
+    // recalculation, so an endpoint-only snapshot can leave that slot empty.
+    // This boundary controls drawing transport only, never signal eligibility.
+    Snapshot result = na
+    if barstate.islast or barstate.islastconfirmedhistory or time >= last_bar_time - 2 * STEP
+        array<WeekRange> outWeeks = array.new<WeekRange>()
+        array<Plan> outPlans = array.new<Plan>()
+        for w in weeks
+            outWeeks.push(w.copy())
+        for p in plans
+            outPlans.push(p.copy())
+        result := Snapshot.new(time_close, outWeeks, outPlans, sourceStart, total)
+    if debug and barstate.islast
+        log.info("SOURCE tf={0} bars={1} weeks={2} plans={3} monday={4} ready={5} count={6} expected={7} complete={8} hi={9}", timeframe.period, count, weeks.size(), plans.size(), st, readyAt, monCount, monExpected, monComplete, mh)
+        log.info("RANGE sourceMinutes={0} complete5m={1} complete30m={2} complete1h={3} hi5={4} hi30={5} hi60={6}", sourceMinutes, fiveReady, thirtyReady, hourlyReady, rawHigh, high30, high60)
+    int lastAt = plans.size() > 0 ? plans.last().at : 0
+    int lastSide = plans.size() > 0 ? plans.last().side : 0
+    [result, lastAt, lastSide]
+
+pairedCloud() =>
+    [s, at, side] = cloudEngine()
+    [s, s[1], at, at[1], side, side[1], time_close]
+
+float seconds = timeframe.in_seconds()
+if seconds < 300 or seconds > 86400 or not chart.is_standard
+    runtime.error("请使用标准 K 线，周期支持 5 分钟至 1 日；信号固定为 UTC 12H。")
+int observedAt = barstate.isrealtime ? timenow : time_close
+[s, prior, at, pat, side, pside, endAt] = request.security(syminfo.tickerid, "720", pairedCloud(),
+     lookahead=barmerge.lookahead_off)
+// Only the realtime snapshot can contain an unfinished12H. The engine itself
+// forbids unfinished entries, but allows current-tick exits immediately.
+bool useCurrent = barstate.isrealtime or endAt <= observedAt
+Snapshot snap = useCurrent ? s : prior
+int latestAt = useCurrent ? at : pat
+int latestSide = useCurrent ? side : pside
+
+// 4H trendline on native 4H bars; V1.2 also computed only the latest 3000.
+// lookahead_off: a 4H state reaches lower periods once that 4H bar has closed.
+[rSeq, rBreaks, rStart, rAt, rAy, rBt, rBy, rBorn, rEnded, rExt, rKnown, rFit,
+     sSeq, sBreaks, sStart, sAt, sAy, sBt, sBy, sBorn, sEnded, sExt, sKnown, sFit] =
+     request.security(syminfo.tickerid, "240", trendEngine(), lookahead=barmerge.lookahead_off, calc_bars_count=3000)
+var array<TrendRec> resRecs = array.new<TrendRec>()
+var array<TrendRec> supRecs = array.new<TrendRec>()
+trendSync(resRecs, rSeq, rStart, rAt, rAy, rBt, rBy, rBorn, rEnded, rExt)
+trendSync(supRecs, sSeq, sStart, sAt, sAy, sBt, sBy, sBorn, sEnded, sExt)
+plot(showTrend ? rKnown : na, "4H 压力参考价", display=display.data_window)
+plot(showTrend and showSupport ? sKnown : na, "4H 支撑参考价", display=display.data_window)
+// Counters only advance; the first chart bar adopts the state without an event.
+bool resBorn = showTrend and rSeq > nz(rSeq[1], rSeq)
+// Debug cross-check on a 4H chart only: recount wick/body piercings of the new
+// line with chart-context series, independent of the requested 4H engine.
+float chartAtr = ta.atr(14)
+if debug and resBorn
+    int badChart = 0
+    float gapChart = 0.0
+    int nChart = 0
+    if timeframe.isminutes and timeframe.multiplier == 240
+        for k = 0 to 400
+            if time[k] < rAt
+                break
+            float lv = rBy + (rBy - rAy) * float(time[k] - rBt) / float(rBt - rAt)
+            if high[k] > lv + 0.30 * chartAtr[k] or math.max(open[k], close[k]) > lv + 0.10 * chartAtr[k]
+                badChart += 1
+            if chartAtr[k] > 0
+                gapChart += math.max(lv - high[k], 0) / chartAtr[k]
+                nChart += 1
+    log.info("BORN seq={0} a={1} {2} b={3} {4} fit={5} | chart bad={6} fit={7} bars={8}", rSeq, str.format_time(rAt, "yyyy-MM-dd HH:mm", "Asia/Shanghai"), rAy,
+         str.format_time(rBt, "yyyy-MM-dd HH:mm", "Asia/Shanghai"), rBy, rFit, badChart, nChart > 0 ? gapChart / nChart : na, nChart)
+bool supBorn = showTrend and showSupport and sSeq > nz(sSeq[1], sSeq)
+bool resBreak = showTrend and rBreaks > nz(rBreaks[1], rBreaks)
+bool supBreak = showTrend and showSupport and sBreaks > nz(sBreaks[1], sBreaks)
+plotshape(showEvents and resBorn, "压力建线", shape.circle, location.abovebar, resInk, size=size.tiny, display=display.pane)
+plotshape(showEvents and supBorn, "支撑建线", shape.circle, location.belowbar, supportColor, size=size.tiny, display=display.pane)
+plotshape(showEvents and resBreak, "收盘上破", shape.triangleup, location.belowbar, resInk, size=size.tiny, display=display.pane)
+plotshape(showEvents and supBreak, "收盘下破", shape.triangledown, location.abovebar, supportColor, size=size.tiny, display=display.pane)
+
+// Current display timeframe cloud, matching the web drawer; no border plots.
+var float display20 = na
+var float display50 = na
+if na(display20) or time != time[1] + int(seconds * 1000)
+    display20 := close
+    display50 := close
+display20 += (close - display20) * 2.0 / 21
+display50 += (close - display50) * 2.0 / 51
+p20 = plot(showCloud ? display20 : na, "EMA20", color=na, display=display.pane)
+p50 = plot(showCloud ? display50 : na, "EMA50", color=na, display=display.pane)
+// Native fill colors the whole previous-to-current segment with the current
+// color. On a cross this paints the new direction back onto the prior key K.
+// Keep the exact EMA geometry and use a neutral transition segment instead.
+// Directional color resumes at the first point with the new EMA relationship.
+float spread = display20 - display50
+bool cloudCross = time == time[1] + int(seconds * 1000) and spread * spread[1] < 0
+color cloudTransition = color.new(#8C919C, 88)
+fill(p20, p50, cloudCross ? cloudTransition : spread > 0 ? cloudBullFill : cloudBearFill, title="EMA 云带")
+int visibleLeft = chart.left_visible_bar_time
+int visibleRight = chart.right_visible_bar_time + int(seconds * 1000)
+// The original Fanshen glyphs follow the CHART period, independent of12H plans.
+// Store only visible candidates; viewport changes already rebuild this script.
+// Normal var rollback preserves the original forming-bar preview without
+// accumulating duplicate labels. Confirmed bars keep their final Stoch result.
+// Match against snap.weeks below: glyphs use exactly the same ranges as lines,
+// with no extra data request and no second calendar/source-selection path.
+type RangeMarker
+    int at
+    int side
+    float extreme
+var array<RangeMarker> markerCandidates = array.new<RangeMarker>()
+float fs_k = ta.sma(ta.stoch(close, high, low, 5), 3)
+float fs_d = ta.sma(fs_k, 3)
+bool fs_crossUp = ta.crossover(fs_k, fs_d)
+bool fs_crossDown = ta.crossunder(fs_k, fs_d)
+bool fs_signalLong = fs_crossUp and fs_k < 20 and fs_d < 20
+bool fs_signalShort = fs_crossDown and fs_k > 80 and fs_d > 80
+bool markerDayVisible = markerDayAllows(dayofweek(time, ZONE))
+if showMarkers and markerDayVisible and time >= visibleLeft and time < visibleRight
+    if fs_signalLong
+        markerCandidates.push(RangeMarker.new(time, 1, low))
+    if fs_signalShort
+        markerCandidates.push(RangeMarker.new(time, -1, high))
+
+int day = dayofweek(time, ZONE)
+color ordinary = day == dayofweek.monday ? mondayColor : day == dayofweek.saturday or day == dayofweek.sunday ? weekendColor : close >= open ? upColor : downColor
+// Native candles own their body width, border and zoom geometry.
+// On lower chart periods, color the matching chart candle only once the12H
+// signal is confirmed; a rollover may expose the key on the preceding bar.
+// Also cover a live12H/day rollover without depending on a final closing tick.
+bool currentKey = latestAt > 0 and time < latestAt and latestAt <= time_close and observedAt >= latestAt
+bool previousKey = latestAt > 0 and time[1] < latestAt and latestAt <= time_close[1] and observedAt >= latestAt
+barcolor(showKeys and currentKey ? keyColor : colorCandles ? ordinary : na, title="K 线颜色")
+barcolor(showKeys and previousKey ? keyColor : na, offset=-1, title="已确认关键 K")
+// barcolor changes bodies only. This plot colors wicks with transparent bodies,
+// so it cannot cover or duplicate the native key candle body.
+color wickInk = showKeys and currentKey ? keyColor : ordinary
+plotcandle(colorCandles or (showKeys and currentKey) ? open : na, high, low, close,
+     title="影线颜色", color=na, wickcolor=wickInk, bordercolor=na, display=display.pane)
+// A lower-period key becomes known on the following chart bar. Its body
+// is barcolor(offset=-1); only the centered wick needs a retrospective line.
+// Keep this independent of plan-window snapshots and their drawing limits.
+var array<line> keyWicks = array.new<line>()
+if showKeys and previousKey and not previousKey[1] and time_close[1] >= visibleLeft and time[1] <= visibleRight
+    keyWicks.push(line.new(time[1], high[1], time[1], low[1], xloc=xloc.bar_time, color=keyColor, width=1))
+    // Drawing IDs are a TradingView limit, not a retained-history cutoff.
+    // V1.8 reserves 100 of the 500 line IDs for 4H trendlines.
+    if keyWicks.size() > 390
+        line.delete(keyWicks.shift())
+
+// The full engine history is retained. Viewport filtering only chooses which
+// immutable ranges/plans consume TradingView drawing IDs on this screen.
+// Keep endpoint redraws: request-context snapshots can finish materializing
+// after the historical-to-realtime boundary, even with the same closeAt.
+var array<line> drawnLines = array.new<line>()
+var array<line> drawnTrends = array.new<line>()
+var array<box> drawnBoxes = array.new<box>()
+var array<label> drawnLabels = array.new<label>()
+var table info = table.new(position.top_right, 1, 2, border_width=0)
+var table historyInfo = table.new(position.bottom_right, 1, 1, border_width=0)
+style = levelStyle == "虚线" ? line.style_dashed : levelStyle == "点线" ? line.style_dotted : line.style_solid
+color fibColor = autoFibColor ? chart.fg_color : customFibColor
+
+rMark(int endAt, float price, string txt, int startAt, string details) =>
+    int tickStart = math.max(startAt, endAt - int(seconds * 1000))
+    // Range rays and native key wicks take priority at Pine's500-line cap.
+    // Keep every R number even when an optional tiny tick would exceed budget.
+    if drawnLines.size() + keyWicks.size() + drawnTrends.size() < 500
+        drawnLines.push(line.new(tickStart, price, endAt, price, xloc=xloc.bar_time, color=rInk, width=1))
+    if drawnLabels.size() < 500
+        drawnLabels.push(label.new(endAt, price, txt, xloc=xloc.bar_time, style=label.style_label_lower_right,
+             color=color.new(color.white, 100), textcolor=rInk, size=textSize, tooltip=details))
+
+// V1.2 drawing rules in time: the live line extends right from its second
+// anchor; a closing break keeps extending until 360 4H bars after the break or
+// a newer line; age-outs stop 24 4H bars after ending; replaced lines stop at
+// the successor's birth. Inactive lines fade. Old lines keep their own region.
+// TradingView skips a line whose first point lies before the bars the client
+// has loaded (observed 2026-11-09: V1.2's 12-day left guide vanished after a
+// reload; lower periods load even less history). Start at the visible left
+// edge instead, on the same line; viewport changes already rerun this block.
+drawTrendSet(array<TrendRec> recs, color ink) =>
+    int n = 0
+    if recs.size() > 0
+        for i = recs.size() - 1 to 0
+            TrendRec r = recs.get(i)
+            bool latest = i == recs.size() - 1
+            bool live = latest and (na(r.endedAt) or r.extended)
+            int finish = not na(r.endedAt) ? r.endedAt + TL_TAIL * FOUR_H : latest or na(r.cutAt) ? r.bAt : r.cutAt
+            int x1 = math.max(r.startAt, visibleLeft)
+            int x2 = live ? math.max(finish, x1 + FOUR_H) : finish
+            if r.startAt <= visibleRight and x2 > x1 and drawnTrends.size() < 100
+                drawnTrends.push(line.new(x1, r.levelAt(x1), x2, r.levelAt(x2), xloc=xloc.bar_time,
+                     extend=live ? extend.right : extend.none, color=live ? ink : color.new(ink, 68), width=1))
+                n += 1
+                if debug
+                    log.info("TRENDLINE seq={0} x1={1} y1={2} x2={3} y2={4} live={5}", r.seq, str.format_time(x1, "yyyy-MM-dd HH:mm", "Asia/Shanghai"),
+                         r.levelAt(x1), str.format_time(x2, "yyyy-MM-dd HH:mm", "Asia/Shanghai"), r.levelAt(x2), live)
+    n
+
+if barstate.islast
+    for l in drawnTrends
+        line.delete(l)
+    drawnTrends.clear()
+    if showTrend
+        int nRes = drawTrendSet(resRecs, resInk)
+        int nSup = showSupport ? drawTrendSet(supRecs, supportColor) : 0
+        if debug
+            log.info("TREND res seq={0} breaks={1} drawn={2} | sup seq={3} drawn={4} | a={5} {6} b={7} {8} ended={9} ext={10}", rSeq, rBreaks, nRes, sSeq, nSup,
+                 na(rAt) ? "na" : str.format_time(rAt, "yyyy-MM-dd HH:mm", "Asia/Shanghai"), rAy,
+                 na(rBt) ? "na" : str.format_time(rBt, "yyyy-MM-dd HH:mm", "Asia/Shanghai"), rBy,
+                 na(rEnded) ? "na" : str.format_time(rEnded, "yyyy-MM-dd HH:mm", "Asia/Shanghai"), rExt)
+
+if barstate.islast and not na(snap)
+    for l in drawnLines
+        line.delete(l)
+    for b in drawnBoxes
+        box.delete(b)
+    for l in drawnLabels
+        label.delete(l)
+    drawnLines.clear()
+    drawnBoxes.clear()
+    drawnLabels.clear()
+    int nRanges = 0
+    int visibleRanges = 0
+    if showRanges and snap.weeks.size() > 0
+        for i = snap.weeks.size() - 1 to 0
+            WeekRange w = snap.weeks.get(i)
+            if w.expires >= visibleLeft and w.ready <= visibleRight
+                visibleRanges += 1
+            if w.expires >= visibleLeft and w.ready <= visibleRight and drawnLines.size() + keyWicks.size() + drawnTrends.size() <= 496
+                float upper = w.hi + 0.618 * (w.hi - w.lo)
+                float lower = w.lo - 0.618 * (w.hi - w.lo)
+                for level in array.from(w.hi, w.lo, upper, lower)
+                    color col = level == w.hi or level == w.lo ? extremaColor : fibColor
+                    drawnLines.push(line.new(w.ready, level, w.expires, level, xloc=xloc.bar_time, color=col, width=levelWidth, style=style))
+                nRanges += 1
+    if debug and snap.weeks.size() > 0
+        log.info("HISTORY availableWeeks={0} firstWeek={1} drawnWeeks={2} viewport={3}..{4}", snap.weeks.size(), str.format_time(snap.weeks.first().start, "yyyy-MM-dd", ZONE), nRanges, str.format_time(visibleLeft, "yyyy-MM-dd", ZONE), str.format_time(visibleRight, "yyyy-MM-dd", ZONE))
+    int nPlans = 0
+    int visiblePlans = 0
+    if snap.plans.size() > 0
+        for i = snap.plans.size() - 1 to 0
+            Plan p = snap.plans.get(i)
+            int finish = p.ended > 0 ? math.min(p.drawEnd, p.ended) : p.drawEnd
+            if showPlans and finish >= visibleLeft and p.at <= visibleRight
+                visiblePlans += 1
+            if finish >= visibleLeft and p.at <= visibleRight and drawnBoxes.size() <= 498
+                nPlans += 1
+                if debug
+                    log.info("PATH key={0} confirmed={1} ended={2} intervalEnd={3} timing={4} reason={5} exitPrice={6} peak={7}..{8}", p.keyAt, p.at, p.ended, p.exitBarEnd, p.timing, p.reason, p.exitPrice, p.lowerR, p.upperR)
+                float extent = math.max(p.rr, p.lowerR)
+                float peak = p.entry + p.side * p.lowerR * p.risk
+                float far = p.entry + p.side * extent * p.risk
+                string details = str.format_time(p.at, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 确认\n" + (p.side == 1 ? "多" : "空") +
+                     " · 1.618 " + str.tostring(p.entry, format.mintick) + "\n固定止损 " + str.tostring(p.stop, format.mintick) +
+                     "\n止损距离 " + str.tostring(STOP_PCT * 100, "#.####") + "%\n对侧1.618 " + str.tostring(p.target, format.mintick) + " · " + str.tostring(p.rr, "#.##") + "R" +
+                     "\n参考计划，不代表成交；最高R为确认后浮盈。" + (p.reason == 1 ? "\n已触止损" : p.reason == 2 ? "\n盘中云带反向结束" : p.reason == 3 ? "\n数据缺口，统计中断" : "")
+                if p.ended > 0 and p.reason != 3
+                    details += "\n退出参考 " + str.tostring(p.exitPrice, format.mintick) + " · " + str.tostring((p.exitPrice - p.entry) * p.side / p.risk, "#.##") + "R"
+                    details += "\n" + str.format_time(p.ended, "MM-dd HH:mm", "Asia/Shanghai") + (p.timing == 1 ? " 开盘即结束" : p.timing == 2 ? " 至 " + str.format_time(p.exitBarEnd, "HH:mm", "Asia/Shanghai") + " 内结束；精确时刻未知" : " 首次观察到退出")
+                // A zero-duration reference must not draw a future profit box.
+                if showPlans and showR and finish == p.at and p.ended > 0 and p.reason != 3
+                    rMark(finish, peak, str.tostring(p.lowerR, "#.##") + "R", p.at, details)
+                if showPlans and finish > p.at
+                    drawnBoxes.push(box.new(p.at, math.max(p.entry, p.stop), finish, math.min(p.entry, p.stop), xloc=xloc.bar_time, border_color=na, bgcolor=lossFill))
+                    drawnBoxes.push(box.new(p.at, math.max(p.entry, far), finish, math.min(p.entry, far), xloc=xloc.bar_time, border_color=na, bgcolor=profitFill))
+                    if showR
+                        bool ambiguous = p.upperR - p.lowerR > 1e-8
+                        // Keep tiny marks apart in the plan's own price space;
+                        // viewport-dependent spacing would restart the full engine.
+                        float minDistance = p.risk * math.max(1.0, extent * 0.035)
+                        float previousMark = na
+                        for r in array.from(5.0, 10.0)
+                            float markPrice = p.entry + p.side * r * p.risk
+                            bool clearPeak = not (p.lowerR > 0 or ambiguous) or math.abs(markPrice - peak) > minDistance
+                            bool clearPrior = na(previousMark) or math.abs(markPrice - previousMark) > minDistance
+                            if r <= extent and clearPeak and clearPrior
+                                rMark(finish, markPrice, str.tostring(r, "#") + "R", p.at, details)
+                                previousMark := markPrice
+                        if p.lowerR > 0 or ambiguous
+                            string peakText = str.tostring(p.lowerR, "#.##") + (ambiguous ? "–" + str.tostring(p.upperR, "#.##") : "") + "R"
+                            rMark(finish, peak, peakText, p.at, details)
+        Plan last = snap.plans.last()
+        if showInfo
+            table.cell(info, 0, 0, (last.side == 1 ? "↗ " : "↘ ") + str.tostring(last.rr, "#.##") + "R", text_color=keyColor, text_size=12, bgcolor=color.new(chart.bg_color, 12))
+            table.cell(info, 0, 1, str.tostring(last.entry, format.mintick) + "  /  " + str.tostring(last.stop, format.mintick) + "  /  " + str.tostring(last.target, format.mintick), text_color=chart.fg_color, text_size=10, bgcolor=color.new(chart.bg_color, 12))
+        if debug
+            log.info("SPIKE V1.9 | plans={0} | source={1} | latest={2} | side={3} | entry={4} | stop={5} | target={6} | peak={7}..{8} | exit={9}", snap.total, snap.sourceStart, last.at, last.side, last.entry, last.stop, last.target, last.lowerR, last.upperR, last.reason)
+    else if showInfo
+        table.cell(info, 0, 0, "暂无已确认参考", text_color=chart.fg_color, text_size=10)
+    // Descending time merge is O(weeks + visible candidates), not one history
+    // search per marker. Missing/partial/expired weeks fail the temporal gate.
+    int visibleMarkers = 0
+    int nMarkers = 0
+    int rangeIndex = snap.weeks.size() - 1
+    if showMarkers and markerCandidates.size() > 0 and rangeIndex >= 0
+        for i = markerCandidates.size() - 1 to 0
+            RangeMarker m = markerCandidates.get(i)
+            while rangeIndex > 0 and snap.weeks.get(rangeIndex).start > m.at
+                rangeIndex -= 1
+            WeekRange w = snap.weeks.get(rangeIndex)
+            bool ready = m.at >= w.ready and m.at < w.expires
+            bool allowed = markerOutside(ready, m.extreme, m.side, w.hi, w.lo, markerRangeMode == "1.618之外")
+            if allowed
+                visibleMarkers += 1
+                if drawnLabels.size() < 500
+                    drawnLabels.push(label.new(m.at, m.extreme, m.side == 1 ? "✓" : "×", xloc=xloc.bar_time,
+                         yloc=m.side == 1 ? yloc.belowbar : yloc.abovebar, style=label.style_none,
+                         textcolor=m.side == 1 ? #39F340 : #FF5252, size=size.small,
+                         tooltip="Stoch 5/3/3 · " + markerRangeMode + "\n" + str.format_time(m.at, "yyyy-MM-dd HH:mm", "Asia/Shanghai") +
+                         (m.at == time and not barstate.isconfirmed ? "\n盘中预览，收盘前可能变化" : "\n已收盘") + " · 图表标记，不是12H入场"))
+                    nMarkers += 1
+    if debug
+        log.info("MARKERS mode={0} candidates={1} visible={2} drawn={3} chartTF={4}", markerRangeMode, markerCandidates.size(), visibleMarkers, nMarkers, timeframe.period)
+    string historyText = visibleRanges > nRanges or (showPlans and visiblePlans > nPlans) or visibleMarkers > nMarkers ? "绘图密集，请放大查看该段全部区间与标记" : ""
+    if debug and snap.weeks.size() > 0
+        historyText := str.format_time(snap.weeks.first().start, "yyyy-MM-dd", ZONE) + " 起 · " + str.tostring(snap.weeks.size()) + "周 / " + str.tostring(snap.plans.size()) + "框 · 当前 " + str.tostring(nRanges) + "周 / " + str.tostring(nPlans) + "框"
+    table.cell(historyInfo, 0, 0, historyText, text_color=chart.fg_color, text_size=10, bgcolor=historyText == "" ? na : color.new(chart.bg_color, 15))
+
+// Explicitly opt-in via TradingView's alert UI; this script creates no alert.
+bool freshSignal = latestAt > 0 and latestAt != latestAt[1] and observedAt >= latestAt and observedAt - latestAt < 1800000
+alertcondition(freshSignal and latestSide == 1, "12H 多头确认", "{{ticker}} · 12H EMA20/50 · 下侧1.618插针收回 · 每周首个参考，非成交")
+alertcondition(freshSignal and latestSide == -1, "12H 空头确认", "{{ticker}} · 12H EMA20/50 · 上侧1.618插针收回 · 每周首个参考，非成交")
+alertcondition(resBreak, "4H 压力线收盘上破", "{{ticker}} · 4H 主趋势线 · 连续两根4H收盘上破下降压力线 · 图表参考，非成交")
+alertcondition(supBreak, "4H 支撑线收盘下破", "{{ticker}} · 4H 主趋势线 · 连续两根4H收盘下破上升支撑线 · 图表参考，非成交")
