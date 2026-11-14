@@ -1,0 +1,16 @@
+{
+  "experiment_id": "exp-monday-reclaimed-wick-okx-20261115-v1",
+  "cutoff_utc": "2026-11-14T18:00:00+00:00",
+  "first_weekly_side_touch": true,
+  "score_basis": "touch_close",
+  "strict_score_above": 0.5,
+  "universe": "OKX normal USDT crypto perpetuals excluding BTC and ETH, category at extraction",
+  "entry": "market at completed touch 5m close after strict penetration and recovery inside the same 1.618; ideal close-fill benchmark",
+  "stop": "signal-bar low long or high short, no buffer, no target or breakeven",
+  "horizons_hours": [1, 6, 24, 72],
+  "diagnostics": "MFE on post-entry candles before original stop; +2%, +5%, +10% gross excursion then return to cost-adjusted entry. Independent opportunities, no account sizing.",
+  "bar_minutes": 1,
+  "taker_fee_bps_each": 5,
+  "slippage_bps_each": 10,
+  "funding_included": false
+}
