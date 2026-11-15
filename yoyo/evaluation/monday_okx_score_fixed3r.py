@@ -113,7 +113,7 @@ def price_path(row):
 
 
 def evaluate(row, frame):
-    arrays = [np.ascontiguousarray(frame[k].to_numpy(float)[:, None]) for k in COLS[1:]]
+    arrays = [np.ascontiguousarray(frame[k].to_numpy(dtype=float, copy=True)[:, None]) for k in COLS[1:]]
     n = len(frame)
     work = (np.empty((n,1)), np.empty((n,1), dtype=np.int64), np.empty(1, dtype=np.int64))
     entry = frame.close.iloc[0]
