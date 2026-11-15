@@ -54,9 +54,10 @@ def load_rows():
     assert set(rows.loc[rows.status.eq('entered'), 'outcome']) <= {'tp','sl','censored'}
     assert set(rows.tf)=={1,4,12}
     known = rows.outcome.isin(['tp','sl'])
-    if not set(rows.loc[known,'resolution']).issubset({'h1','1m'}):
+    duration = rows.resolution.map({'h1':HOUR, 'h1_fallback':HOUR, '1m':60_000, '1m_stop_first':60_000})
+    if duration[known].isna().any():
         raise ValueError('Unexpected exit time resolution')
-    rows['known_ms'] = (rows.exit_ms + np.where(rows.resolution.eq('1m'),60_000,HOUR)).where(known)
+    rows['known_ms'] = (rows.exit_ms + duration).where(known)
     assert (rows.loc[known,'known_ms'] >= rows.loc[known,'close_ms']).all()
     return rows.sort_values(['close_ms','event_id']).reset_index(drop=True)
 
