@@ -232,7 +232,7 @@ def score_csv(path):
         bundle=joblib.load(EXP/choice['models'][choice['selected']]['file'])
         raw=predict(bundle,g)
         fields=[k for k in ['event_id','symbol','tf','close_ms'] if k in g]
-        results.append(g[fields].assign(p3r=calibrated(raw,bundle['calibration']),
+        results.append(g[fields].assign(raw_score=raw, p3r=calibrated(raw,bundle['calibration']),
                                         high=raw>=bundle['raw_high_threshold']))
     print(pd.concat(results).sort_index().to_csv(index=False),end='')
 

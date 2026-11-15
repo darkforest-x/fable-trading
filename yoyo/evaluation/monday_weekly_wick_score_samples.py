@@ -62,7 +62,7 @@ def panel(draw, x, y, event, prediction, label):
     chart.label(draw,(point(0),bottom+5),'信号K',15,chart.GOLD,True,'ma')
     result = {'tp':'先到 3R', 'sl':'先止损', 'censored':'观察截止仍未决'}[label.outcome]
     band = '高分组' if prediction.band == 'top10' else '普通组'
-    chart.label(draw,(x+20,y+241),f'收盘时预测 3R 概率 {prediction.p3r:.1%}   ·   {band}',
+    chart.label(draw,(x+20,y+241),f'原始评分 {100*prediction.raw_score:.1f} / 100   ·   {band}',
                 19,chart.INK)
     chart.label(draw,(x+754,y+241),f'实际结果   {result}',19,
                 chart.TARGET if label.outcome=='tp' else chart.MUTED,True,'ra')
