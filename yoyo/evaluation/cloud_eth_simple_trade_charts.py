@@ -60,7 +60,6 @@ def add_label(ax, xy, text, color, preferred, obstacles, reserved, marker):
     """Choose a nearby on-chart label position clear of the other labels and wicks."""
     fig = ax.figure
     renderer = fig.canvas.get_renderer()
-    px, py = ax.transData.transform(xy)
     offsets = [(sx * dx, sy * dy) for dx,dy in ((13,19),(14,38),(30,54),(40,73),(65,29))
                for sx,sy in (preferred,(-preferred[0],preferred[1]),(preferred[0],-preferred[1]),
                              (-preferred[0],-preferred[1]))]
@@ -115,6 +114,8 @@ def draw(row, formal, hourly):
     fmt = "%m/%d %H:%M" if right-left < 96*H else "%m/%d"
     ticks = np.unique(np.linspace(0,len(bars)-1,6).round().astype(int))
     ax.set_xticks(ticks+.5,[bjt(bars.index[i],fmt) for i in ticks])
+    ax.get_xticklabels()[0].set_ha("left")
+    ax.get_xticklabels()[-1].set_ha("right")
     ax.tick_params(length=0,pad=5,colors=AXIS,labelsize=9.8)
     ax.grid(axis="y",color=GRID,lw=.6,ls=(0,(2,5)))
     a,b = x(row.entry_ms),x(exit_time(row))
