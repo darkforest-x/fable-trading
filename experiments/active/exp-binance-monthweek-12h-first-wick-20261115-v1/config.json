@@ -14,6 +14,6 @@
   "target_maker_fee": 0.0002,
   "slippage": 0,
   "funding": 0,
-  "execution": "VectorBT. Gap opens have precedence. Remaining H1 double touches default to stop first; ambiguity is retained.",
+  "execution": "VectorBT. Gap opens have precedence. H1 double touches use the 60 reconciled Binance trading minutes when available. Remaining one-minute ties or unavailable minute data default to stop first; ambiguity is retained.",
   "control": "One seeded uniform other UTC 12h decision clock in the observable same instrument and NY active range month per entry, matching long/short and percentage stop distance. Seed 20261115 plus stable event key. Compare fixed-R targets across paired cohorts."
 }

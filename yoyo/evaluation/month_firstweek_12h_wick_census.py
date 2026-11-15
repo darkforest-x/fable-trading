@@ -7,6 +7,7 @@ execution price. Subsequent highs/lows enter only through the exit engine.
 """
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 from pathlib import Path
@@ -15,6 +16,7 @@ import sys
 import numpy as np
 import pandas as pd
 
+from yoyo.data.binance_monthweek_disputed_minutes import minute_lookup
 from yoyo.monitor.month_first_week_1618 import HOUR_MS, month_window
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -172,27 +174,35 @@ def main():
     roster = pd.read_csv(REFRESH / 'roster.csv')
     assert roster.symbol.is_unique
     symbol_rows, all_touches, coverage, outcomes = [], [], [], []
-    for n, symbol in enumerate(roster.symbol, 1):
+
+    def one_symbol(symbol):
         raw = tape(symbol, cutoff, read_raw)
         sig, cov = scan(symbol, raw, months, config['stop_buffer'])
         entries = [e for e in sig if e['status'] == 'entered']
-        symbol_rows.append(dict(symbol=symbol, hours=len(raw),
+        contract = dict(symbol=symbol, hours=len(raw),
                                 first_ms=int(raw[0,0]) if len(raw) else None,
                                 end_ms=int(raw[-1,0])+HOUR_MS if len(raw) else None,
-                                eligible_months=sum(x['status']=='eligible' for x in cov), trades=len(entries)))
+                                eligible_months=sum(x['status']=='eligible' for x in cov), trades=len(entries))
+        runs = []
         for cohort, events in [('signal', entries), ('random', controls(raw, entries, by_month))]:
             if events:
-                fills = run_exits(raw, events)
+                fills = run_exits(raw, events, minute_lookup=minute_lookup)
                 keys = {e['event_id']:e for e in events}
                 for f in fills:
                     e = keys[f['event_id']]
                     f.update(cohort=cohort, side=e['side'], month=e['month'],
                              entry_ms=int(raw[e['entry_i'],0]), entry=e['entry'], stop=e['stop'])
-                outcomes.extend(fills)
-        all_touches.extend(sig)
-        coverage.extend(cov)
-        if n % 100 == 0:
-            print(f'{n}/{len(roster)} contracts; {len(all_touches)} first touches', flush=True)
+                runs.extend(fills)
+        return contract, sig, cov, runs
+
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        for n, (contract, sig, cov, runs) in enumerate(pool.map(one_symbol, roster.symbol), 1):
+            symbol_rows.append(contract)
+            all_touches.extend(sig)
+            coverage.extend(cov)
+            outcomes.extend(runs)
+            if n % 100 == 0:
+                print(f'{n}/{len(roster)} contracts; {len(all_touches)} first touches', flush=True)
     pd.DataFrame(symbol_rows).to_csv(EXP/'contracts.csv', index=False)
     pd.DataFrame(coverage).to_csv(EXP/'anchor_coverage.csv.gz', index=False)
     pd.DataFrame(all_touches).drop(columns='entry_i').to_csv(EXP/'first_touches.csv.gz', index=False)
