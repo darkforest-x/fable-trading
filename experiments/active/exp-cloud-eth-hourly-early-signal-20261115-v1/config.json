@@ -1,0 +1,11 @@
+{
+  "symbol": "ETH-USDT-SWAP",
+  "source_experiment": "exp-cloud-top20-peak10r-20261108-v1",
+  "cutoff_utc": "2026-11-08T12:00:00Z",
+  "candidate": "First same-side strict penetration and reclaim in an eligible UTC 12H bar, checked at each of its first 11 completed hours. Direction is the developing 12H EMA20/50 from the prior confirmed EMA state and the current hourly close.",
+  "weekly_policy": "At most one early candidate per New York week. Stop looking if the formal 12H confirmation has already occurred. The original confirmation stream is also tracked independently.",
+  "match": "Original weekly first signal on the same 12H bar and side.",
+  "price_comparison": "Use the actual next hourly open after each decision. A lower long entry or a higher short entry improves the price.",
+  "risk_diagnostic": "Report any touch of the original ETH stop 1.5% beyond the pierced rail, starting at the candidate's next hourly open and ending at the formal 12H close.",
+  "scope": "Exploratory signal-timing census. No trade simulation, net returns or account P&L."
+}
