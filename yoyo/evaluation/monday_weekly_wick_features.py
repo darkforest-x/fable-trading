@@ -172,8 +172,10 @@ def _event_timing(event: Mapping) -> tuple[int, int, int, int, int]:
         raise ValueError(f"First breach falls outside signal bar for {event['event_id']}")
     if anchor_ready_ms - anchor_start_ms != DAY_MS:
         raise ValueError(f"NY Monday anchor is not exactly 24 hours for {event['event_id']}")
-    if anchor_ready_ms > bar_ms:
-        raise ValueError(f"Signal bar starts before its frozen Monday anchor completes: {event['event_id']}")
+    # A UTC 4h/12h bar can straddle NY midnight. The rail must be known
+    # at the first breach, and scoring takes place only when that bar closes.
+    if breach_ms < anchor_ready_ms:
+        raise ValueError(f"First breach precedes the frozen Monday anchor: {event['event_id']}")
     if anchor_start_ms % HOUR_MS or anchor_ready_ms % HOUR_MS:
         raise ValueError(f"NY Monday anchor is not H1-aligned for {event['event_id']}")
     local_start = pd.Timestamp(anchor_start_ms, unit="ms", tz="UTC").tz_convert(NY)

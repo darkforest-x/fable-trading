@@ -184,3 +184,14 @@ def test_datetime_dataframe_tape_uses_millisecond_timestamps():
     values, ts = f._as_hourly(frame, event["close_ms"])
     assert ts[-1] == event["close_ms"] - f.HOUR_MS
     assert values[-1, 0] == ts[-1]
+
+
+def test_candle_may_open_before_anchor_is_known_but_first_breach_must_follow_it():
+    _, event = _fixture()
+    ready = event['anchor_ready_ms']
+    start = ready // (4 * f.HOUR_MS) * (4 * f.HOUR_MS)
+    assert start < ready
+    event.update(bar_ms=start, close_ms=start + 4 * f.HOUR_MS, first_breach_ms=ready)
+    assert f._event_timing(event)[3] == ready
+    with pytest.raises(ValueError, match='First breach precedes'):
+        f._event_timing({**event, 'first_breach_ms': start})
