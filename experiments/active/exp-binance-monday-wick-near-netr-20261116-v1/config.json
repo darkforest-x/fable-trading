@@ -1,0 +1,22 @@
+{
+  "id": "exp-binance-monday-wick-near-netr-20261116-v1",
+  "parent": "exp-binance-monday-wick-score3r-20261116-v1",
+  "protocol": "Frozen Binance USDT perpetual NY Monday first pure wick cohort, including delisted; same 1h then 4h then 12h priority. Each timeframe is fit separately.",
+  "target": "long takes Monday low, short takes Monday high; skip if target at or behind actual next H1 opening fill. Eligibility is decided before exposing the account to the trade.",
+  "stop": "Original signal wick extreme extended 1% outward. Stop and TP live from entry, orders may persist across weeks, independent equal initial risk per event.",
+  "fees": {"entry_taker": 0.0005, "stop_exit_taker": 0.0005, "tp_exit_maker": 0.0002},
+  "slippage": 0,
+  "funding": 0,
+  "validation_years": [2023, 2024, 2025],
+  "test_start": "2026-01-01T00:00:00Z",
+  "cutoff_exclusive": "2026-11-15T15:00:00Z",
+  "timeframes": [1, 4, 12],
+  "winner_quantile": 0.9,
+  "score_quantile": 0.9,
+  "candidates": ["logit", "lgb_d3", "lgb_d5"],
+  "candidate_detail": "Standardized logistic regression; LightGBM d3/150 trees and d5/240 trees, frozen original hyperparameters. Shared expanded close-time features plus potential near-edge net R computed using the signal close as the decision-time entry proxy.",
+  "label_design": "At each fit, take the 90th percentile of that timeframe's net R for events settled and known by the cut. Label equal or above and strictly positive as winners. All other settled eligible trades are negatives; censor unresolved labels. Freeze that R cutoff for the following evaluation interval.",
+  "selection": "Rank configurations by equal-weight mean of 2023/24/25 forward high-band mean realized net R. For each model/fold use its own training score 90th percentile to define high. Freeze final scores/thresholds before 2026 test; 2026 has been viewed in the older 3R study. Assess against all eligible, mechanism-only predicted near net R and same-week/side/timeframe equal count random draws.",
+  "draws": 9999,
+  "seed": 20261116
+}
