@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-okx-score-fixed3r-20261115-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: a12586f93f
+    status: inconclusive
+    question: How far did all 67 recorded OKX Monday 1.618 scores above 0.5 move after score publication with a fixed 3 percent stop?
+    single_variable: Compare fixed limit targets from 0.5 to 10 nominal R against the same 3 percent stop and a stop-only baseline.
+    result: "67 independent signals across 65 contracts. Median stop-bounded gross peak 0.6942R, maximum 13.4119R. First hits at 0.5/1/1.5/2/3/4/5/10R were 45/24/20/18/11/7/5/2. At 0.5R all 67 resolved, 67.16 percent won, realized mean -0.0591R after fees and slippage. One slot at 0.5R won 22 of 32, mean -0.0342R. Without targets 59 stopped and 8 were open at cutoff."
+    notes: "VectorBT first_hit and Portfolio.from_orders on completed 1m OKX candles from first minute close after scored_ms through 2026-11-15 18:15 Shanghai. Earliest monitor records include reconstruction. 38 crypto and 29 equity/ETF signals, no wick filter. Stop-minute open only for conservative peak; no ambiguous target/stop cases. Market taker 5bp, resting limit maker 2bp, separate market slippage 10bp per fill on entry notional; no funding. Overlapping observational cohort across four NY Monday labels."
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-okx-score-fixed3r-20261115-v1/metrics.csv
+
   - experiment_id: exp-monday-reclaimed-wick-trailing-20261115-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 641b7fe207
