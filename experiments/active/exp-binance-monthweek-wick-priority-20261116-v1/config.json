@@ -1,0 +1,9 @@
+{
+  "parent": "exp-binance-monthweek-12h-first-wick-20261115-v1",
+  "cutoff_exclusive": "2026-11-15T15:00:00Z",
+  "timeframes_hours": [1, 4, 12],
+  "stop_buffer": 0.01,
+  "signal": "First strict outward excursion per frozen NY month, Binance USDT perpetual and rail. Earlier equality is allowed. Both open and close of the UTC-aligned candle containing that first excursion must be strictly inward; the wick must strictly cross. No minimum wick fraction, no repeat. Choose the first qualifying duration in the registered priority. Only the chosen candle's close permits entry, using its next H1 open and its own high/low to set the stop.",
+  "execution": "Use the parent VectorBT independent-position engine, fee rates, no added slippage or funding, matched minute resolution for conflicting H1 stops/targets, and continuous same-contract paths that can span months. Inherit the 8 fixed R and 3 frozen range targets. Reuse any identical previous entry clock, price, stop and anchor.",
+  "control": "One other uniformly sampled matched-duration open per symbol, NY month, side and original risk fraction, same seed and selection method as parent. Controls are for comparison, never used to construct the signal."
+}
