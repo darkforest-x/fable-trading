@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-eth-hourly-early-execution-20261115-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 69afb22432
+    status: rejected
+    question: Does the first hourly reclaim as a weekly replacement preserve the 12H confirmed ETH strategy's net win rate and total R at equal risk?
+    single_variable: Replace the confirmed entry with the first developing hourly reclaim and close an unconfirmed surviving position at its 12H boundary open. One attempt per arm per NY week.
+    result: "Confirmed 18/97 net wins, +71.88R, hourly marked drawdown 54.63R. Early 13/111 wins, +52.33R, drawdown 40.23R. Early minus confirmed -6.84 percentage points and -19.56R. In the 37 definite original chart 5R moves the two arms reached their own 5R on 22 vs 17; for 22 original chart 10R moves, 12 vs 8."
+    notes: "Frozen ETH through 2026-11-08 12:00 UTC. 208 independent Nautilus positions, all 416 fills taker at 5bp. No funding, spread, slippage or compounding. Historical 97 formal entry prices and exit hours reconciled. Rejection applies to this replacement's two point-estimate criteria on this sample. Four-week paired bootstrap total-R difference interval includes zero. Notion 4198856479af811a9734caf990aee6a3."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-cloud-eth-hourly-early-execution-20261115-v1/summary.json
+
   - experiment_id: exp-cloud-eth-hourly-early-signal-20261115-v1
     source_repo: darkforest-x/fable-trading
     source_commit: bb8929b0d6
