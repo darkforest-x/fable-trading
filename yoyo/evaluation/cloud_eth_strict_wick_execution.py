@@ -1,4 +1,5 @@
 """Execute frozen ETH first-wick selections with the existing native hourly adapter."""
+import argparse
 import json
 import math
 from pathlib import Path
@@ -20,7 +21,7 @@ def read_csv(path):
 
 
 def build_plans(cfg, hourly):
-    """Only the selected closed candle can authorize entry. Parent failure acts at its own close."""
+    """Only the selected closed candle authorizes entry. Parent outcomes label trades retrospectively."""
     folder = ACTIVE / cfg["signals"]
     weeks = read_csv(folder / "weekly_selections.csv")
     candles = read_csv(folder / "mother_candidates.csv")
@@ -34,8 +35,8 @@ def build_plans(cfg, hourly):
     strict = parents[parents.passes].sort_values(["week", "decision_close_ms"])
     if strict.duplicated(["week", "decision_close_ms"]).any():
         raise ValueError("Ambiguous simultaneous 12H alternatives")
-    records, skipped = [], []
-    for arm, candidates in (("ladder", ladder), ("recheck", ladder),
+    records = []
+    for arm, candidates in (("ladder", ladder),
                             ("wait_12h", strict.drop_duplicates("week"))):
         for row in candidates.itertuples(index=False):
             key = (row.week, row.side)
@@ -46,19 +47,15 @@ def build_plans(cfg, hourly):
             rail = float(rails.loc[key, "lower_1618" if side == 1 else "upper_1618"])
             if parent_ms < entry_ms or not row.morphology_pass or not row.trend_match:
                 raise ValueError(f"Invalid frozen selection {row.candidate_id}")
-            if arm == "recheck" and not parent.passes and parent_ms == entry_ms:
-                skipped.append(row.candidate_id)
-                continue
-            fail = parent_ms if arm == "recheck" and not parent.passes else None
             records.append(dict(arm=arm, week=row.week, candidate_id=row.candidate_id,
                                 timeframe=row.timeframe, side=side, entry_ms=entry_ms,
                                 entry_price=float(hourly.at[entry_ms, "open"]), rail=rail,
-                                stop=rail * (1 - side * cfg["stop_beyond_rail"]), fail_at_ms=fail,
+                                stop=rail * (1 - side * cfg["stop_beyond_rail"]), fail_at_ms=None,
                                 parent_close_ms=parent_ms, parent_pass=bool(parent.passes)))
     plans = pd.DataFrame(records)
     if plans.duplicated(["arm", "week"]).any():
         raise ValueError("Repeated weekly entry within one policy")
-    return plans, skipped
+    return plans
 
 
 def plan_key(row, tick):
@@ -69,7 +66,7 @@ def plan_key(row, tick):
     return int(row.side), int(row.entry_ms), round(row.stop, 9), executed_tick, fail
 
 
-def execute(plans, frame, crosses, cfg):
+def execute(plans, frame, crosses, cfg, reuse_fills):
     archive = ACTIVE / cfg["archive"]
     old_cfg = json.loads((archive / "config.json").read_text())
     for field in ("history", "symbol", "cutoff_utc", "risk_usdt", "maker", "taker", "price_tick"):
@@ -94,12 +91,18 @@ def execute(plans, frame, crosses, cfg):
             selected[key] = (trade_id, "new_native")
             pending.append(dict(trade_id=trade_id, side=row.side, entry_ms=row.entry_ms,
                                 entry_price=row.entry_price, stop=row.stop, fail_at_ms=row.fail_at_ms))
-    new, audit = run_cloud_hourly(frame, pd.DataFrame(pending), crosses, tick=tick,
-                                  risk_usdt=cfg["risk_usdt"], maker=cfg["maker"], taker=cfg["taker"])
-    new_records = new.to_dict("records")
-    if {r["trade_id"] for r in new_records} != {r["trade_id"] for r in pending} or len(new) != len(pending):
+    if reuse_fills:
+        saved = json.loads((OUTPUT / "native_fills.json").read_text())
+        requested = {p["trade_id"] for p in pending}
+        new_records = [r for r in saved["positions"] if r["trade_id"] in requested]
+        audit = saved["audit"]
+    else:
+        new, audit = run_cloud_hourly(frame, pd.DataFrame(pending), crosses, tick=tick,
+                                      risk_usdt=cfg["risk_usdt"], maker=cfg["maker"], taker=cfg["taker"])
+        new_records = new.to_dict("records")
+    if {r["trade_id"] for r in new_records} != {r["trade_id"] for r in pending} or len(new_records) != len(pending):
         raise ValueError("Native fills differ from requested new plans")
-    raw = dict(audit=audit, positions=new_records)
+    raw = dict(audit=audit, used_positions=len(new_records), positions=new_records)
     originals.update({f["trade_id"]: f for f in new_records})
     result = []
     for row in plans.itertuples(index=False):
@@ -108,9 +111,8 @@ def execute(plans, frame, crosses, cfg):
         if (f["entry_ms"] != row.entry_ms or f["entry_px"] != row.entry_price or
                 f["side"] != row.side or abs(f["fixed_stop"] - row.stop) > 1e-9):
             raise ValueError(f"Native execution mismatch: {trade_id}")
-        if pd.notna(row.fail_at_ms) and (f["exit_hour_ms"] > row.fail_at_ms or
-                (f["exit_hour_ms"] == row.fail_at_ms and f["exit_phase"] != "open")):
-            raise ValueError(f"Past invalidation boundary: {trade_id}")
+        if f["exit_reason"] not in {"fixed_stop", "cloud_flip", "data_end"}:
+            raise ValueError(f"Unrequested exit: {trade_id}, {f['exit_reason']}")
         expected = (f["entry_px"] + f["exit_px"]) * f["quantity"] * cfg["taker"]
         if not np.isclose(expected, f["fee_usdt"], atol=2e-8, rtol=1e-7):
             raise ValueError(f"Native commission mismatch: {trade_id}")
@@ -131,7 +133,7 @@ def summarize(frame, rows, cfg):
                 top_three_net_r=float(rows.net_r.nlargest(3).sum()))
 
 
-def main():
+def main(reuse_fills=False):
     cfg = json.loads((OUTPUT / "config.json").read_text())
     folder = ACTIVE / cfg["history"] / "inputs/ETH"
     hourly = _bars(folder / "bars1h.csv.gz", HOUR_MS)
@@ -140,9 +142,9 @@ def main():
     if (hourly.index[-1] + HOUR_MS != end or higher.index[-1] + STEP_12H_MS != end
             or not np.all(np.diff(hourly.index) == HOUR_MS)):
         raise ValueError("Source hours or replay cutoff differ from archive")
-    plans, skipped = build_plans(cfg, hourly)
+    plans = build_plans(cfg, hourly)
     frame = hourly.set_axis(pd.to_datetime(hourly.index, unit="ms", utc=True))
-    rows, raw = execute(plans, frame, pd.DataFrame(_cross_index(higher)), cfg)
+    rows, raw = execute(plans, frame, pd.DataFrame(_cross_index(higher)), cfg, reuse_fills)
     if not np.allclose(rows.net_r * cfg["risk_usdt"], rows.net_usdt, atol=2e-8, rtol=0.):
         raise ValueError("Native net P&L does not reconcile with reported R")
     for col in ("entry_ms", "exit_hour_ms"):
@@ -150,7 +152,7 @@ def main():
     rows = rows.sort_values(["entry_ms", "arm"])
     comparison = rows[rows.arm.isin(["ladder", "wait_12h"])].assign(
         cohort=lambda f: f.arm.map({"ladder": "early", "wait_12h": "confirmed"}))
-    result = dict(cutoff_utc=cfg["cutoff_utc"], skipped_on_known_failure=skipped,
+    result = dict(cutoff_utc=cfg["cutoff_utc"],
                   native_new=len(raw["positions"]), native_archived=rows.loc[
                       rows.fill_source == "archived_native", "trade_id"].nunique(),
                   arms={arm: summarize(frame, group, cfg) for arm, group in rows.groupby("arm")},
@@ -161,4 +163,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--reuse-fills", action="store_true", help="Use native fills saved for this experiment")
+    main(parser.parse_args().reuse_fills)

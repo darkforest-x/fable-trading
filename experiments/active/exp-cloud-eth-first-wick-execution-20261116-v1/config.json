@@ -6,14 +6,19 @@
   "cutoff_utc": "2026-11-08T12:00:00Z",
   "entry": "Market at the following hourly open once the selected first-breach wick candle closes, one attempt per NY week.",
   "ladder": "Accept the first eligible 1H, enclosing 4H, or enclosing 12H independently. Exit at the existing protective stop or intrabar 12H cloud flip, final close if still open.",
-  "recheck": "Same ladder and protections. Flatten at the next open when the enclosing 12H closes without strict wick and aligned trend. Skip if already invalid at the entry boundary.",
   "wait_12h": "Independently select the earliest eligible strict 12H signal in each week. Use original protections.",
   "stop_beyond_rail": 0.015,
   "risk_usdt": 100,
   "price_tick": 0.01,
   "maker": 0.0002,
   "taker": 0.0005,
-  "thresholds_r": [1, 2, 3, 5, 10],
+  "thresholds_r": [
+    1,
+    2,
+    3,
+    5,
+    10
+  ],
   "costs": "All entries and exits are taker. No additional slippage, funding, margin limits or compounding.",
   "excursions": "Gross favorable excursion before exit relative to actual entry-to-original-stop distance. Bounds only differ for unsequenced stop-hour highs/lows."
 }
