@@ -1,0 +1,18 @@
+{
+  "symbol": "ETH-USDT-SWAP",
+  "observation": "exp-cloud-eth-hourly-early-signal-20261115-v1",
+  "history": "exp-cloud-top20-peak10r-20261108-v1",
+  "cutoff_utc": "2026-11-08T12:00:00Z",
+  "confirmed": "Enter at the opening price immediately after the first eligible confirmed UTC 12-hour key of the New York week.",
+  "early": "Enter at the next hourly open after the first hourly reclaim of the developing key, one attempt per New York week. At that key's 12-hour close exit at the new open if the same key and side did not confirm. No re-entry or fallback. Confirmation is used only once its bar closes.",
+  "protection": "The original ETH fixed stop is 1.5% beyond the pierced NY Monday 1.618 rail. The 12-hour EMA20/EMA50 intrabar reversal uses a price threshold from the prior completed 12-hour bar. Both protections start at entry. An open position at data end is settled at the final hourly close.",
+  "risk_usdt": 100,
+  "maker": 0.0002,
+  "taker": 0.0005,
+  "price_tick": 0.01,
+  "execution": "NautilusTrader 1.231.0, independent hedged positions. Both arms use market and stop-market orders. No modeled spread, slippage or funding. Fixed initial risk, no compounding or margin constraints.",
+  "large_move": "For the original formal keys whose chart peak_lower_r reached a threshold, count same-key and direction trades which demonstrably reached that many units of their own entry-to-original-stop distance while open. Lower bound excludes unsequenced favorable extremes in the stop hour. Upper bound includes them. Thresholds are price excursions, not take profits.",
+  "drawdown": "Peak-to-trough drop of aggregate hourly closing mark-to-market P&L including open positions and actual paid fees, in units of the common 100 USDT initial risk. The curve starts at zero.",
+  "uncertainty": "Paired circular moving-block bootstrap over NY calendar weeks, four consecutive weeks per block including inactive weeks; 10000 repetitions, seed 20261115. Descriptive sampling intervals for early minus confirmed.",
+  "thresholds_r": [1, 2, 3, 5, 10]
+}
