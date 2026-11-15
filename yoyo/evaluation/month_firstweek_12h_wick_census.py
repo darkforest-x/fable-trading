@@ -163,6 +163,7 @@ def summarize(frame):
 
 
 def main():
+    from yoyo.data.binance_monthweek_lifecycle import clean_lifecycle
     from yoyo.evaluation.month_firstweek_12h_wick_exits import run_exits
     sys.path.insert(0, str(PARENT))
     from census12 import read_raw
@@ -173,16 +174,20 @@ def main():
     by_month = {w['month']: w for w in months}
     roster = pd.read_csv(REFRESH / 'roster.csv')
     assert roster.symbol.is_unique
+    ends = pd.to_numeric(roster.set_index('symbol').end_ms, errors='coerce')
     symbol_rows, all_touches, coverage, outcomes = [], [], [], []
 
     def one_symbol(symbol):
         raw = tape(symbol, cutoff, read_raw)
+        end = ends.at[symbol]
+        before_clean = len(raw)
+        raw = clean_lifecycle(symbol, raw, int(end) if pd.notna(end) and 0 < end <= cutoff else None)
         sig, cov = scan(symbol, raw, months, config['stop_buffer'])
         entries = [e for e in sig if e['status'] == 'entered']
-        contract = dict(symbol=symbol, hours=len(raw),
-                                first_ms=int(raw[0,0]) if len(raw) else None,
-                                end_ms=int(raw[-1,0])+HOUR_MS if len(raw) else None,
-                                eligible_months=sum(x['status']=='eligible' for x in cov), trades=len(entries))
+        contract = dict(symbol=symbol, hours=len(raw), removed_hours=before_clean-len(raw),
+                        first_ms=int(raw[0,0]) if len(raw) else None,
+                        end_ms=int(raw[-1,0])+HOUR_MS if len(raw) else None,
+                        eligible_months=sum(x['status']=='eligible' for x in cov), trades=len(entries))
         runs = []
         for cohort, events in [('signal', entries), ('random', controls(raw, entries, by_month))]:
             if events:

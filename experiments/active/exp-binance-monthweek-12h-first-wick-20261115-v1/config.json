@@ -1,6 +1,7 @@
 {
   "exchange": "Binance USD-M, all archived and current USDT perpetuals, all underlyings",
   "data_cutoff_exclusive": "2026-11-15T15:00:00Z",
+  "lifecycle": "Cut at known delivery, and break long flat-price intervals where exchange turnover or trade counts verify inactivity. Do not carry positions across a dormant listing.",
   "calendar_start": "2019-09",
   "anchor": "Pine V1.5, first complete Monday-Sunday in New York, exact continuous H1 coverage; upper=H+0.618*(H-L), lower=L-0.618*(H-L).",
   "signal": "First post-confirmation reach per symbol, NY month and rail. Closed UTC 00/12 aligned 12h bar must finish strictly back on the inward side before NY month expiry. No wick size or open filter. Never re-arm the rail. Require observable history from anchor confirmation to first touch.",
