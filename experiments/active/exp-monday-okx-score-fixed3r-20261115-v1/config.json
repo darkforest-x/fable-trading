@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-monday-okx-score-fixed3r-20261115-v1",
+  "signal_ledger_cutoff_utc": "2026-11-15T07:37:00Z",
+  "price_cutoff_utc": "2026-11-15T10:15:00Z",
+  "cohort": "All 67 previously frozen OKX touch_close scored first symbol/NY-week/side signals strictly above 0.5, all instruments, including 29 equity/ETF swaps, with no wick or portfolio admission filter.",
+  "entry": "The first 1m close at or after the recorded scored_ms, excluding the entry candle from subsequent excursions. Early score timestamps include historical monitor reconstruction.",
+  "stop_fraction": 0.03,
+  "targets_R": [0.5, 1, 1.5, 2, 3, 4, 5, 10],
+  "price_rules": "One nominal R = 3% of entry. Round stop towards entry and limit targets away from entry to instrument tick. Hold to initial stop, target, or latest confirmed minute at price_cutoff; unresolved trades stay open. Stop first on ambiguous minute unless the opening price already crosses a barrier. Stop-minute MFE conservatively includes only its open, plus possible upper bound using the full minute if not gapped.",
+  "costs": {"maker": 0.0002, "taker": 0.0005, "market_slip_bp": 10, "funding": false},
+  "engine": "VectorBT OHLC first_hit and Portfolio.from_orders; unlevered independent unit exposures, plus chronological one-position schedule separately by target.",
+  "production_eligible": false
+}
