@@ -52,7 +52,7 @@ def _lookup(symbol, start, reference):
             return raw
     name = quote(symbol, safe='')
     archive = f'https://data.binance.vision/data/futures/um/daily/klines/{name}/1m/{name}-1m-{day}.zip'
-    endpoints = [('https://fapi.binance.com/fapi/v1/klines',
+    endpoints = [('https://www.binance.com/fapi/v1/klines',
                   dict(symbol=symbol, interval='1m', startTime=start, endTime=start+3_599_999, limit=60)),
                  (archive, {})]
     for url, params in endpoints:
