@@ -1,0 +1,362 @@
+{
+  "confirmed": 63152,
+  "entered": 63139,
+  "test_start": "2026-01-01T00:00:00Z",
+  "cutoff": "2026-11-15T15:00:00Z",
+  "timeframes": {
+    "1": {
+      "selected": "logit_core",
+      "confirmed": 48844,
+      "models": {
+        "logit_core": {
+          "tf": 1,
+          "name": "logit_core",
+          "features": [
+            "side",
+            "week_range_frac",
+            "week_close_position",
+            "breach_delay_days",
+            "other_side_touch_count_24h",
+            "side_return_24h",
+            "side_return_168h",
+            "tr_pct_24h",
+            "tr_pct_168h",
+            "wick_outside_frac",
+            "log1p_wick_reclaim_ratio",
+            "log1p_outside_wick_to_body_ratio",
+            "signal_close_risk_frac",
+            "monday_side_return",
+            "monday_efficiency",
+            "wick_depth_bar_frac",
+            "body_frac_range",
+            "signal_close_position_side",
+            "signal_range_week_frac"
+          ],
+          "train_n": 32222,
+          "train_wins": 7975,
+          "fit_until_utc_ms": 1767225600000,
+          "calibration": [
+            -1.11925611129358,
+            0.0
+          ],
+          "raw_high_threshold": 0.3024728321932826,
+          "p3r_at_high_threshold": 0.2461492933368949,
+          "oof_scored": 24715,
+          "oof_settled": 24526,
+          "sklearn": "1.6.1",
+          "lightgbm": "4.6.0",
+          "file": "model_1h_logit_core.joblib",
+          "inference": {
+            "settled_high": 314,
+            "high_mean_net_r": -0.04412158985434134,
+            "matched_signal_mean_net_r": -0.01938215435530233,
+            "excess_net_r": -0.024739435499039012,
+            "one_sided_p": 0.5985,
+            "weeks": 46,
+            "high_week_bootstrap_95": [
+              -0.2223979683408596,
+              0.183162299573741
+            ],
+            "excess_week_bootstrap_95": [
+              -0.2043043147586345,
+              0.1695730825058738
+            ],
+            "draws": 9999,
+            "passes_primary": false
+          }
+        }
+      },
+      "elapsed_seconds": 54.77
+    },
+    "4": {
+      "selected": "lgb_all_d5_240",
+      "confirmed": 8949,
+      "models": {
+        "logit_core": {
+          "tf": 4,
+          "name": "logit_core",
+          "features": [
+            "side",
+            "week_range_frac",
+            "week_close_position",
+            "breach_delay_days",
+            "breach_offset_tf_frac",
+            "other_side_touch_count_24h",
+            "side_return_24h",
+            "side_return_168h",
+            "tr_pct_24h",
+            "tr_pct_168h",
+            "wick_outside_frac",
+            "log1p_wick_reclaim_ratio",
+            "log1p_outside_wick_to_body_ratio",
+            "signal_close_risk_frac",
+            "monday_side_return",
+            "monday_efficiency",
+            "wick_depth_bar_frac",
+            "body_frac_range",
+            "signal_close_position_side",
+            "signal_range_week_frac"
+          ],
+          "train_n": 5868,
+          "train_wins": 1469,
+          "fit_until_utc_ms": 1767225600000,
+          "calibration": [
+            -1.0785788051955203,
+            0.0
+          ],
+          "raw_high_threshold": 0.32300181612712053,
+          "p3r_at_high_threshold": 0.2537750587894357,
+          "oof_scored": 4500,
+          "oof_settled": 4441,
+          "sklearn": "1.6.1",
+          "lightgbm": "4.6.0",
+          "file": "model_4h_logit_core.joblib",
+          "inference": {
+            "settled_high": 270,
+            "high_mean_net_r": -0.018438361552016863,
+            "matched_signal_mean_net_r": 0.008652521059997658,
+            "excess_net_r": -0.027090882612014523,
+            "one_sided_p": 0.5829,
+            "weeks": 46,
+            "high_week_bootstrap_95": [
+              -0.2793831786773415,
+              0.25120748628127726
+            ],
+            "excess_week_bootstrap_95": [
+              -0.22719011200565564,
+              0.1722699469835861
+            ],
+            "draws": 9999,
+            "passes_primary": false
+          }
+        },
+        "lgb_all_d5_240": {
+          "tf": 4,
+          "name": "lgb_all_d5_240",
+          "features": [
+            "side",
+            "week_range_frac",
+            "week_close_position",
+            "breach_delay_days",
+            "breach_offset_tf_frac",
+            "other_side_touch_count_24h",
+            "side_return_24h",
+            "side_return_168h",
+            "tr_pct_24h",
+            "tr_pct_168h",
+            "wick_outside_frac",
+            "log1p_wick_reclaim_ratio",
+            "log1p_outside_wick_to_body_ratio",
+            "signal_close_risk_frac",
+            "monday_side_return",
+            "monday_efficiency",
+            "wick_depth_bar_frac",
+            "body_frac_range",
+            "signal_close_position_side",
+            "signal_range_week_frac",
+            "side_return_6h",
+            "side_return_72h",
+            "side_return_336h",
+            "realized_vol_pct_24h",
+            "realized_vol_pct_168h",
+            "realized_vol_pct_336h",
+            "range_pct_24h",
+            "range_pct_168h",
+            "range_pct_336h",
+            "range_position_24h",
+            "range_position_168h",
+            "range_position_336h",
+            "efficiency_24h",
+            "efficiency_168h",
+            "efficiency_336h",
+            "btc_side_return_24h",
+            "btc_side_return_168h",
+            "btc_tr_pct_24h"
+          ],
+          "train_n": 5868,
+          "train_wins": 1469,
+          "fit_until_utc_ms": 1767225600000,
+          "calibration": [
+            -1.0785960763645233,
+            0.0
+          ],
+          "raw_high_threshold": 0.3840177308021426,
+          "p3r_at_high_threshold": 0.25377178810545,
+          "oof_scored": 4500,
+          "oof_settled": 4441,
+          "sklearn": "1.6.1",
+          "lightgbm": "4.6.0",
+          "file": "model_4h_lgb_all_d5_240.joblib",
+          "inference": {
+            "settled_high": 262,
+            "high_mean_net_r": -0.2173023743915684,
+            "matched_signal_mean_net_r": -0.05748423829492314,
+            "excess_net_r": -0.15981813609664527,
+            "one_sided_p": 0.9732,
+            "weeks": 46,
+            "high_week_bootstrap_95": [
+              -0.4073679300866905,
+              0.10311647504977701
+            ],
+            "excess_week_bootstrap_95": [
+              -0.3498131976107863,
+              0.015096259897876229
+            ],
+            "draws": 9999,
+            "passes_primary": false
+          }
+        }
+      },
+      "elapsed_seconds": 11.86
+    },
+    "12": {
+      "selected": "lgb_all_d5_240",
+      "confirmed": 5359,
+      "models": {
+        "logit_core": {
+          "tf": 12,
+          "name": "logit_core",
+          "features": [
+            "side",
+            "week_range_frac",
+            "week_close_position",
+            "breach_delay_days",
+            "breach_offset_tf_frac",
+            "other_side_touch_count_24h",
+            "side_return_24h",
+            "side_return_168h",
+            "tr_pct_24h",
+            "tr_pct_168h",
+            "wick_outside_frac",
+            "log1p_wick_reclaim_ratio",
+            "log1p_outside_wick_to_body_ratio",
+            "signal_close_risk_frac",
+            "monday_side_return",
+            "monday_efficiency",
+            "wick_depth_bar_frac",
+            "body_frac_range",
+            "signal_close_position_side",
+            "signal_range_week_frac"
+          ],
+          "train_n": 3370,
+          "train_wins": 898,
+          "fit_until_utc_ms": 1767225600000,
+          "calibration": [
+            -0.9298312940092232,
+            0.0
+          ],
+          "raw_high_threshold": 0.32351499199932143,
+          "p3r_at_high_threshold": 0.2829589425484972,
+          "oof_scored": 2659,
+          "oof_settled": 2594,
+          "sklearn": "1.6.1",
+          "lightgbm": "4.6.0",
+          "file": "model_12h_logit_core.joblib",
+          "inference": {
+            "settled_high": 368,
+            "high_mean_net_r": -0.044820414276729156,
+            "matched_signal_mean_net_r": -0.06704375954513839,
+            "excess_net_r": 0.022223345268409224,
+            "one_sided_p": 0.3444,
+            "weeks": 46,
+            "high_week_bootstrap_95": [
+              -0.2947603406013734,
+              0.25453446184658024
+            ],
+            "excess_week_bootstrap_95": [
+              -0.10471224455573673,
+              0.1700557866138543
+            ],
+            "draws": 9999,
+            "passes_primary": false
+          }
+        },
+        "lgb_all_d5_240": {
+          "tf": 12,
+          "name": "lgb_all_d5_240",
+          "features": [
+            "side",
+            "week_range_frac",
+            "week_close_position",
+            "breach_delay_days",
+            "breach_offset_tf_frac",
+            "other_side_touch_count_24h",
+            "side_return_24h",
+            "side_return_168h",
+            "tr_pct_24h",
+            "tr_pct_168h",
+            "wick_outside_frac",
+            "log1p_wick_reclaim_ratio",
+            "log1p_outside_wick_to_body_ratio",
+            "signal_close_risk_frac",
+            "monday_side_return",
+            "monday_efficiency",
+            "wick_depth_bar_frac",
+            "body_frac_range",
+            "signal_close_position_side",
+            "signal_range_week_frac",
+            "side_return_6h",
+            "side_return_72h",
+            "side_return_336h",
+            "realized_vol_pct_24h",
+            "realized_vol_pct_168h",
+            "realized_vol_pct_336h",
+            "range_pct_24h",
+            "range_pct_168h",
+            "range_pct_336h",
+            "range_position_24h",
+            "range_position_168h",
+            "range_position_336h",
+            "efficiency_24h",
+            "efficiency_168h",
+            "efficiency_336h",
+            "btc_side_return_24h",
+            "btc_side_return_168h",
+            "btc_tr_pct_24h"
+          ],
+          "train_n": 3370,
+          "train_wins": 898,
+          "fit_until_utc_ms": 1767225600000,
+          "calibration": [
+            -0.9298193544455957,
+            0.0
+          ],
+          "raw_high_threshold": 0.3862094934391094,
+          "p3r_at_high_threshold": 0.2829613650107995,
+          "oof_scored": 2659,
+          "oof_settled": 2594,
+          "sklearn": "1.6.1",
+          "lightgbm": "4.6.0",
+          "file": "model_12h_lgb_all_d5_240.joblib",
+          "inference": {
+            "settled_high": 336,
+            "high_mean_net_r": 0.09334716704425297,
+            "matched_signal_mean_net_r": 0.05474481664200494,
+            "excess_net_r": 0.03860235040224803,
+            "one_sided_p": 0.3065,
+            "weeks": 46,
+            "high_week_bootstrap_95": [
+              -0.1898759460650899,
+              0.38505596921743035
+            ],
+            "excess_week_bootstrap_95": [
+              -0.1292365541337913,
+              0.241094355594361
+            ],
+            "draws": 9999,
+            "passes_primary": false
+          }
+        }
+      },
+      "elapsed_seconds": 9.17
+    }
+  },
+  "validation_fits": 90,
+  "final_fits": 5,
+  "train_runtime": "project .venv",
+  "sklearn": "1.6.1",
+  "lightgbm": "4.6.0",
+  "model_elapsed_seconds": 77.37,
+  "production_eligible": false,
+  "builder": "21a2e9ba238a05466bb5f01ed730686730d77cff"
+}

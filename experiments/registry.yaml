@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-binance-monday-wick-score3r-20261116-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 102501367b
+    status: rejected
+    question: Does the first pure wick at a weekly NY Monday extension identify 3R opportunities, and can deeper separate models rank them profitably out of time?
+    single_variable: Replace monthly first-week ranges with weekly NY Monday ranges for the census. Within the weekly event ledger, compare ten predefined model and feature configurations with identical labels, splits and fees.
+    result: "925 contracts, 63139 executable signals. With 2026 scores frozen from prior years, high 1h hit 76/314 (24.20%, -0.044R), 4h 53/262 (20.23%, -0.217R) and 12h 94/336 (27.98%, +0.093R). Equal-count same-week/side/timeframe randomization p-values 0.5985/0.9732/0.3065. 12h matched mean +0.055R, excess weekly 95% interval [-0.129,+0.241]R. No timeframe passed."
+    notes: "1h/4h/12h train on 32222/5868/3370 pre-2026 settled events respectively. 90 expanding validation fits, 5 final fits incl. baseline. Selected 1h core logit and 4h/12h expanded LightGBM depth 5 with 240 trees. Nonnegative Platt slopes all zero; only raw scores differentiate events. Fixed 3R, next H1 open, stop 1% beyond wick, taker 5bp/maker 2bp, no added slip or funding. Among test high bands 32/0/15 censored. Frozen cutoff 2026-11-15 15:00 UTC. Knowledge record 4198856479af81aeb5e4e35dddf16732."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-binance-monday-wick-score3r-20261116-v1/model_summary.json
+
   - experiment_id: exp-binance-monthweek-wick-score3r-20261116-v2
     source_repo: darkforest-x/fable-trading
     source_commit: ef0234fe60

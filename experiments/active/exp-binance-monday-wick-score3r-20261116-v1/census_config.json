@@ -1,0 +1,23 @@
+{
+  "experiment": "exp-binance-monday-wick-score3r-20261116-v1",
+  "build_version": "monday-weekly-wick-census3r-v1",
+  "parent_priority_experiment": "exp-binance-monthweek-wick-priority-20261116-v1",
+  "parent_frozen_contract_experiment": "exp-binance-monthweek-12h-first-wick-20261115-v1",
+  "cutoff_exclusive_ms": 1794754800000,
+  "cutoff_exclusive": "2026-11-15T15:00:00Z",
+  "roster_contracts": 925,
+  "calendar": "monday_fib.week_window; America/New_York Monday 00:00 anchor; Tuesday 00:00 ready; next Monday 00:00 expiry",
+  "range": "NY Monday high/low plus/minus 0.618 times Monday range",
+  "first_breach": "first strict H1 extreme beyond rail in [ready_ms, expires_ms); previous equality does not consume; terminate at first cleaned-tape gap",
+  "confirmation": "UTC-aligned 1h then 4h then 12h containing first strict breach; strictly inward open and close, strictly outward tip; close_ms == expires_ms allowed",
+  "entry": "next H1 open at close_ms; frozen priority semantics permit close_ms == expires_ms when that next open exists and passes the stop",
+  "stop": "signal bar tip extended outward by 1 percent",
+  "labels": "only 3R TP versus signal-tip stop; VectorBT native fills/fees; first_hit native OHLC ordering; complete minute tape for dual-touch H1s; positions cross weeks; gap/end censored",
+  "fees": {
+    "entry_taker": 0.0005,
+    "stop_exit_taker": 0.0005,
+    "target_exit_maker": 0.0002
+  },
+  "slippage": 0,
+  "funding": 0
+}
