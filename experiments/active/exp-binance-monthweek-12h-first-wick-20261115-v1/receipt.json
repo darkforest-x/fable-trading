@@ -1,0 +1,61 @@
+{
+  "experiment": "exp-binance-monthweek-12h-first-wick-20261115-v1",
+  "data_through_utc_exclusive": "2026-11-15T15:00:00Z",
+  "entry_clock": "UTC 00:00 or 12:00 after confirmed signal",
+  "vectorbt_version": "1.2.0",
+  "roster_size": 925,
+  "with_hourly_data": 924,
+  "with_eligible_months": 922,
+  "with_entries": 845,
+  "eligible_contract_months": 21084,
+  "public_daily_monthly_directory_reconciliation": {
+    "daily_all_contract_directories": 1081,
+    "monthly_all_contract_directories": 1080,
+    "unknown_usdt_names": 0,
+    "exchange_info_serverTime_utc": "2026-11-13T06:02:01.702000+00:00",
+    "symbol_coverage_detail": "Includes delisted, premarket, index and TradFi USDT perpetuals. Daily/monthly Binance Vision archives and exchangeInfo union."
+  },
+  "refresh": {
+    "current_contracts": 758,
+    "received_hourly_rows": 76511,
+    "positive_trade_and_volume_rows": 76491,
+    "archive_month_404": 10,
+    "failed_fetches": 0,
+    "source": "data/research/monthweek-12h-first-touch-20261115/summary.json"
+  },
+  "coverage_first_touches": {
+    "entered": 7570,
+    "no_reclaim": 5259,
+    "expires_before_close": 54,
+    "incomplete_12h": 6
+  },
+  "direction": {
+    "-1": 3869,
+    "1": 3701
+  },
+  "last_12_full_months": 2856,
+  "outcome_evidence": {
+    "signal_paths": 83270,
+    "matched_controls": 7570,
+    "hourly_ties_refined_to_minutes": 79,
+    "unresolved_minute_ties_conservatively_stopped": 1,
+    "verified_checks": [
+      "unique symbol/month/rail and complete 12h signal",
+      "stop and timing arithmetic",
+      "net fee PnL for every closed fill",
+      "all fixed-R hits monotonically nested by signal",
+      "one result for every target on every signal",
+      "official USELESSUSDT 2025-11 NY week from 168 H1 bars and exact native 12h OHLC",
+      "all 90 last H1 bars with exchanges recording trades at the delivery timestamp checked against still-open brackets; no omitted SL/TP for either cohort",
+      "7356 of 7358 narrower previous records matched time, price and rail; YALAUSDT 2026-02 upper and IRUSDT 2026-04 lower required incomplete terminal 12h bars and were excluded"
+    ]
+  },
+  "first_census_source_commit": "a3789b53b0",
+  "recent_data_builder_commit": "9d8ba2527f",
+  "refresh_command": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.data.binance_monthweek_hourly_refresh --repair-history",
+  "run_command": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.month_firstweek_12h_wick_census",
+  "registry_check": {
+    "new_row": "passed ExperimentRecord validation and file resolution",
+    "shared_workspace_global_loader": "pre-existing other artifact monday-calendar-impact-audit-20261101 lacks source_commit"
+  }
+}

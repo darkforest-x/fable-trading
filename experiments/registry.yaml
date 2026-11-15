@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-binance-monthweek-12h-first-wick-20261115-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: a3789b53b0
+    status: inconclusive
+    question: How often does the first monthly 1.618 touch on either side reclaim in its own closed UTC 12h bar, and which independent targets are reached before the buffered wick stop?
+    single_variable: Compare 1/2/3/5/6/7/10/20R and near/mid/far first-week targets on the same entries, with 1 percent beyond the wick tip as stop.
+    result: "925 Binance USDT perpetual codes, 922 with eligible month, 12889 first rail touches, 7570 entries (3701 long, 3869 short). 3552 hit 1R, 1601 hit 3R, 538 hit 10R, 251 hit 20R. Near 2942/7045, mid 2006/7455, far 1551/7534. Every target's average net R among resolved trades was negative."
+    notes: "Data through 2026-11-15 15:00 UTC. Pine V1.5 NY first complete week, one first touch per month and side, next-hour open after the UTC 12h close. Independent trades can carry across months, and are censored at delist, gaps or data end. Entry/stop 5bp, target 2bp; no slippage or funding. VectorBT with disputed H1 candles refined by exact 1m tape. 7570 matched random controls. Full census, 11 target outcomes and one random control path per target retained."
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-binance-monthweek-12h-first-wick-20261115-v1/metrics.csv
+
   - experiment_id: exp-cloud-eth-hourly-early-execution-20261115-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 69afb22432
