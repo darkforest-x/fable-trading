@@ -43,7 +43,10 @@ SOURCE_ROSTER = SOURCE_ROOT / "universe_perpetuals.csv"
 OUTPUT_ROOT = ROOT / "data/research/monthweek-12h-first-touch-20261115"
 EXPERIMENT_ROOT = ROOT / "experiments/active/exp-alt-isolated-12h-firstweek-wicks-20261111-v1"
 
-FAPI = "https://fapi.binance.com"
+# Binance's documented www gateway serves the same USD-M REST routes and is
+# reachable in environments where the dedicated fapi host is intermittently
+# blocked at TLS negotiation.
+FAPI = "https://www.binance.com"
 UM_KLINES = f"{FAPI}/fapi/v1/klines"
 UM_EXCHANGE_INFO = f"{FAPI}/fapi/v1/exchangeInfo"
 UM_TIME = f"{FAPI}/fapi/v1/time"
@@ -129,6 +132,8 @@ def _get_json(url: str, params: dict[str, Any] | None = None, *, weight: int = 1
         try:
             response = requests.get(url, params=params, timeout=(10, 45), headers={
                 "User-Agent": "fable-trading-monthweek-hourly-refresh/1.0",
+                "Cache-Control": "no-cache, no-store",
+                "Pragma": "no-cache",
             })
             if response.status_code in (418, 429, 500, 502, 503, 504):
                 response.raise_for_status()
@@ -180,7 +185,7 @@ def _load_base_roster() -> list[dict[str, str]]:
     return rows
 
 
-def _fetch_live_info(start_ms: int) -> tuple[dict[str, dict[str, Any]], dict[str, Any]]:
+def _fetch_live_info(start_ms: int, cutoff_ms: int) -> tuple[dict[str, dict[str, Any]], dict[str, Any]]:
     # A cache-buster and no-cache headers avoid reusing an older exchangeInfo edge response.
     live_time = _get_json(UM_TIME)
     time_ms = _safe_int(live_time.get("serverTime")) if isinstance(live_time, dict) else None
@@ -199,10 +204,14 @@ def _fetch_live_info(start_ms: int) -> tuple[dict[str, dict[str, Any]], dict[str
         raise RuntimeError(
             f"Binance exchangeInfo is stale relative to requested window: {_iso(exchange_time_ms)}"
         )
+    exchange_info_age_ms = max(0, time_ms - exchange_time_ms)
     live = {str(row["symbol"]): row for row in candidates}
     return live, {
         "server_time_ms": time_ms,
         "exchange_info_server_time_ms": exchange_time_ms,
+        "exchange_info_age_ms": exchange_info_age_ms,
+        "exchange_info_age_hours": round(exchange_info_age_ms / 3_600_000, 2),
+        "exchange_info_stale_for_cutoff_over_24h": exchange_time_ms < cutoff_ms - 24 * HOUR_MS,
         "exchange_info_total_symbols": len(all_symbols),
         "exchange_info_usdt_perpetuals": len(live),
         "exchange_info_status_counts": _count(row.get("status", "") for row in candidates),
@@ -484,7 +493,7 @@ def run(start_ms: int, cutoff_ms: int, *, repair_history: bool = False, workers:
         raise ValueError("cutoff-exclusive is in the future")
     base_list = _load_base_roster()
     base_by_symbol = {row["symbol"].strip(): row for row in base_list}
-    live, live_meta = _fetch_live_info(start_ms)
+    live, live_meta = _fetch_live_info(start_ms, cutoff_ms)
     all_symbols = sorted(set(base_by_symbol) | set(live))
     read_raw = _load_census_reader()
     source_rows = _source_rows(read_raw, all_symbols)
@@ -500,7 +509,10 @@ def run(start_ms: int, cutoff_ms: int, *, repair_history: bool = False, workers:
         delivery_ms = _date_ms(exchange_row, "deliveryDate")
         requested_start = max(start_ms, (last_source_ms + HOUR_MS) if last_source_ms is not None else start_ms)
         if onboard_ms is not None:
-            requested_start = max(requested_start, onboard_ms)
+            # Preserve the listing hour. Its OHLCV candle can open before
+            # onboardDate while containing valid trades after onboarding.
+            onboard_hour_open = (onboard_ms // HOUR_MS) * HOUR_MS
+            requested_start = max(requested_start, onboard_hour_open)
         if include:
             recent_symbols.append(symbol)
             recent_receipts.append({"symbol": symbol, "exchange_row": exchange_row,
@@ -699,6 +711,7 @@ def run(start_ms: int, cutoff_ms: int, *, repair_history: bool = False, workers:
         "historical_base_modified": False,
         "recent_window": {"start_inclusive_ms": start_ms, "start_inclusive_utc": _iso(start_ms),
                           "cutoff_exclusive_ms": cutoff_ms, "cutoff_exclusive_utc": _iso(cutoff_ms)},
+        "market_rest_base": FAPI,
         "live_exchange_info": live_meta,
         "base_roster_count": len(base_by_symbol),
         "roster_count": len(all_symbols),
