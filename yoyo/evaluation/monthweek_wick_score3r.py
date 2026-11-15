@@ -46,8 +46,8 @@ def score_rows(rows, spec):
     return pd.DataFrame({'p3r': p, 'band': bands}, index=rows.index)
 
 
-def fit_model(train, cfg):
-    x = matrix(train, FEATURES)
+def fit_model(train, cfg, features=FEATURES):
+    x = matrix(train, features)
     med = x.median()
     if med.isna().any():
         raise ValueError(f'No train coverage for {list(med[med.isna()].index)}')
@@ -60,7 +60,7 @@ def fit_model(train, cfg):
     p = lr.predict_proba(z)[:, 1]
     cuts = {str(int(h)): np.quantile(p[train.tf.eq(h)], cfg['reference_quantiles']).tolist()
             for h in sorted(train.tf.unique())}
-    spec = dict(method='3R first-hit logistic probability', features=list(FEATURES), median=med.tolist(),
+    spec = dict(method='3R first-hit logistic probability', features=list(features), median=med.tolist(),
                 mean=scaler.mean_.tolist(), scale=scaler.scale_.tolist(), coef=lr.coef_[0].tolist(),
                 intercept=float(lr.intercept_[0]), band_thresholds=cuts, bands=BANDS,
                 band_quantiles=cfg['reference_quantiles'], train_until_exclusive=cfg['train_until_exclusive'],

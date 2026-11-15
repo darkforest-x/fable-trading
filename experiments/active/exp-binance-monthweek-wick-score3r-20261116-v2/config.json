@@ -1,0 +1,8 @@
+{
+  "parent": "exp-binance-monthweek-wick-score3r-20261116-v1",
+  "timeframes": [1, 4, 12],
+  "target": "3R",
+  "single_change": "Fit one independent logistic regression per chosen confirmation timeframe, reusing exactly the v1 causal features, 3R outcomes and purged time split. Fit imputation, scaling, coefficients, intercept and band thresholds using only rows of the corresponding timeframe. Drop training-constant columns within that timeframe.",
+  "population": "For each symbol, NY anchor month and rail, the same first pierce is assigned once, to 1h if confirmed, else 4h if confirmed, else 12h if confirmed. Keep the original frozen wick stop, entry, fees and paths.",
+  "primary_comparison": "Each timeframe's fixed training top-decile versus its same-period all signals and the v1 pooled model's selection on that same timeframe. Primary criterion for each is positive mean net R and one-sided p<0.01 against same-month and same-side equally sized random selections. Report all three and their two individual years. V1's 2025+ evaluation period has already been examined."
+}
