@@ -1,0 +1,29 @@
+{
+  "id": "exp-binance-monday-wick-score3r-20261116-v1",
+  "universe_source": "exp-binance-monthweek-12h-first-wick-20261115-v1",
+  "reference_monthly": "exp-binance-monthweek-wick-score3r-20261116-v2",
+  "cutoff_exclusive": "2026-11-15T15:00:00Z",
+  "anchor": "New York Monday 00:00 through Tuesday 00:00. Upper=H+.618*(H-L), lower=L-.618*(H-L). Take first strict pierce per symbol/week/rail after anchor closes through the next NY Monday open. UTC aligned closed candles, choose 1h then 4h then 12h, wick outside and open/close strictly inside; no repeats. Changed from monthly anchor to weekly Monday.",
+  "execution": "Next H1 open at decision close, chosen wick extreme plus 1% further out, independently measured fixed 3R. Parent VectorBT rules, taker 5bp entry/stop, maker 2bp TP, no extra slippage or funding. Can hold beyond week, censor at gap/end/delisting. Minute refinement on ambiguous source H1 when obtainable, conservative ordering otherwise.",
+  "validation_years": [2023, 2024, 2025],
+  "test_start": "2026-01-01T00:00:00Z",
+  "timeframes": [1, 4, 12],
+  "feature_sets": ["core", "expanded"],
+  "candidates": [
+    {"name": "logit_core", "family": "logit", "features": "core"},
+    {"name": "logit_expanded", "family": "logit", "features": "expanded"},
+    {"name": "lgb_core_d3_150", "family": "tree", "features": "core", "depth": 3, "rounds": 150, "leaf_min": 50},
+    {"name": "lgb_core_d5_240", "family": "tree", "features": "core", "depth": 5, "rounds": 240, "leaf_min": 75},
+    {"name": "lgb_all_d2_120", "family": "tree", "features": "expanded", "depth": 2, "rounds": 120, "leaf_min": 40},
+    {"name": "lgb_all_d3_150", "family": "tree", "features": "expanded", "depth": 3, "rounds": 150, "leaf_min": 50},
+    {"name": "lgb_all_d4_200", "family": "tree", "features": "expanded", "depth": 4, "rounds": 200, "leaf_min": 60},
+    {"name": "lgb_all_d5_240", "family": "tree", "features": "expanded", "depth": 5, "rounds": 240, "leaf_min": 75},
+    {"name": "lgb_all_d6_300", "family": "tree", "features": "expanded", "depth": 6, "rounds": 300, "leaf_min": 100},
+    {"name": "lgb_all_d7_320", "family": "tree", "features": "expanded", "depth": 7, "rounds": 320, "leaf_min": 120}
+  ],
+  "design": "Train each selected confirmation timeframe exclusively on its own rows. Preprocessing and fits use only outcomes known by each fold boundary. For 2023, 2024, 2025 produce expanding-year out-of-fold predictions; only labels known before 2026 may affect selection or calibration. The 2026 final assessment is separate. One independent selection per timeframe.",
+  "select": "Within each validation year rank executable signals by predicted 3R probability. Use the mean of the three annual top-decile mean settled net Rs as the selection criterion; break ties with lower mean validation log loss then declaration order. Annual ranks serve only for model selection. Fit Platt calibration using pre-2026 settled out-of-fold probabilities, with nonnegative slope. Freeze the raw probability threshold at the pooled pre-2026 out-of-fold 90th percentile across executable signals before predicting any 2026 result. Refit selected model and simple baseline using all pre-2026 matured labels.",
+  "evaluate": "Report baseline and selected candidates using each model's own frozen validation thresholds. Do not optimize 2026 thresholds. Primary economics: positive high-band mean net R and one-sided p<0.01 versus equal-count draws from settled same-NY-week, direction and timeframe confirmed signals. Weekly cluster bootstrap intervals; include AUC, Brier, counts including censored, and quarterly slices. Independent signal returns.",
+  "draws": 9999,
+  "seed": 20261116
+}
