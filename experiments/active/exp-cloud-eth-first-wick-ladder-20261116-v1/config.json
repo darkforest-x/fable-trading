@@ -1,0 +1,10 @@
+{
+  "symbol": "ETH-USDT-SWAP",
+  "source": "exp-cloud-top20-peak10r-20261108-v1",
+  "cutoff_utc": "2026-11-08T12:00:00Z",
+  "previous_research": "exp-cloud-eth-hourly-early-execution-20261115-v1",
+  "event": "After the NY Monday range locks, locate the first strict breach per weekly rail, counting earlier wicks as breaches. An exact touch does not consume the rail.",
+  "shape": "Use the closed 1H, then enclosing UTC 4H, then enclosing UTC 12H of that same first breach. For a short, require a high above the upper rail, an open at or below it and a close strictly back inside the two rails. Mirror for a long. Only fully eligible source candles are used.",
+  "trend": "Retain the original developing 12H EMA20/50 direction at the chosen close. The primary ladder only advances when the smaller candle did not provide a qualifying wick shape. Keep first eligible signal per NY week.",
+  "scope": "Historical signal identification only. No new fill, payout or account results. This rule differs from the previously simulated cumulative 12H excursion followed by a later hourly reclaim."
+}
