@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-binance-monthweek-wick-score3r-20261116-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: ef0234fe60
+    status: rejected
+    question: Does fitting a separate 3R scoring model for each priority wick timeframe identify profitable high-score trades that beat matched random selection?
+    single_variable: Split all preprocessing, fitting, thresholds and scoring by chosen confirmation timeframe, retaining the original event universe, outcomes and purged time split.
+    result: "Training 3388/543/318. In the 2025–2026 test, high 1h hit 50/190 (26.32%, +0.023R), 4h 11/65 (16.92%, -0.346R) and 12h 10/51 (19.61%, -0.240R). Same-month, side and timeframe one-sided randomization p-values 0.3801/0.8855/0.9298. None passed the positive net and p<0.01 criterion."
+    notes: "Three independent L2 logistic regressions on original close-time features, fixed train-90th percentile within each model, outcome 3R before wick stop. 12h high group had three additionally censored. Entry/stop taker 5bp, target maker 2bp, no funding or added slippage. Reuses known historical evaluation period. Knowledge record 4198856479af81e58e36c37ff8def433."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-binance-monthweek-wick-score3r-20261116-v2/summary.json
+
   - experiment_id: exp-binance-monthweek-wick-score3r-20261116-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 0b5c8b7f45

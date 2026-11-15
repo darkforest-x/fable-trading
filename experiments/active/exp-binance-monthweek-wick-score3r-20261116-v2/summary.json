@@ -1,0 +1,113 @@
+{
+  "parent": "exp-binance-monthweek-wick-score3r-20261116-v1",
+  "target": "3R",
+  "confirmed": 9769,
+  "entered": 9768,
+  "train_n": 4249,
+  "test_n": 5499,
+  "parameters": "L2 logistic, C=1, independently fit per timeframe",
+  "tests": {
+    "1": {
+      "settled_high": 190,
+      "high_mean_net_r": 0.022602661759863352,
+      "matched_signal_mean_net_r": -0.00843580530258973,
+      "excess_net_r": 0.03103846706245308,
+      "one_sided_p": 0.3801,
+      "months": 23,
+      "high_month_bootstrap_95": [
+        -0.2175164733431294,
+        0.26596799952496214
+      ],
+      "excess_month_bootstrap_95": [
+        -0.19332713659409412,
+        0.24206300931273828
+      ],
+      "draws": 9999,
+      "passes_primary": false,
+      "previous_top10": {
+        "signals": 229,
+        "settled": 229,
+        "tp": 55,
+        "sl": 174,
+        "censored": 0,
+        "behind": 0,
+        "mean_net_r": -0.070988210166002,
+        "settled_win_pct": 24.017467248908297,
+        "hit_pct_all": 24.017467248908297
+      },
+      "overlap_high_signals": 171,
+      "train_n": 3388,
+      "train_hits": 725,
+      "train_p90": 0.2873287990082582
+    },
+    "4": {
+      "settled_high": 65,
+      "high_mean_net_r": -0.34648194623533185,
+      "matched_signal_mean_net_r": -0.15141101960213568,
+      "excess_net_r": -0.19507092663319617,
+      "one_sided_p": 0.8855,
+      "months": 23,
+      "high_month_bootstrap_95": [
+        -0.6326749226832356,
+        -0.02369560999136917
+      ],
+      "excess_month_bootstrap_95": [
+        -0.5662311367490084,
+        0.08658472483888179
+      ],
+      "draws": 9999,
+      "passes_primary": false,
+      "previous_top10": {
+        "signals": 38,
+        "settled": 38,
+        "tp": 8,
+        "sl": 30,
+        "censored": 0,
+        "behind": 0,
+        "mean_net_r": -0.17705632958709516,
+        "settled_win_pct": 21.052631578947366,
+        "hit_pct_all": 21.05263157894737
+      },
+      "overlap_high_signals": 17,
+      "train_n": 543,
+      "train_hits": 124,
+      "train_p90": 0.3016569879033381
+    },
+    "12": {
+      "settled_high": 51,
+      "high_mean_net_r": -0.23989362509689977,
+      "matched_signal_mean_net_r": -0.018367364417037933,
+      "excess_net_r": -0.22152626067986184,
+      "one_sided_p": 0.9298,
+      "months": 22,
+      "high_month_bootstrap_95": [
+        -0.6717354958246013,
+        0.2336202979844614
+      ],
+      "excess_month_bootstrap_95": [
+        -0.5297480781128332,
+        0.03717900330492837
+      ],
+      "draws": 9999,
+      "passes_primary": false,
+      "previous_top10": {
+        "signals": 19,
+        "settled": 18,
+        "tp": 5,
+        "sl": 13,
+        "censored": 1,
+        "behind": 0,
+        "mean_net_r": 0.09763855121291927,
+        "settled_win_pct": 27.77777777777778,
+        "hit_pct_all": 26.31578947368421
+      },
+      "overlap_high_signals": 7,
+      "train_n": 318,
+      "train_hits": 54,
+      "train_p90": 0.3312147725639339
+    }
+  },
+  "cutoff": "2026-11-15T15:00:00Z",
+  "production_eligible": false,
+  "builder": "ef0234fe60f019fc70254d7d18d3aa15178c581f"
+}
