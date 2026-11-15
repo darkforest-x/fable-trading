@@ -1,0 +1,73 @@
+{
+  "parent": "exp-binance-monthweek-wick-priority-20261116-v1",
+  "confirmed": 9769,
+  "entered": 9768,
+  "features": [
+    "side",
+    "tf4",
+    "tf12",
+    "week_range_frac",
+    "week_close_position",
+    "breach_delay_days",
+    "breach_offset_tf_frac",
+    "other_side_touch_count_24h",
+    "side_return_24h",
+    "side_return_168h",
+    "tr_pct_24h",
+    "tr_pct_168h",
+    "wick_outside_frac",
+    "log1p_wick_reclaim_ratio",
+    "log1p_outside_wick_to_body_ratio",
+    "signal_close_risk_frac"
+  ],
+  "missing_features": {
+    "side": 0,
+    "tf4": 0,
+    "tf12": 0,
+    "week_range_frac": 0,
+    "week_close_position": 0,
+    "breach_delay_days": 0,
+    "breach_offset_tf_frac": 0,
+    "other_side_touch_count_24h": 0,
+    "side_return_24h": 0,
+    "side_return_168h": 0,
+    "tr_pct_24h": 0,
+    "tr_pct_168h": 0,
+    "wick_outside_frac": 0,
+    "log1p_wick_reclaim_ratio": 0,
+    "log1p_outside_wick_to_body_ratio": 53,
+    "signal_close_risk_frac": 0
+  },
+  "train_n": 4249,
+  "train_wins": 903,
+  "pre_split_entries": 4269,
+  "purged_unmatured": 11,
+  "pre_split_censored": 9,
+  "test_entered": 5499,
+  "test_censored": 169,
+  "inference": {
+    "settled_high": 285,
+    "high_mean_net_r": -0.07448051484382993,
+    "matched_signal_mean_net_r": 0.019007184542484262,
+    "excess_net_r": -0.0934876993863142,
+    "one_sided_p": 0.83,
+    "months": 23,
+    "high_month_bootstrap_95": [
+      -0.30835732540822797,
+      0.16150838828019298
+    ],
+    "excess_month_bootstrap_95": [
+      -0.3013292286269713,
+      0.11628540762367133
+    ],
+    "draws": 9999,
+    "passes_primary": false
+  },
+  "paired_high_3r": {
+    "n": 283,
+    "high_mean": -0.0818511541797587,
+    "random_clock_mean": -0.19503554425134506
+  },
+  "git_commit": "0b5c8b7f45e0d312362bd0ba12a15eb28b55dbcc",
+  "production_eligible": false
+}

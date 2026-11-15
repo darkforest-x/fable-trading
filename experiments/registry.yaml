@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-binance-monthweek-wick-score3r-20261116-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0b5c8b7f45
+    status: rejected
+    question: Can a causal signal-close score identify monthly first-week wick trades that hit 3R before the buffered stop with positive mean net R out of time?
+    single_variable: Filter the frozen entries with their own timeframe's training 90th-percentile threshold on a pooled standardized logistic score. Hold timing, fills, stop, target and fees fixed.
+    result: "Test 2025 to 2026-11-15 15:00 UTC, 5499 entries, 5330 resolved. All 1214/5330 hit 3R (22.78%, -0.120R). Above threshold 68/285 (23.86%, -0.074R); high 1h 55/229, 4h 8/38, 12h 5/18. Pooled high scores averaged 34.28%. Same-month/timeframe/direction random subset mean +0.019R, one-sided p=0.83. Primary filter failed."
+    notes: "Fit 4249 resolved pre-2025 labels, purge 11 later exits. 9769 confirmed scored. Training-only scaler, median fill and thresholds. Sixteen candle-close and market-context features without volume. Single fixed model tested in 2025 and 2026, no tuning or portfolio sizing. Maker 2bp, taker 5bp, no added slippage or funding. High group monthly-bootstrap 95% interval [-0.308,+0.162]R. Notion 4198856479af8152a179d19581ed2a39."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-binance-monthweek-wick-score3r-20261116-v1/summary.json
+
   - experiment_id: exp-cloud-eth-first-wick-execution-20261116-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 65b74b2969
