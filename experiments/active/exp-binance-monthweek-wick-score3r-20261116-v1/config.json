@@ -1,0 +1,16 @@
+{
+  "parent": "exp-binance-monthweek-wick-priority-20261116-v1",
+  "reference_method": "yoyo/monitor/monday_reclaim_score.json",
+  "target": "3R",
+  "label": "One when the parent's 3R target is hit before its protective stop, zero for a stop. Open, censored, and unavailable fills never receive a binary label.",
+  "decision": "Chosen 1h, 4h or 12h confirmation close, before the next hourly open. One score per confirmed event. Keep the parent's 1% outward wick buffer and fee-bearing frozen VectorBT outcomes.",
+  "train_until_exclusive": "2025-01-01T00:00:00Z",
+  "cutoff_exclusive": "2026-11-15T15:00:00Z",
+  "fit": "One shared L2 logistic regression, C=1, including timeframe indicators, no class reweighting or parameter search. Training-only median imputation and standardization. Use outcomes known by the training boundary, counting from the end of each exit-resolution bar.",
+  "selection": "Fixed score quantiles from the fitted training cohort separately within each timeframe. Primary group is the 90th training percentile or higher in its own timeframe. Freeze all parameters before assessment.",
+  "reference_quantiles": [0.5, 0.8, 0.9],
+  "test": "2025 and 2026 YTD separately and pooled. Never refit from these outcomes. Closed-trade hit rate and mean cost-adjusted R. Include censored counts, calibration, AUC and Brier versus training prevalence. All other target ladders are descriptive on the same scores.",
+  "primary_test": "Pooled held-out top-decile mean net R must be positive and beat uniformly selecting the same count from the settled signals in each NY month, timeframe and side stratum with one-sided permutation p<0.01. Monthly cluster bootstrap for absolute high-group mean and excess; report years and timeframes even on failure.",
+  "draws": 9999,
+  "seed": 20261116
+}
