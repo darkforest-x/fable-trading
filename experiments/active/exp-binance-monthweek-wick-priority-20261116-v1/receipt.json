@@ -1,0 +1,47 @@
+{
+  "experiment": "exp-binance-monthweek-wick-priority-20261116-v1",
+  "builder": "0f0775bede",
+  "parent": "exp-binance-monthweek-12h-first-wick-20261115-v1",
+  "execute": "/Users/zhangzc/.local/bin/vectorbt-python -m yoyo.evaluation.month_firstweek_wick_priority",
+  "cutoff_exclusive": "2026-11-15T15:00:00Z",
+  "roster": 925,
+  "eligible_symbols": 922,
+  "strict_first_breaches": 12889,
+  "confirmed": 9769,
+  "entries": 9768,
+  "symbols_with_entries": 864,
+  "no_next_open": [
+    "YALAUSDT/2026-02/upper"
+  ],
+  "standalone_wick_counts": {
+    "1h": 7632,
+    "4h": 7669,
+    "12h": 7570
+  },
+  "entered_priority_counts": {
+    "1h": 7631,
+    "4h": 1328,
+    "12h": 809
+  },
+  "entrants_from_parent_12h_by_priority": {
+    "1h": 5705,
+    "4h": 1056,
+    "12h": 809
+  },
+  "unchanged_12h_only_count": 7570,
+  "recent_12_complete_months": 3638,
+  "signal_outcomes": 107448,
+  "random_outcomes": 107448,
+  "matched_random_entries": 9768,
+  "identical_prior_signal_outcomes_reused": 19129,
+  "identical_prior_control_outcomes_reused": 10340,
+  "signal_paths_with_h1_ties_resolved_using_minutes": 248,
+  "still_ambiguous_stop_first": 3,
+  "validation": [
+    "Frozen first-touch ledger is unique on symbol, month and rail. All 12889 inclusive first reaches also strictly crossed in that same H1.",
+    "Every entered candle had inward open and close and strict outward tip; all earlier available active H1 extremes were inward or equal. Lower timeframes failed before each fallback.",
+    "Entry clock equals chosen candle end; stop equals chosen wick tip plus outward 1 percent. OHLC, age, and fees inherited from checked parent.",
+    "Every fixed-R hit nests by event, with one outcome per target. All closed VectorBT fills independently reconciled with direct two-fill fee arithmetic.",
+    "Synthetic equality, body outside, nested fallback clocks and lower-tier priority tested. All 7570 parent 12h candles independently passed strict body and wick geometry."
+  ]
+}
