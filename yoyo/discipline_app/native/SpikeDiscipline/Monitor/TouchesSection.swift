@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// 监控 · 触价 (owner Notion #76, 2026-11-07): BTC's position against this week's NY Monday range on
-/// top, then today's 1.618 touches with 全部/做多/做空 and one sort icon (最新 / 最早 / 评分 / 成交量).
+/// top, then today's and historical scored 1.618 touches with 全部/做多/做空 and one sort icon (最新 / 最早 / 评分 / 成交量).
 /// Read-only: rows open the coin's chart; nothing here places orders.
 struct TouchesSection: View {
     @Environment(AccountStore.self) private var account
@@ -16,20 +16,10 @@ struct TouchesSection: View {
     @AppStorage("touch.side") private var side = "all"
     @AppStorage("touch.sort") private var sort = "latest"
     @State private var sortMenu = false
+    @State private var scored = ScoredTouches()
+    @State private var historyLimit = 30
 
     private static let sorts: [(String, String)] = [("latest", "最新"), ("earliest", "最早"), ("score", "评分"), ("volume", "成交量")]
-
-    private var rows: [PaperSignal] {
-        let quotes = account.state?.quotes ?? [:]
-        let filtered = feed.signals.filter { side == "all" || (side == "long" ? $0.side == .long : $0.side == .short) }
-        switch sort {
-        case "earliest": return filtered.sorted { ($0.observedMs ?? 0) < ($1.observedMs ?? 0) }
-        case "score": return filtered.sorted { ($0.score ?? -1) > ($1.score ?? -1) }
-        case "volume":
-            return filtered.sorted { (Trading.turnover(quotes[$0.symbol]) ?? -1) > (Trading.turnover(quotes[$1.symbol]) ?? -1) }
-        default: return filtered.sorted { ($0.observedMs ?? 0) > ($1.observedMs ?? 0) }
-        }
-    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -58,22 +48,46 @@ struct TouchesSection: View {
                 sortButton
             }
             .zIndex(2)
-            LoadState(loading: !feed.loaded && feed.error == nil, error: feed.error, stale: feed.loaded)
-            let visible = rows
-            SectionHeader(title: "今日触价", count: visible.count, trailing: Self.sorts.first { $0.0 == sort }?.1)
-            if feed.loaded && visible.isEmpty {
-                Text(feed.signals.isEmpty ? "今天还没有触价" : "没有符合筛选的触价").font(.footnote).foregroundStyle(Color.muted)
-                    .frame(maxWidth: .infinity).padding(.vertical, 14)
-            } else if !visible.isEmpty {
-                LazyVStack(spacing: 0) {
-                    ForEach(visible, id: \.self) { signal in
-                        row(signal, now: feed.nowMs)
-                        Divider().padding(.leading, 54)
+            LoadState(loading: !scored.loaded && scored.error == nil, error: scored.error, stale: scored.loaded)
+            if scored.loaded {
+                let quotes = sort == "volume" ? (account.state?.quotes ?? [:]) : [:]
+                let today = ScoredTouch.visible(scored.today, side: side, sort: sort, quotes: quotes)
+                let history = ScoredTouch.visible(scored.history, side: side, sort: sort, quotes: quotes)
+                let sortLabel = Self.sorts.first { $0.0 == sort }?.1 ?? "最新"
+                SectionHeader(title: "今日触价", count: today.count, trailing: "评分 ≥ 0.30")
+                touchList(today[...], empty: "今天暂无符合条件的触价")
+                SectionHeader(title: "历史触价", count: history.count, trailing: sortLabel)
+                touchList(history.prefix(historyLimit), empty: "暂无符合条件的历史触价")
+                if history.count > historyLimit {
+                    Button {
+                        historyLimit += 30
+                    } label: {
+                        Label("查看更多历史触价", systemImage: "chevron.down")
+                            .font(.footnote.weight(.semibold)).frame(maxWidth: .infinity, minHeight: 44)
                     }
+                    .buttonStyle(.plain).foregroundStyle(Color.accentColor)
                 }
             }
         }
+        .onChange(of: side) { historyLimit = 30 }
+        .onChange(of: sort) { historyLimit = 30 }
+        .task(id: refresh) { await scored.watch(connection: connection, session: session) }
         .task(id: refresh) { await feed.watch(connection: connection, session: session) }
+    }
+
+    @ViewBuilder
+    private func touchList(_ rows: ArraySlice<ScoredTouch>, empty: String) -> some View {
+        if rows.isEmpty {
+            Text(empty).font(.footnote).foregroundStyle(Color.muted)
+                .frame(maxWidth: .infinity).padding(.vertical, 10)
+        } else {
+            LazyVStack(spacing: 0) {
+                ForEach(rows) { signal in
+                    row(signal, now: scored.nowMs)
+                    Divider().padding(.leading, 54)
+                }
+            }
+        }
     }
 
     private var sortButton: some View {
@@ -109,18 +123,18 @@ struct TouchesSection: View {
         }
     }
 
-    private func row(_ signal: PaperSignal, now: Double) -> some View {
+    private func row(_ signal: ScoredTouch, now: Double) -> some View {
         let volume = Trading.turnover(account.state?.quotes[signal.symbol])
-        let excluded = signal.status == "excluded" || signal.status == "feature_error"
+        let time = Fmt.clock(signal.candleMs, now: now)
         return Button { Haptics.open(); openChart(signal.symbol) } label: {
             HStack(spacing: 11) {
                 CoinLogo(coin: Fmt.coin(signal.symbol), size: 32)
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
                         Text(Fmt.coin(signal.symbol)).font(.scaled(size: 16, weight: .semibold)).foregroundStyle(Color.ink)
-                        SidePill(side: signal.side)
+                        SidePill(side: signal.direction)
                     }
-                    Text(sort == "volume" ? Trading.turnoverLabel(volume) : Fmt.clock(signal.observedMs, now: now))
+                    Text(sort == "volume" ? "\(time) · \(Trading.turnoverLabel(volume))" : time)
                         .font(.scaled(size: 12).monospacedDigit()).foregroundStyle(Color.muted).lineLimit(1)
                 }
                 Spacer()
@@ -128,7 +142,6 @@ struct TouchesSection: View {
                 Image(systemName: "chevron.right").font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
             }
             .padding(.horizontal, 12).frame(minHeight: 56).contentShape(.rect)
-            .opacity(excluded ? 0.5 : 1)
         }
         .buttonStyle(RowPressStyle())
     }

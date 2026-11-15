@@ -338,6 +338,16 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
         except MonitorUnavailable as error:
             raise HTTPException(503, str(error)) from None
 
+    @app.get('/v1/monitor/scored-touches', dependencies=[Depends(auth)])
+    def monitor_scored_touches(offset: int = Query(default=0, ge=0),
+                               limit: int = Query(default=100, ge=1, le=100)):
+        """Read today's and retained historical Monday 1.618 scores from the local monitor ledger."""
+        try:
+            from .scored_touches import ScoredTouchesUnavailable, read_scored_touches
+            return read_scored_touches(offset, limit)
+        except ScoredTouchesUnavailable as error:
+            raise HTTPException(503, str(error)) from None
+
     @app.get('/v1/monitor/trendline-breaks', dependencies=[Depends(auth)])
     def monitor_trendline_breaks(limit: Optional[int] = Query(default=None, ge=1, le=10000),
                                  offset: int = Query(default=0, ge=0, le=100000)):
