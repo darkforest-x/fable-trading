@@ -1,0 +1,82 @@
+{
+  "experiment_id": "exp-cloud-eth-first-wick-ladder-20261116-v1",
+  "source_experiment": "exp-cloud-top20-peak10r-20261108-v1",
+  "symbol": "ETH-USDT-SWAP",
+  "cutoff_utc": "2026-11-08T12:00:00Z",
+  "source_paths": {
+    "h1": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ETH/bars1h.csv.gz",
+    "h12": "experiments/active/exp-cloud-top20-peak10r-20261108-v1/inputs/ETH/bars12h.csv.gz"
+  },
+  "source_rows": {
+    "h1": 60252,
+    "h4_complete_derived": 15063,
+    "h12": 5021,
+    "h12_by_source": {
+      "native12Hutc": 5007,
+      "complete_1H_archive": 14
+    }
+  },
+  "observed": {
+    "first_h1_open_utc": "2019-12-25T00:00:00+00:00",
+    "last_h1_close_utc": "2026-11-08T12:00:00+00:00",
+    "effective_observed_close_utc": "2026-11-08T12:00:00+00:00",
+    "last_native_12h_close_utc": "2026-11-08T12:00:00+00:00"
+  },
+  "calendar": {
+    "weeks": 359,
+    "complete_at_cutoff": 358,
+    "right_truncated": 1,
+    "ready_monday_anchors": 358
+  },
+  "first_crosses": {
+    "upper_found": 164,
+    "lower_found": 142,
+    "both_sides_found_same_week": 43,
+    "same_first_h1": 0,
+    "statuses": {
+      "no_cross_full_week": 409,
+      "found": 306,
+      "anchor_unavailable": 2,
+      "right_censored_at_cutoff": 1
+    }
+  },
+  "candidate_morphology": {
+    "mother_rows": 918,
+    "time_eligible_rows": 895,
+    "morphology_pass_rows": 477,
+    "by_timeframe": {
+      "1H": 174,
+      "4H": 159,
+      "12H": 144
+    },
+    "trend_aligned_rows": 200,
+    "direction_mismatch_rows": 274,
+    "boundary_equalities": {
+      "open_eq_lower": 0,
+      "open_eq_upper": 0,
+      "high_eq_upper": 0,
+      "low_eq_lower": 0,
+      "close_eq_lower": 0,
+      "close_eq_upper": 0
+    }
+  },
+  "selection_counts": {
+    "pure_morphology_selected": 195,
+    "pure_morphology_ambiguous": 0,
+    "morphology_plus_trend_strict_selected": 99,
+    "morphology_plus_trend_strict_no_aligned_signal": 96,
+    "morphology_plus_trend_any_tf_selected": 99,
+    "strict_vs_any_tf_changed_weeks": 0,
+    "weeks_with_direction_blocked_sides": 122
+  },
+  "interpretation": {
+    "range": "Complete NY Monday 00:00-24:00 H1 range; 1.618 rails low-0.618*width and high+0.618*width.",
+    "first_cross": "Each side independently stops at its first complete H1 high>upper or low<lower. Equality is not a cross; any earlier H1 gap censors first-cross knowledge.",
+    "mothers": "Only the containing H1, UTC-aligned 4H built from exact four H1 children, and frozen UTC 12H candle are inspected.",
+    "morphology": "Open may equal a rail; close is strictly inside; whole body is bounded by both rails; target-side wick is strictly beyond its rail.",
+    "trend": "At each candidate close, project EMA20/50 from the prior contiguous completed frozen 12H EMA state plus that candidate close; require 50 samples. Lower wick requires EMA20>EMA50, upper wick requires EMA20<EMA50.",
+    "selection": "One earliest qualifying side per NY week; order by decision close, then 1H, 4H, 12H. Opposite sides tied at the same close and timeframe are left ambiguous.",
+    "strict_vs_alternative": "Primary trend arm stops at the side's first morphology-qualified timeframe even if trend direction mismatches. Any-TF arm is diagnostic and may promote to a higher timeframe; changed-week count is reported.",
+    "scope": "Signal morphology only. No trading, fills, PnL, or original-ledger overlap reconstruction."
+  }
+}
