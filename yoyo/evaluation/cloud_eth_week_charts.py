@@ -91,7 +91,8 @@ def panel(ax, hourly, bounds, period, group, calendar, cloud=None):
                        color=color, linewidths=2.4 if confirmed else 1.8, zorder=7)
     lo, hi = min(prices), max(prices)
     pad = max(hi-lo, hi*.006)*.09
-    ax.set_xlim(first/H-.2*period, last/H+.4*period)
+    margin = max(.55*period, (last-first)/H*.015)
+    ax.set_xlim(first/H-margin, last/H+margin)
     ax.set_ylim(lo-pad, hi+pad)
     ax.spines[:].set_visible(False)
     ax.yaxis.set_major_locator(MaxNLocator(6))
@@ -180,7 +181,7 @@ def main():
     font='/System/Library/Fonts/Hiragino Sans GB.ttc'
     font_manager.fontManager.addfont(font)
     mpl.rcParams.update({'font.family': font_manager.FontProperties(fname=font).get_name(),
-                         'axes.unicode_minus':False, 'pdf.fonttype':42})
+                         'axes.unicode_minus':False, 'pdf.fonttype':3})
     hourly, twelve = (pd.read_csv(SOURCE/f'bars{n}h.csv.gz',index_col='time',float_precision='round_trip')
                       for n in (1,12))
     prev = pd.DataFrame({n:twelve.close.ewm(span=n,adjust=False).mean().shift() for n in (20,50)})
