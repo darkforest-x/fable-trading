@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-cloud-eth-hourly-early-signal-20261115-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: bb8929b0d6
+    status: inconclusive
+    question: Can an hourly reclaim before the UTC 12H close anticipate the original SPIKE V1.9 ETH reference and improve its observable entry price?
+    single_variable: Observe the developing native 12H signal after each of its first eleven completed hours; take at most the earliest eligible hourly alert per NY week.
+    result: "On frozen OKX ETH history, 66 of 111 early candidates matched the original signal bar and side (97 original keys). Median lead 6 hours. Of 66 matches, 41 next-hour opening prices improved on the post-confirmation open, 25 were worse, and 7 touched the original fixed stop before confirmation."
+    notes: "Includes weeks without a subsequent blue key and both directions. Original 97 keys reconciled to the prior census. Signal timing and price observations only; early failures remain in the denominator. No simulated trading P&L, cost or execution claims. Original 12H confirmation is a retrospective label only for the early candidate. Inputs frozen through 2026-11-08T12:00Z."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-cloud-eth-hourly-early-signal-20261115-v1/summary.json
+
   - experiment_id: exp-monday-okx-score-fixed3r-20261115-v1
     source_repo: darkforest-x/fable-trading
     source_commit: a12586f93f
