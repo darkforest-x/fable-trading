@@ -1,0 +1,349 @@
+{
+  "parent": "exp-binance-monday-wick-score3r-20261116-v1",
+  "confirmed": 63152,
+  "eligible": 59622,
+  "settled": 59590,
+  "feature_names": [
+    "side",
+    "tf4",
+    "tf12",
+    "week_range_frac",
+    "week_close_position",
+    "breach_delay_days",
+    "breach_offset_tf_frac",
+    "other_side_touch_count_24h",
+    "side_return_24h",
+    "side_return_168h",
+    "tr_pct_24h",
+    "tr_pct_168h",
+    "wick_outside_frac",
+    "log1p_wick_reclaim_ratio",
+    "log1p_outside_wick_to_body_ratio",
+    "signal_close_risk_frac",
+    "monday_side_return",
+    "monday_efficiency",
+    "wick_depth_bar_frac",
+    "body_frac_range",
+    "signal_close_position_side",
+    "signal_range_week_frac",
+    "side_return_6h",
+    "side_return_72h",
+    "side_return_336h",
+    "realized_vol_pct_24h",
+    "realized_vol_pct_168h",
+    "realized_vol_pct_336h",
+    "range_pct_24h",
+    "range_pct_168h",
+    "range_pct_336h",
+    "range_position_24h",
+    "range_position_168h",
+    "range_position_336h",
+    "efficiency_24h",
+    "efficiency_168h",
+    "efficiency_336h",
+    "btc_side_return_24h",
+    "btc_side_return_168h",
+    "btc_tr_pct_24h",
+    "near_net_r"
+  ],
+  "timeframes": {
+    "1": {
+      "selected": "logit",
+      "confirmed": 48844,
+      "train_n": 31005,
+      "train_winners": 3101,
+      "winner_net_r_cut": 1.6991561801636528,
+      "train_score_q90": 0.23960424955444887,
+      "baseline_near_net_r_q90": 3.2688861815650188,
+      "test_start": "2026-01-01T00:00:00Z",
+      "cutoff_exclusive": "2026-11-15T15:00:00Z",
+      "all": {
+        "n_signals": 16425,
+        "eligible": 15401,
+        "settled": 15383,
+        "tp": 7201,
+        "sl": 8182,
+        "censored": 18,
+        "winners": 1165,
+        "profitable": 7173,
+        "mean_net_r": -0.07968080376776877
+      },
+      "high": {
+        "n_signals": 1338,
+        "eligible": 1336,
+        "settled": 1330,
+        "tp": 327,
+        "sl": 1003,
+        "censored": 6,
+        "winners": 274,
+        "profitable": 327,
+        "mean_net_r": -0.07973498913225048
+      },
+      "baseline_near_net_r": {
+        "n_signals": 1073,
+        "eligible": 1071,
+        "settled": 1066,
+        "tp": 170,
+        "sl": 896,
+        "censored": 5,
+        "winners": 170,
+        "profitable": 170,
+        "mean_net_r": -0.1675249481310948
+      },
+      "selected_vs_matched_random": {
+        "settled_high": 1330,
+        "high_mean_net_r": -0.07973498913225052,
+        "matched_signal_mean_net_r": -0.08626354861165487,
+        "excess_net_r": 0.006528559479404346,
+        "one_sided_p": 0.4154,
+        "draws": 9999,
+        "passes_primary": false,
+        "weeks": 46,
+        "week_bootstrap_95": [
+          -0.23860710028921275,
+          0.08856294963565886
+        ],
+        "excess_week_bootstrap_95": [
+          -0.11210445456432384,
+          0.13413581692579943
+        ]
+      },
+      "baseline_vs_matched_random": {
+        "settled_high": 1066,
+        "high_mean_net_r": -0.1675249481310948,
+        "matched_signal_mean_net_r": -0.06141189694607746,
+        "excess_net_r": -0.10611305118501733,
+        "one_sided_p": 0.9984,
+        "draws": 9999,
+        "passes_primary": false,
+        "weeks": 46,
+        "week_bootstrap_95": [
+          -0.30599504944067313,
+          -0.040945772416457256
+        ],
+        "excess_week_bootstrap_95": [
+          -0.2194284965612403,
+          -0.005843101180628325
+        ]
+      },
+      "model_file": "model_1h.joblib"
+    },
+    "4": {
+      "selected": "lgb_d3",
+      "confirmed": 8949,
+      "train_n": 5644,
+      "train_winners": 565,
+      "winner_net_r_cut": 1.2476206866566075,
+      "train_score_q90": 0.3481209961204168,
+      "baseline_near_net_r_q90": 1.9921797136223731,
+      "test_start": "2026-01-01T00:00:00Z",
+      "cutoff_exclusive": "2026-11-15T15:00:00Z",
+      "all": {
+        "n_signals": 3021,
+        "eligible": 2786,
+        "settled": 2778,
+        "tp": 1595,
+        "sl": 1183,
+        "censored": 8,
+        "winners": 223,
+        "profitable": 1578,
+        "mean_net_r": -0.05219507686373076
+      },
+      "high": {
+        "n_signals": 172,
+        "eligible": 172,
+        "settled": 169,
+        "tp": 75,
+        "sl": 94,
+        "censored": 3,
+        "winners": 69,
+        "profitable": 75,
+        "mean_net_r": 0.1204126082947928
+      },
+      "baseline_near_net_r": {
+        "n_signals": 200,
+        "eligible": 200,
+        "settled": 197,
+        "tp": 61,
+        "sl": 136,
+        "censored": 3,
+        "winners": 61,
+        "profitable": 61,
+        "mean_net_r": 0.08541006040850842
+      },
+      "selected_vs_matched_random": {
+        "settled_high": 169,
+        "high_mean_net_r": 0.12041260829479278,
+        "matched_signal_mean_net_r": -0.054212606338056274,
+        "excess_net_r": 0.17462521463284908,
+        "one_sided_p": 0.0089,
+        "draws": 9999,
+        "passes_primary": true,
+        "weeks": 46,
+        "week_bootstrap_95": [
+          -0.13486868411773775,
+          0.36305288685911585
+        ],
+        "excess_week_bootstrap_95": [
+          -0.006790384018596488,
+          0.34945539486860616
+        ]
+      },
+      "baseline_vs_matched_random": {
+        "settled_high": 197,
+        "high_mean_net_r": 0.08541006040850846,
+        "matched_signal_mean_net_r": 0.0031506643890179386,
+        "excess_net_r": 0.08225939601949052,
+        "one_sided_p": 0.1141,
+        "draws": 9999,
+        "passes_primary": false,
+        "weeks": 46,
+        "week_bootstrap_95": [
+          -0.22058581798184299,
+          0.38230769050408697
+        ],
+        "excess_week_bootstrap_95": [
+          -0.15524958123409058,
+          0.3279017191342203
+        ]
+      },
+      "model_file": "model_4h.joblib"
+    },
+    "12": {
+      "selected": "lgb_d5",
+      "confirmed": 5359,
+      "train_n": 3077,
+      "train_winners": 308,
+      "winner_net_r_cut": 0.9905078180202871,
+      "train_score_q90": 0.4693336897169071,
+      "baseline_near_net_r_q90": 1.4498691331785958,
+      "test_start": "2026-01-01T00:00:00Z",
+      "cutoff_exclusive": "2026-11-15T15:00:00Z",
+      "all": {
+        "n_signals": 1924,
+        "eligible": 1661,
+        "settled": 1659,
+        "tp": 1140,
+        "sl": 519,
+        "censored": 2,
+        "winners": 175,
+        "profitable": 1132,
+        "mean_net_r": 0.06368663032057645
+      },
+      "high": {
+        "n_signals": 94,
+        "eligible": 94,
+        "settled": 94,
+        "tp": 47,
+        "sl": 47,
+        "censored": 0,
+        "winners": 47,
+        "profitable": 47,
+        "mean_net_r": 0.12280619436218831
+      },
+      "baseline_near_net_r": {
+        "n_signals": 143,
+        "eligible": 143,
+        "settled": 143,
+        "tp": 56,
+        "sl": 87,
+        "censored": 0,
+        "winners": 56,
+        "profitable": 56,
+        "mean_net_r": 0.09148794287687335
+      },
+      "selected_vs_matched_random": {
+        "settled_high": 94,
+        "high_mean_net_r": 0.12280619436218831,
+        "matched_signal_mean_net_r": 0.1118598381817807,
+        "excess_net_r": 0.010946356180407606,
+        "one_sided_p": 0.4421,
+        "draws": 9999,
+        "passes_primary": false,
+        "weeks": 46,
+        "week_bootstrap_95": [
+          -0.11096351584847937,
+          0.3797345908766107
+        ],
+        "excess_week_bootstrap_95": [
+          -0.16519357926710085,
+          0.19999726965265177
+        ]
+      },
+      "baseline_vs_matched_random": {
+        "settled_high": 143,
+        "high_mean_net_r": 0.09148794287687335,
+        "matched_signal_mean_net_r": 0.0810437298167776,
+        "excess_net_r": 0.010444213060095763,
+        "one_sided_p": 0.437,
+        "draws": 9999,
+        "passes_primary": false,
+        "weeks": 46,
+        "week_bootstrap_95": [
+          -0.14623108453709066,
+          0.3397094462949374
+        ],
+        "excess_week_bootstrap_95": [
+          -0.17834070470346738,
+          0.22280030618036248
+        ]
+      },
+      "model_file": "model_12h.joblib"
+    }
+  },
+  "selections": {
+    "1": {
+      "selected": "logit",
+      "candidates": {
+        "logit": {
+          "mean_high_net_r": -0.010892034631528618
+        },
+        "lgb_d5": {
+          "mean_high_net_r": -0.07620147305356552
+        },
+        "lgb_d3": {
+          "mean_high_net_r": -0.07854288357404543
+        }
+      }
+    },
+    "4": {
+      "selected": "lgb_d3",
+      "candidates": {
+        "lgb_d3": {
+          "mean_high_net_r": -0.02995498175044341
+        },
+        "lgb_d5": {
+          "mean_high_net_r": -0.08931422271154843
+        },
+        "logit": {
+          "mean_high_net_r": -0.14887623042265233
+        }
+      }
+    },
+    "12": {
+      "selected": "lgb_d5",
+      "candidates": {
+        "lgb_d5": {
+          "mean_high_net_r": -0.02040238866287598
+        },
+        "logit": {
+          "mean_high_net_r": -0.08670618433598347
+        },
+        "lgb_d3": {
+          "mean_high_net_r": -0.21445618499514071
+        }
+      }
+    }
+  },
+  "validation_fits": 27,
+  "final_fits": 3,
+  "baseline": "near_net_r ranked independently; cutoff is the mature fit-sample q90",
+  "draws": 9999,
+  "seed": 20261116,
+  "train_runtime": "project .venv",
+  "sklearn": "1.6.1",
+  "lightgbm": "4.6.0",
+  "model_elapsed_seconds": 24.29,
+  "production_eligible": false,
+  "builder": "115c7b88a8b955189e70a36b54e067ce933fb26a"
+}
