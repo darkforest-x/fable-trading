@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-monday-wick-12h-high-boundary-trail-20261116-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: fbfb432881
+    status: inconclusive
+    question: Should the 12h high-score trades continue after touching the near NY Monday boundary using a trailing stop?
+    single_variable: Change the exit at the boundary to a protective stop based on completed H1 closes. Primary trail width 2%, sensitivity 1% and 3%, and a half-at-boundary/half-2%-trail alternative. Original risk, scoring and entries remain frozen.
+    result: "646 entries. Original 645 settled: 347 wins, 53.80%, payoff 1.189, +0.1836R/trade. Full 2% trail: 307/645, 47.60%, 1.424, +0.1455R. Of 347 boundary TPs, 122 earned more, 225 less, 40 turned negative. Half at the boundary and half trailed by 2%: 342/645, +0.1645R. Full 1% trail: 323/645, 50.08%, 1.394, +0.1930R. Its paired uplift of +0.0094R has weekly 95% interval [-0.0499,+0.0688]R. Full 3% trail: 274/643, 42.61%, 1.699, +0.1352R."
+    notes: "Already studied 2026 period. Use the original 3% hard stop throughout the boundary-touch H1, then ratchet from best completed H1 closes effective next bar. Native VectorBT stop matching including gap opens. Taker 5bp for trailing exit vs maker 2bp for target. No extra slippage or funding. Censored rows retained. Knowledge record 41a8856479af816d9bedef1548fc39c3."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-monday-wick-12h-high-boundary-trail-20261116-v1/comparison.csv
+
   - experiment_id: exp-binance-monday-wick-fixed3-near-20261116-v1
     source_repo: darkforest-x/fable-trading
     source_commit: fd1ba41182
