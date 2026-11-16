@@ -490,8 +490,10 @@ def run_3r_outcomes(
     events: list[Mapping[str, Any]],
     *,
     minute_lookup_fn: Callable[[str, np.ndarray], np.ndarray | None] | None = minute_lookup,
+    target_price_overrides: Mapping[str, float] | None = None,
+    target_label: str = "near_week_edge",
 ) -> list[dict[str, Any]]:
-    """Resolve only a 3R target versus the signal wick stop using VectorBT.
+    """Resolve a default 3R or explicitly overridden target versus the stop.
 
     H1 barrier order, gap fills, and 1m dispute resolution use the existing
     ``monday_wick_r_engine.first_hit`` kernel through the month-week exit
@@ -544,7 +546,19 @@ def run_3r_outcomes(
             raise ValueError(f"Invalid frozen entry/stop for {event_id}")
 
         risk = abs(entry - stop)
-        target = entry + side * TARGET_R * risk
+        has_target_override = target_price_overrides is not None and event_id in target_price_overrides
+        label_name = str(target_label).strip() if has_target_override else "3R"
+        if has_target_override and not label_name:
+            raise ValueError(f"Target override label is empty for {event_id}")
+        target = (
+            float(target_price_overrides[event_id])
+            if has_target_override
+            else entry + side * TARGET_R * risk
+        )
+        if has_target_override and (
+            not np.isfinite(target) or target <= 0 or side * (target - entry) <= 0
+        ):
+            raise ValueError(f"Invalid forward target override for {event_id}")
         target_possible = target > 0 and side * (target - entry) > 0
         active_target = target if target_possible else np.nan
         gap_pos = int(np.searchsorted(gap_after, entry_i + 1, side="left"))
@@ -609,7 +623,7 @@ def run_3r_outcomes(
         entry_fee = entry * ENTRY_TAKER_FEE
         exit_fee = float(exit_price) * float(exit_fee_rate) if closed else 0.0
         row = {
-            "label_id": f"{event_id}/3R", "event_id": event_id,
+            "label_id": f"{event_id}/{label_name}", "event_id": event_id,
             "symbol": str(event["symbol"]), "week": str(event["week"]),
             "side": int(side), "tf": int(event["tf"]),
             "bar_ms": int(event["bar_ms"]), "close_ms": int(event["close_ms"]),
@@ -619,7 +633,8 @@ def run_3r_outcomes(
             "expires_ms": int(event["expires_ms"]),
             "entry_ms": int(timestamps_i[entry_i]), "entry": entry,
             "stop": stop, "risk_abs": risk, "risk_frac": float(event.get("risk_frac", risk / entry)),
-            "target": "3R", "target_price": float(target), "outcome": outcome,
+            "target": label_name,
+            "target_price": float(target), "outcome": outcome,
             "resolution": resolution, "ambiguous": bool(ambiguous_flag),
             "minute_source": minute_source, "exit_ms": exit_ms,
             "exit_price": exit_price,
