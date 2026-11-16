@@ -1,0 +1,20 @@
+{
+  "id": "exp-monday-wick-12h-high-boundary-trail-20261116-v1",
+  "source": "exp-binance-monday-wick-fixed3-near-20261116-v1",
+  "cohort": "The frozen 2026 test_scores.csv.gz rows where tf=12, eligible=true and band=top. All 646, including source losses and an unfinished trade. No change to scoring, risk sizing or admissions.",
+  "primary_distance": 0.02,
+  "sensitivity_distances": [0.01, 0.03],
+  "partial_fraction_at_boundary": 0.5,
+  "stop": "3% from actual entry, always live including the boundary-touch H1",
+  "arm": "On first intrabar touch of the near Monday boundary in the favorable direction, hold; the first revised protective stop is effective beginning with the next H1. In the touch hour, the original stop remains live throughout.",
+  "trail": "For longs use the best completed H1 close since the boundary-touch hour times (1-distance). For shorts use the lowest completed close times (1+distance). Ratchet monotonically; never loosen the hard stop. Opening gap through a stop executes at the opening price.",
+  "partial": "Secondary 2% variant only: take half at source near boundary at its original fill, trail the other half using the same full-trail price path and original R. Fees weight linearly by filled size.",
+  "fees": {"entry_taker": 0.0005, "stop_exit_taker": 0.0005, "boundary_limit_maker": 0.0002},
+  "additional_slippage": 0,
+  "funding": 0,
+  "seed": 20261116,
+  "week_bootstrap_draws": 9999,
+  "cutoff_exclusive": "2026-11-15T15:00:00Z",
+  "censoring": "Stop observation before the first H1 tape gap, contract tape end or cutoff. No hypothetical exit at last price. Compute paired differences on common settled IDs, and report censored counts separately.",
+  "evaluation": "Previously observed 2026 cohort. Compare the primary 2% trailing to taking the entire trade off at the near edge; evaluate pre-specified 1%/3% widths as sensitivity. No refitting or choice of optimal width on this cohort."
+}
