@@ -1,0 +1,22 @@
+{
+  "id": "exp-binance-monday-wick-fixed3-near-20261116-v1",
+  "parent": "exp-binance-monday-wick-near-netr-20261116-v1",
+  "universe": "Freeze the same 59622 executable Binance USDT perpetual Monday-rail wick entries and original near-edge targets (NY Monday low for longs, high for shorts); includes delisted. Prior 1h, then 4h, then 12h priority and next H1 open.",
+  "stop_frac": 0.03,
+  "risk": "Equal original cash risk; initial stop = actual entry * (1 - side * 0.03); 1R = quantity times 3% of actual entry. No leverage assumption or capital compounding.",
+  "fees": {"entry_taker": 0.0005, "stop_exit_taker": 0.0005, "tp_exit_maker": 0.0002},
+  "slippage": 0,
+  "funding": 0,
+  "test_start": "2026-01-01T00:00:00Z",
+  "cutoff_exclusive": "2026-11-15T15:00:00Z",
+  "timeframes": [1, 4, 12],
+  "validation_years": [2023, 2024, 2025],
+  "seed": 20261116,
+  "draws": 9999,
+  "candidates": ["logit", "lgb_d3"],
+  "ranking": ["win_probability", "expected_net_r", "balanced_percentiles"],
+  "high_fractions": [0.2, 0.4],
+  "design": "Each timeframe fits on prior settled labels with outcome known at its cut. Positive = realized net R > 0. Entry features use only signal close and prior history. Potential take-profit net R and stop net R on signal close proxy account for fill fees. Within each fit, score ranks by probability, modeled expected R or min(probability percentile, potential reward percentile), referenced only to that training set. Freeze each high-score threshold at its training quantile.",
+  "select": "For each validation year, compare high-band realized net winning proportion and realized payoff (mean positive net R / absolute mean negative net R) to all settled executable signals. Score the lesser of the two ratios and average equally across the three years. Break ties by average high mean net R then deterministic order. For selection use only validation exits known at 2026 cut. Evaluate 2026 after freezing. 2026 has been seen in prior related studies.",
+  "compare": "Assess pure stop change on all identical entries with new vs old labels, prior trained high score held fixed with both stops, new selected scores vs all fixed-stop and geometry-only, and equal-count within NY-week, side and timeframe random subsets. Track unresolved separately. Compute week-cluster paired uncertainty for win rate, payoff, and mean R."
+}
