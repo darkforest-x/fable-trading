@@ -6,6 +6,7 @@ original cash risk before fees. P&L per 100 risk units uses constant initial
 risk and is independent of the coin price.
 """
 from pathlib import Path
+import argparse
 import json
 
 import numpy as np
@@ -39,7 +40,7 @@ def verify_ledger(labels, events):
     return rows.reset_index()
 
 
-def main():
+def export_winners():
     cfg = json.loads((EXP/'config.json').read_text())
     labels = pd.read_csv(EXP/'outcomes_near.csv.gz')
     events = pd.read_csv(PARENT/'first_breaches.csv.gz')
@@ -59,5 +60,37 @@ def main():
     print(win.groupby('tf').net_r.agg(['count','min','median','max']).to_string())
 
 
+def compare_score_to_target_distance():
+    """Resample the same NY weeks for both frozen filters, retaining overlap."""
+    scores = pd.read_csv(EXP/'test_scores.csv.gz')
+    cfg = json.loads((EXP/'config.json').read_text())
+    results = {}
+    for tf, group in scores[scores.outcome.isin(['tp','sl'])].groupby('tf'):
+        model = group.band.eq('top10')
+        simple = group.baseline_band.eq('top10')
+        totals = group.assign(
+            model_net=group.net_r*model, model_count=model.astype(int),
+            simple_net=group.net_r*simple, simple_count=simple.astype(int),
+        ).groupby('week')[['model_net','model_count','simple_net','simple_count']].sum().to_numpy()
+        rng = np.random.default_rng(cfg['seed'])
+        sample = rng.integers(0, len(totals), size=(cfg['draws'],len(totals)))
+        summed = totals[sample].sum(axis=1)
+        summed = summed[(summed[:,1]>0) & (summed[:,3]>0)]
+        differences = summed[:,0]/summed[:,1] - summed[:,2]/summed[:,3]
+        results[str(int(tf))] = dict(
+            model_n=int(model.sum()), distance_n=int(simple.sum()),
+            overlap=int((model & simple).sum()),
+            mean_net_r_difference=float(group[model].net_r.mean()-group[simple].net_r.mean()),
+            paired_week_bootstrap_95=np.quantile(differences,[.025,.975]).tolist(),
+            weeks=len(totals), draws=cfg['draws'],
+        )
+    (EXP/'baseline_comparison.json').write_text(json.dumps(results,indent=2)+'\n')
+
+
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--compare', action='store_true', help='Compare both frozen 2026 score filters.')
+    if parser.parse_args().compare:
+        compare_score_to_target_distance()
+    else:
+        export_winners()
