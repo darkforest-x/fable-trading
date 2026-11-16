@@ -15,6 +15,21 @@ schema_version: 1
 
 experiments:
 
+  - experiment_id: exp-binance-monday-wick-fixed3-near-20261116-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: fd1ba41182
+    status: inconclusive
+    question: Does a fixed 3% price stop with the near Monday edge target allow higher realized win rate and payoff together after scoring?
+    single_variable: Replay identical entries and targets with the stop changed from 1% beyond the wick to 3% of actual entry. With this new stop held constant, compare the frozen old selection, new per-timeframe scoring and target-distance-only selection.
+    result: "2026 selected 1h/4h/12h respectively 5716/1000/645 settled, net win rates 45.33/55.60/53.80%, realized payoffs 1.055/0.985/1.189 and mean net R -0.071/+0.107/+0.184. Only 4h improved both point estimates over fixed-stop all (54.91%, 0.787, -0.019R). Weekly paired intervals for 4h: win rate change [-2.53,+4.09]pp, payoff [+0.145,+0.256], mean net R [+0.057,+0.197]. 4h vs same-week/side random +0.092R p=0.0001; vs target-distance-only +0.049R interval [-0.075,+0.178]."
+    notes: "Frozen pre-2026 labels, 2023-25 expanding validation, independent classifiers, same cash risk and next-H1-open entry; 59622 eligible (35 censored). 2026 is out of fit for this model but was studied in related experiments. Fees: 5bp per market fill, 2bp per limit exit, no additional slippage or funding. Independent trade R, no capital account. Knowledge record 41a8856479af81799ca7ea4919b50042."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    artifacts: []
+    canonical_report: experiments/active/exp-binance-monday-wick-fixed3-near-20261116-v1/summary.json
+
   - experiment_id: exp-binance-monday-wick-near-netr-20261116-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 115c7b88a8
